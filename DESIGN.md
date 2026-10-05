@@ -490,9 +490,24 @@ carbon we add is carried down into the deep ocean more slowly."
      circulation feedback against CMIP6.
   3. Wind-driven variability (the Southern Ocean's 1990s–2000s swing) is absent.
 - **Benchmarks for the built model** (checks, not calibration):
-  - GCB 2025's ocean climate effect, −0.20 ± 0.05 GtC/yr over 2015–2024 (ESSD 18:3211 p. 3242; its baseline is a
-    "normal year", not 1850);
+  - GCB 2025's ocean climate effect, −0.20 ± 0.05 GtC/yr over 2015–2024 (ESSD 18:3211 p. 3242). Its baseline is
+    each GOBM's own normal year, six of them in 1957–1969. The like-for-like emulation is
+    `calibration/diag_ocean_climate_gobm.R` (CHANGELOG 10-04 p): CCX −0.36, of which the THERMAL part is −0.45;
   - CMIP6 γ_O, −17.2 ± 5.0 PgC/°C (Arora 2020; model-derived).
+
+**T. The high-latitude box's SST anomaly: a DIAGNOSTIC SCALE (H1).** **RULED 2026-10-05 (Marcus: "Yes, test").**
+CHANGELOG 10-05.
+- **Why:**
+  - Like-for-like, CCX's ocean thermal effect is 3.4× one GOBM's warming part (10-04 p).
+  - Hypothesis H1: the HS box, which ventilates the deep, feels the FULL hemispheric SST anomaly, while the real
+    deep-water formation regions have warmed less than the hemispheric mean.
+- **The switch.** `hs_sst_anom_frac` (a base parameter, NOT fitted, in no label):
+  - SST_hs(t) = sst_hs + frac × (the hemisphere's anomaly);
+  - it applies on both branches, the observed HadSST4 columns and the legacy `sst_scale × gmst` fallback;
+  - ABSENT = 1 = the shipped model, bit for bit, in both cores.
+- **The low-latitude boxes are untouched:** the mixed layer, the equatorial cell and the tropical box.
+- **The test:** the like-for-like driver at frac = 1, ½ and 0, each unrefitted. An OBSERVED ratio (high-latitude
+  over hemispheric SST trend) needs gridded SST, which the repo does not hold. It is a data-download decision.
 
 ### 3.5 Isotopes
 

@@ -296,6 +296,9 @@ struct Par {
   // per K of the annual-mean GMST column. Resolved by ccx_cpp_par() to
   // CCX_NPP_TSENS_DEFAULT when absent, the SAME constant the R deriv uses.
   double npp_tsens;
+  // THE HS BOX'S SHARE OF ITS HEMISPHERE'S SST ANOMALY (DESIGN §3.4a T, the H1 diagnostic, 2026-10-05).
+  // Resolved by ccx_hs_sst_frac() on the R side (absent = 1 = the shipped model); no fallback here.
+  double hs_sst_anom_frac;
   // ENSO, FOUR COEFFICIENTS SINCE 2026-09-01 (Marcus's design). GtC/yr per unit
   // Nino3.4 index; [0] = NH, [1] = SH. The land pair drives soil_fast -> atm,
   // the ocean pair an air-sea anomaly carrying the air-sea fractionation of its
@@ -919,8 +922,9 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       //     gas exchange coefficient is the same in high and low latitudes
       //     (their Table 1, g_l = g_h); that is THEIR assumption, inherited.
       //     No seasonal cycle on this box -- see the R twin.
-      const double sst_h = A.sst_hs
-        + ((P.sst_obs > 0 && !std::isnan(sst_an)) ? sst_an : P.sst_scale * gmst);
+      // ⚠ SCALED by hs_sst_anom_frac (DESIGN §3.4a T): 1 = the full anomaly, bit for bit.
+      const double sst_h = A.sst_hs + P.hs_sst_anom_frac
+        * ((P.sst_obs > 0 && !std::isnan(sst_an)) ? sst_an : P.sst_scale * gmst);
       const double dic_hs = y[IX(ihs, C)] * A.mol_per_GtC / A.hs_mass_kg[hi];
       double K0h, pco2_hs;
       if (P.revelle_frozen > 0.0) {
@@ -1364,6 +1368,7 @@ static Par unpack_par(const List& p) {
   P.gamma_diff = p["gamma_diff"];
   P.ndep_ret   = p["ndep_ret"];                                 // D2 (a), 2026-09-30
   P.npp_tsens  = p["npp_tsens"];                                // D2 (b), 2026-09-30
+  P.hs_sst_anom_frac = p["hs_sst_anom_frac"];                   // §3.4a T, 2026-10-05
   P.seas_amp[0] = p["seas_amp_NH"]; P.seas_amp[1] = p["seas_amp_SH"];
   P.seas_phase[0] = p["seas_phase_NH"]; P.seas_phase[1] = p["seas_phase_SH"];
   P.seas_drivers = (int) p["seas_drivers"];

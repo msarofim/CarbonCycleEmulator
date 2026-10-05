@@ -750,6 +750,21 @@ ccx_tau_ex_rate <- function(p, t) {
   (1 / p$tau_ex) * (1 + a * sin(2 * pi * (t - ph / 12)))
 }
 
+#' The HS box's share of its hemisphere's SST anomaly (DESIGN §3.4a T; the H1 diagnostic, Marcus 2026-10-05)
+#'
+#' ONE resolution, used by the R core and by ccx_cpp_params() for the C++ twin, so the two cannot disagree
+#' about what absence means. ABSENT = 1 = the shipped model, bit for bit (x * 1 is exact in IEEE arithmetic).
+#' A base parameter: NOT fitted and in no label. 0 holds the HS box at its climatological SST while the
+#' low-latitude boxes warm.
+ccx_hs_sst_frac <- function(p) {
+  v <- p[["hs_sst_anom_frac"]]                 # `[[`: `$` would partial-match another name
+  if (is.null(v)) return(1)
+  if (length(v) != 1L || !is.finite(v) || v < 0)
+    stop("ccx_hs_sst_frac(): hs_sst_anom_frac = ", paste(v, collapse = ","),
+         " is not one finite number >= 0 (DESIGN §3.4a T).")
+  as.numeric(v)
+}
+
 ccx_seas_norms <- function(p) {
   mid <- (seq_len(720) - 0.5) / 720
   lag <- ccx_seas_lag_p(p)
@@ -3270,7 +3285,9 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       #     Southern-Ocean entrainment channel are LS mechanisms fitted against
       #     LS observables, and reusing them here would move fitted quantities
       #     inside a structural test.
-      sst_hs <- aux$sst_hs +
+      #     ⚠ SCALED by ccx_hs_sst_frac() (DESIGN §3.4a T, the H1 diagnostic):
+      #     absent = 1 = the hemisphere's full anomaly, bit for bit.
+      sst_hs <- aux$sst_hs + ccx_hs_sst_frac(p) *
         (if (isTRUE(p$sst_obs > 0) && !is.null(sa) && is.finite(sa)) sa
          else p$sst_scale * forc$gmst)
       dic_hs <- y[ihs, "C"] * aux$mol_per_GtC / hs_mass_t             # mol/kg

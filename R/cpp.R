@@ -365,6 +365,9 @@ ccx_cpp_par <- function(p) {
   # pre-2026-08-18 parameter list runs the model it was fitted to (the same
   # principle as seas_drivers above). ccx_default_params() sets 1 explicitly.
   if (is.null(p$sst_obs)) p$sst_obs <- 0
+  # The HS box's share of the SST anomaly (DESIGN §3.4a T, 2026-10-05): resolved by the SAME function the R core
+  # calls, so absence means 1 in both cores and the C++ source never sees an absent value.
+  p$hs_sst_anom_frac <- ccx_hs_sst_frac(p)
   if (is.null(p$q_conv)) p$q_conv <- 0
   if (is.null(p$conv_sink)) p$conv_sink <- N_INTERIOR
   if (is.null(p$conv_descent)) p$conv_descent <- 0L
@@ -416,6 +419,7 @@ ccx_cpp_par <- function(p) {
       "seas_lag_p_NH", "seas_lag_p_SH",
       "sst_seas_amp_NH", "sst_seas_amp_SH", "ent_seas_amp_SH",
       "sst_obs", "seas_npp_amp_NH", "seas_npp_amp_SH",
+      "hs_sst_anom_frac",                       # the HS box's share of the SST anomaly (2026-10-05; §3.4a T)
       "revelle_frozen", "gamma_diff",
       "tau_ex_seas_amp", "tau_ex_seas_phase",
       "ndep_ret", "npp_tsens")]
