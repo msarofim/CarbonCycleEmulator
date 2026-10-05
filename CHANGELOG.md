@@ -43,6 +43,7 @@ Project log: what was done, what was tried and abandoned, and why.
   4. Read on LIKELIHOOD against hilda34g's −1143.2508 on the 27 rows. The pin removes a prior term, so the logposts are not comparable.
   5. Read the futures (SSP5-8.5 and vvH 2300; P4's +13.5 and the feedback's +5.5 were both previews), the land's net climate effect (the preview gave −0.04), the ocean's climate effect, and the scorecard.
   6. Adoption is Marcus's call.
+- **Handoff:** `notes/handoff_2026-10-05b_obj16_running.md` (Marcus: "yes, write the handoff"). It supersedes the 10-05 note, which now points to it. Its §5 is the landing procedure with exact commands.
 
 ## 2026-10-05 (e) — **Marcus's launch rulings for #16 ("Mac, today (Recommended)"; "Neither: launch as ruled (Recommended)"), and the ONE code change P4 did need: a ruled reference-set branch for #16's pin set.** (d) said P4 needed no new code. That was wrong: `ccx_ms_reference_set()` STOPS on the ten pins ("no registered incumbent … rule the reference set for this pin before launching"). The canonical's nine pass; the nine plus the READ name `npp_tsens` match no branch, and `npp_tsens` is not on the price-arm list. Found by a dry call before any launch.
 

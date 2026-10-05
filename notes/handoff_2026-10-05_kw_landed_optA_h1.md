@@ -1,5 +1,8 @@
 # HANDOFF 2026-10-05 — the `k_w` arm LANDED (its price is a prior conflict), the ocean benchmark like-for-like, option A and the H1 switch BUILT; objective #16 waits only on P0 vs P4
 
+> ⛔ **SUPERSEDED by `notes/handoff_2026-10-05b_obj16_running.md`** (P4 ruled; #16 launched 10-05 09:01). Read
+> that note first. This one remains the record for everything before the ruling.
+
 **Supersedes** `notes/handoff_2026-10-04c_strat_feedback_kw_running.md`. Written on Marcus's request ("Then write a
 handoff"). Self-contained.
 
