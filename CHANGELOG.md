@@ -2,6 +2,105 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-04 (p) — **THE OCEAN'S CLIMATE EFFECT, LIKE-FOR-LIKE WITH GCB 2025's OCEAN MODELS** (the handoff's item 3; `calibration/diag_ocean_climate_gobm.R` @`d006ba9` → `outputs/diagnostics/ocean_climate_gobm_20261004.{log,rds}`). GCB's protocol is verified: there is NO single normal year. Emulated on CCX's own record with CO₂ prescribed, CCX's effect is **−0.357 ± 0.027 GtC/yr**, against GCB's −0.20 ± 0.05 (1.8×, z −3.2). As a share of the CO₂ effect it is −10.0 %, against GCB's −7.1 % (model range −4.2 to −10.7 %). The like-for-like build closes a third of 10-04 (o)'s gap, but the composition is wrong. CCX's THERMAL part alone is −0.45: 3.4× one GOBM's warming part under the same protocol. Its ENSO limb offsets +0.10, and it has no wind term. Nothing adopted.
+
+- **GCB 2025's protocol, verified** (ESSD 18:3211, main text p. 3242; Supplement S.3.2 and Table S2, printed pp. 14,
+  32–33; Supplement PDF md5 `93a7e289…`):
+  - The climate effect is sim A minus sim C, with CO₂ PRESCRIBED in both. The ± is 1σ over the 10 models (p. 3213).
+  - The −7.1 % is relative to C − B, and "all models simulate a weakening …, range −4.2 % to −10.7 %".
+  - The 10 % upscaling applies to S_OCEAN only (S.3.2 l. 565–572), not to this number.
+  - **Each model has its own normal year:**
+    - six sit in 1957–1969 (IPSL 1958–67 loop, MPIOM 1957, FESOM 1961, CNRM 1958, Princeton 1958–69 loop, ACCESS 1958);
+    - two in 1990 (PlankTOM ERA5 1990; MRI JRA-3Q May 1990–Apr 1991);
+    - two are climatologies: NorESM's CORE-I year, derived from the 43 yr 1958–2000 (Griffies 2009, Ocean Modelling
+      26:1, p. 4), and CESM-ETHZ's "mean of 1958–2024 with 2001 anomalies".
+  - A's transient climate starts in 1940 (IPSL), 1948 (PlankTOM, NorESM, MPIOM) or 1958 (the rest). Before that,
+    A runs its normal year or a loop.
+  - The 10-04 (o) recollection of a "~1990" normal year was wrong for 8 of the 10 models.
+- **The emulation**, per protocol, on the canonical:
+  - Only the climate columns CCX's ocean READS differ between A and C: the two HadSST4 SST anomalies AND the
+    Niño 3.4 index. The index drives the L2 ENSO limb (`w_enso_l2` 12.93 Sv per unit; El Niño suppresses an
+    upwelling limb).
+  - GMST, AOD and N deposition stay historical in both runs.
+  - CO₂ is prescribed exactly: C's emissions carry a per-hemisphere term, iterated until both hemispheres match A's
+    CO₂ to 1e-4 ppm in every month.
+  - The CO₂-effect control B (zero emissions) is matched to the pre-industrial orbit.
+  - The index repeats month by month (it is real monthly data). SST repeats as annual means (annual data,
+    interpolated).
+  - The lagged land-ENSO term gets the protocol's cycle continued back past 1750 as `spin$enso_hist`.
+
+| protocol | normal year | t_r | effect (GtC/yr) | of it SST / ENSO | % of CO₂ effect |
+|---|---|---|---|---|---|
+| PlankTOM12 | 1990 | 1948 | −0.335 | −0.421 / +0.086 | −9.4 |
+| IPSL | loop 1958–67 | 1940 | −0.376 | −0.480 / +0.105 | −10.5 |
+| NorESM | mean 1958–2000 | 1948 | −0.350 | −0.453 / +0.103 | −9.8 |
+| MPIOM | 1957 (A: loop 1948–57) | 1948 | −0.373 | −0.477 / +0.104 | −10.5 |
+| FESOM | 1961 | 1958 | −0.355 | −0.471 / +0.116 | −10.0 |
+| CNRM | 1958 | 1958 | −0.394 | −0.466 / +0.072 | −11.1 |
+| Princeton | loop 1958–69 | 1958 | −0.353 | −0.469 / +0.116 | −9.9 |
+| CESM-ETHZ | mean 1958–2024 | 1958 | −0.317 | −0.411 / +0.094 | −8.9 |
+| MRI | May 1990–Apr 1991 | 1958 | −0.326 | −0.419 / +0.093 | −9.2 |
+| ACCESS | 1958 | 1958 | −0.394 | −0.466 / +0.072 | −11.1 |
+| **mean ± 1σ** | | | **−0.357 ± 0.027** | −0.453 / +0.096 | **−10.0** |
+
+  - CNRM and ACCESS are identical by construction: in CCX terms both are year 1958 with t_r 1958.
+  - Reading CESM-ETHZ's normal year as 2001 instead moves the mean by +0.001.
+- **The decomposition of 10-04 (o)'s −0.430** (the sum is exact):
+  - R0, §D reproduced `identical()`: −0.4305;
+  - R1, SST only (no GMST→land→CO₂ loop): −0.398 (+0.032);
+  - R2, CO₂ PRESCRIBED: −0.520 (−0.121; the warm run's CO₂ was +5.4 ppm higher, and the ocean takes up 0.022 GtC/yr
+    per ppm);
+  - R3, plus the ENSO limb: −0.419 (+0.101);
+  - GCB's own baselines and transient starts: −0.357 (+0.062).
+- **The time shape** (ensemble A − C by decade: 1960s +0.09, 1970s −0.14, 1980s −0.15, 1990s −0.16, 2000s −0.24,
+  2010s −0.27):
+  - CCX goes negative about two decades before GCB's ensemble. GCB Fig. S10, read by eye, sits near 0 until ~2000.
+  - Protocols whose normal year is warmer than the 1960s run POSITIVE then: CESM-ETHZ (the 1958–2024 climatology)
+    +0.45, MRI +0.21, PlankTOM +0.14. A is colder than C in those decades and banks carbon, which it pays back
+    later.
+- **Checks: is the gap an artefact?**
+  - (0) **Completeness**, a new gate. Every listed column held, all else historical, CO₂ matched: the ocean moves
+    −2.9e-6 GtC/yr against an allowance of 2.2e-4 (100 × the matching tolerance × the ocean's CO₂ sensitivity).
+    Its MUTATION (ENSO left historical) reads +0.096 and fails, as it must.
+  - (1) **Chemistry:** d ln pCO₂/dT is 0.0458 / 0.0433 / 0.0412 / 0.0395 /K at 2 / 10 / 18 / 26 °C, against
+    Takahashi 1993's 0.0423.
+  - (2) **Linearity:** a shared history before t_r instead of a shared normal year changes the effect by ≤ 0.0002.
+  - (3) **One GOBM's own split** (Bunsen, Nissen & Hauck 2024 GRL 51:e2023GL107030, FESOM1.4-REcoM2, repeat year
+    1961). Over 2000–2019 the climate effect there is 0.25 PgC/yr: wind 0.17, warming 0.09. Under the same protocol
+    and window, CCX's SST-only effect is −0.304 (**3.4× the warming part**). SST + ENSO is −0.244, ≈ his total, but
+    built from other pieces.
+  - (4) **Pathways** (CNRM protocol, one name scaled ×½ / ×2, spinup re-run, NOT a refit):
+    - `kz` −0.301 / −0.498, an elasticity of 0.36 against the sink's 0.15, so the % moves −9.6 → −12.5;
+    - `u_hs` 0.11;
+    - `w_enso_l2` −0.13;
+    - the equatorial cell is OFF at the canonical, so `w_eq` is inert.
+- **What it means (decisions are Marcus's):**
+  - The like-for-like total is 1.8× GCB's mean and at the strong edge of the model range. That is a moderate
+    excess, not the 10-04 (o) z −4.6.
+  - But the pieces are not a GOBM's. CCX's thermal effect is 3–5× a GOBM's warming part. CCX lacks wind, which is
+    the GOBMs' LARGEST term and has the SAME sign, so adding it would widen the gap. The ENSO limb offsets +0.10.
+  - Two hypotheses for the thermal excess, each with a test:
+    - **H1:** the high-latitude box and the ventilated column feel the full hemispheric SST anomaly, while the real
+      formation regions have warmed less. Test: a switch scaling the `hs` box's anomaly (0, ½, an observed
+      high-latitude/hemispheric ratio), then re-run this driver. That is a model switch, so it needs a ruling.
+    - **H2:** CCX's vertical exchange (kz ~27× diapycnal) returns unwarmed DIC to a uniformly warmed surface,
+      defeating the surface-DIC damping Bunsen describes. Supported by check 4: the effect leans on `kz` 2.4× as
+      hard as the uptake does. Test: the time shape against GCB Fig. S10 per protocol, or a refit at a lower kz.
+  - For the futures: CCX's ocean climate feedback is probably too strong, which biases CO₂ high by an amount not
+    yet measured. The stratification feedback (10-04 n, o) adds +5.5 ppm at SSP5-8.5 2300 on top of that.
+- **Tried and abandoned** (all in this entry's commits):
+  - `85b7052` varied SST alone, on a guard that checked four ENSO coefficients and could not see the L2 limb.
+    - Its CO₂-effect control showed a POSITIVE sink under a WARMER normal year, which exposed it.
+    - Its outputs are QUARANTINED: `outputs/quarantine/20261004_ocean_climate_sst_only/` (README).
+    - Its SST-only numbers reproduce exactly as the fix's thermal part.
+  - The CO₂ match first DIVERGED (3.7e20 ppm): an output row is the state at the START of its month, and a one-month
+    pulse shows at the next row. So the update must lead by a row.
+  - It then STALLED at 0.023 ppm: a per-hemisphere cumulative shift cannot hold a hemispheric DIFFERENCE, which the
+    gross exchange erases at rate 2/`tau_ex`. The fix is a gradient mode with a sustained flux,
+    kh (dG/dt + 2G/`tau_ex`). It now converges in 12–30 iterations.
+- **Reproducibility:** the committed driver ran twice from a frozen copy (md5-identical), and its tables were
+  `identical()`. No RNG. The output records the mode file's md5, the commit and the GCB sources.
+
 ## 2026-10-04 (o) — **THE STRATIFICATION FEEDBACK PREVIEWED** (`calibration/diag_mix_preview.R` @`1be5504` → `outputs/diagnostics/mix_preview_20261004.{log,rds}`; from a frozen copy, md5-identical, `nice 10`). On every registered mode it costs 1.5–1.9 in likelihood, unrefitted. Its futures effect is SMALL: SSP5-8.5 +2.5 ppm at 2100 and +5.5 at 2300 (range +2.7 to +11.0 over q ½–2). The record mildly disfavours it, monotonically in s. Nothing adopted.
 
 - **A. Price at every registered mode,** each under its own structure, gate, pins and spinup. All 6 reproduce their
