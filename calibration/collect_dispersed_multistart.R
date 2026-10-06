@@ -20,6 +20,7 @@
 # Usage:  CCX_MS_OUTDIR=<dir> Rscript calibration/collect_dispersed_multistart.R
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+source(ccx_path("calibration", "lib_ms_deadline.R"))   # ms_start_clock() / ms_clock_mix_note() (2026-10-05 o)
 
 CO_DIR <- local({
   d <- Sys.getenv("CCX_MS_OUTDIR", NA_character_)
@@ -102,6 +103,11 @@ conv <- vapply(R, function(r) isTRUE(r$converged), logical(1))
 oot  <- vapply(R, function(r) isTRUE(r$out_of_time), logical(1))
 ids  <- vapply(R, function(r) r$id, integer(1))
 U    <- do.call(rbind, lapply(R, function(r) r$u_mode))
+# ⭐ THE CLOCK EACH START'S BUDGET RAN ON (2026-10-05 o; Marcus D3, "Record and warn (Recommended)"). An absent
+# field is "wall": every start file written before then ran the wall clock. Out-of-time counts and minutes on two
+# clocks are not like-for-like, so a mixed wave is WARNED below and every label names its clock.
+clk  <- vapply(R, ms_start_clock, character(1))
+CO_CLOCK <- if (length(unique(clk)) == 1L) ms_clock_label(clk[1]) else "MIXED-clock"
 
 # ---- clustering, on the FINISHED starts only -------------------------
 # An out-of-time start is a point the search had not finished moving, so
@@ -113,13 +119,15 @@ RAD <- CO_FRAC * R[[1]]$spread_measured * sqrt(ncol(U))
 did_work <- vapply(R, function(r) is.null(r$restarts_done) || r$restarts_done > 0L, logical(1))
 keep <- which(!oot & did_work)
 if (any(!did_work))
-  cat(sprintf("  ⚠ %d start(s) ran NO restart at all (the wall budget did not fit one).\n     Excluded from the basin count.\n",
-              sum(!did_work)))
+  cat(sprintf("  ⚠ %d start(s) ran NO restart at all (the %s budget did not fit one).\n     Excluded from the basin count.\n",
+              sum(!did_work), CO_CLOCK))
 # CONVERGED and OUT-OF-TIME are mutually exclusive as of 08-31f, and the counts
 # must sum: a report saying "1 of 5 converged, 5 ran out of time" is describing
 # two states of one task and is how that driver bug was caught.
-cat(sprintf("\n  %d of %d starts CONVERGED, %d ran out of wall time (excluded from the\n  basin count, kept in the table), %d spent their restart budget.\n",
-            sum(conv), length(R), sum(oot), sum(!conv & !oot)))
+cat(sprintf("\n  %d of %d starts CONVERGED, %d ran out of %s time (excluded from the\n  basin count, kept in the table), %d spent their restart budget.\n",
+            sum(conv), length(R), sum(oot), CO_CLOCK, sum(!conv & !oot)))
+.mix <- ms_clock_mix_note(clk, ids)
+if (!is.null(.mix)) cat(sprintf("  ⚠ %s\n", .mix))
 if (any(conv & oot))
   stop("a start reports BOTH converged and out-of-time: ",
        paste(ids[conv & oot], collapse = ", "),
@@ -151,14 +159,14 @@ if (length(keep)) {
 }
 
 o <- order(fin, decreasing = TRUE)
-cat(sprintf("\n  %5s %6s %14s %14s %8s %7s %6s  %s\n",
-            "rank", "id", "logpost", "vs best", "basin", "status", "min", "kind"))
+cat(sprintf("\n  %5s %6s %14s %14s %8s %7s %6s %5s  %s\n",
+            "rank", "id", "logpost", "vs best", "basin", "status", "min", "clock", "kind"))
 for (i in seq_along(o)) {
   j <- o[i]; r <- R[[j]]
-  cat(sprintf("  %5d %6d %14.4f %14.4f %8s %7s %6.0f  %s\n", i, r$id, fin[j],
+  cat(sprintf("  %5d %6d %14.4f %14.4f %8s %7s %6.0f %5s  %s\n", i, r$id, fin[j],
               fin[j] - max(fin), if (is.na(lab[j])) "--" else as.character(lab[j]),
               if (oot[j]) "TIME" else if (conv[j]) "conv" else "cap",
-              r$minutes, r$kind))
+              r$minutes, clk[j], r$kind))
 }
 
 # ---- the verdict's BOUND, READ FROM THE OPTIMISER THAT PRODUCED THESE --
@@ -253,6 +261,10 @@ cat("    test's power before believing its null).\n")
 
 sm <- data.frame(id = ids, logpost = fin, basin = lab, converged = conv,
                  out_of_time = oot, minutes = vapply(R, function(r) r$minutes, numeric(1)),
+                 # the clock `minutes` is on, and the WALL minutes beside it (a pre-10-05 wall file: the same number)
+                 clock = clk,
+                 minutes_wall = vapply(R, function(r) if (!is.null(r$minutes_wall)) r$minutes_wall
+                                       else if (ms_start_clock(r) == "wall") r$minutes else NA_real_, numeric(1)),
                  n_eval = vapply(R, function(r) r$n_eval, numeric(1)),
                  draws = vapply(R, function(r) r$draws, numeric(1)),
                  kind = vapply(R, function(r) r$kind, character(1)),

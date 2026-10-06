@@ -18,11 +18,14 @@
 # calibration/output/<outdir>; copy the outdir back into the repo before collecting.
 #
 # ENV -- identical names and defaults to the sbatch, so a run here is
-# like-for-like with a Torch run (same WALL/RESTARTS/CYCLES/MAXIT design, same
-# outdir label, same port gate):
+# like-for-like with a Torch run (same BUDGET/RESTARTS/CYCLES/MAXIT design, same
+# outdir label, same port gate) -- EXCEPT THE CLOCK (D1, CHANGELOG 2026-10-05 o:
+# "CPU on Mac, wall on Torch"). Here the budget is CPU minutes; on Torch it is wall
+# minutes. Every start file records which (`clock`):
 #   CCX_MS_STRUCT (required), CCX_MS_SEAS_ML (1), CCX_MS_SPREAD (1.0452),
 #   CCX_MS_PUMP_FIELD (solved), CCX_MS_PIN (''), CCX_MS_TAG (today),
-#   CCX_MS_OUTDIR (derived), CCX_MS_WALL_MIN (300), CCX_MS_RESTARTS (3),
+#   CCX_MS_OUTDIR (derived), CCX_MS_BUDGET_MIN (300; its pre-10-05 name
+#   CCX_MS_WALL_MIN is still read), CCX_MS_CLOCK (cpu), CCX_MS_RESTARTS (3),
 #   CCX_MS_CYCLES (6), CCX_MS_MAXIT (6000), CCX_MS_PREFLIGHT ('' | 1)
 # Mac-only:
 #   CCX_MAC_IDS   the id list, as a space-separated string   (default "0 1 ... 23")
@@ -36,8 +39,17 @@
 # BLAS threads pinned to 1 (the sbatch does the same): N single-threaded tasks,
 # never N x 10 threads fighting for 10 cores.
 #
-# caffeinate -i -s: the Mac must not idle-sleep or lid-sleep under a 6-15 h run.
-# Keep it on AC power -- `-s` only holds off sleep while plugged in.
+# ⛔ caffeinate CANNOT STOP A LID-CLOSED SLEEP ON BATTERY (corrected 2026-10-05 o;
+# this said "the Mac must not idle-sleep or lid-sleep"). `-i` blocks only IDLE
+# sleep, and `man caffeinate` says `-s` "is valid only when system is running on
+# AC power". On 10-05 the lid was closed on battery and the Mac slept ~3 h of #16's
+# refit ("Clamshell Sleep"; memory mac_sleep_eats_wall_budget). Observed the same
+# evening: lid closed ON AC, driving an external display (closed-display mode),
+# it did not sleep.
+# ⭐ SINCE 10-05 (o) THE BUDGET HERE IS CPU TIME, so a sleep no longer spends a
+# start's budget. Nothing RUNS while the Mac sleeps, though, so the wave still
+# stops for it: keep it on AC, with the lid open or in closed-display mode. The
+# launch WARNS on battery; it does not refuse.
 #
 # Logs: logs/ccx_multistart_mac_<tag>_<id>.out (one per task, the same lines the
 # sbatch's %x_%A_%a.out would carry). Exit codes: logs/ccx_multistart_mac_<tag>_exit.txt.
@@ -70,7 +82,15 @@ case "$CCX_MS_OUTDIR" in
 esac
 
 export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1
-export CCX_MS_WALL_MIN="${CCX_MS_WALL_MIN:-300}"
+# THE BUDGET AND ITS CLOCK (2026-10-05 o). CCX_MS_WALL_MIN is the budget's pre-10-05 name: still honoured,
+# but only ONE name reaches the driver, and two that differ are refused here rather than by 24 tasks.
+if [ -n "${CCX_MS_BUDGET_MIN:-}" ] && [ -n "${CCX_MS_WALL_MIN:-}" ] && [ "$CCX_MS_BUDGET_MIN" != "$CCX_MS_WALL_MIN" ]; then
+  echo "FATAL: CCX_MS_BUDGET_MIN=$CCX_MS_BUDGET_MIN and its pre-10-05 name CCX_MS_WALL_MIN=$CCX_MS_WALL_MIN differ. Set one." >&2
+  exit 1
+fi
+export CCX_MS_BUDGET_MIN="${CCX_MS_BUDGET_MIN:-${CCX_MS_WALL_MIN:-300}}"
+unset CCX_MS_WALL_MIN
+export CCX_MS_CLOCK="${CCX_MS_CLOCK:-cpu}"     # D1: CPU on the Mac. The driver validates the value.
 export CCX_MS_RESTARTS="${CCX_MS_RESTARTS:-3}"
 export CCX_MS_CYCLES="${CCX_MS_CYCLES:-6}"
 export CCX_MS_MAXIT="${CCX_MS_MAXIT:-6000}"
@@ -84,7 +104,13 @@ EXITS="${LOGSTEM}_exit.txt"; : > "$EXITS"
 echo "CCX_PROJ_DIR  $CCX_PROJ_DIR"
 echo "CCX_MS_OUTDIR $CCX_MS_OUTDIR"
 echo "CCX_MS_STRUCT $CCX_MS_STRUCT   CCX_MS_SEAS_ML $CCX_MS_SEAS_ML   CCX_MS_PUMP_FIELD $CCX_MS_PUMP_FIELD   CCX_MS_SPREAD $CCX_MS_SPREAD   CCX_MS_PIN '${CCX_MS_PIN}'"
-echo "WALL_MIN $CCX_MS_WALL_MIN  RESTARTS $CCX_MS_RESTARTS  CYCLES $CCX_MS_CYCLES  MAXIT $CCX_MS_MAXIT   mode $MODE_LABEL   ids [$IDS]   $NPAR at once"
+echo "BUDGET $CCX_MS_BUDGET_MIN min on the $CCX_MS_CLOCK clock  RESTARTS $CCX_MS_RESTARTS  CYCLES $CCX_MS_CYCLES  MAXIT $CCX_MS_MAXIT   mode $MODE_LABEL   ids [$IDS]   $NPAR at once"
+POWER_SRC="$(pmset -g batt 2>/dev/null || true)"
+case "$POWER_SRC" in
+  *"'Battery Power'"*)
+    echo "WARNING: the Mac is on BATTERY. caffeinate -s holds only on AC, and a lid-closed Mac on battery SLEEPS"
+    echo "         (2026-10-05: ~3 h). On the $CCX_MS_CLOCK clock a sleep spends no budget, but the wave stops while it lasts. Plug in." ;;
+esac
 echo "host $(hostname)  started $(date "+%Y-%m-%dT%H:%M:%S%z")  uptime: $(uptime)"
 echo "already running at launch (>20% CPU), so a slow eval rate is read as CONTENTION first:"
 ps -Ao pcpu,etime,command -r | awk 'NR>1 && $1 > 20 {print "   " substr($0,1,160)}' | head -12

@@ -32,6 +32,13 @@
 # behind. See calibration/torch/README.md, "Two rounds, and the second is not
 # the first repeated".
 #
+# ⭐ THE BUDGET'S CLOCK IS WALL HERE, AND PINNED (D1, Marcus 2026-10-05: "CPU on Mac,
+# wall on Torch"; CHANGELOG 10-05 o). Everything below is WALL-clock arithmetic against
+# SLURM's hard --time cap, and a CPU budget could overrun that cap by however much a task
+# is starved of CPU (an I/O or NFS stall is wall time, not CPU time). So this script
+# exports CCX_MS_CLOCK=wall and REFUSES any other value. The budget's env name is
+# CCX_MS_BUDGET_MIN since 10-05 (o); CCX_MS_WALL_MIN, its older name, is still read.
+#
 # WALL -- RE-DERIVED 2026-09-10 FROM A PREFLIGHT MEASURED ON THE NODES, not from
 # the Mac. Adopting the periodic spinup (2026-09-09x) made every evaluation ~3x
 # more expensive, which invalidated the pre-adoption arithmetic that stood here.
@@ -369,7 +376,19 @@ echo "CCX_MS_STRUCT $CCX_MS_STRUCT   CCX_MS_SEAS_ML $CCX_MS_SEAS_ML   CCX_MS_PUM
 # and cost 11 h vs 2 h17 elsewhere when they oversubscribe. [[pin_blas_threads]]
 export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
 
-export CCX_MS_WALL_MIN="${CCX_MS_WALL_MIN:-300}"        # 5 h of the 6 h cap; see WALL above
+# THE CLOCK (D1, 2026-10-05 o): WALL, pinned; see the header.
+if [ -n "${CCX_MS_CLOCK:-}" ] && [ "$CCX_MS_CLOCK" != "wall" ]; then
+  echo "FATAL: CCX_MS_CLOCK=$CCX_MS_CLOCK, but Torch budgets on WALL time: SLURM's --time is a hard wall limit (D1, CHANGELOG 2026-10-05 o)." >&2
+  exit 1
+fi
+export CCX_MS_CLOCK=wall
+# THE BUDGET: CCX_MS_WALL_MIN is its pre-10-05 name, still honoured; only ONE name reaches the driver.
+if [ -n "${CCX_MS_BUDGET_MIN:-}" ] && [ -n "${CCX_MS_WALL_MIN:-}" ] && [ "$CCX_MS_BUDGET_MIN" != "$CCX_MS_WALL_MIN" ]; then
+  echo "FATAL: CCX_MS_BUDGET_MIN=$CCX_MS_BUDGET_MIN and its pre-10-05 name CCX_MS_WALL_MIN=$CCX_MS_WALL_MIN differ. Set one." >&2
+  exit 1
+fi
+export CCX_MS_BUDGET_MIN="${CCX_MS_BUDGET_MIN:-${CCX_MS_WALL_MIN:-300}}"   # 5 h of the 6 h cap; see WALL above
+unset CCX_MS_WALL_MIN
 export CCX_MS_RESTARTS="${CCX_MS_RESTARTS:-3}"
 export CCX_MS_CYCLES="${CCX_MS_CYCLES:-6}"
 export CCX_MS_MAXIT="${CCX_MS_MAXIT:-6000}"

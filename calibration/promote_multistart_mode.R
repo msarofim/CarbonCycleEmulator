@@ -23,6 +23,7 @@
 #   Rscript calibration/promote_multistart_mode.R [--outdir=DIR] [--dest=DIR] [--force]
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+source(ccx_path("calibration", "lib_ms_deadline.R"))   # ms_start_clock(): the clock `minutes` is on (2026-10-05 o)
 ccx_load_cpp()
 
 args <- commandArgs(trailingOnly = TRUE)
@@ -308,6 +309,9 @@ out <- list(
   # hilda30e). Both 09-19 j promotions had to be re-recorded by the restamp tool
   # for that reason; a file written from the objective's path needs no restamp.
   streams = attr(lpf_by_stream(u), "streams"), n_eval = best$n_eval, minutes = best$minutes,
+  # COPIED THROUGH (2026-10-05 o): the clock `minutes` is on ("wall" for a start file that predates the field).
+  # The budget and the wall minutes beside it are added below the list, only when the start file recorded them.
+  clock = ms_start_clock(best),
   seed = best$seed, param_names = CCX_PARAM_NAMES, prior_z = best$prior_z,
   kz_bracket = c(CCX_PARAM_TABLE$kz$lo, CCX_PARAM_TABLE$kz$hi),
   hml_bound = best$hml_bound,
@@ -331,6 +335,8 @@ out <- list(
                        host = best$host, r_version = best$r_version),
   promoted_by = "calibration/promote_multistart_mode.R",
   promoted_on = format(Sys.Date()))
+# the start file's budget and wall minutes (2026-10-05 o); assigning NULL adds nothing, so an older start adds neither
+out$budget_min <- best$budget_min; out$minutes_wall <- best$minutes_wall
 dir.create(PMM_DEST_DIR, showWarnings = FALSE, recursive = TRUE)
 if (file.exists(PMM_DEST_FILE) && !PMM_FORCE)
   stop(PMM_DEST_FILE, " exists; pass --force to overwrite")

@@ -93,7 +93,9 @@
 #   CCX_MS_RESTARTS  Nelder-Mead restarts per cycle          (default 3)
 #   CCX_MS_CYCLES    NM-then-BFGS cycles                     (default 6)
 #   CCX_MS_MAXIT     NM iterations per restart               (default 6000)
-#   CCX_MS_WALL_MIN  wall budget in MINUTES; stop cleanly    (default 210)
+#   CCX_MS_BUDGET_MIN  the budget in MINUTES on CCX_MS_CLOCK; stop cleanly (default 180; both runners
+#                    export 300). Its pre-2026-10-05 name CCX_MS_WALL_MIN is still read.
+#   CCX_MS_CLOCK     the budget's clock: wall | cpu          (default wall; the Mac runner exports cpu)
 #   CCX_MS_SPREAD    dispersion sd in u-space               (default: measured)
 #   CCX_MS_SEED      base seed; start k uses SEED + k        (default 2026)
 # =====================================================================
@@ -118,7 +120,7 @@ if (length(MS_PINS)) cat(sprintf("PINNED (removed from the fitted set, held in t
                                  paste(sprintf("%s = %s", names(MS_PINS), MS_PINS), collapse = ", "), length(CCX_PARAM_NAMES)))
 source(ccx_path("calibration", "lib_run_inputs.R"))
 source(ccx_path("calibration", "lib_ms_deadline.R"))   # the in-restart deadline (option A, 2026-10-05)
-ccx_require_run_inputs()   # BEFORE the wall budget, and before any target is written
+ccx_require_run_inputs()   # BEFORE the budget's clock starts, and before any target is written
 
 # ---- named constants ------------------------------------------------
 MS_ARM        <- "N"          # the shipped arm; see run_modefind_pump_arms.R
@@ -301,11 +303,33 @@ MS_PORT_FLOOR_SEED <- 20260915L   # the floor's own RNG stream; the driver's is 
 MS_RESTARTS <- .env_num("CCX_MS_RESTARTS", 3)
 MS_CYCLES   <- .env_num("CCX_MS_CYCLES",   6)
 MS_MAXIT    <- .env_num("CCX_MS_MAXIT",    6000)
-# ⚠ 180 MATCHES calibration/torch/multistart.sbatch. Two files stating two
-# different "defaults" for the same budget is the caption-sync bug class: the
-# batch job would run 180 while anyone invoking the driver directly got 210, and
-# the preflight would print a budget no production task uses.
-MS_WALL_MIN <- .env_num("CCX_MS_WALL_MIN", 180)
+# ⚠ 180 IS THE DIRECT-INVOCATION DEFAULT ONLY. It once matched
+# calibration/torch/multistart.sbatch; the sbatch and the Mac runner now both
+# export 300 (corrected 2026-10-05 o: this comment still said "MATCHES").
+# ⭐ THE BUDGET IS ON THE CLOCK CCX_MS_CLOCK NAMES (2026-10-05 o; D1 "CPU on
+# Mac, wall on Torch"). Its env name is CCX_MS_BUDGET_MIN since then; the older
+# CCX_MS_WALL_MIN is still read, so every earlier launch recipe runs unchanged.
+# Both set and DIFFERENT is a stop, not a precedence rule.
+MS_BUDGET_VAR <- local({
+  b <- Sys.getenv("CCX_MS_BUDGET_MIN", ""); w <- Sys.getenv("CCX_MS_WALL_MIN", "")
+  if (nzchar(b) && nzchar(w) && !identical(b, w))
+    stop("CCX_MS_BUDGET_MIN = '", b, "' and its pre-2026-10-05 name CCX_MS_WALL_MIN = '", w,
+         "' are both set and DIFFER. Set one.", call. = FALSE)
+  if (!nzchar(b) && nzchar(w)) "CCX_MS_WALL_MIN" else "CCX_MS_BUDGET_MIN"
+})
+MS_BUDGET_MIN <- .env_num(MS_BUDGET_VAR, 180)
+MS_CLOCK       <- ms_clock_kind()             # validated: an unknown CCX_MS_CLOCK stops
+MS_CLOCK_LABEL <- ms_clock_label(MS_CLOCK)    # "wall" / "CPU": every budget label derives from it
+# The units the log prints. Under the wall clock they are the pre-10-05 "min" and "s/eval", so a wall run's log
+# reads exactly as it did; under the CPU clock they say so on every line.
+MS_MIN_UNIT <- if (MS_CLOCK == "wall") "min" else paste0(MS_CLOCK_LABEL, "-min")
+MS_SPE_UNIT <- if (MS_CLOCK == "wall") "s/eval" else paste0(MS_CLOCK_LABEL, "-s/eval")
+if (nzchar(Sys.getenv("CCX_MS_CLOCK", "")))
+  cat(sprintf("OVERRIDE CCX_MS_CLOCK = %s (default wall)\n", MS_CLOCK))
+# D4 (Marcus 2026-10-05, "Warn only, at 2x (Recommended)"): under the CPU clock, a
+# start whose WALL time passes this multiple of its budget is FLAGGED (the log and
+# the start file's `wall_warned`). It is never stopped for it.
+MS_WALL_WARN_X <- 2
 MS_SEED     <- .env_num("CCX_MS_SEED",     MS_SEED_BASE)
 
 # ---- WHICH START. Absence ASSERTS nothing here -- 0 is a legal, MEANINGFUL
@@ -448,8 +472,11 @@ cat(sprintf("\n%s\nDISPERSED MULTI-START, id %d, arm %s, %d parameters\n",
             strrep("=", 70), MS_ID, MS_ARM, length(CCX_PARAM_NAMES)))
 cat(sprintf("  host %s   R %s   seed %d + id\n", Sys.info()[["nodename"]],
             paste(R.version$major, R.version$minor, sep = "."), MS_SEED))
-cat(sprintf("  budget: %d restarts x %d maxit x %d cycles, wall %g min\n",
-            MS_RESTARTS, MS_MAXIT, MS_CYCLES, MS_WALL_MIN))
+cat(sprintf("  budget: %d restarts x %d maxit x %d cycles, %s %g min\n",
+            MS_RESTARTS, MS_MAXIT, MS_CYCLES, MS_CLOCK_LABEL, MS_BUDGET_MIN))
+if (MS_CLOCK != "wall")
+  cat(sprintf("  ... on the %s clock (CCX_MS_CLOCK; RECORDED in the start file): a sleep or a suspension does not spend\n      it. WALL time past %g x the budget is FLAGGED, never stopped (D4, CHANGELOG 2026-10-05 o).\n",
+              MS_CLOCK_LABEL, MS_WALL_WARN_X))
 cat(sprintf("  dispersion sd %.4f in u-space (measured per-coordinate RMS between\n    the two known basins = %.4f, pooled over the %d coordinates at least one of\n    them FITTED; over all %d it would be %.4f, diluted by the %d migrated in BOTH:\n    %s)\n",
             MS_SPREAD, MS_SPREAD_MEASURED, length(MS_SPREAD_POOL),
             length(CCX_PARAM_NAMES), MS_SPREAD_ALL, length(MS_SPREAD_SKIP),
@@ -540,7 +567,10 @@ n_eval <- 0L
 # calibration/lib_ms_deadline.R). The wrapper checks the CURRENT step's deadline before each evaluation and
 # tracks the best point the step has evaluated; ms_run_step() returns that point when the deadline passes.
 # Outside a step (the rate measurement, the start, the dead-task check call lp_fun directly) there is none.
-MS_STEP <- ms_step_state()
+# ⭐ ONE CLOCK (2026-10-05 o): the step's deadlines are read on MS_CLOCK, and ms_now() reads the STEP'S clock, so
+# the budget's origin, its elapsed minutes and every deadline below cannot be on two different clocks.
+MS_STEP <- ms_step_state(MS_CLOCK)
+ms_now <- function() ms_clock(MS_STEP$clock)
 neg_lp <- function(u) {
   ms_check_deadline(MS_STEP)
   n_eval <<- n_eval + 1L
@@ -885,7 +915,7 @@ local({
   cat("PORT GATE (a) PASSED.\n")
 })
 
-# ---- the wall budget, PROJECTED rather than merely checked ------------
+# ---- the budget, PROJECTED rather than merely checked -----------------
 # ⛔ A BUDGET CHECK THAT ONLY LOOKS AT THE CLOCK CANNOT STOP A RESTART THAT HAS
 # ALREADY STARTED. `optim()` is not interruptible from inside, so "elapsed <
 # budget, go" commits the task to a WHOLE further restart -- MS_MAXIT evals,
@@ -900,37 +930,42 @@ local({
 # bound: restarts finish early far more often than they overrun.
 # ⚠ 1.5, NOT 1.25, AND THE ARITHMETIC IS WRITTEN DOWN BECAUSE A TIMEOUT COSTS
 # FAIRSHARE. The guard starts a restart only if `elapsed + SAFETY * projection`
-# still fits `MS_WALL_MIN`, so the worst case is a restart that begins just
+# still fits `MS_BUDGET_MIN`, so the worst case is a restart that begins just
 # inside the budget and then runs LONGER than projected -- which is exactly what
 # node contention does ([[eta_in_days_is_not_a_slow_run]]: a 1.61x degradation
-# was measured on this very model). With SAFETY = 1.5 and MS_WALL_MIN set 60 min
+# was measured on this very model). With SAFETY = 1.5 and MS_BUDGET_MIN set 60 min
 # below the SLURM wall, a restart would have to overrun its projection by more
 # than 2.5x to reach the hard cap. At 1.25 with a 30 min gap, 2x was enough.
+# ⚠ THAT MARGIN IS WALL-CLOCK ARITHMETIC, which is why Torch keeps the WALL clock
+# (D1, 2026-10-05 o; the sbatch refuses any other). A CPU budget under a hard
+# wall limit can overrun it by however much the task is starved of CPU.
 MS_PROJ_SAFETY <- 1.5
 MS_RATE_SAMPLES <- 5
-t0 <- Sys.time()
+# ⭐ THE BUDGET'S ORIGIN, on MS_CLOCK (2026-10-05 o). The wall origin beside it
+# feeds only the record (`minutes_wall`) and D4's flag; no deadline reads it.
+t0 <- ms_now(); t0_wall <- ms_clock("wall")
 # ⛔ ONE TIMED CALL IS NOT A RATE. This measured a SINGLE evaluation and used it
 # to project a 6,000-eval restart -- a 6,000x extrapolation from n = 1, on a
 # shared node, where the first call is also the one most likely to be
 # unrepresentative (cold caches, first touch of the forcing arrays). The MEDIAN
 # of a few is still cheap (~1 s) and cannot be thrown by one outlier.
 .tv <- vapply(seq_len(MS_RATE_SAMPLES), function(i) {
-  .t <- Sys.time(); invisible(lp_fun(u))
-  as.numeric(difftime(Sys.time(), .t, units = "secs"))
+  .t <- ms_now(); invisible(lp_fun(u))
+  ms_now() - .t
 }, numeric(1))
 MS_SEC_PER_EVAL <- stats::median(.tv)
-cat(sprintf("measured %.4f s/eval (median of %d; range %.4f-%.4f) => one %d-eval restart\n  projects to %.1f min; wall budget %g min, of which %.1f min is RESERVED for the\n  BFGS polish (%d iterations)\n",
-            MS_SEC_PER_EVAL, MS_RATE_SAMPLES, min(.tv), max(.tv), MS_MAXIT,
-            MS_SEC_PER_EVAL * MS_MAXIT / 60, MS_WALL_MIN,
+cat(sprintf("measured %.4f %s (median of %d; range %.4f-%.4f) => one %d-eval restart\n  projects to %.1f %s; %s budget %g %s, of which %.1f %s is RESERVED for the\n  BFGS polish (%d iterations)\n",
+            MS_SEC_PER_EVAL, MS_SPE_UNIT, MS_RATE_SAMPLES, min(.tv), max(.tv), MS_MAXIT,
+            MS_SEC_PER_EVAL * MS_MAXIT / 60, MS_MIN_UNIT, MS_CLOCK_LABEL, MS_BUDGET_MIN, MS_MIN_UNIT,
             min(MS_PROJ_SAFETY * MS_POLISH_TARGET * (2 * length(CCX_PARAM_NAMES) + 1) *
-                  MS_SEC_PER_EVAL / 60, MS_POLISH_RESERVE_FRAC * MS_WALL_MIN),
+                  MS_SEC_PER_EVAL / 60, MS_POLISH_RESERVE_FRAC * MS_BUDGET_MIN), MS_MIN_UNIT,
             MS_POLISH_TARGET))
 # SAY IT OUT LOUD IF ONE RESTART CANNOT FIT THE BUDGET AT ALL -- that is a
 # sizing error, and the task should announce it rather than quietly shorten
 # every restart for hours.
-if (MS_PROJ_SAFETY * MS_SEC_PER_EVAL * MS_MAXIT / 60 > MS_WALL_MIN)
-  cat(sprintf("*** WARNING: a full %d-eval restart does NOT fit %g min at this rate.\n    Every restart will be SHORTENED. Lower CCX_MS_MAXIT or raise CCX_MS_WALL_MIN.\n",
-              MS_MAXIT, MS_WALL_MIN))
+if (MS_PROJ_SAFETY * MS_SEC_PER_EVAL * MS_MAXIT / 60 > MS_BUDGET_MIN)
+  cat(sprintf("*** WARNING: a full %d-eval restart does NOT fit %g %s at this rate.\n    Every restart will be SHORTENED. Lower CCX_MS_MAXIT or raise %s.\n",
+              MS_MAXIT, MS_BUDGET_MIN, MS_MIN_UNIT, MS_BUDGET_VAR))
 
 # ⭐ THE PREFLIGHT EXITS **HERE**, NOT BEFORE THE RATE MEASUREMENT (moved
 # 2026-09-01). Measuring s/eval costs 5 evaluations -- about two seconds -- and
@@ -939,14 +974,15 @@ if (MS_PROJ_SAFETY * MS_SEC_PER_EVAL * MS_MAXIT / 60 > MS_WALL_MIN)
 # the cluster verified the environment and then threw away the measurement that
 # sizes CCX_MS_MAXIT for every task after it. A preflight now does both.
 if (MS_PREFLIGHT) {
-  cat(sprintf("PREFLIGHT id %03d on %s: start %s, log-post %.4f, %d draw%s, port %s,\n             %.4f s/eval => a %d-eval restart takes %.1f min of a %g min budget. LAUNCHABLE.\n",
+  cat(sprintf("PREFLIGHT id %03d on %s: start %s, log-post %.4f, %d draw%s, port %s,\n             %.4f %s => a %d-eval restart takes %.1f %s of a %g %s budget. LAUNCHABLE.\n",
               MS_ID, Sys.info()[["nodename"]],
               if (MS_ID >= MS_DISPERSED_FROM) "dispersed"
               else if (MS_ID %in% MS_SEED_IDS) "SEEDED" else "REFERENCE", MS_START_LP,
               st$draws, if (st$draws == 1L) "" else "s",
               if (isTRUE(MS_PORT$checked)) sprintf("VERIFIED rel %.1e (floor %.1e, bound %.1e)", MS_PORT$rel, MS_PORT$floor, MS_PORT$tol)
               else "NOT VERIFIED",
-              MS_SEC_PER_EVAL, MS_MAXIT, MS_SEC_PER_EVAL * MS_MAXIT / 60, MS_WALL_MIN))
+              MS_SEC_PER_EVAL, MS_SPE_UNIT, MS_MAXIT, MS_SEC_PER_EVAL * MS_MAXIT / 60, MS_MIN_UNIT,
+              MS_BUDGET_MIN, MS_MIN_UNIT))
   if (length(MS_SPREAD_OVERRIDE))
     cat(sprintf("             start at the overridden coordinates: %s\n",
                 paste(sprintf("%s = %+.5f", names(MS_SPREAD_OVERRIDE), unlist(ccx_unc_to_par(st$u)[names(MS_SPREAD_OVERRIDE)])), collapse = ", ")))
@@ -957,7 +993,22 @@ if (MS_PREFLIGHT) {
     stop("PREFLIGHT id ", MS_ID, ": the start point has a non-finite log-posterior.")
   quit(save = "no", status = 0)
 }
-elapsed_min <- function() as.numeric(difftime(Sys.time(), t0, units = "mins"))
+elapsed_min      <- function() (ms_now() - t0) / 60                    # on MS_CLOCK: what the budget counts
+elapsed_wall_min <- function() (ms_clock("wall") - t0_wall) / 60       # the record and D4's flag only
+# D4 (Marcus 2026-10-05, "Warn only, at 2x (Recommended)"): FLAG a start whose wall time has passed
+# MS_WALL_WARN_X x its budget -- it slept, or it is starved of CPU -- once, in the log and in the start file.
+# It never stops the start. Under the wall clock the budget itself ends a start long before 2x.
+wall_warned <- FALSE
+flag_wall <- function() {
+  if (MS_CLOCK == "wall" || wall_warned) return(invisible(NULL))
+  w <- elapsed_wall_min()
+  if (w > MS_WALL_WARN_X * MS_BUDGET_MIN) {
+    wall_warned <<- TRUE
+    cat(sprintf("*** [%03d] WALL time %.0f min has passed %g x the %g %s budget (%.1f %s spent): the machine\n      slept, or the task is starved of CPU. FLAGGED, not stopped (D4, CHANGELOG 2026-10-05 o).\n",
+                MS_ID, w, MS_WALL_WARN_X, MS_BUDGET_MIN, MS_MIN_UNIT, elapsed_min(), MS_MIN_UNIT))
+  }
+  invisible(NULL)
+}
 restart_min <- numeric(0)
 # ⇒ THE BUDGET SIZES THE RESTART; IT DOES NOT MERELY VETO IT. A task whose
 # remaining budget cannot fit a FULL-maxit restart used to do nothing at all and
@@ -972,10 +1023,10 @@ restart_min <- numeric(0)
 # enough to leave room for MS_POLISH_TARGET iterations.
 polish_reserve_min <- function()
   min(MS_PROJ_SAFETY * MS_POLISH_TARGET * (2 * length(u) + 1) * MS_SEC_PER_EVAL / 60,
-      MS_POLISH_RESERVE_FRAC * MS_WALL_MIN)
+      MS_POLISH_RESERVE_FRAC * MS_BUDGET_MIN)
 
 maxit_for_budget <- function() {
-  left <- MS_WALL_MIN - elapsed_min() - polish_reserve_min()
+  left <- MS_BUDGET_MIN - elapsed_min() - polish_reserve_min()
   per  <- if (length(restart_min)) max(restart_min) / MS_MAXIT else MS_SEC_PER_EVAL / 60
   n    <- floor(left / (MS_PROJ_SAFETY * per))
   if (n < MS_MAXIT_FLOOR) 0L else as.integer(min(n, MS_MAXIT))
@@ -991,17 +1042,16 @@ for (cyc in seq(cyc0, MS_CYCLES)) {
     mx <- maxit_for_budget()
     if (mx == 0L) { out_of_time <- TRUE; break }
     if (mx < MS_MAXIT)
-      cat(sprintf("[%03d] cycle %d restart %2d: SHORTENED to maxit %d by the wall budget\n",
-                  MS_ID, cyc, i, mx))
-    .r0 <- Sys.time(); .n0 <- n_eval
+      cat(sprintf("[%03d] cycle %d restart %2d: SHORTENED to maxit %d by the %s budget\n",
+                  MS_ID, cyc, i, mx, MS_CLOCK_LABEL))
+    .r0 <- ms_now(); .n0 <- n_eval
     # the restart's deadline leaves the polish its reserved slice, as maxit_for_budget() does
     fit <- ms_run_step(MS_STEP, u, best, neg_lp, "Nelder-Mead", list(maxit = mx, reltol = 1e-12),
-                       deadline = as.numeric(t0) + 60 * (MS_WALL_MIN - polish_reserve_min()))
+                       deadline = t0 + 60 * (MS_BUDGET_MIN - polish_reserve_min()))
     # NORMALISED to a FULL restart, because a shortened one is not comparable and
     # feeding it back raw would make the projection shrink every cycle -- by the
     # evaluations it ACTUALLY made (option A, proposal §3), not the planned maxit.
-    restart_min <- c(restart_min, ms_restart_minutes(as.numeric(difftime(Sys.time(), .r0, units = "mins")),
-                                                     MS_MAXIT, n_eval - .n0))
+    restart_min <- c(restart_min, ms_restart_minutes((ms_now() - .r0) / 60, MS_MAXIT, n_eval - .n0))
     cyc_restarts <- cyc_restarts + 1L; restarts_done <- restarts_done + 1L
     if (isTRUE(fit$deadline)) {
       deadline_stops <- deadline_stops + 1L
@@ -1009,8 +1059,9 @@ for (cyc in seq(cyc0, MS_CYCLES)) {
                   MS_ID, cyc, i, n_eval - .n0))
     }
     gain <- best - fit$value; u <- fit$par; best <- fit$value
-    cat(sprintf("[%03d] cycle %d restart %2d: log-post = %12.4f (gain %10.4f) evals %d  %.1f min\n",
-                MS_ID, cyc, i, -best, gain, n_eval, elapsed_min()))
+    cat(sprintf("[%03d] cycle %d restart %2d: log-post = %12.4f (gain %10.4f) evals %d  %.1f %s\n",
+                MS_ID, cyc, i, -best, gain, n_eval, elapsed_min(), MS_MIN_UNIT))
+    flag_wall()
     trace <- rbind(trace, data.frame(cycle = cyc, restart = i, logpost = -best, evals = n_eval))
     if (isTRUE(fit$deadline)) break     # no further restart fits; the polish keeps its reserved slice
     if (i > 1 && gain < MS_TOL) break
@@ -1031,16 +1082,16 @@ for (cyc in seq(cyc0, MS_CYCLES)) {
   # when even the floor does not fit.
   # ⚠ AT THE OBSERVED RATE since option A (proposal §3): this used the START point's measured rate, so a task
   # whose restarts had slowed near the h_ml wall sized its polish as if they had not.
-  mx_pol <- ms_polish_maxit(MS_WALL_MIN - elapsed_min(), length(u), MS_SEC_PER_EVAL, restart_min, MS_MAXIT,
+  mx_pol <- ms_polish_maxit(MS_BUDGET_MIN - elapsed_min(), length(u), MS_SEC_PER_EVAL, restart_min, MS_MAXIT,
                             MS_PROJ_SAFETY, MS_POLISH_FLOOR, MS_POLISH_MAXIT)
   if (!out_of_time && mx_pol > 0L) {
     if (mx_pol < MS_POLISH_MAXIT)
-      cat(sprintf("[%03d] cycle %d polish: SHORTENED to maxit %d by the wall budget\n",
-                  MS_ID, cyc, mx_pol))
+      cat(sprintf("[%03d] cycle %d polish: SHORTENED to maxit %d by the %s budget\n",
+                  MS_ID, cyc, mx_pol, MS_CLOCK_LABEL))
     .n0 <- n_eval
     # the deadline returns the best EVALUATED point; any OTHER error still discards the polish, as before
     pc <- tryCatch(ms_run_step(MS_STEP, u, best, neg_lp, "BFGS", list(maxit = mx_pol, reltol = 1e-14),
-                               deadline = as.numeric(t0) + 60 * MS_WALL_MIN),
+                               deadline = t0 + 60 * MS_BUDGET_MIN),
                    error = function(e) NULL)
     if (!is.null(pc) && isTRUE(pc$deadline)) {
       deadline_stops <- deadline_stops + 1L; out_of_time <- TRUE
@@ -1064,8 +1115,9 @@ for (cyc in seq(cyc0, MS_CYCLES)) {
 # what the first end-to-end run did: "CONVERGED" and "ran out of wall time" on
 # the same task. `out_of_time` therefore vetoes convergence outright.
   cyc_gain <- cyc_start - best
-  cat(sprintf("[%03d] === cycle %d total gain %.4f (log-post %.4f, %d evals, %.1f min) ===\n",
-              MS_ID, cyc, cyc_gain, -best, n_eval, elapsed_min()))
+  cat(sprintf("[%03d] === cycle %d total gain %.4f (log-post %.4f, %d evals, %.1f %s) ===\n",
+              MS_ID, cyc, cyc_gain, -best, n_eval, elapsed_min(), MS_MIN_UNIT))
+  flag_wall()
   # CHECKPOINT EVERY CYCLE. A wall-clock kill must leave the best-so-far on disk
   # and a requeue must be able to continue it -- that is what makes a 4 h
   # partition usable for a job whose length is not known in advance.
@@ -1103,8 +1155,8 @@ for (cyc in seq(cyc0, MS_CYCLES)) {
   if (out_of_time) break
 }
 if (out_of_time)
-  cat(sprintf("*** [%03d] WALL BUDGET %g min REACHED -- checkpointed, NOT converged.\n",
-              MS_ID, MS_WALL_MIN))
+  cat(sprintf("*** [%03d] %s BUDGET %g %s REACHED -- checkpointed, NOT converged.\n",
+              MS_ID, toupper(MS_CLOCK_LABEL), MS_BUDGET_MIN, MS_MIN_UNIT))
 
 names(u) <- CCX_PARAM_NAMES
 pm <- ccx_unc_to_par(u)
@@ -1135,6 +1187,11 @@ res <- list(id = MS_ID, kind = st$kind, u_mode = u, par_mode = pm, logpost = -be
             restarts_done = restarts_done, deadline_stops = deadline_stops,
             trace = trace, n_eval = n_eval, minutes = elapsed_min(),
             sec_per_eval = MS_SEC_PER_EVAL, restart_min = restart_min,
+            # RECORDED (2026-10-05 o): the clock `minutes`, `sec_per_eval` and `restart_min` are on, the budget
+            # they ran against, the WALL minutes beside them, and D4's flag. An absent `clock` reads as "wall"
+            # (ms_start_clock()): every file written before then ran the wall clock.
+            clock = MS_CLOCK, budget_min = MS_BUDGET_MIN, minutes_wall = elapsed_wall_min(),
+            wall_warned = wall_warned,
             prior_z = zs, param_names = CCX_PARAM_NAMES, pump_mode = MS_ARM,
             # RECORDED (2026-09-08f) so a promoted mode carries the structure it
             # was fitted under; consumed by promote_multistart_mode.R / ccx_mode_base().
@@ -1186,12 +1243,14 @@ res <- list(id = MS_ID, kind = st$kind, u_mode = u, par_mode = pm, logpost = -be
             r_version = paste(R.version$major, R.version$minor, sep = "."))
 saveRDS(res, MS_OUT)
 
-cat(sprintf("\n[%03d] FINAL log-post %.4f  (%s, %d restart%s, %d evals, %.1f min)\n",
+cat(sprintf("\n[%03d] FINAL log-post %.4f  (%s, %d restart%s, %d evals, %.1f %s%s)\n",
             MS_ID, -best,
             if (converged) "CONVERGED"
-            else if (restarts_done == 0L) "*** NO RESTART RAN -- the wall budget did not fit ONE"
+            else if (restarts_done == 0L) sprintf("*** NO RESTART RAN -- the %s budget did not fit ONE", MS_CLOCK_LABEL)
             else if (out_of_time) "OUT OF TIME" else "restart budget spent",
-            restarts_done, if (restarts_done == 1L) "" else "s", n_eval, elapsed_min()))
+            restarts_done, if (restarts_done == 1L) "" else "s", n_eval, elapsed_min(), MS_MIN_UNIT,
+            if (MS_CLOCK == "wall") ""
+            else sprintf("; %.1f wall-min%s", elapsed_wall_min(), if (wall_warned) ", FLAGGED (D4)" else "")))
 # The optimiser's own evals, not the wall clock over them: the start evaluation,
 # the compile and the checkpoint writes are not per-eval costs, and a task with
 # NO evals has no rate at all rather than a large one.
@@ -1199,11 +1258,11 @@ cat(sprintf("\n[%03d] FINAL log-post %.4f  (%s, %d restart%s, %d evals, %.1f min
 # bare `else` as a new statement -- "unexpected 'else'". Inside a function or a
 # braced block the same code is fine, which is why this reads as correct.
 if (n_eval > 0L && sum(restart_min) > 0) {
-  cat(sprintf("[%03d] eval rate %.4f s/eval in the optimiser -- SIZE THE ARRAY ON THIS\n",
-              MS_ID, 60 * sum(restart_min) / n_eval))
+  cat(sprintf("[%03d] eval rate %.4f %s in the optimiser -- SIZE THE ARRAY ON THIS\n",
+              MS_ID, 60 * sum(restart_min) / n_eval, MS_SPE_UNIT))
 } else {
-  cat(sprintf("[%03d] eval rate: NOT MEASURED (no restart ran). The start evaluation alone\n      timed %.4f s/eval; raise CCX_MS_WALL_MIN or lower CCX_MS_MAXIT.\n",
-              MS_ID, MS_SEC_PER_EVAL))
+  cat(sprintf("[%03d] eval rate: NOT MEASURED (no restart ran). The start evaluation alone\n      timed %.4f %s; raise %s or lower CCX_MS_MAXIT.\n",
+              MS_ID, MS_SEC_PER_EVAL, MS_SPE_UNIT, MS_BUDGET_VAR))
 }
 
 # ---- DEAD-TASK GATE: fatal, AFTER the file is written (see `dead` above).

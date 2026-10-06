@@ -18,16 +18,69 @@
 #   `optim()` takes the identical path (test-ms-deadline D2 asserts identical()).
 # ⚠ The two SIZING helpers below are deliberate behaviour changes, ruled with option A (proposal §3): a restart's
 #   minutes are normalised by the evaluations it actually made, and the polish is sized from the observed rate.
+#
+# ⭐ THE BUDGET'S CLOCK (CHANGELOG 2026-10-05 o; Marcus, D1 "CPU on Mac, wall on Torch (Recommended)", D2 "Keep
+# 300 CPU-min (Recommended)"). Every budget reading and every deadline goes through ms_clock(), and nothing else
+# in the budget path reads a clock (test-ms-clock C5 lints it). On 10-05 a ~3 h Mac sleep spent #16's WALL budget
+# (memory mac_sleep_eats_wall_budget): four starts ran out of time while the machine was off.
+#   "wall" -- seconds since the epoch. The default, and what every run before 10-05 (o) used.
+#   "cpu"  -- this R process's OWN CPU seconds (user + sys; children excluded, and there are none). They do not
+#             advance while the process is suspended or the machine sleeps (measured 10-05: a 5-s SIGSTOP added
+#             +8.2 s wall, +0.00 s CPU).
+# ⚠ CPU time cannot outrun wall time only while BLAS runs ONE thread (both runners pin it). A k-thread BLAS would
+#   spend a CPU budget up to k times faster than the wall clock.
 # =====================================================================
+
+#' The clocks a budget may run on. CCX_MS_CLOCK selects one.
+MS_CLOCK_KINDS <- c("wall", "cpu")
+
+#' The budget's clock from CCX_MS_CLOCK; unset or "" is "wall". VALIDATED: an unknown value STOPS rather than
+#' falling back, because a typo that silently ran the wall clock is the failure this switch exists to prevent.
+ms_clock_kind <- function(v = Sys.getenv("CCX_MS_CLOCK", "")) {
+  if (!nzchar(v)) return("wall")
+  if (!v %in% MS_CLOCK_KINDS)
+    stop("CCX_MS_CLOCK must be one of ", paste(sprintf("'%s'", MS_CLOCK_KINDS), collapse = ", "),
+         "; got '", v, "'", call. = FALSE)
+  v
+}
+
+#' Seconds on the named clock. Only a DIFFERENCE of two readings on one clock means anything: "wall" counts from
+#' the epoch, "cpu" from this process's start.
+ms_clock <- function(kind) {
+  switch(kind,
+         wall = as.numeric(Sys.time()),
+         cpu  = { pt <- proc.time(); unname(pt[["user.self"]] + pt[["sys.self"]]) },
+         stop("unknown clock '", kind, "'", call. = FALSE))
+}
+
+#' The clock's name in labels ("wall" / "CPU"), so a printed budget always says which clock it is on
+ms_clock_label <- function(kind) c(wall = "wall", cpu = "CPU")[[ms_clock_kind(kind)]]
+
+#' The clock a START FILE ran on. A file written before 10-05 (o) has no `clock` field, and every such file ran
+#' the wall clock, so absent reads as "wall".
+ms_start_clock <- function(r) if (is.null(r$clock)) "wall" else r$clock
+
+#' D3 (Marcus 2026-10-05, "Record and warn (Recommended)"): the warning for a set of start files that ran on more
+#' than one clock, or NULL when they agree. Their minutes and out-of-time counts are not like-for-like.
+ms_clock_mix_note <- function(clocks, ids) {
+  u <- sort(unique(clocks))
+  if (length(u) < 2L) return(NULL)
+  paste0("MIXED CLOCKS: ",
+         paste(vapply(u, function(k) sprintf("%s [%s]", k, paste(ids[clocks == k], collapse = ", ")), character(1)),
+               collapse = "; "),
+         ". Minutes and out-of-time counts are not like-for-like across clocks (D3, CHANGELOG 2026-10-05 o).")
+}
 
 #' The condition a passed deadline signals (classed, so a caller can catch it and nothing else)
 ms_deadline_condition <- function(msg = "the optimiser step's deadline has passed")
   structure(class = c("ms_deadline", "error", "condition"), list(message = msg, call = NULL))
 
-#' The mutable state of the CURRENT optimiser step: its deadline (seconds since the epoch; Inf = none) and the
-#' best point evaluated in it. One environment, shared by the wrapper and ms_run_step().
-ms_step_state <- function() {
+#' The mutable state of the CURRENT optimiser step: the clock its deadlines are read on, its deadline (seconds
+#' on that clock; Inf = none) and the best point evaluated in it. One environment, shared by the wrapper and
+#' ms_run_step(). The driver derives its budget origin and every deadline from `$clock`, so they cannot disagree.
+ms_step_state <- function(clock = "wall") {
   s <- new.env(parent = emptyenv())
+  s$clock <- ms_clock_kind(clock)
   s$deadline <- Inf; s$best_val <- Inf; s$best_u <- NULL
   s
 }
@@ -36,7 +89,7 @@ ms_step_state <- function() {
 #' Checking first means the step never starts an evaluation it has no time for; a single evaluation is itself
 #' bounded (the substep controller STOPs past CCX_SUBSTEPS_MAX).
 ms_check_deadline <- function(state) {
-  if (as.numeric(Sys.time()) > state$deadline) stop(ms_deadline_condition())
+  if (ms_clock(state$clock) > state$deadline) stop(ms_deadline_condition())
   invisible(NULL)
 }
 
