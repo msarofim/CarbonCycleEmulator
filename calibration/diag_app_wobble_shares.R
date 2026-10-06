@@ -31,9 +31,15 @@ setwd(ROOT)
 WS_DRIVER  <- "calibration/diag_app_wobble_shares.R"
 WS_SLIDER  <- c(1850L, APP_HIST_YEARS[2])          # = ui.R's c_years default
 WS_DF      <- 3L                                   # = server.R's ns(year, df = 3)
+# + `revelle` (2026-10-06): Marcus's 09-24 Q2, "is the Revelle effect on year-to-year scatter really that large?",
+# closed by measuring it on this same estimator ("Close the finished items"). It is read, not typed into any copy.
 WS_ARMS    <- list(full = character(0), enso = "enso", warming = "warming_feedback", volcanic = "volcanic",
-                   all_three = c("enso", "warming_feedback", "volcanic"))
-WS_TYPED   <- c(enso = "about a quarter of the wobble goes", all_three = "about a third of the wobble remains")
+                   all_three = c("enso", "warming_feedback", "volcanic"), revelle = "revelle")
+# the copy's CURRENT wording (R/mechanisms.R; "about 40 %" since 10-03 h, kept 10-06 a). It read 10-02's "about a
+# quarter" until 2026-10-06, so the log line below quoted words the app no longer shows.
+WS_TYPED   <- c(enso = "about 40 % of the wobble", all_three = "about a third of the wobble")
+stopifnot(all(vapply(WS_TYPED, function(w) any(grepl(w, unlist(lapply(CCX_MECHANISMS, `[[`, "blurb")), fixed = TRUE)) ||
+                                             any(grepl(w, unlist(lapply(CCX_MECHANISMS, `[[`, "caveat")), fixed = TRUE)), logical(1))))
 WS_REC     <- list(mode = "hilda33d", full = 0.268, share_enso = 0.28, share_all = 0.67)   # CHANGELOG 10-02 (w)
 WS_REC_TOL <- c(full = 0.0005, share = 0.005)      # half a unit in each recorded number's last printed digit
 stopifnot(all(unlist(WS_ARMS) %in% names(CCX_MECHANISMS)))

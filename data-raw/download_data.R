@@ -249,6 +249,18 @@ fetch("gcb_hist",
       "Friedlingstein P, et al. (2026), GCB 2025 historical budget sheet (as above).",
       "1750-2024 GtC/yr; source of prescribed fossil + LUC emissions forcing")
 
+# THE GCB 2025 SUPPLEMENT (2026-10-06, Marcus: "Do the H2 diagnostic and test"). Its Fig. S10 (PDF page 70)
+# is the GOBM ensemble's ocean-sink CLIMATE effect (sim A - C), 1959-2024 -- the only published time series
+# of it; data-raw/build_gcb2025_s10_ocean_climate.R digitises the global panel. It is also the file the
+# like-for-like ocean diagnostic's protocol table was read from (calibration/diag_ocean_climate_gobm.R
+# OC_SUPP_MD5 = 93a7e289fb61849d31a0163ddbec8f45, md5 of THIS file). CC-BY 4.0.
+fetch("gcb2025_supplement",
+      "https://essd.copernicus.org/articles/18/3211/2026/essd-18-3211-2026-supplement.pdf",
+      "gcb2025_supplement.pdf",
+      paste("Friedlingstein P, et al. (2026). Global Carbon Budget 2025, Supplement.",
+            "Earth Syst. Sci. Data 18:3211, doi:10.5194/essd-18-3211-2026."),
+      "Fig. S10 p. 69 (PDF p. 70): SOCEAN CO2 (C-B) and climate (A-C) effects per GOBM + mean, 1959-2024")
+
 # PRE-1850 LAND-USE EMISSIONS (2026-08-13). GCB's LUC column is EMPTY before
 # 1850 -- verified in gcb2025_historical_budget.csv itself, the fossil column
 # starts 1750 and the LUC column does not. Until this file was added,

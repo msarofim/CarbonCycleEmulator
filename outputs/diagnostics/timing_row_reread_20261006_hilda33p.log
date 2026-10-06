@@ -1,0 +1,41 @@
+calibration/diag_timing_row_reread.R @894d6d7, 2026-10-06 12:37 | canonical hilda33p | 4 workers
+mode file /Users/MarcusMarcus/ccx_frozen/20261006_timingrow/calibration/output/refit_20261005_hilda33p_obj16_hilda_csl3v0kaidgbem/mode_fit_pumpN.rds (md5 525404989a20ece51ec8bd088c7d4638); struct hilda_csl3v0kaidgbem; 10 pins incl. npp_tsens = 0; fitted lag 2.6057 months
+block (7, re-optimised at each lag): beta_max, fert_k, gamma_enso_land_NH, gamma_enso_land_SH, luc_scale, imb_share_land, ndep_ret
+
+=== 0. IDENTITY: the canonical at its own lag, 0 rounds, must reproduce its stored logpost ===
+  logpost -1187.451837 (stored -1187.451837, diff 0.0e+00); max |whitened slope| 0.0034
+  at the mode: growth peak +1 months (r 0.679; the record's +5, r 0.505); annual detrended r 0.6414; ssp585 2300 1461.53 ppm
+
+=== T. THE LAG PROFILE (the 7-name land block re-optimised at each lag) ===
+      L     lik     d_lik beta_max peak r_monthly r_annual ssp585    vvH conv
+ 1.0000 -1150.6  -5.61943   2.0671   -1   0.47885  0.56795 1462.7 1010.7 TRUE
+ 2.0000 -1145.6  -0.62733   2.0741    1   0.54843  0.61419 1461.8 1010.2 TRUE
+ 2.6057 -1145.0   0.00000   2.0768    1   0.58577  0.64144 1461.5 1010.0 TRUE
+ 3.0000 -1145.7  -0.64941   2.0761    2   0.60713  0.65818 1461.7 1010.1 TRUE
+ 4.0000 -1150.1  -5.06403   2.0728    3   0.65012  0.69536 1462.5 1010.4 TRUE
+ 5.0000 -1157.0 -11.99110   2.0660    4   0.67197  0.71902 1463.8 1010.9 TRUE
+ 6.0000 -1164.6 -19.55723   2.0581    6   0.67015  0.72214 1465.3 1011.5 TRUE
+ 8.0000 -1176.2 -31.17426   2.0449    8   0.61309  0.67017 1467.6 1012.5 TRUE
+ rounds minutes
+      1     4.4
+      1     4.5
+      0     0.1
+      1     4.4
+      1     4.2
+      1     4.1
+      1     4.1
+      1     4.2
+  n_eff at the mode (Bretherton 1999 eq. 31): monthly 22.5 of 540 points (lag-1 r: model 0.990, obs 0.929); annual 44.8 of 45 (0.235, 0.010)
+  where the row would put the lag (a conditional preview: the land block was optimised WITHOUT the row):
+ estimator             weight L_star  lik_cost row_gain ssp585
+   monthly   1 x n_eff = 22.5   2.70  -0.08641   0.1080   1462
+   monthly   2 x n_eff = 45.1   2.95  -0.52684   0.7800   1462
+   monthly  5 x n_eff = 112.7   3.65  -3.14225   5.6671   1462
+   monthly 10 x n_eff = 225.4   4.35  -7.29150  17.2048   1463
+    annual   1 x n_eff = 44.8   2.90  -0.41537   0.6288   1462
+    annual   2 x n_eff = 89.6   3.45  -2.21108   3.6157   1462
+    annual  5 x n_eff = 224.0   4.60  -9.02920  19.7160   1463
+    annual 10 x n_eff = 447.9   5.15 -13.14042  45.5431   1464
+
+CARD 4's 'about three months': at its MEASURED weight the row puts the lag at 2.70 (monthly) / 2.90 (annual) months,
+  from the fitted 2.606 (10-04 (i) at hilda34g: 2.75 / 2.90 from 2.644). The record's growth peak: 5 months.
