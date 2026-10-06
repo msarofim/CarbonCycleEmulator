@@ -1,0 +1,33 @@
+calibration/diag_obj16_row_split.R @eec4aa1, 2026-10-06 07:14 | hilda33p - hilda34g, row by row; the feedback OFF = mix_strat_s = 0
+reproduction: hilda34g logpost -1182.991369 (stored -1182.991369); hilda33p -1187.451837 (stored -1187.451837)
+
+                  row     total  feedback pin_refit
+          co2_icecore -1.098690  0.004736 -1.103427
+     co2_seasonal_MLO -0.587269 -0.037785 -0.549483
+        co2_level_SPO  0.380452 -0.550324  0.930776
+        co2_level_MLO  0.321867  0.961820 -0.639953
+        gcb_land_sink -0.263085 -0.071758 -0.191327
+     co2_seasonal_SPO -0.259934 -0.078931 -0.181003
+         co2_gradient -0.193847 -0.084493 -0.109354
+    d13c_seasonal_SPO -0.180879  0.005031 -0.185910
+       d13c_level_SPO  0.174614  0.650835 -0.476221
+              d14c_SH -0.133429  0.488002 -0.621430
+         d13c_icecore  0.112013 -0.087214  0.199227
+       ocean_grad_dic -0.104166  0.002898 -0.107064
+      d14c_profile_ab -0.095449  0.000000 -0.095449
+      ocean_grad_d13c  0.092373 -0.069402  0.161775
+       ocean_grad_alk  0.068119  0.000000  0.068119
+       gcb_ocean_sink -0.060448 -0.226331  0.165883
+   d14c_profile_level  0.057270  0.000000  0.057270
+         hs_surf_d13c -0.038417  0.006413 -0.044830
+        d13c_gradient -0.037953 -0.010220 -0.027734
+    d13c_seasonal_MLO  0.037903 -0.007362  0.045264
+       d13c_level_MLO  0.031214 -1.750762  1.781976
+          d14c_intcal  0.029277 -0.017394  0.046671
+              d14c_NH -0.016858 -0.057381  0.040523
+     excess_c14_ocean -0.007480  0.010990 -0.018470
+ gcb_ocean_enso_slope  0.005576 -0.008122  0.013697
+          hs_surf_dic -0.001273  0.000589 -0.001862
+      d14c_profile_bd  0.000662  0.000000  0.000662
+
+SUM: total -1.7678 = the feedback at hilda33p -0.9262 + the pin and the refit -0.8417
