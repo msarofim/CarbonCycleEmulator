@@ -2,6 +2,71 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-06 (a) — **ADOPTED: `hilda33p` is the canonical (objective #16: the stratification feedback, with the greening term pinned at 0). It was adopted on PHYSICS: the record cannot tell it from hilda34g. The full suite at `fb8036a` is CLEAN: 6294 passed, 0 failed, 3 skipped (the standing three). Verified in the running app.**
+
+- **The rulings, verbatim (Marcus, 2026-10-06):**
+  - "Adopt 16, and then write a handoff.";
+  - "hilda33p (Recommended)": 33 fitted names; the letter is CHANGELOG 10-05 (p), where #16 landed;
+  - "Remove, re-express its test (Recommended)": the #16 reference-set branch;
+  - "Move v1.0 to the new mode (Recommended)";
+  - "Approve all (Recommended)": the ledger below;
+  - "Keep \"about 40 %\" (Recommended)": the What-if ENSO blurb.
+- **The case, as put to Marcus before the ruling** (his questions: "What are #16's key physical updates…? Likelihood is worse: what are the largest other changes…? What is your recommendation?"):
+  - **The physical updates:**
+    - the stratification feedback (DESIGN §3.4a S; strength FIXED from observation × law);
+    - `npp_tsens` pinned at 0: the record cannot sign it (0.99 sd from 0), and the futures had extrapolated it 6× to 2300;
+    - the refit's compensations, each within 0.64 of hilda34g's marginal sd: `beta_max` 1.83 → 2.08, `luc_scale` 0.877 → 0.900, `kz` +1.8 %.
+  - **The likelihood, split row by row** (`calibration/diag_obj16_row_split.R` → `outputs/diagnostics/obj16_row_split_20261006.log`): −1.7678 = the feedback at hilda33p −0.9262 + the pin and the refit −0.8417.
+    - `co2_icecore` −1.10 comes ALL from the pin and the refit.
+    - The GCB rows' −0.31 is the feedback's.
+    - The feedback's `d13c_level_MLO` −1.75 is fully absorbed by the refit (+1.78).
+  - **The other changes.**
+    - Improved: the land's net climate effect, +0.118 → −0.038 GtC/yr (the DGVM sign); GATE V −4.60 → −4.39; GATE 6 −0.34 → −0.22; the Hessian condition 1.6e6 → 2.7e5.
+    - Degraded: the ocean's like-for-like climate effect, −0.357 → −0.375 (1.80× → 1.87× GCB); the pulse IRF(100) and IRF(300), slightly further below Joos.
+    - Futures: SSP5-8.5 2300 +12.9 ppm. No gate verdict flips.
+  - **The recommendation was to adopt.** ΔAIC is +1.5 at one fewer name, below the usual 2. The last two adoptions were won by +14.9 and +10.7.
+- **The adoption** (`4d07ccb`):
+  - **The refit directory is renamed** `refit_20261005_obj16_…` → `refit_20261005_hilda33p_obj16_hilda_csl3v0kaidgbem`.
+  - **`R/paths.R`:**
+    - `CCX_MODE_CANONICAL <- "hilda33p"`, registered and PINNED; hilda34g stays registered.
+    - `CCX_MODE_CANONICAL_PINS` = `CCX_MODE_OBJ16_PINS` = `CCX_MODE_OBJ15_PINS` (the nine, new) + `npp_tsens = 0`. Each set is built from its own parts, so no older name changes meaning.
+    - `CCX_MODE_L2_ARM_PINS` stays the canonical's ALIAS. Freezing it at the nine would make its branch REACHABLE for a #15 re-run, with a limb-arm incumbent it is not.
+  - **`R/calibrate.R`:** the unreachable #16 branch of `ccx_ms_reference_set()` is removed (ruled). The ten pins take the first branch, with the canonical as a MODE. **#15's nine are now REFUSED until a reference set is ruled.** Test (11) is re-expressed (15 expectations).
+  - **The rest:** `APP_RELEASE_MODE <- "hilda33p"`; `make_bundle.sh` ships the directory; README, DEPLOY and DESIGN (§3.4a S, the `npp_tsens` note) are updated.
+- **The constraint map** (`eec4aa1`): rebuilt at hilda33p on a CLEAN tree at `4d07ccb`, tag `20261006a`.
+  - Every gate PASSES: 33 names in 8 components, 27 streams in 13 families.
+  - A first build stamped "+dirty" (the adoption was not yet committed) and was discarded, not shipped.
+- **The measurements** (`0b46208`):
+  - **The What-if wobble:** ENSO off removes **36 %**. The blurb's "about 40 %" was KEPT (ruled). All three switches off leave 32 % ("about a third" holds).
+  - **The pulse box:** 1.448 / 1.379 / 1.358 / 1.402 at +20 / 50 / 100 / 200 yr, spread 2.5 %. Every horizon is within the ruled 0.1 of "about 1.4".
+  - **The app's pulse constants** are updated to these measured values (the 10-03 precedent).
+- **The ledger** (`fb8036a`, "Approve all"). The suite at `0b46208` had 16 failures + 5 errors in 15 tests, every one a consequence of the adoption:
+
+| group | tests | change |
+|---|---|---|
+| A. re-pins, MEASURED at hilda33p from scratch copies | `test-enso-demean:283`; `test-imbalance-panel:117,120` | demean price 0.5673 → 0.0560 (0.056049); d_land +0.443 → +0.482 (0.4824), d_luc −0.208 → −0.169 (−0.1690) |
+| B. #16 added | `test-constants-batch:48`; `test-ms-reference-set:36` + (9); `test-mode-file:177,256` | the label list; four real pins (+ `npp_tsens`); GATED names admitted among a mode's pins (hilda33p is the first to pin one) |
+| C. fixtures that assumed a feedback-OFF canonical now NAME hilda34g | `test-hs-sst-frac` T1/T3/T4; `test-mixing-strat` S3/S4/S7/S8; `test-option-e` N-E1 | every ON/OFF contrast had collapsed, and the feedback's own guards fired (a mid-record window without a T_deep history; the martin field). No assertion changed. N-E1's recorded 0.38 stands |
+
+- ⚠ **Tried and corrected: the first adoption suite quit early.** testthat's `ProgressReporter` stops at its default max-fails ("Maximum number of failures exceeded; quitting"). It reported 3688 passes as if complete. Re-run with `testthat::set_max_fails(Inf)`, it gave the 16 + 5 (`suite_20261006_0b46208_adoption{,_full}.log`).
+- **The suites:**
+
+| tree | passed / failed / skipped / errors | what |
+|---|---|---|
+| `0b46208` | 6257 / 16 / 3 / 5 | adopted, ledger pending → `suite_20261006_0b46208_adoption_full.log` |
+| **`fb8036a`** | **6294 / 0 / 3 / 0** | the ledger applied → `outputs/diagnostics/suite_20261006_fb8036a.log` |
+
+- **Verified in the running app** (`ccx-app` on the adopted tree, localhost:7788):
+  - the banner reads "Maximum-a-posteriori fit of **33** parameters … with **10** further values held";
+  - the What-if ENSO switch shows "about 40 % of the wobble"; the warming switch shows "420 ppm instead of 426";
+  - the Futures tab, the pulse lab, the seven Known-issues cards and the constraint map all render;
+  - no console errors.
+- **Open, Marcus's wording:**
+  - the warming switch's blurb does not mention the mixing slowdown it now also removes (DESIGN §3.4a S has a ready sentence);
+  - the `npp_tsens` row shows a bare 0;
+  - whether the hilda34g assessment becomes a hilda33p assessment.
+- **Memory:** `ccx_hilda33p_adopted` (new); `ccx_obj16_landed` marked adopted; `INDEX_ccx`'s live state, `INDEX_ccx_phi`'s pointer and the root `MEMORY.md`'s canonical line repointed (byte-neutral).
+
 ## 2026-10-05 (r) — Handoff: `notes/handoff_2026-10-05e_obj16_landed_cpuclock_merged.md`, written at the end of the overnight work (Marcus: "Take the next obvious steps whenever the running tasks complete"). It supersedes 10-05d, which now points to it.
 - **Nothing is running.**
 - **Open, all Marcus's:**
