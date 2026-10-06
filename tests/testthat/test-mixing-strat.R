@@ -8,17 +8,21 @@
 #   S1 CONSTANTS   s re-derived from its data; tau tied to the climate module; the label's block
 #   S2 THE SERIES  g = 1 exactly at T <= 0; the exact step response; mid-record refusal; a
 #                  split run's g equals the unsplit run's
-#   S3 OFF         the canonical's stored likelihood reproduces row by row (absent, and at s = 0)
+#   S3 OFF         hilda34g's stored likelihood reproduces row by row (absent, and at s = 0)
 #   S4 SPINUP      bit-identical ON vs OFF (the spinup's climate is held at 0, so g = 1)
 #   S5 PARITY / CONSERVATION, mechanism ON at g < 1
 #   S6 THE PUMP    the rescaling identity, and its MUTATION: without it a held-zero-emission run
 #                  under a forced key takes up natural carbon (the spurious, wrong-signed sink)
-#   S7 DIRECTION   the ocean sink falls monotonically in s and in q; the canonical's own number
+#   S7 DIRECTION   the ocean sink falls monotonically in s and in q; hilda34g's own number
 #   S8 REFUSALS    tr box, martin field, uniform K, a point forcing without mix_g
 # =====================================================================
+# ⚠ THE FIXTURE IS hilda34g, NAMED (2026-10-06 a) (Marcus 2026-10-06: "Approve all (Recommended)"): the feedback-OFF canonical the mechanism was built
+# and priced on (10-04 n/o). Every gate below contrasts ON with OFF from that base, and ms_on() switches it ON.
+# From 10-06 the canonical hilda33p carries the feedback, so read as "the canonical" every contrast collapses.
+MS_OFF_MODE <- "hilda34g"
 ms_canon <- local({ cache <- NULL; function() {
   if (!is.null(cache)) return(cache)
-  md <- readRDS(ccx_mode_file())
+  md <- readRDS(ccx_mode_file(MS_OFF_MODE))
   bp <- ccx_mode_base(md); if (!is.null(md$pump_mode)) bp$pump_mode <- md$pump_mode
   pm <- ccx_migrate_par_set(ccx_mode_par_with_pins(md)); attr(pm, "migrated_done") <- TRUE
   p  <- ccx_overlay_par(bp, pm)
@@ -69,7 +73,7 @@ test_that("S2 THE SERIES: g = 1 exactly at T <= 0, the exact step response, the 
   expect_equal(as.numeric(gB), as.numeric(gA), tolerance = 1e-15)
 })
 
-test_that("S3 OFF: the canonical's stored likelihood reproduces row by row, absent AND at s = 0; the aux carries nothing", {
+test_that("S3 OFF: hilda34g's stored likelihood reproduces row by row, absent AND at s = 0; the aux carries nothing", {
   skip_if_no_cpp()
   C <- ms_canon(); md <- C$md
   bp <- ccx_mode_base(md); if (!is.null(md$pump_mode)) bp$pump_mode <- md$pump_mode
@@ -145,7 +149,7 @@ test_that("S6 THE PUMP: the rescaled export IS the export solved against the wea
   expect_lt(abs(d_on - d_off), abs(d_mut - d_off))                        # the ORDERING the rescaling must deliver
 })
 
-test_that("S7 DIRECTION: the historical ocean sink falls monotonically in s and in q, and the canonical's own effect is small", {
+test_that("S7 DIRECTION: the historical ocean sink falls monotonically in s and in q, and hilda34g's own effect is small", {
   skip_if_no_cpp()
   C <- ms_canon(); p0 <- C$p
   F <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = C$spin(p0)$prod_c14,
@@ -155,7 +159,7 @@ test_that("S7 DIRECTION: the historical ocean sink falls monotonically in s and 
   Ss <- c(sink_at(s / 2, 1), sink_at(s, 1)); Sq <- c(sink_at(s, ccx_const("MIX_STRAT_Q_LO")), Ss[2], sink_at(s, ccx_const("MIX_STRAT_Q_HI")))
   expect_true(S0 > Ss[1] && Ss[1] > Ss[2])
   expect_true(Sq[1] > Sq[2] && Sq[2] > Sq[3])
-  # the canonical's own number (CHANGELOG 10-04 n): -0.0149 GtC/yr over 2015-24, i.e. what a
+  # hilda34g's own number (CHANGELOG 10-04 n): -0.0149 GtC/yr over 2015-24, i.e. what a
   # static kz cut of the same size does (elasticity 0.149). A 3x departure is a bug first.
   expect_gt(S0 - Ss[2], 0.0149 / 3); expect_lt(S0 - Ss[2], 0.0149 * 3)
 })

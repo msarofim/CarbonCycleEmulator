@@ -114,10 +114,14 @@ test_that("1. the app's land sink IS the gate's, not a second implementation", {
   # (-0.2079), -d_grow +0.05 -> +0.058 (0.0583), -d_ocn +0.002 -> -0.029 (-0.0290: the ocean sink now sits
   # 0.03 GtC/yr ABOVE GCB's raw column). imbal 0.540 / cement 0.088 unchanged within tolerance. MEASURED
   # (Marcus 2026-10-03: "Approve all (Recommended)").
-  expect_equal(z$d_land, +0.443, tolerance = 0.005)
+  # 2026-10-06 (a): the canonical is hilda33p (objective #16; the refit's stronger fertilisation and larger LUC
+  # scale). d_land +0.443 -> +0.482 (0.4824), d_luc -0.208 -> -0.169 (-0.1690); imbal 0.540, cement 0.088,
+  # -d_grow +0.059, -d_ocn -0.029 and the decade table (5 in band, last miss 0.930) unchanged within tolerance.
+  # MEASURED (Marcus 2026-10-06: "Approve all (Recommended)").
+  expect_equal(z$d_land, +0.482, tolerance = 0.005)
   expect_equal(z$imbal,  +0.54, tolerance = 0.005)
   expect_equal(z$cement, +0.09, tolerance = 0.005)
-  expect_equal(z$d_luc,  -0.208, tolerance = 0.005)
+  expect_equal(z$d_luc,  -0.169, tolerance = 0.005)
   expect_equal(-z$d_grow, +0.058, tolerance = 0.005)
   expect_equal(-z$d_ocn,  -0.029, tolerance = 0.005)
   # \u26a0 THE CLOSURE IS ASSERTED AT ITS MEASURED SIZE, NOT AT ZERO. It is

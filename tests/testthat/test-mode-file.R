@@ -174,7 +174,9 @@ test_that("every named mode is on disk and carries THIS BUILD's parameter set", 
                      info = paste("mode", a, ": the file's `pins` and CCX_MODE_PINNED disagree"))
     if (!is.null(md$pins) && !ccx_mode_pinned(md))
       expect_true(all(names(md$pins) %in% ccx_inert_names(ccx_mode_pump_field(md), ccx_mode_struct(md))), info = paste("mode", a))
-    expect_true(all(names(md$pins) %in% CCX_PARAM_NAMES),
+    # 2026-10-06 (a): or a GATED name (names(CCX_PARAM_GATED)), which the build fits only under a label that opens
+    # the gate -- hilda33p is the first mode to PIN one (npp_tsens = 0, objective #16) (Marcus 2026-10-06: "Approve all (Recommended)")
+    expect_true(all(names(md$pins) %in% c(CCX_PARAM_NAMES, names(CCX_PARAM_GATED))),
                 info = paste("mode", a, "pins a name this build does not fit"))
     # THE BAND IS PART OF THE VECTOR'S PROVENANCE, not housekeeping: the driver
     # overrides CCX_PARAM_TABLE$h_ml in-process, and a logpost recomputed under
@@ -253,7 +255,9 @@ test_that("the canonical wins among FREE arms re-scored on today's objective, or
     md_p <- readRDS(ccx_mode_file(CCX_MODE_PINNED_PARENT))
     # 2026-09-17 (h): a pin may also be one of the INERT names the parent is allowed to lack
     # (CCX_PARAM_ABSENT_OK): hilda30h pins the six the hilda_c / solved-field structure never reads
-    expect_true(all(names(md_c$pins) %in% c(md_p$param_names, CCX_PARAM_ABSENT_OK)))
+    # 2026-10-06 (a): + the GATED names -- the canonical hilda33p pins npp_tsens, which the #13 parent's
+    # pre-gate space cannot carry; the canonicals since hilda33d have no registered free parent of their own (Marcus 2026-10-06: "Approve all (Recommended)")
+    expect_true(all(names(md_c$pins) %in% c(md_p$param_names, CCX_PARAM_ABSENT_OK, names(CCX_PARAM_GATED))))
     expect_true(ccx_mode_carries_build(md_p))   # the full set, or minus CCX_PARAM_ABSENT_OK only (09-13i)
   } else {
     expect_null(CCX_MODE_CANONICAL_PINS); expect_null(CCX_MODE_PINNED_PARENT)

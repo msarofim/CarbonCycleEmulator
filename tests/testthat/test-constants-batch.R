@@ -47,7 +47,9 @@ test_that("alpha_photo_eps: absent = the ledger's 18 (bit-exact for every regist
   # approved by Marcus)
   if (ccx_mode_struct(md) %in% c("hilda_c", "hilda_cs", names(CCX_L2_RETURN_LAYERS), "hilda_csl3v0", "hilda_csl3v0k",
                                  "hilda_csl3v0ka", "hilda_csl3v0kan", "hilda_csl3v0kai", "hilda_csl3v0kaidgb",
-                                 "hilda_csl3v0kaidgbe")) expect_identical(bp$alpha_photo_eps, 15.6) else expect_false("alpha_photo_eps" %in% names(bp))
+                                 "hilda_csl3v0kaidgbe",
+                                 # 2026-10-06 (a): + #16's label, the canonical hilda33p (Marcus 2026-10-06: "Approve all (Recommended)")
+                                 "hilda_csl3v0kaidgbem")) expect_identical(bp$alpha_photo_eps, 15.6) else expect_false("alpha_photo_eps" %in% names(bp))
 })
 
 test_that("the batch is LIVE: each item moves the PI state on its own, and all three together", {

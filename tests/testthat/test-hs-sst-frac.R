@@ -2,7 +2,7 @@
 # THE HS BOX'S SHARE OF ITS HEMISPHERE'S SST ANOMALY (DESIGN §3.4a T; RULED 2026-10-05, Marcus "Yes, test";
 # CHANGELOG 10-05): SST_hs = sst_hs + frac x (the anomaly), frac = hs_sst_anom_frac, ABSENT = 1. The H1
 # diagnostic of the ocean thermal effect (10-04 p). Not fitted, in no label.
-#   T1 ABSENT = 1   bit-identical state and outputs in both cores; the canonical's stored likelihood
+#   T1 ABSENT = 1   bit-identical state and outputs in both cores; hilda34g's stored likelihood
 #                   reproduces row by row with the name absent AND at 1
 #   T2 SPINUP       the periodic spinup is bit-identical at frac 0 and 1 (its anomaly is 0)
 #   T3 PARITY       R vs C++ at frac 1/2: the derivative to 5e-14 and a short transient; the name is LIVE
@@ -11,9 +11,14 @@
 #   T5 REFUSALS     negative, NA, a vector
 # Mutations M1-M5 (CHANGELOG 10-05) are each caught by their own test.
 # =====================================================================
+# ⚠ THE FIXTURE IS hilda34g, NAMED (2026-10-06 a) (Marcus 2026-10-06: "Approve all (Recommended)"). These tests are about the HS box's share of the
+# SST anomaly, and they run a mid-record window the way a continuation would. From 10-06 the canonical hilda33p
+# carries the stratification feedback, which refuses a mid-record window without its T_deep history (by design,
+# R/model.R ccx_mix_g_series()); hilda34g, the canonical the switch was built at (10-05), carries none.
+HF_MODE <- "hilda34g"
 hf_canon <- local({ cache <- NULL; function() {
   if (!is.null(cache)) return(cache)
-  md <- readRDS(ccx_mode_file())
+  md <- readRDS(ccx_mode_file(HF_MODE))
   bp <- ccx_mode_base(md); if (!is.null(md$pump_mode)) bp$pump_mode <- md$pump_mode
   pm <- ccx_migrate_par_set(ccx_mode_par_with_pins(md)); attr(pm, "migrated_done") <- TRUE
   p  <- ccx_overlay_par(bp, pm)
@@ -27,7 +32,7 @@ hf_forcing <- function(p, sp, yrs = c(1996, 1999)) {
                                         enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p)),
                       warning = function(w) if (grepl("Expect a start-up transient", conditionMessage(w))) invokeRestart("muffleWarning")) }
 
-test_that("T1 ABSENT = 1: bit-identical in both cores, and the canonical's stored likelihood reproduces (absent and at 1)", {
+test_that("T1 ABSENT = 1: bit-identical in both cores, and hilda34g's stored likelihood reproduces (absent and at 1)", {
   skip_if_no_cpp()
   C <- hf_canon(); p0 <- C$p; expect_null(p0[["hs_sst_anom_frac"]]); p1 <- hf_with(p0, 1)
   s0 <- C$spin(p0); s0$enso_hist <- "hold"; F <- hf_forcing(p0, s0)

@@ -33,7 +33,9 @@ test_that("the control's pin set is the canonical's without the shim, and the co
   expect_true(!is.null(ms_cp) && "ent_seas_amp_SH" %in% names(ms_cp))
   # 2026-09-20 (r): the canonical is the LIMB arm (fits w_enso_l2, pins the ocean ENSO pair); the
   # control has no limb (holds w_enso_l2 = 0) and fits the pair: the two sets differ by exactly those
-  expect_setequal(setdiff(names(ms_cp), names(ms_ctl)), c("ent_seas_amp_SH", "gamma_enso_ocn_NH", "gamma_enso_ocn_SH"))
+  # 2026-10-06 (a): + npp_tsens -- the canonical hilda33p pins the greening term (objective #16); the control,
+  # on a label that never opens the gate, does not carry it (Marcus 2026-10-06: "Approve all (Recommended)")
+  expect_setequal(setdiff(names(ms_cp), names(ms_ctl)), c("ent_seas_amp_SH", "gamma_enso_ocn_NH", "gamma_enso_ocn_SH", "npp_tsens"))
   expect_identical(setdiff(names(ms_ctl), names(ms_cp)), "w_enso_l2")
   shared <- intersect(names(ms_ctl), names(ms_cp)); expect_equal(unname(ms_ctl[shared]), unname(ms_cp[shared]))
   expect_true(CCX_MODE_SEASML0_CONTROL %in% names(CCX_MODE_FILES))
@@ -120,7 +122,8 @@ test_that("the layer-2 limb's arm: the canonical / the control under hilda_cl2 a
 test_that("(9) the FREE PARENT of the limb canonical (2026-09-21 g): the six inert pins only, under a structure WITH the limb at seas_ml 1 -> the canonical / the control; refused without the limb and at seas_ml 0", {
   fp <- CCX_MODE_FREE_PARENT_PINS
   expect_setequal(names(fp), setdiff(names(CCX_MODE_CONTROL_PINS), "w_enso_l2"))           # the control's minus the limb's name
-  expect_setequal(names(fp), setdiff(names(CCX_MODE_CANONICAL_PINS), c("ent_seas_amp_SH", "gamma_enso_ocn_NH", "gamma_enso_ocn_SH")))   # the canonical's minus its three real pins
+  # 2026-10-06 (a): FOUR real pins since hilda33p -- the shim, the pair and npp_tsens (Marcus 2026-10-06: "Approve all (Recommended)")
+  expect_setequal(names(fp), setdiff(names(CCX_MODE_CANONICAL_PINS), c("ent_seas_amp_SH", "gamma_enso_ocn_NH", "gamma_enso_ocn_SH", "npp_tsens")))   # the canonical's minus its four real pins
   expect_equal(unname(fp), unname(CCX_MODE_CANONICAL_PINS[names(fp)]))
   r9 <- ccx_ms_reference_set(fp, "1", struct = "hilda_csl3")
   # 09-22 (k): the parent is registered (hilda32f) and is its own incumbent; the canonical seeded the wave that made it

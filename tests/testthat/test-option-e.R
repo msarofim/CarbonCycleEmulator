@@ -196,7 +196,11 @@ test_that("P0f MUTATIONS: the Nino3.4 sign, the band's depth, and every guard by
 
 test_that("N-E1 (re-scoped): at the export reproducing the canonical's PI bottom-minus-ML gradient the ocean_grad_dic row moves at most about 1 log-unit; the shape and the deep d13C shift are REPORTED", {
   skip_if_no_cpp()
-  md <- readRDS(ccx_mode_file())
+  # ⚠ AT hilda34g, NAMED (2026-10-06 a) (Marcus 2026-10-06: "Approve all (Recommended)"). From 10-06 the canonical hilda33p carries the stratification
+  # feedback, which the martin field cannot carry (DESIGN §3.4a S: the prescribed export does not read K), so
+  # "the canonical under the martin field" is no longer one model. Option E is CLOSED; this is provenance, and
+  # hilda34g is the last canonical the construction applies to (its recorded 0.38 below stands).
+  md <- readRDS(ccx_mode_file("hilda34g"))
   bp <- ccx_mode_base(md); if (!is.null(md$pump_mode)) bp$pump_mode <- md$pump_mode
   rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm), add = TRUE)
   pm <- suppressWarnings(ccx_seed_unencodable(ccx_migrate_par_set(md$par_mode), "N-E1"))
