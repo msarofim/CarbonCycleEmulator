@@ -93,6 +93,7 @@ Project log: what was done, what was tried and abandoned, and why.
 - **Ruled, no action now:**
   - R2: `rep_dC` stays a NAMED STAND-IN;
   - `ra_ratio` and the σ-audit trio wait for the next model change.
+- **The full suite at `15dbda6`** (frozen detached worktree, BLAS pinned, max-fails Inf; `outputs/diagnostics/suite_20261006_15dbda6.log`): **CLEAN, 6427 passed, 0 failed, 3 skipped (the standing three), 0 errors**, 231 warnings. 6412 + 12 (`test-review-card-numbers`) + 3 (the URL guard and its mutation) = 6427, exactly.
 - **Open for Marcus:**
   - the `k_w` line's wording (drafted);
   - whether to act on H2 (the refit at lower kz, or a structural surface-DIC damping), now that its stake is measured;
