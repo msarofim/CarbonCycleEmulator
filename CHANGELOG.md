@@ -2,6 +2,50 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-05 (q) — **THE MULTISTART BUDGET RUNS ON A CHOSEN CLOCK: CPU time on the Mac, wall time on Torch** (handoff 10-05d §5, as ruled in (o)). A sleep or a suspension no longer spends a Mac start's budget. Merged into `main` as a fast-forward to `05796b9`. The full suite there is CLEAN: 6281 passed, 0 failed, 3 skipped.
+
+- **What was built** (branch `claude/ms-cpu-clock`, rebased onto (p)'s `d078926`: `3c19d99` the build, `dc71684` a test fix, `05796b9` the evidence):
+  - **`calibration/lib_ms_deadline.R`:**
+    - ONE `ms_clock(kind)`: "wall" = `Sys.time()`; "cpu" = this R process's user + sys CPU seconds.
+    - `CCX_MS_CLOCK` is VALIDATED by `ms_clock_kind()`: an unknown value stops, never falls back.
+    - The step state carries its clock.
+    - `ms_start_clock()` reads an absent field as "wall"; `ms_clock_mix_note()` serves D3.
+  - **`calibration/run_dispersed_multistart.R`:**
+    - Every budget reading and deadline goes through `ms_now()`, the step's own clock, so the origin, the elapsed minutes and both deadlines cannot sit on two clocks.
+    - The start file records `clock`, `budget_min`, `minutes_wall` and `wall_warned`.
+    - D4: a start whose wall time passes 2× its CPU budget is FLAGGED in the log and the file, never stopped.
+    - Under the wall clock every log label reads as before.
+  - **The budget's env name is `CCX_MS_BUDGET_MIN`** ("WALL_MIN" is false under a CPU clock). The old `CCX_MS_WALL_MIN` is still read, so every earlier recipe runs unchanged; both set and different is a STOP.
+    - ⚠ My choice, not a ruling: Marcus may veto the name.
+    - Also corrected: the comment that said the driver's 180-min default "MATCHES" `multistart.sbatch`, which exports 300. The VALUE is unchanged; whether a direct invocation should default to 300 is Marcus's call.
+  - **`calibration/mac/run_multistart_mac.sh`:**
+    - exports `CCX_MS_CLOCK=cpu` (D1) and `CCX_MS_BUDGET_MIN`;
+    - refuses two different budget names;
+    - its banner names the clock;
+    - it WARNS at launch on battery and does not refuse;
+    - its comment no longer claims `caffeinate` prevents a lid-closed sleep on battery.
+  - **`calibration/torch/multistart.sbatch`** pins `CCX_MS_CLOCK=wall` and REFUSES any other value (D1: SLURM's `--time` is a hard wall limit, and its 60-min margin is wall-clock arithmetic).
+  - **The collector** prints each start's clock and WARNS on a mixed-clock wave (D3). **Promote** copies `clock` (and, when recorded, `budget_min` and `minutes_wall`) into the mode file.
+- **Tests: `tests/testthat/test-ms-clock.R`, C1–C5, 47 expectations.** `test-ms-deadline.R` D1–D8 pass unchanged (36).
+  - C2 runs on the REAL clocks: `Sys.sleep` advances wall time but not CPU time, and a busy loop advances both.
+  - C5 is the lint: nothing in the budget path reads a clock except `ms_clock()`.
+- **13 of 13 mutations caught,** each by the test aimed at it (`outputs/diagnostics/cpuclock_smoke_20261005/mutations_0038262.log`).
+  - ⚠ **Found by the mutations, in my own test:** the helper `burn()` timed its CPU cost with `ms_clock("cpu")`, the clock under test. Mutation MC4 (CPU reads the children's time, which never advances) HUNG it forever rather than failing it.
+  - Fixed in `dc71684` (base `proc.time()`, capped). The harness now runs each mutant under a 120-s alarm. Memory `mutation_test_gates` gains this blind spot.
+- **End-to-end smokes, 15 of 15 pre-registered criteria PASS** (`outputs/diagnostics/cpuclock_smoke_20261005/`, #16's config, id 1). They ran AFTER the landing's step 1, because the landing helper counts every driver process.
+
+| test | result |
+|---|---|
+| T0 the Mac runner, a 1-task preflight | rc 0. "BUDGET 300 min on the cpu clock"; "0.2250 CPU-s/eval"; "of a 300 CPU-min budget. LAUNCHABLE"; port VERIFIED |
+| T1 old driver vs new vs new through the legacy name, WALL clock | the NM restart is IDENTICAL: −1193.7792, gain 55.6725, 202 evals, identical traces. The logs differ ONLY in the env name, the output path and two measured timings |
+| T1c both names, different | stops at start-up |
+| T3 a real SIGSTOP, 180 s | **CPU arm:** rides through it, 324 evals of a sized 322; 1.632 CPU-min against 4.650 wall-min. **Wall arm:** spends its budget inside the stop; STOPPED AT THE DEADLINE after 210 of 355 |
+
+- **The full suite** at `05796b9` (frozen detached worktree, `nohup`, BLAS pinned; `outputs/diagnostics/suite_20261005_05796b9.log`): **6281 passed, 0 failed, 0 errors, 3 skipped (the standing three)**, rc 0, 17.3 min. That is `aa76fb5`'s 6234 plus exactly test-ms-clock's 47; no test changed between them, and the warnings are the same 231.
+- **Comparability (D3):** every run before this one was budgeted on WALL time, so its out-of-time counts are wall-clock facts. A CPU-clock resume of #16's 8 sleep-affected starts would make a mixed wave, and the collector would say so.
+- **What a CPU budget costs (D2):** a Mac wave's wall ETA grows by the contention, ~10 % at the measured 0.91.
+- **Noticed, NOT fixed (pre-existing):** the end-of-run "eval rate … SIZE THE ARRAY ON THIS" line under-reports ~10× (T1 printed 0.0335 s/eval against a measured ~0.30). It divides the restarts' NORMALISED minutes by an eval count that includes the polish's.
+
 ## 2026-10-05 (p) — **OBJECTIVE #16's REFIT HAS LANDED AND IS READ. On LIKELIHOOD it fits 1.77 WORSE than hilda34g on the same 27 rows; it moves SSP5-8.5 2300 by +12.9 ppm and makes the land's net climate effect slightly negative (−0.038 GtC/yr). One basin. No gate verdict flips. Nothing adopted: adoption is Marcus's call.** It landed itself overnight. Marcus: "I'm headed to bed. Take the next obvious steps whenever the running tasks complete."
 
 - **How it landed.** `~/ccx_frozen/20261005f_obj16_landchain.sh` ran under `nohup` + `caffeinate`, independent of any session. It waited on the launch chain's PID and ran handoff 10-05d §4 steps 1–7, 22:26:32 → 22:41:22, with ONE date stamp.
