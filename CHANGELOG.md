@@ -29,10 +29,10 @@ Project log: what was done, what was tried and abandoned, and why.
 ## 2026-10-06 (e) — **MERGED: the git-stamp branch `claude/youthful-blackburn-fbc009`** (CHANGELOG 10-01 h; Marcus: "Merge git-stamp branch"). One helper, `ccx_git_stamp()`, now stamps every driver, including the **26 that `main` added since 10-01**, converted here.
 
 - **The merge** (`c45840b`, in its own worktree, so `main`'s tree never sat conflicted under the running app):
-  - one conflict, `CHANGELOG.md`, positional: the branch's 10-01 (h) entry now sits between `main`'s (i) and (g), the letter (i) reserved for it;
+  - one conflict, `CHANGELOG.md`, positional: the branch's 10-01 (h) entry now sits between `main`'s (i) and (g), as `main`'s (i) had reserved the letter for it;
   - `diag_constraint_map.R` and `diag_whole_model_scorecard.R`, changed on both sides, auto-merged. No reference to the removed `CM_GIT_PATHS` / `SC_GIT_PATHS` remains, and both parse.
 - **The conversion** (`9a6829f`): the merged lint flagged 26 drivers. 35 edits, all-or-nothing, each matched exactly once in a dry pass before anything was written. Marcus's 10-01 rulings, as the branch applied them:
-  - 16 `local({...})` / `tryCatch({...})` blocks → `<NAME> <- ccx_git_stamp()`;
+  - 17 `local({...})` / `tryCatch({...})` blocks → `<NAME> <- ccx_git_stamp()`;
   - 6 `commit` + `dirty` drivers → `commit <- ccx_git_stamp()`; `dirty <- ccx_stamp_dirty(commit)`, so the rds keeps `dirty` (TRUE / FALSE / NA). The " (+uncommitted)" print suffix folds into the stamp;
   - `build_futures_ribbons`: `ccx_git_stamp(exclude = RB_OUT)`, its own `data/futures_ribbons.rds`. Its `--commit` override for a git-archive copy stays, as does `run_mcmc_check`'s;
   - `diag_mcmc_band_by_chain` sources no `R/`; it now sources `R/aaa_root.R` and `R/provenance.R` for the stamp.
@@ -40,9 +40,9 @@ Project log: what was done, what was tried and abandoned, and why.
   - The stamp itself: `c45840b+dirty` before the commit, `9a6829f` after.
   - `test-git-stamp-lint` 6/6, `test-git-stamp` 63/63.
 - **What NEW outputs of those 26 will show:** the stamp on the standard paths (`R src calibration app data`, untracked files included), where most read the whole tree or four paths before; "+dirty" where they printed " (+uncommitted)".
-- **The full suite at `9a6829f`** — [SUITE 9a6829f: filled when it lands]
+- **The full suite at `9a6829f`** (frozen detached worktree, BLAS pinned, max-fails Inf; `outputs/diagnostics/suite_20261006_9a6829f.log`): **6390 passed, 2 failed, 3 skipped, 0 errors**, rc 1, 18.6 min. The two failures are ONE defect:
   - ⚠ **It caught one failure of mine, from (c): `test-mode-struct-lint.R:71` and `:78`** (a new file, 34 > 32). (c)'s two Set-column tests read `readRDS(ccx_mode_file())` in a file with no `ccx_mode_base()`. **Fixed in the TEST, not the lint** (`658ccd7`): the canonical test now resolves the vector the model RUNS (`ccx_mode_base(md)`) and asserts what the intro's new clause claims: each held row prints its pin, and the base runs exactly that pin. Mutations: the table fed the defaults is caught (4 rows); one pin printed off-value is caught (`pump_export`). 47/47 and 5/5.
-- **The full suite at `658ccd7`** (the final code) — [SUITE 658ccd7: filled when it lands]
+- **The full suite at `658ccd7`** (the final code; `outputs/diagnostics/suite_20261006_658ccd7.log`): **CLEAN, 6412 passed, 0 failed, 3 skipped (the standing three), 0 errors**, rc 0, 18.4 min, 231 warnings as at `fb8036a`. **Predicted before it landed:** 6390 + the lint's 2 + the 20 new held-value expectations (10 pins × 2) = 6412. Against `fb8036a`'s 6294, the +118 is today's tests, counted from their expectations: `test-git-stamp` 63 and `-lint` 6 (new files); D9 14 (`test-ms-deadline` 36 → 50, measured); the Set column and its held values 29 (`test-app-params-table` 18 → 47); the warming ordering 3 (`test-mechanisms` 89 → 92); the 10-06 copy list 3. 63 + 6 + 14 + 29 + 3 + 3 = 118.
 - **Branches:** `claude/youthful-blackburn-fbc009` (local and origin, `6c87138`) is now merged; deleting it is Marcus's call. Its old session folder is in the desktop app's reuse pool since 10-05 (g), "left to it".
 
 ## 2026-10-06 (d) — **The multistart's end-of-run eval rate is CORRECTED** (Marcus: "Fix eval-rate line (Recommended)"; `9b05553`). It was wrong in BOTH directions. The 180-min direct default and the env name `CCX_MS_BUDGET_MIN` stay, as ruled by omission in (c).

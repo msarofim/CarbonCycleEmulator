@@ -34,7 +34,7 @@ comparisons).
   - **the stratification feedback** (DESIGN §3.4a S): thermocline mixing weakens as the surface warms. Its strength
     is FIXED from an observation × a law, not fitted (s 0.0522 /K from Cheng et al. 2025's N² trend; q 1, Gargett
     1984; τ_d 195 yr, CCX's own climate module, model-derived and named);
-  - **`npp_tsens` PINNED at 0** (P4): the record cannot fix the greening term's sign (0.99 sd from 0 at hilda34g),
+  - **`npp_tsens` PINNED at 0** (P4): the record cannot fix the greening term's sign (0.99 sd from 0; CHANGELOG 10-06 a),
     and the futures had extrapolated it 6× to 2300.
 - **The canonical is `hilda33p`**, adopted 10-06 (a) **on physics**, not on fit:
   - likelihood **−1145.0186** on the 27 rows, **−1.7678** against hilda34g (−1143.2508); ΔAIC +1.5 at one fewer
