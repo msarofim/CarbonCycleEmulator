@@ -34,12 +34,26 @@ br_u_of_par <- function(md, nm) vapply(nm, function(n) .to_unc(md$par_mode[[n]],
 #' `extra` (2026-10-04, the P3 preview): an optional function of the NATURAL parameter list returning a
 #' log-likelihood term ADDED to the objective (a candidate row priced before it is built). NULL = the
 #' objective alone, exactly as before.
-br_cell <- function(b, L, free, hold = NULL, start_par = NULL, max_rounds = BR_ROUNDS, extra = NULL) {
+#' `drop` (2026-10-06, the interannual-cut preview): stream names LEFT OUT of the objective the block is
+#' optimised on. The returned `logpost`/`streams` stay the FULL objective's; `obj` is the optimised value.
+#' Checked against the objective's own stream names before any optimisation (inside f() a bad name would
+#' be swallowed by the tryCatch as -Inf on every evaluation). NULL = exactly as before.
+#' `base_over` (2026-10-06, same preview): a named list overriding NON-fitted base parameters of the
+#' objective (e.g. `gamma_diff`, held at 0.25 by the canonical). A fitted or unknown name STOPS.
+#' NULL = exactly as before.
+br_cell <- function(b, L, free, hold = NULL, start_par = NULL, max_rounds = BR_ROUNDS, extra = NULL,
+                    drop = NULL, base_over = NULL) {
   md <- BR_MD[[b]]
   label <- if (L == 0) BR_LABEL_ZERO else BR_LABEL_LAG
   g <- ccx_apply_gate(label); r <- ccx_apply_pins(BR_PINS)
   on.exit({ ccx_unpin_params(r); ccx_unapply_gate(g) }, add = TRUE)
   bp <- ccx_mode_base(md); bp$pump_mode <- md$pump_mode
+  for (n in names(base_over)) {
+    if (n %in% CCX_PARAM_NAMES || !n %in% names(bp))
+      stop("br_cell(): base_over may only override a NON-fitted base parameter; '", n, "' is ",
+           if (n %in% CCX_PARAM_NAMES) "fitted" else "not a base parameter")
+    bp[[n]] <- base_over[[n]]
+  }
   bp[[CCX_GATE_FLAG_ENSO_LAG]] <- if (L > 0) 1L else NULL
   stopifnot(identical(ccx_gates_open(bp), ccx_gates_open(label)))
   lp <- ccx_make_logpost(base_params = bp, by_stream = TRUE, spinup_fn = BR_SPF[[b]], obs = BR_OBS)
@@ -51,9 +65,13 @@ br_cell <- function(b, L, free, hold = NULL, start_par = NULL, max_rounds = BR_R
   stopifnot(identical(names(u_st), CCX_PARAM_NAMES), (L > 0) == ("lag_enso_land" %in% names(u_st)))
   u0 <- br_u_of_par(md, free); U <- chol(br_prec(md, free))
   u_at <- function(z) { uu <- u_st; uu[free] <- u0 + backsolve(U, z); uu }
+  .obj <- function(lv) if (is.null(drop)) as.numeric(lv) else as.numeric(lv) - sum(unlist(attr(lv, "streams"))[drop])
+  if (!is.null(drop)) { s0 <- names(unlist(attr(lp(u_st), "streams")))
+    if (!all(drop %in% s0)) stop("br_cell(): `drop` names streams the objective does not have: ",
+                                 paste(setdiff(drop, s0), collapse = ", ")) }
   n_eval <- 0L; n_bad <- 0L
   f <- function(z) { n_eval <<- n_eval + 1L
-    v <- tryCatch({ uu <- u_at(z); as.numeric(lp(uu)) + if (is.null(extra)) 0 else extra(ccx_unc_to_par(uu)) },
+    v <- tryCatch({ uu <- u_at(z); .obj(lp(uu)) + if (is.null(extra)) 0 else extra(ccx_unc_to_par(uu)) },
                   error = function(e) -Inf)
     if (is.finite(v)) -v else { n_bad <<- n_bad + 1L; 1e10 } }
   slope <- function(z) vapply(seq_along(z), function(i) { e <- rep(0, length(z)); e[i] <- BR_PULL_H
@@ -70,10 +88,14 @@ br_cell <- function(b, L, free, hold = NULL, start_par = NULL, max_rounds = BR_R
   v <- lp(u_at(z)); uu <- u_at(z); par <- ccx_unc_to_par(uu)
   ex <- if (is.null(extra)) 0 else extra(par)
   blk <- unique(c(free, names(hold)))
-  list(base = b, L = L, free = free, hold = hold, label = label, z = z, u = uu, block = unlist(par[blk]),
+  out <- list(base = b, L = L, free = free, hold = hold, label = label, z = z, u = uu, block = unlist(par[blk]),
        logpost = as.numeric(v), streams = unlist(attr(v, "streams")), lik = sum(unlist(attr(v, "streams"))), extra = ex,
        slope = s, converged = max(abs(s)) < BR_MODE_TOL, rounds = rounds, n_eval = n_eval, n_bad = n_bad,
        minutes = as.numeric(difftime(Sys.time(), t0, units = "mins")))
+  # only when used, so every pre-10-06 caller's return value is unchanged, field for field
+  if (!is.null(drop)) { out$drop <- drop; out$obj <- .obj(v) + ex }
+  if (!is.null(base_over)) out$base_over <- base_over
+  out
 }
 
 #' The model vector a cell's optimum implies: the base's, with the block's natural values and the lag.
