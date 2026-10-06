@@ -42,6 +42,7 @@ HF_ALL     <- c(f1 = 1, f_T_hi = 0.724, f_T = 0.613, f_T_lo = 0.502, f_W = 0.296
 HF_FUT     <- c(fut_f_T = 0.613, fut_f_W = 0.296)
 HF_REC     <- c(ssp585_2300 = 1461.53)             # 10-05 (p), obj16_refit_read_20261005.log l. 83
 HF_REC_TOL <- 0.005                                # half its printed last digit
+HF_FROM    <- Sys.getenv("CCX_HF_FROM_RUNS", "")   # a saved _runs.rds: rebuild the tables without re-running
 HF_OUT     <- file.path("outputs", "diagnostics", sprintf("h2_futures_stake_%s_%s", format(Sys.Date(), "%Y%m%d"), HF_MODE))
 COMMIT     <- ccx_git_stamp()
 
@@ -56,7 +57,8 @@ HE <- as.data.frame(readRDS(ccx_path("data", "forcing_emissions_historical.rds")
 SO <- as.data.frame(readRDS(ccx_path("data", "forcing_sst.rds")))
 SEAM <- c(NH = mean(SO$sst_anom_NH[SO$year > max(SO$year) - CCX_SST_SPLICE_YR]),
           SH = mean(SO$sst_anom_SH[SO$year > max(SO$year) - CCX_SST_SPLICE_YR]))   # the builder's own seam level
-LAST_OBS <- max(SO$year)
+LAST_OBS <- max(SO$year)                           # the SST record's last year: the futures-only seam
+HF_TODAY <- max(HE$year)                           # the emissions record's last year: "today" in the tables
 cat(sprintf("mode file %s (md5 %s); SST record ends %d, seam (last %d yr) NH %.3f SH %.3f K\n", MODE_FILE,
             unname(tools::md5sum(MODE_FILE)), LAST_OBS, CCX_SST_SPLICE_YR, SEAM[["NH"]], SEAM[["SH"]]))
 
@@ -118,29 +120,32 @@ JOBS <- c(do.call(c, lapply(names(HF_ALL), function(a) lapply(names(HF_SCEN), fu
           do.call(c, lapply(names(HF_FUT), function(a) lapply(names(HF_SCEN), function(s) list(arm = a, f = HF_FUT[[a]], mode = "future", s = s)))))
 cat(sprintf("\n=== %d runs (%d arms x %d scenarios) on %d forked workers ===\n", length(JOBS), length(HF_ALL) + length(HF_FUT),
             length(HF_SCEN), HF_WORKERS)); flush(LOGCON)
-RES <- parallel::mclapply(JOBS, function(j) { while (sink.number() > 0L) sink()
+# CHECKPOINTED before any table is built (2026-10-06: the first full run lost its 64 runs to a table bug)
+RES <- if (nzchar(HF_FROM)) readRDS(HF_FROM) else parallel::mclapply(JOBS, function(j) { while (sink.number() > 0L) sink()
   r <- arm_run(j$f, j$mode, j$s, HF_SCEN[[j$s]]); c(j, list(co2 = r$co2, gmst = r$gmst)) },
   mc.cores = HF_WORKERS, mc.preschedule = FALSE)
+if (!nzchar(HF_FROM)) saveRDS(RES, paste0(HF_OUT, "_runs.rds"))
 bad <- vapply(RES, function(o) inherits(o, "try-error") || is.null(o$co2), logical(1))
 if (any(bad)) stop("a run failed: ", paste(vapply(RES[bad], function(o) as.character(o)[1], ""), collapse = " | "))
 
 tab <- do.call(rbind, lapply(RES, function(o) data.frame(arm = o$arm, f = o$f, mode = o$mode, scenario = o$s,
-  co2_2024 = at(o$co2, LAST_OBS), co2_2100 = at(o$co2, 2100), co2_2150 = at(o$co2, 2150), co2_2300 = at(o$co2, 2300),
+  co2_today = at(o$co2, HF_TODAY), co2_2100 = at(o$co2, 2100), co2_2150 = at(o$co2, 2150), co2_2300 = at(o$co2, 2300),
   gmst_2100 = at(o$gmst, 2100), gmst_2300 = at(o$gmst, 2300))))
 ref <- tab[tab$arm == "f1", ]
-for (y in c(LAST_OBS, HF_YEARS)) {
-  k <- sprintf("co2_%d", y); tab[[sprintf("d_%d", y)]] <- tab[[k]] - ref[[k]][match(tab$scenario, ref$scenario)] }
-tab$d_2300_since_2024 <- tab$d_2300 - tab[[sprintf("d_%d", LAST_OBS)]]
-cat("\n=== CO2 (ppm, global annual mean) at f = 1, the canonical ===\n")
-print(format(ref[, c("scenario", "co2_2024", "co2_2100", "co2_2150", "co2_2300", "gmst_2100", "gmst_2300")], digits = 5), row.names = FALSE)
+for (k in c("today", HF_YEARS)) {
+  ck <- paste0("co2_", k); stopifnot(ck %in% names(tab))
+  tab[[paste0("d_", k)]] <- tab[[ck]] - ref[[ck]][match(tab$scenario, ref$scenario)] }
+tab$d_2300_since_today <- tab$d_2300 - tab$d_today
+cat(sprintf("\n=== CO2 (ppm, global annual mean) at f = 1, the canonical (\"today\" = %d) ===\n", HF_TODAY))
+print(format(ref[, c("scenario", "co2_today", "co2_2100", "co2_2150", "co2_2300", "gmst_2100", "gmst_2300")], digits = 5), row.names = FALSE)
 cat("\n=== THE STAKE: CO2 change against f = 1 (ppm); negative = less CO2 with a weaker ocean thermal response ===\n")
 for (a in c(names(HF_ALL)[-1], names(HF_FUT))) {
   x <- tab[tab$arm == a, ]
   cat(sprintf("-- %s (f = %.3f, %s)\n", a, x$f[1], if (x$mode[1] == "all") "all-time" else "futures only"))
-  print(format(x[, c("scenario", "d_2024", "d_2100", "d_2150", "d_2300", "d_2300_since_2024")], digits = 3), row.names = FALSE)
+  print(format(x[, c("scenario", "d_today", "d_2100", "d_2150", "d_2300", "d_2300_since_today")], digits = 3), row.names = FALSE)
 }
 sink()
-saveRDS(list(table = tab, arms_all = HF_ALL, arms_future = HF_FUT, scenarios = HF_SCEN, seam = SEAM, last_obs = LAST_OBS,
+saveRDS(list(table = tab, arms_all = HF_ALL, arms_future = HF_FUT, scenarios = HF_SCEN, seam = SEAM, last_obs = LAST_OBS, today = HF_TODAY,
              gates = c(G1 = g1a && g1b, G2 = g2, G3 = g3),
              provenance = list(driver = HF_DRIVER, commit = COMMIT, mode = HF_MODE, mode_file = MODE_FILE,
                                mode_md5 = unname(tools::md5sum(MODE_FILE)), rng = "none",
