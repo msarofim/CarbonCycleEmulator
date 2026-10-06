@@ -1567,7 +1567,8 @@ plot_box_diagram <- function(fx, stock, p) {
   #
   # ⚠ IT LEAVES BOTH LAND POOLS, NOT ONE. At `f_luc_wood` = 0 the debit is split
   # pro rata by ccx_luc_pool_shares(): ~24 % from the vegetation boxes and ~76 %
-  # from the soils (70 % of the whole from the SLOW soil). Drawing one arrow per
+  # from the soils (70 % of the whole from the SLOW soil) at the 09-22 mode; at
+  # hilda33p 28 / 72 % and 66 % (2026-10-06). Drawing one arrow per
   # pool would put "0" and "1" on two arrows for a 1 GtC/yr flux, so it is ONE
   # arrow rising from between the two land boxes -- the land as a whole -- and
   # the footnote says which pools it comes out of. Placed in the empty wedge

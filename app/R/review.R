@@ -531,7 +531,14 @@ RV_CARDS <- list(
                      "index and the ocean sink responds by nearly the amount the",
                      "Global Carbon Budget shows. But the total year-to-year",
                      "wobble in CO₂ growth is only about 60% of the observed",
-                     "one."),
+                     "one.",
+                     # Marcus 2026-10-06 (carbotopecomments.10.2.26): "Change to" -- his wording,
+                     # in the app's CO₂ / El Niño style; the TIMING miss, beside the amplitude one.
+                     # Measured at hilda33p (enso_growth_fit_20261006_hilda33p, T2(b)): the model's
+                     # growth peaks +1 month after Nino 3.4 (r 0.68), the record's +5 (r 0.50).
+                     "The timing of the CO₂ growth peak after an El Niño is too early,",
+                     "peaking a month after the Pacific warmth index rather than five",
+                     "months from the observed record."),
        # A4 (Marcus 2026-10-01, "Fix Card 4"): this said the fitted strength
        # "lands inside the observed range". True at hilda29l (13.71, inside at
        # 1 sd); at hilda33d w_enso_l2 is 11.91 against Meinen's 14-25 Sv per
@@ -565,6 +572,12 @@ RV_CARDS <- list(
                       "moves CO₂ by about one and a half parts per million in",
                       "the years after Pinatubo. It is present and the total",
                       "wobble is still short.",
+                      # Marcus 2026-10-06 (carbotopecomments.10.2.26): "Change to" -- his wording.
+                      # The fitted lag is 2.61 +/- 0.41 months at hilda33p; test-enso-lag.R fails if
+                      # a refit moves it more than one posterior sd from the 2.5 written here.
+                      "\n\nFor the land uptake, the ENSO response is defined to occur",
+                      "2.5 months after the index based on the vegetation model",
+                      "response timing from the Global Carbon Budget.",
                       # N7 (Marcus 2026-09-22): "can we identify any commonalities
                       # between the years the model overshoots the growth rate,
                       # and/or between the years it undershoots?" Measured in
@@ -683,7 +696,18 @@ RV_CARDS <- list(
                       "this app claims are the station offset (card 1), the",
                       "δ¹³C gradient offset (card 2 is scored net of it), and a",
                       "seasonal sea-surface-temperature amplitude fitted well",
-                      "under the observed one."),
+                      "under the observed one.",
+                      # 2026-10-06 (Marcus: "Add a line about k_w to the known issues tab"): wording
+                      # DRAFTED for his review. The record: the k_w = 1446 price arm (CHANGELOG 10-05 a)
+                      # fits 2.75 BETTER on likelihood; its -20 posterior price is ONE prior,
+                      # hs_asx_frac's judgement width (kept, 10-05 e). test-review-card-numbers.R ties
+                      # "1,446" to KW_PRIOR_CENTRE and "about 1,900" to the canonical's fitted k_w.
+                      "One fitted value is a compromise between two sources rather",
+                      "than a measurement: the air-sea gas transfer speed comes out at",
+                      "about 1,900 m per year, against the literature's 1,446 (Naegler",
+                      "2009). The data slightly prefer the literature value; what holds",
+                      "it higher is the stated prior on how much gas exchange the cold",
+                      "high-latitude box gets, and the two cannot both hold."),
        ask = paste("Which of these would you want carried by a real mechanism",
                    "before you would use the model to teach from?"))
 )

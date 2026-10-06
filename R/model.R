@@ -182,6 +182,23 @@ CCX_LUC_CLEARED_MAX    <- 0.9
 #' for the historical E_LUC record. A timing-resolved debit -- fast from veg,
 #' slow from soil, with the split a function of years since clearing -- is the
 #' third option nobody has costed. Logged, not built.
+#' (The "70 %" was at the 2026-08 mode. At hilda33p, 2026-10-06: 65.7 % from the
+#' slow soil, 71.9 % from soil in all, 28.1 % from vegetation.)
+#'
+#' CITED 2026-10-06 (Marcus: "Find a citation for f_luc_wood = 0"; both read in full):
+#' - PRECEDENT for the pro-rata split: Dorheim et al. 2024, Hector V3.2.0, Geosci.
+#'   Model Dev. 17:4855-4869, doi:10.5194/gmd-17-4855-2024, sec. 2.2.2, p. 4858:
+#'   "LUC fluxes now affect land carbon pools in proportion to the sizes of these
+#'   pools, rather than via fixed allocation fractions as previously." Hector weights
+#'   by CURRENT pool sizes; CCX by preindustrial equilibrium shares.
+#' - PREMISE (reason 2 above): Friedlingstein et al. 2026, Global Carbon Budget 2025,
+#'   Earth Syst. Sci. Data 18:3211-3288, doi:10.5194/essd-18-3211-2026, Supplement
+#'   S.2.2, p. 6, l. 204-206: the bookkeeping models' "Literature-based response
+#'   curves describe the decay of vegetation and soil carbon, including carbon
+#'   transfer to product pools of different lifetimes, as well as carbon uptake due
+#'   to regrowth." So the E_LUC CCX is driven by already carries those delays.
+#' - SCOPE: neither source supports the debit's COMPOSITION (the 71.9 % from soil);
+#'   they support taking it pro rata and adding no regrowth or decay of CCX's own.
 CCX_F_LUC_WOOD_DEFAULT <- 0
 
 # ---------------------------------------------------------------------
@@ -3647,6 +3664,8 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # 13C and 14C ratios, so the prescribed `d13c_bio` is no longer needed:
     # clearing a forest does not fractionate, hence alpha13 = 1 (the default).
     #
+    # ⚠ STALE DEFAULT (noted 2026-10-06): the default has been f_luc_wood = 0, PRO RATA, since
+    # 2026-08-13 (CCX_F_LUC_WOOD_DEFAULT, cited there). The paragraph below describes f_luc_wood = 1.
     # IT COMES OUT OF WOOD (Marcus 2026-08-12) at the default f_luc_wood = 1.
     # Deforestation removes standing woody biomass, so that is the pool that
     # should pay -- and it is the pool whose 14C ratio the emitted carbon should

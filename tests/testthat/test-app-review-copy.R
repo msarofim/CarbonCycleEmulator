@@ -136,7 +136,12 @@ AC_CHECKS_1006 <- list(
   c("W1 warming caveat: the third effect", NA, "It also removes a third, smaller effect"),
   c("W1 warming caveat: DESIGN's sentence", NA, "the upper ocean becomes more layered and"),
   c("H1 held rows: the intro clause",      "These are the numbers the calibration fits. Everything", "and the few it holds at a"),
-  c("H1 held rows: the column is wired",   NA, "held = APP_HELD_NAMES")
+  c("H1 held rows: the column is wired",   NA, "held = APP_HELD_NAMES"),
+  # carbotopecomments.10.2.26, his rulings of 10-06 on card 4 (the ENSO TIMING miss): his wording
+  # replaced the 10-04 draft's in both places, so the draft's phrases must not appear either.
+  c("C4t card 4 timing, plain",  "Its timing is a little early, too", "peaking a month after the Pacific warmth index rather than five"),
+  c("C4t card 4 timing, detail", "giving it the weight its year-to-year information supports",
+    "2.5 months after the index based on the vegetation model")
 )
 
 ac_audit <- function(src, checks = AC_CHECKS) {

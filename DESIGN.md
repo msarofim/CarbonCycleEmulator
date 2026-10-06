@@ -205,6 +205,16 @@ d M_atm[h]/dt =
 - **Land-use change:** prescribed GCB bookkeeping flux E_LUC(t) added to the atmosphere and
   decremented from C_wood (carries that pool's own isotopic signature — a transfer, not a
   source, so no ¹⁴C is created; Marcus 2026-08-12).
+  ⚠ **SUPERSEDED 2026-08-13: the debit is PRO RATA** across the four exchanging land pools by their
+  preindustrial equilibrium shares (`f_luc_wood` = 0, `CCX_F_LUC_WOOD_DEFAULT`; at hilda33p 28 %
+  vegetation, 72 % soil). The wood-only text here and in the "Known residual" below describes
+  `f_luc_wood` = 1. **CITED 2026-10-06** (Marcus: "Find a citation for f_luc_wood = 0"):
+  - the precedent is Dorheim et al. 2024 (Hector V3.2.0, GMD 17:4855, doi:10.5194/gmd-17-4855-2024,
+    §2.2.2): "LUC fluxes now affect land carbon pools in proportion to the sizes of these pools";
+  - the premise is GCB 2025 (Friedlingstein et al. 2026, ESSD 18:3211, doi:10.5194/essd-18-3211-2026,
+    Suppl. S.2.2): the bookkeeping E_LUC already includes vegetation and soil decay, product pools and
+    regrowth.
+  - The quotes and the scope caveat are at `CCX_F_LUC_WOOD_DEFAULT` (`R/model.R`).
 - **Converted land — the debit is PERMANENT (added 2026-08-13).** Cumulative land-use
   carbon defines a cleared fraction `c(t) = f_luc_perm · cumLUC(t) / land0`, where `land0`
   is *total* preindustrial land carbon (all four pools). NPP₀ and veg₀ are both scaled by
@@ -225,6 +235,8 @@ d M_atm[h]/dt =
   exactly 1× in the infinite-time limit (verified at `tau_soil_slow = 20`). Closing the
   remainder means debiting the pools *pro rata*, which trades against the 2026-08-12 call
   that the emitted carbon carries wood's lagged ¹⁴C — **an open decision, not a defect.**
+  ⚠ **DECIDED 2026-08-13: pro rata** (the LUC/fossil airborne-fraction ratio is 1.02 at 100 yr,
+  against 0.50 wood-only); cited 2026-10-06, above.
 
 ### 3.4 Ocean (per hemisphere column)
 
