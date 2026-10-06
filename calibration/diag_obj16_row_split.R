@@ -16,11 +16,7 @@ RS_B    <- "hilda33p"                 # objective #16, adopted 2026-10-06
 RS_OFF  <- list(mix_strat_s = 0)      # the feedback OFF
 RS_TOL  <- 1e-6                       # each vector must reproduce its stored logpost
 RS_OUT  <- file.path("outputs", "diagnostics", sprintf("obj16_row_split_%s.log", format(Sys.Date(), "%Y%m%d")))
-RS_COMMIT <- local({
-  h <- suppressWarnings(tryCatch(system2("git", c("rev-parse", "--short", "HEAD"), stdout = TRUE), error = function(e) character(0)))
-  d <- suppressWarnings(tryCatch(system2("git", c("status", "--porcelain", "--", "R", "src", "calibration", "data"), stdout = TRUE),
-                                 error = function(e) NA_character_))
-  if (length(h) != 1L) "?" else paste0(h, if (anyNA(d)) "+dirty?" else if (length(d)) "+dirty" else "") })
+RS_COMMIT <- ccx_git_stamp()
 LOGCON <- file(RS_OUT, open = "wt"); sink(LOGCON, split = TRUE)
 cat(sprintf("calibration/diag_obj16_row_split.R @%s, %s | %s - %s, row by row; the feedback OFF = %s\n",
             RS_COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M"), RS_B, RS_A,

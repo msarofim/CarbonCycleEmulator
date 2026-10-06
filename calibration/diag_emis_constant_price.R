@@ -41,11 +41,7 @@ EP_OUT     <- ccx_path("outputs", "diagnostics", sprintf("emis_constant_price_%s
 EP_MODES   <- if (is.null(EP_EXTRA)) stats::setNames(names(CCX_MODE_FILES), names(CCX_MODE_FILES)) else EP_EXTRA
 EP_METHODS <- c(before = "spline", after = "constant")
 EP_ROW_TOL <- 1e-9    # a row "moved" above this (identical() decides reproduction)
-EP_COMMIT  <- tryCatch({
-  h <- system("git rev-parse --short HEAD", intern = TRUE)
-  d <- length(system("git status --porcelain --untracked-files=no", intern = TRUE)) > 0
-  paste0(h, if (d) "+dirty" else "")
-}, error = function(e) "?")
+EP_COMMIT  <- ccx_git_stamp()
 
 score_with <- function(md, method) {
   old <- CCX_EMIS_METHOD_DEFAULT

@@ -38,11 +38,10 @@ WS_REC     <- list(mode = "hilda33d", full = 0.268, share_enso = 0.28, share_all
 WS_REC_TOL <- c(full = 0.0005, share = 0.005)      # half a unit in each recorded number's last printed digit
 stopifnot(all(unlist(WS_ARMS) %in% names(CCX_MECHANISMS)))
 WS_OUT <- file.path("outputs", "diagnostics", sprintf("app_wobble_shares_%s_%s", format(Sys.Date(), "%Y%m%d"), CCX_MODE_CANONICAL))
-commit <- tryCatch(system2("git", c("-C", ROOT, "rev-parse", "--short", "HEAD"), stdout = TRUE), error = function(e) NA_character_)
-dirty  <- tryCatch(length(system2("git", c("-C", ROOT, "status", "--porcelain", "--untracked-files=no"), stdout = TRUE)) > 0,
-                   error = function(e) NA)
+commit <- ccx_git_stamp()
+dirty  <- ccx_stamp_dirty(commit)   # the rds keeps `dirty`: TRUE / FALSE / NA = git could not tell
 sink(paste0(WS_OUT, ".log"), split = TRUE)
-cat(sprintf("%s | commit %s%s | canonical %s (%s) | %s\n", WS_DRIVER, commit, if (isTRUE(dirty)) " (+uncommitted)" else "",
+cat(sprintf("%s | commit %s | canonical %s (%s) | %s\n", WS_DRIVER, commit,
             CCX_MODE_CANONICAL, basename(dirname(ccx_mode_file())), format(Sys.time(), "%Y-%m-%d %H:%M")))
 
 # ---- the estimator (server.R's c_growth_note) ---------------------------------------------

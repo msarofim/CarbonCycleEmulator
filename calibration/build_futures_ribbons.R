@@ -83,13 +83,7 @@ RB_LIN_CELLS  <- list(c("vvH", "co2_ppm", 2150L), c("vvVL", "co2_ppm", 2150L),
 # --commit=<sha>: the driver is RUN FROM A FROZEN COPY (`git archive` of that commit; never
 # edit a script an interpreter is reading), which is not a checkout and cannot stamp itself
 RB_COMMIT <- if (nzchar(rb_arg("commit", ""))) paste(rb_arg("commit", ""), "(frozen git-archive copy)") else
-  tryCatch({
-    h <- suppressWarnings(system("git rev-parse --short HEAD", intern = TRUE, ignore.stderr = TRUE))
-    if (!length(h) || !nzchar(h[1])) "?" else {
-      d <- length(system("git status --porcelain --untracked-files=no", intern = TRUE)) > 0
-      paste0(h[1], if (d) "+dirty" else "")
-    }
-  }, error = function(e) "?")
+  ccx_git_stamp(exclude = RB_OUT)   # its own product under data/ is never an input
 
 dir.create(dirname(RB_LOG), showWarnings = FALSE, recursive = TRUE)
 sink(RB_LOG, split = TRUE)

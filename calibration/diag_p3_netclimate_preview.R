@@ -44,12 +44,7 @@ BR_FUT_SPLICE <- c(ssp585 = FALSE, vvH = TRUE); BR_FUT_YEAR <- 2300L
 if (P3_SMOKE) { BR_BFGS_MAXIT <- 2L; BR_NM_MAXIT <- 10L; BR_ROUNDS <- 1L }
 P3_TAG  <- paste0(format(Sys.Date(), "%Y%m%d"), if (P3_SMOKE) "_SMOKE" else "")
 P3_OUT  <- file.path("outputs", "diagnostics", sprintf("obj16_p3_preview_%s", P3_TAG))
-COMMIT  <- local({
-  h <- suppressWarnings(tryCatch(system2("git", c("rev-parse", "--short", "HEAD"), stdout = TRUE), error = function(e) character(0)))
-  d <- suppressWarnings(tryCatch(system2("git", c("status", "--porcelain", "--", "R", "src", "calibration", "data"), stdout = TRUE),
-                                 error = function(e) NA_character_))
-  if (length(h) != 1L) "?" else paste0(h, if (anyNA(d)) "+dirty?" else if (length(d)) "+dirty" else "")
-})
+COMMIT  <- ccx_git_stamp()
 stopifnot(isTRUE(LIK_USE_ICE_D13C), identical(LIK_ICE_CO2_END, 1958))      # objective #15
 source(file.path("calibration", "lib_block_reopt.R"))
 LOGCON <- file(paste0(P3_OUT, ".log"), open = "wt"); sink(LOGCON, split = TRUE)

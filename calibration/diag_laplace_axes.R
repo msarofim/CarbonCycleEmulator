@@ -19,9 +19,7 @@ LA_DRIVER <- "calibration/diag_laplace_axes.R"
 LA_STEPS  <- c(-2, -1, -0.5, 0.5, 1, 2)
 LA_N_AXES <- 8L                       # the widest axes (they carry the ribbons' spread)
 LA_LOG <- ccx_path("outputs", "diagnostics", sprintf("laplace_axes_%s.log", format(Sys.Date(), "%Y%m%d")))
-LA_COMMIT <- tryCatch({ h <- system("git rev-parse --short HEAD", intern = TRUE)
-  d <- length(system("git status --porcelain --untracked-files=no", intern = TRUE)) > 0
-  paste0(h, if (d) "+dirty" else "") }, error = function(e) "?")
+LA_COMMIT <- ccx_git_stamp()
 md <- readRDS(ccx_mode_file(CCX_MODE_CANONICAL))
 invisible(ccx_apply_gate(ccx_mode_struct(md))); invisible(ccx_apply_pins(ccx_mode_pins(md)))
 invisible(ccx_adopt_mode_band(md))

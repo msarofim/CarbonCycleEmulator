@@ -159,10 +159,7 @@ OC_PROTO <- list(
 OC_SENS <- list(CESM_ETHZ_as2001 = modifyList(OC_PROTO$CESM_ETHZ, list(N = yr(2001),
                 src = "CESM-ETHZ with its NYF read as year 2001 (the other reading of '2001 anomalies')")))
 
-COMMIT <- local({
-  h <- suppressWarnings(tryCatch(system2("git", c("rev-parse", "--short", "HEAD"), stdout = TRUE), error = function(e) character(0)))
-  d <- suppressWarnings(tryCatch(system2("git", c("status", "--porcelain", "--", "R", "src", "calibration", "data"), stdout = TRUE), error = function(e) NA_character_))
-  if (length(h) != 1L) "?" else paste0(h, if (anyNA(d)) "+dirty?" else if (length(d)) "+dirty" else "") })
+COMMIT <- ccx_git_stamp()
 MODE_FILE <- ccx_mode_file(OC_MODE)
 MODE_MD5  <- unname(tools::md5sum(MODE_FILE))
 LOGCON <- file(paste0(OC_OUT, ".log"), open = "wt"); sink(LOGCON, split = TRUE)

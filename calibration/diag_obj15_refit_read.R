@@ -101,12 +101,7 @@ RD_FUT_SPLICE <- c(vvL = TRUE, vvM = TRUE, vvH = TRUE, ssp585 = FALSE)
 RD_FUT_YEARS  <- c(2100L, 2300L)
 RD_TAG  <- sprintf("%s%s", format(Sys.Date(), "%Y%m%d"), if (RD_INTERIM) "_INTERIM" else "")
 RD_OUT  <- file.path("outputs", "diagnostics", sprintf("obj15_refit_read_%s", RD_TAG))
-COMMIT  <- local({
-  h <- suppressWarnings(tryCatch(system2("git", c("rev-parse", "--short", "HEAD"), stdout = TRUE), error = function(e) character(0)))
-  d <- suppressWarnings(tryCatch(system2("git", c("status", "--porcelain", "--", "R", "src", "calibration", "data"), stdout = TRUE),
-                                 error = function(e) NA_character_))
-  if (length(h) != 1L) "?" else paste0(h, if (anyNA(d)) "+dirty?" else if (length(d)) "+dirty" else "")
-})
+COMMIT  <- ccx_git_stamp()
 stopifnot(isTRUE(LIK_USE_ICE_D13C), identical(LIK_ICE_CO2_END, 1958))      # objective #15
 sink(paste0(RD_OUT, ".log"), split = TRUE)
 cat(sprintf("%s @%s, %s\n", RD_DRIVER, COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M")))

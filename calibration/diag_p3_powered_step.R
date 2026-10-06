@@ -39,12 +39,7 @@ PS_Q10       <- "q10"; PS_GREEN <- "npp_tsens"
 PS_SHOW      <- c("q10", "npp_tsens", "beta_max", "seas_T_amp_NH", "seas_T_amp_SH", "seas_lag_p_NH", "npp_frac_NH", "tau_ex")
 BR_FUT_SPLICE <- c(ssp585 = FALSE, vvH = TRUE); BR_FUT_YEAR <- 2300L
 PS_OUT <- file.path("outputs", "diagnostics", sprintf("p3_powered_step_%s", format(Sys.Date(), "%Y%m%d")))
-COMMIT <- local({
-  h <- suppressWarnings(tryCatch(system2("git", c("rev-parse", "--short", "HEAD"), stdout = TRUE), error = function(e) character(0)))
-  d <- suppressWarnings(tryCatch(system2("git", c("status", "--porcelain", "--", "R", "src", "calibration", "data"), stdout = TRUE),
-                                 error = function(e) NA_character_))
-  if (length(h) != 1L) "?" else paste0(h, if (anyNA(d)) "+dirty?" else if (length(d)) "+dirty" else "")
-})
+COMMIT <- ccx_git_stamp()
 stopifnot(isTRUE(LIK_USE_ICE_D13C), identical(LIK_ICE_CO2_END, 1958))      # objective #15
 source(file.path("calibration", "lib_block_reopt.R"))
 LOGCON <- file(paste0(PS_OUT, ".log"), open = "wt"); sink(LOGCON, split = TRUE)

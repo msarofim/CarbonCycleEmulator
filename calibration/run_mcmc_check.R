@@ -59,12 +59,7 @@ MC_LP_TOL     <- 1e-5                                   # the mode reproduces it
 # A copy that is not a checkout cannot stamp itself, so its commit is SUPPLIED, and labelled as
 # supplied: on Torch the copy is make_bundle.sh's tar of the working tree, not a git archive.
 MC_COMMIT <- if (nzchar(mc_arg("commit", ""))) paste(mc_arg("commit", ""), "(supplied by --commit: the running copy is not a checkout)") else
-  tryCatch({
-    h <- suppressWarnings(system("git rev-parse --short HEAD", intern = TRUE, ignore.stderr = TRUE))
-    if (!length(h) || !nzchar(h[1])) "?" else {
-      d <- length(system("git status --porcelain --untracked-files=no", intern = TRUE)) > 0
-      paste0(h[1], if (d) "+dirty" else "") }
-  }, error = function(e) "?")
+  ccx_git_stamp()
 stopifnot(MC_ADAPT < MC_N, MC_T0 < MC_ADAPT)
 dir.create(MC_OUT_DIR, showWarnings = FALSE, recursive = TRUE)
 MC_FILE <- file.path(MC_OUT_DIR, sprintf("chain_%d.rds", MC_CHAIN))

@@ -41,12 +41,7 @@ RD_RHAT_REF <- 1.01        # Vehtari et al. 2021's recommendation, printed as th
 RD_ESS_REF_PER_CHAIN <- 100L   # ditto, for bulk- and tail-ESS
 RD_LP_BLOCK <- 5000L       # iterations per block in the log-posterior burn-in view
 RD_SHOW     <- 10L         # rows shown in each worst-first list
-RD_COMMIT <- tryCatch({
-  h <- suppressWarnings(system("git rev-parse --short HEAD", intern = TRUE, ignore.stderr = TRUE))
-  if (!length(h) || !nzchar(h[1])) "?" else {
-    d <- length(system("git status --porcelain --untracked-files=no", intern = TRUE)) > 0
-    paste0(h[1], if (d) "+dirty" else "") }
-}, error = function(e) "?")
+RD_COMMIT <- ccx_git_stamp()
 stopifnot(RD_DROP >= 0L)
 sink(RD_LOG, split = TRUE)
 cat(sprintf("=== %s @%s, %s: %s, drop %d ===\n", RD_DRIVER, RD_COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M"),

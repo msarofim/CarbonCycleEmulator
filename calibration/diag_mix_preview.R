@@ -37,10 +37,7 @@ MP_KZ_HALFWIDTH <- 0.3                                # the kz search, +/- in it
 MP_GCB_OCEAN <- c(mean = -0.20, sd = 0.05)            # GCB 2025 ESSD 18:3211 p. 3242 (2015-24; "normal year" baseline)
 MP_WIN  <- c(2015L, 2024L); MP_CLIM <- c(1901L, 1920L)
 MP_OUT  <- ccx_path("outputs", "diagnostics", sprintf("mix_preview_%s", format(Sys.Date(), "%Y%m%d")))
-COMMIT <- local({
-  h <- suppressWarnings(tryCatch(system2("git", c("rev-parse", "--short", "HEAD"), stdout = TRUE), error = function(e) character(0)))
-  d <- suppressWarnings(tryCatch(system2("git", c("status", "--porcelain", "--", "R", "src", "calibration", "data"), stdout = TRUE), error = function(e) NA_character_))
-  if (length(h) != 1L) "?" else paste0(h, if (anyNA(d)) "+dirty?" else if (length(d)) "+dirty" else "") })
+COMMIT <- ccx_git_stamp()
 MIX_BLK <- ccx_struct_block(MP_LABEL_M)[MP_NAMES]
 mix_on_p <- function(p, q = NULL, s_mult = 1) { for (n in MP_NAMES) p[[n]] <- MIX_BLK[[n]]
   p$mix_strat_s <- MIX_BLK$mix_strat_s * s_mult; if (!is.null(q)) p$mix_strat_q <- q; p }

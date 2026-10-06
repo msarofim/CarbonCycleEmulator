@@ -27,9 +27,7 @@ NF_Q10    <- c(canonical = NA, high = 1.4)              # NA = the mode's own; 1
 NF_K0     <- 1                                         # GtC/yr per K: the first try at the bump's scale (rescaled once)
 NF_GCB    <- c(mean = -0.8, sd = 0.7)                  # GCB 2025 TRENDY S2 - S1, 2015-24 (lit note G3)
 NF_OUT    <- file.path("outputs", "diagnostics", sprintf("net_climate_co2_feedback_%s", format(Sys.Date(), "%Y%m%d")))
-COMMIT <- local({ h <- suppressWarnings(tryCatch(system2("git", c("rev-parse", "--short", "HEAD"), stdout = TRUE), error = function(e) "?"))
-  d <- suppressWarnings(tryCatch(system2("git", c("status", "--porcelain", "--", "R", "src", "calibration", "data"), stdout = TRUE), error = function(e) NA))
-  paste0(h, if (anyNA(d)) "+dirty?" else if (length(d)) "+dirty" else "") })
+COMMIT <- ccx_git_stamp()
 sink(paste0(NF_OUT, ".log"), split = TRUE)
 cat(sprintf("%s @%s, %s | mode %s | window %d-%d vs %d-%d climate held\n", NF_DRIVER, COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M"),
             NF_MODE, NF_WIN[1], NF_WIN[2], NF_CLIM[1], NF_CLIM[2]))

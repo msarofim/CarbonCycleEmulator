@@ -36,11 +36,7 @@ DL_DRIVER <- "calibration/diag_ribbons_linearity.R"
 DL_LOG <- file.path(DL_ROOT, "outputs", "diagnostics", sprintf("ribbons_linearity_%s.log", format(Sys.Date(), "%Y%m%d")))
 DL_CELLS <- list(c("vvH", "co2_ppm", "2150"), c("vvVL", "co2_ppm", "2150"), c("vvM", "gmst", "2100"))
 DL_GRAD_FRAC <- 0.1
-DL_COMMIT <- tryCatch({
-  h <- system("git rev-parse --short HEAD", intern = TRUE)
-  d <- length(system("git status --porcelain --untracked-files=no", intern = TRUE)) > 0
-  paste0(h, if (d) "+dirty" else "")
-}, error = function(e) "?")
+DL_COMMIT <- ccx_git_stamp()
 
 rb <- readRDS(file.path(DL_ROOT, "data", "futures_ribbons.rds")); pv <- rb$provenance
 md <- readRDS(ccx_mode_file(CCX_MODE_CANONICAL))

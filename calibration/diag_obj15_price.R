@@ -27,9 +27,8 @@ ccx_load_cpp()
 PR_DRIVER <- "calibration/diag_obj15_price.R"
 PR_OUT    <- ccx_path("outputs", "diagnostics", sprintf("obj15_price_%s", format(Sys.Date(), "%Y%m%d")))
 PR_ROWS   <- c("co2_icecore", "d13c_icecore")            # the two rows #15 touches
-COMMIT <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
-DIRTY  <- tryCatch(length(system("git status --porcelain --untracked-files=no", intern = TRUE)) > 0,
-                   error = function(e) NA)
+COMMIT <- ccx_git_stamp()
+DIRTY  <- ccx_stamp_dirty(COMMIT)   # the rds keeps `dirty`: TRUE / FALSE / NA = git could not tell
 stopifnot(isTRUE(LIK_USE_ICE_D13C), identical(LIK_ICE_CO2_END, 1958), identical(LIK_ICE_D13C_END, 1977))
 # the #14 priors, TRANSCRIBED from R/calibrate.R as of fa4636f (an independent copy is the check)
 PR_PRIOR14 <- list(k_w = c(1500, 0.4), tau_ex = c(1.3, 0.25))
@@ -51,7 +50,7 @@ with_obj <- function(obj, f) {
 }
 
 sink(paste0(PR_OUT, ".log"), split = TRUE)
-cat(sprintf("%s @%s%s, %s\n", PR_DRIVER, COMMIT, if (isTRUE(DIRTY)) " (+uncommitted)" else "",
+cat(sprintf("%s @%s, %s\n", PR_DRIVER, COMMIT,
             format(Sys.time(), "%Y-%m-%d %H:%M")))
 cat(sprintf("#15 = #14 + co2_icecore cut to year < %g + d13c_icecore (sd = sqrt(err^2 + %.3f^2), year < %g, in-run)\n",
             LIK_ICE_CO2_END, LIK_ICE_D13C_REP_ERR, LIK_ICE_D13C_END))
@@ -105,7 +104,7 @@ saveRDS(list(table = tab, provenance = list(driver = PR_DRIVER, commit = COMMIT,
                                             d13c_rep = LIK_ICE_D13C_REP_ERR, rng = "none",
                                             date = format(Sys.time(), "%Y-%m-%d %H:%M"))),
         paste0(PR_OUT, ".rds"))
-cat(sprintf("provenance: %s @%s%s; R/paths.R CCX_MODE_FILES + CCX_MODE_HILDA31_QUARANTINED; each file's own spinup; no RNG\n",
-            PR_DRIVER, COMMIT, if (isTRUE(DIRTY)) " (+uncommitted)" else ""))
+cat(sprintf("provenance: %s @%s; R/paths.R CCX_MODE_FILES + CCX_MODE_HILDA31_QUARANTINED; each file's own spinup; no RNG\n",
+            PR_DRIVER, COMMIT))
 sink()
 if (!ok) stop("objective #15 pricing FAILED its own checks")

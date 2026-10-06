@@ -76,12 +76,7 @@ GS_PROF_DELTA <- 0.003                                    # 3c: npp_tsens held a
 GS_TAG  <- paste0(format(Sys.Date(), "%Y%m%d"), if (GS_SMOKE) "_SMOKE" else "", if (GS_POSTHOC) "_posthoc" else "")
 GS_OUT  <- file.path("outputs", "diagnostics", sprintf("greening_lag_swap_%s", GS_TAG))
 GS_PROG <- paste0(GS_OUT, "_progress.txt")
-COMMIT  <- local({
-  h <- suppressWarnings(tryCatch(system2("git", c("rev-parse", "--short", "HEAD"), stdout = TRUE), error = function(e) character(0)))
-  d <- suppressWarnings(tryCatch(system2("git", c("status", "--porcelain", "--", "R", "src", "calibration", "data"), stdout = TRUE),
-                                 error = function(e) NA_character_))
-  if (length(h) != 1L) "?" else paste0(h, if (anyNA(d)) "+dirty?" else if (length(d)) "+dirty" else "")
-})
+COMMIT  <- ccx_git_stamp()
 stopifnot(isTRUE(LIK_USE_ICE_D13C), identical(LIK_ICE_CO2_END, 1958))      # objective #15
 `%||%` <- function(a, b) if (is.null(a)) b else a
 prog <- function(...) cat(sprintf("%s %s\n", format(Sys.time(), "%H:%M:%S"), sprintf(...)), file = GS_PROG, append = TRUE)

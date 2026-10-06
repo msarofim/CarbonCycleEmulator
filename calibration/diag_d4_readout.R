@@ -23,11 +23,7 @@ ccx_load_cpp()
 D4_DRIVER <- "calibration/diag_d4_readout.R"
 D4_OUT <- ccx_path("outputs", "diagnostics", sprintf("d4_readout_%s", format(Sys.Date(), "%Y%m%d")))
 D4_GTC_PER_KGC_TGN <- 1e-3     # ndep_ret [kg C / kg N] x deposition [Tg N / yr] -> GtC / yr
-D4_COMMIT <- tryCatch({
-  h <- system("git rev-parse --short HEAD", intern = TRUE)
-  d <- length(system("git status --porcelain --untracked-files=no", intern = TRUE)) > 0
-  paste0(h, if (d) "+dirty" else "")
-}, error = function(e) "?")
+D4_COMMIT <- ccx_git_stamp()
 
 md <- readRDS(ccx_mode_file(CCX_MODE_CANONICAL))
 pm <- ccx_mode_par_with_pins(md)

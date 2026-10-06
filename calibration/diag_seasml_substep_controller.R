@@ -66,12 +66,7 @@ SC_LINE_MULT  <- 4L                               # the straight line, re-read a
 SC_BLOWUP_D13C <- 100                             # permil: |d13c_SH| past this marks the blow-up's first year
 SC_TAG  <- format(Sys.Date(), "%Y%m%d")
 SC_OUT  <- file.path("outputs", "diagnostics", sprintf("seasml_substep_controller_%s", SC_TAG))
-COMMIT  <- local({
-  h <- suppressWarnings(tryCatch(system2("git", c("rev-parse", "--short", "HEAD"), stdout = TRUE), error = function(e) character(0)))
-  d <- suppressWarnings(tryCatch(system2("git", c("status", "--porcelain", "--", "R", "src", "calibration", "data"), stdout = TRUE),
-                                 error = function(e) NA_character_))
-  if (length(h) != 1L) "?" else paste0(h, if (anyNA(d)) "+dirty?" else if (length(d)) "+dirty" else "")
-})
+COMMIT  <- ccx_git_stamp()
 PROV <- list(driver = SC_DRIVER, commit = COMMIT, date = format(Sys.time(), "%Y-%m-%d %H:%M %Z"),
              host = Sys.info()[["nodename"]], r = R.version.string,
              blas_threads = Sys.getenv("VECLIB_MAXIMUM_THREADS", "(unset)"),

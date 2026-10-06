@@ -38,12 +38,11 @@ OBS_WEEKLY <- file.path("data-raw", "downloads", "mbl_zonal_co2_GL.txt")
 DRIVER     <- "calibration/diag_lag_profile_obj15.R"
 OUT_STEM   <- file.path("outputs", "diagnostics", sprintf("lag_profile_obj15_%s", format(Sys.Date(), "%Y%m%d")))
 
-commit <- tryCatch(system2("git", c("rev-parse", "--short", "HEAD"), stdout = TRUE), error = function(e) "?")
-dirty  <- tryCatch(length(system2("git", c("status", "--porcelain", "--untracked-files=no"), stdout = TRUE)) > 0,
-                   error = function(e) NA)
+commit <- ccx_git_stamp()
+dirty  <- ccx_stamp_dirty(commit)   # the rds keeps `dirty`: TRUE / FALSE / NA = git could not tell
 sink(paste0(OUT_STEM, ".log"), split = TRUE)
-cat(sprintf("%s @%s%s, %s | arm %s | lag label %s, lag-0 label %s\n", DRIVER, commit,
-            if (isTRUE(dirty)) " (+uncommitted)" else "", format(Sys.time(), "%Y-%m-%d %H:%M"), ARM,
+cat(sprintf("%s @%s, %s | arm %s | lag label %s, lag-0 label %s\n", DRIVER, commit,
+            format(Sys.time(), "%Y-%m-%d %H:%M"), ARM,
             LABEL_LAG, LABEL_ZERO))
 stopifnot(isTRUE(LIK_USE_ICE_D13C), identical(LIK_ICE_CO2_END, 1958))   # objective #15
 
@@ -152,7 +151,7 @@ saveRDS(list(profile = tab, streams = D, timing = TT, best_lik = best,
                                win = WIN, trend_df = TREND_DF, rng = "none", objective = "#15",
                                date = format(Sys.time(), "%Y-%m-%d %H:%M"))),
         paste0(OUT_STEM, ".rds"))
-cat(sprintf("\nprovenance: %s @%s%s; arm %s (%s spinup), objective #15; L = 0 under %s, L > 0 under %s; no RNG\n",
-            DRIVER, commit, if (isTRUE(dirty)) " (+uncommitted)" else "", ARM, ccx_mode_spinup(md),
+cat(sprintf("\nprovenance: %s @%s; arm %s (%s spinup), objective #15; L = 0 under %s, L > 0 under %s; no RNG\n",
+            DRIVER, commit, ARM, ccx_mode_spinup(md),
             LABEL_ZERO, LABEL_LAG))
 sink()

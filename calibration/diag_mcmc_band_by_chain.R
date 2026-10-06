@@ -37,12 +37,8 @@ DB_PROBS   <- c(0.05, 0.50, 0.95)   # the ruled band, as build_futures_ribbons.R
 DB_UNITS   <- c(co2_ppm = "ppm", gmst = "degC")
 DB_SHOW    <- list(c("vvH", "co2_ppm", "2150"), c("vvVL", "co2_ppm", "2150"),   # the 10-01 (l) linearity cells
                    c("vvM", "gmst", "2100"))
-DB_COMMIT <- tryCatch({
-  h <- suppressWarnings(system("git rev-parse --short HEAD", intern = TRUE, ignore.stderr = TRUE))
-  if (!length(h) || !nzchar(h[1])) "?" else {
-    d <- length(system("git status --porcelain --untracked-files=no", intern = TRUE)) > 0
-    paste0(h[1], if (d) "+dirty" else "") }
-}, error = function(e) "?")
+for (.f in c("aaa_root.R", "provenance.R")) source(file.path("R", .f))   # the stamp only; this driver sources no other R/
+DB_COMMIT <- ccx_git_stamp()
 stopifnot(nzchar(DB_RIBBONS), nzchar(DB_DRAWS), file.exists(DB_RIBBONS), file.exists(DB_DRAWS), file.exists(DB_LAPLACE))
 sink(DB_LOG, split = TRUE)
 cat(sprintf("=== %s @%s, %s ===\nribbons %s\ndraws   %s\nlaplace %s\n", DB_DRIVER, DB_COMMIT,

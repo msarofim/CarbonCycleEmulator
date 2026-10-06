@@ -47,13 +47,11 @@ OBS_WEEKLY <- file.path("data-raw", "downloads", "mbl_zonal_co2_GL.txt")
 # The 10-02 outputs keep their name (enso_growth_fit_20261002.*, at hilda33d).
 OUT_STEM   <- file.path("outputs", "diagnostics", sprintf("enso_growth_fit_%s_%s", format(Sys.Date(), "%Y%m%d"), CCX_MODE_CANONICAL))
 
-commit <- tryCatch(system2("git", c("-C", ROOT, "rev-parse", "--short", "HEAD"), stdout = TRUE),
-                   error = function(e) NA_character_)
-dirty  <- tryCatch(length(system2("git", c("-C", ROOT, "status", "--porcelain", "--untracked-files=no"),
-                                  stdout = TRUE)) > 0, error = function(e) NA)
+commit <- ccx_git_stamp()
+dirty  <- ccx_stamp_dirty(commit)   # the rds keeps `dirty`: TRUE / FALSE / NA = git could not tell
 mode_file <- tryCatch(ccx_mode_file(), error = function(e) NA_character_)
-cat(sprintf("diag_enso_growth_fit | commit %s%s | mode %s | window %d-%d\n",
-            commit, if (isTRUE(dirty)) " (+uncommitted)" else "", basename(dirname(mode_file)),
+cat(sprintf("diag_enso_growth_fit | commit %s | mode %s | window %d-%d\n",
+            commit, basename(dirname(mode_file)),
             WIN[1], WIN[2]))
 
 # ---- the app's estimator, reproduced and GATED against the app's own function ----

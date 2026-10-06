@@ -36,11 +36,10 @@ REP_CANDIDATES   <- c(station_rep = LIK_D13C_REP_ERR)   # the station rows' own 
 OUT_STEM         <- file.path("outputs", "diagnostics", sprintf("ice_d13c_sigma_%s", format(Sys.Date(), "%Y%m%d")))
 DRIVER           <- "calibration/diag_ice_d13c_sigma.R"
 
-commit <- tryCatch(system2("git", c("rev-parse", "--short", "HEAD"), stdout = TRUE), error = function(e) "?")
-dirty  <- tryCatch(length(system2("git", c("status", "--porcelain", "--untracked-files=no"), stdout = TRUE)) > 0,
-                   error = function(e) NA)
+commit <- ccx_git_stamp()
+dirty  <- ccx_stamp_dirty(commit)   # the rds keeps `dirty`: TRUE / FALSE / NA = git could not tell
 sink(paste0(OUT_STEM, ".log"), split = TRUE)
-cat(sprintf("%s @%s%s, %s | arm %s\n\n", DRIVER, commit, if (isTRUE(dirty)) " (+uncommitted)" else "",
+cat(sprintf("%s @%s, %s | arm %s\n\n", DRIVER, commit,
             format(Sys.time(), "%Y-%m-%d %H:%M"), ARM))
 
 ice <- readRDS(ccx_path("data", "obs_icecore.rds"))
@@ -147,6 +146,6 @@ saveRDS(list(samples = d, scatter_spline = s2, model_resid = s4, row_candidates 
                                co2_cut = CO2_CUT, anchor_win = ANCHOR_WIN, rng = "none",
                                date = format(Sys.time(), "%Y-%m-%d %H:%M"))),
         paste0(OUT_STEM, ".rds"))
-cat(sprintf("\nprovenance: %s @%s%s; arm %s (%s spinup); data/obs_icecore.rds (Rubino et al. 2019); no RNG\n",
-            DRIVER, commit, if (isTRUE(dirty)) " (+uncommitted)" else "", ARM, v$spinup_label))
+cat(sprintf("\nprovenance: %s @%s; arm %s (%s spinup); data/obs_icecore.rds (Rubino et al. 2019); no RNG\n",
+            DRIVER, commit, ARM, v$spinup_label))
 sink()

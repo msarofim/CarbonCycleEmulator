@@ -69,11 +69,7 @@ one_match <- function(pattern, what) { m <- Sys.glob(file.path("calibration", "o
 O16_WAVE <- Sys.getenv("CCX_O16_WAVE", ""); if (!nzchar(O16_WAVE)) O16_WAVE <- one_match(O16_WAVE_GLOB, "the wave")
 O16_MODE <- Sys.getenv("CCX_O16_MODE", "")
 if (!nzchar(O16_MODE)) O16_MODE <- file.path(one_match(O16_MODE_GLOB, "the promoted mode"), "mode_fit_pumpN.rds")
-COMMIT <- local({
-  h <- suppressWarnings(tryCatch(system2("git", c("rev-parse", "--short", "HEAD"), stdout = TRUE), error = function(e) character(0)))
-  d <- suppressWarnings(tryCatch(system2("git", c("status", "--porcelain", "--", "R", "src", "calibration", "data"), stdout = TRUE),
-                                 error = function(e) NA_character_))
-  if (length(h) != 1L) "?" else paste0(h, if (anyNA(d)) "+dirty?" else if (length(d)) "+dirty" else "") })
+COMMIT <- ccx_git_stamp()
 sink(paste0(O16_OUT, ".log"), split = TRUE)
 cat(sprintf("%s @%s, %s\n  canonical %s (%s)\n  #16       %s (md5 %s)\n  wave      %s\n", O16_DRIVER, COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M"),
             O16_CANON, ccx_mode_file(O16_CANON), O16_MODE, unname(tools::md5sum(O16_MODE)), O16_WAVE))

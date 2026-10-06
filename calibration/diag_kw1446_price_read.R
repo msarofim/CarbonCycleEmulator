@@ -44,11 +44,7 @@ KR_PRICE_COND    <- 1783                                    # CHANGELOG 10-03 (b
 KR_PRICE_LAPLACE <- 47                                      # same, §5(c): 0.5 z^2 on the marginal sd (9.7 sds)
 KR_TOP <- 12L
 KR_OUT <- file.path("outputs", "diagnostics", sprintf("kw1446_price_read_%s", format(Sys.Date(), "%Y%m%d")))
-COMMIT <- local({
-  h <- suppressWarnings(tryCatch(system2("git", c("rev-parse", "--short", "HEAD"), stdout = TRUE), error = function(e) character(0)))
-  d <- suppressWarnings(tryCatch(system2("git", c("status", "--porcelain", "--", "R", "src", "calibration", "data"), stdout = TRUE),
-                                 error = function(e) NA_character_))
-  if (length(h) != 1L) "?" else paste0(h, if (anyNA(d)) "+dirty?" else if (length(d)) "+dirty" else "") })
+COMMIT <- ccx_git_stamp()
 sink(paste0(KR_OUT, ".log"), split = TRUE)
 cat(sprintf("%s @%s, %s\n  canonical %s (%s)\n  price arm %s\n  survey    %s\n", KR_DRIVER, COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M"),
             KR_CANON, ccx_mode_file(KR_CANON), KR_MODE, KR_WAVE))
