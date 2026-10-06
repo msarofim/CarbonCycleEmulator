@@ -15,6 +15,8 @@
 >   - The ocean question is answered in §5.3, which revises my recommendation.
 > - the land-sink row: "Price a smoothed row first (Recommended)". **PRICED** (§5.5, CHANGELOG 10-06 m).
 > - the estimator: "Monthly (Recommended)".
+> - **THE BUILD: "Build: land + ocean module (Recommended)"; "Mac, overnight (Recommended)"; "Yes, handoff first
+>   (Recommended)".** §6 is what gets built; the order is `notes/handoff_2026-10-06c_iav_cut_build.md` §3.
 
 Marcus, verbatim: *"I still find it odd that there is a pattern in the data that ENSO causes a lagged effect on CO2 and
 that we can't somehow make our ENSO parameter do a better job of reproducing that lag. What about having a 12-month

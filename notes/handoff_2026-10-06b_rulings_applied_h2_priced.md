@@ -1,5 +1,8 @@
 # HANDOFF 2026-10-06b — Marcus's 10-06 rulings APPLIED; H2 TESTED and PRICED; the suite is clean and nothing is running.
 
+> ⚠ **SUPERSEDED by `notes/handoff_2026-10-06c_iav_cut_build.md`** (objective #17, the interannual cut, ruled 2026-10-06).
+> §4.3's "the seasonal rows hold the lag short" is CORRECTED there: they set how firmly it is held, not where.
+
 **Supersedes** `notes/handoff_2026-10-06_hilda33p_adopted.md` (which now points here).
 - Written on Marcus's request, verbatim: "write a handoff for the next session."
 - `main` is at this note's commit, pushed. Everything below is in `main`.

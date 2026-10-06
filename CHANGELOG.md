@@ -2,6 +2,21 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-06 (n) — **RULED: build objective #17, the interannual cut with the land + ocean module; the stage-2 refit on the Mac overnight; a handoff first.** Handoff: `notes/handoff_2026-10-06c_iav_cut_build.md`, which supersedes `handoff_2026-10-06b_rulings_applied_h2_priced.md` (that note now points to it).
+- **Marcus, verbatim:** "Build: land + ocean module (Recommended)"; "Mac, overnight (Recommended)"; "Yes, handoff first (Recommended)".
+- **#17, as ruled** (proposal §6):
+  - `gcb_land_sink` is scored on its low-pass part (df 6);
+  - `gcb_ocean_enso_slope` moves into the interannual module;
+  - the module fits `lag_enso_land`, one land amplitude (NH : SH held at the canonical's) and `w_enso_l2` to the monthly detrended growth plus that row;
+  - `gamma_diff` stays fixed at 0.25;
+  - then a 24-start refit of the other names on the Mac.
+- **Nothing is built yet.** The build order and the open design points are in the handoff's §3:
+  - the label name (his call);
+  - the cut posterior for the ribbons;
+  - one pass or iterate to a fixed point;
+  - `gamma_diff`'s own future.
+- **Unanswered:** removing the redundant frozen tree `~/ccx_frozen/20261006_iavcut_54d85e5`.
+
 ## 2026-10-06 (m) — **Marcus's rulings on the interannual cut, and the low-pass land-sink row PRICED: under the cut, scoring `gcb_land_sink` on its ~11-yr part instead of year by year cuts the cost from −36 to −10, with no damage to the trend (its low part slightly improves). Without the cut, smoothing the row alone moves the joint lag only 2.5 → 2.9 months.**
 
 - **Rulings, verbatim** (on `notes/proposal_2026-10-06_iav_cut.md`):
