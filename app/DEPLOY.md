@@ -33,7 +33,7 @@ anyone has shared — so set the account/app name at the FIRST deploy, not after
 
 ## ⚠ BEFORE THE PUBLIC BETA GOES OUT
 
-The app ships as **BETA v1.0 CarboTope** (`APP_RELEASE_NAME`; cut on mode `hilda34g` since 2026-10-03, `hilda33d` before, `APP_RELEASE_MODE`, which `tests/testthat/test-app-version.R` requires to be the mode the app loads), and its seventh tab ("Known issues")
+The app ships as **BETA v1.0 CarboTope** (`APP_RELEASE_NAME`; cut on mode `hilda33p` since 2026-10-06, `hilda34g` from 2026-10-03, `hilda33d` before, `APP_RELEASE_MODE`, which `tests/testthat/test-app-version.R` requires to be the mode the app loads), and its seventh tab ("Known issues")
 is the point of the release: it puts each remaining flaw to the reader and asks
 whether it is a deal-breaker, fixable or acceptable. Three things must be true
 before the link is posted.
@@ -84,7 +84,7 @@ The app reads from the repository root, so deploy the whole tree, not just `app/
 | `R/` | the model |
 | `src/ccx_core.cpp` | compiled at startup |
 | `data/*.rds` | observations, forcings, the FaIR climate module |
-| `calibration/output/refit_20261003_hilda34g_obj15_hilda_csl3v0kaidgbe/mode_fit_pumpN.rds` | **the parameter set the app runs on.** This is the canonical mode, resolved by `ccx_mode_file()` (`R/paths.R`), which is the ONE place its path is named — take the path from there rather than from this table. It moved here 2026-08-27; the old `pump_arms/mode_fit_pumpN.rds` was fitted before the seasonal-NEP isotope fix changed the objective and is quarantined. `mode_fit.rds` has never existed. Omit the file and the app falls back to uncalibrated defaults SILENTLY (the banner is the only report) |
+| `calibration/output/refit_20261005_hilda33p_obj16_hilda_csl3v0kaidgbem/mode_fit_pumpN.rds` | **the parameter set the app runs on.** This is the canonical mode, resolved by `ccx_mode_file()` (`R/paths.R`), which is the ONE place its path is named — take the path from there rather than from this table. It moved here 2026-08-27; the old `pump_arms/mode_fit_pumpN.rds` was fitted before the seasonal-NEP isotope fix changed the objective and is quarantined. `mode_fit.rds` has never existed. Omit the file and the app falls back to uncalibrated defaults SILENTLY (the banner is the only report) |
 | `DESIGN.md` | `.find_root()` locates the repo by looking for this file |
 | `calibration/lib_design_gates.R` (+ `lib_seas_limbs.R`, `lib_glodap_obs.R`) | **the gate kernels the "Known issues" tab measures itself with.** Sourced lazily on first view of that tab, never at start-up. Omit them and the cards that need them render their reason in place of their number — a visible degradation, not a silent one, but the review tab is then half-useless |
 
@@ -97,7 +97,7 @@ at the top of every tab reports which one it landed on:
 
 1. `calibration/output/posterior_draws.rds` → "calibrated posterior"
 2. the first of `ccx_mode_file(CCX_MODE_CANONICAL)` (today
-   `calibration/output/refit_20261003_hilda34g_obj15_hilda_csl3v0kaidgbe/mode_fit_pumpN.rds`), then
+   `calibration/output/refit_20261005_hilda33p_obj16_hilda_csl3v0kaidgbem/mode_fit_pumpN.rds`), then
    `calibration/output/mode_fit.rds`, that exists AND carries this build's
    parameter set (`ccx_mode_carries_build()`; a pinned canonical's held names
    come back through `ccx_mode_par_with_pins()`) → "posterior mode" (so a stale

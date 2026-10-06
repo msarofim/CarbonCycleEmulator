@@ -66,7 +66,7 @@ ccx_load_cpp()
 
 # ---- NAMED CONSTANTS: every label, filename and threshold derives from here ----
 CM_TAG        <- "constraint_map"
-CM_DATE       <- "20261003h"  # the SHIPPED canonical artifact's tag: hilda34g at its adoption (10-03 h; was 20261001k = hilda33d after the 10-01 (k) flip, 20261001 for that adoption build, 20260925 at hilda29l); see CM4. ⚠ MOVE IT AT EVERY ADOPTION: the canonical's log is named by it, so a stale tag overwrites the previous canonical's record (it did, 10-03, and was restored from git)
+CM_DATE       <- "20261006a"  # the SHIPPED canonical artifact's tag: hilda33p at its adoption (10-06 a; was 20261003h = hilda34g, 20261001k = hilda33d after the 10-01 (k) flip, 20261001 for that adoption build, 20260925 at hilda29l); see CM4. ⚠ MOVE IT AT EVERY ADOPTION: the canonical's log is named by it, so a stale tag overwrites the previous canonical's record (it did, 10-03, and was restored from git)
 # ⛔⛔ CM4  THE ARM (2026-09-26). The map used to be canonical-only. A SECOND
 #       evaluation point answers a question one point cannot: is the pins/pulls
 #       picture a property of the MODEL, or only of THIS FIT?
@@ -189,7 +189,8 @@ CM_ARM_ONLY_NAMES <- c("w_enso_l2",                                  # canonical
                        "ent_seas_amp_SH",                            # hilda32f / hilda31pe
                        "gamma_enso_ocn_NH", "gamma_enso_ocn_SH",     # hilda32f / hilda31pe
                        # the GATED names: only an arm whose structure opens the gate fits them
-                       # (the canonical hilda33d, 2026-10-01)
+                       # (the canonical hilda33d, 2026-10-01). npp_tsens is fitted by hilda33d / hilda34g
+                       # and PINNED at 0 by the canonical hilda33p (objective #16, 2026-10-06)
                        "ndep_ret", "npp_tsens", "imb_share_land", "imb_share_ocean_rest",
                        # the LAG gate's name: only the lag label fits it (the canonical hilda34g, 2026-10-03)
                        "lag_enso_land")

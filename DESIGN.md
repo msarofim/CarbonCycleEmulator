@@ -165,7 +165,8 @@ d M_atm[h]/dt =
     `soil_slow` only (a wood/soil split needs a cited ¹⁵N partition; both kept, Marcus 10-01).
   - **Greening** (`npp_tsens`): NPP × exp(`npp_tsens` · GMST), sign-free prior N(0, 0.029) /K
     (SD of MAGICC6's C4MIP σ_NPP, Meinshausen 2011 Table B4).
-    > ⛔ **PINNED AT 0 from objective #16 (P4; Marcus 2026-10-05, "p4").** The record cannot fix its sign: the
+    > ⛔ **PINNED AT 0 from objective #16 (P4; Marcus 2026-10-05, "p4"), and so in the canonical `hilda33p` since
+    > 2026-10-06 (CHANGELOG 10-06 a).** The record cannot fix its sign: the
     > profile is +0.0095 ± 0.0085 /K, and the sign set at hilda34g came from the land ENSO lag. Zero is the
     > C4MIP median for this form. Pinned via `CCX_MS_PIN`, it is the term's absent default, bit for bit. The
     > prior stays for any arm that frees it. Proposal: `notes/proposal_2026-10-04_npp_tsens_prior.md`;
@@ -441,8 +442,9 @@ anchoring `kz` becomes the *near-surface* diffusivity — the quantity NATRE act
 iso-sink solution FAILS by an even wider margin** (6404 vs 536, i.e. 12×). That is a cost of
 A that the logL does not see, and it should be weighed explicitly.
 
-**S. Thermocline mixing weakens with warming: the STRATIFICATION FEEDBACK.** **RULED 2026-10-04 (Marcus); being
-built.** Proposal and literature: `notes/proposal_2026-10-04_warming_weakens_mixing.md`; CHANGELOG 10-04 (m).
+**S. Thermocline mixing weakens with warming: the STRATIFICATION FEEDBACK.** **RULED 2026-10-04 (Marcus); BUILT
+10-04 (n); IN THE CANONICAL `hilda33p` since 2026-10-06** (objective #16; Marcus: "Adopt 16"; CHANGELOG 10-05 p,
+10-06 a). Proposal and literature: `notes/proposal_2026-10-04_warming_weakens_mixing.md`; CHANGELOG 10-04 (m).
 *For the app:* "warming is strongest at the surface, so the upper ocean becomes more layered and mixes less, and the
 carbon we add is carried down into the deep ocean more slowly."
 - **The rulings:** thermocline mixing only; the strength from an observation × a law, FIXED (not fitted); the key is

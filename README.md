@@ -25,15 +25,23 @@ is a **deal-breaker, fixable, or acceptable** for a pedagogical model. Comments 
 the Substack post the app links to; anyone whose comment changes the model or the
 write-up is credited in the acknowledgements.
 
-**Main branch, 2026-10-03: the canonical is `hilda34g`** (objective #15; 34 fitted names, the same
+**Main branch, 2026-10-06: the canonical is `hilda33p`** (objective #16; 33 fitted names, ten held).
+It is `hilda34g` plus the stratification feedback (as the surface warms faster than the deep ocean, the
+upper ocean mixes less, so added carbon is carried down more slowly; its strength fixed from observation and
+mixing law, not fitted), with the greening term held at 0 (a term whose sign the record cannot fix is not
+fitted), refit on objective #16. On the record it is indistinguishable from `hilda34g` (likelihood −1.77 at
+one fewer fitted name); it was adopted on physics. CHANGELOG 2026-10-05 (p), 2026-10-06 (a). The app's release
+name is **BETA v1.0 CarboTope** (`APP_RELEASE_NAME` in `app/global.R`), now cut on `hilda33p`
+(`APP_RELEASE_MODE`; Marcus 2026-10-06: "Move v1.0 to the new mode").
+
+**2026-10-03: `hilda34g`** (objective #15; 34 fitted names, the same
 nine held). It is `hilda33d` (2026-10-01: `hilda29l`'s structure with the vegetation-capacity loop off,
 the evidence-based shape prior on CO₂ fertilisation, the inert soil pool, nitrogen-deposition retention,
 a sign-free greening term, and a fitted allocation of the Global Carbon Budget's imbalance) plus a fitted
 delay of 2.6 months between El Niño and the land's carbon response, refit on objective #15 (the ice-core
 CO₂ row cut to pre-1958, the Law Dome ice-core δ¹³C row added, the gas-exchange and interhemispheric
-exchange priors cited). CHANGELOG 2026-10-03. The app's release name is **BETA v1.0 CarboTope**
-(`APP_RELEASE_NAME` in `app/global.R`), now cut on `hilda34g` (`APP_RELEASE_MODE`; Marcus 2026-10-03:
-"Move v1.0 to hilda34g"). The `v1.0-hilda29l` git tag
+exchange priors cited). CHANGELOG 2026-10-03. The release was cut on `hilda34g` from 2026-10-03 to
+2026-10-06 (Marcus 2026-10-03: "Move v1.0 to hilda34g"). The `v1.0-hilda29l` git tag
 marks the 09-22 freeze; the paragraphs below describe that freeze.
 
 **Product-ready as of 2026-09-21** (`notes/assessment_2026-09-21_product_ready.md`). Model core,

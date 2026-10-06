@@ -200,7 +200,19 @@
 # NOT registered): +14.92 at one more name, dAIC -27.8. Every What-if gain is the lag's (ENSO
 # off: -11.0 % here, +0.89 % at the control); gate V slightly worse (-4.60 vs -4.34). CHANGELOG
 # 10-03 (b)-(h). hilda33d stays REGISTERED (the #14 canonical, restamped #15; the D2/D3 parent).
-CCX_MODE_CANONICAL <- "hilda34g"
+# 2026-10-06: `hilda33p` -- OBJECTIVE #16, THE STRATIFICATION FEEDBACK + NO GREENING (Marcus 2026-10-06:
+# "Adopt 16"; "hilda33p (Recommended)"; "Remove, re-express its test (Recommended)"; "Move v1.0 to the new
+# mode (Recommended)"). Label hilda_csl3v0kaidgbem = hilda_csl3v0kaidgbe + the stratification feedback
+# (DESIGN §3.4a S: the upper part of K(z) x g(T_key), the solved export rescaled with g; s 0.0522 /K,
+# q 1, tau_d 194.94 yr, all FIXED). TEN pins: the nine + npp_tsens = 0 (P4, Marcus 10-05 "p4": a term
+# whose sign the record cannot fix is not fitted). 33 names. The 10-05f Mac wave: 16/24 CONVERGED in ONE
+# basin, 8 out of time (all across the 10-05 sleep); best id 5, logpost -1187.451837, likelihood
+# -1145.0186 on 27 rows; Hessian PD cond 2.73e5. ⭐ ON LIKELIHOOD vs hilda34g: -1.77 at one fewer name
+# (dAIC +1.5: the record does not discriminate; the feedback -0.93, the pin + refit -0.84). Adopted on
+# PHYSICS: the feedback is cited, the greening term was unidentified (0.99 sd from 0) and extrapolated 6x
+# to 2300. SSP5-8.5 2300 +12.9 ppm; land net climate effect +0.118 -> -0.038 GtC/yr; no gate verdict
+# flips. CHANGELOG 10-05 (p), 10-06 (a). hilda34g stays REGISTERED (the #15 canonical).
+CCX_MODE_CANONICAL <- "hilda33p"
 # 2026-09-22 (k): `hilda32f` -- THE FREE PARENT OF THE LIMB CANONICAL (Marcus: "Repoint").
 # hilda29l's OWN structure (hilda_csl3, seas_ml 1) with only the six inert names held: the
 # seasonal shim ent_seas_amp_SH (8.24), the ocean ENSO pair (NH 0.240, SH 0.001) and the
@@ -216,6 +228,8 @@ CCX_MODE_CANONICAL <- "hilda34g"
 # named red #1 ("the parent is the best free arm") discharges here; red #2 (the AIC gate)
 # is untouched.
 CCX_MODE_FILES <- c(
+  hilda33p = file.path("calibration", "output", "refit_20261005_hilda33p_obj16_hilda_csl3v0kaidgbem",
+                       "mode_fit_pumpN.rds"),
   hilda34g = file.path("calibration", "output", "refit_20261003_hilda34g_obj15_hilda_csl3v0kaidgbe",
                        "mode_fit_pumpN.rds"),
   hilda33d = file.path("calibration", "output", "refit_20261001_hilda33d_obj14_hilda_csl3v0kaidgb",
@@ -326,7 +340,7 @@ CCX_MODE_HILDA30S_QUARANTINED <- file.path("calibration", "output", "quarantine"
 # 2026-09-04 -> 2026-09-11 (8) this registry held one arm, then two free arms;
 # the free-vs-pinned comparison it exists to express had no power
 # ([[no_power_null]]). It has power from 09-13 (d): the canonical is PINNED.
-CCX_MODE_PINNED <- c(hilda34g = TRUE, hilda33d = TRUE, hilda29l = TRUE, hilda32f = FALSE, hilda31s2 = FALSE, hilda31pe = FALSE)
+CCX_MODE_PINNED <- c(hilda33p = TRUE, hilda34g = TRUE, hilda33d = TRUE, hilda29l = TRUE, hilda32f = FALSE, hilda31s2 = FALSE, hilda31pe = FALSE)
 # A PINNED CANONICAL (2026-09-13). When the canonical is a pinned arm, the
 # registry names WHAT it pins (the file's own `pins` must agree -- test-mode-file)
 # and its free PARENT: the same space with the pinned names free, kept
@@ -345,9 +359,16 @@ CCX_MODE_PINNED <- c(hilda34g = TRUE, hilda33d = TRUE, hilda29l = TRUE, hilda32f
 # and the ocean ENSO shim pair gamma_enso_ocn_NH/SH is PINNED at 0 (the limb replaces it).
 # Nine pins, 29 free. The CONTROL's pins are named EXPLICITLY below (no longer "the canonical's
 # minus the shim"): the control has no limb, so it holds w_enso_l2 = 0 and FITS the pair.
-CCX_MODE_CANONICAL_PINS  <- c(ent_seas_amp_SH = 0, w_eq = 27, gamma_eq = 1, pump_export = 9.08,
+# 2026-10-06 (hilda33p adopted): the canonical holds OBJECTIVE #16's pins, the nine below + npp_tsens = 0 --
+# the first LAND-side pin. Each set is defined by its own parts, so a later adoption cannot change what an
+# earlier objective's name means. CCX_MODE_OBJ15_PINS is the set the canonicals of #13-#15 (hilda29l,
+# hilda33d, hilda34g) hold; under it npp_tsens is FITTED, and since 10-06 no ruled reference set takes it
+# (a #15 re-run must rule its own before launching -- ccx_ms_reference_set() says so).
+CCX_MODE_OBJ15_PINS      <- c(ent_seas_amp_SH = 0, w_eq = 27, gamma_eq = 1, pump_export = 9.08,
                               w_vent = 0, gamma_vent = 0, w_thc = 0,
                               gamma_enso_ocn_NH = 0, gamma_enso_ocn_SH = 0)
+CCX_MODE_OBJ16_PINS      <- c(CCX_MODE_OBJ15_PINS, npp_tsens = 0)
+CCX_MODE_CANONICAL_PINS  <- CCX_MODE_OBJ16_PINS
 # ⚠ RE-DOCUMENTED 2026-10-01 (Marcus, review 10-01c B3b: option (i), "follow recommendations").
 # `hilda32f` is the free parent of the v1.0 canonical, hilda29l (structure hilda_csl3,
 # objective #13). It is NOT a parent of the current canonical: hilda33d (objective #14, the
@@ -363,7 +384,9 @@ CCX_MODE_CANONICAL_PINS  <- c(ent_seas_amp_SH = 0, w_eq = 27, gamma_eq = 1, pump
 # 2026-10-03 (h): the same holds for the canonical hilda34g (objective #15, the lag label
 # hilda_csl3v0kaidgbe): no registered free parent; its comparison arm is the lag-0 control
 # refit on #15 (unregistered), read in calibration/diag_obj15_refit_read.R.
-CCX_MODE_PINNED_PARENT   <- "hilda32f"   # 2026-09-22 (k): hilda29l's (v1.0's) free parent; the canonicals hilda33d / hilda34g have none (10-01 B3b; 10-03 h)
+# 2026-10-06: and for hilda33p (objective #16): no registered free parent; it is read on LIKELIHOOD against
+# hilda34g, in calibration/diag_obj16_refit_read.R.
+CCX_MODE_PINNED_PARENT   <- "hilda32f"   # 2026-09-22 (k): hilda29l's free parent; the canonicals hilda33d / hilda34g / hilda33p have none (10-01 B3b; 10-03 h; 10-06)
 # THE seas_ml-0 CONTROL AND ITS ARM (2026-09-17 j). The registered control `hilda31p`
 # has the shim FREE (18.69): the seasonal mixed layer is what REPLACED the shim, so
 # the canonical pins it and the control keeps it. Its arm is therefore the canonical's
@@ -400,15 +423,17 @@ CCX_MODE_FREE_PARENT_PINS <- c(w_eq = 27, gamma_eq = 1, pump_export = 9.08, w_ve
 # that name, so it is dropped from the pin set here -- the limb's 9 pins are unchanged.)
 # (2026-09-20 r: the limb's arm IS the canonical's now; kept as a name so the 09-17/18/20 array
 # records and ccx_ms_reference_set()'s limb branch read unchanged -- identical to CANONICAL_PINS.)
+# (2026-10-06: still the canonical's -- now the ten. Freezing it at the nine would make the limb branch
+# REACHABLE for a nine-pin array, a #15 re-run, and give it a limb-arm incumbent it is not; as an alias,
+# that branch stays unreachable and a nine-pin array is refused until its reference set is ruled.)
 CCX_MODE_L2_ARM_PINS     <- CCX_MODE_CANONICAL_PINS
 # OBJECTIVE #16's PINS (2026-10-05, Marcus: "p4"; notes/proposal_2026-10-04_npp_tsens_prior.md, CHANGELOG
-# 10-05 d): the canonical's nine PLUS the greening term `npp_tsens` held at 0. A term whose sign the record
-# cannot fix is not fitted. It is a READ name under #16's gate, so the canonical is a START of this
-# objective (seeded at the pin), not a mode of it -- the price and limb arms' case. Ruled ONLY under #16's
-# label (the stratification feedback, DESIGN §3.4a S; the label KEPT 10-05 a) at seas_ml 1. At 0 the factor
-# is exp(0 * GMST) = 1, the term's absent default (CCX_NPP_TSENS_DEFAULT), so the pinned model is the
-# no-greening model bit for bit.
-CCX_MODE_OBJ16_PINS      <- c(CCX_MODE_CANONICAL_PINS, npp_tsens = 0)
+# 10-05 d) are DEFINED ABOVE, beside the canonical's: #15's nine PLUS the greening term `npp_tsens` held at 0.
+# A term whose sign the record cannot fix is not fitted. At 0 the factor is exp(0 * GMST) = 1, the term's
+# absent default (CCX_NPP_TSENS_DEFAULT), so the pinned model is the no-greening model bit for bit.
+# 2026-10-06: they ARE the canonical's, so ccx_ms_reference_set()'s separate #16 branch (the canonical as a
+# START, seeded at the pin) is REMOVED (Marcus: "Remove, re-express its test (Recommended)"): the canonical
+# is now a MODE of #16, and the first branch takes these pins. The label stays #16's own.
 CCX_MODE_OBJ16_STRUCT    <- "hilda_csl3v0kaidgbem"
 #' The registered FREE mode nearest the canonical: the canonical itself when it
 #' is free, its parent when it is pinned. For a consumer that needs a vector
