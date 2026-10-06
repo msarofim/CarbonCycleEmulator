@@ -145,7 +145,8 @@ under #16 is not measured.
    `OCEAN_DEPTH`, `ALK_SURFACE`, `ALPHA_PHOTO_EPS`, `PUMP_EPS13_ORG/CARB`, `NPP_GLOBAL_PI`, `NPP_FRAC_NH_ANCHOR_1750`,
    `ALPHA_AS_FCO3`, `ALPHA_AS_DOWN/UP_LEGACY`, `ENT_SEAS_BAND_AREA_FRAC`. The five entries added since 10-04 are the
    stratification feedback's (`MIX_STRAT_S` and `MIX_TDEEP_TAU` derived; `MIX_STRAT_Q`, `_Q_LO`, `_Q_HI` cited).
-4. **The 10-01c review §C items** are still unruled, as listed in the 10-01 draft §6.4.
+4. **The 10-01c review §C items** are still unruled, as listed in the 10-01 draft §6.4, except Q5: it was answered
+   10-02 (w) (no newer pulse-response quantification than Joos 2013; IPCC AR6 WG1 §7.6.1.1).
 5. **New since 10-04:**
    - H2, kz's vertical exchange (deferred);
    - `hs_asx_frac`'s judgement width, which holds `k_w` at ~1900 (kept);
