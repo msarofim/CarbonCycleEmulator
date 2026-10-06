@@ -2,6 +2,105 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-06 (j) — **Marcus's rulings of 10-06 (`carbotopecomments.10.2.26.docx`) APPLIED; the H2 test and diagnostic RUN. H2 is supported: CCX's ocean climate effect responds ~1.6× GCB's per K of warming and emerges ~26 years earlier; a GCB-sized thermal response would put SSP5-8.5 CO₂ in 2300 ~24 ppm lower.**
+
+- **The rulings, verbatim:**
+  - "Card 4: re-measure the 'about three months'.";
+  - "Do we have a theory about why our fit for ENSO timing is so much sooner than the best estimate in the literature?";
+  - the card-4 "Change to" texts (below);
+  - "Go ahead and fix the repo link, regenerate the port targets, change the pgrep advice, and correct the DESIGN.md factual error.";
+  - "Close the finished items.";
+  - "Add a line about k_w to the known issues tab.";
+  - "Keep rep_dC as a named standin.";
+  - "Find a citation for f_luc_wood = 0.";
+  - "Save the ra_ratio and sigma-audit items for the next model change.";
+  - "Do the H2 diagnostic and test."
+- **His three "old comments" were already applied on 10-02** (CHANGELOG 10-02 w, from the same file):
+  - the LUC-split "Where this number comes from" text (`app/global.R` `APP_LUC_SPLIT_NOTE`, verbatim). The CHART CAPTION (`app/R/plots.R` `NOTE_LUC_SPLIT`) still carries the longer phrasing; not changed;
+  - the "Our emissions" caveat (`R/mechanisms.R`, verbatim);
+  - the FaIR checkbox: withheld in the pulse lab and in Build your own since 10-02.
+    - Verified live: hidden in both; in Scenarios it draws FaIR's dashed lines and the caveat (at 1440 px).
+    - ONE transient "figure margins too large" was seen at 1024 px during a scripted burst of mode switches. It never recurred: two live retries at that size and 12 offline renders (733–1056 px, pixel ratios 1 and 2, FaIR on and off) all draw. Recorded, not fixed.
+- **Applied** (`0e3f66c`, `a16583d`, `088aec0`; `~/.claude/CLAUDE.md`):
+  - **the repo link** is guarded exactly as the comment link: no live `<a>` to "SET-BEFORE-DEPLOY". A new test generates the check from every `APP_*_URL` in `global.R`, with a mutation;
+  - **the port targets** are regenerated for the canonical (hilda33p incumbent at −1187.4518367516, offset 0). A driver smoke then PASSED the port gate against them (`PORT GATE (a) PASSED`);
+  - **the pgrep advice** (Marcus's file, on his ruling): the bracket form `pgrep -f "Rscript.*fo[o]"`, and the warning that interpreter+script alone self-matched (9 = 8 + the watcher, 10-05 l);
+  - **DESIGN §3.4a T:** the repo DOES hold gridded SST (ERSST v5/v6 with MANIFEST entries); H1's arm closed;
+  - **card 4:** his plain and detail sentences, verbatim in the app's CO₂ / El Niño style;
+    - copy pins in `test-app-review-copy`;
+    - `tests/testthat/test-review-card-numbers.R` (new) holds his "2.5 months" within ONE posterior sd of the fitted lag (2.606 ± 0.407);
+  - **card 7's `k_w` line, DRAFTED for his review:** about 1,900 m/yr against the literature's 1,446 (Naegler 2009); the data slightly prefer the literature value; the cold box's gas-exchange prior holds it higher; the two cannot both hold. The same test ties "1,446" to `KW_PRIOR_CENTRE` and "about 1,900" to the fit (1894.7 ± 53.7);
+  - **`f_luc_wood` = 0 is CITED** at `CCX_F_LUC_WOOD_DEFAULT` (`R/model.R`) and in DESIGN §3.3, both sources read in full:
+    - Dorheim et al. 2024 (Hector V3.2.0, GMD 17:4855, §2.2.2): LUC fluxes "in proportion to the sizes of these pools";
+    - GCB 2025 (ESSD 18:3211, Suppl. S.2.2): the bookkeeping response curves include decay, product pools and regrowth;
+    - scope: neither supports the debit's COMPOSITION (hilda33p: 28 % vegetation, 72 % soil, 66 % from the slow soil);
+    - DESIGN's wood-only text is marked superseded, and two stale comments are corrected.
+- **Card 4's "about three months", RE-MEASURED at hilda33p** (`calibration/diag_timing_row_reread.R`, frozen tree at `894d6d7`, 8.8 min; `outputs/diagnostics/timing_row_reread_20261006_hilda33p.{log,rds}`):
+  - 10-04 (i)'s method, with a 7-name land block (`npp_tsens` pinned) and no L = 0 cell (#16's structure has no lag-0 label); every cell converged;
+  - at its measured weight the timing row puts the lag at **2.70** (monthly) / **2.90** (annual), from the fitted 2.606. hilda34g gave 2.75 / 2.90. "About three months" holds;
+  - moving the lag to the observed 5 months costs **−11.99**.
+- **WHY THE FITTED TIMING IS EARLY (his question), measured on the same cells:**
+  - lag 2.606 → 5 costs −11.99, and the SEASONAL-CYCLE rows pay **−7.56 (63 %)**: `co2_seasonal_MLO` −3.59, `co2_seasonal_SPO` −2.41. The ice core pays −1.93 and `gcb_land_sink` only −1.37;
+  - lag 1 → 2.606 gains +5.62, `gcb_land_sink` the largest part (+2.78);
+  - so GCB's DGVM-based land sink pulls the lag off zero, as his card-4 sentence says, but what holds it short of 5 months is mainly the seasonal rows. They fit a level, a trend and a first harmonic per calendar year, so they respond to WHERE in the year the ENSO anomaly lands. Whether that is real phase information or the two-box model absorbing its seasonal errors is untested;
+  - the structure has a part too: the land term is one fixed delay of Niño 3.4, the same in both hemispheres, with no soil-moisture or temperature state and no fire. Those are the mechanisms the literature (read today by a research agent; DOIs in its report, paraphrased) gives for the observed 3–6-month lag:
+    - Qian, Joseph & Zeng 2008, Tellus B 60:537, doi:10.1111/j.1600-0889.2008.00360.x;
+    - Wang W. et al. 2013, PNAS 110:13061, doi:10.1073/pnas.1219683110;
+    - Wang J., Zeng & Wang 2016, Biogeosciences 13:2339, doi:10.5194/bg-13-2339-2016;
+    - Chatterjee et al. 2017, Science 358:eaam5776, doi:10.1126/science.aam5776;
+  - the observed 5 months carries no error bar: its peak is flat from 4 to 6 months, and n_eff is ~23.
+- **Q2, closed by measurement** (`diag_app_wobble_shares.R` + a `revelle` arm): freezing Revelle buffering at 1750 removes **13 %** of the year-to-year scatter (0.280 → 0.243 ppm/yr). That is less than ENSO (36 %) or warming (24 %) and more than volcanic light (4 %). The other arms reproduce 10-06 (a). Its stale "about a quarter" label is replaced by the copy's current words and checked against them.
+- **H2, THE TEST** (`calibration/diag_h2_time_shape.R` → `outputs/diagnostics/h2_time_shape_20261006.{log,rds,png}`):
+  - **the data:** GCB's Fig. S10 global ensemble mean, digitised by `data-raw/build_gcb2025_s10_ocean_climate.R` → `data/gcb2025_s10_ocean_climate_global.rds`:
+    - from the supplement whose md5 the ocean diagnostic pins;
+    - calibrated on the detected gridlines (residuals 0.00 / 0.23 px);
+    - GATED on GCB's stated 2015–24 −0.20: digitised −0.217, inside one pixel (0.026);
+  - against CCX's like-for-like series at hilda33p (10-05 p; mode md5 checked):
+
+| metric | CCX | GCB |
+|---|---|---|
+| M1 decade means, GtC/yr | 1970s −0.14, 1990s −0.17, 2010–14 −0.32, 2015–24 −0.375 | 1970s −0.04, 1990s +0.01, 2010–14 −0.12, 2015–24 −0.217 |
+| M2 emergence (the 11-yr mean stays below −0.10) | **1973** | **1999** (26 yr later; 23–26 over ±20 % thresholds) |
+| M3 response per K of SST warming | **−0.48 ± 0.07** | **−0.29 ± 0.05** (ratio 1.63 ± 0.35; OLS se, a floor) |
+| M3 the gap at no warming | −0.038 ± 0.029 (≈ 0: the gap GROWS with warming) | |
+| M4 year-to-year anomalies | r 0.56; sd 0.149 | sd 0.102 |
+
+  - **the reading:** H2's signature, a larger per-K response with the gap growing from ~0 as the ocean warms, and NOT a constant emulation offset. It is not the missing wind term either: wind is the GOBMs' largest climate term and has the SAME sign (10-04 p), so adding it to CCX would widen the gap, not close it. M3 regresses GCB's series on CCX's own SST forcing, a stated proxy.
+- **H2, THE DIAGNOSTIC** (`calibration/diag_h2_futures_stake.R` → `outputs/diagnostics/h2_futures_stake_20261006_hilda33p.{log,rds}`, `@2e8138f`):
+  - **the knob:** the ocean's SST anomaly × f, in a wrapper around `ccx_sst_anom_from_gmst()`. No model change;
+  - **the f values:** f = 0.613 is GCB-sized. The like-for-like decomposition gives 0.613, and 1/M3's ratio gives 0.61, independently;
+  - **the gates:** G1, f = 1 is the unwrapped run and reproduces 1461.53; G2, f = 0 is `identical()` to the model's own no-SST route; G3, the futures-only arms leave 1750–2025 `identical()`;
+  - **two driver bugs, both caught before any read:**
+    - G2's first form passed a changed vector with the canonical's spinup. The run takes its parameters from the spinup, so the gate reproduced f = 1 to the digit and FAILED;
+    - a table bug then lost the first full run, so the runs are now checkpointed.
+
+| CO₂ change vs the canonical, ppm | today | 2100 | 2300 |
+|---|---|---|---|
+| f 0.613, SSP5-8.5 / vvH / vvM | −1.8 / −1.9 / −1.9 | −8.3 / −6.3 / −5.5 | **−23.6 / −18.5 / −11.0** |
+| GCB ±1σ (f 0.724 – 0.502), SSP5-8.5 | | | −16.9 to −30.3 |
+| f 0.613, the five lower markers | −1.9 | −3.2 to −5.6 | −0.7 to −3.2 |
+| futures only (f 0.613), SSP5-8.5 / vvH | 0 | −5.3 / −3.4 | −19.2 / −14.4 |
+| f 0 (no ocean thermal response), SSP5-8.5 / vvH | −4.7 / −4.8 | −21.1 / −15.9 | −60.3 / −46.8 |
+
+  - **A pre-check, done because the stake is 2× a ppm-per-K extrapolation from today** (~5 ppm/K × ~6 K ≈ 30 at f = 0): seawater's temperature sensitivity acts on pCO₂ in proportion to its level, so the same kelvin moves more carbon at ~1400 ppm than at ~420. The vvH : SSP5-8.5 pattern follows that scaling. f = 0 today (−4.8) matches the warming switch's seawater path (−4.9).
+  - **The stake in context:** about 4× the stratification feedback's +5.5 at SSP5-8.5 2300, and inside the 2300 futures the app shows.
+- **Closed** ("Close the finished items"):
+  - H1's observed-ratio arm;
+  - the tropical-box substep rule (only `hilda_tr` uses that box, it is unregistered, and the canonical's feedback refuses it);
+  - resuming #16's 8 sleep-hit starts;
+  - Q5 (answered 10-02 w); Q2 (above); the q10 split; the P1 wording; the `INDEX_ccx_phi` listing (the root `MEMORY.md` routes to it);
+  - the three unratified items, ratified as they stand: the 09-22 copy ratchet, the Futures fitted-range caveat, GATE V's phase-blind statistic.
+- **Ruled, no action now:**
+  - R2: `rep_dC` stays a NAMED STAND-IN;
+  - `ra_ratio` and the σ-audit trio wait for the next model change.
+- **Open for Marcus:**
+  - the `k_w` line's wording (drafted);
+  - whether to act on H2 (the refit at lower kz, or a structural surface-DIC damping), now that its stake is measured;
+  - the assessment's §5 / §7;
+  - the scenario descriptors (drafts);
+  - the sink→source caveat;
+  - the pre-launch items (the feedback URL, a public repo target, a start-up re-time, the plan limits, the account name).
+
 ## 2026-10-06 (i) — **Obsolete branches DELETED** (Marcus, verbatim: "Delete any obsolete branches."). Only `main` remains, locally and on `origin`.
 
 - **The test for "obsolete": fully merged.** `git branch -a --no-merged main` listed nothing, so every commit on every branch is reachable from `main` and nothing is lost. Each deletion used `git branch -d`, which refuses an unmerged branch.

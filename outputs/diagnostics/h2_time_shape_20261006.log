@@ -1,0 +1,37 @@
+calibration/diag_h2_time_shape.R @6067b01 | 2026-10-06 12:50
+CCX: outputs/diagnostics/ocean_climate_gobm_20261005_obj16.rds (protocol mean of 10 GOBM protocols); its mode md5 525404989a20ece51ec8bd088c7d4638, the canonical hilda33p's 525404989a20ece51ec8bd088c7d4638 -> SAME FILE
+GCB: data/gcb2025_s10_ocean_climate_global.rds (GCB 2025 Supplement Fig. S10, GLOBAL panel, solid red 'A-C, clim' (ensemble mean of the GOBMs); its gate: 2015-24 -0.217 vs stated -0.20)
+
+=== M1. DECADE MEANS (GtC/yr, uptake positive; negative = warming reduces the sink) ===
+  period    ccx ccx_lo   ccx_hi      gcb     gap      z  dsst_K
+   1960s  0.092 -0.115  0.44908  0.06547  0.0265  0.472 0.00731
+   1970s -0.142 -0.320  0.00452 -0.03726 -0.1042 -1.855 0.07340
+   1980s -0.149 -0.316 -0.03332 -0.01821 -0.1309 -2.329 0.25897
+   1990s -0.165 -0.291 -0.06046  0.00708 -0.1719 -3.060 0.42342
+   2000s -0.246 -0.403 -0.13532 -0.16405 -0.0817 -1.455 0.53576
+ 2010-14 -0.324 -0.518 -0.20895 -0.11834 -0.2061 -3.667 0.60569
+ 2015-24 -0.375 -0.483 -0.28311 -0.21733 -0.1575 -2.804 0.85917
+  (z = gap / sqrt(GCB's 0.05^2 + the pixel 0.026^2); CCX's lo/hi = the range over its 10 protocols)
+
+=== M2. EMERGENCE: first year after which the 11-yr centred mean stays below the threshold ===
+ threshold  ccx  gcb lead_yr
+     -0.08 1972 1998      26
+     -0.10 1973 1999      26
+     -0.12 1989 2012      23
+
+=== M3. THE H2 SIGNATURE: each series regressed on the global SST anomaly (HadSST4, K vs 1959-68) ===
+          a   a_se       b   b_se     r2
+ccx  0.0099 0.0339 -0.4816 0.0708 0.4195
+gcb  0.0476 0.0216 -0.2947 0.0451 0.4000
+gap -0.0376 0.0285 -0.1868 0.0596 0.1332
+  on decade means (robustness):
+          a       b
+ccx -0.0071 -0.4555
+gcb  0.0451 -0.2890
+  per-K response: CCX -0.482 +/- 0.071, GCB -0.295 +/- 0.045 GtC/yr per K; ratio 1.63 +/- 0.35 (OLS se: a floor, the residuals are autocorrelated)
+  the gap's intercept -0.038 +/- 0.029 GtC/yr at no warming (H2: ~0; an artefact: a constant offset)
+
+=== M4. SHAPE: correlation of the year-to-year anomalies (minus each series' 11-yr running mean), 56 years: r = 0.56 ===
+  their sd: CCX 0.149, GCB 0.102 GtC/yr
+null device 
+          1 

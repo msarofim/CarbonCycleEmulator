@@ -112,18 +112,29 @@ under #16 is not measured.
    Beside it, +0.63 GtC/yr is retained via N deposition (gross: `ndep_ret` 12.83 kg C/kg N × 48.9 Tg N/yr). It stays a
    named tension.
 2. **The lag vs the atmosphere's timing.** The rows that set the lag want ~2.6 months; the observed growth wants ~5.
-   **RULED 10-04 (j): no timing row; a card-4 disclosure instead** ("No row; draft card-4 text (Recommended)"). The
-   card-4 wording is still open (§6.5).
+   **RULED 10-04 (j): no timing row; a card-4 disclosure instead** ("No row; draft card-4 text (Recommended)"). Card 4
+   carries Marcus's wording since 10-06 (j).
+   - **Re-measured at hilda33p (10-06 j):** at its measured weight the timing row would put the lag at 2.70 / 2.90
+     months (monthly / annual estimator; hilda34g 2.75 / 2.90). Moving it to 5 costs −11.99, and the SEASONAL-CYCLE
+     rows pay 63 % of that (MLO −3.59, SPO −2.41); GCB's land sink pays −1.37, though it is the largest pull off short
+     lags. The structure (one fixed delay, no soil-moisture state, no fire) is the literature's candidate mechanism.
    At hilda33p the model's growth peaks **1 month** after Niño 3.4 (r 0.68), as at hilda34g; the record's peaks at
    5 (r 0.50) (`enso_growth_fit_20261006_hilda33p`, T2(b)).
 3. **The greening sign: closed by ruling.** `npp_tsens` is pinned at 0 (P4, 10-05 d). The app's parameter table
    marks it "held", with the other nine pins (10-06 c).
 4. **`k_w` sits at ~1895 m/yr against Naegler's 1446.** The price arm (10-05 a) says the data alone would take 1446
    (+2.75 on likelihood); the posterior keeps ~1900 because of ONE judgement-width prior, `hs_asx_frac`'s (§6.5).
+   Disclosed on Known-issues card 7 since 10-06 (j) (wording drafted for Marcus).
 5. **The ocean's climate effect is 1.87× GCB's, like-for-like** (§3.3). The excess is THERMAL: at hilda34g the SST
    part alone (−0.45) was 3.4× one GOBM's warming part under the same protocol (10-04 p), and at hilda33p it is
-   −0.452. H1 found the high-latitude box carries only ~18 % of it; **H2**, kz's strong vertical exchange, is
-   deferred. H1's observed-ratio arm needs a gridded SST download (§6.5).
+   −0.452. H1 found the high-latitude box carries only ~18 % of it (its observed-ratio arm is closed, 10-06 j).
+   - **H2 TESTED (10-06 j)** against GCB's Fig. S10, digitised and gated: CCX's effect responds −0.48 ± 0.07 GtC/yr per K
+     of SST warming against the GOBMs' −0.29 ± 0.05 (ratio 1.63 ± 0.35), the gap grows from ~0 with the warming, and
+     CCX's effect emerges ~26 years earlier (1973 vs 1999). That is H2's signature, not an emulation offset, and not
+     the missing wind term (same sign as the gap).
+   - **Its stake (10-06 j):** with a GCB-sized thermal response, CO₂ in 2300 would be ~24 ppm lower under SSP5-8.5
+     (17–30 over GCB's ±1σ), ~19 under vvH, ~11 under vvM, under 3.5 for the five lower markers; 3–8 ppm at 2100.
+   - Acting on it (a refit at lower kz, or a structural surface-DIC damping) is Marcus's call.
 6. **Uncertainty.** The app shows no bands. They are HELD by ruling (10-02, after the MCMC check): the Laplace band
    failed its check, and the sampler did not converge on the fertilisation ridge.
 7. **Strained priors (|z| > 2):** `q10` −2.53, `kz_deep_frac` −2.79, `pump_hs_gcm2` +2.15, **`rep_dC` +4.16**, the
@@ -134,7 +145,7 @@ under #16 is not measured.
 > evidence above is what changed under it.
 
 ## 6. What "final" would NOT mean — the items carried OUT (re-checked 10-06)
-1. **The σ audit's three objective items** are unchanged and unruled:
+1. **The σ audit's three objective items** are unchanged, and RULED 10-06 to wait for the next model change:
    - `gcb_ocean_sink`'s 0.4 GtC/yr uninflated σ;
    - the `excess_c14_ocean` target set;
    - `CCX_ICE_DISCREPANCY`.
@@ -145,15 +156,16 @@ under #16 is not measured.
    `OCEAN_DEPTH`, `ALK_SURFACE`, `ALPHA_PHOTO_EPS`, `PUMP_EPS13_ORG/CARB`, `NPP_GLOBAL_PI`, `NPP_FRAC_NH_ANCHOR_1750`,
    `ALPHA_AS_FCO3`, `ALPHA_AS_DOWN/UP_LEGACY`, `ENT_SEAS_BAND_AREA_FRAC`. The five entries added since 10-04 are the
    stratification feedback's (`MIX_STRAT_S` and `MIX_TDEEP_TAU` derived; `MIX_STRAT_Q`, `_Q_LO`, `_Q_HI` cited).
-4. **The 10-01c review §C items** are still unruled, as listed in the 10-01 draft §6.4, except Q5: it was answered
-   10-02 (w) (no newer pulse-response quantification than Joos 2013; IPCC AR6 WG1 §7.6.1.1).
+4. **The 10-01c review §C items**, as listed in the 10-01 draft §6.4. RULED or CLOSED 10-06 (j): R2 (`rep_dC` stays a
+   named stand-in); `ra_ratio` (waits for the next model change); `f_luc_wood` = 0 (cited); Q2 (measured: Revelle
+   freezing removes 13 % of the scatter); Q5 (answered 10-02 w); the q10 split, the P1 wording and the `INDEX_ccx_phi`
+   listing (closed); the three unratified items (ratified). STILL OPEN: the pre-launch checklist, the scenario
+   descriptors, the sink→source caveat.
 5. **New since 10-04:**
-   - H2, kz's vertical exchange (deferred);
-   - `hs_asx_frac`'s judgement width, which holds `k_w` at ~1900 (kept);
-   - H1's observed-ratio arm (needs Marcus's permission for a gridded SST download);
-   - the card-4 wording for the timing disclosure;
-   - extending the substep fix's held-K rule to `ccx_tr_box_eigbound()` (optional; no registered mode would move);
-   - the resume of #16's 8 sleep-affected starts (not chosen 10-06; the survey found one basin).
+   - H2, kz's vertical exchange: TESTED and its stake MEASURED (§4.5); acting on it is open;
+   - `hs_asx_frac`'s judgement width, which holds `k_w` at ~1900 (kept; disclosed on card 7);
+   - CLOSED 10-06 (j): H1's observed-ratio arm, the card-4 wording (applied), the substep held-K rule for
+     `ccx_tr_box_eigbound()`, and the resume of #16's 8 sleep-affected starts.
 
 ## 7. What the freeze would BE (the acts) — [Marcus]
 - **The model:** canonical `hilda33p`
@@ -174,7 +186,7 @@ under #16 is not measured.
   - README and DEPLOY.md name the release.
 
 ## 8. What would re-open it
-- H2, if taken up (the ocean's 1.87× climate effect);
+- H2, if taken up (the ocean's 1.87× climate effect; its futures stake is measured, §4.5);
 - a different width for `hs_asx_frac`'s prior (it would move `k_w` toward 1446);
 - a ruling on §6.1;
 - freeing `npp_tsens` again, or a timing row (both declined; each would be an objective change and a refit);
