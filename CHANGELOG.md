@@ -2,6 +2,48 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-06 (m) — **Marcus's rulings on the interannual cut, and the low-pass land-sink row PRICED: under the cut, scoring `gcb_land_sink` on its ~11-yr part instead of year by year cuts the cost from −36 to −10, with no damage to the trend (its low part slightly improves). Without the cut, smoothing the row alone moves the joint lag only 2.5 → 2.9 months.**
+
+- **Rulings, verbatim** (on `notes/proposal_2026-10-06_iav_cut.md`):
+  - "Explain why ocean enso is not also a part of this. But I think that land enso only is a good path." "Land ENSO only" was the option that holds `gamma_diff`;
+  - "Price a smoothed row first (Recommended)";
+  - "Monthly (Recommended)".
+- **The ocean question, answered** (proposal §5.3, recommendation REVISED):
+  - on the growth alone, the ocean limb and the land term cancel and run away (`w_enso_l2` 55 / 113);
+  - the ocean's own interannual row, `gcb_ocean_enso_slope`, pins it (15.1, canonical 13.2) and leaves the land answer unchanged;
+  - left in the main objective, the limb would be pulled by the seasonal and land-sink rows, which is what the split exists to stop;
+  - so the recommendation is now IN the module, WITH its row: 2 observations, 3 names.
+- **The low-pass row** (`calibration/diag_iav_cut_smoothed_land.R` @`565aa92`, frozen copy → `outputs/diagnostics/iav_cut_smoothed_land_20261006_hilda33p.{log,rds}`):
+  - the row MINUS its high part under an orthogonal projection onto a natural spline (df 6 over the 66 GCB years, ~11 yr; df 4 / 9 bracket it). It needs no new sigma: it is an exact split of the row under its own independence assumption;
+  - priced through `br_cell`'s `extra` on a re-run scored by `dg_streams`' own residuals;
+  - gates: the residual row reproduces the objective's (6.6e-12); `extra` reproduces the split (0); the projection is orthogonal;
+  - at the canonical the row is −49.85 = low −22.27 + high −27.58.
+- **Stage 1** (monthly, `gamma_diff` held at 0.25):
+  - land only: lag 5.86, ×1.27 (0.644 / 0.617), growth r 0.68;
+  - land + ocean, with `gcb_ocean_enso_slope` in the module: lag 5.84, ×1.30, `w_enso_l2` 14.7, the slope row +2.79 (canonical +2.55).
+- **The main objective at the module's names** (likelihood against the canonical; B2 re-optimises the five other land names; every B2 passes the slope gate):
+
+  | scope | land row as now: B1 / B2 | low-pass row: B1 / B2 | land row high part / low part | seasonal rows | SSP5-8.5 2300 at B2, as now / low-pass |
+  |---|---|---|---|---|---|
+  | land only | −37.0 / −36.4 | **−10.7 / −10.0** | −26.3 / +0.76 | −13.0 | −6.5 / −3.7 ppm |
+  | land + ocean | −39.7 / −39.2 | **−10.9 / −10.3** | −28.8 / +0.87 | −13.3 | −6.4 / −3.5 ppm |
+
+  - The land + ocean main objective omits the slope row, which moved to the module.
+  - The land row's whole objection to the cut is its INTERANNUAL part. Its trend part improves.
+  - The df 4 / df 9 low parts (+0.80 / +0.91 at land B1) bracket df 6's +0.76: insensitive to the scale.
+  - B2's land block barely moves (`beta_max` +0.6 %, `fert_k` −1 % on the low-pass row). What remains is the seasonal rows.
+- **The joint objective with the low-pass row and NO cut** (the 7-name land block re-optimised per lag; all 8 cells converged):
+  - the lag peaks at **2.90** months (2.48 with the row as now), and lag 5 costs −8.4 (−12.0 as now). So the cut, not the smoothing, is what moves the lag;
+  - ⭐ the land amplitude jumps to ×1.6 (0.83 / 0.77 at 2.6 months). Once the DGVMs' damped interannual signal is out, the seasonal rows set it. C2 predicted exactly this: their own optimum scale at 2.6 months is I / 2V = 20.1 / 12.8 = 1.57;
+  - so the interannual AMPLITUDE has three different preferred values: the seasonal rows want ×1.6 (at 2.6 months), the growth ×1.27–1.38 (at 5.9), and the DGVM land row ≤ ×1.
+- **Open for Marcus:** the build, as objective #17. It would be:
+  - the low-pass land-sink row (df 6);
+  - the module {monthly growth, `gcb_ocean_enso_slope`} → {land lag, one land amplitude at the canonical's NH : SH ratio, `w_enso_l2`};
+  - `gamma_diff` held at 0.25;
+  - then a stage-2 refit, on Torch or the Mac.
+
+  Separately: `gamma_diff`'s own question (its AOD forcing is not zero-mean).
+
 ## 2026-10-06 (l) — **Marcus's SPLIT CALIBRATION of the interannual parameters, PREVIEWED. Fitted to the 12-month-smoothed growth alone, the land ENSO lag lands at 5.9 months (the canonical's 2.6 is outside 2σ), the amplitude at ×1.38 and `gamma_diff` at 0.56. The modelled growth then peaks 6 months after Niño 3.4 (the record: 5), and ENSO's share of the What-if readout rises from 9.6 % to 25.9 %. The main objective pays −80 unrefitted and −72 after the land and seasonal blocks are re-optimised. The joint fit holds 2.6 because the rows that see ENSO measure DIFFERENT objects: GCB's DGVM land sink (earlier and weaker than GCB's own budget implies), Mauna Loa (which sees ENSO ~3 months before the global mean) and the seasonal harmonics. Nothing adopted: building it is Marcus's call** (`notes/proposal_2026-10-06_iav_cut.md`).
 
 - **His question, verbatim:** "I still find it odd that there is a pattern in the data that ENSO causes a lagged effect on CO2 and that we can't somehow make our ENSO parameter do a better job of reproducing that lag. What about having a 12-month smoothed CO2 growth that is used only for calibrating the ENSO and volcanic aerosol parameters? E.g., the parameters that only care about interannual variability and not the regular annual cycle or the long term trend which is what all the other parameters in the model care about."

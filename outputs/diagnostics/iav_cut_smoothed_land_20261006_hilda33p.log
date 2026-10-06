@@ -1,0 +1,49 @@
+calibration/diag_iav_cut_smoothed_land.R @565aa92, 2026-10-06 16:56 | from outputs/diagnostics/iav_cut_preview_20261006_hilda33p.rds (calibration/diag_iav_cut_preview.R @54d85e5) | 4 workers
+
+=== 0. GATES ===
+  the row from its own residuals: -49.851862 vs the objective's -49.851862 (diff -6.6e-12); high part -27.582, low-pass row -22.270
+  extra at the canonical: 27.582250 = -high part 27.582250 (diff 0.0e+00)
+
+=== 1. STAGE 1 (the module), monthly estimator, gamma_diff held at the canonical ===
+  land       lag 5.858 months, land x1.269 (0.644 / 0.617), w_enso_l2 13.18 | growth r 0.681 (canonical 0.586), ssr ratio 0.817 | gcb_ocean_enso_slope +1.974 (canonical +2.547)
+  land_ocean lag 5.843 months, land x1.301 (0.661 / 0.633), w_enso_l2 14.73 | growth r 0.683 (canonical 0.586), ssr ratio 0.814 | gcb_ocean_enso_slope +2.786 (canonical +2.547)
+
+=== 2. THE MAIN OBJECTIVE under each scope, with the raw and the low-pass land row (B1 unrefitted, B2 = 5 land names) ===
+  every likelihood is against the canonical; 'main' = the main objective's rows (land_ocean: without gcb_ocean_enso_slope, which moved to the module);
+  _raw / _lowpass = the land row as scored now / its low-pass part (df 6); d_low_df4/9 bracket the scale
+                  cell d_main_raw d_main_lowpass d_land_raw d_land_low
+           land_raw_B1     -36.99         -10.68     -25.54     0.7610
+           land_raw_B2     -36.43         -10.10     -26.16     0.1662
+       land_lowpass_B1     -36.99         -10.68     -25.54     0.7610
+       land_lowpass_B2     -36.45         -10.01     -26.22     0.2124
+     land_ocean_raw_B1     -39.69         -10.86     -27.96     0.8728
+     land_ocean_raw_B2     -39.18         -10.34     -28.55     0.2893
+ land_ocean_lowpass_B1     -39.69         -10.86     -27.96     0.8728
+ land_ocean_lowpass_B2     -39.20         -10.25     -28.61     0.3391
+ d_land_high d_seasonal beta_max fert_k d_low_df4 d_low_df9 conv
+      -26.30     -12.88    2.077  752.1    0.7960    0.9099    0
+      -26.33     -13.02    2.120  759.9    0.2247    0.3157    1
+      -26.30     -12.88    2.077  752.1    0.7960    0.9099    0
+      -26.43     -13.02    2.089  744.8    0.3253    0.3564    1
+      -28.83     -13.10    2.077  752.1    0.9226    1.0518    0
+      -28.84     -13.25    2.119  759.0    0.3575    0.4694    1
+      -28.83     -13.10    2.077  752.1    0.9226    1.0518    0
+      -28.95     -13.25    2.088  743.8    0.4625    0.5145    1
+  CO2 change in 2300 at each B2 (ppm):
+                      d_ssp585_2300 d_vvH_2300
+land_raw_B2                   -6.53      -3.16
+land_lowpass_B2               -3.73      -1.84
+land_ocean_raw_B2             -6.41      -3.14
+land_ocean_lowpass_B2         -3.53      -1.78
+
+=== 3. THE JOINT OBJECTIVE with the low-pass land row: the 7-name land block re-optimised per lag ===
+      L     obj lik_lowpass conv rounds gamma_NH gamma_SH minutes     d_lik
+ 1.0000 -1158.5     -1114.8 TRUE      1  0.80865  0.67785     8.5  -4.68330
+ 2.0000 -1154.5     -1111.4 TRUE      1  0.82262  0.73585     5.5  -1.23574
+ 2.6057 -1153.1     -1110.1 TRUE      1  0.82845  0.77064     7.8   0.00000
+ 3.0000 -1152.9     -1110.0 TRUE      1  0.83321  0.79065     7.8   0.14105
+ 4.0000 -1155.0     -1112.3 TRUE      1  0.83602  0.82009     7.4  -2.14657
+ 5.0000 -1161.1     -1118.5 TRUE      1  0.81679  0.80439     8.2  -8.38537
+ 6.0000 -1170.0     -1127.6 TRUE      1  0.74925  0.74159     7.9 -17.43419
+ 8.0000 -1185.8     -1143.7 TRUE      1  0.51019  0.53213     7.5 -33.54323
+  with the low-pass land row the JOINT objective's lag peaks at 2.90 months (raw row: 2.48 on 10-06's spline; growth alone: 5.86)

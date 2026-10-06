@@ -9,6 +9,13 @@
 > These are CONDITIONAL slices: every other name stays at the canonical, apart from the blocks B2/B3 re-optimise.
 > A real stage-2 refit gives the joint answer.
 
+> **RULINGS SO FAR (Marcus, 2026-10-06, verbatim):**
+> - the scope: "Explain why ocean enso is not also a part of this. But I think that land enso only is a good path."
+>   - "Land ENSO only" was the option that holds `gamma_diff`.
+>   - The ocean question is answered in §5.3, which revises my recommendation.
+> - the land-sink row: "Price a smoothed row first (Recommended)". **PRICED** (§5.5, CHANGELOG 10-06 m).
+> - the estimator: "Monthly (Recommended)".
+
 Marcus, verbatim: *"I still find it odd that there is a pattern in the data that ENSO causes a lagged effect on CO2 and
 that we can't somehow make our ENSO parameter do a better job of reproducing that lag. What about having a 12-month
 smoothed CO2 growth that is used only for calibrating the ENSO and volcanic aerosol parameters? E.g., the parameters
@@ -145,19 +152,55 @@ the other parameters in the model care about."*
      - Moving it drags the fertilisation pair and the 2300 futures.
      - The canonical's objective prefers 0 (+1.74).
    - It deserves its own decision. One candidate: an AOD term made zero-mean, as Ruling A made the ENSO index.
-3. **The ocean limb: keep it in the main module** (recommended). A2 shows the module would leave it near 15
-   (canonical 13.2), so moving it gains nothing and makes `gcb_ocean_enso_slope` a module row.
+3. **The ocean limb, REVISED after Marcus asked why it is not in the module.** My first recommendation was to keep it in
+   the main objective; I now recommend moving it INTO the module, together with its own row.
+   - **Why it was left out at first.** The growth record sees land plus ocean together.
+     - The ocean term reads Niño 3.4 unlagged and has the opposite sign, so on the growth alone a bigger ocean
+       response is cancelled by a bigger land one.
+     - Measured, A2 on the growth alone runs away: `w_enso_l2` 55 / 113 (monthly / annual), land ×2.4 / ×4.1.
+   - **What pins it is its own interannual observation,** `gcb_ocean_enso_slope`, GCB's ocean ENSO slope. Before that
+     row existed (objective #13), the objective had no power on the ocean's ENSO response; the limb refit landed at
+     0.09× the observed slope.
+   - **With that row in the module (A2), nothing material changes:** `w_enso_l2` goes 13.2 → 15.1 and the land answer
+     stays (lag 5.84, ×1.42).
+   - **Why it now belongs inside.** Left in the main objective, `w_enso_l2` would also be pulled by the seasonal rows
+     and the land-sink row's year-to-year signal. That is exactly what the split is meant to stop.
+   - The ENSO index is demeaned, so the limb's exchange is close to zero-mean: it is nearly as interannual-only as the
+     land term. A small exception: the limb clips in the strongest El Niño months, when the index exceeds
+     27 / 13.2 ≈ 2.0.
+   - **The module then has two observations (the growth, the ocean ENSO slope) and three names (land lag, land
+     amplitude, ocean limb).**
 4. **The estimator.** Monthly gives the timing resolution, and the 10-02/10-04/10-06 diagnostics use it. Annual is the
    app's readout and gives tighter bars. Both give a lag of 5.9–6.2.
    - **Recommended: monthly, with annual as a check.**
-5. **The land-sink row's year-by-year part.** Under the split's own logic the main names care about the trend. Scoring
-   `gcb_land_sink` on its 11-yr smoothed part (the window its imbalance already uses) would stop the main module
-   fighting the module over a DGVM ensemble mean's ENSO timing.
-   - It is NOT priced here, and the σ of a smoothed target is itself a choice.
-   - **Recommended: price it before deciding**, as a cheap preview like this one.
+5. **The land-sink row's year-by-year part: PRICED** (`diag_iav_cut_smoothed_land.R`; CHANGELOG 10-06 m).
+   - **The definition needs no new σ.** The low-pass row is the row minus its high part under an orthogonal
+     natural-spline projection (df 6 over the 66 GCB years, ~11 yr). That splits the row EXACTLY under its own
+     independence assumption.
+   - **Under the cut it removes almost the whole cost.** B2 goes from −36.4 to **−10.0** (land only) and from −39.2 to
+     **−10.3** (land + ocean).
+     - The land row's whole objection is its interannual part (−26 to −29). Its trend part slightly IMPROVES
+       (+0.2 to +0.9), so the long-term partition is not harmed.
+     - The −10 that remains is the seasonal rows (−13).
+     - SSP5-8.5 2300 moves −3.5 to −3.7 ppm. The answer is insensitive to the scale (df 4–9).
+   - **Without the cut, the smoothing alone moves the joint lag only 2.5 → 2.9 months.** The seasonal rows hold it, and
+     the amplitude jumps to ×1.6: their own preference, as C2 predicts (I / 2V = 1.57).
+   - **Recommended: adopt the low-pass row as part of the cut.** It is the split's own logic: the main names care about
+     the trend.
 6. **Where stage 2 runs.** Torch, or the Mac's CPU clock (13–16 h). This is decided at launch.
 
-## 6. Cost, if built
+## 6. The build, as I would now propose it (objective #17)
+- **Main objective:** `gcb_land_sink` scored on its low-pass part (df 6). Every other row as now, except
+  `gcb_ocean_enso_slope`, which moves to the module.
+- **Interannual module:**
+  - observations: the monthly detrended growth (n_eff 22.5) and `gcb_ocean_enso_slope`;
+  - names: `lag_enso_land`, ONE land amplitude (NH : SH held at the canonical's 1.04, since the global growth cannot
+    split it) and `w_enso_l2`.
+- **`gamma_diff`** stays fixed at 0.25 (his lean). Its own question, an AOD term that is not zero-mean, is separate.
+- **Expected:** lag ≈ 5.8 months, amplitude ≈ ×1.3; the main objective about −10 after the refit, mostly the seasonal
+  rows; futures within ~4 ppm.
+
+## 7. Cost, if built
 - **Stage 1**, minutes on the Mac. A fitter for the module's objective: superposition plus a direct polish, as in this
   preview.
 - **`gamma_diff` as a fitted name**, if it joins the module:
