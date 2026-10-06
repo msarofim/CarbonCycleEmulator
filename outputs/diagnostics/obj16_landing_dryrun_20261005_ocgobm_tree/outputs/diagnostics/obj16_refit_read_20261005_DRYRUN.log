@@ -1,0 +1,97 @@
+calibration/diag_obj16_refit_read.R @f35ca59+dirty, 2026-10-05 12:47
+  canonical hilda34g (/Users/MarcusMarcus/ccx_frozen/20261005g_ocgobm/calibration/output/refit_20261003_hilda34g_obj15_hilda_csl3v0kaidgbe/mode_fit_pumpN.rds)
+  #16       /Users/MarcusMarcus/ccx_frozen/20261005g_ocgobm/calibration/output/DRYRUN_refit_obj16/mode_fit_pumpN.rds (md5 6f8c0208d2384c0c0e9e713f56d4dff6)
+  wave      /Users/MarcusMarcus/ccx_frozen/20261005g_ocgobm/calibration/output/DRYRUN_wave
+  ⚠ TAGGED '_DRYRUN': read the provenance before quoting anything below
+
+=== 0. EACH VECTOR REPRODUCES ITS STORED LOGPOST IN ITS OWN SPACE (tol 1e-05); THE WAVE ===
+  survey: 1 start files; 1 CONVERGED in time, 0 out of time; best -1187.451842 (id 001)
+  converged logposts in clusters split at gaps > 0.05: -1187.4518 x1
+  promoted: id 1 at -1187.451842 (GATE 3's best is id 001 at -1187.451842)
+  canonical hilda34g     logpost -1182.991369 (stored -1182.991369, diff +0.0e+00)  likelihood -1143.2508 on 27 rows  prior+Jacobian -39.7406
+  objective #16          logpost -1187.451842 (stored -1187.451842, diff +0.0e+00)  likelihood -1145.0175 on 27 rows  prior+Jacobian -42.4344
+
+=== 1. #16 vs hilda34g ON LIKELIHOOD (the same 27 rows; > 0 = #16 fits BETTER) ===
+  co2_icecore            canonical   -508.347 | #16   -1.101
+  co2_seasonal_MLO       canonical      4.994 | #16   -0.590
+  co2_level_SPO          canonical    -64.104 | #16   +0.382
+  co2_level_MLO          canonical    -71.671 | #16   +0.323
+  gcb_land_sink          canonical    -49.589 | #16   -0.264
+  co2_seasonal_SPO       canonical     72.976 | #16   -0.260
+  co2_gradient           canonical    -15.168 | #16   -0.194
+  d13c_seasonal_SPO      canonical    249.566 | #16   -0.181
+  d13c_level_SPO         canonical     55.815 | #16   +0.176
+  d14c_SH                canonical   -287.312 | #16   -0.132
+  d13c_icecore           canonical     65.646 | #16   +0.111
+  ocean_grad_dic         canonical     -6.821 | #16   -0.103
+  d14c_profile_ab        canonical     -3.199 | #16   -0.095
+  ocean_grad_d13c        canonical     -4.072 | #16   +0.091
+  ocean_grad_alk         canonical     -5.796 | #16   +0.068
+  gcb_ocean_sink         canonical     -6.009 | #16   -0.060
+  d14c_profile_level     canonical     -3.330 | #16   +0.057
+  d13c_seasonal_MLO      canonical    209.256 | #16   +0.039
+  hs_surf_d13c           canonical     -2.434 | #16   -0.038
+  d13c_gradient          canonical    105.801 | #16   -0.038
+  d13c_level_MLO         canonical     63.221 | #16   +0.034
+  d14c_intcal            canonical   -640.676 | #16   +0.029
+  d14c_NH                canonical   -288.467 | #16   -0.019
+  excess_c14_ocean       canonical     -9.641 | #16   -0.008
+  gcb_ocean_enso_slope   canonical      2.542 | #16   +0.005
+  hs_surf_dic            canonical     -4.245 | #16   -0.001
+  d14c_profile_bd        canonical     -2.188 | #16   +0.001
+  TOTAL -1.7667 (canonical -1143.2508; #16 -1145.0175)
+  by family: CO2 -1.439 | d13C +0.141 | atm_d14C -0.122 | ocean_14C -0.045 | GCB -0.318 | ocean_grad_surface +0.017 | other +0.000
+  THE PREVIEWS (each conditional or unrefitted, so not a bound on the joint refit): P4's slice -0.26; the feedback -1.7668; their sum -2.03
+  the START (hilda34g seeded at npp_tsens 0, under #16's label) sat -66.46 below on logpost: pin -53.93, feedback -1.77, interaction -8.19, prior removed -2.57
+
+=== 2. THE PRIOR LEDGER (natural-scale prior log-density + log-Jacobian, the objective's own terms) ===
+  name                    canonical          #16   z canon     z #16   d prior     d jac
+  ndep_ret                   13.943       12.828      1.91      1.78    +0.313    -0.083
+  imb_share_land            0.55664      0.61066      0.85      1.03    -0.130    -0.037
+  fert_k                     726.83        752.4      0.82      0.92    -0.120    +0.015
+  pump_hs_gcm2               81.764       82.948      2.13      2.15    -0.066    +0.004
+  hs_asx_frac                0.6852      0.69642      0.32      0.43    -0.057    +0.008
+  seas_T_amp_NH              15.503       15.743      0.35      0.42    -0.042    +0.015
+  pump_grad                  330.14        328.2      1.39      1.37    +0.039    -0.006
+  k_w                        1902.7       1894.7      1.37      1.35    +0.033    -0.004
+  rep_dC                     4.1697       4.1642      4.17      4.16    +0.023    +0.000
+  sst_seas_amp_NH            1.7183       1.7278     -1.06     -1.03    +0.018    +0.006
+  luc_scale                 0.87728      0.90025     -0.47     -0.38    +0.013    +0.026
+  q10                        1.0603       1.0617     -2.54     -2.53    +0.012    +0.001
+  logpost difference -4.4605 = likelihood -1.7667 + the other names' priors +0.0640 + their Jacobians -0.1871 - npp_tsens's own term at the canonical (2.5707 at 0.00885)  [check +6.8e-14]
+
+=== 3. THE MOVES: each common name's move from hilda34g, in hilda34g's MARGINAL Laplace sd (u-space) ===
+  npp_tsens itself: 0.00885 -> 0 (pinned) = -0.99 marginal sd
+  beta_max                   1.8307 ->       2.0776   +0.64 sd   (#16's own sd 0.49, u-space)
+  luc_scale                 0.87728 ->      0.90025   +0.59 sd   (#16's own sd 0.036, u-space)
+  imb_share_land            0.55664 ->      0.61066   +0.45 sd   (#16's own sd 0.471, u-space)
+  gamma_enso_land_NH        0.53623 ->      0.50778   -0.29 sd   (#16's own sd 0.0956, u-space)
+  gamma_enso_land_SH         0.5118 ->      0.48664   -0.27 sd   (#16's own sd 0.0911, u-space)
+  ndep_ret                   13.943 ->       12.828   -0.23 sd   (#16's own sd 0.378, u-space)
+  kz                          14224 ->        14476   +0.22 sd   (#16's own sd 0.169, u-space)
+  imb_share_ocean_rest      0.25593 ->      0.28666   +0.18 sd   (#16's own sd 0.888, u-space)
+  k_w                        1902.7 ->       1894.7   -0.15 sd   (#16's own sd 0.0284, u-space)
+  fert_k                     726.83 ->        752.4   +0.15 sd   (#16's own sd 0.316, u-space)
+  hs_asx_frac                0.6852 ->      0.69642   +0.14 sd   (#16's own sd 0.179, u-space)
+  seas_lag_p_NH               1.517 ->       1.5244   +0.14 sd   (#16's own sd 0.0538, u-space)
+  q10                        1.0603 ->       1.0617   +0.06 sd   (#16's own sd 0.0228, u-space)   [named]
+  beside the P4 slice: beta_max 1.83 -> 2.05 there (canonical 1.83 here, #16 2.078)
+
+=== 4. THE FUTURES: CO2 (ppm) in 2300, ssp585, vvH (spliced onto the historical emissions) (br_futures(), the previews' estimator) ===
+  canonical            ssp585  1448.65 (  +0.00) | vvH  1002.22 (  +0.00)
+  canonical_pin        ssp585  1495.61 ( +46.97) | vvH  1029.74 ( +27.52)
+  canonical_feedback   ssp585  1454.14 (  +5.49) | vvH  1005.10 (  +2.87)
+  obj16                ssp585  1461.45 ( +12.80) | vvH  1009.99 (  +7.77)
+  obj16_feedback_off   ssp585  1455.93 (  +7.29) | vvH  1007.12 (  +4.90)
+  cross-checks (printed, not gated): canonical ssp585 1448.65 vs the preview's 1448.6; the feedback at the canonical +5.49 vs 10-04 (o)'s +5.5
+  #16's move ssp585 +12.80, vvH +7.77 = the feedback's direct part at #16 +5.52/+2.87 + the pin and the refit's re-arrangement +7.29/+4.90
+  the previews: P4 (land block re-optimised) ssp585 +13.6, vvH +9.3; the pin UNREFITTED here ssp585 +46.97, vvH +27.52
+
+=== 5. THE LAND's NET CLIMATE EFFECT, 2015-2024 (TRENDY S2 - S1: climate varying vs held at its 1901-1920 mean), GtC/yr ===
+  canonical  land gain 1.7761 (climate held 1.6586) -> net climate effect +0.1176, z +1.31 against GCB 2025's -0.8 +/- 0.7
+  obj16      land gain 1.7625 (climate held 1.8003) -> net climate effect -0.0378, z +1.09 against GCB 2025's -0.8 +/- 0.7
+  the previews: the canonical +0.12 (10-04 i), P4 -0.04 (10-05 d)
+
+=== THE SEPARATE DRIVERS (run from a frozen copy; each writes its own log) ===
+  CCX_OC_MODE="obj16=/Users/MarcusMarcus/ccx_frozen/20261005g_ocgobm/calibration/output/DRYRUN_refit_obj16/mode_fit_pumpN.rds" Rscript calibration/diag_ocean_climate_gobm.R
+  CCX_SC_EXTRA_MODE="obj16=/Users/MarcusMarcus/ccx_frozen/20261005g_ocgobm/calibration/output/DRYRUN_refit_obj16/mode_fit_pumpN.rds" CCX_SC_TAG_SUFFIX=_obj16 Rscript calibration/diag_whole_model_scorecard.R

@@ -1,0 +1,33 @@
+
+==========================================================================
+DISPERSED MULTI-START SURVEY -- 1 starts under
+  /Users/MarcusMarcus/ccx_frozen/20261005g_ocgobm/calibration/output/DRYRUN_wave
+==========================================================================
+  ⚠ reference start 'cold' (id 0) IS MISSING -- the port is NOT verified
+  reference incumbent  id 1  logpost   -1187.4518  port VERIFIED (rel 3.9e-14)
+  ⚠ reference start 'new_basin' (id 2) IS MISSING -- the port is NOT verified
+
+  1 of 1 starts CONVERGED, 0 ran out of wall time (excluded from the
+  basin count, kept in the table), 0 spent their restart budget.
+  cluster radius 0.6431 = 0.25 x the measured inter-basin separation
+
+  ⇒ 1 DISTINCT BASIN among the 1 finished starts.
+
+   rank     id        logpost        vs best    basin  status    min  kind
+      1      1     -1187.4518         0.0000        1    conv    200  reference: INCUMBENT = hilda34g (OBJECTIVE #16 (P4, Marcus 2026-10-05): the canonical's pins plus npp_tsens held at 0 (the canonical, seeded at the pin: a start, not a mode of this objective); scored under this build's objective, periodic spinup, evaluated at seas_ml 1)
+
+--------------------------------------------------------------------------
+  BEST FOUND      id 1 at -1187.4518
+  TO BEAT         id 1 (reference: INCUMBENT = hilda34g (OBJECTIVE #16 (P4, Marcus 2026-10-05): the canonical's pins plus npp_tsens held at 0 (the canonical, seeded at the pin: a start, not a mode of this objective); scored under this build's objective, periodic spinup, evaluated at seas_ml 1)) at -1187.4518
+  difference      +0.0000 log-units
+  ⚠ the benchmark is the best of only 1 of the 5 known-basin starts;
+    ids 2, 3, 4, 5 are MISSING and one of them could be higher.
+  ⚠ NO DISPERSED START finished, so the survey has not been run yet --
+    the table above is the known basins re-converged, and nothing more.
+  ⚠ A survey bounds what N starts at ONE dispersion found. It is not a
+    proof that no better basin exists ([[no_power_null]]: measure the
+    test's power before believing its null).
+
+  summary written to /Users/MarcusMarcus/ccx_frozen/20261005g_ocgobm/calibration/output/DRYRUN_wave/summary.csv
+⛔ NOTHING IS ADOPTED.
+==========================================================================

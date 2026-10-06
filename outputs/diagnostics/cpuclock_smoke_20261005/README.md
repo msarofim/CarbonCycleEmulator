@@ -19,5 +19,7 @@ They ran objective #16's config at id 1, after #16 had landed.
 | T1c | both budget names set and different | stops at start-up with the message |
 | T3 | a real SIGSTOP of 180 s, 60 s after the rate line; 3-min budget | **CPU arm:** the restart rode through it (324 evals of a sized 322), 1.632 CPU-min against 4.650 wall-min. **Wall arm:** the budget was spent inside the stop, and the restart STOPPED AT THE DEADLINE after 210 of 355 |
 
-The scratch trees `~/ccx_frozen/20261005h_cpuclock_old` and `~/ccx_frozen/20261005h_cpuclock_smoke` hold the start files.
-Each has #16's port targets copied in; they are scratch only.
+The start files are in `start_files/`: `old/` from the scratch tree `~/ccx_frozen/20261005h_cpuclock_old`, `smoke/`
+from `~/ccx_frozen/20261005h_cpuclock_smoke`, each with the #16 port targets that tree had copied in. They were
+moved here, byte-identical, when the trees were removed on 2026-10-06 (Marcus: "Housekeeping (Recommended)";
+CHANGELOG 10-06 f). Scratch only.

@@ -1,0 +1,70 @@
+calibration/diag_ocean_climate_gobm.R @a5d6afa+dirty, 2026-10-05 10:11 | mode hilda34g (/Users/MarcusMarcus/ccx_frozen/20261005g_ocgobm/calibration/output/refit_20261003_hilda34g_obj15_hilda_csl3v0kaidgbe/mode_fit_pumpN.rds, md5 0c2b10bcf588b7317e0de332e8fed97b) | window 2015-2024 | GCB 2025 -0.20 +/- 0.05 GtC/yr (-7.1 %, range -10.7 to -4.2 %)
+forcing 1750-2025, 3312 monthly rows; spinup periodic; the ocean's climate columns: sst_anom_NH + sst_anom_SH + enso (w_enso_l2 12.931 Sv per index unit)
+pre-industrial orbit (B's target): CO2 276.880 ppm in 2015-2024 (first year 276.880; drift +1.52e-09 ppm)
+
+=== R0-R3: §D decomposed (climate held at its 1901-1920 mean from 1901) ===
+  R0 GMST + SST held, CO2 interactive: effect -0.430496 GtC/yr | §D stored -0.430496 (mix_preview_20261004.rds) -> IDENTICAL
+  R1 SST only held, CO2 interactive:  effect -0.3983 GtC/yr (warm-run CO2 +5.43 ppm)
+  R2 SST only held, CO2 PRESCRIBED:   effect -0.5197 GtC/yr = -14.59 % of the CO2 effect; -0.442 per K of SST (dSST +1.177 K); match 17 iters, max |dCO2| 7.9e-05 ppm
+  R3 SST + ENSO held, CO2 PRESCRIBED: effect -0.4188 GtC/yr = -11.77 % (the ENSO limb's share +0.1009; the index's 1901-1920 mean is 0.000, 0 before 1948)
+
+=== CHECK 0. COMPLETENESS: sst_anom_NH + sst_anom_SH + enso held, everything else historical, CO2 matched to the orbit ===
+  the ocean's CO2 sensitivity 0.0223 GtC/yr per ppm -> allowed |sink| 2.23e-04 GtC/yr
+  listed columns held:      sink -2.87e-06 GtC/yr, max |ocean_C - orbit| 1.24e-04 GtC -> PASS
+  MUTATION (ENSO not held): sink +9.56e-02 GtC/yr, max |ocean_C - orbit| 1.55e+00 GtC -> the gate FAILS it, as it must
+
+=== THE TEN GCB 2025 GOBM PROTOCOLS, emulated (A: pre-transient climate to t_r, historical after; C: the normal year from 1750; CO2 prescribed) ===
+  PlankTOM12        N year 1990                  PA year 1990       t_r 1948 | effect -0.3351 GtC/yr (-9.42 %) = SST -0.4210 + ENSO +0.0859 | dSST +0.454 K | interactive -0.2332 (dCO2 +1.11 ppm) | match 16/30
+  IPSL              N loop 1958-1967             PA loop 1958-1967  t_r 1940 | effect -0.3757 GtC/yr (-10.54 %) = SST -0.4804 + ENSO +0.1047 | dSST +0.841 K | interactive -0.2498 (dCO2 +3.85 ppm) | match 14/26
+  NorESM            N mean 1958-2000             PA mean 1958-2000  t_r 1948 | effect -0.3499 GtC/yr (-9.83 %) = SST -0.4525 + ENSO +0.1026 | dSST +0.665 K | interactive -0.2344 (dCO2 +2.70 ppm) | match 15/28
+  MPIOM             N year 1957                  PA loop 1948-1957  t_r 1948 | effect -0.3729 GtC/yr (-10.47 %) = SST -0.4771 + ENSO +0.1042 | dSST +0.784 K | interactive -0.2474 (dCO2 +2.98 ppm) | match 25/28
+  FESOM             N year 1961                  PA year 1961       t_r 1958 | effect -0.3554 GtC/yr (-9.97 %) = SST -0.4710 + ENSO +0.1156 | dSST +0.790 K | interactive -0.2315 (dCO2 +3.77 ppm) | match 13/26
+  CNRM              N year 1958                  PA year 1958       t_r 1958 | effect -0.3941 GtC/yr (-11.09 %) = SST -0.4657 + ENSO +0.0716 | dSST +0.752 K | interactive -0.2774 (dCO2 +2.71 ppm) | match 14/28
+  Princeton         N loop 1958-1969             PA loop 1958-1969  t_r 1958 | effect -0.3533 GtC/yr (-9.92 %) = SST -0.4693 + ENSO +0.1159 | dSST +0.825 K | interactive -0.2326 (dCO2 +3.70 ppm) | match 13/26
+  CESM_ETHZ         N mean 1958-2024             PA loop 1958-2024  t_r 1958 | effect -0.3168 GtC/yr (-8.92 %) = SST -0.4111 + ENSO +0.0943 | dSST +0.486 K | interactive -0.2185 (dCO2 +1.72 ppm) | match 21/29
+  MRI               N months 1990.333-1991.333   PA loop 1948-2024  t_r 1958 | effect -0.3261 GtC/yr (-9.17 %) = SST -0.4188 + ENSO +0.0928 | dSST +0.443 K | interactive -0.2238 (dCO2 +1.03 ppm) | match 24/30
+  ACCESS            N year 1958                  PA year 1958       t_r 1958 | effect -0.3941 GtC/yr (-11.09 %) = SST -0.4657 + ENSO +0.0716 | dSST +0.752 K | interactive -0.2774 (dCO2 +2.71 ppm) | match 14/28
+
+  ENSEMBLE (unweighted, as GCB): effect -0.3573 +/- 0.0268 GtC/yr (1 sigma over the ten; range -0.3941 to -0.3168)
+    vs GCB 2025 -0.20 +/- 0.05: difference -0.1573 = -3.15 GCB sigmas; ratio 1.79 | as % of the CO2 effect: -10.04 % (range -11.09 to -8.92) vs GCB -7.1 % (range -10.7 to -4.2)
+    of it SST (the thermal part) -0.4533 +/- 0.0262, the ENSO limb +0.0959; the interactive twins' mean -0.2426 (CO2 interactivity's share -0.1147)
+
+=== SENSITIVITY (not in the ensemble) ===
+  CESM_ETHZ_as2001  N year 2001                  PA loop 1958-2024  t_r 1958 | effect -0.3073 GtC/yr (-8.64 %) = SST -0.4033 + ENSO +0.0960 | dSST +0.346 K | interactive -0.2099 (dCO2 +0.75 ppm) | match 24/30
+  swapping it in moves the ensemble mean by +0.0010 GtC/yr
+
+=== THE ANNUAL A - C SERIES, prescribed CO2, ensemble mean by decade (GtC/yr): SST + ENSO | SST only ===
+  1960s: +0.0913 (protocol range -0.0762 to +0.4457) | +0.1326
+  1970s: -0.1408 (protocol range -0.2342 to +0.0020) | -0.0651
+  1980s: -0.1462 (protocol range -0.2159 to -0.0545) | -0.1664
+  1990s: -0.1600 (protocol range -0.2182 to -0.0943) | -0.2411
+  2000s: -0.2367 (protocol range -0.2804 to -0.1780) | -0.2193
+  2010s: -0.2657 (protocol range -0.3099 to -0.2162) | -0.3500
+  2015-2024: -0.3573 | -0.4533 (the window's annual means; the table's rate uses year-boundary interpolation)
+
+=== CHECK 1. CHEMISTRY: d ln pCO2 / dT at fixed DIC and ALK (Takahashi 1993's 0.0423 /K) ===
+  T  2.0 C: pCO2 189.5 uatm, d ln pCO2/dT 0.0458 /K
+  T 10.0 C: pCO2 270.9 uatm, d ln pCO2/dT 0.0433 /K
+  T 18.0 C: pCO2 380.2 uatm, d ln pCO2/dT 0.0412 /K
+  T 26.0 C: pCO2 525.4 uatm, d ln pCO2/dT 0.0395 /K
+
+=== CHECK 2. LINEARITY: shared normal year before t_r (literal) vs shared HISTORY before t_r (A = the standard run) ===
+  CNRM        literal -0.3941 | shared history -0.3943 | difference -0.00018
+  PlankTOM12  literal -0.3351 | shared history -0.3352 | difference -0.00010
+  Princeton   literal -0.3533 | shared history -0.3534 | difference -0.00004
+
+=== CHECK 3. ONE GOBM's OWN SPLIT (Bunsen 2024 GRL, FESOM1.4-REcoM2, repeat year 1961; 2000-2019: total 0.25, warming 0.09, wind 0.17 PgC/yr less uptake) ===
+  CCX under the FESOM protocol, 2000-2019 annual means: SST only -0.3044 GtC/yr = 3.4 x his WARMING part | SST + ENSO -0.2440 = 1.0 x his TOTAL
+
+=== CHECK 4. PATHWAYS: the effect (SST + ENSO) off the canonical, one name scaled at a time (spinup and orbit re-run; NOT a refit), CNRM protocol ===
+  base              effect -0.3941 GtC/yr | sink_A 3.150 | -11.09 % of the CO2 effect
+  kz_half           effect -0.3012 GtC/yr | sink_A 2.831 | -9.61 % of the CO2 effect
+  kz_double         effect -0.4977 GtC/yr | sink_A 3.482 | -12.45 % of the CO2 effect
+  u_hs_half         effect -0.3699 GtC/yr | sink_A 2.998 | -10.96 % of the CO2 effect
+  u_hs_double       effect -0.4286 GtC/yr | sink_A 3.335 | -11.35 % of the CO2 effect
+  w_enso_l2_half    effect -0.4298 GtC/yr | sink_A 3.114 | -12.07 % of the CO2 effect
+  w_enso_l2_double  effect -0.3609 GtC/yr | sink_A 3.185 | -10.17 % of the CO2 effect
+  elasticity to kz       : effect 0.362, sink 0.149
+  elasticity to u_hs     : effect 0.106, sink 0.077
+  elasticity to w_enso_l2: effect -0.126, sink 0.016
+saved /Users/MarcusMarcus/ccx_frozen/20261005g_ocgobm/outputs/diagnostics/ocean_climate_gobm_20261005.{log,rds}

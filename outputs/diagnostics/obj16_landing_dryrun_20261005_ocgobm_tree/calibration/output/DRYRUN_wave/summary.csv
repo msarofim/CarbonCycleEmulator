@@ -1,0 +1,2 @@
+"id","logpost","basin","converged","out_of_time","minutes","n_eval","draws","kind","start_class","host"
+1,-1187.45184173092,1,TRUE,FALSE,199.62206714948,28791,0,"reference: INCUMBENT = hilda34g (OBJECTIVE #16 (P4, Marcus 2026-10-05): the canonical's pins plus npp_tsens held at 0 (the canonical, seeded at the pin: a start, not a mode of this objective); scored under this build's objective, periodic spinup, evaluated at seas_ml 1)","reference","MacBook-Pro-2.local"
