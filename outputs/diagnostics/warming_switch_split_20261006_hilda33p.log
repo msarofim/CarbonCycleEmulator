@@ -1,4 +1,4 @@
-calibration/diag_warming_switch_split.R | commit 6758e25 (+uncommitted) | canonical hilda33p (refit_20261005_hilda33p_obj16_hilda_csl3v0kaidgbem) | 2026-10-06 09:37
+calibration/diag_warming_switch_split.R | commit 16c94fd | canonical hilda33p (refit_20261005_hilda33p_obj16_hilda_csl3v0kaidgbem) | 2026-10-06 10:30
 gate 1: the no-knockout run vs APP_HIST, |d CO2 today| 0.0e+00 ppm
 the app's sentence: "CO2 today would be 420 ppm instead of 426" (420.419 vs 426.120)
   path soil     : q10 -> 1 (at the mode: q10 = 1.06168)
