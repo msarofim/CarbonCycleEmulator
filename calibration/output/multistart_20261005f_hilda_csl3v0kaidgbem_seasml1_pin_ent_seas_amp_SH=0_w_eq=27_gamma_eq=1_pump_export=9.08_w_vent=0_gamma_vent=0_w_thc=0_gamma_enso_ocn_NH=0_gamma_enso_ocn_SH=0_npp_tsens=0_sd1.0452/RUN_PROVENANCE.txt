@@ -1,0 +1,33 @@
+FROZEN_FROM_COMMIT aa76fb5; worktree /Users/MarcusMarcus/ccx_frozen/20261005f_obj16 (data-raw nuclear14c copied in, diff -rq clean against the repo's; port targets regenerated there under this pin set = port_targets_hilda_csl3v0kaidgbem.csv here, cmp-identical to the tree's calibration/torch/port_targets.csv; their log logs/port_targets_20261005f.log); Mac 8-parallel (CCX_MAC_NPAR=8), WALL_MIN 300 RESTARTS 3 CYCLES 6 MAXIT 6000; label hilda_csl3v0kaidgbem, seas_ml 1, spread 1.0452, PINS ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0,npp_tsens=0 (npp_tsens PINNED at 0: OBJECTIVE #16, P4, Marcus 2026-10-05 "p4"; the reference-set branch of CHANGELOG 10-05 e); launched 2026-10-05T09:01:19-0400, finished 2026-10-05T22:26:07-0400 rc 0; 24/24 exit 0 (logs/ccx_multistart_mac_20261005f_exit.txt); 24 start files + 24 checkpoints; launch script logs/launch.sh, chain log logs/launch.out; copied into the repo 2026-10-05 byte-identical (diff -rq on the outdir and the preflight folder, cmp on the 27 logs, launch.{sh,out} and the port targets) by ~/ccx_frozen/20261005f_obj16_land.sh. CHANGELOG 10-05 (e)/(f) launch; the landing is the entry that cites this file.
+
+SLEEP STATEMENT (ruled: Marcus 2026-10-05, "Land as is, state it (Recommended)"; CHANGELOG 10-05 m, o; appended 2026-10-05 22:26:34 EDT by ~/ccx_frozen/20261005f_obj16_sleep_addendum.R, every number read):
+The Mac SLEPT during this run (lid closed on battery: 'Clamshell Sleep'). The budget was 300 WALL min, so asleep minutes counted against every start alive across them.
+Asleep spans from `pmset -g log` within the run (2026-10-05 09:01:19 to 2026-10-05 22:26:07): 13:50:45-13:53:04 (2.3 min), 13:53:49-13:55:33 (1.7 min), 13:56:18-14:34:01 (37.7 min), 16:48:20-16:51:13 (2.9 min), 16:51:58-16:52:34 (0.6 min), 16:53:19-18:05:37 (72.3 min), 18:06:22-18:49:15 (42.9 min), 18:50:00-19:10:08 (20.1 min). Total 180.6 min asleep.
+Per start -- id: started-done (wall); asleep min within its span; status; logpost:
+  000: 09:01:19-13:04:30; asleep   0.0; converged  ; -1187.6364
+  001: 09:01:19-12:21:07; asleep   0.0; converged  ; -1187.4518
+  002: 09:01:19-12:32:42; asleep   0.0; converged  ; -1187.4518
+  003: 09:01:19-12:22:20; asleep   0.0; converged  ; -1187.4518
+  004: 09:01:19-12:28:06; asleep   0.0; converged  ; -1187.4518
+  005: 09:01:19-12:35:22; asleep   0.0; converged  ; -1187.4518
+  006: 09:01:19-13:01:47; asleep   0.0; converged  ; -1187.6428
+  007: 09:01:19-13:03:20; asleep   0.0; converged  ; -1187.4518
+  008: 12:21:07-16:05:58; asleep  41.8; converged  ; -1187.6364
+  009: 12:22:21-16:39:14; asleep  41.8; converged  ; -1187.6364
+  010: 12:28:06-16:15:25; asleep  41.8; converged  ; -1187.4518
+  011: 12:32:42-16:14:38; asleep  41.8; converged  ; -1187.6364
+  012: 12:35:22-18:05:51; asleep 117.5; OUT OF TIME; -1187.6429
+  013: 13:01:47-18:06:12; asleep 117.5; OUT OF TIME; -2354.9083
+  014: 13:03:20-18:05:50; asleep 117.5; OUT OF TIME; -1187.6464
+  015: 13:04:30-18:05:50; asleep 117.5; OUT OF TIME; -1187.5592
+  016: 16:05:58-20:18:59; asleep 138.8; OUT OF TIME; -1187.8768
+  017: 16:14:38-20:20:41; asleep 138.8; converged  ; -1187.5466
+  018: 16:15:25-20:22:13; asleep 138.8; OUT OF TIME; -1188.5665
+  019: 16:39:14-20:41:09; asleep 138.8; converged  ; -1187.5477
+  020: 18:05:50-22:26:07; asleep  63.0; OUT OF TIME; -1199.0848
+  021: 18:05:51-22:15:51; asleep  63.0; OUT OF TIME; -1729.8261
+  022: 18:05:51-21:46:06; asleep  63.0; converged  ; -1187.6364
+  023: 18:06:12-21:39:41; asleep  63.0; converged  ; -1187.4518
+Summary: 16 of 24 CONVERGED; OUT OF TIME: [12, 13, 14, 15, 16, 18, 20, 21]; of those, alive across a sleep: [12, 13, 14, 15, 16, 18, 20, 21]; starts alive across any sleep: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23].
+REDUCED SURVEY POWER: an out-of-time start that slept says the MACHINE was off, not that the start was slow (memory mac_sleep_eats_wall_budget). Resuming those starts from their checkpoints stays an option (handoff 10-05d section 6.3).
+

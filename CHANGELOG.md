@@ -2,6 +2,56 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-05 (p) — **OBJECTIVE #16's REFIT HAS LANDED AND IS READ. On LIKELIHOOD it fits 1.77 WORSE than hilda34g on the same 27 rows; it moves SSP5-8.5 2300 by +12.9 ppm and makes the land's net climate effect slightly negative (−0.038 GtC/yr). One basin. No gate verdict flips. Nothing adopted: adoption is Marcus's call.** It landed itself overnight. Marcus: "I'm headed to bed. Take the next obvious steps whenever the running tasks complete."
+
+- **How it landed.** `~/ccx_frozen/20261005f_obj16_landchain.sh` ran under `nohup` + `caffeinate`, independent of any session. It waited on the launch chain's PID and ran handoff 10-05d §4 steps 1–7, 22:26:32 → 22:41:22, with ONE date stamp.
+  - It was mock-tested first: the full path, a promote failure and a refused landing each stopped where they should.
+  - The chain, its log, the landing helper and the sleep-statement script are copied into the outdir's `logs/` (cmp-identical).
+- **The run.** 24/24 exit 0, finished 22:26:07, 13 h 25 min after its 09:01:19 launch. It ended ~45 min before the handoff's ~23:10 estimate. Ids 20 and 21 reached their budgets at 259.8 and 249.5 wall-min, 63 of them asleep: the next step's projection no longer fit. 021 spent 249 min on ONE 6002-eval restart.
+- **THE SLEEP, stated as ruled** ("Land as is, state it (Recommended)"; (m)). The statement is appended to `RUN_PROVENANCE.txt` by `logs/sleep_addendum.R`, every number read:
+  - the asleep spans from `pmset -g log`: 180.6 min in all, in the two windows of (o);
+  - each task's span from its own log;
+  - each start's status from its start file.
+  - **All 8 out-of-time starts were alive across a sleep: 12, 13, 14, 15, 16, 18, 20, 21.** So were 8 of the 16 converged ones.
+  - The survey's power is REDUCED by the machine being off, not by slow starts. Resuming those 8 from their checkpoints stays an option (10-05d §6.3).
+- **Collect** (`collect_20261005.log`):
+  - **ONE distinct basin** among the 16 finished starts (radius 0.6431).
+  - 18 dispersed starts REPRODUCED the best re-converged known basin and did not beat it.
+  - Best is id 5 at −1187.451837; 8 starts tie there within 8.6e-6 (5, 2, 7, 23, 1, 4, 3, 10; `summary.csv`).
+  - ⚠ **A correction to (m) and the handoff, which called the converged values "two basins" (A −1187.452, B −1187.636).** The read script's value groups are −1187.4518 ×8, −1187.5466 ×2 and −1187.6364 ×6. All of them lie within 0.19 log-units, inside the optimiser's own 0.5 convergence bound, and the collector's u-space radius puts them in ONE basin.
+  - A group that RECURS (five starts reach −1187.63642 within 5e-6: ids 0, 8, 9, 11, 22) is a repeatable stopping point. At this survey's resolution it is not a separable basin.
+- **Promote** (`refit_20261005_obj16_hilda_csl3v0kaidgbem/`):
+  - GATE 1: 24/24 starts on this build's 33 names. GATE 2: arm N. GATE 3: id 5.
+  - GATE 4: diff 0.000e+00. GATE 5: gap −5.0e-14. 0 h_ml kinks.
+  - ⛔ "ADOPTS NOTHING".
+- **The Hessian:**
+  - GATE 1: diff 0.
+  - −H is POSITIVE-DEFINITE, condition 2.73e+05 (hilda34g's 1.6e+06). No |r| > 0.8.
+  - Every direction is step-stable: eps/3 against 3 eps agree within 1.09 % (`kz_deep_frac`).
+- **The read** (`outputs/diagnostics/obj16_refit_read_20261005.{log,rds}`). Both vectors reproduce their stored logposts (diff 0).
+
+| | #16 − hilda34g |
+|---|---|
+| **likelihood, the same 27 rows** | **−1.7678** (−1145.0186 vs −1143.2508) |
+| by family | CO₂ −1.437 (`co2_icecore` −1.099), GCB −0.318, δ¹³C +0.137, atm Δ¹⁴C −0.121, ocean ¹⁴C −0.045 |
+| logpost | −4.4605 = likelihood −1.7678 + the other priors +0.0633 + their Jacobians −0.1852 − `npp_tsens`'s own term 2.5707 (closes to −5.1e-14) |
+| the largest moves (hilda34g's marginal sd) | `beta_max` 1.831 → 2.077 (+0.64), `luc_scale` +0.59, `imb_share_land` +0.45; `k_w` 1902.7 → 1894.7 (−0.15) |
+| CO₂ in 2300, SSP5-8.5 / vvH | **+12.88 / +7.81 ppm** = the feedback's direct part at #16 +5.52 / +2.87 + the pin and the refit's re-arrangement +7.36 / +4.94 |
+| the land's net climate effect, 2015–24 | **−0.0378 GtC/yr** (z +1.09 against GCB 2025's −0.8 ± 0.7); hilda34g +0.1176 (z +1.31) |
+
+- **The ocean, like-for-like with GCB's GOBMs, under the RULED GMST rule** (`outputs/diagnostics/ocean_climate_gobm_20261005_obj16.{log,rds}`):
+  - **headline −0.3749 ± 0.0282 GtC/yr** (1.87× GCB's −0.20 ± 0.05, −3.50 GCB sigmas; −10.49 % of the CO₂ effect against GCB's −7.1 %);
+  - its parts: SST −0.4519, the ENSO limb +0.0970, the stratification feedback −0.0200;
+  - the GMST-historical twin −0.3549 ± 0.0270 (1.77×);
+  - CHECK 0 passes, and both of its mutations fail as they must;
+  - hilda34g's like-for-like value (10-04 p) was −0.357 ± 0.027.
+- **The scorecard** (`outputs/diagnostics/whole_model_scorecard_20261005_hilda34g_obj16.{log,rds}`):
+  - #16 reproduces its streams (5.0e-11).
+  - **NO gate verdict flips against hilda34g.** GATE V z −4.39 (hilda34g −4.60), still FAIL (too smooth). GATE 6 z −0.22 (−0.34). IRF(100) 0.366 (0.374).
+  - The strained priors are the same four: `q10` −2.53, `kz_deep_frac` −2.79, `pump_hs_gcm2` +2.15, `rep_dC` +4.16.
+- **Against the one-start preview (10-05 j)** every number holds within a few thousandths. Likelihood −1.7678 (preview −1.7667); futures +12.88 (+12.80); net climate −0.0378 (−0.038); ocean −0.3749 / −0.3549 (identical). Promoted id 5, where the preview used id 1; they agree to 5e-6 in logpost.
+- **Nothing adopted; no mode moves.** If Marcus adopts, the steps are in 10-05b §5 step 7.
+
 ## 2026-10-05 (o) — **The CPU-time budget's four decisions are RULED (handoff 10-05d §5.5), all as recommended.** The build proceeds on a branch in its own worktree, and `main`'s landing scripts stay untouched until #16 lands. **The landing watch was re-armed:** cron `dc08080d` had not survived the session's context reset.
 - **The rulings, verbatim:**
   - D1: "CPU on Mac, wall on Torch (Recommended)". The Mac runner exports `CCX_MS_CLOCK=cpu`. `multistart.sbatch` keeps wall, because SLURM's `--time` is a hard wall limit. The driver's default stays wall.

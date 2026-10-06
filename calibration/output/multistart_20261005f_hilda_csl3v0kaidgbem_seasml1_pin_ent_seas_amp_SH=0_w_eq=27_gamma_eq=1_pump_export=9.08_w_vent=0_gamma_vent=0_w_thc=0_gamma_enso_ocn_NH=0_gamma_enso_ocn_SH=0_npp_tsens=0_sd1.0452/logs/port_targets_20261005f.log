@@ -1,0 +1,30 @@
+run-time inputs present: 14/14. OK
+reference set: incumbent hilda34g, new basin hilda31pe (OBJECTIVE #16 (P4, Marcus 2026-10-05): the canonical's pins plus npp_tsens held at 0 (the canonical, seeded at the pin: a start, not a mode of this objective))
+objective label: struct 'hilda_csl3v0kaidgbem', seas_ml 1, pump_field 'solved', pins '_pin_ent_seas_amp_SH=0.00_w_eq=27.00_gamma_eq=1.00_pump_export=9.08_w_vent=0.00_gamma_vent=0.00_w_thc=0.00_gamma_enso_ocn_NH=0.00_gamma_enso_ocn_SH=0.00_npp_tsens=0.00' (33 free parameters)
+SEEDING ndep_ret for the new_basin port target: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 3.9.
+     The ancestor held no opinion about this coordinate.
+SEEDING imb_share_land for the new_basin port target: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.333333.
+     The ancestor held no opinion about this coordinate.
+SEEDING imb_share_ocean_rest for the new_basin port target: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING lag_enso_land for the new_basin port target: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 6.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_enso_l2 for the new_basin port target: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 18.7.
+     The file held it OFF; this arm fits it.
+
+PORT TARGETS written to /Users/MarcusMarcus/ccx_frozen/20261005f_obj16/calibration/torch/port_targets.csv
+
+      name           logpost           stored            offset
+      cold -60581.5797768220             <NA>              <NA>
+ incumbent  -1249.4517037433 -1182.9913693589    -66.4603343844
+ new_basin -11908.9195675050 -1231.0747417395 -10677.8448257656
+
+  arm N, 33 parameters, struct 'hilda_csl3v0kaidgbem', seas_ml 1, commit aa76fb5, host MacBook-Pro-2.local, R 4.5.3
+  ⚠ `stored` is each mode FILE's own logpost and is NOT the target: each
+    offset (incumbent -66.46, new_basin -10677.84) is objective drift since that file was fitted, not a port defect.
+    (This line was a typed '-0.85' until 2026-09-07f; it is now GENERATED.)

@@ -1,0 +1,57 @@
+
+==========================================================================
+DISPERSED MULTI-START SURVEY -- 24 starts under
+  /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261005f_hilda_csl3v0kaidgbem_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_npp_tsens=0_sd1.0452
+==========================================================================
+  reference cold       id 0  logpost   -1187.6364  port VERIFIED (rel 0.0e+00)
+  reference incumbent  id 1  logpost   -1187.4518  port VERIFIED (rel 3.9e-14)
+  reference new_basin  id 2  logpost   -1187.4518  port VERIFIED (rel 2.9e-15)
+
+  16 of 24 starts CONVERGED, 8 ran out of wall time (excluded from the
+  basin count, kept in the table), 0 spent their restart budget.
+  cluster radius 0.6431 = 0.25 x the measured inter-basin separation
+
+  ⇒ 1 DISTINCT BASIN among the 16 finished starts.
+
+   rank     id        logpost        vs best    basin  status    min  kind
+      1      5     -1187.4518         0.0000        1    conv    214  seeded: NEW BASIN + the OBSERVATION-implied partition (the ocean ENSO pair PINNED; the limb's w_enso_l2 SET to 25 Sv per index (the HIGH edge of Meinen's bracket); land x1.734)
+      2      2     -1187.4518        -0.0000        1    conv    211  reference: NEW BASIN = hilda31pe (seas_ml 0 control, periodic spinup; registered, evaluated at seas_ml 1)
+      3      7     -1187.4518        -0.0000        1    conv    242  dispersed about the COLD init, sd 1.0452
+      4     23     -1187.4518        -0.0000        1    conv    170  dispersed about the COLD init, sd 1.0452
+      5      1     -1187.4518        -0.0000        1    conv    200  reference: INCUMBENT = hilda34g (OBJECTIVE #16 (P4, Marcus 2026-10-05): the canonical's pins plus npp_tsens held at 0 (the canonical, seeded at the pin: a start, not a mode of this objective); scored under this build's objective, periodic spinup, evaluated at seas_ml 1)
+      6      4     -1187.4518        -0.0000        1    conv    207  seeded: NEW BASIN with the ocean ENSO pair PINNED; the limb's w_enso_l2 SET to 14 Sv per index (the LOW edge of Meinen's bracket)
+      7      3     -1187.4518        -0.0000        1    conv    201  seeded: INCUMBENT with the ocean ENSO pair PINNED; the limb's w_enso_l2 SET to 25 Sv per index (the HIGH edge of Meinen's bracket)
+      8     10     -1187.4518        -0.0000        1    conv    227  dispersed about the COLD init, sd 1.0452
+      9     17     -1187.5466        -0.0948        1    conv    246  dispersed about the COLD init, sd 1.0452
+     10     19     -1187.5477        -0.0959        1    conv    242  dispersed about the COLD init, sd 1.0452
+     11     15     -1187.5592        -0.1073       --    TIME    301  dispersed about the COLD init, sd 1.0452
+     12      0     -1187.6364        -0.1846        1    conv    243  reference: COLD hand-set init
+     13      9     -1187.6364        -0.1846        1    conv    257  dispersed about the COLD init, sd 1.0452
+     14     22     -1187.6364        -0.1846        1    conv    220  dispersed about the COLD init, sd 1.0452
+     15     11     -1187.6364        -0.1846        1    conv    222  dispersed about the COLD init, sd 1.0452
+     16      8     -1187.6364        -0.1846        1    conv    225  dispersed about the COLD init, sd 1.0452
+     17      6     -1187.6428        -0.1910        1    conv    240  dispersed about the COLD init, sd 1.0452
+     18     12     -1187.6429        -0.1911       --    TIME    330  dispersed about the COLD init, sd 1.0452
+     19     14     -1187.6464        -0.1946       --    TIME    302  dispersed about the COLD init, sd 1.0452
+     20     16     -1187.8768        -0.4250       --    TIME    253  dispersed about the COLD init, sd 1.0452
+     21     18     -1188.5665        -1.1146       --    TIME    247  dispersed about the COLD init, sd 1.0452
+     22     20     -1199.0848       -11.6329       --    TIME    260  dispersed about the COLD init, sd 1.0452
+     23     21     -1729.8261      -542.3743       --    TIME    250  dispersed about the COLD init, sd 1.0452
+     24     13     -2354.9083     -1167.4565       --    TIME    304  dispersed about the COLD init, sd 1.0452
+
+--------------------------------------------------------------------------
+  BEST FOUND      id 5 at -1187.4518
+  TO BEAT         id 5 (seeded: NEW BASIN + the OBSERVATION-implied partition (the ocean ENSO pair PINNED; the limb's w_enso_l2 SET to 25 Sv per index (the HIGH edge of Meinen's bracket); land x1.734)) at -1187.4518
+  difference      +0.0000 log-units
+  BEST DISPERSED  id 7 at -1187.4518 (-0.0000 vs the benchmark), of 18 finished
+  VERDICT: 18 dispersed starts REPRODUCED, and did not beat, the best re-converged known
+           basin, at the optimiser's own convergence bound of 0.5 log-units.
+  ENSO seeding at the incumbent: -0.0000 log-units (-1187.4518 seeded vs -1187.4518 not)
+  ENSO seeding at the new_basin: -0.0000 log-units (-1187.4518 seeded vs -1187.4518 not)
+  ⚠ A survey bounds what N starts at ONE dispersion found. It is not a
+    proof that no better basin exists ([[no_power_null]]: measure the
+    test's power before believing its null).
+
+  summary written to /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261005f_hilda_csl3v0kaidgbem_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_npp_tsens=0_sd1.0452/summary.csv
+⛔ NOTHING IS ADOPTED.
+==========================================================================

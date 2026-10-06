@@ -1,0 +1,645 @@
+landchain start 2026-10-05T20:52:26-0400; waiting on the launch chain, PID 27265
+launch chain gone 2026-10-05T22:26:32-0400; date stamp 20261005; DEST calibration/output/refit_20261005_obj16_hilda_csl3v0kaidgbem
+
+######## 2026-10-05T22:26:32-0400 STEP 1 land: confirm, copy, verify, record
+== 1. FINISHED?
+  objective #16 end 2026-10-05T22:26:07-0400 rc 0
+  exit file: 24 lines, 0 non-zero
+  all tasks finished 2026-10-05T22:26:07-0400
+  non-zero exits: 0
+  outdir: 24 start files, 24 checkpoints, 48 entries in all
+== 2. COPY into /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261005f_hilda_csl3v0kaidgbem_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_npp_tsens=0_sd1.0452
+== 3. VERIFY byte-identity
+  all identical: the outdir's 48 files, 27 logs (task logs, exit, wave, port targets), 26 preflight files, launch.{sh,out}, port targets
+== 4. RUN_PROVENANCE.txt
+FROZEN_FROM_COMMIT aa76fb5; worktree /Users/MarcusMarcus/ccx_frozen/20261005f_obj16 (data-raw nuclear14c copied in, diff -rq clean against the repo's; port targets regenerated there under this pin set = port_targets_hilda_csl3v0kaidgbem.csv here, cmp-identical to the tree's calibration/torch/port_targets.csv; their log logs/port_targets_20261005f.log); Mac 8-parallel (CCX_MAC_NPAR=8), WALL_MIN 300 RESTARTS 3 CYCLES 6 MAXIT 6000; label hilda_csl3v0kaidgbem, seas_ml 1, spread 1.0452, PINS ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0,npp_tsens=0 (npp_tsens PINNED at 0: OBJECTIVE #16, P4, Marcus 2026-10-05 "p4"; the reference-set branch of CHANGELOG 10-05 e); launched 2026-10-05T09:01:19-0400, finished 2026-10-05T22:26:07-0400 rc 0; 24/24 exit 0 (logs/ccx_multistart_mac_20261005f_exit.txt); 24 start files + 24 checkpoints; launch script logs/launch.sh, chain log logs/launch.out; copied into the repo 2026-10-05 byte-identical (diff -rq on the outdir and the preflight folder, cmp on the 27 logs, launch.{sh,out} and the port targets) by ~/ccx_frozen/20261005f_obj16_land.sh. CHANGELOG 10-05 (e)/(f) launch; the landing is the entry that cites this file.
+== DONE. Next (handoff §5 step 3): CCX_MS_OUTDIR="/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261005f_hilda_csl3v0kaidgbem_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_npp_tsens=0_sd1.0452" Rscript calibration/collect_dispersed_multistart.R | tee "/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261005f_hilda_csl3v0kaidgbem_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_npp_tsens=0_sd1.0452/collect_20261005.log"
+
+######## 2026-10-05T22:26:32-0400 STEP 1b the ruled sleep statement, appended to RUN_PROVENANCE.txt
+
+SLEEP STATEMENT (ruled: Marcus 2026-10-05, "Land as is, state it (Recommended)"; CHANGELOG 10-05 m, o; appended 2026-10-05 22:26:34 EDT by ~/ccx_frozen/20261005f_obj16_sleep_addendum.R, every number read):
+The Mac SLEPT during this run (lid closed on battery: 'Clamshell Sleep'). The budget was 300 WALL min, so asleep minutes counted against every start alive across them.
+Asleep spans from `pmset -g log` within the run (2026-10-05 09:01:19 to 2026-10-05 22:26:07): 13:50:45-13:53:04 (2.3 min), 13:53:49-13:55:33 (1.7 min), 13:56:18-14:34:01 (37.7 min), 16:48:20-16:51:13 (2.9 min), 16:51:58-16:52:34 (0.6 min), 16:53:19-18:05:37 (72.3 min), 18:06:22-18:49:15 (42.9 min), 18:50:00-19:10:08 (20.1 min). Total 180.6 min asleep.
+Per start -- id: started-done (wall); asleep min within its span; status; logpost:
+  000: 09:01:19-13:04:30; asleep   0.0; converged  ; -1187.6364
+  001: 09:01:19-12:21:07; asleep   0.0; converged  ; -1187.4518
+  002: 09:01:19-12:32:42; asleep   0.0; converged  ; -1187.4518
+  003: 09:01:19-12:22:20; asleep   0.0; converged  ; -1187.4518
+  004: 09:01:19-12:28:06; asleep   0.0; converged  ; -1187.4518
+  005: 09:01:19-12:35:22; asleep   0.0; converged  ; -1187.4518
+  006: 09:01:19-13:01:47; asleep   0.0; converged  ; -1187.6428
+  007: 09:01:19-13:03:20; asleep   0.0; converged  ; -1187.4518
+  008: 12:21:07-16:05:58; asleep  41.8; converged  ; -1187.6364
+  009: 12:22:21-16:39:14; asleep  41.8; converged  ; -1187.6364
+  010: 12:28:06-16:15:25; asleep  41.8; converged  ; -1187.4518
+  011: 12:32:42-16:14:38; asleep  41.8; converged  ; -1187.6364
+  012: 12:35:22-18:05:51; asleep 117.5; OUT OF TIME; -1187.6429
+  013: 13:01:47-18:06:12; asleep 117.5; OUT OF TIME; -2354.9083
+  014: 13:03:20-18:05:50; asleep 117.5; OUT OF TIME; -1187.6464
+  015: 13:04:30-18:05:50; asleep 117.5; OUT OF TIME; -1187.5592
+  016: 16:05:58-20:18:59; asleep 138.8; OUT OF TIME; -1187.8768
+  017: 16:14:38-20:20:41; asleep 138.8; converged  ; -1187.5466
+  018: 16:15:25-20:22:13; asleep 138.8; OUT OF TIME; -1188.5665
+  019: 16:39:14-20:41:09; asleep 138.8; converged  ; -1187.5477
+  020: 18:05:50-22:26:07; asleep  63.0; OUT OF TIME; -1199.0848
+  021: 18:05:51-22:15:51; asleep  63.0; OUT OF TIME; -1729.8261
+  022: 18:05:51-21:46:06; asleep  63.0; converged  ; -1187.6364
+  023: 18:06:12-21:39:41; asleep  63.0; converged  ; -1187.4518
+Summary: 16 of 24 CONVERGED; OUT OF TIME: [12, 13, 14, 15, 16, 18, 20, 21]; of those, alive across a sleep: [12, 13, 14, 15, 16, 18, 20, 21]; starts alive across any sleep: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23].
+REDUCED SURVEY POWER: an out-of-time start that slept says the MACHINE was off, not that the start was slow (memory mac_sleep_eats_wall_budget). Resuming those starts from their checkpoints stays an option (handoff 10-05d section 6.3).
+
+
+######## 2026-10-05T22:26:34-0400 STEP 2 collect
+
+==========================================================================
+DISPERSED MULTI-START SURVEY -- 24 starts under
+  /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261005f_hilda_csl3v0kaidgbem_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_npp_tsens=0_sd1.0452
+==========================================================================
+  reference cold       id 0  logpost   -1187.6364  port VERIFIED (rel 0.0e+00)
+  reference incumbent  id 1  logpost   -1187.4518  port VERIFIED (rel 3.9e-14)
+  reference new_basin  id 2  logpost   -1187.4518  port VERIFIED (rel 2.9e-15)
+
+  16 of 24 starts CONVERGED, 8 ran out of wall time (excluded from the
+  basin count, kept in the table), 0 spent their restart budget.
+  cluster radius 0.6431 = 0.25 x the measured inter-basin separation
+
+  ⇒ 1 DISTINCT BASIN among the 16 finished starts.
+
+   rank     id        logpost        vs best    basin  status    min  kind
+      1      5     -1187.4518         0.0000        1    conv    214  seeded: NEW BASIN + the OBSERVATION-implied partition (the ocean ENSO pair PINNED; the limb's w_enso_l2 SET to 25 Sv per index (the HIGH edge of Meinen's bracket); land x1.734)
+      2      2     -1187.4518        -0.0000        1    conv    211  reference: NEW BASIN = hilda31pe (seas_ml 0 control, periodic spinup; registered, evaluated at seas_ml 1)
+      3      7     -1187.4518        -0.0000        1    conv    242  dispersed about the COLD init, sd 1.0452
+      4     23     -1187.4518        -0.0000        1    conv    170  dispersed about the COLD init, sd 1.0452
+      5      1     -1187.4518        -0.0000        1    conv    200  reference: INCUMBENT = hilda34g (OBJECTIVE #16 (P4, Marcus 2026-10-05): the canonical's pins plus npp_tsens held at 0 (the canonical, seeded at the pin: a start, not a mode of this objective); scored under this build's objective, periodic spinup, evaluated at seas_ml 1)
+      6      4     -1187.4518        -0.0000        1    conv    207  seeded: NEW BASIN with the ocean ENSO pair PINNED; the limb's w_enso_l2 SET to 14 Sv per index (the LOW edge of Meinen's bracket)
+      7      3     -1187.4518        -0.0000        1    conv    201  seeded: INCUMBENT with the ocean ENSO pair PINNED; the limb's w_enso_l2 SET to 25 Sv per index (the HIGH edge of Meinen's bracket)
+      8     10     -1187.4518        -0.0000        1    conv    227  dispersed about the COLD init, sd 1.0452
+      9     17     -1187.5466        -0.0948        1    conv    246  dispersed about the COLD init, sd 1.0452
+     10     19     -1187.5477        -0.0959        1    conv    242  dispersed about the COLD init, sd 1.0452
+     11     15     -1187.5592        -0.1073       --    TIME    301  dispersed about the COLD init, sd 1.0452
+     12      0     -1187.6364        -0.1846        1    conv    243  reference: COLD hand-set init
+     13      9     -1187.6364        -0.1846        1    conv    257  dispersed about the COLD init, sd 1.0452
+     14     22     -1187.6364        -0.1846        1    conv    220  dispersed about the COLD init, sd 1.0452
+     15     11     -1187.6364        -0.1846        1    conv    222  dispersed about the COLD init, sd 1.0452
+     16      8     -1187.6364        -0.1846        1    conv    225  dispersed about the COLD init, sd 1.0452
+     17      6     -1187.6428        -0.1910        1    conv    240  dispersed about the COLD init, sd 1.0452
+     18     12     -1187.6429        -0.1911       --    TIME    330  dispersed about the COLD init, sd 1.0452
+     19     14     -1187.6464        -0.1946       --    TIME    302  dispersed about the COLD init, sd 1.0452
+     20     16     -1187.8768        -0.4250       --    TIME    253  dispersed about the COLD init, sd 1.0452
+     21     18     -1188.5665        -1.1146       --    TIME    247  dispersed about the COLD init, sd 1.0452
+     22     20     -1199.0848       -11.6329       --    TIME    260  dispersed about the COLD init, sd 1.0452
+     23     21     -1729.8261      -542.3743       --    TIME    250  dispersed about the COLD init, sd 1.0452
+     24     13     -2354.9083     -1167.4565       --    TIME    304  dispersed about the COLD init, sd 1.0452
+
+--------------------------------------------------------------------------
+  BEST FOUND      id 5 at -1187.4518
+  TO BEAT         id 5 (seeded: NEW BASIN + the OBSERVATION-implied partition (the ocean ENSO pair PINNED; the limb's w_enso_l2 SET to 25 Sv per index (the HIGH edge of Meinen's bracket); land x1.734)) at -1187.4518
+  difference      +0.0000 log-units
+  BEST DISPERSED  id 7 at -1187.4518 (-0.0000 vs the benchmark), of 18 finished
+  VERDICT: 18 dispersed starts REPRODUCED, and did not beat, the best re-converged known
+           basin, at the optimiser's own convergence bound of 0.5 log-units.
+  ENSO seeding at the incumbent: -0.0000 log-units (-1187.4518 seeded vs -1187.4518 not)
+  ENSO seeding at the new_basin: -0.0000 log-units (-1187.4518 seeded vs -1187.4518 not)
+  ⚠ A survey bounds what N starts at ONE dispersion found. It is not a
+    proof that no better basin exists ([[no_power_null]]: measure the
+    test's power before believing its null).
+
+  summary written to /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261005f_hilda_csl3v0kaidgbem_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_npp_tsens=0_sd1.0452/summary.csv
+⛔ NOTHING IS ADOPTED.
+==========================================================================
+
+######## 2026-10-05T22:26:34-0400 STEP 3 promote (GATES 1-5 must pass; it STOPs otherwise)
+
+==== PROMOTE a obj16_hilda_csl3v0kaidgbem multistart start to a mode file ====
+source  /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261005f_hilda_csl3v0kaidgbem_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_npp_tsens=0_sd1.0452
+dest    calibration/output/refit_20261005_obj16_hilda_csl3v0kaidgbem/mode_fit_pumpN.rds
+GATE OPEN (structure 'hilda_csl3v0kaidgbem'): ndep_ret, npp_tsens, imb_share_land, imb_share_ocean_rest, lag_enso_land are fitted names
+PINNED arm: _pin_ent_seas_amp_SH=0.00_w_eq=27.00_gamma_eq=1.00_pump_export=9.08_w_vent=0.00_gamma_vent=0.00_w_thc=0.00_gamma_enso_ocn_NH=0.00_gamma_enso_ocn_SH=0.00_npp_tsens=0.00 (33 free parameters)
+
+GATE 1: every start in this directory is on THIS build's parameter set
+----------------------------------------------------------------------
+build fits 33 parameters; 24 of 24 starts match
+
+GATE 2: one arm, one objective -- or a ranking across them is meaningless
+-------------------------------------------------------------------------
+pump arms present: N
+
+GATE 3: the start to promote is COMPUTED from the directory
+-----------------------------------------------------------
+16 of 24 starts CONVERGED in time
+best is id 5 at -1187.451837
+runners-up: id 2 -1187.451837; id 7 -1187.451837; id 23 -1187.451839
+16 of 16 finished starts lie within the optimiser's own convergence
+bound of 0.50 log-units, spanning 1.91e-01 log-units
+
+GATE 4: the point reproduces its own logpost, under the band it RECORDS
+-----------------------------------------------------------------------
+structure RECORDED in the starts: 'hilda_csl3v0kaidgbem'
+seas_ml RECORDED in the starts: 1 (the seasonal mixed layer ON -- round 6)
+pump_field RECORDED in the starts: 'solved'
+h_ml band  [42.5, 200] (from the start file)
+log-post   -1187.451837   file -1187.451837   diff 0.000e+00
+
+the per-stream decomposition at the mode
+----------------------------------------
+27 streams, total -1145.0186
+         d14c_intcal          co2_icecore              d14c_NH 
+            -640.647             -509.446             -288.484 
+             d14c_SH        co2_level_MLO        co2_level_SPO 
+            -287.445              -71.349              -63.724 
+       gcb_land_sink         co2_gradient     excess_c14_ocean 
+             -49.852              -15.362               -9.648 
+      ocean_grad_dic       gcb_ocean_sink       ocean_grad_alk 
+              -6.925               -6.070               -5.728 
+         hs_surf_dic      ocean_grad_d13c      d14c_profile_ab 
+              -4.246               -3.979               -3.294 
+  d14c_profile_level         hs_surf_d13c      d14c_profile_bd 
+              -3.273               -2.472               -2.187 
+gcb_ocean_enso_slope     co2_seasonal_MLO       d13c_level_SPO 
+               2.547                4.407               55.990 
+      d13c_level_MLO         d13c_icecore     co2_seasonal_SPO 
+              63.252               65.758               72.716 
+       d13c_gradient    d13c_seasonal_MLO    d13c_seasonal_SPO 
+             105.763              209.294              249.385 
+
+GATE 5: the streams sum to the likelihood half of the logpost
+-------------------------------------------------------------
+sum(streams) -1145.018629 ; logpost -1187.451837 ; implied prior+jacobian -42.433208 ; recomputed prior+jacobian -42.433208 ; gap -4.974e-14 (tol 1e-05)
+
+the h_ml KINK MAP -- derived from the shape function, not typed
+---------------------------------------------------------------
+0 kink(s) in [42.5, 200] -- as expected post-C1-remap
+
+writing the mode file
+---------------------
+wrote calibration/output/refit_20261005_obj16_hilda_csl3v0kaidgbem/mode_fit_pumpN.rds
+
+⛔ ADOPTS NOTHING. CCX_MODE_CANONICAL is still 'hilda34g'.
+   Next: recompute_hessian.R --update, then the repoint.
+
+######## 2026-10-05T22:26:39-0400 STEP 4 Hessian
+
+GATE 1: the stored mode reproduces at the point this Hessian is taken
+---------------------------------------------------------------------
+mode file  calibration/output/refit_20261005_obj16_hilda_csl3v0kaidgbem/mode_fit_pumpN.rds
+pump_mode  N
+pins       ent_seas_amp_SH = 0, w_eq = 27, gamma_eq = 1, pump_export = 9.08, w_vent = 0, gamma_vent = 0, w_thc = 0, gamma_enso_ocn_NH = 0, gamma_enso_ocn_SH = 0, npp_tsens = 0   (33 free names)
+h_ml band  [42.5, 200] (from the file)
+log-post   -1187.451837   file -1187.451837   diff 0.000e+00
+(md$u_mode would have decoded h_ml to 49.611 m; par_mode says 49.611 m)
+NA = the step leaves the feasible region
+                          1e-05      3e-05      1e-04      3e-04      1e-03
+beta_max             -2.839e+04 -1.145e+04 -8.167e+03 -7.973e+03 -7.958e+03
+fert_k               -4.585e+04 -2.791e+04 -2.512e+04 -2.494e+04 -2.492e+04
+q10                  -1.482e+05 -1.363e+05 -1.351e+05 -1.348e+05 -1.348e+05
+k_w                  -6.242e+04 -4.239e+04 -4.009e+04 -3.991e+04 -3.989e+04
+h_ml                 -2.922e+04 -1.604e+03 -2.614e+02 -5.957e+01 -3.001e+01
+kz                   -2.604e+04 -3.922e+03 -1.712e+03 -1.516e+03 -1.491e+03
+kz_deep_frac         -1.498e+04 -2.603e+03 -2.068e+02 -3.107e+01 -4.034e+00
+hs_asx_frac          -1.327e+04 -3.616e+03 -1.007e+03 -7.658e+02 -7.373e+02
+h_hs                 -1.517e+04 -2.387e+03 -2.658e+02 -4.516e+01 -3.266e+01
+u_hs                 -2.106e+04 -2.901e+03 -7.958e+02 -6.094e+02 -5.939e+02
+w_enso_l2            -1.031e+02 -9.348e+01 -9.143e+01 -9.142e+01 -9.141e+01
+pump_hs_gcm2         -1.943e+04 -2.522e+03 -2.341e+02 -5.505e+01 -3.323e+01
+pump_grad            -2.196e+04 -3.694e+03 -1.193e+03 -9.982e+02 -9.727e+02
+tau_ex               -2.830e+04 -7.557e+03 -6.598e+03 -6.456e+03 -6.440e+03
+npp_frac_NH          -2.863e+04 -3.218e+03 -8.385e+02 -7.421e+02 -7.168e+02
+seas_T_amp_NH        -2.832e+04 -2.520e+03 -6.742e+02 -5.141e+02 -4.967e+02
+seas_T_amp_SH        -2.942e+04 -2.784e+03 -2.020e+02 -6.049e+01 -4.397e+01
+seas_lag_p_NH        -3.518e+04 -1.118e+04 -9.533e+03 -9.376e+03 -9.355e+03
+seas_lag_p_SH        -2.126e+04 -3.877e+03 -8.460e+02 -6.727e+02 -6.526e+02
+sst_seas_amp_NH      -1.358e+04 -2.793e+03 -2.651e+02 -1.519e+02 -1.333e+02
+sst_seas_amp_SH      -2.132e+04 -3.430e+03 -6.085e+02 -4.560e+02 -4.308e+02
+gamma_enso_land_NH   -1.615e+02 -1.636e+02 -1.638e+02 -1.638e+02 -1.638e+02
+gamma_enso_land_SH   -1.755e+02 -1.746e+02 -1.741e+02 -1.742e+02 -1.742e+02
+bomb_total           -1.495e+05 -1.495e+05 -1.495e+05 -1.495e+05 -1.495e+05
+luc_scale            -2.282e+05 -2.282e+05 -2.282e+05 -2.282e+05 -2.282e+05
+sigma_d14c           -1.003e+02 -1.003e+02 -1.003e+02 -1.003e+02 -1.003e+02
+rep_dC               -2.100e+02 -2.100e+02 -2.100e+02 -2.100e+02 -2.100e+02
+grad_off_co2         -4.856e+02 -4.856e+02 -4.856e+02 -4.856e+02 -4.856e+02
+grad_off_d13c        -6.884e+04 -6.884e+04 -6.884e+04 -6.884e+04 -6.884e+04
+ndep_ret             -3.722e+03 -3.726e+03 -3.729e+03 -3.729e+03 -3.729e+03
+imb_share_land       -8.711e+00 -8.712e+00 -8.712e+00 -8.711e+00 -8.711e+00
+imb_share_ocean_rest -1.803e+00 -1.804e+00 -1.804e+00 -1.804e+00 -1.804e+00
+lag_enso_land        -3.129e+01 -2.745e+01 -2.630e+01 -2.631e+01 -2.630e+01
+                          3e-03      1e-02      3e-02      1e-01      3e-01
+beta_max             -7.956e+03 -7.956e+03 -7.956e+03 -7.960e+03 -7.992e+03
+fert_k               -2.492e+04 -2.492e+04 -2.492e+04 -2.494e+04 -2.513e+04
+q10                  -1.348e+05 -1.348e+05 -1.347e+05 -1.341e+05 -1.284e+05
+k_w                  -3.989e+04 -3.989e+04 -3.989e+04 -3.992e+04 -4.022e+04
+h_ml                 -2.782e+01 -2.758e+01 -2.761e+01 -3.208e+01 -2.391e+01
+kz                   -1.489e+03 -1.489e+03 -1.489e+03 -1.489e+03 -1.493e+03
+kz_deep_frac         -2.470e+00 -2.305e+00 -2.280e+00 -2.284e+00 -2.342e+00
+hs_asx_frac          -7.354e+02 -7.352e+02 -7.351e+02 -7.345e+02 -7.291e+02
+h_hs                 -3.074e+01 -3.056e+01 -3.053e+01 -3.049e+01 -3.013e+01
+u_hs                 -5.916e+02 -5.914e+02 -5.913e+02 -5.907e+02 -5.859e+02
+w_enso_l2            -9.141e+01 -9.208e+01 -9.129e+01 -8.959e+01 -8.830e+01
+pump_hs_gcm2         -3.024e+01 -3.005e+01 -3.002e+01 -2.998e+01 -2.968e+01
+pump_grad            -9.713e+02 -9.711e+02 -9.715e+02 -9.762e+02 -1.018e+03
+tau_ex               -6.437e+03 -6.437e+03 -6.439e+03 -6.459e+03 -6.629e+03
+npp_frac_NH          -7.147e+02 -7.145e+02 -7.144e+02 -7.134e+02 -7.047e+02
+seas_T_amp_NH        -4.950e+02 -4.948e+02 -4.950e+02 -4.974e+02 -5.194e+02
+seas_T_amp_SH        -4.227e+01 -4.216e+01 -4.216e+01 -4.232e+01 -4.383e+01
+seas_lag_p_NH        -9.354e+03 -9.354e+03 -9.354e+03 -9.348e+03 -9.296e+03
+seas_lag_p_SH        -6.506e+02 -6.504e+02 -6.504e+02 -6.500e+02 -6.478e+02
+sst_seas_amp_NH      -1.309e+02 -1.307e+02 -1.307e+02 -1.313e+02 -1.367e+02
+sst_seas_amp_SH      -4.288e+02 -4.286e+02 -4.288e+02 -4.310e+02 -4.504e+02
+gamma_enso_land_NH   -1.638e+02 -1.638e+02 -1.638e+02 -1.638e+02 -1.638e+02
+gamma_enso_land_SH   -1.742e+02 -1.742e+02 -1.742e+02 -1.742e+02 -1.742e+02
+bomb_total           -1.495e+05 -1.495e+05 -1.496e+05 -1.504e+05 -1.575e+05
+luc_scale            -2.282e+05 -2.283e+05 -2.284e+05 -2.300e+05 -2.448e+05
+sigma_d14c           -1.003e+02 -1.003e+02 -1.003e+02 -1.000e+02 -9.765e+01
+rep_dC               -2.100e+02 -2.100e+02 -2.100e+02 -2.100e+02 -2.100e+02
+grad_off_co2         -4.856e+02 -4.856e+02 -4.856e+02 -4.856e+02 -4.856e+02
+grad_off_d13c        -6.884e+04 -6.884e+04 -6.884e+04 -6.884e+04 -6.884e+04
+ndep_ret             -3.729e+03 -3.729e+03 -3.731e+03 -3.751e+03 -3.924e+03
+imb_share_land       -8.711e+00 -8.711e+00 -8.711e+00 -8.701e+00 -8.616e+00
+imb_share_ocean_rest -1.804e+00 -1.804e+00 -1.804e+00 -1.803e+00 -1.798e+00
+lag_enso_land        -2.630e+01 -2.630e+01 -2.630e+01 -2.636e+01 -2.437e+01
+
+CHOSEN STEP, PER PARAMETER
+--------------------------
+eps = 0.10 x the direction's own posterior sd; verified at eps/3 and 3 eps
+d(logpost) over the step is 0.0050 in EVERY direction by construction
+parameter          sd (unc)    eps (u) reach (nat)   curvature eps/3-3eps
+(this mode file carries no producing-refit step -- the comparison column is
+ OMITTED, not blank: there is nothing to compare against.)
+beta_max            0.01121  1.121e-03   0.0007164     -7957.6     0.11%
+fert_k              0.00633  6.332e-04      0.2922      -24925     0.23%
+q10                 0.00272  2.721e-04   0.0002889 -1.3484e+05     0.17%
+k_w                 0.00501  5.006e-04      0.9484      -39896     0.12%
+h_ml                0.19041  1.904e-02      0.1293     -27.583     0.61%
+kz                  0.02590  2.590e-03       17.25     -1489.1     0.15%
+kz_deep_frac        0.66229  6.623e-02   0.0001745     -2.2804     1.09%
+hs_asx_frac         0.03687  3.687e-03    0.001642     -735.32     0.18%
+h_hs                0.18089  1.809e-02       2.145     -30.535     0.19%
+u_hs                0.04111  4.111e-03     0.06611     -591.44     0.20%
+w_enso_l2           0.10459  1.046e-02      0.1076     -92.138     1.03%
+pump_hs_gcm2        0.18242  1.824e-02      0.8825     -30.027     0.14%
+pump_grad           0.03209  3.209e-03       1.053     -971.25     0.09%
+tau_ex              0.01246  1.246e-03    0.001095     -6438.6     0.15%
+npp_frac_NH         0.03741  3.741e-03   0.0003678     -714.61     0.14%
+seas_T_amp_NH       0.04495  4.495e-03     0.07076     -494.76     0.16%
+seas_T_amp_SH       0.15400  1.540e-02      0.0607     -42.152     0.16%
+seas_lag_p_NH       0.01033  1.033e-03    0.001033     -9356.1     0.18%
+seas_lag_p_SH       0.03920  3.920e-03     0.00392     -650.56     0.16%
+sst_seas_amp_NH     0.08741  8.741e-03      0.0151     -130.69     0.14%
+sst_seas_amp_SH     0.04829  4.829e-03    0.006452     -428.67     0.21%
+gamma_enso_land_NH    0.07818  7.818e-03    0.007818     -163.77     0.00%
+gamma_enso_land_SH    0.07567  7.567e-03    0.007567     -174.17     0.00%
+bomb_total          0.00259  2.586e-04     0.03076 -1.4954e+05     0.00%
+luc_scale           0.00209  2.093e-04   0.0001884 -2.2824e+05     0.00%
+sigma_d14c          0.09984  9.984e-03     0.05632     -100.32     0.02%
+rep_dC              0.06900  6.900e-03      0.0069     -210.05     0.00%
+grad_off_co2        0.04538  4.538e-03    0.004538     -485.63     0.00%
+grad_off_d13c       0.00381  3.811e-04   0.0003811      -68844     0.00%
+ndep_ret            0.01638  1.638e-03     0.02102     -3729.3     0.00%
+imb_share_land      0.33880  3.388e-02    0.008055     -8.7103     0.11%
+imb_share_ocean_rest    0.74456  7.446e-02     0.01522     -1.8037     0.16%
+lag_enso_land       0.19497  1.950e-02     0.03977     -26.301     0.06%
+
+FULL HESSIAN
+------------
+33x33 with per-direction steps, eps = 0.10 x each posterior sd
+
+eigenvalues (all < 0 at a clean interior maximum):
+ [1] -9.940e-01 -1.189e+00 -2.669e+00 -2.998e+00 -4.049e+00 -6.848e+00
+ [7] -7.763e+00 -1.039e+01 -1.200e+01 -1.387e+01 -1.762e+01 -1.851e+01
+[13] -2.491e+01 -3.981e+01 -4.280e+01 -6.039e+01 -6.629e+01 -7.849e+01
+[19] -7.890e+01 -1.027e+02 -1.786e+02 -2.080e+02 -2.403e+02 -5.017e+02
+[25] -1.047e+03 -1.522e+03 -3.182e+03 -4.923e+03 -1.305e+04 -6.999e+04
+[31] -1.393e+05 -1.752e+05 -2.713e+05
+
+-H IS positive-definite. condition number 2.73e+05
+log|-H| = 163.3095
+
+strongest parameter correlations (|r| > 0.8):
+  none
+
+posterior sd, unconstrained scale (and what it reaches in natural units):
+  grad_off_d13c      0.00594   +/- 0.0059353    around 0.063469
+  bomb_total         0.00752   +/- 0.89408      around 118.96
+  q10                0.02276   +/- 0.024169     around 1.0617
+  k_w                0.02835   +/- 53.718       around 1894.7
+  luc_scale          0.03581   +/- 0.032238     around 0.90026
+  tau_ex             0.04599   +/- 0.040421     around 0.87887
+  seas_lag_p_NH      0.05380   +/- 0.053802     around 1.5244
+  seas_lag_p_SH      0.07543   +/- 0.075427     around 2.6159
+  grad_off_co2       0.09076   +/- 0.090762     around 0.30346
+  gamma_enso_land_SH   0.09114   +/- 0.091136     around 0.48664
+  gamma_enso_land_NH   0.09563   +/- 0.095628     around 0.50777
+  sigma_d14c         0.10337   +/- 0.58315      around 5.6413
+  pump_grad          0.11511   +/- 37.777       around 328.19
+  sst_seas_amp_SH    0.13946   +/- 0.18633      around 1.3361
+  sst_seas_amp_NH    0.15453   +/- 0.26699      around 1.7278
+  kz                 0.16916   +/- 1126.9       around 14475
+  hs_asx_frac        0.17895   +/- 0.079692     around 0.69644
+  w_enso_l2          0.19269   +/- 1.9821       around 13.183
+  lag_enso_land      0.19959   +/- 0.40714      around 2.6057
+  npp_frac_NH        0.20241   +/- 0.019902     around 0.57412
+  seas_T_amp_NH      0.22100   +/- 3.4794       around 15.744
+  rep_dC             0.24361   +/- 0.24361      around 4.1641
+  u_hs               0.25975   +/- 4.177        around 23.422
+  h_ml               0.29908   +/- 2.0308       around 49.611
+  fert_k             0.31840   +/- 146.91       around 752.14
+  seas_T_amp_SH      0.33186   +/- 1.308        around 3.9413
+  pump_hs_gcm2       0.35497   +/- 17.173       around 82.963
+  ndep_ret           0.37733   +/- 4.8422       around 12.833
+  imb_share_land     0.47006   +/- 0.11175      around 0.61072
+  beta_max           0.50114   +/- 0.32027      around 2.0768
+  h_hs               0.60331   +/- 71.544       around 286.06
+  imb_share_ocean_rest   0.88759   +/- 0.18149      around 0.28664
+  kz_deep_frac       0.97982   +/- 0.0025819    around 0.0076421
+
+wrote calibration/output/refit_20261005_obj16_hilda_csl3v0kaidgbem/mode_fit_pumpN_hess.rds
+updated the second-order block of calibration/output/refit_20261005_obj16_hilda_csl3v0kaidgbem/mode_fit_pumpN.rds (--update)
+
+######## 2026-10-05T22:38:42-0400 STEP 5 read (its own log: outputs/diagnostics/)
+calibration/diag_obj16_refit_read.R @263d5f0+dirty, 2026-10-05 22:38
+  canonical hilda34g (/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261003_hilda34g_obj15_hilda_csl3v0kaidgbe/mode_fit_pumpN.rds)
+  #16       calibration/output/refit_20261005_obj16_hilda_csl3v0kaidgbem/mode_fit_pumpN.rds (md5 525404989a20ece51ec8bd088c7d4638)
+  wave      calibration/output/multistart_20261005f_hilda_csl3v0kaidgbem_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_npp_tsens=0_sd1.0452
+
+=== 0. EACH VECTOR REPRODUCES ITS STORED LOGPOST IN ITS OWN SPACE (tol 1e-05); THE WAVE ===
+  survey: 24 start files; 16 CONVERGED in time, 8 out of time; best -1187.451837 (id 005)
+  converged logposts in clusters split at gaps > 0.05: -1187.4518 x8 | -1187.5466 x2 | -1187.6364 x6
+  promoted: id 5 at -1187.451837 (GATE 3's best is id 005 at -1187.451837)
+  canonical hilda34g     logpost -1182.991369 (stored -1182.991369, diff +0.0e+00)  likelihood -1143.2508 on 27 rows  prior+Jacobian -39.7406
+  objective #16          logpost -1187.451837 (stored -1187.451837, diff +0.0e+00)  likelihood -1145.0186 on 27 rows  prior+Jacobian -42.4332
+
+=== 1. #16 vs hilda34g ON LIKELIHOOD (the same 27 rows; > 0 = #16 fits BETTER) ===
+  co2_icecore            canonical   -508.347 | #16   -1.099
+  co2_seasonal_MLO       canonical      4.994 | #16   -0.587
+  co2_level_SPO          canonical    -64.104 | #16   +0.380
+  co2_level_MLO          canonical    -71.671 | #16   +0.322
+  gcb_land_sink          canonical    -49.589 | #16   -0.263
+  co2_seasonal_SPO       canonical     72.976 | #16   -0.260
+  co2_gradient           canonical    -15.168 | #16   -0.194
+  d13c_seasonal_SPO      canonical    249.566 | #16   -0.181
+  d13c_level_SPO         canonical     55.815 | #16   +0.175
+  d14c_SH                canonical   -287.312 | #16   -0.133
+  d13c_icecore           canonical     65.646 | #16   +0.112
+  ocean_grad_dic         canonical     -6.821 | #16   -0.104
+  d14c_profile_ab        canonical     -3.199 | #16   -0.095
+  ocean_grad_d13c        canonical     -4.072 | #16   +0.092
+  ocean_grad_alk         canonical     -5.796 | #16   +0.068
+  gcb_ocean_sink         canonical     -6.009 | #16   -0.060
+  d14c_profile_level     canonical     -3.330 | #16   +0.057
+  hs_surf_d13c           canonical     -2.434 | #16   -0.038
+  d13c_gradient          canonical    105.801 | #16   -0.038
+  d13c_seasonal_MLO      canonical    209.256 | #16   +0.038
+  d13c_level_MLO         canonical     63.221 | #16   +0.031
+  d14c_intcal            canonical   -640.676 | #16   +0.029
+  d14c_NH                canonical   -288.467 | #16   -0.017
+  excess_c14_ocean       canonical     -9.641 | #16   -0.007
+  gcb_ocean_enso_slope   canonical      2.542 | #16   +0.006
+  hs_surf_dic            canonical     -4.245 | #16   -0.001
+  d14c_profile_bd        canonical     -2.188 | #16   +0.001
+  TOTAL -1.7678 (canonical -1143.2508; #16 -1145.0186)
+  by family: CO2 -1.437 | d13C +0.137 | atm_d14C -0.121 | ocean_14C -0.045 | GCB -0.318 | ocean_grad_surface +0.017 | other +0.000
+  THE PREVIEWS (each conditional or unrefitted, so not a bound on the joint refit): P4's slice -0.26; the feedback -1.7668; their sum -2.03
+  the START (hilda34g seeded at npp_tsens 0, under #16's label) sat -66.46 below on logpost: pin -53.93, feedback -1.77, interaction -8.19, prior removed -2.57
+
+=== 2. THE PRIOR LEDGER (natural-scale prior log-density + log-Jacobian, the objective's own terms) ===
+  name                    canonical          #16   z canon     z #16   d prior     d jac
+  ndep_ret                   13.943       12.833      1.91      1.78    +0.312    -0.083
+  imb_share_land            0.55664      0.61072      0.85      1.03    -0.130    -0.037
+  fert_k                     726.83       752.14      0.82      0.92    -0.119    +0.015
+  pump_hs_gcm2               81.764       82.963      2.13      2.15    -0.066    +0.004
+  hs_asx_frac                0.6852      0.69644      0.32      0.43    -0.057    +0.008
+  seas_T_amp_NH              15.503       15.744      0.35      0.42    -0.042    +0.015
+  pump_grad                  330.14       328.19      1.39      1.37    +0.039    -0.006
+  k_w                        1902.7       1894.7      1.37      1.35    +0.033    -0.004
+  rep_dC                     4.1697       4.1641      4.17      4.16    +0.024    +0.000
+  sst_seas_amp_NH            1.7183       1.7278     -1.06     -1.03    +0.018    +0.006
+  luc_scale                 0.87728      0.90026     -0.47     -0.38    +0.013    +0.026
+  q10                        1.0603       1.0617     -2.54     -2.53    +0.012    +0.001
+  logpost difference -4.4605 = likelihood -1.7678 + the other names' priors +0.0633 + their Jacobians -0.1852 - npp_tsens's own term at the canonical (2.5707 at 0.00885)  [check -5.1e-14]
+
+=== 3. THE MOVES: each common name's move from hilda34g, in hilda34g's MARGINAL Laplace sd (u-space) ===
+  npp_tsens itself: 0.00885 -> 0 (pinned) = -0.99 marginal sd
+  beta_max                   1.8307 ->       2.0768   +0.64 sd   (#16's own sd 0.501, u-space)
+  luc_scale                 0.87728 ->      0.90026   +0.59 sd   (#16's own sd 0.0358, u-space)
+  imb_share_land            0.55664 ->      0.61072   +0.45 sd   (#16's own sd 0.47, u-space)
+  gamma_enso_land_NH        0.53623 ->      0.50777   -0.29 sd   (#16's own sd 0.0956, u-space)
+  gamma_enso_land_SH         0.5118 ->      0.48664   -0.27 sd   (#16's own sd 0.0911, u-space)
+  ndep_ret                   13.943 ->       12.833   -0.23 sd   (#16's own sd 0.377, u-space)
+  kz                          14224 ->        14475   +0.22 sd   (#16's own sd 0.169, u-space)
+  imb_share_ocean_rest      0.25593 ->      0.28664   +0.18 sd   (#16's own sd 0.888, u-space)
+  k_w                        1902.7 ->       1894.7   -0.15 sd   (#16's own sd 0.0284, u-space)
+  fert_k                     726.83 ->       752.14   +0.15 sd   (#16's own sd 0.318, u-space)
+  hs_asx_frac                0.6852 ->      0.69644   +0.14 sd   (#16's own sd 0.179, u-space)
+  seas_lag_p_NH               1.517 ->       1.5244   +0.14 sd   (#16's own sd 0.0538, u-space)
+  q10                        1.0603 ->       1.0617   +0.06 sd   (#16's own sd 0.0228, u-space)   [named]
+  beside the P4 slice: beta_max 1.83 -> 2.05 there (canonical 1.83 here, #16 2.077)
+
+=== 4. THE FUTURES: CO2 (ppm) in 2300, ssp585, vvH (spliced onto the historical emissions) (br_futures(), the previews' estimator) ===
+  canonical            ssp585  1448.65 (  +0.00) | vvH  1002.22 (  +0.00)
+  canonical_pin        ssp585  1495.61 ( +46.97) | vvH  1029.74 ( +27.52)
+  canonical_feedback   ssp585  1454.14 (  +5.49) | vvH  1005.10 (  +2.87)
+  obj16                ssp585  1461.53 ( +12.88) | vvH  1010.03 (  +7.81)
+  obj16_feedback_off   ssp585  1456.01 (  +7.36) | vvH  1007.16 (  +4.94)
+  cross-checks (printed, not gated): canonical ssp585 1448.65 vs the preview's 1448.6; the feedback at the canonical +5.49 vs 10-04 (o)'s +5.5
+  #16's move ssp585 +12.88, vvH +7.81 = the feedback's direct part at #16 +5.52/+2.87 + the pin and the refit's re-arrangement +7.36/+4.94
+  the previews: P4 (land block re-optimised) ssp585 +13.6, vvH +9.3; the pin UNREFITTED here ssp585 +46.97, vvH +27.52
+
+=== 5. THE LAND's NET CLIMATE EFFECT, 2015-2024 (TRENDY S2 - S1: climate varying vs held at its 1901-1920 mean), GtC/yr ===
+  canonical  land gain 1.7761 (climate held 1.6586) -> net climate effect +0.1176, z +1.31 against GCB 2025's -0.8 +/- 0.7
+  obj16      land gain 1.7624 (climate held 1.8002) -> net climate effect -0.0378, z +1.09 against GCB 2025's -0.8 +/- 0.7
+  the previews: the canonical +0.12 (10-04 i), P4 -0.04 (10-05 d)
+
+=== THE SEPARATE DRIVERS (run from a frozen copy; each writes its own log) ===
+  CCX_OC_MODE="obj16=calibration/output/refit_20261005_obj16_hilda_csl3v0kaidgbem/mode_fit_pumpN.rds" Rscript calibration/diag_ocean_climate_gobm.R
+  CCX_SC_EXTRA_MODE="obj16=calibration/output/refit_20261005_obj16_hilda_csl3v0kaidgbem/mode_fit_pumpN.rds" CCX_SC_TAG_SUFFIX=_obj16 Rscript calibration/diag_whole_model_scorecard.R
+saved outputs/diagnostics/obj16_refit_read_20261005.{log,rds}
+
+######## 2026-10-05T22:39:00-0400 STEP 6 ocean, like-for-like, under the RULED GMST rule (its own log: outputs/diagnostics/)
+calibration/diag_ocean_climate_gobm.R @263d5f0+dirty, 2026-10-05 22:39 | mode obj16 (calibration/output/refit_20261005_obj16_hilda_csl3v0kaidgbem/mode_fit_pumpN.rds, md5 525404989a20ece51ec8bd088c7d4638) | window 2015-2024 | GCB 2025 -0.20 +/- 0.05 GtC/yr (-7.1 %, range -10.7 to -4.2 %)
+⭐ STRATIFICATION FEEDBACK ON (s 0.052198 /K, q 1, tau_d 194.939 yr): the ocean reads GMST, so it is held with SST + ENSO; T_deep starts at each run's own pre-transient GMST (RULED 2026-10-05); the GMST-historical twin is printed beside
+forcing 1750-2025, 3312 monthly rows; spinup periodic; the ocean's climate columns: sst_anom_NH + sst_anom_SH + enso + gmst (w_enso_l2 13.183 Sv per index unit)
+pre-industrial orbit (B's target): CO2 276.880 ppm in 2015-2024 (first year 276.880; drift +1.53e-09 ppm)
+
+=== R0-R3: §D decomposed (climate held at its 1901-1920 mean from 1901) ===
+  R0 GMST + SST held, CO2 interactive: effect -0.406450 GtC/yr | §D stored -0.430496 (mix_preview_20261004.rds) -> DIFFERS by 0.024
+  (R0 differs from §D BY CONSTRUCTION here: the mode is obj16, not §D's hilda34g)
+  R1 SST only held, CO2 interactive:  effect -0.3992 GtC/yr (warm-run CO2 +5.33 ppm)
+  R2 SST only held, CO2 PRESCRIBED:   effect -0.5179 GtC/yr = -14.59 % of the CO2 effect; -0.440 per K of SST (dSST +1.177 K); match 18 iters, max |dCO2| 5.1e-05 ppm
+  R3 SST + ENSO + GMST held, CO2 PRESCRIBED: effect -0.4399 GtC/yr = -12.31 % (the ENSO limb's + the feedback's (GMST, T_deep continuing its history) share +0.0780; the index's 1901-1920 mean is 0.000, 0 before 1948)
+
+=== CHECK 0. COMPLETENESS: sst_anom_NH + sst_anom_SH + enso + gmst held, everything else historical, CO2 matched to the orbit ===
+  the ocean's CO2 sensitivity 0.0223 GtC/yr per ppm -> allowed |sink| 2.23e-04 GtC/yr
+  listed columns held:      sink -3.48e-06 GtC/yr, max |ocean_C - orbit| 1.51e-04 GtC -> PASS
+  MUTATION (ENSO not held): sink +9.57e-02 GtC/yr, max |ocean_C - orbit| 1.55e+00 GtC -> the gate FAILS it, as it must
+  MUTATION (GMST not held): sink +2.73e-03 GtC/yr, max |ocean_C - orbit| 1.43e-01 GtC -> the gate FAILS it, as it must
+
+=== THE TEN GCB 2025 GOBM PROTOCOLS, emulated (A: pre-transient climate to t_r, historical after; C: the normal year from 1750; CO2 prescribed) ===
+  PlankTOM12        N year 1990                  PA year 1990       t_r 1948 | effect -0.3500 GtC/yr (-9.80 %) = SST -0.4199 + ENSO +0.0867 + GMST -0.0167 | dSST +0.454 K | interactive -0.2410 (dCO2 +1.28 ppm) | match 16/31
+  IPSL              N loop 1958-1967             PA loop 1958-1967  t_r 1940 | effect -0.3944 GtC/yr (-11.02 %) = SST -0.4789 + ENSO +0.1066 + GMST -0.0221 | dSST +0.841 K | interactive -0.2591 (dCO2 +4.10 ppm) | match 14/27
+  NorESM            N mean 1958-2000             PA mean 1958-2000  t_r 1948 | effect -0.3676 GtC/yr (-10.28 %) = SST -0.4512 + ENSO +0.1043 + GMST -0.0207 | dSST +0.665 K | interactive -0.2436 (dCO2 +2.90 ppm) | match 15/29
+  MPIOM             N year 1957                  PA loop 1948-1957  t_r 1948 | effect -0.3925 GtC/yr (-10.97 %) = SST -0.4757 + ENSO +0.1044 + GMST -0.0212 | dSST +0.784 K | interactive -0.2577 (dCO2 +3.30 ppm) | match 26/29
+  FESOM             N year 1961                  PA year 1961       t_r 1958 | effect -0.3741 GtC/yr (-10.45 %) = SST -0.4696 + ENSO +0.1181 + GMST -0.0226 | dSST +0.790 K | interactive -0.2413 (dCO2 +3.96 ppm) | match 13/27
+  CNRM              N year 1958                  PA year 1958       t_r 1958 | effect -0.4125 GtC/yr (-11.55 %) = SST -0.4643 + ENSO +0.0718 + GMST -0.0200 | dSST +0.752 K | interactive -0.2859 (dCO2 +3.04 ppm) | match 14/29
+  Princeton         N loop 1958-1969             PA loop 1958-1969  t_r 1958 | effect -0.3715 GtC/yr (-10.39 %) = SST -0.4678 + ENSO +0.1178 + GMST -0.0216 | dSST +0.825 K | interactive -0.2418 (dCO2 +3.96 ppm) | match 13/27
+  CESM_ETHZ         N mean 1958-2024             PA loop 1958-2024  t_r 1958 | effect -0.3318 GtC/yr (-9.31 %) = SST -0.4100 + ENSO +0.0958 + GMST -0.0176 | dSST +0.486 K | interactive -0.2262 (dCO2 +1.86 ppm) | match 22/30
+  MRI               N months 1990.333-1991.333   PA loop 1948-2024  t_r 1958 | effect -0.3418 GtC/yr (-9.57 %) = SST -0.4177 + ENSO +0.0932 + GMST -0.0173 | dSST +0.443 K | interactive -0.2324 (dCO2 +1.19 ppm) | match 24/31
+  ACCESS            N year 1958                  PA year 1958       t_r 1958 | effect -0.4125 GtC/yr (-11.55 %) = SST -0.4643 + ENSO +0.0718 + GMST -0.0200 | dSST +0.752 K | interactive -0.2859 (dCO2 +3.04 ppm) | match 14/29
+
+  ENSEMBLE (unweighted, as GCB): effect -0.3749 +/- 0.0282 GtC/yr (1 sigma over the ten; range -0.4125 to -0.3318)
+    vs GCB 2025 -0.20 +/- 0.05: difference -0.1749 = -3.50 GCB sigmas; ratio 1.87 | as % of the CO2 effect: -10.49 % (range -11.55 to -9.31) vs GCB -7.1 % (range -10.7 to -4.2)
+    of it SST (the thermal part) -0.4519 +/- 0.0261, the ENSO limb +0.0970, the STRATIFICATION FEEDBACK (GMST held, T_deep spun up) -0.0200; the interactive twins' mean -0.2515 (CO2 interactivity's share -0.1234)
+  GMST HISTORICAL in A and C (the feedback alike in both: SST + ENSO in a weakened ocean, every OFF mode's definition): -0.3549 +/- 0.0270 GtC/yr (range -0.3925 to -0.3142); ratio 1.77 to GCB; -10.00 % of the CO2 effect
+
+=== SENSITIVITY (not in the ensemble) ===
+  CESM_ETHZ_as2001  N year 2001                  PA loop 1958-2024  t_r 1958 | effect -0.3223 GtC/yr (-9.02 %) = SST -0.4023 + ENSO +0.0979 + GMST -0.0179 | dSST +0.346 K | interactive -0.2180 (dCO2 +0.80 ppm) | match 25/31
+  swapping it in moves the ensemble mean by +0.0010 GtC/yr
+
+=== THE ANNUAL A - C SERIES, prescribed CO2, ensemble mean by decade (GtC/yr): SST + ENSO + GMST | SST only | GMST historical ===
+  1960s: +0.0920 (protocol range -0.0764 to +0.4491) | +0.1330 | +0.0915
+  1970s: -0.1415 (protocol range -0.2355 to +0.0029) | -0.0650 | -0.1412
+  1980s: -0.1491 (protocol range -0.2197 to -0.0546) | -0.1666 | -0.1466
+  1990s: -0.1649 (protocol range -0.2241 to -0.0962) | -0.2412 | -0.1595
+  2000s: -0.2458 (protocol range -0.2911 to -0.1838) | -0.2192 | -0.2372
+  2010s: -0.2793 (protocol range -0.3249 to -0.2270) | -0.3493 | -0.2643
+  2015-2024: -0.3749 | -0.4519 | -0.3549 (the window's annual means; the table's rate uses year-boundary interpolation)
+
+=== CHECK 1. CHEMISTRY: d ln pCO2 / dT at fixed DIC and ALK (Takahashi 1993's 0.0423 /K) ===
+  T  2.0 C: pCO2 189.5 uatm, d ln pCO2/dT 0.0458 /K
+  T 10.0 C: pCO2 270.9 uatm, d ln pCO2/dT 0.0433 /K
+  T 18.0 C: pCO2 380.2 uatm, d ln pCO2/dT 0.0412 /K
+  T 26.0 C: pCO2 525.4 uatm, d ln pCO2/dT 0.0395 /K
+
+=== CHECK 2. LINEARITY: shared normal year before t_r (literal) vs shared HISTORY before t_r (A = the standard run) ===
+  CNRM        literal -0.4125 | shared history -0.4119 | difference +0.00059
+  PlankTOM12  literal -0.3500 | shared history -0.3486 | difference +0.00144
+  Princeton   literal -0.3715 | shared history -0.3710 | difference +0.00056
+
+=== CHECK 3. ONE GOBM's OWN SPLIT (Bunsen 2024 GRL, FESOM1.4-REcoM2, repeat year 1961; 2000-2019: total 0.25, warming 0.09, wind 0.17 PgC/yr less uptake) ===
+  CCX under the FESOM protocol, 2000-2019 annual means: SST only -0.3039 GtC/yr = 3.4 x his WARMING part | SST + ENSO + GMST -0.2566 = 1.0 x his TOTAL | GMST historical -0.2424 = 1.0 x his TOTAL
+
+=== CHECK 4. PATHWAYS: the effect (SST + ENSO + GMST) off the mode obj16, one name scaled at a time (spinup and orbit re-run; NOT a refit), CNRM protocol ===
+  base              effect -0.4125 GtC/yr | sink_A 3.147 | -11.55 % of the CO2 effect
+  kz_half           effect -0.3169 GtC/yr | sink_A 2.828 | -10.07 % of the CO2 effect
+  kz_double         effect -0.5174 GtC/yr | sink_A 3.481 | -12.89 % of the CO2 effect
+  u_hs_half         effect -0.3800 GtC/yr | sink_A 3.000 | -11.22 % of the CO2 effect
+  u_hs_double       effect -0.4533 GtC/yr | sink_A 3.329 | -11.94 % of the CO2 effect
+  w_enso_l2_half    effect -0.4488 GtC/yr | sink_A 3.111 | -12.55 % of the CO2 effect
+  w_enso_l2_double  effect -0.3795 GtC/yr | sink_A 3.182 | -10.65 % of the CO2 effect
+  elasticity to kz       : effect 0.354, sink 0.150
+  elasticity to u_hs     : effect 0.127, sink 0.075
+  elasticity to w_enso_l2: effect -0.121, sink 0.016
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/ocean_climate_gobm_20261005_obj16.{log,rds}
+
+######## 2026-10-05T22:40:59-0400 STEP 7 scorecard
+calibration/diag_whole_model_scorecard.R @263d5f0+dirty, 2026-10-05 22:41
+ARMS (each spun up as its file records):
+  ent26    ent26 (column control, quarantined)   struct column, seas_ml 0, spinup aseasonal, 38 par, h_ml 134.1
+  hilda31pe hilda31pe (seas_ml 0 control, CCX_MODE_SEASML0_CONTROL)   struct hilda_c, seas_ml 0, spinup periodic, 31 par + 7 PINNED (w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0,w_enso_l2=0), h_ml 49.5
+  hilda34g hilda34g (canonical, CCX_MODE_CANONICAL)   struct hilda_csl3v0kaidgbe, seas_ml 1, spinup periodic, 34 par + 9 PINNED (ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0), h_ml 49.6
+  obj16    calibration/output/refit_20261005_obj16_hilda_csl3v0kaidgbem/mode_fit_pumpN.rds (extra arm, CCX_SC_EXTRA_MODE)   struct hilda_csl3v0kaidgbem, seas_ml 1, spinup periodic, 33 par + 10 PINNED (ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0,npp_tsens=0), h_ml 49.6
+
+=== 0. EACH ARM REPRODUCES ITS OWN STORED STREAMS (tol 0.001; the like-for-like guard) ===
+  ent26    stored -1410.9591  recomputed -1234.3400  diff +1.77e+02 over 20 rows  -> MIGRATED file: its stored streams are PROVENANCE (restamp_mode_objective.R cannot encode a pre-migration vector); not gated
+           rows not in both (excluded from the sum): d14c_deep_ocean d13c_icecore d14c_profile_level d14c_profile_ab d14c_profile_bd gcb_ocean_enso_slope
+  hilda31pe stored -1194.8050  recomputed -1194.8050  diff -6.71e-07 over 27 rows  -> REPRODUCES
+  hilda34g stored -1143.2508  recomputed -1143.2508  diff +7.67e-07 over 27 rows  -> REPRODUCES
+  obj16    stored -1145.0186  recomputed -1145.0186  diff +5.02e-11 over 27 rows  -> REPRODUCES
+
+=== 1. LIKELIHOOD BY STREAM GROUP (common rows; rows absent from an arm shown after) ===
+  group               ent26 hilda31pe  hilda34g     obj16       B-A       C-B   rows
+  co2_level         -651.41   -668.51   -644.12   -644.52    -17.10    +24.39   co2_level_MLO co2_level_SPO co2_icecore
+  co2_seasonal        67.99     68.80     77.97     77.12     +0.80     +9.17   co2_seasonal_MLO co2_seasonal_SPO
+  d13c_level         217.75    189.76    184.68    185.00    -27.99     -5.08   d13c_icecore d13c_level_MLO d13c_level_SPO
+  d13c_seasonal      463.31    458.76    458.82    458.68     -4.56     +0.06   d13c_seasonal_MLO d13c_seasonal_SPO
+  gradients           92.09     92.28     90.63     90.40     +0.19     -1.65   co2_gradient d13c_gradient
+  bomb_d14c         -571.09   -581.29   -575.78   -575.93    -10.20     +5.51   d14c_NH d14c_SH
+  d14c_profile      -241.61     -8.50     -8.72     -8.75   +233.11     -0.22   d14c_profile_level d14c_profile_ab d14c_profile_bd
+  excess_c14          -9.17     -9.85     -9.64     -9.65     -0.68     +0.20   excess_c14_ocean
+  gcb_sinks         -121.47    -71.64    -53.06    -53.37    +49.83    +18.59   gcb_ocean_sink gcb_land_sink gcb_ocean_enso_slope
+  ocean_deep          -7.35    -16.33    -16.69    -16.63     -8.98     -0.36   ocean_grad_dic ocean_grad_d13c ocean_grad_alk
+  TOTAL common     -1401.38  -1187.66  -1136.57  -1138.30   +213.72    +51.09
+  TOTAL shared     -1280.23  -1113.28  -1080.97  -1082.38   +166.94    +32.31   <- WITHOUT the two GCB level rows (hilda34g, obj16 score them against #14's moved targets)
+  hilda31pe-only rows: hs_surf_dic -4.27, hs_surf_d13c -2.87
+  hilda34g-only rows: hs_surf_dic -4.24, hs_surf_d13c -2.43
+  obj16-only rows: hs_surf_dic -4.25, hs_surf_d13c -2.47
+  rows not common to every arm: hs_surf_dic hs_surf_d13c  (TOTAL incl. them: ent26 -1401.38, hilda31pe -1194.81, hilda34g -1143.25, obj16 -1145.02)
+
+=== 2. GATES (the ledger, INDEX_ccx_gates) ===
+  GATE V  ent26    sd 0.720 vs obs 0.933 ± 0.084  ratio 0.77  z -2.54  -> FAIL (too smooth)
+  GATE V  hilda31pe sd 0.528 vs obs 0.933 ± 0.084  ratio 0.57  z -4.84  -> FAIL (too smooth)
+  GATE V  hilda34g sd 0.548 vs obs 0.933 ± 0.084  ratio 0.59  z -4.60  -> FAIL (too smooth)
+  GATE V  obj16    sd 0.565 vs obs 0.933 ± 0.084  ratio 0.61  z -4.39  -> FAIL (too smooth)
+  GATE H  ent26    R_co2 0.913 (z_level -3.60) R_d13c 1.969 (z_level -21.70)  contrast z +11.65  -> FAIL
+  GATE H  hilda31pe R_co2 0.911 (z_level -3.67) R_d13c 2.006 (z_level -22.53)  contrast z +11.87  -> FAIL
+  GATE H  hilda34g R_co2 0.874 (z_level -5.19) R_d13c 1.953 (z_level -21.34)  contrast z +12.02  -> FAIL
+  GATE H  obj16    R_co2 0.874 (z_level -5.22) R_d13c 1.951 (z_level -21.31)  contrast z +12.02  -> FAIL
+  GATE GL ent26    d13C gradient -0.1314 vs obs -0.0668 ± 0.0030 (ratio 1.97); rep_frac 0.087 (derived from R_co2 0.913) -> se 0.0065, z -9.90 (bare z -21.70)  -> FAIL
+  GATE GL hilda31pe d13C gradient -0.1339 vs obs -0.0668 ± 0.0030 (ratio 2.01); rep_frac 0.089 (derived from R_co2 0.911) -> se 0.0066, z -10.12 (bare z -22.53)  -> FAIL
+  GATE GL hilda34g d13C gradient -0.1304 vs obs -0.0668 ± 0.0030 (ratio 1.95); rep_frac 0.126 (derived from R_co2 0.874) -> se 0.0089, z -7.15 (bare z -21.34)  -> FAIL
+  GATE GL obj16    d13C gradient -0.1303 vs obs -0.0668 ± 0.0030 (ratio 1.95); rep_frac 0.126 (derived from R_co2 0.874) -> se 0.0089, z -7.11 (bare z -21.31)  -> FAIL
+  GATE 5  ent26    nh_drop z -1.79, sh_t z +1.42, lag z +1.66, nh_efold z -7.49, nh_v z +0.08, sh_v z +8.35; orderings sh_after_nh ok nh_peak_higher ok  -> FAIL
+  GATE 5  hilda31pe nh_drop z -1.78, sh_t z +1.38, lag z +1.61, nh_efold z -7.49, nh_v z +0.39, sh_v z +12.35; orderings sh_after_nh ok nh_peak_higher ok  -> FAIL
+  GATE 5  hilda34g nh_drop z -1.83, sh_t z +1.45, lag z +1.69, nh_efold z -7.32, nh_v z +0.22, sh_v z +10.58; orderings sh_after_nh ok nh_peak_higher ok  -> FAIL
+  GATE 5  obj16    nh_drop z -1.83, sh_t z +1.45, lag z +1.68, nh_efold z -7.15, nh_v z +0.22, sh_v z +10.63; orderings sh_after_nh ok nh_peak_higher ok  -> FAIL
+  GATE G  ent26    se 17.1, z -0.0837, n_eff 20, d_umol -1.43, inv_d -79.2, inv_pct -0.214, uptake 155  -> PASS
+  GATE G  hilda31pe se 18.6, z 0.0165, n_eff 20, d_umol 0.307, inv_d 581, inv_pct 1.8, uptake 129  -> PASS
+  GATE G  hilda34g se 18.6, z -0.0239, n_eff 20, d_umol -0.445, inv_d 629, inv_pct 1.95, uptake 130  -> PASS
+  GATE G  obj16    se 18.6, z -0.0203, n_eff 20, d_umol -0.377, inv_d 639, inv_pct 1.98, uptake 130  -> PASS
+  GATE Q  ent26    air-sea d13C diseq k-weighted +0.755 vs 0.60 ± 0.10 (bottles k +0.545)  n_sd 1.55  -> PASS   [ml/hs NH +0.80/+0.00 SH +0.73/+0.00; area-all +0.758 vs bottles +0.846; old ML-area +0.757]
+  GATE Q  hilda31pe air-sea d13C diseq k-weighted +0.558 vs 0.60 ± 0.10 (bottles k +0.545)  n_sd 0.42  -> PASS   [ml/hs NH +0.96/-0.07 SH +0.84/+0.05; area-all +0.754 vs bottles +0.846; old ML-area +0.893]
+  GATE Q  hilda34g air-sea d13C diseq k-weighted +0.560 vs 0.60 ± 0.10 (bottles k +0.545)  n_sd 0.40  -> PASS   [ml/hs NH +0.99/-0.12 SH +0.86/+0.02; area-all +0.769 vs bottles +0.846; old ML-area +0.918]
+  GATE Q  obj16    air-sea d13C diseq k-weighted +0.562 vs 0.60 ± 0.10 (bottles k +0.545)  n_sd 0.38  -> PASS   [ml/hs NH +0.99/-0.11 SH +0.86/+0.03; area-all +0.771 vs bottles +0.846; old ML-area +0.918]
+  GATE D  ent26    hemispheric diseq NH +0.843 SH +0.779 (ml/hs NH +0.84/NA SH +0.78/NA; obs +1.28/-0.48 +1.05/-1.06) asym +0.063 vs obs +0.286 ± 0.029  z -7.67  -> FAIL
+  GATE D  hilda31pe hemispheric diseq NH +0.886 SH +0.796 (ml/hs NH +1.01/+0.07 SH +0.89/+0.17; obs +1.28/-0.48 +1.05/-1.06) asym +0.090 vs obs +0.286 ± 0.029  z -6.76  -> FAIL
+  GATE D  hilda34g hemispheric diseq NH +0.903 SH +0.813 (ml/hs NH +1.03/+0.03 SH +0.91/+0.14; obs +1.28/-0.48 +1.05/-1.06) asym +0.090 vs obs +0.286 ± 0.029  z -6.74  -> FAIL
+  GATE D  obj16    hemispheric diseq NH +0.905 SH +0.814 (ml/hs NH +1.03/+0.03 SH +0.91/+0.15; obs +1.28/-0.48 +1.05/-1.06) asym +0.091 vs obs +0.286 ± 0.029  z -6.72  -> FAIL
+  GATE 7  ent26    ocean 3.07 (z -0.32) land 3.29 (z +1.77) GtC/yr  -> PASS
+  GATE 7  hilda31pe ocean 3.12 (z -0.22) land 3.12 (z +1.42) GtC/yr  -> PASS
+  GATE 7  hilda34g ocean 3.14 (z -0.26) land 3.06 (z +0.86) GtC/yr  -> PASS
+  GATE 7  obj16    ocean 3.14 (z -0.27) land 3.08 (z +0.87) GtC/yr  -> PASS
+  GATE S  ent26    SPO ocean limb 0.437 ppm @ month 8.87, bracket [7.41, 10.41]  -> PASS
+  GATE S  hilda31pe SPO ocean limb 0.311 ppm @ month 8.70, bracket [7.41, 10.41]  -> PASS
+  GATE S  hilda34g SPO ocean limb 0.210 ppm @ month 8.50, bracket [7.41, 10.41]  -> PASS
+  GATE S  obj16    SPO ocean limb 0.205 ppm @ month 8.47, bracket [7.41, 10.41]  -> PASS
+  GATE 6  ent26    MLO seasonal-amplitude growth 1960s -> 2010s: +19.40 % vs obs +15.57 % (se 3.44 pp; boot 2000, seed 20261002)  z +1.11  -> PASS
+  GATE 6  hilda31pe MLO seasonal-amplitude growth 1960s -> 2010s: +18.00 % vs obs +15.57 % (se 3.44 pp; boot 2000, seed 20261002)  z +0.70  -> PASS
+  GATE 6  hilda34g MLO seasonal-amplitude growth 1960s -> 2010s: +14.42 % vs obs +15.57 % (se 3.44 pp; boot 2000, seed 20261002)  z -0.34  -> PASS
+  GATE 6  obj16    MLO seasonal-amplitude growth 1960s -> 2010s: +14.80 % vs obs +15.57 % (se 3.44 pp; boot 2000, seed 20261002)  z -0.22  -> PASS
+  GATE 11 ent26    screen: 21 series screened, 4 listed (n < 20); no flags; uncaptured (non-Gaussian rows): excess_c14_ocean, d14c_profile_level, d14c_profile_ab, d14c_profile_bd
+  GATE 11 hilda31pe screen: 21 series screened, 6 listed (n < 20); no flags; uncaptured (non-Gaussian rows): excess_c14_ocean, d14c_profile_level, d14c_profile_ab, d14c_profile_bd
+  GATE 11 hilda34g screen: 21 series screened, 6 listed (n < 20); no flags; uncaptured (non-Gaussian rows): excess_c14_ocean, d14c_profile_level, d14c_profile_ab, d14c_profile_bd
+  GATE 11 obj16    screen: 21 series screened, 6 listed (n < 20); no flags; uncaptured (non-Gaussian rows): excess_c14_ocean, d14c_profile_level, d14c_profile_ab, d14c_profile_bd
+  GATE P7 hilda34g modern surface-deep d13C gradient, ONE VECTOR: seas_ml OFF -0.368 -> ON -0.355: move +0.013 vs bound (OFF sd_eff) 0.160 = 0.08x, target -0.861; DIC 305.6 -> 303.6 (-2.0, 0.06x its sd_eff 31.9; reported)  -> PASS
+  GATE P7 obj16    modern surface-deep d13C gradient, ONE VECTOR: seas_ml OFF -0.372 -> ON -0.360: move +0.013 vs bound (OFF sd_eff) 0.160 = 0.08x, target -0.861; DIC 307.1 -> 305.1 (-2.0, 0.06x its sd_eff 31.9; reported)  -> PASS
+  (gradient rows) ent26    d13C -0.879 (target -0.861, sd_eff 0.118)  DIC 220.4 (target 233.1, sd_eff 26.4)  ALK 95.1
+  (gradient rows) hilda31pe d13C -0.334 (target -0.861, sd_eff 0.160)  DIC 309.2 (target 233.1, sd_eff 32.0)  ALK 102.7
+  (gradient rows) hilda34g d13C -0.355 (target -0.861, sd_eff 0.160)  DIC 303.6 (target 233.1, sd_eff 31.9)  ALK 117.1
+  (gradient rows) obj16    d13C -0.360 (target -0.861, sd_eff 0.160)  DIC 305.1 (target 233.1, sd_eff 31.9)  ALK 116.4
+
+=== 3. THE ENSO OCEAN RESPONSE (09-04g estimator: annual ocean uptake ~ year + Nino3.4) ===
+  GCB observed: slope +0.1153 ± 0.0246 GtC/yr per index, r +0.488 (n 66)
+  ent26    full model slope +0.0548 ± 0.0313 (r +0.207) = 0.48x obs;  solubility-only -0.1741 (r -0.523)  [gamma_enso_ocn NH +0.262 SH +0.094; w_enso_l2 0.00]
+  hilda31pe full model slope +0.1082 ± 0.0323 (r +0.373) = 0.94x obs;  solubility-only -0.1789 (r -0.569)  [gamma_enso_ocn NH +0.422 SH +0.063; w_enso_l2 0.00]
+  hilda34g full model slope +0.0988 ± 0.0426 (r +0.269) = 0.86x obs;  solubility-only -0.1826 (r -0.558)  [gamma_enso_ocn NH +0.000 SH +0.000; w_enso_l2 12.93]
+  obj16    full model slope +0.0990 ± 0.0426 (r +0.270) = 0.86x obs;  solubility-only -0.1853 (r -0.563)  [gamma_enso_ocn NH +0.000 SH +0.000; w_enso_l2 13.18]
+
+=== 4. COMPARISONS, NOT GATES (Marcus 09-08h: nothing from Joos may score the model) ===
+  12 IRF   ent26    IRF(20) 0.523  IRF(100) 0.281  IRF(300) 0.197   (Joos 2013 multi-model: 0.596 / 0.409 / 0.322)
+  12 IRF   hilda31pe IRF(20) 0.508  IRF(100) 0.285  IRF(300) 0.204   (Joos 2013 multi-model: 0.596 / 0.409 / 0.322)
+  12 IRF   hilda34g IRF(20) 0.528  IRF(100) 0.374  IRF(300) 0.280   (Joos 2013 multi-model: 0.596 / 0.409 / 0.322)
+  12 IRF   obj16    IRF(20) 0.516  IRF(100) 0.366  IRF(300) 0.274   (Joos 2013 multi-model: 0.596 / 0.409 / 0.322)
+  L split  ent26    @100 yr land 39 / ocean 33 / air 28 %;  @1000 yr land 30 / ocean 52 / air 18 %   (Joos 2013 at 1000 yr: land 16 ± 7 / ocean 59 ± 6 / air 25 ± 4.5 %; z at 1000: land +1.96 ocean -1.10 air -1.58; closure 1.0000)
+  L split  hilda31pe @100 yr land 39 / ocean 32 / air 28 %;  @1000 yr land 33 / ocean 49 / air 18 %   (Joos 2013 at 1000 yr: land 16 ± 7 / ocean 59 ± 6 / air 25 ± 4.5 %; z at 1000: land +2.49 ocean -1.74 air -1.55; closure 1.0000)
+  L split  hilda34g @100 yr land 25 / ocean 38 / air 37 %;  @1000 yr land 15 / ocean 62 / air 23 %   (Joos 2013 at 1000 yr: land 16 ± 7 / ocean 59 ± 6 / air 25 ± 4.5 %; z at 1000: land -0.08 ocean +0.50 air -0.54; closure 1.0000)
+  L split  obj16    @100 yr land 26 / ocean 37 / air 37 %;  @1000 yr land 16 / ocean 61 / air 22 %   (Joos 2013 at 1000 yr: land 16 ± 7 / ocean 59 ± 6 / air 25 ± 4.5 %; z at 1000: land +0.04 ocean +0.38 air -0.58; closure 1.0000)
+
+=== 5. STRAINED PRIORS (|z| > 2) and the declared structure ===
+  ent26    q10 -2.24, sst_seas_amp_NH -3.91, rep_dC +3.39
+  hilda31pe q10 -2.43, kz_deep_frac -2.74, pump_hs_gcm2 +2.29, ent_seas_amp_SH +2.03, rep_dC +3.51
+  hilda34g q10 -2.54, kz_deep_frac -2.75, pump_hs_gcm2 +2.13, rep_dC +4.17
+  obj16    q10 -2.53, kz_deep_frac -2.79, pump_hs_gcm2 +2.15, rep_dC +4.16
+
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/whole_model_scorecard_20261005_hilda34g_obj16.rds
+  ⛔ Nothing adopted.
+provenance: calibration/diag_whole_model_scorecard.R @263d5f0+dirty; canonical hilda34g; arms (spinup) ent26 (aseasonal), hilda31pe (periodic), hilda34g (periodic), obj16 (periodic); no RNG
+
+landchain DONE 2026-10-05T22:41:22-0400: steps 1-7 complete. NOTHING committed; NOTHING adopted.
