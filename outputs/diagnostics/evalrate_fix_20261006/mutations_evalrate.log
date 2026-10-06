@@ -1,0 +1,8 @@
+baseline: 50 passed 0 failed 0 errors
+ME1_mean_not_max: CAUGHT (failure) by: D5, D9 
+ME2_minutes_not_s: CAUGHT (failure) by: D5, D9 
+ME3_fixed_maxit: CAUGHT (failure) by: D9 
+ME4_driver_old: CAUGHT (failure) by: D9 
+ME5_polish_own_sum: CAUGHT (failure) by: D5, D9 
+ME6_no_null_guard: CAUGHT (failure) by: D9 
+tree after: [] (empty = every mutation restored)

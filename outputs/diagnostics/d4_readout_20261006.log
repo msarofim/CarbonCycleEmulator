@@ -1,0 +1,5 @@
+=== calibration/diag_d4_readout.R @7915464, run 2026-10-06 10:00 ===
+mode hilda33p; emissions interpolation "constant"; target 56.06 +/- 7.75 GtC/yr over 2001-2023
+D4 (exclusive, RULED): modern NPP 66.83 GtC/yr, z +1.39
+  beside it: +0.63 GtC/yr retained via N deposition (GROSS: ndep_ret 12.83 kg C/kg N x 48.9 Tg N/yr)
+  (inclusive, not ruled: 67.46, z +1.47)

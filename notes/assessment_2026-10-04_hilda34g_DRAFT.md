@@ -1,5 +1,8 @@
 # ASSESSMENT — CarbonCycleEmulator at `hilda34g`, release BETA v1.0 CarboTope (2026-10-04) — ⚠ DRAFT EVIDENCE, NOT A VERDICT
 
+> ⛔ **SUPERSEDED 2026-10-06** by `notes/assessment_2026-10-06_hilda33p_DRAFT.md` (Marcus: "Assessment → hilda33p
+> (Recommended)"). hilda33p is the canonical since 10-06 (a). This draft is kept as the record of hilda34g.
+
 **Marcus (2026-10-04), on the 10-04 handoff's open items: "hilda34g assessment"** (item 6). This note follows
 `notes/assessment_2026-10-01_hilda33d_DRAFT.md`, with the same sections. It gives the model as it stands, judged
 against the 09-03 standard, with every remaining flaw named and classed.

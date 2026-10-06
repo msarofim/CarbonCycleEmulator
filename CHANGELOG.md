@@ -2,6 +2,74 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-06 (g) — **The assessment is RE-BASED on hilda33p** (Marcus: "Assessment → hilda33p (Recommended)"): `notes/assessment_2026-10-06_hilda33p_DRAFT.md`, with his §5 verdict and §7 acts left as placeholders. It supersedes the hilda34g draft, which now points to it. **No gate verdict flips against hilda34g.**
+
+- **Three re-reads, from a frozen worktree at `7915464`** (clean stamps; BLAS pinned):
+  - **the scorecard**, hilda33p canonical + hilda34g as the comparison arm (`whole_model_scorecard_20261006_hilda33p.{log,rds}`; 26 s). It **reproduces 10-05 (p)'s scorecard of the same vector (the arm "obj16", at `263d5f0+dirty`) line for line**: 18 of 18 gate, comparison, prior and reproduction lines identical. The AIC row: the canonical leads `hilda31pe` by +30.90 on the shared rows at 33 vs 31 names;
+  - **D4** (`d4_readout_20261006.{log,csv}`): modern NPP **66.83 GtC/yr, z +1.39** (hilda34g 66.31, z +1.32); +0.63 retained via N deposition beside it;
+  - **the ENSO growth timing** (`enso_growth_fit_20261006_hilda33p.{log,rds}`, T2(b)): the model's growth peaks **1 month** after Niño 3.4 (r 0.68), as at hilda34g; the record's, 5 (r 0.50). Its console is the log, as the earlier `tee`'d runs.
+- **Read from the running app:** ENSO off moves the What-if's typical miss 0.37 → 0.41 ppm/yr, "10% further from the data" (hilda34g 11 %).
+- **Re-checked for §6:** `CCX_CONSTANTS` has 79 entries (74 at 10-04), 11 provisional (the same eleven), 6 retired. The five added are the stratification feedback's (`MIX_STRAT_S`, `MIX_TDEEP_TAU` derived; `MIX_STRAT_Q`, `_Q_LO`, `_Q_HI` cited).
+- **Every number in the note is sourced** in its header; the hilda34g-only figure (the SST part's 3.4× one GOBM's, 10-04 p) is labelled as hilda34g's.
+
+## 2026-10-06 (f) — **Housekeeping, on Marcus's "Housekeeping (Recommended)": the handoff's §4.6 list is REMOVED, after every target was checked; two trees' only-copy evidence was moved into the repo first** (`7915464`).
+
+- **Checked before anything was removed:**
+  - `20261005f_obj16`, #16's run tree: its 48 wave files, 25 task logs, 6 chain files (`launch.{sh,out}`, `land.sh`, `landchain.{sh,out}`, `sleep_addendum.R`), its port targets, the preflight dir and the wave and port logs are all `cmp`-identical to the repo's wave directory.
+  - `20261005g_ocgobm`: **its 23 untracked files were the ONLY copy** of the evidence CHANGELOG 10-05 (h) and (j) cite (the ocean diagnostic's two tests; the landing chain's dry run, "logs in the tree's `DRYRUN_logs/`"). → `outputs/diagnostics/obj16_landing_dryrun_20261005_ocgobm_tree/` (328 KB, byte-identical, paths kept), with a README naming each file and saying none is canonical.
+  - `20261005h_cpuclock_old` / `_smoke`: the smoke README said these trees "hold the start files". Their 14 start files and copied-in port targets → `outputs/diagnostics/cpuclock_smoke_20261005/start_files/`; the README now points there.
+  - The smoke's 11 logs and its launch, eval and driver-output files are identical to the repo's copies. The three suite trees had no uncommitted files.
+- **Removed:**
+  - 8 worktrees: `20261005f_obj16`, `20261005g_ocgobm`, `20261005h_cpuclock`, `_cpuclock_old`, `_cpuclock_smoke`, `20261005h_suite_05796b9`, `20261006_suite_0b46208`, `20261006_suite_fb8036a`;
+  - 27 launch, chain and pid files (theirs, and the carried `20261004f_kw1446_launch.*`) and `20261005h_cpuclock_smoke_logs/`;
+  - the local branch `claude/ms-cpu-clock` (`git branch -d`: merged at `05796b9`, never pushed).
+- ⚠ **Tried and corrected:** my first removal command was BLOCKED by a safety check (an unguarded `rm $F/$f`, which an empty variable would turn into a top-level path). Nothing ran. Re-run with `"${F:?}"/"${f:?}"`.
+- **Not touched, not on the list:** the `20261002ee_obj15_launch.*`, `20261005_suite_777877b_rerun_launch.*` and `20261005_suite_aa76fb5_launch.*` files; the September frozen trees; the two `.claude/worktrees/` folders, which sit in the desktop app's reuse pool (10-05 g). `~/ccx_frozen/` is 13 GB.
+
+## 2026-10-06 (e) — **MERGED: the git-stamp branch `claude/youthful-blackburn-fbc009`** (CHANGELOG 10-01 h; Marcus: "Merge git-stamp branch"). One helper, `ccx_git_stamp()`, now stamps every driver, including the **26 that `main` added since 10-01**, converted here.
+
+- **The merge** (`c45840b`, in its own worktree, so `main`'s tree never sat conflicted under the running app):
+  - one conflict, `CHANGELOG.md`, positional: the branch's 10-01 (h) entry now sits between `main`'s (i) and (g), the letter (i) reserved for it;
+  - `diag_constraint_map.R` and `diag_whole_model_scorecard.R`, changed on both sides, auto-merged. No reference to the removed `CM_GIT_PATHS` / `SC_GIT_PATHS` remains, and both parse.
+- **The conversion** (`9a6829f`): the merged lint flagged 26 drivers. 35 edits, all-or-nothing, each matched exactly once in a dry pass before anything was written. Marcus's 10-01 rulings, as the branch applied them:
+  - 16 `local({...})` / `tryCatch({...})` blocks → `<NAME> <- ccx_git_stamp()`;
+  - 6 `commit` + `dirty` drivers → `commit <- ccx_git_stamp()`; `dirty <- ccx_stamp_dirty(commit)`, so the rds keeps `dirty` (TRUE / FALSE / NA). The " (+uncommitted)" print suffix folds into the stamp;
+  - `build_futures_ribbons`: `ccx_git_stamp(exclude = RB_OUT)`, its own `data/futures_ribbons.rds`. Its `--commit` override for a git-archive copy stays, as does `run_mcmc_check`'s;
+  - `diag_mcmc_band_by_chain` sources no `R/`; it now sources `R/aaa_root.R` and `R/provenance.R` for the stamp.
+  - Static checks on all 26: each parses; exactly one `ccx_git_stamp()`, defined before its first use; no `"git` string and no "+uncommitted" left.
+  - The stamp itself: `c45840b+dirty` before the commit, `9a6829f` after.
+  - `test-git-stamp-lint` 6/6, `test-git-stamp` 63/63.
+- **What NEW outputs of those 26 will show:** the stamp on the standard paths (`R src calibration app data`, untracked files included), where most read the whole tree or four paths before; "+dirty" where they printed " (+uncommitted)".
+- **The full suite at `9a6829f`** — [SUITE 9a6829f: filled when it lands]
+  - ⚠ **It caught one failure of mine, from (c): `test-mode-struct-lint.R:71` and `:78`** (a new file, 34 > 32). (c)'s two Set-column tests read `readRDS(ccx_mode_file())` in a file with no `ccx_mode_base()`. **Fixed in the TEST, not the lint** (`658ccd7`): the canonical test now resolves the vector the model RUNS (`ccx_mode_base(md)`) and asserts what the intro's new clause claims: each held row prints its pin, and the base runs exactly that pin. Mutations: the table fed the defaults is caught (4 rows); one pin printed off-value is caught (`pump_export`). 47/47 and 5/5.
+- **The full suite at `658ccd7`** (the final code) — [SUITE 658ccd7: filled when it lands]
+- **Branches:** `claude/youthful-blackburn-fbc009` (local and origin, `6c87138`) is now merged; deleting it is Marcus's call. Its old session folder is in the desktop app's reuse pool since 10-05 (g), "left to it".
+
+## 2026-10-06 (d) — **The multistart's end-of-run eval rate is CORRECTED** (Marcus: "Fix eval-rate line (Recommended)"; `9b05553`). It was wrong in BOTH directions. The 180-min direct default and the env name `CCX_MS_BUDGET_MIN` stay, as ruled by omission in (c).
+
+- **The defect.** The line printed `60 × sum(restart_min) / n_eval`: minutes NORMALISED to a full-maxit restart (`ms_restart_minutes()`), over EVERY eval of the task (the polish's and the start's too).
+  - T1 of the 10-05 (q) smoke printed **0.0333** s/eval for a true **0.2935**.
+  - T3's wall arm printed **32.8** for a true **1.149** (one 210-eval restart normalised to maxit 6000).
+- **The fix** (`calibration/lib_ms_deadline.R`): `ms_eval_rate_sec(restart_min, maxit_full)` → `c(slowest, fastest)`, each `60 × restart_min / maxit_full`, so the normalisation cancels; NULL when no restart ran. `ms_polish_maxit()` now sizes on it (identical arithmetic), so **the printed rate IS the sizing rate**. The driver prints "eval rate X, the slowest of N restarts (fastest Y)".
+- **Tests** (`test-ms-deadline.R` D9; 50 passed; `test-ms-clock` 47):
+  - the smokes' OWN numbers, inverted from what the old line printed (T1 0.988 min, T3 4.021 min). The inversion reproduces both printed values exactly;
+  - **an independent instrument:** T1's driver had measured 0.2945 s/eval before the restart (median of 5, range 0.2807–0.3755). The helper's 0.2935 sits inside it; the old 0.0333 is 9× below it;
+  - the cancellation property at three maxits; the slowest/fastest pair; the polish's sizing through the helper; a lint that the driver uses the helper and the old expression is gone.
+- **Mutations: 6 of 6 caught, each as a test FAILURE** (scratch worktree, 120-s alarm; `outputs/diagnostics/evalrate_fix_20261006/`):
+
+| mutant | caught by |
+|---|---|
+| ME1 the mean, not the max | D5, D9 |
+| ME2 minutes, not seconds | D5, D9 |
+| ME3 a fixed maxit of 6000 | D9 |
+| ME4 the driver back on the old expression | D9 |
+| ME5 the polish sizing on its own mean | D5, D9 |
+| ME6 no NULL guard | D9 |
+
+- **End to end** (the committed driver, frozen worktree, #16's config, id 1, MAXIT 100, a 5-min wall budget): the line printed **"eval rate 0.2140 s/eval, the slowest of 1 restart (fastest 0.2140)"**, inside the driver's own pre-launch range (0.2048; 0.2016–0.2535). The old expression would have printed ~0.11.
+  - ⚠ The port gate was SKIPPED there, deliberately and as printed. The tracked `calibration/torch/port_targets.csv` is the 09-21 one (32 parameters; hilda29l as incumbent), and the 10-05 copies name hilda34g; either stops the driver at start-up. The smoke tests the print, not the port.
+  - **Noticed, not changed:** the tracked port targets are stale against the canonical. A stale file cannot be used silently: the driver and `calibration/torch/setup_torch.sh` both STOP on its parameter count, structure, seas_ml or pump field. So a launch regenerates it with `make_port_targets.R` (the 10-05 run's copy is in its wave directory). Doing so is a launch step, not this fix.
+
 ## 2026-10-06 (c) — **The handoff's open items RULED; the two app-wording items APPLIED.** The warming switch's caveat now names the mixing slowdown it also removes, as "a third, smaller effect" (smaller is measured and guarded). The parameter table marks its ten HELD rows, from the mode file's own lists. Verified in the restarted app.
 
 - **The rulings, verbatim (Marcus, 2026-10-06), on the handoff's §4:**
