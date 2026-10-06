@@ -1251,15 +1251,22 @@ cat(sprintf("\n[%03d] FINAL log-post %.4f  (%s, %d restart%s, %d evals, %.1f %s%
             restarts_done, if (restarts_done == 1L) "" else "s", n_eval, elapsed_min(), MS_MIN_UNIT,
             if (MS_CLOCK == "wall") ""
             else sprintf("; %.1f wall-min%s", elapsed_wall_min(), if (wall_warned) ", FLAGGED (D4)" else "")))
-# The optimiser's own evals, not the wall clock over them: the start evaluation,
+# The RESTARTS' own rate, not the clock over the whole task: the start evaluation,
 # the compile and the checkpoint writes are not per-eval costs, and a task with
-# NO evals has no rate at all rather than a large one.
+# NO restart has no rate at all rather than a large one.
+# ⚠ FIXED 2026-10-06 (Marcus: "Fix eval-rate line (Recommended)"): this printed
+# 60 x sum(restart_min) / n_eval, NORMALISED minutes over ALL evals (the polish's
+# too), wrong both ways -- 0.0333 for a true 0.2935, 32.8 for a true 1.149 (CHANGELOG
+# 10-06 d). ms_eval_rate_sec() is the slowest restart's rate, the one the polish
+# and maxit_for_budget() size on.
 # ⚠ BRACES: at TOP LEVEL R parses `if (...) expr` as complete and then meets a
 # bare `else` as a new statement -- "unexpected 'else'". Inside a function or a
 # braced block the same code is fine, which is why this reads as correct.
-if (n_eval > 0L && sum(restart_min) > 0) {
-  cat(sprintf("[%03d] eval rate %.4f %s in the optimiser -- SIZE THE ARRAY ON THIS\n",
-              MS_ID, 60 * sum(restart_min) / n_eval, MS_SPE_UNIT))
+.rate <- ms_eval_rate_sec(restart_min, MS_MAXIT)
+if (!is.null(.rate)) {
+  cat(sprintf("[%03d] eval rate %.4f %s, the slowest of %d restart%s (fastest %.4f) -- SIZE THE ARRAY ON THIS\n",
+              MS_ID, .rate[["slowest"]], MS_SPE_UNIT, length(restart_min),
+              if (length(restart_min) == 1L) "" else "s", .rate[["fastest"]]))
 } else {
   cat(sprintf("[%03d] eval rate: NOT MEASURED (no restart ran). The start evaluation alone\n      timed %.4f %s; raise %s or lower CCX_MS_MAXIT.\n",
               MS_ID, MS_SEC_PER_EVAL, MS_SPE_UNIT, MS_BUDGET_VAR))

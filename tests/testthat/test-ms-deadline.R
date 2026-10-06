@@ -6,6 +6,7 @@
 # D5 the polish is sized at the OBSERVED rate; D6 a restart's minutes are normalised by the evals it made;
 # D7 the driver routes BOTH its steps through the stepper and records the stops; D8 val0 is forced before the
 # deadline is set. Mutations M1-M7 (CHANGELOG 10-05) are each caught by their own test.
+# D9 (2026-10-06) the end-of-run eval rate is the restarts' own rate, not normalised minutes over every eval.
 source(file.path(.root, "calibration", "lib_ms_deadline.R"))
 
 # a smooth bowl, minimised; `slow_after` evaluations in, each one sleeps (the near-wall slowdown, scripted)
@@ -93,4 +94,35 @@ test_that("D7: the driver routes BOTH optimiser steps through the stepper and re
   expect_true(any(grepl("ms_check_deadline\\(MS_STEP\\)", code)))
   expect_true(any(grepl("deadline_stops = deadline_stops", code)))
   expect_true(any(grepl("ms_polish_maxit\\(", code)) && any(grepl("ms_restart_minutes\\(", code)))
+})
+
+test_that("D9: the eval rate is the restarts' OWN rate, independent of the normalisation and of the polish", {
+  # The 10-05 (q) smokes (outputs/diagnostics/cpuclock_smoke_20261005/), INVERTED from what the replaced line
+  # printed, so the inputs are the runs' own numbers, not round ones:
+  #   T1      one restart, 202 evals at maxit 200, in a 1763-eval task (the polish's evals too): printed 0.0333.
+  #   T3 wall one restart, 210 evals normalised to maxit 6000, the whole task: printed 32.8228.
+  m1 <- 0.0333 * 1763 / 60 * 202 / 200;     t1 <- ms_restart_minutes(m1, 200, 202)    # 0.988 min (log: "1.0 min")
+  m3 <- 32.8228 * 210 / 60 * 210 / 6000;    t3 <- ms_restart_minutes(m3, 6000, 210)   # 4.021 min (log: "4.0 min")
+  old <- function(rm, n_eval) 60 * sum(rm) / n_eval           # the REPLACED expression
+  expect_equal(old(t1, 1763), 0.0333); expect_equal(old(t3, 210), 32.8228)   # the inversion reproduces both lines
+  r1 <- ms_eval_rate_sec(t1, 200)[["slowest"]]; r3 <- ms_eval_rate_sec(t3, 6000)[["slowest"]]
+  expect_equal(r1, 60 * m1 / 202); expect_equal(r3, 60 * m3 / 210)
+  # AN INDEPENDENT INSTRUMENT: T1's driver measured 0.2945 s/eval before the restart (median of 5, range
+  # 0.2807-0.3755). The helper's 0.2935 sits inside that range; the replaced line's 0.0333 is 9x below it.
+  expect_true(r1 >= 0.2807 && r1 <= 0.3755)
+  expect_false(old(t1, 1763) >= 0.2807)
+  # the normalisation CANCELS: the same restart reads the same rate whatever maxit it is normalised to
+  for (M in c(50, 200, 6000))
+    expect_equal(ms_eval_rate_sec(ms_restart_minutes(2.5, M, 300), M)[["slowest"]], 60 * 2.5 / 300)
+  # two restarts: the slowest is what the polish sizes on, the fastest is reported beside it
+  r2 <- c(ms_restart_minutes(1, 6000, 600), ms_restart_minutes(5, 6000, 1000))
+  expect_equal(unname(ms_eval_rate_sec(r2, 6000)), c(60 * 5 / 1000, 60 * 1 / 600))
+  expect_identical(ms_polish_maxit(100, 33, 0.3, r2, 6000, 1.5, 10, 1e6),
+                   as.integer(floor(100 / (1.5 * 67 * ms_eval_rate_sec(r2, 6000)[["slowest"]] / 60))))
+  expect_null(ms_eval_rate_sec(numeric(0), 6000))
+  # the driver prints the helper's rate, and the replaced expression is gone
+  src <- readLines(file.path(.root, "calibration", "run_dispersed_multistart.R"))
+  code <- src[!grepl("^\\s*#", src)]
+  expect_true(any(grepl("ms_eval_rate_sec\\(restart_min, MS_MAXIT\\)", code)))
+  expect_false(any(grepl("sum(restart_min) / n_eval", code, fixed = TRUE)))
 })

@@ -131,8 +131,22 @@ ms_restart_minutes <- function(minutes, maxit_full, evals) {
 #' iteration, at the OBSERVED per-evaluation rate when restarts have run (the slowest, as maxit_for_budget()
 #' uses), else the start point's measured rate. 0 when not even `floor_` iterations fit.
 ms_polish_maxit <- function(left_min, n_par, sec_per_eval, restart_min, maxit_full, safety, floor_, cap) {
-  spe <- if (length(restart_min)) 60 * max(restart_min) / maxit_full else sec_per_eval
+  spe <- if (length(restart_min)) ms_eval_rate_sec(restart_min, maxit_full)[["slowest"]] else sec_per_eval
   per <- safety * (2 * n_par + 1) * spe / 60
   n <- floor(left_min / per)
   if (n < floor_) 0L else as.integer(min(n, cap))
+}
+
+#' The restarts' OBSERVED seconds per evaluation, on the budget's clock: the slowest restart (what the polish and
+#' maxit_for_budget() size on, so the printed rate IS the sizing rate) and the fastest. `restart_min` holds
+#' ms_restart_minutes() values, i.e. minutes NORMALISED to a full `maxit_full` restart, so one restart's rate is
+#' 60 x restart_min / maxit_full and the normalisation cancels. NULL when no restart ran.
+#' ⚠ REPLACES (2026-10-06, Marcus: "Fix eval-rate line (Recommended)") the driver's end-of-run
+#'   60 x sum(restart_min) / n_eval, which divided NORMALISED minutes by an eval count that includes the polish's
+#'   and the start's. It was wrong in BOTH directions: 0.0333 s/eval printed against a true 0.2935 (10-05 q smoke
+#'   T1: one 202-eval restart at maxit 200 in a 1763-eval task; the driver had measured 0.2945 before it), and
+#'   32.8 against 1.149 (T3's wall arm: one 210-eval restart normalised to maxit 6000). test-ms-deadline D9.
+ms_eval_rate_sec <- function(restart_min, maxit_full) {
+  if (!length(restart_min) || !(max(restart_min) > 0)) return(NULL)
+  c(slowest = 60 * max(restart_min) / maxit_full, fastest = 60 * min(restart_min) / maxit_full)
 }
