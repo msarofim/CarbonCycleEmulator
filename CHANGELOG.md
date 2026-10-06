@@ -2,6 +2,28 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-05 (o) — **The CPU-time budget's four decisions are RULED (handoff 10-05d §5.5), all as recommended.** The build proceeds on a branch in its own worktree, and `main`'s landing scripts stay untouched until #16 lands. **The landing watch was re-armed:** cron `dc08080d` had not survived the session's context reset.
+- **The rulings, verbatim:**
+  - D1: "CPU on Mac, wall on Torch (Recommended)". The Mac runner exports `CCX_MS_CLOCK=cpu`. `multistart.sbatch` keeps wall, because SLURM's `--time` is a hard wall limit. The driver's default stays wall.
+  - D2: "Keep 300 CPU-min (Recommended)". Each start gets the compute the design intended. A Mac wave's wall ETA grows ~10–20 % under load.
+  - D3: "Record and warn (Recommended)". Start files record `clock` (absent = wall). The collector prints it per start and warns on a mixed wave.
+  - D4: "Warn only, at 2× (Recommended)". A log line flags a start whose wall time passes 2× its CPU budget; it never stops one.
+  - D5, the "awake wall clock", was offered as D1's third option and not chosen.
+- **A second measurement, from the live run** (`ps -o lstart,etime,time` at 20:39; asleep spans from `pmset -g log`):
+
+| worker | wall min | asleep min | awake min | CPU min | CPU / awake |
+|---|---|---|---|---|---|
+| id 19 (started 16:39:14) | 240.2 | 138.8 | 101.4 | 98.9 | 0.975 |
+| ids 20–23 (started 18:05:50–18:06:12) | 153.2–153.6 | 63.0 | 90.2–90.6 | 88.3–88.6 | 0.978 |
+
+  - CPU time tracks AWAKE time to ~2 % under the evening's 5-worker load. Wall time does not: it counted the 139 asleep minutes.
+- **The sleep windows, made exact for the landing's statement** (they refine (m), which counted the DarkWakes as asleep):
+  - Window 1: 13:50:45 → 14:34:01, with DarkWakes at 13:53:04 and 13:55:33 (45 s each). **41.8 min asleep.**
+  - Window 2: 16:48:20 → 19:10:08, with FOUR DarkWakes, at 16:51:13, 16:52:34, 18:05:37 and 18:49:15 ((m) named the last two). **138.8 min asleep.**
+  - In all, **180.6 min asleep** (3 h 01 min). (m)'s "about 3 h 05 min" included the DarkWakes.
+- **The watch.** At pickup (20:25) `CronList` was empty. It is replaced by a PID waiter: `kill -0` on the launch chain (27265, 27274, 27295) and the five workers, with no `pgrep`. Both of its exits were tested on stand-ins.
+- **At pickup:** the Mac was on AC with its lid closed, driving the external display (closed-display mode), and had not slept since 19:10:49. #16 had 19 of 24 tasks finished, all exit 0; ids 19–23 were running.
+
 ## 2026-10-05 (n) — Handoff: `notes/handoff_2026-10-05d_obj16_cpu_budget.md`. Marcus, verbatim: "Can you write a handoff that includes budgeting by CPU time instead of clock time." It supersedes 10-05c, which now points to it.
 - **Its §4** is the dry-run-tested landing, plus the ruled sleep statement.
 - **Its §5 SPECIFIES the next build:** a multistart start's budget measured in CPU time instead of wall-clock time.

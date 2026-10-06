@@ -1,5 +1,10 @@
 # HANDOFF 2026-10-05d — #16 is still RUNNING and its landing is ready; THE NEXT BUILD is budgeting multistart starts by CPU TIME instead of wall-clock time
 
+> **STATUS 2026-10-05 20:45 (CHANGELOG 10-05 o):**
+> - **D1–D4 are RULED, all as recommended.** D5 was not chosen.
+> - **Cron `dc08080d` is GONE;** it did not survive the context reset. A PID waiter in the same session replaces it.
+> - The exact sleep windows for §4's statement are in (o).
+
 **Supersedes** `notes/handoff_2026-10-05c_obj16_landing_ready.md`.
 - 10-05c remains the record of the landing tools and the dry run.
 - Its landing commands are reproduced in §4 here, so this note stands alone.
