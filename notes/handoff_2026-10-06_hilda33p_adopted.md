@@ -1,5 +1,8 @@
 # HANDOFF 2026-10-06 — `hilda33p` (objective #16) IS THE CANONICAL. The suite is clean, the app is verified, and nothing is running.
 
+> ⛔ **SUPERSEDED** by `notes/handoff_2026-10-06b_rulings_applied_h2_priced.md` (CHANGELOG 10-06 k). Its open items
+> were ruled and applied the same day (10-06 c–j).
+
 **Supersedes** `notes/handoff_2026-10-05e_obj16_landed_cpuclock_merged.md`.
 - Written on Marcus's request, verbatim: "Adopt 16, and then write a handoff."
 - `main` is at `8b3adc5` plus this note's commit, pushed.

@@ -2,6 +2,24 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-06 (k) — Handoff: `notes/handoff_2026-10-06b_rulings_applied_h2_priced.md` (Marcus: "write a handoff for the next session."). It supersedes `handoff_2026-10-06_hilda33p_adopted.md`, which now points to it.
+- **Nothing is running** except the `ccx-app` preview. The suite of record is `15dbda6`'s, CLEAN (6427 / 0 / 3 / 0).
+- **His question, "why don't we have a term for that?"** (the growth-rate timing), was answered in chat from the record:
+  - a growth-rate ROW was asked for on 09-26 and declined. Its 1991 premise was an estimator artefact, and three
+    objections stand: it is near-redundant with the two sink rows, it is very loud, and it would fight the known
+    variability shortfall;
+  - a timing-only row was ruled out on 10-04 ("No row"): at its honest weight it moves the lag only to 2.70 / 2.90.
+  - No change was made (memory `ccx_growth_objective_declined`, cross-linked to today's numbers).
+- **Open, all Marcus's:**
+  - the `k_w` line's wording (my draft);
+  - H2's next step;
+  - the ENSO-timing test without the seasonal rows;
+  - the assessment's §5 / §7;
+  - the pre-launch items;
+  - the LUC chart caption;
+  - the next-model-change bundle;
+  - the older `~/ccx_frozen/` items.
+
 ## 2026-10-06 (j) — **Marcus's rulings of 10-06 (`carbotopecomments.10.2.26.docx`) APPLIED; the H2 test and diagnostic RUN. H2 is supported: CCX's ocean climate effect responds ~1.6× GCB's per K of warming and emerges ~26 years earlier; a GCB-sized thermal response would put SSP5-8.5 CO₂ in 2300 ~24 ppm lower.**
 
 - **The rulings, verbatim:**
