@@ -24,7 +24,12 @@ make_obj <- function(st, cost) {
   list(f = f, env = env)
 }
 nap  <- function() Sys.sleep(0.05)                                       # ~0 CPU, 0.05 s wall
-burn <- function() { t <- ms_clock("cpu"); while (ms_clock("cpu") - t < 0.02) NULL }   # 0.02 s of CPU
+# ~0.02 s of CPU, timed with BASE proc.time(), never with ms_clock(): a cost measured by the clock under test hangs
+# forever when a mutation stops that clock (found 2026-10-05: mutation MC4, the children's CPU). Capped as well.
+burn <- function() {
+  t <- proc.time()[["user.self"]]; k <- 0L
+  while (proc.time()[["user.self"]] - t < 0.02 && k < 200000L) k <- k + 1L
+}
 
 test_that("C1: the clock is VALIDATED -- an unknown value stops, never falls back -- and the default is wall", {
   expect_identical(ms_clock_kind(""), "wall")
