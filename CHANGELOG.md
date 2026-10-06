@@ -2,6 +2,16 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-05 (r) — Handoff: `notes/handoff_2026-10-05e_obj16_landed_cpuclock_merged.md`, written at the end of the overnight work (Marcus: "Take the next obvious steps whenever the running tasks complete"). It supersedes 10-05d, which now points to it.
+- **Nothing is running.**
+- **Open, all Marcus's:**
+  - #16's adoption (the read is in its §2);
+  - the optional resume of the 8 sleep-affected starts;
+  - three flags from (q): the env name, the 180-vs-300 default, the eval-rate line;
+  - the carried items;
+  - a housekeeping list (tonight's scratch worktrees included), nothing deleted.
+- **Memory:** `ccx_obj16_landed` (new; pointers in `INDEX_ccx_phi` and `INDEX_ccx_ocean_struct`); `mac_sleep_eats_wall_budget` marked FIXED (+ its `INDEX_infra` line); `mutation_test_gates` gains the hung-mutant blind spot.
+
 ## 2026-10-05 (q) — **THE MULTISTART BUDGET RUNS ON A CHOSEN CLOCK: CPU time on the Mac, wall time on Torch** (handoff 10-05d §5, as ruled in (o)). A sleep or a suspension no longer spends a Mac start's budget. Merged into `main` as a fast-forward to `05796b9`. The full suite there is CLEAN: 6281 passed, 0 failed, 3 skipped.
 
 - **What was built** (branch `claude/ms-cpu-clock`, rebased onto (p)'s `d078926`: `3c19d99` the build, `dc71684` a test fix, `05796b9` the evidence):

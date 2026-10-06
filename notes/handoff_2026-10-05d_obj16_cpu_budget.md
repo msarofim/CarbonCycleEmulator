@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-05d — #16 is still RUNNING and its landing is ready; THE NEXT BUILD is budgeting multistart starts by CPU TIME instead of wall-clock time
 
+> ⛔ **SUPERSEDED by `notes/handoff_2026-10-05e_obj16_landed_cpuclock_merged.md`.** #16 landed at 22:41 (CHANGELOG 10-05 p), and the CPU-clock build was merged and its suite is clean (10-05 q). Nothing is running. The status blocks below are history.
+
 > **STATUS 2026-10-05 20:45 (CHANGELOG 10-05 o):**
 > - **D1–D4 are RULED, all as recommended.** D5 was not chosen.
 > - **Cron `dc08080d` is GONE;** it did not survive the context reset. A PID waiter in the same session replaces it.
