@@ -4,6 +4,23 @@
 > - **D1–D4 are RULED, all as recommended.** D5 was not chosen.
 > - **Cron `dc08080d` is GONE;** it did not survive the context reset. A PID waiter in the same session replaces it.
 > - The exact sleep windows for §4's statement are in (o).
+>
+> **STATUS 2026-10-05 21:10, OVERNIGHT.** Marcus: "I'm headed to bed. Take the next obvious steps whenever the running tasks complete."
+> - **The landing runs ITSELF.** `~/ccx_frozen/20261005f_obj16_landchain.sh` is under `nohup` + `caffeinate`; its PID is in `…_landchain.pid` and its log in `…_landchain.out`.
+>   - It waits on the launch chain (PID 27265), then runs §4 steps 1–7 with ONE date stamp.
+>   - Its step 1b appends the ruled sleep statement (`…_sleep_addendum.R`, every number read).
+>   - It stops at the first failing step. Mock-tested: the full path, a promote failure, and a refused landing.
+>   - Step 8 (CHANGELOG, commit, push) is the session's. Adoption is Marcus's.
+>   - If `…_landchain.out` ends in "landchain DONE", read the step logs and write step 8. If it does not, read where it stopped.
+> - **The CPU-clock build is DONE on branch `claude/ms-cpu-clock` (`0038262`; worktree `~/ccx_frozen/20261005h_cpuclock`). It is NOT merged.**
+>   - test-ms-clock passes (47 expectations), and test-ms-deadline's 36 pass unchanged.
+>   - 13 of 13 mutations are caught (`~/ccx_frozen/20261005h_cpuclock_smoke_logs/mutations_0038262.log`).
+>   - Still to do, in order:
+>     1. the end-to-end smokes, `~/ccx_frozen/20261005h_cpuclock_smoke.sh`, ONLY after the chain's step 1 (the landing helper counts every driver process);
+>     2. rebase onto the landing commit;
+>     3. the full suite, frozen, under `nohup`;
+>     4. merge, then the build's CHANGELOG entry.
+> - **Scratch worktrees, never to be committed from:** `~/ccx_frozen/20261005h_cpuclock_old` (2ed310a) and `~/ccx_frozen/20261005h_cpuclock_smoke` (0038262). Each has #16's port targets copied in.
 
 **Supersedes** `notes/handoff_2026-10-05c_obj16_landing_ready.md`.
 - 10-05c remains the record of the landing tools and the dry run.
