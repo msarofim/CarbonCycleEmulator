@@ -190,6 +190,42 @@ test_that("under the warming switch, the CANONICAL's run is blind to the tempera
                      label = sprintf("%s under the warming switch with the climate record +1 K", cc))
 })
 
+test_that("the warming caveat's 'third, smaller effect' (the mixing slowdown) holds at the CANONICAL", {
+  # THE COPY MAKES A MEASURED CLAIM (2026-10-06, Marcus: "Caveat sentence (Recommended)"): the
+  # switch "also removes a third, smaller effect", the stratification feedback (DESIGN §3.4a S).
+  # Smaller than the two the blurb names: soil respiration (q10) and seawater (SST, both columns).
+  # An ORDERING between measured quantities, on the app's estimator (CO2 at the last row of the
+  # historical run), each path knocked out alone. A refit that made the mixing path the larger
+  # one would make the copy false in silence; this is what stops it.
+  # Measured at hilda33p (calibration/diag_warming_switch_split.R): mixing 0.151, soil 0.634,
+  # seawater 4.903 ppm (this test's estimator reproduces the app's 426.120 exactly). MUTATION-TESTED
+  # 2026-10-06: with mix_strat_s x 10 at the mode the mixing path is 1.253 ppm, past soil's 0.638,
+  # and this FAILS; at x 3 it is 0.433 and still passes (CHANGELOG 10-06 c).
+  skip_if_no_cpp()
+  md <- readRDS(ccx_mode_file())
+  rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm), add = TRUE)
+  bp <- ccx_mode_base(md); bp$pump_mode <- md$pump_mode
+  p <- ccx_overlay_par(bp, md$par_mode)
+  skip_if(!isTRUE(p$mix_strat_s > 0), "the canonical carries no stratification feedback")
+  sp_fn <- ccx_spinup_from_label(ccx_mode_spinup(md))
+  F0 <- suppressWarnings(ccx_build_forcing("historical", c(1750, 2024), prod_c14 = 0,
+          bomb_total_kmol = md$par_mode$bomb_total, luc_scale = md$par_mode$luc_scale,
+          enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p)))
+  today <- function(set) {
+    pp <- p; for (n in names(set)) pp[[n]] <- set[[n]]
+    sp <- sp_fn(pp); FF <- F0; FF$c14_cosmo <- sp$prod_c14
+    o <- ccx_run_fast(sp, FF)$out; n <- nrow(o)
+    (o$co2_NH[n] + o$co2_SH[n]) / 2
+  }
+  full <- today(list())
+  d <- c(mixing   = full - today(list(mix_strat_s = 0)),
+         soil     = full - today(list(q10 = 1)),
+         seawater = full - today(list(sst_scale = 0, sst_obs = 0)))
+  expect_gt(d[["mixing"]], 0)   # the feedback raises CO2: knocking it out lowers it
+  expect_lt(d[["mixing"]], d[["soil"]])
+  expect_lt(d[["mixing"]], d[["seawater"]])
+})
+
 test_that("under the emissions switch, the CANONICAL's carbon is blind to every human carbon input", {
   # The emissions twin of the test above (2026-10-01). INVENTORY first: every
   # forcing column is either a HUMAN CARBON INPUT, which "nature alone" must

@@ -133,9 +133,20 @@ CCX_MECHANISMS <- list(
     # does not know the temperature is PRESCRIBED will read "switch off the
     # warming feedback" as "switch off the warming". The "so the two effects can
     # be told apart" tail IS pedantry and is dropped.
+    # 2026-10-06 (Marcus: "Caveat sentence (Recommended)"): the switch also removes the
+    # stratification feedback (DESIGN §3.4a S, in the canonical since hilda33p), and the blurb
+    # names only the soil and seawater paths. The added sentence is DESIGN's "For the app" one.
+    # "Smaller" is MEASURED, and test-mechanisms.R guards it: at hilda33p, on the app's own
+    # estimator (CO2 today, 426 -> 420), the switch's 5.70 ppm splits 4.90 seawater / 0.63 soil /
+    # 0.15 mixing (calibration/diag_warming_switch_split.R; outputs/diagnostics/
+    # warming_switch_split_20261006_hilda33p.log).
     caveat = paste("The world still warms either way — this model is driven by",
                    "the observed temperature record. What is switched off is",
-                   "only the carbon cycle's response to that warming."),
+                   "only the carbon cycle's response to that warming.",
+                   "It also removes a third, smaller effect: warming is strongest",
+                   "at the surface, so the upper ocean becomes more layered and",
+                   "mixes less, and the carbon we add is carried down into the",
+                   "deep ocean more slowly."),
     apply = function(p, F) {
       p$q10 <- 1; p$sst_scale <- 0
       # sst_obs = 0, or the observed HadSST4 columns would carry real SST

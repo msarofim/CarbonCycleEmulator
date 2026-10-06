@@ -122,3 +122,67 @@ test_that("the renderer REPORTS a broken table instead of printing NAs", {
   expect_true("Problem" %in% names(tab))
   expect_false("Parameter" %in% names(tab))
 })
+
+# ---- THE "Set" COLUMN (2026-10-06, Marcus: "Mark held rows (Recommended)") ---------------------
+# The heading said every row is FITTED while the canonical HOLDS some (hilda33p: ten, npp_tsens and
+# six others at 0, unmarked). The column is generated from the mode file's own lists -- never typed --
+# and these tests hold it to them. `pt_set_problems()` is the check both the canonical test and its
+# mutation use, so the mutation exercises the same code the real assertion runs.
+pt_set_problems <- function(tab, rows, fitted, held) {
+  p <- character(0)
+  if (!"Set" %in% names(tab)) return("no Set column")
+  for (n in held)   if (!identical(tab$Set[match(n, rows)], "held"))   p <- c(p, paste("not marked held:", n))
+  for (n in fitted) if (!identical(tab$Set[match(n, rows)], "fitted")) p <- c(p, paste("not marked fitted:", n))
+  if (sum(tab$Set == "held") != length(held)) p <- c(p, sprintf("%d rows marked held, %d pins", sum(tab$Set == "held"), length(held)))
+  p
+}
+
+test_that("the Set column follows the lists it is given, and is absent without a mode", {
+  skip_if_no_param_meta()
+  f <- .pm_get("app_param_table")
+  tab0 <- f(CCX_PARAM_NAMES, ccx_default_params(), .pm_get("APP_PARAM_META"))
+  expect_false("Set" %in% names(tab0))          # the defaults: nothing was fitted, so no column
+  held <- c("kz", "q10"); fitted <- setdiff(CCX_PARAM_NAMES, held)
+  tab <- f(CCX_PARAM_NAMES, ccx_default_params(), .pm_get("APP_PARAM_META"), fitted = fitted, held = held)
+  expect_equal(pt_set_problems(tab, CCX_PARAM_NAMES, fitted, held), character(0))
+  # a row in neither list prints an em-dash, not a guess
+  tab2 <- f(CCX_PARAM_NAMES, ccx_default_params(), .pm_get("APP_PARAM_META"), fitted = setdiff(fitted, "h_ml"), held = held)
+  expect_identical(tab2$Set[match("h_ml", CCX_PARAM_NAMES)], "—")
+})
+
+test_that("at the SHIPPED canonical, the held rows are exactly the mode file's pins", {
+  skip_if_no_param_meta()
+  md <- readRDS(ccx_mode_file())
+  rows <- c(CCX_PARAM_NAMES, setdiff(ccx_gated_names(ccx_mode_struct(md)), CCX_PARAM_NAMES))
+  held <- names(ccx_mode_pins(md))
+  tab <- .pm_get("app_param_table")(CCX_PARAM_NAMES, ccx_default_params(), .pm_get("APP_PARAM_META"),
+                                    extra = ccx_gated_names(ccx_mode_struct(md)),
+                                    fitted = md$param_names, held = held)
+  expect_equal(pt_set_problems(tab, rows, md$param_names, held), character(0))
+  expect_false(any(tab$Set == "—"), info = "every row of the canonical is either fitted or held")
+})
+
+# ---- MUTATIONS: each must be REJECTED --------------------------------------------------------------
+test_that("MUTATION: a column that says 'fitted' everywhere fails the canonical's check", {
+  skip_if_no_param_meta()
+  md <- readRDS(ccx_mode_file())
+  held <- names(ccx_mode_pins(md)); skip_if(!length(held), "the canonical holds nothing")
+  rows <- c(CCX_PARAM_NAMES, setdiff(ccx_gated_names(ccx_mode_struct(md)), CCX_PARAM_NAMES))
+  # the failure this column exists to fix: the pins passed as fitted, i.e. not passed at all
+  tab <- .pm_get("app_param_table")(CCX_PARAM_NAMES, ccx_default_params(), .pm_get("APP_PARAM_META"),
+                                    extra = ccx_gated_names(ccx_mode_struct(md)),
+                                    fitted = c(md$param_names, held), held = character(0))
+  expect_true(length(pt_set_problems(tab, rows, md$param_names, held)) > 0)
+})
+
+test_that("MUTATION: a name both fitted and held, or held with no row, is REPORTED, not rendered", {
+  skip_if_no_param_meta()
+  f <- .pm_get("app_param_table")
+  tab <- f(CCX_PARAM_NAMES, ccx_default_params(), .pm_get("APP_PARAM_META"),
+           fitted = CCX_PARAM_NAMES, held = "kz")
+  expect_true("Problem" %in% names(tab))
+  expect_true(any(grepl("both fitted and held: kz", tab$Problem, fixed = TRUE)))
+  tab2 <- f(CCX_PARAM_NAMES, ccx_default_params(), .pm_get("APP_PARAM_META"),
+            fitted = CCX_PARAM_NAMES, held = "a_pin_with_no_row")
+  expect_true(any(grepl("held but has no row: a_pin_with_no_row", tab2$Problem, fixed = TRUE)))
+})

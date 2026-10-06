@@ -1176,7 +1176,9 @@ function(input, output, session) {
                     c(APP_PARAMS, list(bomb_total = APP_BOMB_TOTAL,
                                        luc_scale  = APP_LUC_SCALE,
                                        rep_dC     = APP_REP_DC), APP_IMB_SHARES),
-                    extra = APP_GATED_FIT),
+                    extra = APP_GATED_FIT,
+                    # 2026-10-06: the "Set" column, from the mode file's own lists (params_meta.R)
+                    fitted = APP_FITTED_NAMES, held = APP_HELD_NAMES),
     striped = TRUE, width = "100%")
 
   # ---- 7. Known issues (the beta review) -----------------------------

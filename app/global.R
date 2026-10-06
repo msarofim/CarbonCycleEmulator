@@ -261,6 +261,10 @@ app_params <- local({
   # none for the defaults; a mode file under a structure that opens the gate sets both (below)
   gated_fit  <- character(0)
   imb_shares <- list()
+  # the parameter table's "Set" column (2026-10-06): the mode file's own FITTED names and HELD
+  # pins. NULL for the defaults, where nothing was fitted and the table prints no column.
+  fitted_names <- NULL
+  held_names   <- NULL
   for (mode_file in mode_files) {
     if (!file.exists(mode_file)) next
     md <- tryCatch(readRDS(mode_file), error = function(e) NULL)
@@ -287,6 +291,8 @@ app_params <- local({
     # (every gate the structure opens since 2026-10-02 -- the land ENSO lag's too)
     gated_fit  <- ccx_gated_names(ccx_mode_struct(md))
     imb_shares <- pm[intersect(c("imb_share_land", "imb_share_ocean_rest"), names(pm))]
+    fitted_names <- md$param_names
+    held_names   <- names(ccx_mode_pins(md))
     # THE FILE'S OWN SPINUP (2026-09-21 h). Every mode since 09-09x is fitted under
     # the PERIODIC spinup (a seasonal mixed layer spun to its own annual cycle);
     # started from the aseasonal equilibrium instead, the canonical hilda29l runs
@@ -341,6 +347,7 @@ app_params <- local({
   list(p = p, source = src, status = status, detail = detail,
        bomb_total = bomb_total, luc_scale = luc_scale, rep_dC = rep_dC,
        spinup_label = spinup_label, gated_fit = gated_fit, imb_shares = imb_shares,
+       fitted_names = fitted_names, held_names = held_names,
        has_posterior = file.exists(post_file))
 })
 
@@ -357,6 +364,9 @@ APP_SPINUP_LABEL <- app_params$spinup_label
 # the gated names the mode fits and the D3 shares, for the parameter table (2026-10-01)
 APP_GATED_FIT  <- app_params$gated_fit
 APP_IMB_SHARES <- app_params$imb_shares
+# the parameter table's "Set" column (2026-10-06): NULL when no mode file loaded
+APP_FITTED_NAMES <- app_params$fitted_names
+APP_HELD_NAMES   <- app_params$held_names
 app_spinup <- ccx_spinup_from_label(APP_SPINUP_LABEL)
 
 #' Build a forcing with THIS APP'S fitted forcing parameters applied

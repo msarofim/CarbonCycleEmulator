@@ -626,7 +626,10 @@ navbarPage(
           "isotopes — ¹²C, ¹³C and ¹⁴C."),
         plotOutput("h_diagram", height = "330px"),
         h4("Parameters"),
-        p("These are the numbers the calibration fits. Everything else — ocean",
+        # 2026-10-06 (Marcus: "Mark held rows (Recommended)"): "and the few it holds at a stated
+        # value" added; the table's "Set" column says which (app/R/params_meta.R)
+        p("These are the numbers the calibration fits, and the few it holds at a",
+          "stated value. Everything else — ocean",
           "area, the mass of the atmosphere, carbonate chemistry constants — is",
           "fixed from measurements and cited in the repository."),
         tableOutput("h_params")

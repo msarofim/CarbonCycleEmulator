@@ -2,6 +2,39 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-06 (c) — **The handoff's open items RULED; the two app-wording items APPLIED.** The warming switch's caveat now names the mixing slowdown it also removes, as "a third, smaller effect" (smaller is measured and guarded). The parameter table marks its ten HELD rows, from the mode file's own lists. Verified in the restarted app.
+
+- **The rulings, verbatim (Marcus, 2026-10-06), on the handoff's §4:**
+  - "Caveat sentence (Recommended)": the warming switch (4.1a);
+  - "Mark held rows (Recommended)": the `npp_tsens` row and the nine other pins (4.1b);
+  - "Fix eval-rate line (Recommended)": the only CPU-clock flag acted on → (d). **The 180-min direct default and the env name `CCX_MS_BUDGET_MIN` STAY** (not ticked, so not vetoed);
+  - "Assessment → hilda33p (Recommended)", "Housekeeping (Recommended)", "Merge git-stamp branch" → later entries. The resume of #16's 8 sleep-affected starts was NOT chosen.
+- **The measurement behind "smaller"** (`calibration/diag_warming_switch_split.R` → `outputs/diagnostics/warming_switch_split_20261006_hilda33p.{log,rds}`). It runs on the app's own runner and estimator (CO₂ at the last row, the takeaway's 426 → 420), with each temperature path knocked out alone. Gate 1: the no-knockout run IS `APP_HIST` (|d| 0).
+
+| path the switch zeroes | CO₂ today removed, ppm | share | 2024 mean, ppm |
+|---|---|---|---|
+| seawater (`sst_scale`, `sst_obs` → 0) | 4.903 | 86.0 % | 4.817 |
+| soil respiration (`q10` → 1) | 0.634 | 11.1 % | 0.406 |
+| **mixing (`mix_strat_s` → 0)** | **0.151** | **2.65 %** | 0.148 |
+| greening (`npp_tsens` → 0; pinned at 0) | 0 | 0 | 0 |
+| the singles' sum / the switch | 5.688 / 5.701 | 99.8 % | 5.371 / 5.385 |
+
+  - ⚠ **A correction to the numbers I put to Marcus with the question:** "0.15 of 5.39 ppm, 3 %" was the 2024 ANNUAL MEAN from a scratch run. On the app's estimator it is 0.151 of 5.701, 2.65 %. The ordering is the same on both.
+- **The caveat** (`R/mechanisms.R`, `warming_feedback`): "…only the carbon cycle's response to that warming." gains DESIGN §3.4a S's sentence: "It also removes a third, smaller effect: warming is strongest at the surface, so the upper ocean becomes more layered and mixes less, and the carbon we add is carried down into the deep ocean more slowly." The blurb is unchanged.
+- **The held rows** (`app/R/params_meta.R` `app_param_table()`; `app/global.R`; `app/server.R`; `app/ui.R`):
+  - a fourth column, **"Set"**, reads "held" or "fitted". It is generated from the mode file's `param_names` and `ccx_mode_pins()`, never typed;
+  - with no mode loaded (the defaults) there is no column, because nothing was fitted;
+  - a row in neither list prints "—"; a name in both, or a held name with no row, is REPORTED as a broken table, not rendered;
+  - the intro reads "These are the numbers the calibration fits, and the few it holds at a stated value."
+- **Tests** (27 / 41 / 92 passed, 0 failed, in the three files):
+  - `test-mechanisms.R`: **the caveat's ORDERING at the canonical**: mixing > 0, < soil, < seawater, on the app's estimator (reproduces 426.120 exactly). **MUTATION-TESTED:** with `mix_strat_s` × 10 the mixing path is 1.253 ppm, past soil's 0.638, and it FAILS; at × 3 it is 0.433 and passes.
+  - `test-app-params-table.R`: the column follows its lists and is absent without a mode; at the SHIPPED canonical the held rows are exactly the pins, and no row is "—". Mutations: an all-"fitted" column fails the canonical's check; both-lists and held-without-a-row are reported.
+  - `test-app-review-copy.R`: a 10-06 list (the caveat's two phrases, the intro clause, the column's wiring), with its own mutations.
+- **Verified in the running app** (`ccx-app` restarted: ~90 s to serve):
+  - the table: 43 rows, 33 "fitted", 10 "held" (the ten pins), none "—";
+  - the What-if, warming switch ticked: the takeaway "420 ppm instead of 426", the caveat with the new sentence;
+  - no console errors.
+
 ## 2026-10-06 (b) — Handoff: `notes/handoff_2026-10-06_hilda33p_adopted.md` (Marcus: "Adopt 16, and then write a handoff."). It supersedes 10-05e, which now points to it.
 - **Nothing is running except the `ccx-app` preview** (localhost:7788, on the adopted tree).
 - **Open, all Marcus's:**

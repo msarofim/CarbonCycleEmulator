@@ -127,6 +127,18 @@ AC_CHECKS_1001 <- list(
   c("B5 CO2 fertilisation only",          "the land stops taking up carbon", "This switches off CO₂ fertilisation only")
 )
 
+# THE 2026-10-06 RULINGS (Marcus, after the hilda33p adoption; handoff 10-06 §4.1): "Caveat sentence
+# (Recommended)" -- the warming switch's caveat names the mixing slowdown it now also removes, in DESIGN
+# §3.4a S's sentence ("smaller" is measured and guarded in test-mechanisms.R); "Mark held rows
+# (Recommended)" -- the parameter table's intro gains a clause and the table a generated "Set" column
+# (test-app-params-table.R holds the column to the mode file).
+AC_CHECKS_1006 <- list(
+  c("W1 warming caveat: the third effect", NA, "It also removes a third, smaller effect"),
+  c("W1 warming caveat: DESIGN's sentence", NA, "the upper ocean becomes more layered and"),
+  c("H1 held rows: the intro clause",      "These are the numbers the calibration fits. Everything", "and the few it holds at a"),
+  c("H1 held rows: the column is wired",   NA, "held = APP_HELD_NAMES")
+)
+
 ac_audit <- function(src, checks = AC_CHECKS) {
   problems <- character(0)
   for (ck in checks) {
@@ -155,6 +167,18 @@ test_that("all 28 of Marcus's 2026-09-22 copy items are still applied", {
 test_that("all of Marcus's 2026-10-01 copy rulings are still applied", {
   problems <- ac_audit(.ac_src, AC_CHECKS_1001)
   expect_equal(problems, character(0), info = paste(problems, collapse = " | "))
+})
+
+test_that("all of Marcus's 2026-10-06 copy rulings are still applied", {
+  problems <- ac_audit(.ac_src, AC_CHECKS_1006)
+  expect_equal(problems, character(0), info = paste(problems, collapse = " | "))
+})
+
+test_that("MUTATION: the 10-06 list fires when the old intro returns or the caveat sentence goes", {
+  m1 <- paste(.ac_src, '  p("These are the numbers the calibration fits. Everything else")', sep = "\n")
+  expect_true(any(grepl("H1 held rows: the intro clause", ac_audit(m1, AC_CHECKS_1006), fixed = TRUE)))
+  m2 <- gsub("the upper ocean becomes more layered and", "the ocean changes and", .ac_src, fixed = TRUE)
+  expect_true(any(grepl("W1 warming caveat: DESIGN's sentence", ac_audit(m2, AC_CHECKS_1006), fixed = TRUE)))
 })
 
 test_that("MUTATION: the 10-01 list fires when the deleted fertilisation sentence returns", {

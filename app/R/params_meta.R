@@ -191,12 +191,27 @@ app_validate_param_meta <- function(names, meta = APP_PARAM_META,
 #' likelihood-only parameter is still one of the numbers the calibration fits.
 #' ⚠ When the gate fails, the table says so IN PLACE OF the rows: a label table
 #' that has gone short is a defect the page should report, not paper over.
-app_param_table <- function(names, values, meta = APP_PARAM_META, extra = character(0)) {
+app_param_table <- function(names, values, meta = APP_PARAM_META, extra = character(0),
+                            fitted = NULL, held = NULL) {
   # `extra` (2026-10-01): the GATED names a mode fits on top of the table (R/calibrate.R
   # CCX_PARAM_GATED; the D2/D3 canonical from hilda33d). The base set stays CCX_PARAM_NAMES --
   # Marcus's U1 (09-22): every parameter the build carries has a row, the held ones included.
   names <- c(names, setdiff(extra, names))
   problems <- app_validate_param_meta(names, meta)
+  # THE "Set" COLUMN (2026-10-06, Marcus: "Mark held rows (Recommended)"). The table's heading
+  # said every row is fitted while hilda33p HOLDS ten of them (npp_tsens and six others at 0),
+  # unmarked. `fitted` and `held` are the MODE FILE's own lists (md$param_names and
+  # ccx_mode_pins(md)), never typed here; NULL for both (no mode loaded, the defaults) prints no
+  # column, because nothing was fitted then. A row in NEITHER list prints "—" rather than a guess,
+  # and a name in BOTH, or a held name with no row, is a broken mode and is REPORTED.
+  if (!is.null(fitted) || !is.null(held)) {
+    both <- intersect(fitted, held)
+    if (length(both))
+      problems <- c(problems, sprintf("listed as both fitted and held: %s", paste(both, collapse = ", ")))
+    lost <- setdiff(held, names)
+    if (length(lost))
+      problems <- c(problems, sprintf("held but has no row: %s", paste(lost, collapse = ", ")))
+  }
   if (length(problems))
     return(data.frame(
       Problem = c(paste("The parameter label table does not match this build,",
@@ -208,9 +223,12 @@ app_param_table <- function(names, values, meta = APP_PARAM_META, extra = charac
     x <- values[[n]]
     if (is.null(x)) NA_real_ else as.numeric(x)[1]
   }, numeric(1))
-  data.frame(
+  tab <- data.frame(
     Parameter = vapply(names, function(n) meta[[n]]$desc, ""),
     Value = ifelse(is.na(v), "—", formatC(v, digits = 3, format = "g")),
     Units = vapply(names, function(n) meta[[n]]$unit, ""),
     row.names = NULL, check.names = FALSE)
+  if (!is.null(fitted) || !is.null(held))
+    tab$Set <- ifelse(names %in% held, "held", ifelse(names %in% fitted, "fitted", "—"))
+  tab
 }
