@@ -1,0 +1,13 @@
+smokes start 22:27:36
+T0 runner rc 0
+T1c rc 1 (expect non-zero)
+T3_wall.log: SIGSTOP pid 50295 at 22:28:57
+T3_cpu.log: SIGSTOP pid 50293 at 22:28:57
+T3_wall.log: SIGCONT pid 50295 at 22:31:57
+T3_cpu.log: SIGCONT pid 50293 at 22:31:57
+T3_wall.log rc 0
+T3_cpu.log rc 0
+T1_new.log rc 0
+T1_old.log rc 0
+T1_alias.log rc 0
+smokes end 22:35:06

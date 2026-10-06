@@ -1,0 +1,14 @@
+MC1_fallback: CAUGHT by: C1
+MC2_check_reads_wall: CAUGHT by: C2a, C5
+MC3_cpu_is_elapsed: CAUGHT by: C2a
+MC4_cpu_is_children: CAUGHT by: C2c
+MC5_step_default_clock: CAUGHT by: C4
+MC6_sys_time_in_driver: CAUGHT by: C5
+MC7_absent_clock_NA: CAUGHT by: C3
+MC8_no_mix_warning: CAUGHT by: C4
+MC9_torch_cpu: CAUGHT by: C4
+MC10_mac_wall: CAUGHT by: C4
+MC11_no_wall_warned_record: CAUGHT by: C4
+MC12_state_ignores_clock: CAUGHT by: C1, C2a
+MC13_origin_on_wall: CAUGHT by: C4
+tree after: [] (empty = every mutation restored)

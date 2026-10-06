@@ -1,0 +1,7 @@
+GATE OPEN (structure 'hilda_csl3v0kaidgbem'): ndep_ret, npp_tsens, imb_share_land, imb_share_ocean_rest, lag_enso_land enter the fitted set
+PINNED (removed from the fitted set, held in the base): ent_seas_amp_SH = 0, w_eq = 27, gamma_eq = 1, pump_export = 9.08, w_vent = 0, gamma_vent = 0, w_thc = 0, gamma_enso_ocn_NH = 0, gamma_enso_ocn_SH = 0, npp_tsens = 0 -> 33 free parameters
+run-time inputs present: 14/14. OK
+OVERRIDE CCX_MS_RESTARTS = 1 (default 3)
+OVERRIDE CCX_MS_CYCLES = 1 (default 6)
+Error: CCX_MS_BUDGET_MIN = '12' and its pre-2026-10-05 name CCX_MS_WALL_MIN = '11' are both set and DIFFER. Set one.
+Execution halted

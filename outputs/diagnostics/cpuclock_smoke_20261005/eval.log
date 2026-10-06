@@ -1,0 +1,34 @@
+T1 NM restart lines:
+                                                                            old 
+"[001] cycle 1 restart  1: log-post =   -1193.7792 (gain    55.6725) evals 202" 
+                                                                            new 
+"[001] cycle 1 restart  1: log-post =   -1193.7792 (gain    55.6725) evals 202" 
+                                                                          alias 
+"[001] cycle 1 restart  1: log-post =   -1193.7792 (gain    55.6725) evals 202" 
+
+T3 restart lines:
+[001] cycle 1 restart  1: SHORTENED to maxit 322 by the CPU budget
+[001] cycle 1 restart  1: log-post =   -1190.9372 (gain    58.5145) evals 324  1.5 CPU-min
+[001] cycle 1 restart  1: SHORTENED to maxit 355 by the wall budget
+[001] cycle 1 restart  1: STOPPED AT THE DEADLINE after 210 evals; the best EVALUATED point is kept
+[001] cycle 1 restart  1: log-post =   -1193.7792 (gain    55.6725) evals 210  4.0 min
+T3 cpu : clock cpu minutes 1.632 minutes_wall 4.650 n_eval 324 deadline_stops 0 out_of_time TRUE wall_warned FALSE
+T3 wall: clock wall minutes 4.143 minutes_wall 4.143 n_eval 210 deadline_stops 1 out_of_time TRUE wall_warned FALSE
+
+PASS T1  old == new (wall clock, NEW name) -- [001] cycle 1 restart  1: log-post =   -1193.7792 (gain    55.6725) evals 202
+PASS T1  old == alias (wall clock, LEGACY name) -- [001] cycle 1 restart  1: log-post =   -1193.7792 (gain    55.6725) evals 202
+PASS T1  trace rows 1-2 identical (start + restart 1) --   cycle restart   logpost evals | 1     0       0 -1249.452     0 | 2     1       1 -1193.779   202
+PASS T1  start point identical -- -1249.4517037433
+PASS T1  the old file has no clock; the new ones record wall, budget 12 -- old clock NULL; new wall/12; alias wall/12
+PASS T1  wall arm: minutes_wall == minutes to < 0.01 -- minutes 7.185, minutes_wall 7.184
+PASS T1  the alias arm says it read CCX_MS_WALL_MIN -- OVERRIDE line
+PASS T1c both names, different: stopped at start-up -- the stop message
+PASS T3  CPU arm's restart NOT stopped by the suspension -- its restart made 324 evals of a sized maxit 322
+PASS T3  CPU arm's minutes within its 3-min budget -- 1.632 CPU-min
+PASS T3  CPU arm's wall exceeds its CPU by >= 2.9 (the 3-min stop) -- wall - CPU = 3.018 min
+PASS T3  WALL arm's restart STOPPED AT THE DEADLINE -- its restart made 210 evals of a sized maxit 355
+PASS T3  WALL arm made fewer restart evals than the CPU arm -- 210 < 324
+PASS T3  WALL arm's minutes include the stop (>= 3) -- 4.143 wall-min
+PASS T3  the record: clocks cpu / wall -- start files
+
+15 PASS, 0 FAIL

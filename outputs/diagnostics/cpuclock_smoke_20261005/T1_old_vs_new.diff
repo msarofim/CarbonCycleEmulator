@@ -1,0 +1,16 @@
+7c7
+< OVERRIDE CCX_MS_WALL_MIN = 12 (default 180)
+---
+> OVERRIDE CCX_MS_BUDGET_MIN = 12 (default 180)
+48c48
+<   out /Users/MarcusMarcus/ccx_frozen/20261005h_cpuclock_old/calibration/output/SMOKE_T1_old/start_001.rds
+---
+>   out /Users/MarcusMarcus/ccx_frozen/20261005h_cpuclock_smoke/calibration/output/SMOKE_T1_new/start_001.rds
+60c60
+< measured 0.3083 s/eval (median of 5; range 0.2804-0.3361) => one 200-eval restart
+---
+> measured 0.2945 s/eval (median of 5; range 0.2807-0.3755) => one 200-eval restart
+76c76
+< [001] eval rate 0.0335 s/eval in the optimiser -- SIZE THE ARRAY ON THIS
+---
+> [001] eval rate 0.0333 s/eval in the optimiser -- SIZE THE ARRAY ON THIS
