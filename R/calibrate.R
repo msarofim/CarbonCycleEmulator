@@ -2638,6 +2638,10 @@ ccx_l2_on <- function(p) {
 #'   (OBJECTIVE #16's pins had a branch of their own, 2026-10-05 -- the canonical seeded at the pin, a
 #'   START. Since 2026-10-06 they ARE the canonical's (hilda33p), so the first rule takes them with the
 #'   canonical as a MODE; the branch was removed on Marcus's ruling "Remove, re-express its test".)
+#'   OBJECTIVE #17's pins (#16's + the interannual module's four at stage 1's values; 2026-10-06 n,
+#'   Marcus: "Build: land + ocean module (Recommended)"), under #17's label at seas_ml 1
+#'                          -> incumbent the canonical (seeded at the pins: a start);
+#'                             new basin the control
 #'   anything else          -> stop: a new objective with no incumbent on disk.
 ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_PUMP_FIELD", "solved"),
                                  struct = Sys.getenv("CCX_MS_STRUCT", "")) {
@@ -2656,6 +2660,21 @@ ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_
     list(incumbent = CCX_MODE_CANONICAL, new_basin = CCX_MODE_SEASML0_CONTROL,
          why = sprintf(paste0("a PRICE arm: the canonical's pins plus %s held at %s (the canonical, seeded ",
                               "at the pin: a start, not a mode of this arm)"), held, format(pins[[held]])))
+  } else if (same(pins, CCX_MODE_OBJ17_PINS)) {
+    # OBJECTIVE #17 (2026-10-06 n, the interannual cut): #16's pins + the module's four names at stage 1's
+    # values (fit_iav_module.R). They are READ names, so the canonical is a START here (seeded at the pins),
+    # as #16's was before its adoption. Ruled only under #17's own label and on the canonical's seasonal
+    # mixed layer.
+    if (!identical(struct, CCX_MODE_OBJ17_STRUCT))
+      stop("ccx_ms_reference_set(): objective #17's pins '", ccx_pin_label(pins), "' are ruled under ",
+           CCX_MODE_OBJ17_STRUCT, " (the interannual cut) only; struct '", struct, "' is not a ruled arm.")
+    if (seas_ml != 1L)
+      stop("ccx_ms_reference_set(): OBJECTIVE #17 is ruled at seas_ml 1 (the canonical's seasonal mixed ",
+           "layer); seas_ml ", seas_ml, " is not a ruled arm.")
+    list(incumbent = CCX_MODE_CANONICAL, new_basin = CCX_MODE_SEASML0_CONTROL,
+         why = paste0("OBJECTIVE #17 (the interannual cut, Marcus 2026-10-06): the canonical's pins plus the module's ",
+                      "four names at stage 1's values (the canonical, seeded at the pins: a start, not a mode of this ",
+                      "objective)"))
   } else if (is.null(pins)) {
     list(incumbent = if (is.null(CCX_MODE_PINNED_PARENT)) CCX_MODE_CANONICAL else CCX_MODE_PINNED_PARENT,
          new_basin = CCX_MODE_SEASML0_CONTROL,
@@ -2701,12 +2720,22 @@ ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_
               "' at seas_ml ", seas_ml, " (the canonical's are '", ccx_pin_label(CCX_MODE_CANONICAL_PINS),
               "', the control's '", ccx_pin_label(CCX_MODE_CONTROL_PINS),
               "', the layer-2 limb's '", ccx_pin_label(CCX_MODE_L2_ARM_PINS),
+              "', objective #17's '", ccx_pin_label(CCX_MODE_OBJ17_PINS),
               "'); rule the reference set for this pin before launching.")
   # 2026-09-20 (r): the canonical FITS w_enso_l2, so its pin set under a structure WITHOUT the limb
   # would leave a name the structure never reads FREE -- the driver refuses such a name, and so
   # does the reference set, by name (the L2 branch's "no layer-2 limb" refusal, generalised to
   # every inert name: a registered pin set does not license an arm on a structure it does not fit)
   # (applied AFTER the set is matched, so a foreign set still says "no registered incumbent")
+  # 2026-10-06 (objective #17): under the interannual CUT the module's names are stage 1's, so a pin set that
+  # leaves any of them FREE is refused here, at launch, by name -- not first by ccx_make_logpost()'s guard
+  # inside every task. (The canonical's ten under #17's label would otherwise take the first branch.)
+  if (isTRUE(ccx_struct_block(struct)[["iav_cut"]] == 1)) {
+    miss <- setdiff(CCX_IAV_MODULE_NAMES, names(pins))
+    if (length(miss))
+      stop("ccx_ms_reference_set(): struct '", struct, "' is the interannual CUT (objective #17): the module's ",
+           "names are stage 1's and must be PINNED; ", paste(miss, collapse = ", "), " would be free.")
+  }
   if (!is.null(pins)) {
     free_inert <- setdiff(ccx_inert_names(pump_field, struct), names(pins))
     free_inert <- intersect(free_inert, CCX_PARAM_NAMES)

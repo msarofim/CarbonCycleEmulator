@@ -435,6 +435,25 @@ CCX_MODE_L2_ARM_PINS     <- CCX_MODE_CANONICAL_PINS
 # START, seeded at the pin) is REMOVED (Marcus: "Remove, re-express its test (Recommended)"): the canonical
 # is now a MODE of #16, and the first branch takes these pins. The label stays #16's own.
 CCX_MODE_OBJ16_STRUCT    <- "hilda_csl3v0kaidgbem"
+# OBJECTIVE #17's PINS (2026-10-06 n, Marcus: "Build: land + ocean module (Recommended)"; the interannual cut,
+# R/likelihood.R "OBJECTIVE #17"): #16's ten PLUS the module's four names (CCX_IAV_MODULE_NAMES) at STAGE 1's
+# values -- calibration/fit_iav_module.R @edc0cd0 at hilda33p, CCX_MODE_OBJ17_MODULE_FILE. Literals, so this
+# file reads nothing at source time; test-ms-reference-set.R (12) ties them to that file.
+# ⚠ WITHIN ONE ULP, NOT BIT FOR BIT: R's decimal parser (R_strtod) is not correctly rounded at 17 significant
+# digits, so w_enso_l2's literal parses 1.8e-15 (one ulp) above stage 1's double. The launch string
+# (CCX_MS_PIN, through ccx_parse_pins() -> as.numeric()) parses the SAME way, so these literals ARE the run's
+# pins exactly; the test holds both facts.
+# They are READ names under #17's label, so the canonical is a START of this objective (seeded at the pins),
+# not a mode of it -- #16's case before its adoption. Ruled ONLY under #17's label at seas_ml 1.
+# ⚠ After the one-pass check (Marcus: "One pass + check (Recommended)") a re-run of stage 1 that moves a name by
+# more than 0.1 of its own sigma comes back to Marcus; these literals change only with a ruling.
+CCX_MODE_OBJ17_MODULE_FILE <- file.path("calibration", "output", "iav_module_20261006_hilda33p.rds")
+CCX_MODE_OBJ17_PINS      <- c(CCX_MODE_OBJ16_PINS,
+                              lag_enso_land      = 5.8432437811315161,
+                              gamma_enso_land_NH = 0.66071085740286073,
+                              gamma_enso_land_SH = 0.63322088075695704,
+                              w_enso_l2          = 14.726151317112599)
+CCX_MODE_OBJ17_STRUCT    <- "hilda_csl3v0kaidgbemw"
 #' The registered FREE mode nearest the canonical: the canonical itself when it
 #' is free, its parent when it is pinned. For a consumer that needs a vector
 #' ENCODABLE on the full table (an ancestor constructed by dropping names, a

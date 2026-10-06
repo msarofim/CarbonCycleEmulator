@@ -25,6 +25,11 @@
 #       branch removed, Marcus: "Remove, re-express its test"): the first branch takes them, the
 #       canonical as a MODE; the launch string resolves the same; MUTATION: refused with npp_tsens
 #       off 0 and with a canonical pin moved or dropped; #15's nine are refused (no ruled set)
+#   (12) OBJECTIVE #17's pins (2026-10-06 n, the interannual cut; Marcus: "Build: land + ocean module
+#       (Recommended)"): #16's ten + the module's four at STAGE 1's values, tied bit for bit to the stage-1
+#       file, under #17's label at seas_ml 1 -> the canonical (seeded at the pins: a start) / the control;
+#       the launch string resolves the same; MUTATION: refused under #16's label, at seas_ml 0, with a module
+#       value moved or a module name dropped, and the canonical's ten under #17's label (the module FREE)
 # =====================================================================
 ms_cp <- CCX_MODE_CANONICAL_PINS
 ms_ctl <- CCX_MODE_CONTROL_PINS
@@ -195,4 +200,43 @@ test_that("(11) OBJECTIVE #16's pins ARE the canonical's since 2026-10-06 (hilda
   expect_error(ccx_ms_reference_set(p16[setdiff(names(p16), "w_thc")], "1"), "no registered incumbent")
   # #15's nine (npp_tsens FITTED) have no ruled reference set since the adoption: a #15 re-run rules its own
   expect_error(ccx_ms_reference_set(CCX_MODE_OBJ15_PINS, "1"), "no registered incumbent")
+})
+
+test_that("(12) OBJECTIVE #17's pins (2026-10-06 n, the interannual cut): #16's ten + the module's four at stage 1's values, under #17's label at seas_ml 1 -> the canonical (seeded) / the control; refused under #16's label, at seas_ml 0, a module value moved or dropped, and with the module free", {
+  withr::local_envvar(CCX_MS_STRUCT = CCX_MODE_OBJ17_STRUCT, CCX_MS_PUMP_FIELD = "solved")
+  p17 <- CCX_MODE_OBJ17_PINS
+  expect_identical(names(p17), c(names(CCX_MODE_OBJ16_PINS), CCX_IAV_MODULE_NAMES))
+  expect_identical(p17[names(CCX_MODE_OBJ16_PINS)], CCX_MODE_OBJ16_PINS)
+  # the four literals ARE stage 1's result (calibration/fit_iav_module.R at hilda33p, not a smoke): R's parser is not
+  # correctly rounded at 17 digits, so they are what its %.17g string PARSES to -- within 2 ulps of the double, and
+  # identical to what the launch string gives (MUTATION-checked by the 1-ulp case: w_enso_l2 is not bit-identical)
+  s1 <- readRDS(ccx_path(CCX_MODE_OBJ17_MODULE_FILE)); x1 <- s1$pins[CCX_IAV_MODULE_NAMES]
+  expect_identical(unname(p17[CCX_IAV_MODULE_NAMES]), as.numeric(sprintf("%.17g", x1)))
+  expect_true(all(abs(p17[CCX_IAV_MODULE_NAMES] - x1) <= 2 * .Machine$double.eps * abs(x1)))
+  expect_false(identical(unname(p17[["w_enso_l2"]]), unname(x1[["w_enso_l2"]])), info = "the documented 1-ulp case")
+  expect_identical(s1$provenance$base, "hilda33p"); expect_false(s1$provenance$smoke)
+  expect_identical(s1$provenance$n_eff, LIK_IAV_NEFF)
+  # the two land amplitudes sit at hilda33p's NH : SH ratio (one scale, as ruled)
+  expect_equal(p17[["gamma_enso_land_NH"]] / p17[["gamma_enso_land_SH"]], s1$ratio[[1]] / s1$ratio[[2]], tolerance = 1e-14)
+  expect_true(CCX_MODE_OBJ17_STRUCT %in% CCX_STRUCT_LABELS)
+  expect_false(ccx_pins_extend_canonical(p17, "solved"), info = "the module's names are READ under #17: not an inert extension")
+  expect_false(ccx_pins_price_canonical(p17, "solved"), info = "#17 is an objective, not a price arm")
+  r12 <- ccx_ms_reference_set(p17, "1")
+  expect_identical(r12$incumbent, CCX_MODE_CANONICAL); expect_identical(r12$new_basin, CCX_MODE_SEASML0_CONTROL)
+  expect_match(r12$why, "OBJECTIVE #17.*seeded at the pins")
+  # the LAUNCH STRING (the values at %.17g, as the launch writes them), through the driver's own parser
+  launch <- paste(sprintf("%s=%.17g", names(p17), p17), collapse = ",")
+  expect_identical(ccx_parse_pins(launch), p17)
+  expect_identical(ccx_ms_reference_set(ccx_parse_pins(launch), "1"), r12)
+  # MUTATION: under #16's label, and at seas_ml 0
+  expect_error(ccx_ms_reference_set(p17, "1", struct = CCX_MODE_OBJ16_STRUCT), "ruled under")
+  expect_error(ccx_ms_reference_set(p17, "0"), "OBJECTIVE #17")
+  # MUTATION: a module value moved, or a module name dropped
+  moved <- p17; moved[["lag_enso_land"]] <- 6
+  expect_error(ccx_ms_reference_set(moved, "1"), "no registered incumbent")
+  expect_error(ccx_ms_reference_set(p17[setdiff(names(p17), "w_enso_l2")], "1"), "no registered incumbent")
+  # MUTATION: the canonical's ten under #17's label leave the module FREE -- refused at launch, by name
+  expect_error(ccx_ms_reference_set(ms_cp, "1"), "interannual CUT.*lag_enso_land")
+  # ... while under #16's label the ten still take the first branch, as before
+  expect_identical(ccx_ms_reference_set(ms_cp, "1", struct = CCX_MODE_OBJ16_STRUCT)$why, "the canonical, under this array's pins")
 })

@@ -1,0 +1,40 @@
+calibration/diag_obj17_price.R @be223f0, 2026-10-06 19:00 | hilda33p under hilda_csl3v0kaidgbemw | stage 1 calibration/output/iav_module_20261006_hilda33p.rds
+module at hilda33p: lag_enso_land 2.60571, gamma_enso_land_NH 0.50777, gamma_enso_land_SH 0.48664, w_enso_l2 13.18274
+module at stage 1:  lag_enso_land 5.84324, gamma_enso_land_NH 0.66071, gamma_enso_land_SH 0.63322, w_enso_l2 14.72615
+
+=== 0. GATES ===
+  hilda33p under its own label: logpost -1187.451837 vs stored -1187.451837 (diff 0.0e+00)
+  REF (hilda33p on #17's rows): likelihood -1119.983530; land row -22.269612 vs the pricing preview's low-pass row -22.269612 (diff -4.9e-12)
+
+=== B1: the module at stage 1's values, nothing refitted ===
+  likelihood -10.8609 against REF (the preview's land + ocean, low-pass: -10.8594)
+ co2_seasonal_MLO  co2_seasonal_SPO d13c_seasonal_SPO    d13c_level_MLO 
+           -5.629            -5.095            -1.611            -1.048 
+d13c_seasonal_MLO    gcb_ocean_sink           d14c_SH       co2_icecore 
+           -0.770            -0.743             0.055             0.116 
+    co2_level_SPO      d13c_icecore    d13c_level_SPO     gcb_land_sink 
+            0.400             0.425             0.759             0.873 
+    co2_level_MLO 
+            1.389 
+  at the PREVIEW's values B1 is -10.859355 (preview -10.859355; diff -3.7e-11, the built objective vs its emulation);
+  stage 1's values move B1 by 1.6e-03, so the gate on B1 vs the preview is 10x that: 1.6e-02
+
+=== B2: the five other land names re-optimised (whitened, BFGS + Nelder-Mead rounds) ===
+  round 1: logpost -1165.9865, max whitened slope 0.009
+  1 rounds, 2.6 min, converged (max whitened slope < 0.1): TRUE
+  likelihood -10.2523 against REF (the preview's: -10.2506); prior part -0.1390
+  the block: beta_max 2.0879 (hilda33p 2.0768); fert_k 743.81 (hilda33p 752.14); luc_scale 0.90931 (hilda33p 0.90026); imb_share_land 0.64966 (hilda33p 0.61072); ndep_ret 12.983 (hilda33p 12.833)
+ co2_seasonal_MLO  co2_seasonal_SPO d13c_seasonal_SPO    gcb_ocean_sink 
+           -5.888            -5.087            -1.638            -0.807 
+d13c_seasonal_MLO           d14c_SH      co2_gradient    d13c_level_SPO 
+           -0.635            -0.200            -0.134             0.244 
+          d14c_NH     gcb_land_sink     co2_level_SPO    d13c_level_MLO 
+            0.311             0.339             0.406             0.482 
+     d13c_icecore       co2_icecore 
+            0.920             1.387 
+  of which the seasonal rows -13.249 and the land row +0.339
+
+=== THE FUTURES at B2 (CO2 in 2300, ppm) ===
+  ssp585: canonical 1461.53 -> B2 1457.99 (-3.53)
+  vvH: canonical 1010.03 -> B2 1008.25 (-1.78)
+  (the preview's land + ocean low-pass B2: SSP5-8.5 -3.53, vvH -1.78)
