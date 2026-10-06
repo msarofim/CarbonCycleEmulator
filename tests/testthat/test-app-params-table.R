@@ -150,16 +150,22 @@ test_that("the Set column follows the lists it is given, and is absent without a
   expect_identical(tab2$Set[match("h_ml", CCX_PARAM_NAMES)], "—")
 })
 
-test_that("at the SHIPPED canonical, the held rows are exactly the mode file's pins", {
+test_that("at the SHIPPED canonical, the held rows are exactly the pins, at the values the model RUNS", {
   skip_if_no_param_meta()
   md <- readRDS(ccx_mode_file())
+  base <- ccx_mode_base(md)      # the structure-resolved vector the model runs (test-mode-struct-lint's resolver)
   rows <- c(CCX_PARAM_NAMES, setdiff(ccx_gated_names(ccx_mode_struct(md)), CCX_PARAM_NAMES))
-  held <- names(ccx_mode_pins(md))
-  tab <- .pm_get("app_param_table")(CCX_PARAM_NAMES, ccx_default_params(), .pm_get("APP_PARAM_META"),
+  pins <- ccx_mode_pins(md); held <- names(pins)
+  tab <- .pm_get("app_param_table")(CCX_PARAM_NAMES, ccx_mode_par_with_pins(md), .pm_get("APP_PARAM_META"),
                                     extra = ccx_gated_names(ccx_mode_struct(md)),
                                     fitted = md$param_names, held = held)
   expect_equal(pt_set_problems(tab, rows, md$param_names, held), character(0))
   expect_false(any(tab$Set == "—"), info = "every row of the canonical is either fitted or held")
+  # the intro's "held at a stated value": each held row prints its pin, and the pin is what the model runs at
+  for (n in held) {
+    expect_identical(tab$Value[match(n, rows)], formatC(pins[[n]], digits = 3, format = "g"), info = n)
+    expect_equal(base[[n]], unname(pins[[n]]), info = paste(n, ": the structure-resolved base runs the pin"))
+  }
 })
 
 # ---- MUTATIONS: each must be REJECTED --------------------------------------------------------------
