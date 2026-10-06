@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-06c — BUILD OBJECTIVE #17: the interannual cut (Marcus's split calibration). Ruled; nothing built yet.
 
+> ⛔ **SUPERSEDED 2026-10-06 by `notes/handoff_2026-10-06d_obj17_running.md`.** Its §3 build was executed through step 8 (objective #17 built, stage 1 run, priced, stage 2 LAUNCHED on the Mac at 19:26 EDT); steps 9-11 and the open design points are carried there. Read that note first.
+
 **Supersedes** `notes/handoff_2026-10-06b_rulings_applied_h2_priced.md`, which now points here. Everything in that note's
 §4 not named below is still open, and its §5 non-obvious state still holds.
 - Written on Marcus's ruling, verbatim: "Yes, handoff first (Recommended)".

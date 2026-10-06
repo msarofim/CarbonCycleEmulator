@@ -2,6 +2,78 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-06 (o) — **OBJECTIVE #17 BUILT, STAGE 1 RUN, PRICED, AND STAGE 2 LAUNCHED.** The label is `hilda_csl3v0kaidgbemw`. Stage 1 at hilda33p puts the land ENSO lag at **5.84 months** (1σ 4.46–7.28; the canonical's 2.61 is outside 2σ), the land amplitude at **×1.30** and `w_enso_l2` at **14.73**, reproducing the preview. Priced unrefitted on the canonical, the main objective pays **−10.86**; with the five land names re-optimised it pays **−10.25**, almost all of it the seasonal rows (−13.2). SSP5-8.5 CO₂ in 2300 moves −3.5 ppm. **The build found and fixed a latent bug:** a PINNED ENSO amplitude was silently reset to 0 inside the objective. It never moved a stored number, but under #17 it would have switched the land ENSO term off. Nothing adopted.
+
+- **Rulings, verbatim (this session):**
+  - the label: "hilda_csl3v0kaidgbemw (Recommended)" (w = wobble);
+  - stage 1 / stage 2: "One pass + check (Recommended)". Re-run stage 1 at stage 2's values and stop if each module name moves less than 0.1 of its own stage-1 1σ; a larger move goes back to Marcus before any second refit;
+  - the cut posterior: "Laplace + propagation (Recommended)". Stage 1's Laplace covariance is propagated into the other names through the main objective's cross-Hessian. Stage 1 now stores its Hessian; the propagation itself is built after stage 2;
+  - "Remove it (Recommended)": `~/ccx_frozen/20261006_iavcut_54d85e5` was removed after its three outputs were checked md5-identical to the committed copies. Its stdout added only the runtime and "exit 0", both already in (l).
+- **The build** (`1ce5018`, `edc0cd0`, `be223f0`, `20a89f8`):
+  - **The label** (`R/calibrate.R`): kaidgbem's block plus `iav_cut` 1, `gcb_land_lowpass_df` 6 and `gcb_enso_slope_row` 0; the gates are unchanged.
+    - `ccx_make_logpost()` refuses the four module names FITTED under the cut, both when built and per draw. They are stage 1's, so they must be pinned.
+    - `ccx_ms_reference_set()` refuses the same at launch, by name.
+  - **The main objective** (`R/likelihood.R`):
+    - the low-pass `gcb_land_sink` row is the row + |(I−P)e|²/(2σ²), with P the orthogonal projection onto [1, ns(year, 6)]. It needs no new σ;
+    - the slope row's switch takes it out of the main objective;
+    - `ccx_calendar_flux()` and `ccx_enso_slope_row()` moved out of `ccx_loglik()` verbatim, so the module and the main objective score that row through ONE definition;
+    - `ccx_err_with_struct()` carries the label's switches onto `err` in the objective, `ccx_load_mode()`, `dg_streams()` and the promotion script.
+  - **The module** (`R/likelihood.R`): `LIK_IAV_*` (window 1980–2024, trend df 5, n_eff 22.5388); `ccx_cen12()`, `ccx_iav_growth_pair()` and `ccx_iav_module_loglik()`.
+    - n_eff is MEASURED (Bretherton et al. 1999 eq. 31 at hilda33p) and held fixed. The test recomputes it from the series.
+  - **The data:** `data-raw/build_mbl_global_growth_monthly.R` → `data/mbl_global_growth_monthly.rds`.
+    - The source is the manifest's `mbl_zonal_gl` (checksum verified); nothing new was downloaded, so there is no new manifest row.
+    - It reproduces `br_obs_growth()` bit for bit. DATA.md has a row.
+  - **Stage 1:** `calibration/fit_iav_module.R`.
+  - **Pricing:** `calibration/diag_obj17_price.R`.
+  - **The pins** (`R/paths.R`): `CCX_MODE_OBJ17_PINS`, which is #16's ten plus stage 1's four, and `CCX_MODE_OBJ17_STRUCT`. The reference set has a #17 branch: the canonical as a START (seeded at the pins), the control as the new basin, only under #17's label at seas_ml 1.
+- **⛔ THE BUG** (fixed in `1ce5018`). `ccx_make_logpost()` resolved the four ENSO amplitudes with `ccx_set_enso(p, pv)`, and `pv` holds only the FITTED names. A pinned amplitude was therefore resolved to `CCX_GAMMA_ENSO_DEFAULT` (0), overwriting the pin's value in the base list.
+  - **It never moved a stored number.** Every registered pin set holds the ocean pair at 0, which is the default itself, and none ever held the land pair (searched).
+  - **#17 pins the land pair at 0.66 / 0.63**, so the main objective would have run with the land ENSO term OFF.
+  - **How it was found:** the smoke check's land row read −26.62 against the pricing preview's −22.27, and the 25 rows the cut does not touch had moved.
+  - **The fix:** read from `p_pr` (the base list plus this draw's fitted values). It is bit-identical for every fitted name. Test IC7 shows that pinned at its own value is identical to free, and pinned at 0 moves the likelihood.
+  - **Same pattern, not on any live path:** `calibration/lib_seas_limbs.R` `sl_run()` also calls `ccx_set_enso(p, pv)`. Its callers pass a full vector, so it is harmless there. Not changed.
+- **Gates and tests:**
+  - hilda33p's stored logpost and 27 streams reproduce BIT FOR BIT under its own label.
+  - Under #17 at its vector, with the module pinned at its own values, the land row is −22.2696115790 against the pricing preview's −22.2696115789751. The slope row leaves and the other 25 rows are identical.
+  - `tests/testthat/test-iav-cut.R` (new): **119 expectations, 0 failed**.
+    - Nine source mutations, each caught: M1 the high-pass cost zeroed; M2 the projector without its intercept; M3 the low-pass switch not copied; M4 the slope row never switched off; M5 the ENSO bug restored; M6 the cut's guard removed; M7 the calendar flux held flat at its end; M8 an uncentred difference; M9 the label without the slope switch.
+  - `test-ms-reference-set.R` (12): **23 new** (the file 90 → **113 / 0**). Five mutations caught: R1 the label check, R2 seas_ml, R3 the branch dead, R4 the module-free refusal, R5 a literal moved by 1e-4.
+    - ⚠ The `20a89f8` commit message says "20 new". That was 113 minus 93, the file's count at 10-05 (e); the 10-06 rework of test (11) had left it at 90. Counted at both commits, and corrected here.
+  - Files were restored md5-identical after every mutation.
+  - Six label ledgers and the mixing feedback's "every other label OFF" test were extended deliberately. The new label inherits the feedback.
+  - A regression subset (13 files): **1434 / 0**.
+  - **The full suite, twice** (frozen detached worktrees, the git-ignored downloads symlinked, BLAS pinned, `nohup`):
+    - at `1ce5018` (the main half): **6550 passed, 0 failed, 3 skipped (the standing three)**, rc 0, 18.5 min, 231 warnings (`outputs/diagnostics/suite_20261006_1ce5018.log`). Against `15dbda6`'s 6427 that is +123 = `test-iav-cut.R` 119 + the mixing ON check 2 + `INERT_ON` 1 + `PRIOR_ON` 1;
+    - at `20a89f8` (the LAUNCH commit): **6573 passed, 0 failed, 3 skipped**, rc 0, 18.2 min, 231 warnings (`…_20a89f8.log`). That is 6550 + test (12)'s 23, exactly.
+- **STAGE 1 at hilda33p** (`calibration/output/iav_module_20261006_hilda33p.rds`, `outputs/diagnostics/iav_module_20261006_hilda33p.log`; 1.1 min, 6 workers):
+  - **lag 5.8432 months, land ×1.30120 (0.66071 / 0.63322), `w_enso_l2` 14.7262.** The preview's land + ocean answer was 5.8430 / ×1.30119 / 14.7263.
+  - The module's log-likelihood is +2.56 over the canonical's values. Growth r 0.586 → 0.683; the growth peak moves +1 → +6 months after Niño 3.4 (the record +5).
+  - **The lag's profile on real runs** (scale and limb re-optimised per lag): **1σ 4.46–7.28, 2σ 2.88–8.99 months.** The canonical's 2.61 sits at −2.29, outside 2σ.
+  - **Laplace 1σ:** lag 1.25 months, scale 0.294, `w_enso_l2` 1.28. Correlations: lag–limb +0.31, the others under 0.05. The Hessian is negative definite.
+  - Gates: superposition holds to 5.4e-6 ppm/yr against a 0.35 signal; the base's 27 rows reproduce through the dg path to 2.7e-10; the module's slope row is the main objective's, bit for bit.
+- **#17 PRICED on the canonical** (`outputs/diagnostics/obj17_price_20261006_hilda33p.{log,rds}`). Likelihoods are against hilda33p scored on #17's own rows:
+  - **B1, the module at stage 1, unrefitted: −10.861.** At the preview's own module values the built objective gives −10.859355, which is the preview's emulated B1 to **3.7e-11**.
+  - **B2, the five other land names re-optimised (converged in one round): −10.252**; the preview gave −10.251.
+    - The seasonal rows pay −13.25 and the land row gains +0.34.
+    - `beta_max` 2.077 → 2.088 and `fert_k` 752 → 744.
+  - **Futures at B2, CO₂ in 2300:** SSP5-8.5 1461.53 → 1457.99 (**−3.53 ppm**), vvH −1.78. These are the preview's numbers.
+- **Tried and abandoned:**
+  - **IC2's first oblique-projector mutation.** It perturbed a column by a LINEAR trend, which the natural spline already spans, so the "oblique" projector was the orthogonal one and the mutation passed. Caught on its first run; a high-frequency cosine replaced it.
+  - **A bit-identity test of the pin literals.** R's decimal parser is not correctly rounded at 17 digits: `w_enso_l2`'s literal parses one ulp (1.8e-15) above stage 1's double. The launch string parses the same way, so the literals ARE the run's pins. The test now holds both facts, and the 1-ulp case is asserted.
+  - **The fitter's first superposition check**, which compared the parts with a direct run at the base. At hilda33p the scale is 1 there, so it was an identity with no power. It now checks at the scan's best point.
+  - **The driver's default output directory.** It carries the pin label, 379 bytes with 14 pins, which is over macOS's 255-byte limit. The launch names it: `multistart_20261006o_hilda_csl3v0kaidgbemw_seasml1_pin_obj17_sd1.0452`.
+- **STAGE 2 LAUNCHED** on the Mac (Marcus: "Mac, overnight (Recommended)"; **the Torch verdict, said out loud: Mac, as ruled**):
+  - **2026-10-06 19:26:02 EDT**, from the frozen worktree `~/ccx_frozen/20261006x_obj17` at `20a89f8`, under `nohup` (launcher PID 6620; `~/ccx_frozen/20261006o_obj17_launch.{sh,out,pid}`). 8 work processes confirmed at launch, not just the launcher.
+  - The run: label `hilda_csl3v0kaidgbemw`, the 14 pins, 29 free names; 24 starts, 8 at once; the CPU clock, 300 CPU-min per start, 3 restarts × 6 cycles × 6000 maxit, spread 1.0452; tag `20261006o`.
+  - In the tree: the git-ignored downloads symlinked (14/14 inputs); port targets regenerated under this pin set. The incumbent (hilda33p seeded at the pins) evaluates to −1166.456; its +21.0 offset from the stored logpost is the objective change, not a port defect.
+  - Preflight: 24/24 exit 0, all LAUNCHABLE, every port VERIFIED (incumbent rel 3.2e-14); 0.347 CPU-s/eval at id 1, so a 6000-eval restart takes ~35 of the 300 CPU-min.
+  - On AC power; the launcher holds `caffeinate -i -s`. Expected ~13–16 h: late morning to early afternoon of 10-07.
+  - **Landing prep, ready:**
+    - `~/ccx_frozen/20261006o_obj17_land.sh` (verify, copy, cmp, RUN_PROVENANCE);
+    - `calibration/diag_obj17_refit_read.R` (`8727ea7`), dry-run on a scratch B1 file;
+    - `~/ccx_frozen/20261006o_obj17_dryrun.sh`: the whole landing chain on the first finished start, in a separate tree.
+- **Handoff:** `notes/handoff_2026-10-06d_obj17_running.md`. It supersedes `handoff_2026-10-06c_iav_cut_build.md`, which now points to it.
+
 ## 2026-10-06 (n) — **RULED: build objective #17, the interannual cut with the land + ocean module; the stage-2 refit on the Mac overnight; a handoff first.** Handoff: `notes/handoff_2026-10-06c_iav_cut_build.md`, which supersedes `handoff_2026-10-06b_rulings_applied_h2_priced.md` (that note now points to it).
 - **Marcus, verbatim:** "Build: land + ocean module (Recommended)"; "Mac, overnight (Recommended)"; "Yes, handoff first (Recommended)".
 - **#17, as ruled** (proposal §6):
