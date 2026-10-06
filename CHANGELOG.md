@@ -2,6 +2,17 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-06 (i) — **Obsolete branches DELETED** (Marcus, verbatim: "Delete any obsolete branches."). Only `main` remains, locally and on `origin`.
+
+- **The test for "obsolete": fully merged.** `git branch -a --no-merged main` listed nothing, so every commit on every branch is reachable from `main` and nothing is lost. Each deletion used `git branch -d`, which refuses an unmerged branch.
+- **Deleted:**
+  - `claude/compassionate-leavitt-a7e631` (`4be643b`, merged 10-01 f);
+  - `claude/youthful-blackburn-fbc009` (`6c87138`, merged 10-06 e), locally and on `origin` (`git push origin --delete`);
+  - `isotopic-audit-20260909` (`596701b`, merged 09-09g);
+  - `luc-veg-debit` (`e2c9238`, merged 08-18).
+- **References:** the CHANGELOG records each merge, and the notes that name these branches cite history, not a branch as a storage place. Every commit hash they quote is still in `main`.
+- **Untouched:** the two `.claude/worktrees/` folders. They are detached checkouts (no branch) in the desktop app's reuse pool (10-05 g).
+
 ## 2026-10-06 (h) — **Closed out: `main` is fast-forwarded through (c)–(g) and pushed (`6758e25..1b10a84`); the app is re-verified on it.**
 
 - **The suite of record is `658ccd7`'s, CLEAN** (6412 / 0 / 3 / 0; (e)). The commits after it change no code: evidence, notes, CHANGELOG, two suite logs.
