@@ -625,6 +625,198 @@ ccx_enso_annual_index <- function() {
   a <- stats::aggregate(nino34_anom ~ year, data = en, FUN = mean)
   data.frame(year = as.integer(a$year), nino34 = a$nino34_anom)
 }
+
+#' The model's CALENDAR-YEAR land and ocean fluxes: the stocks interpolated to calendar-year
+#' BOUNDARIES and differenced (ccx_loglik()'s trap (b), year alignment). Moved here VERBATIM from
+#' ccx_loglik() on 2026-10-06 (objective #17), so the interannual module scores the ENSO slope row
+#' through the same construction as the main objective. NULL when the run spans fewer than two
+#' calendar years (the old `length(bnd) > 2` guard).
+#' Linear, with linear EXTRAPOLATION at the two ends. On a monthly grid the first and last year
+#' boundary fall half a month outside the run, and approx(rule = 2) would hold the stock flat across
+#' that gap and silently under-count the first and last year's flux. Half a month of a 3 GtC/yr sink
+#' is 0.13 GtC -- small, but it would land entirely on the two end years rather than spread out,
+#' which is the shape of a bug.
+ccx_calendar_flux <- function(out) {
+  yrs <- sort(unique(floor(out$t + 1e-9)))
+  bnd <- c(yrs, max(yrs) + 1L)
+  if (length(bnd) <= 2) return(NULL)
+  tt <- out$t; n <- length(tt)
+  stock_at <- function(v) {
+    y  <- stats::approx(tt, v, xout = bnd)$y
+    lo <- bnd < tt[1]; hi <- bnd > tt[n]
+    if (any(lo)) y[lo] <- v[1] + (bnd[lo] - tt[1]) * (v[2] - v[1]) / (tt[2] - tt[1])
+    if (any(hi)) y[hi] <- v[n] + (bnd[hi] - tt[n]) * (v[n] - v[n - 1]) /
+                                   (tt[n] - tt[n - 1])
+    y
+  }
+  data.frame(year  = utils::head(bnd, -1),
+             ocean = diff(stock_at(out$ocean_C)),
+             land  = diff(stock_at(out$land_C)))
+}
+#' THE `gcb_ocean_enso_slope` ROW on a calendar-year flux table (ccx_calendar_flux()): one Gaussian
+#' on the model's ENSO ocean slope at the observed regression's own se. NULL = ABSENT (obs carries no
+#' target, or the run is too short for the window) -- never zero. The ONE definition, read by the
+#' main objective (ccx_loglik(), where LIK_USE_GCB_ENSO_SLOPE and the cut switch gate it) and by the
+#' interannual module (ccx_iav_module_loglik(), objective #17). `dn` is ccx_loglik()'s residual-
+#' capturing dnorm, or stats::dnorm itself.
+ccx_enso_slope_row <- function(flux, obs, dn = stats::dnorm) {
+  if (is.null(obs$enso_slope) || !is.finite(obs$enso_slope[["slope"]])) return(NULL)
+  ms <- ccx_enso_slope(flux$year, flux$ocean, obs$enso_idx)
+  if (!is.finite(ms[["slope"]])) return(NULL)
+  dn(obs$enso_slope[["slope"]], ms[["slope"]], obs$enso_slope[["se"]], log = TRUE)
+}
+
+# ---- OBJECTIVE #17 (RULED 2026-10-06 n): THE INTERANNUAL CUT ------------------------------------
+# Marcus 2026-10-06, verbatim: "What about having a 12-month smoothed CO2 growth that is used only for
+# calibrating the ENSO and volcanic aerosol parameters? E.g., the parameters that only care about
+# interannual variability and not the regular annual cycle or the long term trend which is what all the
+# other parameters in the model care about." Ruled: "Build: land + ocean module (Recommended)"; the
+# label "hilda_csl3v0kaidgbemw (Recommended)" (w = wobble). A MODULAR ("cut") calibration (Liu, Bayarri
+# & Berger 2009, Bayesian Analysis 4:119, doi:10.1214/09-BA404; Plummer 2015, Stat. Comput. 25:37,
+# doi:10.1007/s11222-014-9503-z): the module's data inform only the module's names.
+#   STAGE 1, the MODULE: lag_enso_land, ONE land amplitude (NH : SH held at hilda33p's) and w_enso_l2,
+#     fitted to {the monthly detrended global growth, gcb_ocean_enso_slope} by ccx_iav_module_loglik()
+#     (calibration/fit_iav_module.R). gamma_diff stays a fixed 0.25 (Marcus: "land ENSO only").
+#   STAGE 2, the MAIN objective: every other name, with the module's names PINNED, under the label
+#     hilda_csl3v0kaidgbemw, which (ccx_err_with_struct()) scores `gcb_land_sink` on its LOW-PASS part
+#     and drops `gcb_ocean_enso_slope` (it moved to the module).
+# Design and every number: notes/proposal_2026-10-06_iav_cut.md; CHANGELOG 2026-10-06 (l)-(n).
+#
+# THE LOW-PASS LAND ROW. The row is independent Gaussians at sd s on the per-year residual e = target -
+# (model land + E_LUC) over the scored GCB years. With P the orthogonal projection onto [1, ns(year, df)],
+# |e|^2 = |Pe|^2 + |(I-P)e|^2 EXACTLY, so the row splits into a low and a high part under its OWN
+# independence assumption, and the low-pass row = row + |(I-P)e|^2 / (2 s^2) needs NO new sigma (the
+# normalising constant stays the full row's). df 6 over the 66 GCB years is the ~11-yr scale the
+# imbalance smoothing already uses (LIK_IMB_SMOOTH_YR); df 4 and 9 bracketed it (+0.80 / +0.91 against
+# df 6's +0.76 at land B1: insensitive). Priced by calibration/diag_iav_cut_smoothed_land.R @565aa92:
+# at hilda33p the row is -49.85 = low -22.27 + high -27.58, and under the cut it takes B2's cost from
+# -36.4 to -10.0, its trend part slightly IMPROVING. ⛔ RULED VALUE: test-iav-cut.R pins it.
+LIK_LAND_LOWPASS_DF <- 6L
+#' The orthogonal projection onto [1, ns(year, df)] (the intercept and a natural-spline basis): the
+#' low-pass operator of objective #17's land row. Built exactly as the pricing preview built it.
+ccx_lowpass_projector <- function(year, df) {
+  if (length(df) != 1L || !is.finite(df) || df != round(df) || df < 1 || df > length(year) - 2)
+    stop("ccx_lowpass_projector(): `df` must be one whole number in [1, n - 2] (n = ", length(year),
+         " years); got ", paste(df, collapse = ","), ".")
+  X <- stats::model.matrix(~ splines::ns(year, df = df))
+  X %*% solve(crossprod(X), t(X))
+}
+#' What the land row's HIGH part costs: |(I - P) e|^2 / (2 sd^2) >= 0. Added to the row, it leaves the
+#' row's low-pass part: row + cost = -n/2 log(2 pi sd^2) - |P e|^2 / (2 sd^2).
+ccx_land_highpass_cost <- function(e, year, df, sd) {
+  if (length(e) != length(year)) stop("ccx_land_highpass_cost(): one residual per year.")
+  h <- as.numeric(e - ccx_lowpass_projector(year, df) %*% e)
+  sum(h^2) / (2 * sd^2)
+}
+#' Is the `gcb_ocean_enso_slope` row in the MAIN objective? Absent switch = yes (every label but the
+#' cut's); 0 = no, it is scored in the interannual module instead.
+ccx_enso_slope_row_on <- function(err) {
+  s <- err[["gcb_enso_slope_row"]]
+  if (is.null(s)) return(TRUE)
+  if (length(s) != 1L || !is.finite(s) || !s %in% c(0, 1))
+    stop("ccx_loglik(): err$gcb_enso_slope_row must be 0 or 1; got ", paste(s, collapse = ","), ".")
+  s == 1
+}
+#' THE STRUCTURE'S LIKELIHOOD SWITCHES onto `err` (objective #17): every caller that hands ccx_loglik()
+#' an `err` built from a mode file passes it through here with the file's base list (the structure).
+#' Absent fields = nothing added = the objective of every label but the cut's, bit for bit.
+#' ⚠ A caller that builds `err` WITHOUT this scores a #17 vector on #16's rows: the stored `streams`
+#' of a #17 file then disagree on `gcb_land_sink` and on `gcb_ocean_enso_slope`'s presence.
+ccx_err_with_struct <- function(err, p) {
+  if (!is.null(p[["gcb_land_lowpass_df"]])) err$gcb_land_lowpass_df <- p[["gcb_land_lowpass_df"]]
+  if (!is.null(p[["gcb_enso_slope_row"]]))  err$gcb_enso_slope_row  <- p[["gcb_enso_slope_row"]]
+  err
+}
+
+# ---- THE INTERANNUAL MODULE (objective #17's stage 1) ------------------------------------------
+# THE ESTIMATOR (ruled "Monthly (Recommended)", 2026-10-06 m): NOAA MBL global CO2, monthly means of the
+# weekly reference, its CENTRED 12-month difference (removes the annual cycle), matched by month to the
+# model's global mean ((NH + SH) / 2: equal-mass boxes) over LIK_IAV_WIN, both series detrended by the
+# residual-maker of [1, ns(t, LIK_IAV_TREND_DF)] on the matched months' own axis (removes the trend).
+# Exactly the refit read's s. 6 estimator (calibration/lib_block_reopt.R br_timing) that every 10-02 /
+# 10-04 / 10-06 diagnostic used, and the one the preview fitted (proposal s. 2).
+# THE LIKELIHOOD: -(n_eff / 2) log(SSR / SSR_ref) -- a Gaussian with its sigma profiled out, at an
+# EFFECTIVE sample size, because the monthly residuals are strongly autocorrelated (a 12-month
+# difference overlaps its neighbours 11 months in 12). SSR_ref is a constant: it moves the value, not
+# the optimum. Plus the `gcb_ocean_enso_slope` row, which pins the ocean limb (on the growth alone the
+# limb and the land term cancel and run away: w_enso_l2 55-113; proposal s. 5.3).
+# ⚠ The model's centred difference for Jul-Dec 2024 reads Jan-Jun 2025, so a module run must extend
+# past the record (calibration/lib_design_gates.R DG_YEARS, forcing held in 2025 by design); the slope
+# row is read on the same run TRUNCATED to the objective's span (LIK_IAV_SPAN_END), which is how the main
+# objective and dg_streams() score it.
+LIK_IAV_GROWTH_RDS <- "mbl_global_growth_monthly.rds"   # data/; data-raw/build_mbl_global_growth_monthly.R
+LIK_IAV_WIN        <- c(1980L, 2024L)                   # the MBL reference starts 1979, so its growth 1980
+LIK_IAV_TREND_DF   <- 5L                                # the refit read's s. 6 (BR_TREND_DF)
+LIK_IAV_SPAN_END   <- 2024L                             # the objective's last scored year
+# n_eff: MEASURED, not asserted. Bretherton et al. 1999, J. Climate 12:1990, eq. 31,
+# n (1 - r1(x) r1(y)) / (1 + r1(x) r1(y)), with r1 the lag-1 autocorrelations of the two detrended
+# series, at the canonical hilda33p over the 540 months of LIK_IAV_WIN (calibration/
+# diag_iav_cut_preview.R @54d85e5, outputs/diagnostics/iav_cut_preview_20261006_hilda33p.rds $n_eff[["m"]]).
+# It sets the module's weight against the slope row, so it is held FIXED (a draw-dependent n_eff would
+# make the module's optimum move with its own autocorrelation). The annual estimator's was 44.8.
+LIK_IAV_NEFF       <- 22.53880639959581
+#' The names stage 1 fits (the module), in the order the fitter reports them. The two land amplitudes
+#' move TOGETHER (one scale on hilda33p's NH : SH), since the global growth sees only their sum.
+CCX_IAV_MODULE_NAMES <- c("lag_enso_land", "gamma_enso_land_NH", "gamma_enso_land_SH", "w_enso_l2")
+#' The centred 12-month difference x[t + 6] - x[t - 6] (NA within six months of either end): the ONE
+#' definition (lib_block_reopt.R br_cen12's, verbatim, with a guard for short series).
+ccx_cen12 <- function(x) {
+  n <- length(x); g <- rep(NA_real_, n)
+  if (n < 13L) return(g)
+  i <- 7:(n - 6); g[i] <- x[i + 6] - x[i - 6]; g
+}
+#' The observed monthly growth product (cached per process): $monthly is data.frame(year, month, k =
+#' 12 year + month, co2, n, g), g = ccx_cen12(co2); $provenance records the source and its checksum.
+ccx_iav_growth_obs <- local({
+  cache <- NULL
+  function() {
+    if (is.null(cache)) {
+      f <- ccx_path("data", LIK_IAV_GROWTH_RDS)
+      if (!file.exists(f))
+        stop("ccx_iav_growth_obs(): ", f, " is missing; run data-raw/build_mbl_global_growth_monthly.R")
+      cache <<- readRDS(f)
+    }
+    cache
+  }
+})
+#' The module's estimator on ONE run: the matched, detrended monthly growth pair over LIK_IAV_WIN.
+#' `out` / `F` are a run's output and its forcing (one row per month, aligned); `obs_g` the product's
+#' $monthly table. Returns list(k, mod, obs), k = 12 year + month.
+ccx_iav_growth_pair <- function(out, F, obs_g = ccx_iav_growth_obs()$monthly) {
+  if (nrow(F) != nrow(out)) stop("ccx_iav_growth_pair(): the forcing and the output must align, month for month.")
+  m <- data.frame(k = F$year * 12L + F$month, g = ccx_cen12((out$co2_NH + out$co2_SH) / 2))
+  M <- merge(m, data.frame(k = obs_g$k, g = obs_g$g), by = "k", suffixes = c("_mod", "_obs"))
+  M <- M[M$k >= LIK_IAV_WIN[1] * 12L + 1L & M$k <= LIK_IAV_WIN[2] * 12L + 12L & stats::complete.cases(M), ]
+  n_want <- 12L * (LIK_IAV_WIN[2] - LIK_IAV_WIN[1] + 1L)
+  if (nrow(M) != n_want)
+    stop("ccx_iav_growth_pair(): ", nrow(M), " matched months, not the window's ", n_want, ". The run must ",
+         "extend six months past ", LIK_IAV_WIN[2], " (DG_YEARS) and the product cover the window.")
+  tt <- (M$k - 1) / 12
+  X <- stats::model.matrix(~ splines::ns(tt, df = LIK_IAV_TREND_DF))
+  Q <- function(g) as.numeric(g - X %*% qr.solve(X, g))
+  list(k = M$k, mod = Q(M$g_mod), obs = Q(M$g_obs))
+}
+#' THE MODULE'S LOG-LIKELIHOOD on one run: -(n_eff / 2) log(SSR / ssr_ref) + the slope row.
+#' `obs` = ccx_prepare_obs() (the slope row's target and index). `ssr_ref` > 0 is the caller's
+#' reference SSR (a constant). Returns c(loglik, growth, slope_row, ssr, n, r): the two parts, the
+#' SSR, the matched months and the detrended correlation. The slope row is REQUIRED: an absent row
+#' would let the limb run away silently, so it stops.
+ccx_iav_module_loglik <- function(out, F, obs, ssr_ref, obs_g = ccx_iav_growth_obs()$monthly,
+                                  n_eff = LIK_IAV_NEFF) {
+  if (length(ssr_ref) != 1L || !is.finite(ssr_ref) || ssr_ref <= 0)
+    stop("ccx_iav_module_loglik(): `ssr_ref` must be one positive number.")
+  gp  <- ccx_iav_growth_pair(out, F, obs_g)
+  ssr <- sum((gp$mod - gp$obs)^2)
+  # the slope row on the objective's own span (the main objective and dg_streams() read it there)
+  fl  <- ccx_calendar_flux(out[out$t < LIK_IAV_SPAN_END + 1, , drop = FALSE])
+  row <- if (is.null(fl)) NULL else ccx_enso_slope_row(fl, obs)
+  if (is.null(row))
+    stop("ccx_iav_module_loglik(): the gcb_ocean_enso_slope row is ABSENT (no target in `obs`, or the run ",
+         "is too short); the module cannot be scored without it.")
+  growth <- -(n_eff / 2) * log(ssr / ssr_ref)
+  c(loglik = growth + row, growth = growth, slope_row = row, ssr = ssr, n = length(gp$mod),
+    r = stats::cor(gp$mod, gp$obs))
+}
 # GCB 2025 stated 1 sigma on E_LUC, GtC/yr. Not used in the likelihood -- it is
 # the receipt behind the luc_scale prior in calibrate.R, kept beside its
 # siblings so the four numbers stay together and traceable to one header.
@@ -2623,27 +2815,11 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   #     against a sigma of 0.4-1.5, i.e. nothing; but it ALIASES exactly the
   #     interannual variability a partition constraint exists to use. The stock
   #     is now interpolated to calendar-year BOUNDARIES and differenced.
-  yrs <- sort(unique(floor(out$t + 1e-9)))
-  bnd <- c(yrs, max(yrs) + 1L)
-  if (length(bnd) > 2) {
-    # Linear, with linear EXTRAPOLATION at the two ends. On a monthly grid the
-    # first and last year boundary fall half a month outside the run, and
-    # approx(rule = 2) would hold the stock flat across that gap and silently
-    # under-count the first and last year's flux. Half a month of a 3 GtC/yr
-    # sink is 0.13 GtC -- small, but it would land entirely on the two end
-    # years rather than spread out, which is the shape of a bug.
-    tt <- out$t; n <- length(tt)
-    stock_at <- function(v) {
-      y  <- stats::approx(tt, v, xout = bnd)$y
-      lo <- bnd < tt[1]; hi <- bnd > tt[n]
-      if (any(lo)) y[lo] <- v[1] + (bnd[lo] - tt[1]) * (v[2] - v[1]) / (tt[2] - tt[1])
-      if (any(hi)) y[hi] <- v[n] + (bnd[hi] - tt[n]) * (v[n] - v[n - 1]) /
-                                     (tt[n] - tt[n - 1])
-      y
-    }
-    flux <- data.frame(year  = utils::head(bnd, -1),
-                       ocean = diff(stock_at(out$ocean_C)),
-                       land  = diff(stock_at(out$land_C)))
+  #     (2026-10-06, objective #17: the construction moved, verbatim, into
+  #     ccx_calendar_flux(), so the interannual module scores the ENSO slope row
+  #     through the same code. NULL there = the old `length(bnd) > 2` failing.)
+  flux <- ccx_calendar_flux(out)
+  if (!is.null(flux)) {
     if (is.null(luc))
       luc <- data.frame(year = obs$gcb$year, eluc = obs$gcb$luc)
     g <- merge(as.data.frame(obs$gcb)[, c("year", "ocean_sink", "land_sink")],
@@ -2663,9 +2839,16 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
       }
       add("gcb_ocean_sink",
           sum(dn(tgt_o, g$ocean, LIK_GCB_OCEAN_SD, log = TRUE)))
-      add("gcb_land_sink",
-          sum(dn(tgt_l, g$land + g$eluc,
-                           LIK_GCB_LAND_SD * LIK_LAND_SINK_INFLATE, log = TRUE)))
+      # OBJECTIVE #17 (2026-10-06 n; see LIK_LAND_LOWPASS_DF): under the interannual cut the
+      # row is scored on its LOW-PASS part -- the row PLUS what its high part costs, which is
+      # the row minus that part, exactly. Absent switch = the row as it always was, bit for bit
+      # (the same dn() call; `dn` records the residual e = target - model either way).
+      sd_l  <- LIK_GCB_LAND_SD * LIK_LAND_SINK_INFLATE
+      row_l <- sum(dn(tgt_l, g$land + g$eluc, sd_l, log = TRUE))
+      if (!is.null(err[["gcb_land_lowpass_df"]]))
+        row_l <- row_l + ccx_land_highpass_cost(tgt_l - (g$land + g$eluc), g$year,
+                                                err[["gcb_land_lowpass_df"]], sd_l)
+      add("gcb_land_sink", row_l)
     }
     # ---- the ENSO ocean slope (objective #13, 2026-09-18 e; see LIK_USE_GCB_ENSO_SLOPE) --
     # The MODEL's own calendar-year ocean flux (the series above, over the model's
@@ -2673,11 +2856,12 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
     # estimator as the obs target. ABSENT (never zero) when the run is too short
     # for the window, when obs carries no target (an old fixture), or with the
     # switch off -- a missing row is a warning in dg_streams, a zero is a lie.
-    if (LIK_USE_GCB_ENSO_SLOPE && !is.null(obs$enso_slope) && is.finite(obs$enso_slope[["slope"]])) {
-      ms <- ccx_enso_slope(flux$year, flux$ocean, obs$enso_idx)
-      if (is.finite(ms[["slope"]]))
-        add("gcb_ocean_enso_slope",
-            dn(obs$enso_slope[["slope"]], ms[["slope"]], obs$enso_slope[["se"]], log = TRUE))
+    # (2026-10-06, objective #17: the row is ccx_enso_slope_row(), which the
+    # interannual module scores too; under the cut it is OFF here,
+    # err$gcb_enso_slope_row = 0, and lives in the module.)
+    if (LIK_USE_GCB_ENSO_SLOPE && ccx_enso_slope_row_on(err)) {
+      v_sl <- ccx_enso_slope_row(flux, obs, dn)
+      if (!is.null(v_sl)) add("gcb_ocean_enso_slope", v_sl)
     }
   }
   if (!is.null(npp)) {

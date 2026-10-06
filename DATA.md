@@ -56,6 +56,7 @@ Rscript data-raw/download_data.R && Rscript data-raw/build_carbonate_tables.R &&
 | Zonal Δ¹⁴C, 5 zones, monthly | 1941.2–2019.4, n=4689 | bomb-era target, both hemispheres | Hua et al. 2022 via `SoilR::Hua2021` |
 | **IntCal20 Δ¹⁴C** | 1700–1950 | **pre-bomb Suess target** | Reimer et al. 2020 via `rintcal` |
 | GCB global budget | 1959–2024 | sink partition constraint | GCB 2025 (Friedlingstein et al. 2026) |
+| **NOAA MBL global CO₂ growth, monthly** (`data/mbl_global_growth_monthly.rds`) | g defined 1979-07–2025-07; scored 1980–2024, n=540 | **objective #17's interannual MODULE only** (stage 1: the land ENSO lag and amplitude, `w_enso_l2`), never the main objective. Centred 12-month difference of monthly means, detrended in `ccx_iav_growth_pair()` | NOAA GML MBL reference (Lan et al. 2024, doi:10.15138/DVNP-F961), manifest key `mbl_zonal_gl`; built by `data-raw/build_mbl_global_growth_monthly.R` (added 2026-10-06) |
 
 **Cross-checks, deliberately NOT used as extra likelihood terms** (using them would
 double-count the same measurements):

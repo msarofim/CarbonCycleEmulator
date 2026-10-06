@@ -1719,6 +1719,9 @@ dg_streams <- function(r, v, obs = ccx_prepare_obs(), residuals = FALSE) {
   # silence. Absent (every older file, and "defaults") = NULL = #13's rows.
   .sh <- ccx_imb_shares(v$pm)
   if (!is.null(.sh)) { err$imb_share_land <- .sh[["land"]]; err$imb_share_ocean <- .sh[["ocean"]] }
+  # the STRUCTURE's likelihood switches (objective #17, 2026-10-06: the cut's low-pass land row and the
+  # slope row moved to the module), from the model list, which carries the label's block. Absent = as before.
+  err <- ccx_err_with_struct(err, v$p)
   ccx_loglik(o, obs, err, luc = eluc,
              deep = ccx_d14c_deep_read(r$sp),
              ocean_grad = ccx_ocean_grad_scored(o, r$sp), by_stream = TRUE,

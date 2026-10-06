@@ -1948,6 +1948,8 @@ ccx_load_mode <- function(arm = CCX_MODE_CANONICAL, base = NULL) {
   # two GCB rows; a caller feeding this `err` to ccx_loglik() must get them. Absent = #13.
   .sh <- ccx_imb_shares(pm)
   if (!is.null(.sh)) { err$imb_share_land <- .sh[["land"]]; err$imb_share_ocean <- .sh[["ocean"]] }
+  # the structure's likelihood switches (objective #17, 2026-10-06): absent = nothing added
+  err <- ccx_err_with_struct(err, p)
   list(p = p, luc_scale = pm$luc_scale, bomb_total = pm$bomb_total,
        err = err, hml_bound = md$hml_bound, md = md, file = f)
 }
@@ -2486,7 +2488,25 @@ ccx_struct_hilda_csl3v0kaidgbem <- function() {
   stopifnot(!anyDuplicated(names(blk)))
   blk
 }
-CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", names(CCX_L2_RETURN_LAYERS), "hilda_cs", "hilda_csl3v0", "hilda_csl3v0k", "hilda_csl3v0ka", "hilda_csl3v0kan", "hilda_csl3v0kai", "hilda_csl3v0kaidgb", "hilda_csl3v0kaidgbe", "hilda_csl3v0kaidgbem")
+#' THE "hilda_csl3v0kaidgbemw" STRUCTURE (OBJECTIVE #17, RULED 2026-10-06 n): hilda_csl3v0kaidgbem with
+#' the MAIN objective's half of the INTERANNUAL CUT (R/likelihood.R, "OBJECTIVE #17"). Marcus, verbatim:
+#' "Build: land + ocean module (Recommended)"; the NAME "hilda_csl3v0kaidgbemw (Recommended)" (w = wobble,
+#' the app's word for the year-to-year signal the module fits). Three fields; the MODEL reads none of them:
+#'   iav_cut = 1              the module's names (CCX_IAV_MODULE_NAMES) are STAGE 1's: the main objective
+#'                            HOLDS them, so ccx_make_logpost() refuses them fitted (pin them, CCX_MS_PIN)
+#'   gcb_land_lowpass_df = 6  `gcb_land_sink` scored on its LOW-PASS part (LIK_LAND_LOWPASS_DF)
+#'   gcb_enso_slope_row = 0   `gcb_ocean_enso_slope` leaves the main objective; the module scores it
+#' The gates are kaidgbem's, untouched (the lag gate stays open, so the lag is a fitted name a pin can
+#' hold). Every other label leaves the three absent, so every registered file stays bit-exact.
+ccx_struct_hilda_csl3v0kaidgbemw <- function() {
+  blk <- ccx_struct_hilda_csl3v0kaidgbem()
+  blk$iav_cut             <- 1L
+  blk$gcb_land_lowpass_df <- LIK_LAND_LOWPASS_DF
+  blk$gcb_enso_slope_row  <- 0L
+  stopifnot(!anyDuplicated(names(blk)))
+  blk
+}
+CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", names(CCX_L2_RETURN_LAYERS), "hilda_cs", "hilda_csl3v0", "hilda_csl3v0k", "hilda_csl3v0ka", "hilda_csl3v0kan", "hilda_csl3v0kai", "hilda_csl3v0kaidgb", "hilda_csl3v0kaidgbe", "hilda_csl3v0kaidgbem", "hilda_csl3v0kaidgbemw")
 ccx_struct_block <- function(struct) {
   if (identical(struct, "")) return(list())        # the column: nothing declared
   switch(struct,
@@ -2506,6 +2526,7 @@ ccx_struct_block <- function(struct) {
     "hilda_csl3v0kaidgb" = ccx_struct_hilda_csl3v0kaidgb(), # ... + D2 / D3 FITTED, the gate open (2026-09-30; objective #14)
     "hilda_csl3v0kaidgbe" = ccx_struct_hilda_csl3v0kaidgbe(), # ... + the land ENSO lag FITTED, the second gate (2026-10-02; objective #15)
     "hilda_csl3v0kaidgbem" = ccx_struct_hilda_csl3v0kaidgbem(), # ... + the stratification feedback (2026-10-04; DESIGN §3.4a S)
+    "hilda_csl3v0kaidgbemw" = ccx_struct_hilda_csl3v0kaidgbemw(), # ... + the interannual cut's main half (2026-10-06; objective #17)
     stop("ccx_struct_block(): unknown structure label '", struct, "'"))
 }
 #' The pump field's construction is the THIRD structure axis (option D + E,
@@ -2719,7 +2740,8 @@ ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", ""),
          "and \"hilda_csl3v0kai\" (arm A + the inert soil carve-out, 2026-09-30) ",
          "and \"hilda_csl3v0kaidgb\" (+ D2 / D3 fitted, objective #14, 2026-09-30) ",
          "and \"hilda_csl3v0kaidgbe\" (+ the land ENSO lag fitted, objective #15, 2026-10-02) ",
-         "and \"hilda_csl3v0kaidgbem\" (+ the stratification feedback, DESIGN §3.4a S, 2026-10-04).")
+         "and \"hilda_csl3v0kaidgbem\" (+ the stratification feedback, DESIGN §3.4a S, 2026-10-04) ",
+         "and \"hilda_csl3v0kaidgbemw\" (+ the interannual cut's main half, objective #17, 2026-10-06).")
   blk <- ccx_struct_block(struct)
   for (n in names(blk)) p[[n]] <- blk[[n]]
   structure(p, struct = struct, seas_ml = seas_ml, pump_field = pump_field)
@@ -2821,9 +2843,28 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     }
   }
   .gate_check()
+  # THE CUT'S GUARD (objective #17, 2026-10-06; the label hilda_csl3v0kaidgbemw). Under the interannual
+  # cut the module's names are STAGE 1's (calibration/fit_iav_module.R). Fitted here, the main objective
+  # would fit them on rows that cannot identify them -- with gcb_ocean_enso_slope moved to the module,
+  # w_enso_l2 runs away (proposal s. 5.3) -- and a label has to mean ONE objective. So every module name
+  # must be PINNED. Checked when the objective is built AND per draw, as the gate check is.
+  IAV_CUT <- isTRUE(base_params[["iav_cut"]] == 1)
+  .iav_check <- function() {
+    if (!IAV_CUT) return(invisible(NULL))
+    fit  <- intersect(CCX_IAV_MODULE_NAMES, CCX_PARAM_NAMES)
+    miss <- setdiff(CCX_IAV_MODULE_NAMES, names(CCX_PINS))
+    if (length(fit) || length(miss))
+      stop("ccx_make_logpost(): the structure is the INTERANNUAL CUT (iav_cut = 1, objective #17): ",
+           paste(CCX_IAV_MODULE_NAMES, collapse = ", "), " are the module's names, fitted by stage 1, so ",
+           "the main objective must HOLD them. ",
+           if (length(fit)) paste0(paste(fit, collapse = ", "), " are FITTED here. ") else "",
+           "Pin all four at the module's values (CCX_MS_PIN / ccx_apply_pins()).")
+  }
+  .iav_check()
 
   function(u) {
     .gate_check()
+    .iav_check()
     # An OPEN structure records the ruled I(t) (ccx_struct_hilda_csl3v0kaidgb()); the D3
     # rows read the LIK_IMB_* globals at call time, so a draw under globals that disagree
     # would score a different objective under the same label. Refused per draw, before
@@ -2863,7 +2904,15 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
       stop("ccx_make_logpost(): base_params lacks fitted name(s) ",
            paste(.miss, collapse = ", "), "; they would never reach the model.")
     for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]
-    p <- ccx_set_enso(p, pv)
+    # ⛔ FROM `p_pr`, NOT `pv` (2026-10-06, found building objective #17). `pv` holds the FITTED names
+    # only, so a PINNED ENSO amplitude was absent from it and ccx_gamma_enso() resolved it to
+    # CCX_GAMMA_ENSO_DEFAULT (0): the pin's value, carried in base_params, was overwritten with 0. It
+    # never moved a stored number -- every registered pin set holds the ocean pair at 0, the default
+    # itself, and none ever held the land pair -- but #17 pins the land pair at non-zero values, and
+    # the main objective would have run with the land ENSO term silently OFF (the smoke check's land
+    # row read -26.62 against the pricing preview's -22.27). `p_pr` is base_params (pins included)
+    # overlaid with this draw's fitted values: for a fitted name the same value as `pv`, bit for bit.
+    p <- ccx_set_enso(p, p_pr)
 
     # `spinup_fn`, not `ccx_spinup` by name: see the argument's own block. The
     # DEFAULT is CCX_OBJECTIVE_SPINUP = ccx_periodic_spinup since 2026-09-09x
@@ -2943,6 +2992,9 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     # = NULL = objective #13's two sink rows, bit for bit.
     .sh <- ccx_imb_shares(p_pr)
     if (!is.null(.sh)) { err$imb_share_land <- .sh[["land"]]; err$imb_share_ocean <- .sh[["ocean"]] }
+    # the STRUCTURE's likelihood switches (objective #17's cut: the low-pass land row, the slope row
+    # moved to the module). Absent under every other label = nothing added.
+    err <- ccx_err_with_struct(err, base_params)
     # `luc` is the MODEL's own land-use flux, so the gross-sink reconstruction
     # in the gcb_land_sink term follows luc_scale instead of silently reverting
     # to GCB's unscaled column.

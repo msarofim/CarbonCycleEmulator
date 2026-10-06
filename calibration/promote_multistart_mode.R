@@ -219,6 +219,8 @@ streams <- local({
   # targets. Absent (every older label) = NULL = objective #13's rows, as before.
   .sh <- ccx_imb_shares(pm)
   if (!is.null(.sh)) { err$imb_share_land <- .sh[["land"]]; err$imb_share_ocean <- .sh[["ocean"]] }
+  # the structure's likelihood switches (objective #17, 2026-10-06): absent under every other label
+  err <- ccx_err_with_struct(err, p_mode)
   ccx_loglik(r$out, ccx_prepare_obs(), err,
              luc = el, deep = ccx_d14c_deep_read(sp),
              # the modern-NPP row, where the structure carries it (npp_row, 2026-09-29)
