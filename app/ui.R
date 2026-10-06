@@ -681,7 +681,15 @@ navbarPage(
         h4("Source"),
         p("Model, data-download scripts and the full decision log are in the",
           "repository, including what was tried and abandoned."),
-        p(tags$a(href = APP_REPO_URL, target = "_blank", APP_REPO_URL)),
+        # 2026-10-06 (Marcus: "Go ahead and fix the repo link"): guarded exactly as the comment link
+        # is (global.R app_link_ok()). Unguarded, it linked to the placeholder "SET-BEFORE-DEPLOY";
+        # and the GitHub remote is private, so there is no public target until one is chosen.
+        if (app_link_ok(APP_REPO_URL))
+          p(tags$a(href = APP_REPO_URL, target = "_blank", APP_REPO_URL))
+        else
+          div(class = "prov prov-warn",
+              tags$strong("This build has no repository link set. "),
+              "Set APP_REPO_URL in app/global.R before deploying."),
         # U3 / ruling R4 (Marcus 2026-09-22): no institutional affiliation on
         # this page. Marron Institute is for professional output — posters,
         # talks, papers — and this app is Substack-facing.

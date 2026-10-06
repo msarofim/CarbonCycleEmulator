@@ -80,6 +80,30 @@ test_that("the feedback link is a placeholder until it is deliberately set", {
   expect_true(grepl("app_link_ok\\(APP_FEEDBACK_URL\\)", .rv_ui_text))
 })
 
+# EVERY link constant, not just the comment link (2026-10-06, Marcus: "Go ahead and fix the repo link").
+# The repo link rendered UNGUARDED, a live <a> to "SET-BEFORE-DEPLOY", while global.R's comment said ui.R
+# guards its links: the test above named one URL, so the other was never checked. This one is generated
+# from global.R's own definitions, so a third URL cannot go unchecked either.
+rv_unguarded_urls <- function(global_lines, ui_text) {
+  urls <- unique(sub("^\\s*(APP_[A-Z_]*URL)\\s*<-.*", "\\1",
+                     grep("^\\s*APP_[A-Z_]*URL\\s*<-", global_lines, value = TRUE)))
+  urls[!vapply(urls, function(u) grepl(sprintf("app_link_ok(%s)", u), ui_text, fixed = TRUE), logical(1))]
+}
+
+test_that("every APP_*_URL in global.R is guarded by app_link_ok() in ui.R", {
+  skip_if_no_review()
+  g <- readLines(file.path(.rv_app_dir, "global.R"), warn = FALSE)
+  expect_gte(length(grep("^\\s*APP_[A-Z_]*URL\\s*<-", g)), 2L)   # the feedback AND the repo link
+  expect_identical(rv_unguarded_urls(g, .rv_ui_text), character(0))
+})
+
+test_that("MUTATION: the URL-guard check fires on the 10-06 defect (the repo link unguarded)", {
+  skip_if_no_review()
+  g <- readLines(file.path(.rv_app_dir, "global.R"), warn = FALSE)
+  mutated <- gsub("app_link_ok(APP_REPO_URL)", "TRUE", .rv_ui_text, fixed = TRUE)
+  expect_identical(rv_unguarded_urls(g, mutated), "APP_REPO_URL")
+})
+
 # ---------------------------------------------------------------------
 # MUTATION TESTS -- break what the gate guards, confirm it fails
 # ---------------------------------------------------------------------

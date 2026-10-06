@@ -514,7 +514,14 @@ CHANGELOG 10-05.
   - ABSENT = 1 = the shipped model, bit for bit, in both cores.
 - **The low-latitude boxes are untouched:** the mixed layer, the equatorial cell and the tropical box.
 - **The test:** the like-for-like driver at frac = 1, ½ and 0, each unrefitted. An OBSERVED ratio (high-latitude
-  over hemispheric SST trend) needs gridded SST, which the repo does not hold. It is a data-download decision.
+  over hemispheric SST trend) needs gridded SST.
+  - ⚠ **CORRECTED 2026-10-06** (Marcus: "correct the DESIGN.md factual error"). This line said the repo does not
+    hold gridded SST. It does: ERSST v5 and v6, monthly at 2°, in `data-raw/downloads/` (`MANIFEST.csv` entries
+    `ersst_v5_monthly`, `ersst_v6_monthly`), and `data-raw/build_hs_exchange_factor.R` already builds HILDA's
+    SST < 5 °C cold-box mask on that grid. The arm needed no download, only method rulings (ERSST against the
+    HadSST4 forcing, the mask, the window).
+  - **The arm is CLOSED** (2026-10-06, "Close the finished items"): it cannot change the conclusion. Even at
+    frac 0 the thermal part is 2.8× one GOBM's (10-05 c).
 
 ### 3.5 Isotopes
 
