@@ -44,6 +44,7 @@
 # Usage:  Rscript calibration/diag_rep_dc_mass_weighting.R
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+MW_COMMIT <- ccx_git_stamp()
 .root <- normalizePath(".")
 
 MW_DATE <- format(Sys.Date(), "%Y%m%d")
@@ -84,8 +85,7 @@ say <- function(fmt, ...) {
 say("=====================================================================")
 say("T3 -- THE SURFACE vs MASS-WEIGHTED TERM IN `rep_dC`")
 say("  run     %s", format(Sys.time(), "%Y-%m-%d %H:%M:%S"))
-say("  commit  %s", tryCatch(trimws(system2("git", c("rev-parse", "--short", "HEAD"),
-                                            stdout = TRUE)), error = function(e) "unknown"))
+say("  commit  %s", MW_COMMIT)
 say("  window  %d-%d", MW_WIN[1], MW_WIN[2])
 say("=====================================================================")
 

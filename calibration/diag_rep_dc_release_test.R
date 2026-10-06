@@ -48,6 +48,7 @@
 })
 setwd(.root)
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+RT_COMMIT <- ccx_git_stamp()
 ccx_load_cpp()
 
 # ---- NAMED CONSTANTS -------------------------------------------------
@@ -335,14 +336,11 @@ rt_run_job <- function(k) {
                 nm_maxit = RT_NM_MAXIT, rungs = RT_RUNGS,
                 units = "rep_dC ppm; logpost/loglik log-units",
                 comparability = "logpost is comparable WITHIN an arm only; arms score different row sets",
-                commit = tryCatch(system("git rev-parse --short HEAD", intern = TRUE),
-                                  error = function(e) NA_character_),
+                commit = RT_COMMIT,
                 # ⚠ A commit alone is not provenance if the tree was dirty --
                 # the 09-23 T1 wave ran with uncommitted driver edits and its
                 # artifacts name a HEAD that does not fully describe them.
-                tree_dirty = tryCatch(length(system("git status --porcelain -- calibration R",
-                                                    intern = TRUE)) > 0,
-                                      error = function(e) NA),
+                tree_dirty = ccx_stamp_dirty(RT_COMMIT),
                 built = as.character(Sys.time())))
   dir.create(RT_OUTDIR, showWarnings = FALSE, recursive = TRUE)
   saveRDS(out, file.path(RT_OUTDIR, sprintf("job%02d_%s.rds", j$id, j$label)))

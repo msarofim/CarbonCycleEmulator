@@ -22,6 +22,7 @@
 # USAGE: Rscript calibration/diag_phi0_futures.R
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+FUT_COMMIT <- ccx_git_stamp()
 ccx_load_cpp()
 
 # ---- labels derive from constants (project rule) --------------------
@@ -57,7 +58,7 @@ build_arm <- function(a) {
 }
 
 cat(sprintf("=== PROVENANCE ===\n  driver calibration/diag_phi0_futures.R, commit %s, run %s\n",
-            tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?"),
+            FUT_COMMIT,
             format(Sys.time(), "%Y-%m-%d %H:%M")))
 cat(sprintf("  protocol: ccx_run_coupled, IGCC GMST spliced to the obs record's end, each scenario's own non-CO2, 1750-%d\n",
             FUT_END_YEAR))
@@ -121,5 +122,5 @@ for (s in FUT_SCENARIOS) for (n in setdiff(names(A), "hilda29l")) {
 }
 out <- ccx_path("outputs", "diagnostics", sprintf("phi0_futures_%s_%s.rds", FUT_SET, format(Sys.Date(), "%Y%m%d")))
 saveRDS(list(table = R, arms = FUT_ARMS, end_year = FUT_END_YEAR, ref_year = FUT_REF_YEAR,
-             commit = tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")), out)
+             commit = FUT_COMMIT), out)
 cat(sprintf("\n  saved %s\n  ⛔ A comparison; nothing adopted.\n", out))

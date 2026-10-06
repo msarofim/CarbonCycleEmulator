@@ -35,6 +35,7 @@ ccx_require_run_inputs()   # BEFORE the wall budget, and before any target is wr
 
 PT_ARM  <- "N"
 PT_OUT  <- ccx_path("calibration", "torch", "port_targets.csv")
+PT_COMMIT <- ccx_git_stamp(exclude = PT_OUT)   # the targets file is its product, not an input
 # ⛔ RE-RULED 2026-09-10 (round 6): the 08-31e new basin is -Inf at seas_ml = 1
 # (h_ml 143.9 m vs the ~75 m P8 wall). MUST MATCH run_dispersed_multistart.R's
 # MS_REF_INC / MS_REF_NEW -- the names are the driver's port-target KEYS.
@@ -164,8 +165,7 @@ tg$pins      <- ccx_pin_label(PT_PINS)        # "" = free arm; READ by the drive
 # recorded AND read, this time, by run_dispersed_multistart.R.
 tg$kz_lo     <- sprintf("%.6f", .ship$kz[1]);   tg$kz_hi   <- sprintf("%.6f", .ship$kz[2])
 tg$hml_lo    <- sprintf("%.6f", .ship$h_ml[1]); tg$hml_hi  <- sprintf("%.6f", .ship$h_ml[2])
-tg$commit    <- tryCatch(sub("\\s.*", "", system("git rev-parse --short HEAD",
-                                                 intern = TRUE)), error = function(e) NA)
+tg$commit    <- PT_COMMIT
 tg$host      <- Sys.info()[["nodename"]]
 tg$r_version <- paste(R.version$major, R.version$minor, sep = ".")
 tg$measured  <- format(Sys.time(), "%Y-%m-%dT%H:%M:%S%z")

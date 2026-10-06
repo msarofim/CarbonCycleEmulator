@@ -19,6 +19,7 @@
 # USAGE: Rscript calibration/diag_q10_ridge_futures.R   (~5 min)
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+Q10_COMMIT <- ccx_git_stamp()
 ccx_load_cpp()
 
 Q10_MODE     <- "hilda29l"
@@ -59,7 +60,7 @@ futures <- function(u) {
 }
 
 cat(sprintf("=== PROVENANCE ===\n  commit %s, %s | mode %s logpost %.4f (control reproduces)\n",
-            tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?"),
+            Q10_COMMIT,
             format(Sys.time(), "%Y-%m-%d %H:%M"), Q10_MODE, md$logpost))
 cat(sprintf("  q10 fixed at {%s}; re-optimised: %s (Nelder-Mead, maxit %d); futures %s, GCB spliced\n\n",
             paste(Q10_VALUES, collapse = ", "), paste(Q10_COMP, collapse = ", "), Q10_NM_MAXIT,

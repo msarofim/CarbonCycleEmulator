@@ -32,6 +32,7 @@
 # =====================================================================
 
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+ATTR_COMMIT <- ccx_git_stamp()
 ccx_load_cpp()
 
 # ---- labels derive from constants (project rule) --------------------
@@ -61,7 +62,7 @@ p0$pump_mode <- .md$pump_mode
 
 cat(sprintf("=== PROVENANCE ===\n  arm %s [asked '%s', resolved %s], logpost %.2f, commit %s\n",
             ATTR_ARM, ATTR_ARM_ASKED, format(Sys.Date()), .md$logpost,
-            tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")))
+            ATTR_COMMIT))
 cat(sprintf("  protocol: Joos PD100 -- CO2 held from %d, %d GtC released %d, GMST held unless stated\n",
             JOOS_REF_YEAR, JOOS_PULSE, JOOS_PULSE_YR))
 cat(sprintf("  units: GtC of the pulse in each reservoir (pulse run minus its own paired base run)\n"))

@@ -65,7 +65,7 @@ AS_PD3_OCN_MIN <- 0.05
 AS_PD3_FUT_TOL <- 20
 AS_PD3_ROW_MIN <- 8
 AS_IMB_ROWS <- c("gcb_land_sink", "gcb_ocean_sink")
-COMMIT <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
+COMMIT <- ccx_git_stamp()
 sink(paste0(RD_OUT, ".log"), split = TRUE)
 cat(sprintf("%s @%s, %s\n", RD_DRIVER, COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M")))
 

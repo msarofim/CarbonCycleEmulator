@@ -20,6 +20,7 @@
 # USAGE: Rscript calibration/diag_rep_dc_ladder_futures.R   (~10 min)
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+RLF_COMMIT <- ccx_git_stamp()
 ccx_load_cpp()
 
 # Defaults = the 09-23 T1 ladder at hilda29l. RLF_DIR / RLF_MODE / RLF_TAG
@@ -64,7 +65,7 @@ run_u <- function(u) {
 
 sink(paste0(RLF_OUT, ".log"), split = TRUE)
 cat(sprintf("=== PROVENANCE ===\n  driver calibration/diag_rep_dc_ladder_futures.R, commit %s, run %s\n",
-            tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?"),
+            RLF_COMMIT,
             format(Sys.time(), "%Y-%m-%d %H:%M")))
 cat(sprintf("  vectors: %s (T1 ladder, mode %s, all 28 other names re-optimised)\n", RLF_DIR, RLF_MODE))
 cat(sprintf("  scenarios %s; spliced %s; coupled, 1750-%d; ppm global mean, land GtC (model land_C)\n\n",

@@ -50,8 +50,7 @@ QP_ID_TOL <- 1e-4
 QP_CORES  <- 4L
 QP_SMOKE  <- identical(Sys.getenv("FP_SMOKE"), "1")
 QP_OUT    <- ccx_path("outputs", "diagnostics", sprintf("%s_%s", QP_TAG, QP_DATE))
-COMMIT    <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
-DIRTY     <- tryCatch(length(system("git status --porcelain -- R src data calibration", intern = TRUE)) > 0, error = function(e) NA)
+COMMIT    <- ccx_git_stamp()
 
 md <- readRDS(ccx_mode_file(QP_MODE)); invisible(ccx_apply_pins(md$pins))
 tg <- ccx_npp_modern_target()
@@ -105,7 +104,7 @@ res <- c(list(ref), res)
 
 sink(paste0(QP_OUT, ".log"), split = TRUE)
 X2 <- 2 * ccx_const("CO2_PI_PPM"); X4 <- 4 * ccx_const("CO2_PI_PPM")
-cat(sprintf("=== PROVENANCE === driver %s, commit %s%s, run %s\n", QP_DRIVER, COMMIT, if (isTRUE(DIRTY)) " (DIRTY)" else "", format(Sys.time(), "%Y-%m-%d %H:%M")))
+cat(sprintf("=== PROVENANCE === driver %s, commit %s, run %s\n", QP_DRIVER, COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M")))
 cat(sprintf("  structure %s at v0k basin 1 + control overrides {%s}; control = %s value %g (rebalanced 11)\n",
   QP_STRUCT, paste(sprintf("%s=%g", names(ctrl$over), unlist(ctrl$over)), collapse = ", "), basename(QP_CTRL_PROFILE), QP_CTRL_VALUE))
 cat(sprintf("  (beta_max, fert_k) PINNED per row; rebal = NM maxit %d on the other 9 {%s}\n", QP_MAXIT, paste(QP_FREE, collapse = ", ")))

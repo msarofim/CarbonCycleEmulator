@@ -11,6 +11,7 @@
 # USAGE: Rscript calibration/diag_npp_row_power.R  (~20 min)
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+PW_COMMIT <- ccx_git_stamp()
 ccx_load_cpp()
 PW_MODE <- ccx_path("calibration", "output",
   "multistart_20260928c_hilda_csl3v0k_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452",
@@ -36,7 +37,7 @@ npp_modern <- function(u, bp) {
 }
 sink(paste0(PW_OUT, ".log"), split = TRUE)
 cat(sprintf("=== PROVENANCE === driver calibration/diag_npp_row_power.R, commit %s, run %s\n  mode v0k basin 1; free {%s}; NM maxit %d; target %.3f +/- %.3f GtC/yr over %d-%d\n\n",
-  system("git rev-parse --short HEAD", intern = TRUE), format(Sys.time(), "%Y-%m-%d %H:%M"),
+  PW_COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M"),
   paste(PW_FREE, collapse = ", "), PW_MAXIT, tg$centre, tg$sd, tg$win[1], tg$win[2]))
 rows <- list()
 for (a in names(PW_ARMS)) {

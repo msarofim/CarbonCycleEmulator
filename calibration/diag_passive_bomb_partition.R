@@ -54,7 +54,7 @@ bp_a <- sin(BP_TROPOPAUSE_LAT * pi / 180)
 BP_F_TROP <- (1 - bp_a) * (1 - BP_TROPOPAUSE_HPA[["extratropical"]] / BP_SURFACE_HPA) + bp_a * (1 - BP_TROPOPAUSE_HPA[["tropical"]] / BP_SURFACE_HPA)
 BP_STRAT_TROP <- (1 - BP_F_TROP) / BP_F_TROP
 BP_OUT    <- ccx_path("outputs", "diagnostics", sprintf("%s_%s", BP_TAG, BP_DATE))
-COMMIT    <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
+COMMIT    <- ccx_git_stamp()
 
 md <- readRDS(ccx_mode_file(BP_MODE)); invisible(ccx_apply_pins(md$pins))
 bp <- ccx_mode_base(md); bp$pump_mode <- md$pump_mode

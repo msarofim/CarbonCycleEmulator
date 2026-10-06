@@ -32,6 +32,7 @@
 # outputs/diagnostics/. Usage: Rscript calibration/diag_mode_streams_provenance.R
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+MS_COMMIT <- ccx_git_stamp()
 ccx_load_cpp(); source(ccx_path("calibration", "lib_design_gates.R"))
 
 # ---- named constants: every label below derives from these ----------
@@ -223,7 +224,6 @@ saveRDS(list(mode = MS_MODE, file = ccx_mode_file(MS_MODE),
              stale_by = if (is.null(stale)) 0 else sum(rec) - sum(stale),
              reconciles = c(file = recon(fil), recomputed = recon(rec)),
              measured_on = as.character(Sys.Date()),
-             commit = tryCatch(system("git rev-parse --short HEAD", intern = TRUE),
-                               error = function(e) NA_character_)), MS_OUT)
+             commit = MS_COMMIT), MS_OUT)
 cat(sprintf("\n  saved %s\n  ⛔ Reads only: no prior moved, no constant changed, no artifact repaired.\n",
             MS_OUT))

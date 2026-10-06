@@ -17,6 +17,7 @@
 # Usage:  Rscript calibration/diag_hml_c1_kinkmap.R
 # =====================================================================
 for (f in list.files("R", pattern = "[.]R$", full.names = TRUE)) source(f)
+COMMIT <- ccx_git_stamp()
 
 ## ---- named constants (all labels below derive from these) ------------
 BAND_OLD   <- c(85, 120)      # the RETIRED refit band, ccx_hml_kink 08-18
@@ -83,6 +84,6 @@ cat(sprintf("  ~2 mm of a kink: %.4f%% of the live support, vs %.4f%% of the ret
 saveRDS(list(res = res, bands = list(old = BAND_OLD, now = BAND_NOW),
              constants = list(probe_dz = PROBE_DZ, kink_mult = KINK_MULT),
              provenance = list(when = "2026-08-29",
-                               commit = system("git rev-parse --short HEAD", intern = TRUE))),
+                               commit = COMMIT)),
         OUT_RDS)
 cat(sprintf("\nWrote %s\n", OUT_RDS))

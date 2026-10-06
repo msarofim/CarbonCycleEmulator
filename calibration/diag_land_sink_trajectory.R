@@ -66,7 +66,7 @@ LS_ID_V0K <- 1388.3; LS_ID_TOL_V0K <- 0.05; LS_ID_TOL_CTRL <- 1e-6
 LS_CORES  <- 6L
 LS_OUT_SUFFIX <- Sys.getenv("LS_OUT_SUFFIX", "")
 LS_OUT    <- ccx_path("outputs", "diagnostics", sprintf("%s%s_%s", LS_TAG, LS_OUT_SUFFIX, LS_DATE))
-COMMIT    <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
+COMMIT    <- ccx_git_stamp()
 
 md <- readRDS(ccx_mode_file(LS_MODE)); invisible(ccx_apply_pins(md$pins))
 bp <- ccx_mode_base(md); bp$pump_mode <- md$pump_mode

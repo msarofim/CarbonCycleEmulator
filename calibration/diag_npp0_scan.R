@@ -17,6 +17,7 @@
 # USAGE: Rscript calibration/diag_npp0_scan.R   (~40 min on NS_CORES forks)
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+NS_COMMIT <- ccx_git_stamp()
 ccx_load_cpp()
 NS_MODE   <- ccx_path("calibration", "output",
   "multistart_20260928c_hilda_csl3v0k_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452",
@@ -63,7 +64,7 @@ ok <- !vapply(res, inherits, logical(1), "try-error"); if (!all(ok)) print(res[!
 ref <- res[[which(NS_SCALES == 1)]]
 sink(paste0(NS_OUT, ".log"), split = TRUE)
 cat(sprintf("=== PROVENANCE === driver calibration/diag_npp0_scan.R, commit %s, run %s\n  structure %s at v0k basin 1; free {%s}; NM maxit %d; NPP_GLOBAL_PI x {%s}; logpost units; NPP GtC/yr %d-%d\n",
-  system("git rev-parse --short HEAD", intern = TRUE), format(Sys.time(), "%Y-%m-%d %H:%M"), NS_STRUCT,
+  NS_COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M"), NS_STRUCT,
   paste(NS_FREE, collapse = ", "), NS_MAXIT, paste(NS_SCALES, collapse = ", "), tg$win[1], tg$win[2]))
 cat(sprintf("  [control] scale 1.00 re-optimised gain %+.3f over the stored vector (arm A adds aod anomaly)\n\n", ref$opt - ref$frozen))
 cat(sprintf("  %-6s %9s %9s %8s %5s %6s | %s\n", "scale", "d_frozen", "d_opt", "NPPmod", "conv", "evals", paste(sprintf("%8s", NS_FREE), collapse = "")))

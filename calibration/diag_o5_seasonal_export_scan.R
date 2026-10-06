@@ -18,6 +18,7 @@
 # Usage: Rscript calibration/diag_o5_seasonal_export_scan.R      (O5_SMOKE=1 for a smoke)
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+O5_COMMIT <- ccx_git_stamp()
 ccx_load_cpp(); source(ccx_path("calibration", "lib_design_gates.R"))
 
 O5_ARM     <- CCX_MODE_CANONICAL
@@ -39,7 +40,7 @@ O5_OUT     <- ccx_path("outputs", "diagnostics", sprintf("o5_seasonal_export_sca
 sink_log <- file(paste0(O5_OUT, ".log"), open = "wt"); sink(sink_log, split = TRUE)
 on.exit({ sink(); close(sink_log) }, add = TRUE)
 cat(sprintf("== O5 seasonal-export probe at %s (prereg 2026-09-15f) -- commit %s ==\n", O5_ARM,
-            tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")))
+            O5_COMMIT))
 cat(sprintf("export %.2f GtC/yr (martin); amp %s x lag %s mo; control (solved) amp %s; arm C = %s\n\n", O5_EXPORT,
             paste(O5_AMP, collapse = "/"), paste(O5_LAG, collapse = "/"), paste(O5_CTRL_AMP, collapse = "/"), paste(O5_ARMC, collapse = ",")))
 
@@ -174,5 +175,5 @@ cat(sprintf("layer-2 inversion (READ, predicted to persist): martin amp 0 %+.0f;
 cat(sprintf("\nVERDICT: %s\n", if (a && b && isTRUE(cc)) "O5 PASSES its preregistered rule (a)-(c)" else "O5 does NOT pass (a)-(c): REFUTED AS BUILT under this probe -- reported, not patched."))
 saveRDS(list(grid = grid1, S1 = S1, tab1 = tab1, S2 = S2, g_can = g_can, g_m0 = g_m0, best = best, best_spo = best_spo, rule = c(a = a, b = b, c = cc),
              ref = ref, ref_st = ref_st, export = O5_EXPORT, obs_spo = o_spo, armc = O5_ARMC, canonical = O5_ARM, md_logpost = md$logpost,
-             commit = tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) NA), built = format(Sys.time())), paste0(O5_OUT, ".rds"))
+             commit = O5_COMMIT, built = format(Sys.time())), paste0(O5_OUT, ".rds"))
 cat(sprintf("\nsaved %s.{log,rds}\n", O5_OUT))

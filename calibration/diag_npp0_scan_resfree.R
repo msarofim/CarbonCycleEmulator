@@ -81,8 +81,7 @@ if (RS_FIX_PASSIVE || !setequal(RS_RES, RS_RES_ALL)) RS_TAG <- paste0(RS_TAG, "_
 if (!is.na(RS_PIN_Q10)) RS_TAG <- paste0(RS_TAG, sprintf("_q10pin%g", RS_PIN_Q10))
 if (RS_SMOKE) { RS_TAG <- paste0(RS_TAG, "_smoke"); RS_SCALES <- c(0.75, 1.00); RS_MAXIT <- 20L; RS_CTRL_MAXIT <- 10L }
 RS_OUT    <- ccx_path("outputs", "diagnostics", sprintf("%s_%s", RS_TAG, RS_DATE))
-COMMIT    <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
-DIRTY     <- tryCatch(length(system("git status --porcelain -- R src data calibration", intern = TRUE)) > 0, error = function(e) NA)
+COMMIT    <- ccx_git_stamp()
 
 md <- readRDS(ccx_mode_file(RS_MODE)); invisible(ccx_apply_pins(md$pins))
 tg <- ccx_npp_modern_target()
@@ -157,7 +156,7 @@ stopifnot(max(abs(d_start - d_prev)) < RS_ID_TOL)
 stopifnot(is.finite(ref$reach), abs(ref$reach) > 0)
 
 sink(paste0(RS_OUT, ".log"), split = TRUE)
-cat(sprintf("=== PROVENANCE === driver %s, commit %s%s, run %s\n", RS_DRIVER, COMMIT, if (isTRUE(DIRTY)) " (DIRTY)" else "", format(Sys.time(), "%Y-%m-%d %H:%M")))
+cat(sprintf("=== PROVENANCE === driver %s, commit %s, run %s\n", RS_DRIVER, COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M")))
 cat(sprintf("  structure %s at v0k basin 1; warm start = %s optimum per scale\n", RS_STRUCT, basename(RS_PREV)))
 cat(sprintf("  free {%s} + residence {%s} (log / logit[%s], UNBOUNDED, no prior); NM maxit %d; control (residence fixed) maxit %d\n",
   paste(RS_FREE, collapse = ", "), paste(RS_RES, collapse = ", "), RS_LOGIT, RS_MAXIT, RS_CTRL_MAXIT))

@@ -31,7 +31,7 @@ KW_WIDTHS   <- c(0.37, 0.35, 0.30, 0.26, 0.20, 0.14)
 KW_TARGETS  <- c(750, 625)            # the 09-28 (c) band's top and the band middle's K
 KW_LIK_WIDEN <- 1.5
 KW_OUT      <- ccx_path("outputs", "diagnostics", "fert_k_prior_width_20260930.log")
-COMMIT      <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
+COMMIT      <- ccx_git_stamp()
 
 pr <- readRDS(ccx_path("data", "prior_fert_k.rds"))
 d  <- utils::read.csv(KW_CMIP6)

@@ -111,29 +111,14 @@ CM_LOG        <- file.path("outputs", "diagnostics",
                                    if (CM_IS_CANONICAL) CM_DATE else format(Sys.Date(), "%Y%m%d"),
                                    CM_SUFFIX))
 # PROVENANCE STAMP (2026-10-01 f): the commit, in the log header, the closing `provenance:` line
-# and the artifact's `provenance$commit`. "+dirty" = a tracked edit or an untracked file under
-# CM_GIT_PATHS; on 2026-10-01 a diagnostic run on an uncommitted tree stamped its parent commit.
-# "+dirty?" = git gave no status, so the tree is NOT PROVEN clean -- kept distinct from "+dirty" so a
-# broken check cannot pass for a dirty tree. "?" = no commit could be read (a frozen copy under
-# ~/ccx_frozen/ is not a checkout). Ignored inputs (data-raw/downloads/) are invisible to git status
-# either way.
+# and the artifact's `provenance$commit`. On 2026-10-01 a diagnostic run on an uncommitted tree
+# stamped its parent commit. The stamp's forms (<hash>, +dirty, +dirty?, +frozen?, ?) and why it is
+# not the bare system("git ...") idiom: R/provenance.R, where this driver's 10-01 (f) block now
+# lives as ccx_git_stamp() (10-01 h).
 # ⚠ CM_OUT IS EXCLUDED: it is this script's own OUTPUT, never an input, so a second build before
 # the first is committed would otherwise stamp ITSELF dirty ([[gate_reads_its_own_output]]).
-# ⚠ NOT the bare tryCatch(system(...), error = ) idiom: outside a checkout git exits 128,
-# system() only WARNS and returns character(0), and sprintf() of that is character(0) -- the
-# stamped line silently vanishes (measured 2026-10-01).
-# ⚠ Args are shQuote()d: system2() hands them to sh UNQUOTED, and the `:(exclude)` pathspec is a sh
-# syntax error -- caught by mutation-testing this stamp, where it read "+dirty" on a CLEAN tree.
 CM_DRIVER     <- "calibration/diag_constraint_map.R"
-CM_GIT_PATHS  <- c("R", "src", "calibration", "app", "data")
-CM_COMMIT     <- local({
-  git <- function(...) suppressWarnings(tryCatch(system2("git", shQuote(c(...)), stdout = TRUE),
-                                                 error = function(e) structure(character(0), status = NA_integer_)))
-  h <- git("rev-parse", "--short", "HEAD")
-  if (!is.null(attr(h, "status")) || length(h) != 1L || !nzchar(h)) return("?")
-  d <- git("status", "--porcelain", "--", CM_GIT_PATHS, paste0(":(exclude)", CM_OUT))
-  paste0(h, if (!is.null(attr(d, "status"))) "+dirty?" else if (length(d)) "+dirty" else "")
-})
+CM_COMMIT     <- ccx_git_stamp(exclude = CM_OUT)
 # printed by the log's closing line AND stored in the artifact, so the two cannot disagree
 CM_UNITS      <- "log-likelihood units per stream"
 CM_SEED_NOTE  <- "deterministic: no RNG is used"

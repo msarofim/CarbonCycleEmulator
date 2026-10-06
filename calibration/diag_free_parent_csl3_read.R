@@ -22,6 +22,7 @@
 # Usage: Rscript calibration/diag_free_parent_csl3_read.R   (env FP_DIR, FP_B1)
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+FP_COMMIT <- ccx_git_stamp()
 ccx_load_cpp(); source(ccx_path("calibration", "lib_design_gates.R"))
 FP_DIR  <- local({ d <- Sys.getenv("FP_DIR", ""); if (nzchar(d)) d else
   ccx_path("calibration", "output", "multistart_20260921_hilda_csl3_seasml1_pin_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_sd1.0452") })
@@ -36,7 +37,7 @@ FP_NAMES <- c(FP_FREED, "h_ml", "sst_seas_amp_NH", "sst_seas_amp_SH", "kz_deep_f
               "gamma_enso_land_NH", "gamma_enso_land_SH")
 sink_log <- file(paste0(FP_OUT, ".log"), open = "wt"); sink(sink_log, split = TRUE)
 on.exit({ sink(); close(sink_log) }, add = TRUE)
-cat(sprintf("== THE FREE PARENT OF THE LIMB CANONICAL: the read -- %s -- %s ==\n  %s\n", format(Sys.time()), tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?"), FP_JOB))
+cat(sprintf("== THE FREE PARENT OF THE LIMB CANONICAL: the read -- %s -- %s ==\n  %s\n", format(Sys.time()), FP_COMMIT, FP_JOB))
 
 if (!file.exists(file.path(FP_DIR, "summary.csv")))
   stop("no summary.csv in ", FP_DIR, ": copy the wave's outdir into the repo and run collect_dispersed_multistart.R first.")
@@ -147,5 +148,5 @@ cat("  the RULING: whether CCX_MODE_PINNED_PARENT repoints to fp1 (a promotion: 
 saveRDS(list(job = FP_JOB, dir = FP_DIR, ids = basin_ids, summary = sm,
              params = lapply(ARMS, function(v) list(p = v$p, pm = v$pm, prior_z = v$prior_z, src = v$src, n_fit = v$n_fit)), streams = ST, groups = G, tot = tot, aic = aic, k = k,
              enso_slope = ES, verdict = verdict, verdicts = verd, built = format(Sys.time()),
-             provenance = list(commit = tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?"), seed = "none (a read; the wave's draws are seeded per id in its start files)")), paste0(FP_OUT, ".rds"))
+             provenance = list(commit = FP_COMMIT, seed = "none (a read; the wave's draws are seeded per id in its start files)")), paste0(FP_OUT, ".rds"))
 cat(sprintf("\nsaved %s.{log,rds}\n⛔ NOTHING IS ADOPTED; no mode is promoted.\n", FP_OUT))

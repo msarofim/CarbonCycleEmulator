@@ -60,8 +60,7 @@ IA_TREAT <- c(RAW = "annual imbalance as published",
               RAW_CEM = "annual imbalance + cement carbonation sink",
               SMOOTH_CEM = sprintf("%d-yr smooth of (imbalance + cement)", IA_SMOOTH_YR),
               CONST_CEM = "full-period mean of (imbalance + cement)")
-COMMIT <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
-DIRTY  <- tryCatch(length(system("git status --porcelain -- R src data calibration", intern = TRUE)) > 0, error = function(e) NA)
+COMMIT <- ccx_git_stamp()
 
 # ---- the control (as diag_alignment_screen.R builds it) -----------------------
 md <- readRDS(ccx_mode_file(IA_MODE)); invisible(ccx_apply_pins(md$pins))
@@ -169,8 +168,8 @@ if (abs(full$closure) > 0.1 * abs(full$d_land)) stop(sprintf("G4 FAIL: closure %
 R <- as.data.frame(do.call(rbind, res), stringsAsFactors = FALSE)
 for (c in setdiff(names(R), "treat")) R[[c]] <- as.numeric(R[[c]])
 sink(paste0(IA_OUT, ".log"), split = TRUE)
-cat(sprintf("=== PROVENANCE === driver %s, commit %s%s, run %s; no RNG\n", IA_DRIVER, COMMIT,
-            if (isTRUE(DIRTY)) " (DIRTY)" else "", format(Sys.time(), "%Y-%m-%d %H:%M")))
+cat(sprintf("=== PROVENANCE === driver %s, commit %s, run %s; no RNG\n", IA_DRIVER, COMMIT,
+            format(Sys.time(), "%Y-%m-%d %H:%M")))
 cat(sprintf("  structure %s at v0k basin 1; control %s value %g; G1 d %.2e; G2 rows d %.1e / %.1e\n",
             IA_STRUCT, basename(IA_CTRL_PROFILE), IA_CTRL_VALUE, id_d, g2[1], g2[2]))
 cat(sprintf("  rows: land sigma %.2f, ocean sigma %.2f GtC/yr (objective #13); GCB years %d-%d (n %d); luc_scale %.4f\n\n",
@@ -201,6 +200,6 @@ sink()
 saveRDS(list(shares = R, identity = ident, I = cbind(year = g$year, as.data.frame(I_of)),
              rows = data.frame(year = g$year, model_land = g$land_resid, gcb_land = g$land_sink,
                                model_ocean = g$ocean, gcb_ocean = g$ocean_sink),
-             provenance = sprintf("%s @%s%s; %s; control %s tau %g; no RNG", IA_DRIVER, COMMIT,
-                                  if (isTRUE(DIRTY)) " (DIRTY)" else "", IA_STRUCT, basename(IA_CTRL_PROFILE), IA_CTRL_VALUE)),
+             provenance = sprintf("%s @%s; %s; control %s tau %g; no RNG", IA_DRIVER, COMMIT,
+                                  IA_STRUCT, basename(IA_CTRL_PROFILE), IA_CTRL_VALUE)),
         paste0(IA_OUT, ".rds"))

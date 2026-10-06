@@ -8,6 +8,7 @@
 # Usage: Rscript calibration/diag_o5_thc_2x2.R
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+X2_COMMIT <- ccx_git_stamp()
 ccx_load_cpp(); source(ccx_path("calibration", "lib_design_gates.R"))
 X2_ARM <- CCX_MODE_CANONICAL; X2_EXPORT <- ccx_pump_export_prior()$centre_gtc
 src <- readRDS(ccx_path("data", "obs_export_seasonal_shape_cmip6.rds")); sm <- src$summary
@@ -21,7 +22,7 @@ X2_RULE_ADD <- 20; X2_RULE_DICZ <- 1; X2_RULE_SPO <- 20
 X2_OUT <- ccx_path("outputs", "diagnostics", sprintf("o5_thc_2x2_%s", format(Sys.Date(), "%Y%m%d")))
 sink_log <- file(paste0(X2_OUT, ".log"), open = "wt"); sink(sink_log, split = TRUE); on.exit({ sink(); close(sink_log) }, add = TRUE)
 cat(sprintf("== O5 x THC 2x2 at %s (prereg 2026-09-16) -- commit %s ==\nsource: SH LS amp %.2f [%.2f, %.2f], lag %+d mo [%+.1f, %+.1f]; THC k %d W %g Sv; export %.2f\n\n", X2_ARM,
-            tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?"), X2_AMP, X2_AMP_IQR[1], X2_AMP_IQR[2], X2_LAG, X2_LAG_IQR[1], X2_LAG_IQR[2], X2_K, X2_W, X2_EXPORT))
+            X2_COMMIT, X2_AMP, X2_AMP_IQR[1], X2_AMP_IQR[2], X2_LAG, X2_LAG_IQR[1], X2_LAG_IQR[2], X2_K, X2_W, X2_EXPORT))
 obs <- ccx_prepare_obs(); exc_obs <- obs$excess_c14; i95 <- which(exc_obs$year == 1995); tg <- ccx_ocean_gradient_target()
 harm <- function(h) c(amp = sqrt(h$a_mean^2 + h$b_mean^2), phase_mo = (atan2(h$b_mean, h$a_mean) / (2 * pi)) * 12)
 v0 <- dg_vector(X2_ARM); md <- v0$md; r_ref <- dg_run(v0); ref <- unlist(dg_streams(r_ref, v0))
@@ -84,5 +85,5 @@ if (ok) { a <- S2$both$dlik >= max(S2$O5$dlik, S2$THC$dlik) + X2_RULE_ADD; b <- 
   cat(sprintf("armC: none %+.1f | O5 %+.1f | THC %+.1f | both %+.1f | interaction %+.1f | (a) %s (b) z %+.2f %s (c) SPO %+.1f vs %+.1f %s\nVERDICT: %s\n",
               S2$none$dlik, S2$O5$dlik, S2$THC$dlik, S2$both$dlik, inter_c, if (a) "PASS" else "FAIL", S2$both$read$z_dic, if (b) "PASS" else "FAIL", S2$both$read$spo, S2$O5$read$spo, if (cc) "PASS" else "FAIL",
               if (a && b && cc) "O5 and THC ADD under the prescribed field" else "O5 and THC do NOT add under this build -- reported")) }
-saveRDS(list(cells = cells, S1 = S1, S2 = S2, amp = X2_AMP, lag = X2_LAG, W = X2_W, k = X2_K, ref = ref, commit = tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) NA), built = format(Sys.time())), paste0(X2_OUT, ".rds"))
+saveRDS(list(cells = cells, S1 = S1, S2 = S2, amp = X2_AMP, lag = X2_LAG, W = X2_W, k = X2_K, ref = ref, commit = X2_COMMIT, built = format(Sys.time())), paste0(X2_OUT, ".rds"))
 cat(sprintf("\nsaved %s.{log,rds}\n", X2_OUT))

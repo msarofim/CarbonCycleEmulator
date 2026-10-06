@@ -21,6 +21,7 @@
 # Usage: Rscript calibration/diag_o1_deep_return_scan.R      (DR_SMOKE=1 for a 3-point smoke)
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+DR_COMMIT <- ccx_git_stamp()
 ccx_load_cpp(); source(ccx_path("calibration", "lib_design_gates.R"))
 DR_ARM     <- CCX_MODE_CANONICAL
 DR_EXPORT  <- ccx_pump_export_prior()$centre_gtc          # 9.08, Nowicki's LS median -- READ, not typed
@@ -42,7 +43,7 @@ DR_OUT     <- ccx_path("outputs", "diagnostics", sprintf("o1_deep_return_scan_%s
 sink_log <- file(paste0(DR_OUT, ".log"), open = "wt"); sink(sink_log, split = TRUE)
 on.exit({ sink(); close(sink_log) }, add = TRUE)
 cat(sprintf("== O1 deep-return probe at %s (prereg 2026-09-15d) -- commit %s ==\n", DR_ARM,
-            tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")))
+            DR_COMMIT))
 cat(sprintf("export %.2f GtC/yr (martin); kz x %s; THC k %s x W %s Sv; STC k %s x W %s Sv; arm C = %s\n\n", DR_EXPORT,
             paste(DR_KZ_FAC, collapse = "/"), paste(DR_THC_K, collapse = "/"), paste(DR_THC_W, collapse = "/"),
             paste(DR_STC_K, collapse = "/"), paste(DR_STC_W, collapse = "/"), paste(DR_ARMC, collapse = ",")))
@@ -226,5 +227,5 @@ cat(sprintf("\nVERDICT: %s\n", if (!nrow(pass)) "NO point passes (a)-(d): O1 is 
                                else sprintf("%d point(s) pass: %s", nrow(pass), paste(sprintf("%s k%d W%g f%.2f (armC %+.1f)", pass$arm, pass$k, pass$W, pass$f, pass$armC), collapse = "; "))))
 saveRDS(list(grid = grid1, S1 = S1, tab1 = tab1, sel = sel, S2 = S2, S3 = S3, verdict = verdict, ref = ref, ref_st = ref_st, export = DR_EXPORT,
              kz_fac = DR_KZ_FAC, armc = DR_ARMC, canonical = DR_ARM, md_logpost = md$logpost, obs_exc = exc_obs, dic_target = tg$dic,
-             commit = tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) NA), built = format(Sys.time())), paste0(DR_OUT, ".rds"))
+             commit = DR_COMMIT, built = format(Sys.time())), paste0(DR_OUT, ".rds"))
 cat(sprintf("\nsaved %s.{log,rds}\n", DR_OUT))

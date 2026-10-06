@@ -38,8 +38,7 @@ RC_QUAR     <- ccx_path("calibration", "output", "quarantine",
 RC_DRY      <- "--dry-run" %in% commandArgs(TRUE)
 RC_TOL_RECON <- 1e-4     # logpost - logprior vs the recomputed sum
 RC_DATE     <- as.character(Sys.Date())
-RC_COMMIT   <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE),
-                        error = function(e) NA_character_)
+RC_COMMIT   <- ccx_git_stamp(exclude = c(ccx_mode_file(RC_MODE), RC_QUAR))   # what it re-writes or quarantines is its product
 
 f  <- ccx_mode_file(RC_MODE)
 md <- readRDS(f)
