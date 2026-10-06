@@ -96,7 +96,7 @@ leg("bottomleft", lwd = 1.6, lty = c(1, 1, 2), pch = c(NA, 16, 1),
 
 # c
 cs <- X$c2_sum[order(X$c2_sum$L), ]; g2 <- X$g2[order(X$g2$L), ]
-yc <- range(c(cs$net, cs$I, -cs$V, g2$net), na.rm = TRUE); yc[2] <- yc[2] + 0.3 * diff(yc)
+yc <- range(c(cs$net, cs$I, -cs$V, g2$net), na.rm = TRUE); yc[1] <- yc[1] - 0.15 * diff(yc); yc[2] <- yc[2] + 0.08 * diff(yc)
 graphics::plot(NA, xlim = c(0, 10), ylim = yc, xlab = "land ENSO lag, months after Nino 3.4",
                ylab = "log-likelihood vs no land ENSO", main = "c. The seasonal rows: information, not visibility")
 hgrid(); vlines(yc[2] - 0.04 * diff(yc))
@@ -105,7 +105,7 @@ graphics::lines(cs$L, cs$I, col = COL[["seasonal"]], lwd = 1.4, lty = 2)
 graphics::lines(cs$L, -cs$V, col = COL[["seasonal"]], lwd = 1.4, lty = 3)
 graphics::lines(cs$L, cs$net, col = COL[["seasonal"]], lwd = 1.8)
 graphics::lines(g2$L, g2$net, col = COL[["growth"]], lwd = 1.8)
-leg("topright", lwd = c(1.8, 1.4, 1.4, 1.8), lty = c(1, 2, 3, 1),
+leg("bottomleft", lwd = c(1.8, 1.4, 1.4, 1.8), lty = c(1, 2, 3, 1),
                  col = COL[c("seasonal", "seasonal", "seasonal", "growth")],
                  legend = c("4 seasonal rows: what they score (= I - V)", "  information I: residual on the ENSO signature",
                             "  visibility -V: the signature's own size", "growth record, same split (net)"))

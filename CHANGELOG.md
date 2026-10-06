@@ -2,6 +2,84 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-06 (l) — **Marcus's SPLIT CALIBRATION of the interannual parameters, PREVIEWED. Fitted to the 12-month-smoothed growth alone, the land ENSO lag lands at 5.9 months (the canonical's 2.6 is outside 2σ), the amplitude at ×1.38 and `gamma_diff` at 0.56. The modelled growth then peaks 6 months after Niño 3.4 (the record: 5), and ENSO's share of the What-if readout rises from 9.6 % to 25.9 %. The main objective pays −80 unrefitted and −72 after the land and seasonal blocks are re-optimised. The joint fit holds 2.6 because the rows that see ENSO measure DIFFERENT objects: GCB's DGVM land sink (earlier and weaker than GCB's own budget implies), Mauna Loa (which sees ENSO ~3 months before the global mean) and the seasonal harmonics. Nothing adopted: building it is Marcus's call** (`notes/proposal_2026-10-06_iav_cut.md`).
+
+- **His question, verbatim:** "I still find it odd that there is a pattern in the data that ENSO causes a lagged effect on CO2 and that we can't somehow make our ENSO parameter do a better job of reproducing that lag. What about having a 12-month smoothed CO2 growth that is used only for calibrating the ENSO and volcanic aerosol parameters? E.g., the parameters that only care about interannual variability and not the regular annual cycle or the long term trend which is what all the other parameters in the model care about."
+- **What it is:** a modular ("cut") calibration (Liu, Bayarri & Berger 2009, *Bayesian Analysis* 4:119, doi:10.1214/09-BA404; Plummer 2015, *Stat. Comput.* 25:37, doi:10.1007/s11222-014-9503-z).
+  - It is not the growth row declined on 09-26, nor the timing row ruled out on 10-04. Both were added to the JOINT objective, where the existing rows outvote them.
+  - Here the existing rows get no vote on these names.
+- **Drivers**, all committed. The preview ran from frozen tree `~/ccx_frozen/20261006_iavcut_54d85e5` (BLAS pinned, 4 workers, 15.7 min):
+
+  | driver | part | output |
+  |---|---|---|
+  | `calibration/diag_iav_cut_preview.R` | A, B, C1–C4 | `outputs/diagnostics/iav_cut_preview_20261006_hilda33p.{log,rds,png}` |
+  | `diag_iav_kernel_preview.R` | C5 | `…/iav_kernel_preview_…` |
+  | `diag_iav_station_timing.R` | C6 | `…/iav_station_timing_…` |
+  | `diag_iav_cut_se.R` | error bars | `…/iav_cut_se_…` |
+  | `diag_iav_cut_scope.R` | B2 split by part | `…/iav_cut_scope_…` |
+  | `fig_iav_cut_preview.R` | the figure | |
+
+- **Gates:**
+  - the identity reproduces the stored logpost (diff 0);
+  - `dg_run` + `dg_streams` reproduce all 27 rows (2.7e-10);
+  - superposition holds (8.5e-5 against a 0.30 ppm/yr signal);
+  - C2's split reproduces each row's own change (9e-14);
+  - C5's τ = 0 is `identical()` to the unwrapped run, and τ = 3 moves the answer;
+  - the figure's panel d reproduces C4's peaks;
+  - `br_cell()`'s two new optional arguments (`drop`, `base_over`; NULL = unchanged, return value too): `base_over gamma_diff = 0.25` reproduces to the digit, and 0 moves the logpost (+1.74).
+- **A, THE GROWTH MODULE** (every other name at the canonical; real runs at the optimum):
+
+  | | canonical | growth module (A1) |
+  |---|---|---|
+  | land ENSO lag, months | 2.61 | **5.86** (1σ 4.6–7.2, 2σ 3.1–8.8; annual estimator 6.2, 2σ 4.5–7.8) |
+  | land ENSO amplitude | ×1 | **×1.38** (1σ 1.09–1.67 monthly / 1.22–1.59 annual) |
+  | `gamma_diff` | 0.25 (fixed) | **0.56** (1σ 0.34–0.78 / 0.49–0.73) |
+  | growth peak after Niño 3.4 (record +5) | +1 | +6 |
+  | detrended growth r, monthly / annual | 0.59 / 0.64 | 0.71 / 0.77 |
+  | What-if annual miss, ppm/yr | 0.370 | 0.328 |
+  | worse with ENSO zeroed | 9.6 % | 25.9 % |
+
+  - **The two amplitudes are 1.3–2.8σ from the canonical**, depending on the estimator. **The lag is outside 2σ on both.**
+  - **With `gamma_diff` held (A0):** lag 5.85, ×1.27, r 0.68.
+  - **With the ocean limb freed:**
+    - on the growth ALONE it runs away (`w_enso_l2` 55–113);
+    - with `gcb_ocean_enso_slope` in the module it stays at 15.1 (canonical 13.2).
+- **B, THE COST in the main objective:**
+  - **B1 unrefitted: −80.2.** Lag −22.6 (seasonal rows −12.4, land sink −9.6); amplitude −23.6 (land sink −24.9); `gamma_diff` −34.0 (land sink −12.1, ice cores −12.2, MLO level −6.3).
+  - **`gcb_land_sink` −46.7**, in the big years: 2010 −4.2; 1992 −4.1 (Pinatubo); 1966; 2016; 2023; 1963 (Agung); 1998.
+  - **B2** (the five other land names re-optimised) **−71.9**; **B3** (+ the six seasonal-cycle names + `tau_ex`) **−72.1**; both pass the slope gate. Only the ice core and level rows recover. The land sink (−48.0) and the seasonal rows (MLO −5.8, SPO −5.3) do not.
+  - **B2 raises `beta_max` 2.08 → 2.36 and `fert_k` 752 → 855.** That moves SSP5-8.5 CO₂ in 2300 1461.5 → 1431.4 (−30 ppm), and vvH −14. **Its owner is `gamma_diff`** (`diag_iav_cut_scope.R`):
+    - the ENSO part alone (A1's lag and amplitude, `gamma_diff` 0.25) is −45.2 after B2, with `beta_max` / `fert_k` +2.7 % / +1.4 % and SSP5-8.5 2300 −8.8 ppm;
+    - the volcanic part alone (`gamma_diff` 0.56) is −33.3, with +11 % / +13 % and −22.4 ppm;
+    - so `gamma_diff` is NOT an interannual-only name: its AOD forcing has a positive mean, and raising it drags the fertilisation pair and the futures. The ENSO names nearly are interannual-only (the index is demeaned, Ruling A).
+- **WHY THE JOINT FIT HOLDS 2.6, measured:**
+  - **C4 (data only, GCB 2025's budget, 1959–2024):**
+    - the land sink the atmosphere implies (fossil + LUC − growth − ocean − cement) peaks 5 months after Niño 3.4 (8 in 1980–2024), with sd 0.92 GtC/yr and an ENSO slope of 0.92;
+    - GCB's S_LAND (DGVMs) peaks at 3 (4), with sd 0.56 and a slope of 0.70;
+    - the imbalance carries the difference and is anti-correlated with ENSO: r −0.32 (−0.40);
+    - the row's imbalance is 11-yr smoothed (09-30 ruling), so at interannual frequencies `gcb_land_sink` scores the DGVM ensemble MEAN's own timing. An ensemble mean damps year-to-year signal.
+  - **C6 (data only):**
+    - observed growth peaks at +2 (Scripps) / +3 (NOAA) at MLO, against +5 / +5 at SPO and +5 for the global MBL. The whole cross-correlation curve shifts;
+    - the model's NH box (which the MLO rows score) responds on the global timing: +1 at the canonical, +6 at A1;
+    - so one land lag cannot satisfy both MLO and the global mean in a two-box model.
+  - **C2:**
+    - the four seasonal rows' preference splits EXACTLY into information minus visibility;
+    - information peaks at 2.6 (MLO 1.5, SPO 3.0), while visibility favours LONG lags (6.7 at 1.5 months → 1.9 at 7.5);
+    - mostly interannual (peak at 2.0; the decadal part peaks at 4.5);
+    - five big years (1983, 2016, 1992, 1998, 2011) carry 45 % of what lag 5 costs (C3);
+    - C6 explains MLO's preference. **SPO's is unexplained**, since SPO's own growth peaks on the global timing.
+  - **C1:**
+    - without the seasonal rows the optimum hardly moves (2.65, against 2.48 on 10-06's spline);
+    - lag 5 then costs −4.0 instead of −12.0;
+    - `gcb_land_sink`, the ice cores and the ocean-slope row still sit at ~2.6. **No existing row sees the global growth timing.**
+    - ⚠ This CORRECTS 10-06 (j)'s reading that the seasonal rows hold the lag short: they set how FIRMLY it is held, not where.
+  - **C5:**
+    - an exponential memory on the land term (onset L, τ 1–9 months, causal, normalised) reconciles nothing;
+    - the growth's best stays τ 0, L 6, and the seasonal rows' best stays τ 0, L 3. Memory worsens both;
+    - the simplest version of the onset-vs-centroid shape hypothesis is refuted.
+- **`lib_block_reopt.R`:** `br_cell()` gains `drop` and `base_over`, both optional; NULL is bit-identical, return value too.
+- **Open for Marcus:** the proposal's §5 — build at all; the scope (A0 / A1 / A2); the estimator; whether to price an 11-yr-smoothed land-sink row first; where stage 2 runs.
+
 ## 2026-10-06 (k) — Handoff: `notes/handoff_2026-10-06b_rulings_applied_h2_priced.md` (Marcus: "write a handoff for the next session."). It supersedes `handoff_2026-10-06_hilda33p_adopted.md`, which now points to it.
 - **Nothing is running** except the `ccx-app` preview. The suite of record is `15dbda6`'s, CLEAN (6427 / 0 / 3 / 0).
 - **His question, "why don't we have a term for that?"** (the growth-rate timing), was answered in chat from the record:

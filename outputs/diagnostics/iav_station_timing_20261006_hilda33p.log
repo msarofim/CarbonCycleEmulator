@@ -1,0 +1,22 @@
+calibration/diag_iav_station_timing.R @7d3c191, 2026-10-06 16:08 | from outputs/diagnostics/iav_cut_preview_20261006_hilda33p.rds (calibration/diag_iav_cut_preview.R @54d85e5)
+each record's growth (centred 12-month difference, 1980-2024, detrended df 5) against Nino 3.4 read k months late:
+                  record months peak     r
+     observed MBL_global    540    5 0.505
+            observed MLO    540    2 0.457
+            observed SPO    491    5 0.502
+       observed MLO_NOAA    540    3 0.462
+       observed SPO_NOAA    506    5 0.525
+ model canonical, global    540    1 0.679
+ model canonical, NH_box    540    1 0.657
+ model canonical, SH_box    540    1 0.697
+        model A1, global    540    6 0.645
+        model A1, NH_box    540    6 0.620
+        model A1, SH_box    540    6 0.666
+each observed record against the model series its statistic compares it with (detrended growth; peak_gap = model - observed, months):
+   setting   observed  model     r peak_gap
+ canonical MBL_global global 0.586       -4
+ canonical        MLO NH_box 0.597       -1
+ canonical        SPO SH_box 0.527       -4
+        A1 MBL_global global 0.711        1
+        A1        MLO NH_box 0.608        4
+        A1        SPO SH_box 0.603        1

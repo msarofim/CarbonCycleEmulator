@@ -1,0 +1,23 @@
+calibration/diag_iav_cut_scope.R @7d3c191, 2026-10-06 16:08 | from outputs/diagnostics/iav_cut_preview_20261006_hilda33p.rds (calibration/diag_iav_cut_preview.R @54d85e5) | 4 workers
+arms: ENSO = lag 5.862, amplitude x1.380, gamma_diff 0.25 | VOLC = lag 2.606, amplitude x1, gamma_diff 0.561
+canonical: beta_max 2.0768, fert_k 752.14; CO2 2300 ssp585_2300 / vvH_2300 = 1461.53 / 1010.03 ppm
+    cell  d_lik d_land_sink d_seasonal beta_max fert_k converged rounds minutes
+ ENSO_B1 -46.22      -34.59   -13.2488    2.077  752.1     FALSE      0     0.0
+ ENSO_B2 -45.17      -35.43   -13.4162    2.133  762.7      TRUE      1     2.7
+ VOLC_B1 -40.94      -16.88     0.7486    2.077  752.1     FALSE      0     0.0
+ VOLC_B2 -33.28      -17.06     0.5491    2.308  849.2      TRUE      1     3.4
+ d_ssp585_2300 d_vvH_2300
+     -0.004584  -0.004264
+     -8.810885  -4.197904
+      0.013767   0.012521
+    -22.374432  -9.884523
+  ENSO_B2, the rows that move most (vs the canonical):
+    gcb_land_sink  co2_seasonal_MLO  co2_seasonal_SPO       co2_icecore 
+          -35.433            -5.960            -5.127             1.869 
+d13c_seasonal_SPO      d13c_icecore    d13c_level_MLO d13c_seasonal_MLO 
+           -1.690             1.217             0.699            -0.639 
+  VOLC_B2, the rows that move most (vs the canonical):
+ gcb_land_sink   d13c_icecore  co2_level_SPO  co2_level_MLO    co2_icecore 
+       -17.057         -6.158         -3.088         -2.838         -2.792 
+d13c_level_SPO d13c_level_MLO   co2_gradient 
+        -1.456         -0.650          0.568 

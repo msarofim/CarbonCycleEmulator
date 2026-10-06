@@ -1,0 +1,8 @@
+calibration/diag_iav_cut_se.R @7d3c191, 2026-10-06 16:08 | from outputs/diagnostics/iav_cut_preview_20261006_hilda33p.rds (calibration/diag_iav_cut_preview.R @54d85e5)
+at the A1 lag 5.862 months; profile ranges (the other amplitude re-fitted), and OLS se scaled by n/n_eff:
+ estimator n_eff    L    s s_1lo s_1hi s_2lo s_2hi gamma_diff d_1lo d_1hi d_2lo
+         m  22.5 5.86 1.38  1.09  1.67  0.77  1.99      0.560 0.340  0.78 0.105
+         a  44.8 5.86 1.41  1.22  1.59  1.03  1.78      0.609 0.485  0.73 0.360
+ d_2hi se_s_ols se_d_ols cor_s_d z_d_vs_canonical z_s_vs_canonical
+  1.02    0.296    0.220   0.267             1.41             1.29
+  0.86    0.191    0.126   0.299             2.84             2.13

@@ -1,0 +1,182 @@
+calibration/diag_iav_cut_preview.R @54d85e5, 2026-10-06 15:51 | canonical hilda33p | 4 workers
+mode file /Users/MarcusMarcus/ccx_frozen/20261006_iavcut_54d85e5/calibration/output/refit_20261005_hilda33p_obj16_hilda_csl3v0kaidgbem/mode_fit_pumpN.rds (md5 525404989a20ece51ec8bd088c7d4638); struct hilda_csl3v0kaidgbem; 10 pins
+canonical interannual set: lag 2.6057 months; gamma_enso_land_NH / gamma_enso_land_SH = 0.5078 / 0.4866 GtC/yr per index unit; w_enso_l2 = 13.183; gamma_diff = 0.25 (fixed)
+
+=== 0. IDENTITY: the canonical at its own lag, 0 rounds, must reproduce its stored logpost ===
+  logpost -1187.451837 (stored -1187.451837, diff 0.0e+00); likelihood -1145.018629
+  base_over gamma_diff = 0.25 reproduces: diff 0.0e+00; = 0 moves the logpost by +1.7407 (must be nonzero)
+  dg_run + dg_streams reproduce the objective's 27 rows: max |diff| 2.7e-10
+
+=== A. THE GROWTH MODULE: the interannual names fitted to the detrended growth ALONE ===
+  superposition check at the canonical: rms(sum of parts - direct) 8.48e-05 ppm/yr against rms(direct) 0.296
+  n_eff at the canonical (Bretherton 1999 eq. 31): monthly 22.5 of 540; annual 44.8 of 45
+  the canonical: monthly r 0.586, sd ratio 0.53; annual r 0.641, sd ratio 0.61
+  the profile, 39 lags from 0.5 to 10 months; the optimum per arm (A0 s only, A1 s + gamma_diff, A2g s + gamma_diff + w_enso_l2 on the growth ALONE):
+ arm est L_star L_grid  lo1  hi1  lo2  hi2     s gamma_NH gamma_SH      d
+  A0   a   6.07   6.00 5.16 7.04 4.04 8.01 1.250   0.6347   0.6083 0.2500
+  A1   a   6.19   6.25 5.43 6.98 4.53 7.77 1.422   0.7223   0.6922 0.6121
+ A2g   a   5.09   5.00 4.76 5.59 4.47 6.40 4.126   2.0950   2.0078 0.6033
+  A0   m   5.85   5.75 4.44 7.36 2.83 9.18 1.269   0.6442   0.6174 0.2500
+  A1   m   5.86   5.75 4.56 7.22 3.14 8.81 1.380   0.7009   0.6718 0.5603
+ A2g   m   5.10   5.00 4.28 6.85 3.33 9.67 2.431   1.2341   1.1828 0.5451
+      w      r sd_ratio ssr_vs_canonical dll_vs_canonical
+  13.18 0.7262   0.6367           0.8150            4.581
+  13.18 0.7730   0.8061           0.6843            8.496
+ 112.82 0.7988   0.8430           0.6170           10.814
+  13.18 0.6808   0.6287           0.8175            2.271
+  13.18 0.7112   0.7427           0.7508            3.231
+  55.33 0.7193   0.7545           0.7335            3.492
+  A1 on REAL runs (Nelder-Mead, 74 evaluations, convergence 0): L 5.862 months, s 1.380 (gammas 0.701 / 0.672), gamma_diff 0.561; ssr 82.5415 (superposition said 82.5642 at L 5.86)
+  A2 (+ w_enso_l2, with gcb_ocean_enso_slope in the module; 155 evaluations, convergence 0): L 5.836, s 1.421, gamma_diff 0.561, w_enso_l2 15.13 (canonical 13.18); ssr 82.1159; gcb_ocean_enso_slope +2.786 (canonical +2.547)
+  growth statistics on real runs (peak = months after Nino 3.4; r_m / r_a detrended monthly / annual; rms = the What-if
+  readout's annual miss, ppm/yr; enso_gain_pct = how much worse it gets with the index zeroed):
+          peak   r_xc peak_obs    r_m  sdr_m    r_a  sdr_a    rms rms_off
+canonical    1 0.6789        5 0.5858 0.5329 0.6414 0.6068 0.3702  0.4059
+A1           6 0.6447        5 0.7112 0.7425 0.7704 0.7793 0.3276  0.4126
+          enso_gain_pct
+canonical        9.6325
+A1              25.9199
+
+  A1's names in the MAIN objective, unrefitted, one step at a time: lag 2.61 -> 5.86 -22.59 | amplitude x1.38 -23.63 | gamma_diff 0.25 -> 0.56 -34.02 | total -80.24
+                     lag amplitude volcanic
+gcb_land_sink     -9.638   -24.949  -12.122
+d13c_icecore      -0.279     0.861   -6.590
+co2_level_MLO     -0.014     1.944   -6.338
+co2_icecore       -0.017     0.205   -5.653
+co2_seasonal_MLO  -5.161    -0.533    0.524
+co2_seasonal_SPO  -4.894    -0.236    0.058
+d13c_level_SPO     0.034     0.869   -3.618
+d13c_level_MLO     0.211    -1.591    0.122
+d13c_seasonal_SPO -1.456    -0.212   -0.308
+d13c_seasonal_MLO -0.848     0.091    0.265
+  gcb_land_sink year by year (sd 0.50 GtC/yr; residual = GCB target - model): -46.71 in all, -34.59 from the ENSO steps, -12.12 from gamma_diff; the eight worst years:
+ year canonical    A1 d_enso  d_volc     d nino_ann
+ 2010     0.810  1.67 -4.010 -0.2310 -4.24  -0.2134
+ 1992    -0.666 -1.58  0.872 -4.9529 -4.08   0.6725
+ 1966     1.079  1.77 -2.987 -0.9573 -3.94   0.1250
+ 2016     0.273  1.33 -3.307 -0.0791 -3.39   0.6375
+ 2023    -0.831 -1.49 -2.951 -0.1248 -3.08   0.8725
+ 1963    -0.364 -1.24 -0.723 -2.0973 -2.82   0.1533
+ 1998    -0.131  1.11 -1.663 -0.7526 -2.42   0.0366
+ 1978     0.827  1.33 -2.063 -0.1161 -2.18  -0.1067
+
+=== B / C1. THE COST of A1's interannual names in the MAIN objective, and the lag profile WITHOUT the seasonal rows ===
+  likelihood change vs the canonical: B1 (unrefitted) -80.24 | B2 (+ 5 land names) -71.91 | B3 (+ 7 seasonal/transport names) -72.08
+  (prior part, B1/B2/B3: +0.33 / -0.50 / -0.25; the slope gate passed: TRUE/TRUE)
+                          B1      B2      B3
+gcb_land_sink        -46.708 -47.769 -48.031
+d13c_icecore          -6.008  -4.860  -4.879
+co2_seasonal_MLO      -5.169  -5.557  -5.767
+co2_icecore           -5.466  -0.834  -1.026
+co2_seasonal_SPO      -5.072  -5.081  -5.266
+co2_level_MLO         -4.407  -1.852  -1.741
+d13c_level_SPO        -2.716  -0.855  -0.864
+d13c_seasonal_SPO     -1.976  -1.964  -1.869
+co2_level_SPO         -0.019  -1.798  -1.726
+d13c_level_MLO        -1.258   0.343   0.671
+gcb_ocean_enso_slope  -1.056  -1.043  -1.044
+gcb_ocean_sink        -0.595  -0.700  -0.694
+  the re-optimised names (natural units; canonical first):
+          beta_max   fert_k luc_scale imb_share_land ndep_ret seas_T_amp_NH
+canonical   2.0768 752.1360    0.9003         0.6107  12.8329       15.7439
+B2          2.3579 855.2065    0.9139         0.6383  12.9594       15.7439
+B3          2.3697 842.1769    0.9178         0.6450  12.2199       16.1731
+          seas_T_amp_SH seas_lag_p_NH seas_lag_p_SH sst_seas_amp_NH
+canonical        3.9413        1.5244        2.6159          1.7278
+B2               3.9413        1.5244        2.6159          1.7278
+B3               4.0594        1.5284        2.6211          1.7362
+          sst_seas_amp_SH tau_ex
+canonical          1.3361 0.8789
+B2                 1.3361 0.8789
+B3                 1.3492 0.8782
+  CO2 in 2300 (ppm):
+          ssp585_2300 vvH_2300
+canonical     1461.53  1010.03
+B1            1461.53  1010.04
+B2            1431.38   996.48
+B3            1429.30   994.79
+  growth statistics with the re-optimised blocks (the cut's stage 1 is not re-run against them):
+   peak   r_xc peak_obs    r_m  sdr_m    r_a  sdr_a    rms rms_off
+B2    6 0.6439        5 0.7111 0.7428 0.7703 0.7798 0.3289  0.4136
+B3    6 0.6430        5 0.7110 0.7433 0.7702 0.7804 0.3291  0.4139
+   enso_gain_pct
+B2       25.7801
+B3       25.7728
+  C1: WITHOUT the four seasonal rows the land block's lag profile peaks at 2.65 months (re-optimised cells):
+      L     obj     lik   seas gamma_NH gamma_SH conv rounds minutes     d_obj
+ 1.0000 -1726.7 -1153.7 530.50  0.46291  0.45486 TRUE      1     4.5  -4.38315
+ 2.0000 -1722.9 -1148.8 532.22  0.48022  0.46037 TRUE      1     5.2  -0.60972
+ 2.6057 -1722.3 -1148.2 532.38  0.47609  0.45044 TRUE      1     4.8   0.00000
+ 3.0000 -1722.4 -1148.9 531.94  0.46962  0.44096 TRUE      1     4.9  -0.13137
+ 4.0000 -1724.0 -1153.4 529.28  0.44538  0.41120 TRUE      1     5.2  -1.67513
+ 5.0000 -1726.3 -1160.1 525.00  0.41734  0.38174 TRUE      1     4.9  -4.00762
+ 6.0000 -1728.7 -1167.6 520.03  0.39052  0.35827 TRUE      1     4.8  -6.41240
+ 8.0000 -1733.0 -1179.5 512.34  0.35187  0.34255 TRUE      1     5.0 -10.72825
+  10-06's WITH-rows profile (outputs/diagnostics/timing_row_reread_20261006_hilda33p.rds): its identity cell's likelihood -1145.018629 vs today's -1145.018629 (diff 0.0e+00)
+  WITH the rows the peak is 2.48 months (10-06); WITHOUT them 2.65; the record's growth peak is 5 months
+  without the seasonal rows, what lag 5 costs against lag 2.61, by row (each cell's block re-optimised):
+    co2_seasonal_MLO     co2_seasonal_SPO        gcb_land_sink 
+              -3.245               -2.643               -1.971 
+   d13c_seasonal_SPO         d13c_icecore          co2_icecore 
+              -0.941               -0.792               -0.732 
+gcb_ocean_enso_slope    d13c_seasonal_MLO 
+              -0.641               -0.551 
+
+=== C2. EACH SEASONAL ROW'S LAG PREFERENCE, SPLIT EXACTLY INTO INFORMATION AND VISIBILITY ===
+  gate: I - V reproduces each row's own change (canonical minus no land ENSO): max |diff| 9.0e-14
+  summed over the four seasonal rows (log-likelihood units, relative to NO land ENSO):
+      L       I     V     net    I_hp   I_lp
+  0.500  16.451 6.229  10.222  17.286 -0.835
+  1.000  18.024 6.523  11.501  18.552 -0.527
+  1.500  19.280 6.677  12.603  19.471 -0.191
+  2.000  19.944 6.631  13.313  19.808  0.136
+  2.500  20.093 6.434  13.659  19.602  0.492
+  2.606  20.105 6.408  13.696  19.540  0.564
+  3.000  19.494 6.062  13.432  18.737  0.757
+  3.500  18.070 5.525  12.545  17.142  0.927
+  4.000  16.049 4.915  11.134  15.033  1.017
+  4.500  13.300 4.237   9.063  12.266  1.034
+  5.000  10.220 3.605   6.615   9.267  0.954
+  5.500   6.576 2.983   3.593   5.808  0.768
+  6.000   3.070 2.509   0.561   2.574  0.495
+  6.500  -0.445 2.116  -2.561  -0.524  0.079
+  7.000  -3.530 1.930  -5.461  -3.218 -0.312
+  7.500  -6.278 1.898  -8.176  -5.567 -0.711
+  8.000  -8.412 2.074 -10.486  -7.394 -1.018
+  8.500  -9.860 2.370 -12.229  -8.633 -1.227
+  9.000 -10.843 2.766 -13.609  -9.482 -1.361
+  9.500 -11.278 3.196 -14.474  -9.848 -1.431
+ 10.000 -11.416 3.667 -15.083 -10.010 -1.406
+  peaks: net (what the rows score) at 2.60571 months; information alone at 2.60571; interannual information at 2; decadal at 4.5
+  co2_seasonal_MLO   net peaks at  1.5 | I at  1.5 | I_hp at  1.0 | at L = 5 vs 2.61: net -3.30 = I -4.48 - V -1.18
+  co2_seasonal_SPO   net peaks at  3.0 | I at  3.0 | I_hp at  2.6 | at L = 5 vs 2.61: net -2.27 = I -3.40 - V -1.13
+  d13c_seasonal_MLO  net peaks at  1.0 | I at  1.5 | I_hp at  2.0 | at L = 5 vs 2.61: net -0.54 = I -0.80 - V -0.26
+  d13c_seasonal_SPO  net peaks at  1.5 | I at  1.5 | I_hp at  1.5 | at L = 5 vs 2.61: net -0.97 = I -1.20 - V -0.23
+  the growth record's own analogue (canonical amplitudes): information peaks at 5.75 months, net at 5.75
+
+=== C3. THE PER-YEAR LEDGER: the seasonal rows' change, lag 2.61 -> 5 months, canonical amplitudes ===
+  total -7.08 over 50 years (31 years pay, -10.90; 19 gain, +3.82); the five worst years carry -4.91 (45 % of what is paid):
+ year      d nino_ann nino_prev
+ 1983 -1.542   0.3008    0.7633
+ 2016 -1.288   0.6375    1.4591
+ 1992 -0.722   0.6725    0.7583
+ 1998 -0.714   0.0366    1.0550
+ 2011 -0.643  -0.6284   -0.2134
+ 2001 -0.623  -0.0859   -0.6600
+ 2021 -0.562  -0.4650    0.0358
+ 2018 -0.502   0.3808    0.1400
+
+=== C4. DATA ONLY: does GCB's own budget carry the atmosphere's ENSO timing and size? ===
+  identity: residual sink - S_LAND - imbalance, max |.| 3.4e-14 GtC/yr
+  correlation with Nino 3.4 read 'peak_shift' months late (annual means; sources positive), and the slope there (GtC/yr per index unit):
+    window           series peak_shift r_peak     r_0    r_5  slope    sd
+ 1959-2024       atm_growth          5  0.532  0.3064  0.532  0.806 0.924
+ 1959-2024  land_source_atm          5  0.608  0.3631  0.608  0.916 0.920
+ 1959-2024 land_source_dgvm          3  0.695  0.5573  0.664  0.704 0.556
+ 1959-2024        imbalance          8 -0.324 -0.0374 -0.292 -0.319 0.649
+ 1980-2024       atm_growth          8  0.548  0.2377  0.534  0.801 1.004
+ 1980-2024  land_source_atm          8  0.638  0.2851  0.621  0.930 1.002
+ 1980-2024 land_source_dgvm          4  0.716  0.5443  0.704  0.628 0.541
+ 1980-2024        imbalance         10 -0.403  0.0119 -0.332 -0.461 0.725
+  1959-2024: the atmosphere's land sink regressed on the DGVMs' (detrended): slope 1.19, r 0.72; sd 0.920 vs 0.556 GtC/yr
+  1980-2024: the atmosphere's land sink regressed on the DGVMs' (detrended): slope 1.32, r 0.71; sd 1.002 vs 0.541 GtC/yr
