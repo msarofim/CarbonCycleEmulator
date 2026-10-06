@@ -2,6 +2,16 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-06 (b) — Handoff: `notes/handoff_2026-10-06_hilda33p_adopted.md` (Marcus: "Adopt 16, and then write a handoff."). It supersedes 10-05e, which now points to it.
+- **Nothing is running except the `ccx-app` preview** (localhost:7788, on the adopted tree).
+- **Open, all Marcus's:**
+  - the app wording: the warming switch's blurb, which does not mention the mixing slowdown; the bare-0 `npp_tsens` row;
+  - the assessment;
+  - the three CPU-clock flags;
+  - the optional resume of the 8 sleep-affected starts;
+  - the carried items;
+  - a housekeeping list, with nothing deleted.
+
 ## 2026-10-06 (a) — **ADOPTED: `hilda33p` is the canonical (objective #16: the stratification feedback, with the greening term pinned at 0). It was adopted on PHYSICS: the record cannot tell it from hilda34g. The full suite at `fb8036a` is CLEAN: 6294 passed, 0 failed, 3 skipped (the standing three). Verified in the running app.**
 
 - **The rulings, verbatim (Marcus, 2026-10-06):**

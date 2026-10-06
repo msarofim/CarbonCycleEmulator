@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-05e — #16 has LANDED (not adopted), and the CPU-clock budget is BUILT, TESTED and MERGED. Nothing is running.
 
+> ⛔ **SUPERSEDED by `notes/handoff_2026-10-06_hilda33p_adopted.md`.** #16 was ADOPTED on 2026-10-06 as `hilda33p` (CHANGELOG 10-06 a).
+
 **Supersedes** `notes/handoff_2026-10-05d_obj16_cpu_budget.md`.
 - Written at the end of the overnight work. Marcus, 2026-10-05 ~20:50: "I'm headed to bed. Take the next obvious steps whenever the running tasks complete."
 - `main` is at `c7242cc` (pushed).
