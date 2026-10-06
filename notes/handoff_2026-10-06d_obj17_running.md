@@ -122,8 +122,16 @@ superseded by §5 here.
 - **Frozen trees** (all detached worktrees of this repo):
   - `~/ccx_frozen/20261006x_obj17`: the RUN. Do not touch until landed. Its `calibration/torch/port_targets.csv` is
     modified IN THE TREE ONLY (#17's targets); `main`'s copy still holds the canonical's.
-  - `~/ccx_frozen/suite_20261006_1ce5018` and `~/ccx_frozen/suite_20261006_20a89f8`: the two suite trees. Both are
-    finished and removable (their logs are in `outputs/diagnostics/`).
+  - The two suite trees (`suite_20261006_1ce5018`, `suite_20261006_20a89f8`) are REMOVED; their logs are in
+    `outputs/diagnostics/`.
+  - `~/ccx_frozen/20261006o_obj17_dryrun`: created by the dry run below, at the repo's HEAD; scratch only.
+- **The landing dry run is ARMED** (a background waiter in the launching session, started 19:27 EDT): when the first
+  finished start is 2 min old it runs `~/ccx_frozen/20261006o_obj17_dryrun.sh`, i.e. collect → promote (scratch dest) →
+  Hessian (`nice 19`) → `diag_obj17_refit_read.R` (`_DRYRUN`) → the one-pass check, logs in the dry-run tree's
+  `DRYRUN_logs/`. Expected ~23:00 EDT. ⚠ The waiter dies with that session; if it did not report, run the script by hand
+  once a start file exists. ONE start of 24: its numbers preview the landing, they are not its read.
+- **Early eval rates** (19:27, ~1 min in): 0.31–0.34 CPU-s/eval for the seven warm starts, 1.16 for the cold id 0
+  (#16: 0.23–0.41, cold 1.23).
 - **The pin literals are within one ulp, not bit-identical.** R's parser mis-rounds `w_enso_l2`'s 17-digit literal by
   1.8e-15. The launch string parses the same way, so the run's pins ARE `CCX_MODE_OBJ17_PINS` exactly. The test holds
   both facts.
