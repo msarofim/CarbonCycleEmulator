@@ -2,6 +2,20 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-06 (h) — **Closed out: `main` is fast-forwarded through (c)–(g) and pushed (`6758e25..1b10a84`); the app is re-verified on it.**
+
+- **The suite of record is `658ccd7`'s, CLEAN** (6412 / 0 / 3 / 0; (e)). The commits after it change no code: evidence, notes, CHANGELOG, two suite logs.
+- **The warming-switch split was re-stamped on the clean tree** (`1b10a84`). Through `ccx_git_stamp()` it reads "commit 16c94fd", dirty FALSE; the committed run read "6758e25 (+uncommitted)". Its numbers are `identical()` to the committed run's, the third run that agrees.
+- **The app, restarted on `main`:** the banner reads "33 parameters … 10 further values held"; the parameter table shows 43 rows with "Set" (33 fitted, 10 held); the What-if warming switch reads "420 ppm instead of 426", with the new caveat sentence; no console errors. The `ccx-app` preview is LEFT RUNNING on localhost:7788.
+- **This session's scratch, removed** after the check (f) recommends: four worktrees (`20261006_gitstamp`, `_diag_7915464`, `_suite_9a6829f`, `_suite_658ccd7`), their 10 launch and pid files, and the merged local branch `claude/git-stamp-merge`.
+  - Nothing in the CHANGELOG, `notes/` or any README cites them.
+  - Every untracked output in the diag tree is byte-identical in the repo; the other three had no uncommitted files.
+- **Open for Marcus:**
+  - the assessment's §5 verdict and §7 acts;
+  - whether to delete the merged `claude/youthful-blackburn-fbc009` (local and origin);
+  - the carried items (H2, `hs_asx_frac`'s width, H1's SST download, card-4 wording, the substep held-K rule, his `CLAUDE.md` pgrep remedy);
+  - the stale tracked port targets, which a launch regenerates ((d)).
+
 ## 2026-10-06 (g) — **The assessment is RE-BASED on hilda33p** (Marcus: "Assessment → hilda33p (Recommended)"): `notes/assessment_2026-10-06_hilda33p_DRAFT.md`, with his §5 verdict and §7 acts left as placeholders. It supersedes the hilda34g draft, which now points to it. **No gate verdict flips against hilda34g.**
 
 - **Three re-reads, from a frozen worktree at `7915464`** (clean stamps; BLAS pinned):
