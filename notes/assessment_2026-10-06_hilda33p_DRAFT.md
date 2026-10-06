@@ -163,7 +163,8 @@ under #16 is not measured.
 - **The objective:** #16.
 - **The suite:**
   - at `fb8036a` (the adoption's ledger): **6294 passed, 0 failed, 3 skipped, 0 errors**;
-  - [the 10-06 c–e suite: filled when it lands].
+  - at `658ccd7` (10-06 c–e: the app wording, the eval-rate fix, the git-stamp merge): **6412 passed, 0 failed,
+    3 skipped, 0 errors** (`outputs/diagnostics/suite_20261006_658ccd7.log`).
 - **A version tag?** [Marcus.] `v1.0-hilda29l` marks the 09-22 freeze. The app's release name, BETA v1.0
   CarboTope, now runs on hilda33p.
 - **The product:**
