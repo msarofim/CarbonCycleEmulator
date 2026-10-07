@@ -1,0 +1,34 @@
+calibration/diag_iav_redesign_ridge_read.R @b276583+dirty, 2026-10-07 12:04 | from outputs/diagnostics/iav_redesign_ridge_20261007.rds (calibration/diag_iav_redesign_ridge.R @4f8a95d), grid 1.9000, 1.9473, 2.0000, 2.0500, 2.1002, 2.1500
+
+obj17, NATURAL space (likelihood + prior, no Jacobians) (6 points, beta_max 1.900-2.150)
+  MEASURED: optimum beta_max 2.1500; 1-sigma interval 1.9000 (grid edge: a BOUND) to 2.1500 (grid edge: a BOUND)
+    2300 CO2 over that interval: ssp585 1452.0 to 1479.5 ppm (+0.0 / +27.4 about the optimum's 1452.0); vvH 1004.5 to 1018.2 ppm (+0.0 / +13.7 about the optimum's 1004.5)
+  QUADRATIC (max |residual| 0.0024): optimum 2.1454, 1-sigma +/- 0.3074; 2300 CO2 ssp585 -109.7 ppm, vvH -54.9 ppm per unit beta_max -> +/- ssp585 33.7 ppm, vvH 16.9 ppm
+
+redesign, NATURAL space (likelihood + prior, no Jacobians) (6 points, beta_max 1.900-2.150)
+  MEASURED: optimum beta_max 1.9769; 1-sigma interval 1.9000 (grid edge: a BOUND) to 2.1500 (grid edge: a BOUND)
+    2300 CO2 over that interval: ssp585 1458.8 to 1486.0 ppm (-18.4 / +8.8 about the optimum's 1477.2); vvH 1007.0 to 1020.5 ppm (-9.0 / +4.4 about the optimum's 1016.1)
+  QUADRATIC (max |residual| 0.0021): optimum 1.9810, 1-sigma +/- 0.3429; 2300 CO2 ssp585 -108.7 ppm, vvH -53.8 ppm per unit beta_max -> +/- ssp585 37.3 ppm, vvH 18.5 ppm
+
+obj17, u-space logpost (the objective; Jacobians in) (6 points, beta_max 1.900-2.150)
+  MEASURED: optimum beta_max 2.0959; 1-sigma interval 1.9000 (grid edge: a BOUND) to 2.1500 (grid edge: a BOUND)
+    2300 CO2 over that interval: ssp585 1452.0 to 1479.5 ppm (-5.6 / +21.8 about the optimum's 1457.6); vvH 1004.5 to 1018.2 ppm (-2.8 / +11.0 about the optimum's 1007.2)
+  QUADRATIC (max |residual| 0.0022): optimum 2.0972, 1-sigma +/- 0.2875; 2300 CO2 ssp585 -109.7 ppm, vvH -54.9 ppm per unit beta_max -> +/- ssp585 31.6 ppm, vvH 15.8 ppm
+
+redesign, u-space logpost (the objective; Jacobians in) (6 points, beta_max 1.900-2.150)
+  MEASURED: optimum beta_max 1.9507; 1-sigma interval 1.9000 (grid edge: a BOUND) to 2.1500 (grid edge: a BOUND)
+    2300 CO2 over that interval: ssp585 1458.8 to 1486.0 ppm (-21.3 / +5.8 about the optimum's 1480.1); vvH 1007.0 to 1020.5 ppm (-10.5 / +2.9 about the optimum's 1017.5)
+  QUADRATIC (max |residual| 0.0019): optimum 1.9455, 1-sigma +/- 0.3161; 2300 CO2 ssp585 -108.7 ppm, vvH -53.8 ppm per unit beta_max -> +/- ssp585 34.4 ppm, vvH 17.0 ppm
+
+THE INDEX's OWN FUTURES EFFECT at a FIXED beta_max (redesign minus #17, the four re-optimised under each), ppm in 2300:
+ beta_max ssp585   vvH
+    1.900  6.489 2.302
+    1.947  6.530 2.351
+    2.000  6.582 2.406
+    2.050  6.634 2.458
+    2.100  6.683 2.505
+    2.150  6.743 2.561
+  range: SSP5-8.5 +6.49 to +6.74, vvH +2.30 to +2.56
+
+saved outputs/diagnostics/iav_redesign_ridge_read_20261007.{log,rds}
+⛔ ADOPTS NOTHING.
