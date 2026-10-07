@@ -2,6 +2,34 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-07 (i) — **#17's BASIN B REGISTERED as `hilda29w` (#18's incumbent seed), and OBJECTIVE #18's STAGE 2 LAUNCHED on the Mac** (handoff 10-07c §3 item 6). Torch verdict, said out loud: **Mac, overnight, as ruled.** Nothing adopted.
+
+- **Rulings, verbatim (AskUserQuestion):**
+  - the incumbent: "Register B, seed from it (Recommended)", with the name proposed with it, `hilda29w` (29 free names; w = #17's label);
+  - the one test this turned red: "Widen to all gates (Recommended)".
+- **The registry** (`c81f285`):
+  - `hilda29w` = `calibration/output/refit_20261006_obj17_basinB_start001_DRYRUN/mode_fit_pumpN.rds`: PINNED (`CCX_MODE_PINNED`), not canonical, not adopted. `CCX_MODE_OBJ18_INCUMBENT`.
+  - `ccx_ms_reference_set()`: #18's pins under #18's label at seas_ml 1 → incumbent `hilda29w` seeded at the pins (a start: its module values are #17's stage 1), new basin the seas_ml-0 control. Refused under #17's label, at seas_ml 0, with a module value moved or dropped, and with the module free. `test-ms-reference-set.R` (13), 148 / 0.
+  - ⚠ **Registering it turned `test-mode-file.R:179` red:** "mode hilda29w pins a name this build does not fit". The name is the LAG gate's `lag_enso_land`; the assertion admitted only the D2/D3 gate's names (`names(CCX_PARAM_GATED)`, widened 10-06 a for `npp_tsens`).
+    - Reported, not edited; then RULED.
+    - The admitted set is now every gate's names (`names(CCX_PARAM_GATED_ALL)`). A mutation check holds that a name no gate opens is still refused, and that the old set refused `lag_enso_land`. 136 / 0.
+    - The other registry loops took `hilda29w` without change: `test-hml-floor` (29 / 0; its stored logpost reproduces) and `test-param-absent-ok` (121 / 0).
+- **The full suite at `c81f285` (the LAUNCH commit):** **6747 passed, 0 failed, 3 skipped** (the standing three), rc 0, 18 min, 231 warnings (`outputs/diagnostics/suite_20261007_c81f285.log`).
+- **THE LAUNCH: 2026-10-07 14:55:44 EDT**, from the frozen worktree `~/ccx_frozen/20261007i_obj18` at `c81f285`.
+  - Under `nohup`: launcher PID 51496, `~/ccx_frozen/20261007i_obj18_launch.{sh,out,pid}`. 8 work processes confirmed at launch, not just the launcher. On AC power; the launcher holds `caffeinate -i -s`.
+  - The run: label `hilda_csl3v0kaidgbemwt`, the 14 pins (`logs/pins_20261007i.txt`, parsed back identical), 29 free names. #17's recipe: 24 starts, 8 at once, the CPU clock, 300 CPU-min per start, 3 restarts × 6 cycles × 6000 maxit, spread 1.0452. Tag `20261007i`.
+  - The outdir is NAMED: `multistart_20261007i_hilda_csl3v0kaidgbemwt_seasml1_pin_obj18_sd1.0452`.
+  - In the tree:
+    - the downloads APFS-cloned (14/14 inputs);
+    - port targets regenerated under the pin set (`logs/port_targets_20261007i.log`). The incumbent evaluates to −1173.0992111, the pricing's B1s exactly. The new basin evaluates to −11724.57, an objective offset, not a port defect: the control is a seas_ml-0 `hilda_c` file.
+  - **Preflight:** 24/24 exit 0, all LAUNCHABLE, every port VERIFIED (incumbent rel 2.1e-14); 0.351 CPU-s/eval at id 1, so a 6000-eval restart takes ~35 of the 300 CPU-min (`logs/preflight_20261007i/`).
+  - **Expected:** #17's identical recipe ran 11.1 h (19:26 → 06:34), so about 02:00–07:00 EDT on 10-08.
+- **Next** (handoff): the landing chain for #18, on #17's `land_chain.sh`, needs:
+  - a #18 read script;
+  - a basin decomposition BEFORE promoting, because promote has no `--id` ([[basin_rank_by_logit_jacobian]]);
+  - the one-pass check (`fit_iav_module.R --base=<#18 mode> --check=<CCX_MODE_OBJ18_MODULE_FILE>`).
+  Dry-run it on the first finished start (#17's first took 3.3 h).
+
 ## 2026-10-07 (h) — **OBJECTIVE #18 BUILT, STAGE 1 RUN AND PRICED (handoff 10-07c §3 items 1–5). Every parity target reproduces EXACTLY (difference 0.0, not merely within tolerance).** The built objective at basin B gives the emulation's logpost −1173.052374 and B1 −12.342383. Stage 1 under #18 at B is the pricing mirror's answer bit for bit: lag 5.8483, ×1.29779, `w_enso_l2` 16.6051. The land-block re-fit (B2) and the fixed-`beta_max` cell reproduce the emulation and the ridge to the last bit, futures included. **New: at stage 1's own module values the redesign resists the module's move by −0.047 unrefitted and −0.13 with the land five re-fitted, almost all in the seasonal rows' interannual part (kept, as ruled). The move shifts the 2300 futures by ≤ 0.6 ppm.** Nothing launched, nothing adopted. Stage 2's incumbent needs a ruling first (below).
 
 - **The build** (`3d50312`), as handoff §3 items 1–2 specified:
