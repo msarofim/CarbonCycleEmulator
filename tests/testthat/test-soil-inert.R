@@ -217,7 +217,7 @@ test_that("the structure label switches it on at the cited value, and only there
   # (2026-09-30, objective #14; the 09-30c handoff's "extend the label ledgers deliberately")
   # + the land ENSO lag label chained from that (2026-10-02, objective #15; the 10-02 plan's
   #   "extend the four label ledgers")
-  INERT_ON <- c("hilda_csl3v0kai", "hilda_csl3v0kaidgb", "hilda_csl3v0kaidgbe", "hilda_csl3v0kaidgbem", "hilda_csl3v0kaidgbemw")  # + the interannual cut's main half (2026-10-06, objective #17; Marcus: "Build: land + ocean module (Recommended)", the name "hilda_csl3v0kaidgbemw (Recommended)")   # + the stratification feedback (2026-10-04; DESIGN §3.4a S; extension authorised by Marcus's ruling "History + futures, one #16 refit")
+  INERT_ON <- c("hilda_csl3v0kai", "hilda_csl3v0kaidgb", "hilda_csl3v0kaidgbe", "hilda_csl3v0kaidgbem", "hilda_csl3v0kaidgbemw", "hilda_csl3v0kaidgbemwt")  # + the redesigned cut (2026-10-07, objective #18; Marcus: "Full redesign (Recommended)", the name "hilda_csl3v0kaidgbemwt (Recommended)")   # + the interannual cut's main half (2026-10-06, objective #17; Marcus: "Build: land + ocean module (Recommended)", the name "hilda_csl3v0kaidgbemw (Recommended)")   # + the stratification feedback (2026-10-04; DESIGN §3.4a S; extension authorised by Marcus's ruling "History + futures, one #16 refit")
   for (lab in INERT_ON) expect_identical(ccx_struct_block(lab)$soil_inert_frac, F_ON, info = lab)
   for (lab in setdiff(CCX_STRUCT_LABELS, INERT_ON))
     expect_null(ccx_struct_block(lab)$soil_inert_frac, info = lab)

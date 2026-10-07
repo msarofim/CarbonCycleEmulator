@@ -49,7 +49,7 @@ test_that("S1 CONSTANTS: s re-derived from its own data, tau tied to the climate
   expect_identical(blk_m[names(blk_e)], blk_e)                            # nothing else differs
   expect_identical(ccx_gates_open("hilda_csl3v0kaidgbem"), ccx_gates_open("hilda_csl3v0kaidgbe"))
   # the feedback is ON under #16's label and every label chained from it + the interannual cut's main half (2026-10-06, objective #17; Marcus: "Build: land + ocean module (Recommended)", the name "hilda_csl3v0kaidgbemw (Recommended)")
-  MIX_ON_LABELS <- c("hilda_csl3v0kaidgbem", "hilda_csl3v0kaidgbemw")
+  MIX_ON_LABELS <- c("hilda_csl3v0kaidgbem", "hilda_csl3v0kaidgbemw", "hilda_csl3v0kaidgbemwt")  # + the redesigned cut (2026-10-07, objective #18; Marcus: "Full redesign (Recommended)", the name "hilda_csl3v0kaidgbemwt (Recommended)")
   for (lab in MIX_ON_LABELS) expect_true(ccx_mix_on(ccx_apply_structure(ccx_default_params(), lab, seas_ml = "1")), info = lab)
   for (lab in setdiff(CCX_STRUCT_LABELS, MIX_ON_LABELS))                # every other label: OFF
     expect_false(ccx_mix_on(ccx_apply_structure(ccx_default_params(), lab, seas_ml = "1")), info = lab)

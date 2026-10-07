@@ -703,6 +703,7 @@ ccx_lowpass_projector <- function(year, df) {
 }
 #' What the land row's HIGH part costs: |(I - P) e|^2 / (2 sd^2) >= 0. Added to the row, it leaves the
 #' row's low-pass part: row + cost = -n/2 log(2 pi sd^2) - |P e|^2 / (2 sd^2).
+#' (Since objective #18, 2026-10-07, the OCEAN row's too, at its own sd: nothing in it is land-specific.)
 ccx_land_highpass_cost <- function(e, year, df, sd) {
   if (length(e) != length(year)) stop("ccx_land_highpass_cost(): one residual per year.")
   h <- as.numeric(e - ccx_lowpass_projector(year, df) %*% e)
@@ -722,11 +723,32 @@ ccx_enso_slope_row_on <- function(err) {
 #' Absent fields = nothing added = the objective of every label but the cut's, bit for bit.
 #' ⚠ A caller that builds `err` WITHOUT this scores a #17 vector on #16's rows: the stored `streams`
 #' of a #17 file then disagree on `gcb_land_sink` and on `gcb_ocean_enso_slope`'s presence.
+#' (2026-10-07, objective #18: `gcb_ocean_lowpass_df`, the ocean row's twin of the land switch; see
+#' "OBJECTIVE #18" below. Absent = the ocean row year by year, as before.)
 ccx_err_with_struct <- function(err, p) {
-  if (!is.null(p[["gcb_land_lowpass_df"]])) err$gcb_land_lowpass_df <- p[["gcb_land_lowpass_df"]]
-  if (!is.null(p[["gcb_enso_slope_row"]]))  err$gcb_enso_slope_row  <- p[["gcb_enso_slope_row"]]
+  if (!is.null(p[["gcb_land_lowpass_df"]]))  err$gcb_land_lowpass_df  <- p[["gcb_land_lowpass_df"]]
+  if (!is.null(p[["gcb_ocean_lowpass_df"]])) err$gcb_ocean_lowpass_df <- p[["gcb_ocean_lowpass_df"]]
+  if (!is.null(p[["gcb_enso_slope_row"]]))   err$gcb_enso_slope_row   <- p[["gcb_enso_slope_row"]]
   err
 }
+
+# ---- OBJECTIVE #18 (RULED 2026-10-07 f): THE REDESIGNED CUT ------------------------------------
+# Marcus, verbatim: "Full redesign (Recommended)"; the label "hilda_csl3v0kaidgbemwt (Recommended)" (t =
+# trendless). Objective #17 left the main objective RESISTING the module's ocean limb: moving w_enso_l2 14.73
+# -> 16.71 at #17's basin B cost it -1.29, half of it interannual (this row year by year, the seasonal rows)
+# and half LOW-FREQUENCY in the CO2 level rows -- the shipped ENSO index's +0.0083 K/yr trend carried by the
+# limb (CHANGELOG 2026-10-07 b). The redesign removes both channels:
+#   (i)  the DETRENDED ENSO index (enso_index 1, CCX_ENSO_INDEX_CODES[["detrend"]]; R/forcing.R) for BOTH
+#        ENSO terms -- a structure field, read by every forcing build through ccx_enso_index_of();
+#   (ii) `gcb_ocean_sink` scored on its LOW-PASS part: the land row's construction (LIK_LAND_LOWPASS_DF,
+#        ccx_lowpass_projector(), ccx_land_highpass_cost()) applied UNCHANGED at the ocean row's own sd
+#        LIK_GCB_OCEAN_SD: row + |(I-P)e|^2 / (2 sd^2), e = target - model over the scored GCB years. An exact
+#        split under the row's own independence assumption, so again NO new sigma.
+# PRICED before the build by EMULATION (calibration/diag_iav_redesign_price.R @e891fa9: the index as a base
+# field, the row by wrapping ccx_loglik() in-process): the resistance -1.29 -> -0.10; stage 1 index-blind
+# (<= 0.08 sigma); no pump ratchet; the index's fit price -7.6 after a land-block re-fit (the ice cores).
+# CHANGELOG 2026-10-07 (d) / (e). The built switch reproduces the emulation: test-iav-redesign.R.
+# The seasonal rows' interannual part STAYS in the main objective (ruled: "No, keep them (Recommended)").
 
 # ---- THE INTERANNUAL MODULE (objective #17's stage 1) ------------------------------------------
 # THE ESTIMATOR (ruled "Monthly (Recommended)", 2026-10-06 m): NOAA MBL global CO2, monthly means of the
@@ -2837,8 +2859,14 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
         tgt_o <- tgt_o + sh[["ocean"]] * I
         tgt_l <- tgt_l + sh[["land"]]  * I
       }
-      add("gcb_ocean_sink",
-          sum(dn(tgt_o, g$ocean, LIK_GCB_OCEAN_SD, log = TRUE)))
+      # OBJECTIVE #18 (2026-10-07 f; see "OBJECTIVE #18"): the ocean row on its LOW-PASS part, the land
+      # row's construction below at the ocean row's own sd. Absent switch = the row as it always was,
+      # bit for bit (the same dn() call, which records the residual either way).
+      row_o <- sum(dn(tgt_o, g$ocean, LIK_GCB_OCEAN_SD, log = TRUE))
+      if (!is.null(err[["gcb_ocean_lowpass_df"]]))
+        row_o <- row_o + ccx_land_highpass_cost(tgt_o - g$ocean, g$year,
+                                                err[["gcb_ocean_lowpass_df"]], LIK_GCB_OCEAN_SD)
+      add("gcb_ocean_sink", row_o)
       # OBJECTIVE #17 (2026-10-06 n; see LIK_LAND_LOWPASS_DF): under the interannual cut the
       # row is scored on its LOW-PASS part -- the row PLUS what its high part costs, which is
       # the row minus that part, exactly. Absent switch = the row as it always was, bit for bit

@@ -73,7 +73,13 @@ test_that("IC1 THE LABEL: kaidgbem's block plus exactly the three cut fields; ka
   expect_identical(b_w$gcb_enso_slope_row, 0L)
   expect_identical(LIK_LAND_LOWPASS_DF, 6L)                                 # RULED: the df priced 10-06 (m)
   expect_identical(ccx_gates_open(IC_LABEL), ccx_gates_open(IC_PARENT))     # the cut opens no gate
-  for (lab in setdiff(CCX_STRUCT_LABELS, IC_LABEL))                         # every other label: none of the three
+  # the ledger: the labels that CARRY the cut's three fields. Extending it is a DELIBERATE edit.
+  # + the redesigned cut (2026-10-07, objective #18; Marcus: "Full redesign (Recommended)", the name
+  #   "hilda_csl3v0kaidgbemwt (Recommended)"): #17's block + two fields, so the three at #17's values
+  IC_CUT_LABELS <- c(IC_LABEL, "hilda_csl3v0kaidgbemwt")
+  for (lab in setdiff(IC_CUT_LABELS, IC_LABEL))                             # the cut's own three, unchanged
+    expect_identical(ccx_struct_block(lab)[IC_FIELDS], b_w[IC_FIELDS], info = lab)
+  for (lab in setdiff(CCX_STRUCT_LABELS, IC_CUT_LABELS))                    # every other label: none of the three
     expect_false(any(IC_FIELDS %in% names(ccx_struct_block(lab))), info = lab)
   expect_identical(CCX_IAV_MODULE_NAMES, c("lag_enso_land", "gamma_enso_land_NH", "gamma_enso_land_SH", "w_enso_l2"))
   p <- ccx_apply_structure(ccx_default_params(), IC_LABEL, seas_ml = "1")

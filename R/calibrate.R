@@ -2506,7 +2506,26 @@ ccx_struct_hilda_csl3v0kaidgbemw <- function() {
   stopifnot(!anyDuplicated(names(blk)))
   blk
 }
-CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", names(CCX_L2_RETURN_LAYERS), "hilda_cs", "hilda_csl3v0", "hilda_csl3v0k", "hilda_csl3v0ka", "hilda_csl3v0kan", "hilda_csl3v0kai", "hilda_csl3v0kaidgb", "hilda_csl3v0kaidgbe", "hilda_csl3v0kaidgbem", "hilda_csl3v0kaidgbemw")
+#' THE "hilda_csl3v0kaidgbemwt" STRUCTURE (OBJECTIVE #18, RULED 2026-10-07 f): hilda_csl3v0kaidgbemw, the
+#' interannual cut, REDESIGNED (R/likelihood.R, "OBJECTIVE #18"). Marcus, verbatim: "Full redesign
+#' (Recommended)"; the NAME "hilda_csl3v0kaidgbemwt (Recommended)" (t = trendless). Two fields on #17's block:
+#'   enso_index = 1              the DETRENDED ENSO index (CCX_ENSO_INDEX_CODES[["detrend"]]) for both ENSO
+#'                               terms. The MODEL reads it, through the forcing: every consumer builds its
+#'                               table with ccx_enso_index_of(params), and ccx_enso_index_check() refuses a
+#'                               table built with another index
+#'   gcb_ocean_lowpass_df = 6    `gcb_ocean_sink` scored on its LOW-PASS part, the land row's projector
+#'                               (LIK_LAND_LOWPASS_DF) applied unchanged
+#' The gates are #17's, untouched; so is the cut (iav_cut 1: the module's four names are PINNED, at stage 1's
+#' values UNDER THIS LABEL). Every other label leaves both fields absent, so every registered file -- and
+#' #17's files -- stay bit-exact. The seasonal rows stay in the main objective (ruled: "No, keep them").
+ccx_struct_hilda_csl3v0kaidgbemwt <- function() {
+  blk <- ccx_struct_hilda_csl3v0kaidgbemw()
+  blk$enso_index           <- CCX_ENSO_INDEX_CODES[["detrend"]]
+  blk$gcb_ocean_lowpass_df <- LIK_LAND_LOWPASS_DF
+  stopifnot(!anyDuplicated(names(blk)))
+  blk
+}
+CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", names(CCX_L2_RETURN_LAYERS), "hilda_cs", "hilda_csl3v0", "hilda_csl3v0k", "hilda_csl3v0ka", "hilda_csl3v0kan", "hilda_csl3v0kai", "hilda_csl3v0kaidgb", "hilda_csl3v0kaidgbe", "hilda_csl3v0kaidgbem", "hilda_csl3v0kaidgbemw", "hilda_csl3v0kaidgbemwt")
 ccx_struct_block <- function(struct) {
   if (identical(struct, "")) return(list())        # the column: nothing declared
   switch(struct,
@@ -2527,6 +2546,7 @@ ccx_struct_block <- function(struct) {
     "hilda_csl3v0kaidgbe" = ccx_struct_hilda_csl3v0kaidgbe(), # ... + the land ENSO lag FITTED, the second gate (2026-10-02; objective #15)
     "hilda_csl3v0kaidgbem" = ccx_struct_hilda_csl3v0kaidgbem(), # ... + the stratification feedback (2026-10-04; DESIGN §3.4a S)
     "hilda_csl3v0kaidgbemw" = ccx_struct_hilda_csl3v0kaidgbemw(), # ... + the interannual cut's main half (2026-10-06; objective #17)
+    "hilda_csl3v0kaidgbemwt" = ccx_struct_hilda_csl3v0kaidgbemwt(), # ... + the detrended ENSO index + the low-pass ocean row (2026-10-07; objective #18)
     stop("ccx_struct_block(): unknown structure label '", struct, "'"))
 }
 #' The pump field's construction is the THIRD structure axis (option D + E,
@@ -2733,7 +2753,7 @@ ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_
   if (isTRUE(ccx_struct_block(struct)[["iav_cut"]] == 1)) {
     miss <- setdiff(CCX_IAV_MODULE_NAMES, names(pins))
     if (length(miss))
-      stop("ccx_ms_reference_set(): struct '", struct, "' is the interannual CUT (objective #17): the module's ",
+      stop("ccx_ms_reference_set(): struct '", struct, "' is the interannual CUT (objectives #17 / #18): the module's ",
            "names are stage 1's and must be PINNED; ", paste(miss, collapse = ", "), " would be free.")
   }
   if (!is.null(pins)) {
@@ -2770,7 +2790,8 @@ ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", ""),
          "and \"hilda_csl3v0kaidgb\" (+ D2 / D3 fitted, objective #14, 2026-09-30) ",
          "and \"hilda_csl3v0kaidgbe\" (+ the land ENSO lag fitted, objective #15, 2026-10-02) ",
          "and \"hilda_csl3v0kaidgbem\" (+ the stratification feedback, DESIGN §3.4a S, 2026-10-04) ",
-         "and \"hilda_csl3v0kaidgbemw\" (+ the interannual cut's main half, objective #17, 2026-10-06).")
+         "and \"hilda_csl3v0kaidgbemw\" (+ the interannual cut's main half, objective #17, 2026-10-06) ",
+         "and \"hilda_csl3v0kaidgbemwt\" (+ the detrended ENSO index + the low-pass ocean row, objective #18, 2026-10-07).")
   blk <- ccx_struct_block(struct)
   for (n in names(blk)) p[[n]] <- blk[[n]]
   structure(p, struct = struct, seas_ml = seas_ml, pump_field = pump_field)
@@ -2883,7 +2904,7 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     fit  <- intersect(CCX_IAV_MODULE_NAMES, CCX_PARAM_NAMES)
     miss <- setdiff(CCX_IAV_MODULE_NAMES, names(CCX_PINS))
     if (length(fit) || length(miss))
-      stop("ccx_make_logpost(): the structure is the INTERANNUAL CUT (iav_cut = 1, objective #17): ",
+      stop("ccx_make_logpost(): the structure is the INTERANNUAL CUT (iav_cut = 1, objectives #17 / #18): ",
            paste(CCX_IAV_MODULE_NAMES, collapse = ", "), " are the module's names, fitted by stage 1, so ",
            "the main objective must HOLD them. ",
            if (length(fit)) paste0(paste(fit, collapse = ", "), " are FITTED here. ") else "",
