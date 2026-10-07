@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-06d — OBJECTIVE #17 BUILT; STAGE 2 RUNNING ON THE MAC OVERNIGHT
 
+> ⛔ **SUPERSEDED 2026-10-07 by `notes/handoff_2026-10-07_obj17_finished.md`.** Stage 2 FINISHED 06:34 EDT rc 0 (two basins; A, −1164.8154, wins and is promoted); the landing is one chained command there. Read that note first.
+
 **Supersedes** `notes/handoff_2026-10-06c_iav_cut_build.md`, whose §3 build order this session executed through
 step 8. That note's §3 steps 9–11 and its open design points are carried below. Its §5 non-obvious state is
 superseded by §5 here.

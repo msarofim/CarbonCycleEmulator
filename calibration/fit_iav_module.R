@@ -73,7 +73,10 @@ COMMIT   <- ccx_git_stamp()
 
 # ---- the base, the ratio, the observations ------------------------------------------
 BASE_FILE <- ccx_mode_file(IAV_BASE); md <- readRDS(BASE_FILE)
-BASE_NAME <- if (file.exists(IAV_BASE)) sub("[.]rds$", "", basename(IAV_BASE)) else IAV_BASE
+# a promoted file is always `mode_fit_pump<arm>.rds`, so its DIRECTORY names it (refit_<date>_obj17_...)
+BASE_NAME <- if (file.exists(IAV_BASE)) {
+  b <- sub("[.]rds$", "", basename(IAV_BASE)); if (grepl("^mode_fit_pump", b)) basename(dirname(IAV_BASE)) else b
+} else IAV_BASE
 IAV_TAG  <- paste0(IAV_DATE, "_", BASE_NAME, if (IAV_SMOKE) "_SMOKE" else "")
 IAV_OUT  <- file.path("calibration", "output", sprintf("iav_module_%s.rds", IAV_TAG))
 IAV_LOG  <- file.path("outputs", "diagnostics", sprintf("iav_module_%s.log", IAV_TAG))

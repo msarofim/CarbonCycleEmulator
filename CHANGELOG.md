@@ -2,6 +2,31 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-06 (q) — **STAGE 2 FINISHED (2026-10-07 06:34 EDT, rc 0): 18 of 24 converged, into TWO basins. A at −1164.8154 (eight cold starts; best id 10) beats B at −1165.2246 (eight starts, the incumbent seed among them) by 0.41. They differ mainly in `h_ml`, 58.0 m vs 49.9 m (the known near-degeneracy).** Not landed and not read yet. Marcus, verbatim: "write the handoff and run everything in the next session". Handoff: `notes/handoff_2026-10-07_obj17_finished.md`, which supersedes 10-06d (that note now points to it).
+
+- **The survey** (the 24 start files, read-only; NOT the read):
+  - basin A, −1164.8154: ids 10, 17, 15, 9, 8, 0, 14, 13, all COLD dispersed starts;
+  - basin B, −1165.2246: the incumbent seed 1, the new-basin seed 2, seeds 3 / 4 / 5, cold 20 / 16 / 7;
+  - converged elsewhere: 6 (−1198.68), 23 (−1216.36); out of time: 11, 12, 19, 18, 21, and 22 (a penalty region,
+    −1.56e9).
+- **What separates A from B** (hilda33p's marginal sd): `h_ml` 58.03 vs 49.89 m (+2.67); `sst_seas_amp_SH` +0.76;
+  `npp_frac_NH`, `q10` and the seasonal lags ≤ 0.38. hilda33p sits at 49.6 m, on B's side.
+- **⚠ The dry run's preview numbers (p) were basin B's** (start_001). The landing promotes id 10, so every number, the
+  one-pass check's `w_enso_l2` flag included, is to be re-read at A.
+- **Id 18 exited rc 1, and it changes nothing.** The driver's DEAD-TASK gate fired on a relative gap of 1.58e-8 between
+  its recorded best (−1284.939812) and the re-evaluation (−1284.939832), against `MS_EVAL_TOL` 1e-8.
+  - The re-evaluation is finite, despite the message's "penalty plateau" wording.
+  - Its log shows two non-converged 12C conveyor spinups (|resid| ~5e-9), the likely source; untested.
+  - It is an out-of-time cold start about 120 log-units below the basins, and `collect` refuses it.
+- **Prepared for the landing:**
+  - `~/ccx_frozen/20261007_obj17_land_chain.sh` chains every dry-run-tested step on the real outdir and stops at the
+    first failure: land (copy + cmp + RUN_PROVENANCE) → the id-18 statement → collect → promote → Hessian → read → the
+    one-pass check → the read at basin B. Syntax-checked.
+  - Its id-18 step was tested on a scratch copy. That test caught `Rscript -e` unescaping a regex backreference, so the
+    tolerance read NA; the step now matches the number directly.
+  - `fit_iav_module.R` now names a promoted base by its directory, not the generic `mode_fit_pumpN`.
+- **Not running any more:** the app preview on localhost:7788 (it died overnight).
+
 ## 2026-10-06 (p) — **THE LANDING DRY RUN on #17's first finished start: it caught a SECOND pinned-value bug (promote's GATE 5, gap 39.1), now fixed; with the fix the whole chain PASSES end to end. And an early warning: re-running stage 1 at that start moves `w_enso_l2` by 1.55σ (the lag and the land scale by ≤ 0.02σ).** One start of 24 (id 1, the incumbent seed), so every number below previews the landing and is not its read. The refit itself runs on, unaffected.
 
 - **What ran** (`~/ccx_frozen/20261006o_obj17_dryrun.sh`, armed at the launch). A separate worktree at the repo's HEAD, a scratch copy of `start_001.rds` (finished 21:50), then collect → promote (scratch dest) → Hessian (`nice 19`) → `diag_obj17_refit_read.R` → the one-pass check. Evidence: `outputs/diagnostics/obj17_dryrun_20261006/` (byte-identical copies of the tree's logs; the failed first attempt in `attempt1_6135b39/`).
