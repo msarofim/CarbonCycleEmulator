@@ -30,11 +30,18 @@ RS_DF     <- LIK_LAND_LOWPASS_DF
 RS_ROWS   <- c("gcb_ocean_sink", "co2_level_MLO", "co2_level_SPO", "co2_seasonal_MLO", "co2_seasonal_SPO")
 RS_TOL    <- 1e-5
 RS_MODULE <- CCX_IAV_MODULE_NAMES
-RS_OUT <- file.path("outputs", "diagnostics", sprintf("obj17_resistance_split_%s", format(Sys.Date(), "%Y%m%d")))
+# THE INDEX VARIANT (2026-10-07 b): CCX_RS_ENSO_INDEX=detrend reruns the split on the DETRENDED index (the 09-29 f structure
+# axis, CCX_ENSO_INDEX_CODES) -- the test of whether the CO2 levels' LOW-FREQUENCY resistance is the shipped index's
+# +0.0083 K/yr trend carried by the limb. The rows then differ from the stored ones at P0 by construction, so the two
+# gates against stored numbers are SKIPPED under it (said in the log); the residual-rebuild gate stays.
+RS_INDEX  <- Sys.getenv("CCX_RS_ENSO_INDEX", "")
+if (nzchar(RS_INDEX) && !RS_INDEX %in% names(CCX_ENSO_INDEX_CODES)) stop("CCX_RS_ENSO_INDEX: one of ", paste(names(CCX_ENSO_INDEX_CODES), collapse = ", "))
+RS_OUT <- file.path("outputs", "diagnostics", sprintf("obj17_resistance_split_%s%s", format(Sys.Date(), "%Y%m%d"),
+                                                      if (nzchar(RS_INDEX)) paste0("_", RS_INDEX) else ""))
 COMMIT <- ccx_git_stamp()
 sink(paste0(RS_OUT, ".log"), split = TRUE)
-cat(sprintf("%s @%s, %s | projector df %d (LIK_LAND_LOWPASS_DF) for every row\n", RS_DRIVER, COMMIT,
-            format(Sys.time(), "%Y-%m-%d %H:%M"), RS_DF))
+cat(sprintf("%s @%s, %s | projector df %d (LIK_LAND_LOWPASS_DF) for every row | ENSO index %s\n", RS_DRIVER, COMMIT,
+            format(Sys.time(), "%Y-%m-%d %H:%M"), RS_DF, if (nzchar(RS_INDEX)) sprintf("'%s' (the VARIANT: gates vs stored numbers SKIPPED)", RS_INDEX) else "as each file records"))
 OBS <- ccx_prepare_obs(); PRICE <- readRDS(RS_PRICE)
 
 # each row's SCORED years and sd(s), one entry per coefficient series: ccx_loglik()'s own matching (obs years with a
@@ -61,7 +68,9 @@ split_row <- function(res, row, o_run, F_run) {
   c(row = sum(parts["gauss", ]), high_cost = sum(parts["high", ]), lowpass = sum(parts["gauss", ]) + sum(parts["high", ])) }
 with_module <- function(F, vals) { V <- dg_vector(F)
   for (n in names(vals)) { if (n %in% names(V$p)) V$p[[n]] <- vals[[n]]; V$pm[[n]] <- vals[[n]] }
-  V$p <- ccx_set_enso(V$p, V$pm); V }
+  V$p <- ccx_set_enso(V$p, V$pm)
+  if (nzchar(RS_INDEX)) V$p$enso_index <- unname(CCX_ENSO_INDEX_CODES[[RS_INDEX]])
+  V }
 rows_at <- function(V) { r <- dg_run(V); st <- dg_streams(r, V, obs = OBS, residuals = TRUE); RES <- attr(st, "residuals")
   o_run <- r$out[r$out$t < DG_SINK_LAST + 1, ]; F_run <- r$F[r$F$t < DG_SINK_LAST + 1, ]      # = dg_streams()'s span
   s <- unlist(st)
@@ -76,20 +85,20 @@ for (k in names(RS_MODES)) {
   cat(sprintf("\n=== basin %s (%s, md5 %s): pins %s -> %s ===\n", k, RS_MODES[[k]], unname(tools::md5sum(RS_MODES[[k]])),
               paste(sprintf("%.4f", P0), collapse = "/"), paste(sprintf("%.4f", P1), collapse = "/")))
   g0 <- max(abs(a$streams[names(md$streams)] - md$streams)); cat(sprintf("  GATE: the dg rows at P0 vs the stored streams, max |diff| %.1e\n", g0))
-  if (g0 > RS_TOL) stop("basin ", k, ": the dg rows do not reproduce the stored streams")
+  if (g0 > RS_TOL && !nzchar(RS_INDEX)) stop("basin ", k, ": the dg rows do not reproduce the stored streams")
   g1 <- max(abs(a$split[, "row"] - a$streams[RS_ROWS])); cat(sprintf("  GATE: the residuals rebuild each row from its sd, max |diff| %.1e\n", g1))
   if (g1 > 1e-8) stop("basin ", k, ": the residuals do not rebuild the rows (an offset or a per-year sd the split misses)")
   D <- b$split - a$split
   g2 <- max(abs(D[, "row"] - PRICE[[k]]$rows[RS_ROWS])); cat(sprintf("  GATE: each row's change vs diag_obj17_iterate_price.R, max |diff| %.1e\n", g2))
-  if (g2 > RS_TOL) stop("basin ", k, ": the row changes disagree with the iterate price")
+  if (g2 > RS_TOL && !nzchar(RS_INDEX)) stop("basin ", k, ": the row changes disagree with the iterate price")
   cat(sprintf("  %-18s %10s %18s %16s\n", "row", "change", "interannual part", "low-pass part"))
   for (row in RS_ROWS) cat(sprintf("  %-18s %+10.4f %+18.4f %+16.4f\n", row, D[row, "row"], -D[row, "high_cost"], D[row, "lowpass"]))
   rest <- PRICE[[k]]$d_lik - sum(D[, "row"])
   cat(sprintf("  %-18s %+10.4f %+18.4f %+16.4f\n", "these five", sum(D[, "row"]), -sum(D[, "high_cost"]), sum(D[, "lowpass"])))
-  cat(sprintf("  the other rows: %+.4f; in all %+.4f (diag_obj17_iterate_price.R)\n", rest, PRICE[[k]]$d_lik))
+  if (!nzchar(RS_INDEX)) cat(sprintf("  the other rows: %+.4f; in all %+.4f (diag_obj17_iterate_price.R)\n", rest, PRICE[[k]]$d_lik))
   OUT[[k]] <- list(p0 = P0, p1 = P1, split0 = a$split, split1 = b$split, change = D, rest = rest, total = PRICE[[k]]$d_lik)
 }
-saveRDS(c(OUT, list(provenance = list(driver = RS_DRIVER, commit = COMMIT, modes = RS_MODES, checks = RS_CHECKS, price = RS_PRICE,
+saveRDS(c(OUT, list(provenance = list(driver = RS_DRIVER, commit = COMMIT, enso_index = if (nzchar(RS_INDEX)) RS_INDEX else "as recorded", modes = RS_MODES, checks = RS_CHECKS, price = RS_PRICE,
                                        df = RS_DF, rows = RS_ROWS, date = format(Sys.time(), "%Y-%m-%d %H:%M"), rng = "none"))),
         paste0(RS_OUT, ".rds"))
 cat(sprintf("\nsaved %s.{log,rds}\n⛔ ADOPTS NOTHING.\n", RS_OUT))
