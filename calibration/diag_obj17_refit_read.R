@@ -84,10 +84,14 @@ MOD_N  <- stats::setNames(as.numeric(unclass(PIN_N)[O17_MODULE]), O17_MODULE)   
 
 #' ONE vector (a mode file's par_mode with pins, `over` overriding names) scored under `label` with `pins` applied in
 #' process and written onto the base -- diag_obj17_price.R's score17(), generalised to either vector.
-score_on <- function(md, label, pins, over = NULL) {
+#' `base`: the base list to score on. NULL builds it BY HAND under `label` -- deliberately, to score a vector under
+#' ANOTHER objective (sections 1-2). A file in its OWN space passes ccx_mode_base(md), the file's own structure (the
+#' mode-struct lint's resolver; section 0).
+score_on <- function(md, label, pins, over = NULL, base = NULL) {
   g <- ccx_apply_gate(label); on.exit(ccx_unapply_gate(g), add = TRUE)
   r <- ccx_apply_pins(pins);  on.exit(ccx_unpin_params(r), add = TRUE, after = FALSE)
-  bp <- ccx_apply_structure(ccx_default_params(), label, seas_ml = md$seas_ml, pump_field = ccx_mode_pump_field(md))
+  bp <- if (is.null(base)) ccx_apply_structure(ccx_default_params(), label, seas_ml = md$seas_ml,
+                                               pump_field = ccx_mode_pump_field(md)) else base
   for (n in names(pins)) bp[[n]] <- pins[[n]]
   bp$pump_mode <- md$pump_mode
   lp <- ccx_make_logpost(base_params = bp, by_stream = TRUE, spinup_fn = ccx_spinup_from_label(ccx_mode_spinup(md)), obs = OBS)
@@ -117,8 +121,9 @@ if (!is.null(MD_N$promoted_from$id)) {
   if (length(ids) && !identical(as.integer(MD_N$promoted_from$id), as.integer(ids[1])))
     stop("the promoted id is not the wave's best converged start")
 }
-OWN_C <- score_on(MD_C, O17_LABEL_CANON, PINS_C)
-OWN_N <- score_on(MD_N, O17_LABEL, O17_PINS)
+# each file in its OWN space: its own base (ccx_mode_base(), the file's structure and pins)
+OWN_C <- score_on(MD_C, O17_LABEL_CANON, PINS_C, base = ccx_mode_base(MD_C))
+OWN_N <- score_on(MD_N, O17_LABEL, O17_PINS, base = ccx_mode_base(MD_N))
 for (r in list(list(sprintf("canonical %s", O17_CANON), OWN_C, MD_C$logpost), list("objective #17", OWN_N, MD_N$logpost))) {
   d <- r[[2]]$logpost - r[[3]]
   cat(sprintf("  %-22s logpost %.6f (stored %.6f, diff %+.1e)  likelihood %.4f on %d rows\n", r[[1]], r[[2]]$logpost, r[[3]], d,

@@ -40,6 +40,21 @@ superseded by §5 here.
   - full suite at `1ce5018`: **6550 passed, 0 failed, 3 skipped**, rc 0 (= `15dbda6`'s 6427 + 123, each counted);
   - full suite at `20a89f8` (the launch commit): **6573 passed, 0 failed, 3 skipped**, rc 0 (= 6550 + test (12)'s 23).
 
+## 1b. The landing DRY RUN, 21:54-22:16 (CHANGELOG 2026-10-06 p)
+- On the first finished start (`start_001`, the incumbent seed; ONE of 24, so a preview, not the read), in a separate
+  tree, the whole chain ran: collect → promote → Hessian → read → the one-pass check.
+- **⛔ It caught a SECOND pinned-value bug:** promote's GATE 5 rebuilt the start through `ccx_overlay_par()` on a
+  hand-built base and lost the pinned land ENSO pair (gap 39.1). **Fixed in `0a4e89f`** (the overlay keeps the process's
+  pins; the promote base carries the `pins` attribute; test IC11). The refit itself was never affected.
+- **With the fix every step PASSES:** GATE 5 gap 2.1e-14; Hessian PD, condition 2.9e5; the read's every section.
+- **Preview numbers:** #17's rows −9.32 against REF (pricing B2 −10.25); #16's rows −39.24; SSP5-8.5 2300 −4.33 ppm,
+  vvH −3.04.
+- **⚠ The one-pass check FLAGGED `w_enso_l2`:** re-running stage 1 at that start moves it 14.73 → 16.71 (**+1.55σ**),
+  while the lag (+0.010σ) and the land scale (−0.021σ) hold. Stage 2 has no slope row and moved names that set the ocean's
+  ENSO response, so the slope row fell +2.79 → +1.85 at fixed `w`. If the real landing shows the same, the ruled check
+  sends it to Marcus: accept the one pass, iterate (another overnight refit at `w` ≈ 16.7), or change the design.
+  Evidence: `outputs/diagnostics/obj17_dryrun_20261006/`.
+
 ## 2. The run
 - **What:** objective #17's stage 2. Label `hilda_csl3v0kaidgbemw`, 14 pins (#16's ten + the module's four), 29 free names.
   24 dispersed starts, 8 at a time, on the CPU clock: 300 CPU-min per start, 3 restarts × 6 cycles × 6000 maxit,
@@ -82,11 +97,9 @@ superseded by §5 here.
      Rscript calibration/promote_multistart_mode.R --name=obj17_hilda_csl3v0kaidgbemw --outdir=<repo outdir> --dest=calibration/output/refit_<date>_obj17_hilda_csl3v0kaidgbemw
      ```
    - Then `Rscript calibration/recompute_hessian.R <mode file> --update`.
-   - ⚠ **The first promotion of a label with `iav_cut`, and of 14 pins with four READ names.** GATE 5's hand-built
-     reconstruction now passes `err` through `ccx_err_with_struct()` (else it would score #16's rows and fail). Check
-     every registry step rather than assume it: the promote's gates, `ccx_mode_pins()`, the mode-struct lint,
-     `recompute_hessian.R` under the guard (its logpost must be built with the four pinned), and `CCX_MODE_FILES` if
-     it is registered. Registering a mode is a separate act from ADOPTING it.
+   - ✅ **The chain is DRY-RUN TESTED on start_001 at `0a4e89f`** (§1b): promote's GATE 5 needed the overlay fix; collect,
+     promote, the Hessian, the read and the check all pass. ⚠ Run the landing from code at or after `0a4e89f`.
+     `CCX_MODE_FILES` registration is still untested, and registering a mode is a separate act from ADOPTING it.
 4. **Read:** `Rscript calibration/diag_obj17_refit_read.R` (written this session on #16's model).
    - It was dry-run on a SCRATCH #17 file: hilda33p with the module pinned at stage 1's values, which is the pricing's
      B1. Every section ran and reproduced the pricing (B1 −10.8609; #16's rows −39.45; the module +2.5622).
@@ -103,6 +116,7 @@ superseded by §5 here.
 5. **The one-pass check (RULED):** `Rscript calibration/fit_iav_module.R --base=<the promoted #17 file>
    --check=calibration/output/iav_module_20261006_hilda33p.rds`. VERDICT STOP = every module name moved less than
    0.1 of its stage-1 1σ. Otherwise it goes to Marcus before any second refit.
+   - ⚠ **Expect it to flag `w_enso_l2`** (§1b: +1.55σ at start_001); the lag and the scale held to ≤ 0.02σ there.
 6. **Then:** the scorecard, the constraint map, the gate ledger, the ocean-climate diagnostic. Adoption is Marcus's call.
 7. **The cut posterior ("Laplace + propagation"), after adoption or for the read:**
    - Stage 1's covariance is in the stage-1 rds (`$laplace$cov`, and `$laplace$cov4` on the four pinned names).
@@ -124,12 +138,11 @@ superseded by §5 here.
     modified IN THE TREE ONLY (#17's targets); `main`'s copy still holds the canonical's.
   - The two suite trees (`suite_20261006_1ce5018`, `suite_20261006_20a89f8`) are REMOVED; their logs are in
     `outputs/diagnostics/`.
-  - `~/ccx_frozen/20261006o_obj17_dryrun`: created by the dry run below, at the repo's HEAD; scratch only.
-- **The landing dry run is ARMED** (a background waiter in the launching session, started 19:27 EDT): when the first
-  finished start is 2 min old it runs `~/ccx_frozen/20261006o_obj17_dryrun.sh`, i.e. collect → promote (scratch dest) →
-  Hessian (`nice 19`) → `diag_obj17_refit_read.R` (`_DRYRUN`) → the one-pass check, logs in the dry-run tree's
-  `DRYRUN_logs/`. Expected ~23:00 EDT. ⚠ The waiter dies with that session; if it did not report, run the script by hand
-  once a start file exists. ONE start of 24: its numbers preview the landing, they are not its read.
+  - `~/ccx_frozen/20261006o_obj17_dryrun` at `0a4e89f`: the dry run's tree (scratch promote dest, its Hessian, the
+    read's outputs). Removable once the landing is done; its logs are copied into `outputs/diagnostics/obj17_dryrun_20261006/`.
+  - `~/ccx_frozen/suite_20261006_0a4e89f`: the suite at the fix commit; removable once it has reported.
+- **The landing dry run RAN** (21:54-22:16; §1b). Its script `~/ccx_frozen/20261006o_obj17_dryrun.sh` can be re-run by
+  hand on any finished start (it reuses its tree).
 - **Early eval rates** (19:27, ~1 min in): 0.31–0.34 CPU-s/eval for the seven warm starts, 1.16 for the cold id 0
   (#16: 0.23–0.41, cold 1.23).
 - **The pin literals are within one ulp, not bit-identical.** R's parser mis-rounds `w_enso_l2`'s 17-digit literal by

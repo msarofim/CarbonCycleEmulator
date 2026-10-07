@@ -2,6 +2,42 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-06 (p) — **THE LANDING DRY RUN on #17's first finished start: it caught a SECOND pinned-value bug (promote's GATE 5, gap 39.1), now fixed; with the fix the whole chain PASSES end to end. And an early warning: re-running stage 1 at that start moves `w_enso_l2` by 1.55σ (the lag and the land scale by ≤ 0.02σ).** One start of 24 (id 1, the incumbent seed), so every number below previews the landing and is not its read. The refit itself runs on, unaffected.
+
+- **What ran** (`~/ccx_frozen/20261006o_obj17_dryrun.sh`, armed at the launch). A separate worktree at the repo's HEAD, a scratch copy of `start_001.rds` (finished 21:50), then collect → promote (scratch dest) → Hessian (`nice 19`) → `diag_obj17_refit_read.R` → the one-pass check. Evidence: `outputs/diagnostics/obj17_dryrun_20261006/` (byte-identical copies of the tree's logs; the failed first attempt in `attempt1_6135b39/`).
+- **⛔ THE SECOND BUG** (fixed in `0a4e89f`). The first attempt stopped at `promote_multistart_mode.R` GATE 5: the hand-built stream reconstruction summed to −1168.36 against the objective's −1129.30 (gap 39.06).
+  - **Cause:** the promote base was built by hand, with the pins WRITTEN but no `pins` attribute, and a start's `par_mode` carries the fitted names only. `ccx_overlay_par()` read held values only from the attribute, so it migrated the pinned land ENSO pair to its ABSENT default (0), and `ccx_set_enso()` copied that over the pins. The reconstruction ran with the land ENSO amplitudes at 0.
+  - The same family as (o)'s bug, in a second resolver. It hid for the same reason: every earlier pin set held its gated / ENSO names AT their defaults.
+  - **The fix:** `ccx_overlay_par()` fills any name the PROCESS holds (`CCX_PINS`) from the base's own value, where every caller writes a pin; and the promote base carries `attr(, "pins")`, as `ccx_mode_base()` does.
+  - **Unaffected:** the RUNNING refit (its objective is `ccx_make_logpost()`, fixed in (o); GATE 4 reproduced the start's logpost to the digit), and every stored number.
+  - **Swept for the class** after this second site, as the memory now says to: every other resolver of the ENSO / gated names on the landing and app paths (`ccx_load_mode`, `dg_vector`, `br_vec`, `ccx_mode_run_params` for the app and the ribbons) receives a list that already carries the pins. Only `calibration/lib_seas_limbs.R` `sl_run()` shares the call shape, with full vectors (noted in (o)).
+  - **Test:** `test-iav-cut.R` IC11 (25 new; the file 144 / 0). A hand-built pinned base keeps every pin, for #16's ten and #17's fourteen, and equals the canonical path for hilda33p. Mutation O1 (the new loop removed) caught: the two land amplitudes fail. Restored md5-identical.
+  - **The full suite at `0a4e89f`: 6596 passed, 2 FAILED**, 3 skipped, rc 1 (`outputs/diagnostics/suite_20261006_0a4e89f.log`). Both failures are `test-mode-struct-lint.R`, the ratchet on direct mode-file reads. My new `diag_obj17_refit_read.R` (`8727ea7`) read hilda33p's file and built every base by hand, never through `ccx_mode_base()`. The lint was right, so the SCRIPT was fixed and the ratchet's baseline was not touched.
+    - Section 0 now scores each file in its own space on `ccx_mode_base(md)`. The hand-built bases remain only where a vector is deliberately scored under the OTHER objective.
+    - The lint passes 5 / 0. The read re-run on the dry run's promoted file reproduces both vectors with diff 0 and every number above.
+    - The full suite at the fix: SUITE_FIX_RESULT.
+- **WITH THE FIX THE CHAIN PASSES:**
+
+| step | result |
+|---|---|
+| collect | rc 0; 1 of 1 converged; the incumbent's port VERIFIED (rel 3.2e-14) |
+| promote | GATE OPEN: five gated names (the lag among them, then PINNED); PINNED arm: the 14, 29 free; GATES 1–4 pass; **GATE 5 gap 2.1e-14**; 0 kinks |
+| Hessian (`--update`, 15.7 min at `nice 19`) | GATE 1 diff 0; −H positive-definite, condition 2.9e5 |
+| read (`diag_obj17_refit_read.R`) | every section ran; both vectors reproduce; the survey and the promoted-id check now had a start to read |
+| the one-pass check (`fit_iav_module.R --base --check`) | ran; VERDICT below |
+
+- **The preview numbers (one start: the incumbent's basin):**
+  - **On #17's rows: −9.316** against REF (hilda33p with its own module values). The pricing's B2 was −10.252, so the full 29-name refit recovers ~0.94 more than re-optimising the five land names alone.
+  - **On #16's rows: −39.24** (the preview's −39.2).
+  - **Futures in 2300:** SSP5-8.5 1461.53 → 1457.19 (**−4.33 ppm**), vvH −3.04. The pricing's B2 gave −3.53 / −1.78.
+  - The land's net climate effect −0.043 GtC/yr (hilda33p −0.038).
+  - **The module at this vector: +1.61** (stage 1 measured +2.56 at hilda33p's other names). The slope row falls from +2.79 to **+1.85** at the same `w_enso_l2`: the refit moved names that set the ocean's ENSO response.
+- **⚠ THE ONE-PASS CHECK, PREVIEWED** (`check.log`), re-running stage 1 at this start's stage-2 values:
+  - lag 5.843 → 5.855 (**+0.010σ**); land scale 1.301 → 1.295 (**−0.021σ**);
+  - **`w_enso_l2` 14.73 → 16.71 (+1.55σ)**: the limb rises until the slope row is back at +2.79;
+  - VERDICT: a name moved MORE than the ruled 0.1σ, so this goes to Marcus before any second refit. **Nothing was re-launched.**
+  - **Reading it:** the land answer, the point of the cut, is stable to 0.02σ. The ocean limb is not, because stage 2 has no slope row of its own and is free to move what the module's slope depends on. If the landing shows the same, the choice (accept the one pass, iterate, or change the design) is Marcus's.
+
 ## 2026-10-06 (o) — **OBJECTIVE #17 BUILT, STAGE 1 RUN, PRICED, AND STAGE 2 LAUNCHED.** The label is `hilda_csl3v0kaidgbemw`. Stage 1 at hilda33p puts the land ENSO lag at **5.84 months** (1σ 4.46–7.28; the canonical's 2.61 is outside 2σ), the land amplitude at **×1.30** and `w_enso_l2` at **14.73**, reproducing the preview. Priced unrefitted on the canonical, the main objective pays **−10.86**; with the five land names re-optimised it pays **−10.25**, almost all of it the seasonal rows (−13.2). SSP5-8.5 CO₂ in 2300 moves −3.5 ppm. **The build found and fixed a latent bug:** a PINNED ENSO amplitude was silently reset to 0 inside the objective. It never moved a stored number, but under #17 it would have switched the land ENSO term off. Nothing adopted.
 
 - **Rulings, verbatim (this session):**
