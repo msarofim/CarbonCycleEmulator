@@ -1,0 +1,10 @@
+M0_as_written            PASSES | RESULT failed 0 errors 0 of 67 expectations; failing tests: 
+M1_id_ignored            CAUGHT | RESULT failed 18 errors 0 of 67 expectations; failing tests: PI1: PI1: PI3:
+M2_no_refusal            CAUGHT | RESULT failed 3 errors 0 of 67 expectations; failing tests: PI1:
+M3_dead_not_refused      CAUGHT | RESULT failed 1 errors 0 of 67 expectations; failing tests: PI1:
+M4_default_min           CAUGHT | RESULT failed 13 errors 0 of 67 expectations; failing tests: PI1: PI3:
+M5_why_optional          CAUGHT | RESULT failed 4 errors 0 of 67 expectations; failing tests: PI3:
+M6_promotes_top          CAUGHT | RESULT failed 8 errors 0 of 67 expectations; failing tests: PI2: PI3:
+M7_gap_not_recorded      CAUGHT | RESULT failed 2 errors 1 of 50 expectations; failing tests: PI2: PI3:
+source restored (md5): yes
+ALL CAUGHT

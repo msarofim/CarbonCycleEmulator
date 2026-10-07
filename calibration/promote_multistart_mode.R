@@ -19,11 +19,20 @@
 # hand-typed id is exactly the drift `[[derived_must_mean_computed]]` warns
 # about: 39 of these 40 starts agree to 4e-4, so "the best one" is a fact about
 # the directory that must be READ from it, not remembered.
+# ⚠ --id=<n> NAMES ANOTHER START (2026-10-07 k; Marcus: "Build --id, read both
+# (Recommended)"). The best is still COMPUTED, printed and recorded beside it
+# (`promoted_from$best_id`, `$best_logpost`, `$gap_to_best`), and `--why=<text>`
+# is REQUIRED: the file must say why it is not the best. The reason this exists:
+# the stored logpost carries each transform's log-Jacobian, and at objective #17
+# its best basin was not the likelihood's ([[basin_rank_by_logit_jacobian]]).
+# The choice itself is calibration/lib_ms_promote.R pmm_choose_start(), tested.
 #
 #   Rscript calibration/promote_multistart_mode.R [--outdir=DIR] [--dest=DIR] [--force]
+#                                                 [--id=N --why="reason"]
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 source(ccx_path("calibration", "lib_ms_deadline.R"))   # ms_start_clock(): the clock `minutes` is on (2026-10-05 o)
+source(ccx_path("calibration", "lib_ms_promote.R"))    # pmm_choose_start(): GATE 3's choice, and --id (2026-10-07 k)
 ccx_load_cpp()
 
 args <- commandArgs(trailingOnly = TRUE)
@@ -44,6 +53,14 @@ PMM_DEST_DIR   <- .arg("dest",   ccx_path("calibration", "output",
 PMM_ARM        <- "N"                              # the pump arm; free, not pinned
 PMM_DEST_FILE  <- file.path(PMM_DEST_DIR, sprintf("mode_fit_pump%s.rds", PMM_ARM))
 PMM_FORCE      <- "--force" %in% args
+# --id / --why (2026-10-07 k): refused before any start file is read, so a malformed call costs nothing
+PMM_ID_ARG     <- .arg("id", NA_character_)
+PMM_WHY        <- .arg("why", NA_character_)
+if (!is.na(PMM_ID_ARG) && !grepl("^[0-9]+$", PMM_ID_ARG)) stop("--id must be a whole number >= 0, not '", PMM_ID_ARG, "'")
+PMM_ID         <- if (is.na(PMM_ID_ARG)) NA_integer_ else as.integer(PMM_ID_ARG)
+if (!is.na(PMM_ID) && (is.na(PMM_WHY) || !nzchar(trimws(PMM_WHY))))
+  stop("--id needs --why=\"<reason>\": the mode file must record why it is not the best stored logpost")
+if (is.na(PMM_ID) && !is.na(PMM_WHY)) stop("--why is for --id only: the computed best needs no reason")
 PMM_LP_TOL     <- 1e-5      # matches recompute_hessian.R's GATE 1 -- the same
                             # question ("does this point reproduce?") answered
                             # to the same precision, deliberately not tighter.
@@ -92,13 +109,16 @@ if (!identical(arms, PMM_ARM))
   stop("this directory is arm '", arms, "', not the free arm '", PMM_ARM, "'")
 
 # ---------------------------------------------------------------------
-sep("GATE 3: the start to promote is COMPUTED from the directory")
-fin <- Filter(function(s) isTRUE(s$converged) && !isTRUE(s$out_of_time), S)
-if (!length(fin)) stop("no CONVERGED, in-time start in ", PMM_SRC_DIR)
-lp  <- vapply(fin, function(s) s$logpost, numeric(1))
-best <- fin[[which.max(lp)]]
+sep(if (is.na(PMM_ID)) "GATE 3: the start to promote is COMPUTED from the directory"
+    else "GATE 3: the start to promote is NAMED by --id; the best is COMPUTED beside it")
+CH   <- pmm_choose_start(S, PMM_ID)
+fin  <- CH$fin; lp <- CH$lp; top <- CH$top
+best <- CH$pick      # ⚠ `best` is the start PROMOTED below: the computed best, unless --id names another
 cat(sprintf("%d of %d starts CONVERGED in time\n", length(fin), length(S)))
-cat(sprintf("best is id %d at %.6f\n", best$id, best$logpost))
+cat(sprintf("best is id %d at %.6f\n", top$id, top$logpost))
+if (identical(CH$chosen_by, "id"))
+  cat(sprintf("⚠ PROMOTING id %d (--id) at %.6f, %.6f below the best (id %d)\n  why: %s\n",
+              best$id, best$logpost, CH$gap, top$id, PMM_WHY))
 # The runners-up are quoted because the SPREAD is the honest statement: when 39
 # starts agree to 4e-4, "the best" is a label on a tie, not a distinguished
 # point, and the file records that rather than implying a precision it lacks.
@@ -337,7 +357,11 @@ out <- list(
                        n_within_cycle_tol = tie, cycle_tol = best$cycle_tol,
                        spread_measured = best$spread_measured,
                        port_target = best$port_target, port_rel = best$port_rel,
-                       host = best$host, r_version = best$r_version),
+                       host = best$host, r_version = best$r_version,
+                       # HOW the start was chosen (2026-10-07 k): "best_logpost" (computed) or "id" (--id, with
+                       # --why); the computed best and the gap are recorded either way (gap 0 when it IS the best)
+                       chosen_by = CH$chosen_by, best_id = top$id, best_logpost = top$logpost,
+                       gap_to_best = CH$gap, why = PMM_WHY),
   promoted_by = "calibration/promote_multistart_mode.R",
   promoted_on = format(Sys.Date()))
 # the start file's budget and wall minutes (2026-10-05 o); assigning NULL adds nothing, so an older start adds neither
