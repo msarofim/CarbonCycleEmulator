@@ -2,6 +2,20 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-07 (f) — **RULED: BUILD THE FULL REDESIGN as objective #18, `hilda_csl3v0kaidgbemwt`** (AskUserQuestion on the (d)/(e) price). Nothing built yet.
+
+- **Rulings, verbatim:**
+  - the design: "Full redesign (Recommended)". The detrended ENSO index + `gcb_ocean_sink` on its low-pass part, on top of #17;
+  - the seasonal rows: "No, keep them (Recommended)". Their interannual part stays in the main objective;
+  - stage 1's base: "Basin B (Recommended)". #17's stage-2 vector, where the pump is already released (the mirror's answer there: lag 5.8483, scale 1.2978, `w_enso_l2` 16.6051);
+  - the label: "hilda_csl3v0kaidgbemwt (Recommended)" (t = trendless).
+- **What the build needs** (from this session's code reading; the order is the next session's):
+  - `R/likelihood.R`: a `gcb_ocean_lowpass_df` switch beside `gcb_land_lowpass_df` (`ccx_err_with_struct()` and the ocean row). Absent = bit-identical. The emulation in `diag_iav_redesign_price.R` is its parity target: the low-pass ocean row at B is −1.977390, and B1 is −12.342 on the redesign's rows.
+  - `R/calibrate.R`: `ccx_struct_hilda_csl3v0kaidgbemwt()` = #17's block + `enso_index` 1 + `gcb_ocean_lowpass_df` 6, registered with its pins and reference-set rule as #17's were (`CCX_MODE_OBJ17_*`).
+  - `fit_iav_module.R` at basin B: B's file carries #17's label, so stage 1 needs a base under ANOTHER structure. The mirror's pattern is tested (CONTROL exact): gate the base as stored, then switch. Its answer is the parity target.
+  - Then the pricing, the stage-2 refit on the Mac overnight (the Torch verdict said out loud), and the landing chain (#17's `land_chain.sh` is the template).
+  - Still open from 10-07 (c): promote cannot choose a basin (no `--id`); decompose before promoting ([[basin_rank_by_logit_jacobian]]).
+
 ## 2026-10-07 (e) — **(d)'s "+23 ppm" IS MOSTLY A RIDGE POSITION, not the index.** Profiling `beta_max` with the other four land names re-optimised: under EITHER objective, B's value and B2's differ by only 0.12–0.13 log-units, and by ~17 ppm in SSP5-8.5 2300. **At a fixed `beta_max` the detrended index moves 2300 by +6.3 to +7.2 ppm (vvH +2.0 to +2.9). The rest of B2's +23 is the ridge optimum sliding ~0.6σ. MEASURED on a wide profile (1.50–2.55), 2300 CO₂ along this ridge alone spans about −35 / +35 ppm at 1σ under #17 and −38 / +34 under the redesign (natural space; vvH about ±17).** (d) is corrected in place; nothing adopted.
 
 - **Why the test.** (d)'s +23 ppm was carried by `beta_max` (−7.3 %), and `beta_max`–`fert_k` is a known ρ ≈ 0.998 ridge. On 09-29 (e), converging a re-fit had barely moved its cost but moved the futures by tens of ppm. Two hypotheses: FORCED (the redesign's record prefers the lower `beta_max` by a margin a re-fit cannot give back) or RIDGE (the record is ~indifferent once the other land names follow).
