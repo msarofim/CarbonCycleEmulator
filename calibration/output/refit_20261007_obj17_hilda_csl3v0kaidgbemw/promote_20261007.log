@@ -1,0 +1,63 @@
+
+==== PROMOTE a obj17_hilda_csl3v0kaidgbemw multistart start to a mode file ====
+source  /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261006o_hilda_csl3v0kaidgbemw_seasml1_pin_obj17_sd1.0452
+dest    /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261007_obj17_hilda_csl3v0kaidgbemw/mode_fit_pumpN.rds
+GATE OPEN (structure 'hilda_csl3v0kaidgbemw'): ndep_ret, npp_tsens, imb_share_land, imb_share_ocean_rest, lag_enso_land are fitted names
+PINNED arm: _pin_ent_seas_amp_SH=0.0000000_w_eq=27.0000000_gamma_eq=1.0000000_pump_export=9.0800000_w_vent=0.0000000_gamma_vent=0.0000000_w_thc=0.0000000_gamma_enso_ocn_NH=0.0000000_gamma_enso_ocn_SH=0.0000000_npp_tsens=0.0000000_lag_enso_land=5.8432438_gamma_enso_land_NH=0.6607109_gamma_enso_land_SH=0.6332209_w_enso_l2=14.7261513 (29 free parameters)
+
+GATE 1: every start in this directory is on THIS build's parameter set
+----------------------------------------------------------------------
+build fits 29 parameters; 24 of 24 starts match
+
+GATE 2: one arm, one objective -- or a ranking across them is meaningless
+-------------------------------------------------------------------------
+pump arms present: N
+
+GATE 3: the start to promote is COMPUTED from the directory
+-----------------------------------------------------------
+18 of 24 starts CONVERGED in time
+best is id 10 at -1164.815378
+runners-up: id 17 -1164.815389; id 15 -1164.815393; id 9 -1164.815395
+16 of 18 finished starts lie within the optimiser's own convergence
+bound of 0.50 log-units, spanning 4.09e-01 log-units
+
+GATE 4: the point reproduces its own logpost, under the band it RECORDS
+-----------------------------------------------------------------------
+structure RECORDED in the starts: 'hilda_csl3v0kaidgbemw'
+seas_ml RECORDED in the starts: 1 (the seasonal mixed layer ON -- round 6)
+pump_field RECORDED in the starts: 'solved'
+h_ml band  [42.5, 200] (from the start file)
+log-post   -1164.815380   file -1164.815378   diff -1.780e-06
+
+the per-stream decomposition at the mode
+----------------------------------------
+26 streams, total -1130.0603
+       d14c_intcal        co2_icecore            d14c_NH            d14c_SH 
+          -640.571           -507.655           -288.257           -287.330 
+     co2_level_MLO      co2_level_SPO      gcb_land_sink       co2_gradient 
+           -71.166            -63.101            -22.220            -15.075 
+  excess_c14_ocean     ocean_grad_dic     gcb_ocean_sink     ocean_grad_alk 
+            -9.638             -7.354             -6.799             -4.756 
+   ocean_grad_d13c        hs_surf_dic    d14c_profile_ab d14c_profile_level 
+            -4.708             -4.271             -3.615             -3.255 
+      hs_surf_d13c    d14c_profile_bd   co2_seasonal_MLO     d13c_level_SPO 
+            -2.772             -2.185             -1.745             56.506 
+    d13c_level_MLO       d13c_icecore   co2_seasonal_SPO      d13c_gradient 
+            63.717             66.635             67.729            105.771 
+ d13c_seasonal_MLO  d13c_seasonal_SPO 
+           208.023            248.032 
+
+GATE 5: the streams sum to the likelihood half of the logpost
+-------------------------------------------------------------
+sum(streams) -1130.060339 ; logpost -1164.815380 ; implied prior+jacobian -34.755041 ; recomputed prior+jacobian -34.755039 ; gap -1.780e-06 (tol 1e-05)
+
+the h_ml KINK MAP -- derived from the shape function, not typed
+---------------------------------------------------------------
+0 kink(s) in [42.5, 200] -- as expected post-C1-remap
+
+writing the mode file
+---------------------
+wrote /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261007_obj17_hilda_csl3v0kaidgbemw/mode_fit_pumpN.rds
+
+⛔ ADOPTS NOTHING. CCX_MODE_CANONICAL is still 'hilda33p'.
+   Next: recompute_hessian.R --update, then the repoint.

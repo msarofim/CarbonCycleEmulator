@@ -1,0 +1,36 @@
+CCX_PROJ_DIR  /Users/MarcusMarcus/ccx_frozen/20261006x_obj17
+CCX_MS_OUTDIR /Users/MarcusMarcus/ccx_frozen/20261006x_obj17/calibration/output/multistart_20261006o_hilda_csl3v0kaidgbemw_seasml1_pin_obj17_sd1.0452
+CCX_MS_STRUCT hilda_csl3v0kaidgbemw   CCX_MS_SEAS_ML 1   CCX_MS_PUMP_FIELD solved   CCX_MS_SPREAD 1.0452   CCX_MS_PIN 'ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.0800000000000001,w_vent=0,gamma_vent=0,w_thc=0,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0,npp_tsens=0,lag_enso_land=5.8432437811315161,gamma_enso_land_NH=0.66071085740286073,gamma_enso_land_SH=0.63322088075695704,w_enso_l2=14.726151317112601'
+BUDGET 300 min on the cpu clock  RESTARTS 3  CYCLES 6  MAXIT 6000   mode wave   ids [0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 ]   8 at once
+host MacBook-Pro-2.local  started 2026-10-06T19:26:02-0400  uptime: 19:26  up 5 days,  9:51, 4 users, load averages: 2.27 2.35 2.88
+already running at launch (>20% CPU), so a slow eval rate is read as CONTENTION first:
+    44.8 05-09:44:48 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer -daemon
+    33.8       44:09 /System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XprotectService.xpc/Contents/MacOS/XprotectService
+    23.1    20:11:22 /Applications/Claude.app/Contents/Frameworks/Claude Helper (Renderer).app/Contents/MacOS/Claude Helper (Renderer) --type=renderer --user-data-
+all tasks finished 2026-10-07T06:34:28-0400
+exit codes (id rc):
+0 0
+1 0
+2 0
+3 0
+4 0
+5 0
+6 0
+7 0
+8 0
+9 0
+10 0
+11 0
+12 0
+13 0
+14 0
+15 0
+16 0
+17 0
+18 1
+19 0
+20 0
+21 0
+22 0
+23 0
+non-zero exits: 1

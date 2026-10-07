@@ -1,0 +1,12 @@
+== 1. FINISHED?
+  objective #17 end 2026-10-07T06:34:28-0400 rc 0
+  exit file: 24 lines, 1 non-zero
+  all tasks finished 2026-10-07T06:34:28-0400
+  non-zero exits: 1
+  outdir: 24 start files, 24 checkpoints, 48 entries in all
+== 2. COPY into /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261006o_hilda_csl3v0kaidgbemw_seasml1_pin_obj17_sd1.0452
+== 3. VERIFY byte-identity
+  all identical: the outdir's 48 files, 28 logs (task logs, exit, wave, port targets, pins), 26 preflight files, launch.{sh,out}, port targets
+== 4. RUN_PROVENANCE.txt
+FROZEN_FROM_COMMIT 20a89f8; worktree /Users/MarcusMarcus/ccx_frozen/20261006x_obj17 (the git-ignored data-raw/downloads entries SYMLINKED to the repo's; 14/14 run-time inputs; port targets regenerated there under this pin set = port_targets_hilda_csl3v0kaidgbemw.csv here, cmp-identical to the tree's calibration/torch/port_targets.csv; their log logs/port_targets_20261006o.log); Mac 8-parallel (CCX_MAC_NPAR=8), BUDGET 300 min on the cpu clock RESTARTS 3 CYCLES 6 MAXIT 6000; label hilda_csl3v0kaidgbemw (OBJECTIVE #17, the interannual cut: the low-pass gcb_land_sink row, gcb_ocean_enso_slope moved to the module), seas_ml 1, spread 1.0452, PINS = R/paths.R CCX_MODE_OBJ17_PINS: #16's ten + the module's four at stage 1's values (calibration/output/iav_module_20261006_hilda33p.rds; the launch string is logs/pins_20261006o.txt); the reference-set branch of CHANGELOG 10-06 (o); outdir NAMED (the driver's default would carry the 14 pins, 379 bytes); launched 2026-10-06T19:26:02-0400, finished 2026-10-07T06:34:28-0400 rc 0; 23/24 exit 0 (logs/ccx_multistart_mac_20261006o_exit.txt); 24 start files + 24 checkpoints; launch script logs/launch.sh, chain log logs/launch.out; copied into the repo 2026-10-07 byte-identical (diff -rq on the outdir and the preflight folder, cmp on the 28 logs, launch.{sh,out} and the port targets) by ~/ccx_frozen/20261006o_obj17_land.sh. CHANGELOG 10-06 (o) launch; the landing is the entry that cites this file.
+== DONE. Next: CCX_MS_OUTDIR="/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261006o_hilda_csl3v0kaidgbemw_seasml1_pin_obj17_sd1.0452" Rscript calibration/collect_dispersed_multistart.R | tee "/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261006o_hilda_csl3v0kaidgbemw_seasml1_pin_obj17_sd1.0452/collect_20261007.log"

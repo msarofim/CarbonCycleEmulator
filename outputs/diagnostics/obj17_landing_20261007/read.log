@@ -1,0 +1,98 @@
+calibration/diag_obj17_refit_read.R @1949dff+dirty, 2026-10-07 08:24
+  canonical hilda33p (/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261005_hilda33p_obj16_hilda_csl3v0kaidgbem/mode_fit_pumpN.rds)
+  #17       calibration/output/refit_20261007_obj17_hilda_csl3v0kaidgbemw/mode_fit_pumpN.rds (md5 9612ed72cc9675dd85162e10ca69f38d)
+  wave      calibration/output/multistart_20261006o_hilda_csl3v0kaidgbemw_seasml1_pin_obj17_sd1.0452
+  stage 1   calibration/output/iav_module_20261006_hilda33p.rds
+
+=== 0. EACH VECTOR REPRODUCES ITS STORED LOGPOST IN ITS OWN SPACE (tol 1e-05); THE WAVE ===
+  survey: 24 start files; 18 CONVERGED in time, 6 out of time; best -1164.815378 (id 010)
+  converged logposts in clusters split at gaps > 0.05: -1164.8154 x8 | -1165.2246 x8 | -1198.6838 x1 | -1216.3568 x1
+  promoted: id 10 at -1164.815380
+  canonical hilda33p     logpost -1187.451837 (stored -1187.451837, diff +0.0e+00)  likelihood -1145.0186 on 27 rows
+  objective #17          logpost -1164.815380 (stored -1164.815380, diff +0.0e+00)  likelihood -1130.0603 on 26 rows
+
+=== 1. ON #17's ROWS (the low-pass land row, no slope row): #17 vs REF = hilda33p with its own module values ===
+  co2_seasonal_MLO       REF      4.407 | #17   -6.152
+  co2_seasonal_SPO       REF     72.716 | #17   -4.987
+  co2_icecore            REF   -509.446 | #17   +1.790
+  d13c_seasonal_SPO      REF    249.385 | #17   -1.353
+  d13c_seasonal_MLO      REF    209.294 | #17   -1.271
+  ocean_grad_alk         REF     -5.728 | #17   +0.972
+  d13c_icecore           REF     65.758 | #17   +0.877
+  gcb_ocean_sink         REF     -6.070 | #17   -0.729
+  ocean_grad_d13c        REF     -3.979 | #17   -0.729
+  co2_level_SPO          REF    -63.724 | #17   +0.623
+  d13c_level_SPO         REF     55.990 | #17   +0.517
+  d13c_level_MLO         REF     63.252 | #17   +0.465
+  ocean_grad_dic         REF     -6.925 | #17   -0.429
+  d14c_profile_ab        REF     -3.294 | #17   -0.321
+  hs_surf_d13c           REF     -2.472 | #17   -0.300
+  co2_gradient           REF    -15.362 | #17   +0.287
+  d14c_NH                REF   -288.484 | #17   +0.227
+  co2_level_MLO          REF    -71.349 | #17   +0.183
+  d14c_SH                REF   -287.445 | #17   +0.115
+  d14c_intcal            REF   -640.647 | #17   +0.076
+  gcb_land_sink          REF    -22.270 | #17   +0.049
+  hs_surf_dic            REF     -4.246 | #17   -0.025
+  d14c_profile_level     REF     -3.273 | #17   +0.017
+  excess_c14_ocean       REF     -9.648 | #17   +0.010
+  d13c_gradient          REF    105.763 | #17   +0.009
+  d14c_profile_bd        REF     -2.187 | #17   +0.002
+  TOTAL -10.0768 (REF -1119.9835; #17 -1130.0603). The pricing: B1 -10.861 unrefitted, B2 -10.252 (five land names), of which the seasonal rows -13.25
+
+=== 2. ON #16's ROWS (the full land row and the slope row): #17's vector vs hilda33p's ===
+  gcb_land_sink          canonical    -49.852 | #17  -29.394
+  co2_seasonal_MLO       canonical      4.407 | #17   -6.152
+  co2_seasonal_SPO       canonical     72.716 | #17   -4.987
+  co2_icecore            canonical   -509.446 | #17   +1.790
+  gcb_ocean_enso_slope   canonical      2.547 | #17   -1.670
+  d13c_seasonal_SPO      canonical    249.385 | #17   -1.353
+  d13c_seasonal_MLO      canonical    209.294 | #17   -1.271
+  ocean_grad_alk         canonical     -5.728 | #17   +0.972
+  d13c_icecore           canonical     65.758 | #17   +0.877
+  gcb_ocean_sink         canonical     -6.070 | #17   -0.729
+  ocean_grad_d13c        canonical     -3.979 | #17   -0.729
+  co2_level_SPO          canonical    -63.724 | #17   +0.623
+  TOTAL -41.1903 on #16's 27 rows (the preview's raw-row land + ocean B2: -39.2)
+
+=== 3. THE MODULE's likelihood (the detrended monthly growth + the slope row), each on its own vector ===
+  hilda33p: SSR 109.9747, slope row +2.5472, growth r 0.5858
+  #17:      SSR 89.8059, slope row +0.8771, growth r 0.6796 -> module +0.6132 (stage 1 at hilda33p's other names: +2.5622)
+
+=== 4. THE PRIOR LEDGER (common names) and THE MOVES in hilda33p's marginal Laplace sd ===
+  the common names' priors +0.7120, Jacobians +0.1446; the module's own terms at hilda33p (absent under #17) -6.8215
+  h_ml                       49.611 ->       58.026   +2.80 sd
+  pump_grad                  328.19 ->       293.97   -0.96 sd
+  luc_scale                 0.90026 ->      0.92267   +0.69 sd
+  q10                        1.0617 ->       1.0771   +0.63 sd
+  imb_share_land            0.61072 ->      0.67713   +0.62 sd
+  k_w                        1894.7 ->       1865.3   -0.55 sd
+  seas_lag_p_NH              1.5244 ->       1.5527   +0.53 sd
+  hs_asx_frac               0.69644 ->      0.73785   +0.51 sd
+  u_hs                       23.422 ->       21.407   -0.51 sd
+  npp_frac_NH               0.57412 ->      0.58256   +0.42 sd
+  imb_share_ocean_rest      0.28664 ->      0.35301   +0.34 sd
+  kz                          14475 ->        14786   +0.28 sd
+  beta_max                   2.0768 ->       2.0966   +0.06 sd
+  fert_k                     752.14 ->        714.4   -0.26 sd
+  ndep_ret                   12.833 ->        11.78   -0.23 sd
+  lag_enso_land              2.6057 ->       5.8432  (PINNED at stage 1's;  +2.60 of stage 1's own sd 1.247)
+  gamma_enso_land_NH        0.50777 ->      0.66071  (PINNED at stage 1's;  +1.02 of stage 1's own sd 0.1493)
+  gamma_enso_land_SH        0.48664 ->      0.63322  (PINNED at stage 1's;  +1.02 of stage 1's own sd 0.1431)
+  w_enso_l2                  13.183 ->       14.726  (PINNED at stage 1's;  +1.21 of stage 1's own sd 1.278)
+
+=== 5. THE FUTURES: CO2 (ppm) in 2300 (br_futures()) ===
+  canonical  ssp585  1461.53 (  +0.00) | vvH  1010.03 (  +0.00)
+  b1         ssp585  1461.52 (  -0.00) | vvH  1010.03 (  -0.00)
+  obj17      ssp585  1460.39 (  -1.14) | vvH  1008.93 (  -1.10)
+  the pricing at B2: ssp585 -3.53, vvH -1.78
+
+=== 6. THE LAND's NET CLIMATE EFFECT, 2015-2024 (TRENDY S2 - S1), GtC/yr ===
+  canonical  net climate effect -0.0378, z +1.09 against GCB 2025's -0.8 +/- 0.7
+  obj17      net climate effect -0.0480, z +1.07 against GCB 2025's -0.8 +/- 0.7
+
+=== THE SEPARATE DRIVERS (run from a frozen copy; each writes its own log) ===
+  THE ONE-PASS CHECK (RULED): Rscript calibration/fit_iav_module.R --base=calibration/output/refit_20261007_obj17_hilda_csl3v0kaidgbemw/mode_fit_pumpN.rds --check=calibration/output/iav_module_20261006_hilda33p.rds
+  CCX_OC_MODE="obj17=calibration/output/refit_20261007_obj17_hilda_csl3v0kaidgbemw/mode_fit_pumpN.rds" Rscript calibration/diag_ocean_climate_gobm.R
+  CCX_SC_EXTRA_MODE="obj17=calibration/output/refit_20261007_obj17_hilda_csl3v0kaidgbemw/mode_fit_pumpN.rds" CCX_SC_TAG_SUFFIX=_obj17 Rscript calibration/diag_whole_model_scorecard.R
+saved outputs/diagnostics/obj17_refit_read_20261007.{log,rds}

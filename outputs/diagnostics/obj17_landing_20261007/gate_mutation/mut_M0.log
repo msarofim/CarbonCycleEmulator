@@ -1,0 +1,7 @@
+calibration/fit_iav_module.R @1949dff+dirty, 2026-10-07 08:51 | base refit_20261007_obj17_hilda_csl3v0kaidgbemw (hilda_csl3v0kaidgbemw) | 6 workers
+ratio hilda33p (md5 525404989a20ece51ec8bd088c7d4638): gamma_enso_land_NH / gamma_enso_land_SH = 0.5077686 / 0.4866420, NH : SH = 1.0434; base's own: L 5.8432, s 1.30120 (SH's 1.30120), w 14.7262, gamma_diff 0.25
+growth product mbl_global_growth_monthly.rds (sha256 ab0bae11a89f...); window 1980-2024, trend df 5, n_eff 22.5388
+
+=== 0. GATES ===
+  the base's 26 stored rows through the dg path: max |diff| 1.7e-06 (tol 1e-05)
+MUTATION HARNESS: GATE PASSED

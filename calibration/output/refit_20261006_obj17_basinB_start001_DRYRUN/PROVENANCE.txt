@@ -1,0 +1,12 @@
+BASIN B of objective #17's stage 2 (label hilda_csl3v0kaidgbemw, CCX_MODE_OBJ17_PINS), kept in the repo 2026-10-07 because the
+landing's basin read needs it and its only copy was in a frozen tree marked removable (CHANGELOG 2026-10-07 a).
+- WHAT: the landing DRY RUN's promoted file (CHANGELOG 2026-10-06 p), copied byte-identical (cmp) from
+  ~/ccx_frozen/20261006o_obj17_dryrun/calibration/output/DRYRUN_refit_obj17/ (that tree at 0a4e89f).
+- FROM: start_001 (the incumbent seed, basin B, logpost -1165.224582), promoted by promote_multistart_mode.R
+  --name=obj17_hilda_csl3v0kaidgbemw_DRYRUN from a scratch copy that is cmp-identical to the landed
+  calibration/output/multistart_20261006o_hilda_csl3v0kaidgbemw_seasml1_pin_obj17_sd1.0452/start_001.rds; Hessian by
+  recompute_hessian.R --update at nice 19 (condition 2.913e+05; h_ml UNSTABLE, fallback step). Logs:
+  outputs/diagnostics/obj17_dryrun_20261006/.
+- B's best converged starts (ids 2 / 4 / 5, -1165.224579) lie 3e-6 above start_001: inside the objective's measured
+  ~1e-6 noise floor, the same point for every purpose here.
+- ⛔ NOT a canonical and NOT the landing's promotion (that is refit_20261007_obj17_hilda_csl3v0kaidgbemw/, id 10, basin A).
