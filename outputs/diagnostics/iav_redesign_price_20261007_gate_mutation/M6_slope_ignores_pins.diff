@@ -1,0 +1,4 @@
+406c406
+<   V <- set_names(with_index(VB_B, index), pins[CCX_IAV_MODULE_NAMES]); if (length(vals)) V <- set_names(V, vals)
+---
+>   V <- set_names(with_index(VB_B, index), P0[CCX_IAV_MODULE_NAMES]); if (length(vals)) V <- set_names(V, vals)

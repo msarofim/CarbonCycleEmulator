@@ -1,0 +1,7 @@
+driver /Users/MarcusMarcus/ccx_frozen/20261007c_redesign_price/diag_iav_redesign_price.R (md5 f5beb202426d77a66a24fe8c9668bc8e), 2026-10-07 11:30
+M1_wrapper_adds_nothing: FAILS AS IT SHOULD (rc 1, stopped at: the emulated low-pass ocean row is not the priced one)
+M2_objective_ignores_index: FAILS AS IT SHOULD (rc 1, stopped at: the objective path and the dg path disagree under the switched index)
+M3_trend_reads_wrong_index: FAILS AS IT SHOULD (rc 1, stopped at: the shipped index's trend is not the recorded one)
+M4_stage1_never_switches: FAILS AS IT SHOULD (rc 1, stopped at: does not carry the 'detrend' index)
+M5_resistance_wrong_pins: FAILS AS IT SHOULD (rc 1, stopped at: the resistance does not reproduce the stored prices)
+M6_slope_ignores_pins: FAILS AS IT SHOULD (rc 1, stopped at: the ENSO ocean slope does not reproduce the iterate price's)

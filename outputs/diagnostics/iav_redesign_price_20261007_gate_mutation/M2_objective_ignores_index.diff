@@ -1,0 +1,4 @@
+156c156
+<   if (index != RP_SHIPPED) bp$enso_index <- CCX_ENSO_INDEX_CODES[[index]]
+---
+>   if (index != RP_SHIPPED) bp$enso_index <- NULL; if (FALSE)

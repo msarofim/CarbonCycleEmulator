@@ -1,0 +1,4 @@
+204c204
+< TR <- rbind(shipped = tr_of(RP_SHIPPED), redesign = tr_of(RP_INDEX))
+---
+> TR <- rbind(shipped = tr_of(RP_INDEX), redesign = tr_of(RP_INDEX))

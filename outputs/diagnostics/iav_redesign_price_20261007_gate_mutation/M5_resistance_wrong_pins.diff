@@ -1,0 +1,4 @@
+373c373
+< S <- list(shipped = list(P0 = REF, P1 = score(P1, RP_SHIPPED), P1d = score(P1d, RP_SHIPPED)),
+---
+> S <- list(shipped = list(P0 = REF, P1 = score(P1d, RP_SHIPPED), P1d = score(P1d, RP_SHIPPED)),

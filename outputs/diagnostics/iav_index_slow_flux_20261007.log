@@ -1,0 +1,21 @@
+calibration/diag_iav_index_slow_flux.R @6f43a17, 2026-10-07 11:29 | basin B calibration/output/refit_20261006_obj17_basinB_start001_DRYRUN/mode_fit_pumpN.rds (md5 081eb16f4fe718692004fb1cf9645891)
+GATE: the shipped run as fitted reproduces B's stored rows through dg_streams(): max |diff| 1.0e-10 (tol 1e-05)
+B's land ENSO pair gamma_enso_land_NH 0.66071, gamma_enso_land_SH 0.63322, lag 5.8432 months; w_enso_l2 14.7262
+
+SHIPPED minus DETRENDED: the calendar-year fluxes (GtC/yr, positive = more UPTAKE under the shipped index), decadal means
+                  1950s  1960s  1970s  1980s  1990s  2000s  2010s  2020s
+all: land         0.117  0.011 -0.031 -0.057 -0.073 -0.086 -0.094 -0.100
+all: ocean       -0.084 -0.022  0.009  0.030  0.044  0.056  0.062  0.069
+limb only: land   0.014  0.008  0.002 -0.003 -0.007 -0.009 -0.011 -0.012
+limb only: ocean -0.045 -0.006  0.010  0.019  0.026  0.032  0.034  0.040
+land term: land   0.103  0.002 -0.033 -0.053 -0.067 -0.076 -0.084 -0.089
+land term: ocean -0.039 -0.016 -0.001  0.010  0.018  0.024  0.027  0.029
+
+SHIPPED minus DETRENDED: global CO2 (ppm), annual mean
+            1960   1990   2024
+all       -0.312 -0.021  0.476
+limb_only  0.221  0.072 -0.292
+land_term -0.533 -0.093  0.769
+
+saved outputs/diagnostics/iav_index_slow_flux_20261007.{log,rds}
+⛔ ADOPTS NOTHING.

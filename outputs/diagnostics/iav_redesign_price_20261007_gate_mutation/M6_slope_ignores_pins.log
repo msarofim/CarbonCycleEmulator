@@ -1,0 +1,148 @@
+calibration/diag_iav_redesign_price.R @6f43a17, 2026-10-07 11:32 | basin B calibration/output/refit_20261006_obj17_basinB_start001_DRYRUN/mode_fit_pumpN.rds | the redesign: ENSO index 'detrend' + gcb_ocean_sink low-pass (df 6, sd 0.4) | 2 workers | ⚠ SMOKE: tiny budgets, NOT A RESULT
+basin B: struct hilda_csl3v0kaidgbemw, stored logpost -1165.224582; module pins P0 lag_enso_land 5.8432, gamma_enso_land_NH 0.6607, gamma_enso_land_SH 0.6332, w_enso_l2 14.7262
+  P1 (the one-pass check at B, outputs/diagnostics/obj17_dryrun_20261006/iav_module_check_DRYRUN.rds): 5.8554, 0.6576, 0.6302, 16.7050
+
+=== 0. GATES ===
+  B under its own label, the shipped index, the wrapper OFF: logpost -1165.224582 vs stored -1165.224582 (+0.0e+00); rows max |diff| 0.0e+00
+  the wrapper ON: the other 25 rows identical() to OFF: TRUE; the full ocean row identical(): TRUE
+  the low-pass ocean row -1.977390 vs diag_obj17_lowpass_ocean_price.R's -1.977390 (+0.0e+00); its high part's cost 4.514590 vs 4.514590 (+0.0e+00)
+  the ENSO index over 1959-2024: shipped trend +0.008308 K/yr, mean +0.0421 K | detrend trend +0.000124 K/yr, mean -0.0029 K
+  the objective under 'detrend' vs diag_obj17_resistance_split.R's detrend run (dg path), P0 and P1: the five rows max |diff| 1.9e-12; the ocean's high-part cost 0.0e+00
+
+=== 1. THE INDEX SWITCH AT B, module at P0: B1 unrefitted; B2 beta_max, fert_k, luc_scale, imb_share_land, ndep_ret re-optimised; B3 + pump_grad, kz ===
+  B1 likelihood: -12.3424 on the redesign's rows (ocean low-pass) | -12.3393 on #17's rows (ocean year by year)
+  per row (redesign's rows):
+   gcb_ocean_sink     co2_level_MLO     co2_level_SPO  co2_seasonal_MLO 
+           -1.768            -7.168            -1.960             0.328 
+ co2_seasonal_SPO    d13c_level_MLO     gcb_land_sink    d13c_level_SPO 
+           -0.019             5.933            -2.839            -2.405 
+     d13c_icecore       co2_icecore           d14c_SH           d14c_NH 
+           -1.998            -0.496             0.133            -0.116 
+d13c_seasonal_MLO 
+            0.050 
+  B2 (the five land names)           1 round(s), 0.2 min, max whitened slope 2.356 -> 0.794 (converged < 0.1: FALSE)
+  B3 (B2's five + the ocean pair)    1 round(s), 0.3 min, max whitened slope 2.356 -> 0.822 (converged < 0.1: FALSE)
+  B2 likelihood: -7.6877 on the redesign's rows | -7.6871 on #17's rows; prior part +0.4612
+    the block: beta_max 2.0014 (B 2.1002); fert_k 692.07 (B 717.76); luc_scale 0.90309 (B 0.92102); imb_share_land 0.66924 (B 0.67932); ndep_ret 10.499 (B 11.859)
+    per row (the redesign's rows):
+  gcb_ocean_sink    co2_level_MLO    co2_level_SPO co2_seasonal_MLO 
+          -1.238           -0.191           -0.776            0.454 
+co2_seasonal_SPO      co2_icecore     d13c_icecore   d13c_level_MLO 
+           0.004           -4.128           -3.378            1.783 
+         d14c_NH          d14c_SH    gcb_land_sink     co2_gradient 
+          -0.616            0.597           -0.414            0.411 
+  d13c_level_SPO 
+          -0.094 
+    of which the seasonal rows +0.454, the CO2 level rows -0.967, the two GCB rows -1.652, the ice cores -7.506
+  B3 likelihood: -7.5842 on the redesign's rows | -7.6468 on #17's rows; prior part +0.3658
+    the block: beta_max 2.0051 (B 2.1002); fert_k 696.94 (B 717.76); luc_scale 0.90129 (B 0.92102); imb_share_land 0.6665 (B 0.67932); ndep_ret 10.595 (B 11.859); pump_grad 301.42 (B 296.48); kz 14903 (B 14924)
+    per row (the redesign's rows):
+  gcb_ocean_sink    co2_level_MLO    co2_level_SPO co2_seasonal_MLO 
+          -1.266           -0.057           -0.812            0.435 
+co2_seasonal_SPO      co2_icecore     d13c_icecore   d13c_level_MLO 
+           0.178           -4.188           -3.406            2.051 
+         d14c_NH          d14c_SH     co2_gradient    gcb_land_sink 
+          -0.656            0.566            0.413           -0.353 
+  d13c_level_SPO 
+          -0.344 
+    of which the seasonal rows +0.555, the CO2 level rows -0.869, the two GCB rows -1.619, the ice cores -7.594
+
+=== 2. STAGE 1 UNDER THE DETRENDED INDEX: the mirror of fit_iav_module.R, at B and at hilda33p ===
+
+  --- CONTROL hilda33p, shipped: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261005_hilda33p_obj16_hilda_csl3v0kaidgbem/mode_fit_pumpN.rds under 'demean' ---
+  GATE 0 on the base AS STORED (before the switch): its 27 rows through the dg path, max |diff| 2.7e-10 (tol 1e-05)
+  basin scan: L 6.00, s 1.270 (superposition rms 5.4e-06 of 0.349); Nelder-Mead 10 evaluations, convergence 1
+  OPTIMUM: L 6.0000 months, s 1.26956, w 14.5010 | module loglik +2.5205 vs the base (SSR 109.9747 -> 89.6700; growth r 0.5858 -> 0.6832; slope row +2.5472 -> +2.7674)
+  the lag: 1-sigma 4.54-7.00, 2-sigma 4.00-7.00 months (⚠ 2-sigma reaches the grid's end: a bound); Laplace 1-sigma L 1.413, s 0.2948, w 1.270 (eigenvalues -0.413/-0.841/-11.6); growth peak +6 months (record +5) | 0.1 min
+
+  --- CONTROL basin B, shipped: calibration/output/refit_20261006_obj17_basinB_start001_DRYRUN/mode_fit_pumpN.rds under 'demean' ---
+  GATE 0 on the base AS STORED (before the switch): its 26 rows through the dg path, max |diff| 1.0e-10 (tol 1e-05)
+  basin scan: L 6.00, s 1.262 (superposition rms 5.4e-06 of 0.350); Nelder-Mead 10 evaluations, convergence 1
+  OPTIMUM: L 6.0000 months, s 1.26237, w 16.1988 | module loglik +0.9230 vs the base (SSR 89.6655 -> 89.2426; growth r 0.6806 -> 0.6848; slope row +1.8519 -> +2.7216)
+  the lag: 1-sigma 4.46-7.00, 2-sigma 4.00-7.00 months (⚠ 2-sigma reaches the grid's end: a bound); Laplace 1-sigma L 1.420, s 0.2942, w 1.471 (eigenvalues -0.359/-0.714/-11.6); growth peak +6 months (record +5) | 0.1 min
+
+  --- hilda33p, detrended: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261005_hilda33p_obj16_hilda_csl3v0kaidgbem/mode_fit_pumpN.rds under 'detrend' ---
+  GATE 0 on the base AS STORED (before the switch): its 27 rows through the dg path, max |diff| 2.7e-10 (tol 1e-05)
+  basin scan: L 6.00, s 1.270 (superposition rms 2.8e-06 of 0.349); Nelder-Mead 10 evaluations, convergence 1
+  OPTIMUM: L 6.0000 months, s 1.26990, w 14.5010 | module loglik +2.5125 vs the base (SSR 110.0603 -> 89.8392; growth r 0.5853 -> 0.6824; slope row +2.5458 -> +2.7706)
+  the lag: 1-sigma 4.55-7.00, 2-sigma 4.00-7.00 months (⚠ 2-sigma reaches the grid's end: a bound); Laplace 1-sigma L 1.415, s 0.2951, w 1.242 (eigenvalues -0.418/-0.868/-11.5); growth peak +6 months (record +5) | 0.1 min
+
+  --- basin B, detrended: calibration/output/refit_20261006_obj17_basinB_start001_DRYRUN/mode_fit_pumpN.rds under 'detrend' ---
+  GATE 0 on the base AS STORED (before the switch): its 26 rows through the dg path, max |diff| 1.0e-10 (tol 1e-05)
+  basin scan: L 6.00, s 1.264 (superposition rms 2.8e-06 of 0.350); Nelder-Mead 10 evaluations, convergence 1
+  OPTIMUM: L 6.0000 months, s 1.26412, w 16.1988 | module loglik +0.9011 vs the base (SSR 89.8258 -> 89.5062; growth r 0.6799 -> 0.6837; slope row +1.8779 -> +2.7388)
+  the lag: 1-sigma 4.47-7.00, 2-sigma 4.00-7.00 months (⚠ 2-sigma reaches the grid's end: a bound); Laplace 1-sigma L 1.418, s 0.2947, w 1.433 (eigenvalues -0.371/-0.73/-11.6); growth peak +6 months (record +5) | 0.1 min
+Warning messages:
+1: In stage1(ccx_mode_file(RP_CANON), RP_SHIPPED, "CONTROL hilda33p, shipped") :
+  CONTROL hilda33p, shipped: the lag's steps straddle a whole month (the stencil's kink): the L curvature mixes two segments
+2: In stage1(RP_MODE_B, RP_SHIPPED, "CONTROL basin B, shipped") :
+  CONTROL basin B, shipped: the lag's steps straddle a whole month (the stencil's kink): the L curvature mixes two segments
+3: In stage1(ccx_mode_file(RP_CANON), RP_INDEX, "hilda33p, detrended") :
+  hilda33p, detrended: the lag's steps straddle a whole month (the stencil's kink): the L curvature mixes two segments
+4: In stage1(RP_MODE_B, RP_INDEX, "basin B, detrended") :
+  basin B, detrended: the lag's steps straddle a whole month (the stencil's kink): the L curvature mixes two segments
+
+  CONTROL: the mirror under the shipped index vs the stored stage-1 runs, in #17's stage-1 sigma:
+          L      s      w
+canon 0.126 -0.108 -0.176
+B     0.116 -0.111 -0.396
+  (stored: hilda33p calibration/output/iav_module_20261006_hilda33p.rds @edc0cd0; basin B outputs/diagnostics/obj17_dryrun_20261006/iav_module_check_DRYRUN.rds @0a4e89f+dirty)
+
+  THE INDEX SWITCH's MOVE on stage 1 (detrended - shipped, same base), in #17's stage-1 sigma:
+                                 L      s     w
+hilda33p                     0.000  0.001 0.000
+basin_B                      0.000  0.006 0.000
+B detrended vs #17's stage 1 0.126 -0.126 1.152
+              L      s       w L_1sig_lo L_1sig_hi   sd_L   sd_s   sd_w
+canon_shipped 6 1.2696 14.5010      4.54         7 1.4135 0.2948 1.2696
+B_shipped     6 1.2624 16.1988      4.46         7 1.4204 0.2942 1.4713
+canon_detrend 6 1.2699 14.5010      4.55         7 1.4146 0.2951 1.2423
+B_detrend     6 1.2641 16.1988      4.47         7 1.4178 0.2947 1.4333
+
+=== 3. THE RESISTANCE TO THE MODULE's MOVE, on the WHOLE main objective at B, unrefitted ===
+  GATES (P0 -> P1): shipped, year by year, vs diag_obj17_iterate_price.R: rows max |diff| 0.0e+00, total +2.2e-13; shipped, low-pass total vs diag_obj17_lowpass_ocean_price.R +2.2e-13;
+    detrended, the five rows vs diag_obj17_resistance_split.R 8.9e-13, its low-pass ocean change +0.0e+00
+
+  P0 -> P1 (the one-pass check at B, shipped index): lag_enso_land 5.8432 -> 5.8554, gamma_enso_land_NH 0.6607 -> 0.6576, gamma_enso_land_SH 0.6332 -> 0.6302, w_enso_l2 14.7262 -> 16.7050
+  row                    shipped/yby    shipped/lp   detrend/yby      REDESIGN
+  gcb_ocean_sink             -0.4459       +0.1079       -0.5234       +0.0367
+  co2_level_MLO              -0.3837       -0.3837       +0.1332       +0.1332
+  co2_level_SPO              -0.1989       -0.1989       -0.0074       -0.0074
+  co2_seasonal_MLO           -0.1237       -0.1237       -0.1397       -0.1397
+  co2_seasonal_SPO           -0.1541       -0.1541       -0.1666       -0.1666
+  d14c_NH                    +0.1139       +0.1139       +0.0488       +0.0488
+  d14c_SH                    -0.0109       -0.0109       +0.0388       +0.0388
+  gcb_land_sink              +0.0004       +0.0004       -0.0238       -0.0238
+  d13c_icecore               -0.0093       -0.0093       -0.0171       -0.0171
+  ocean_grad_d13c            -0.0146       -0.0146       -0.0167       -0.0167
+  d13c_level_MLO             -0.0098       -0.0098       +0.0114       +0.0114
+  d13c_seasonal_MLO          -0.0098       -0.0098       -0.0103       -0.0103
+  ocean_grad_dic             +0.0082       +0.0082       +0.0089       +0.0089
+  the five                   -1.3063       -0.7525       -0.7039       -0.1438
+  the other rows             +0.0118       +0.0118       +0.0422       +0.0422
+  ALL                        -1.2945       -0.7407       -0.6617       -0.1016   (the WHOLE main objective)
+
+  P0 -> P1d (item 2's stage 1 at B, detrended): lag_enso_land 5.8432 -> 6.0000, gamma_enso_land_NH 0.6607 -> 0.6419, gamma_enso_land_SH 0.6332 -> 0.6152, w_enso_l2 14.7262 -> 16.1988
+  row                    shipped/yby    shipped/lp   detrend/yby      REDESIGN
+  gcb_ocean_sink             -0.2473       +0.0672       -0.2863       +0.0300
+  co2_level_MLO              -0.4996       -0.4996       +0.1150       +0.1150
+  co2_level_SPO              -0.1861       -0.1861       -0.0070       -0.0070
+  co2_seasonal_MLO           -0.4129       -0.4129       -0.4384       -0.4384
+  co2_seasonal_SPO           -0.6067       -0.6067       -0.6182       -0.6182
+  gcb_land_sink              -0.1041       -0.1041       -0.0778       -0.0778
+  d13c_seasonal_MLO          -0.0628       -0.0628       -0.0645       -0.0645
+  d13c_icecore               -0.0877       -0.0877       -0.0621       -0.0621
+  d13c_seasonal_SPO          -0.0515       -0.0515       -0.0520       -0.0520
+  d14c_NH                    +0.0925       +0.0925       +0.0346       +0.0346
+  d14c_SH                    -0.0133       -0.0133       +0.0299       +0.0299
+  d13c_level_SPO             -0.0874       -0.0874       -0.0217       -0.0217
+  ocean_grad_d13c            -0.0087       -0.0087       -0.0107       -0.0107
+  the five                   -1.9525       -1.6381       -1.2348       -0.9185
+  the other rows             -0.2289       -0.2289       -0.2171       -0.2171
+  ALL                        -2.1814       -1.8670       -1.4519       -1.1356   (the WHOLE main objective)
+
+=== 3b. THE RATCHET TEST: re-optimise the ocean pair at P0 and at P1 -- does a higher w push it further? ===
+  (the pair: pump_grad, kz; #17's own stage 2 moved pump_grad -0.88 hilda33p-sd at B, which is why the check wanted w higher)
+  GATE: the slope at B (shipped) vs diag_obj17_iterate_price.R, P0 +0.0e+00, P1 -3.5e-02 (tol 1e-06)
+Error: the ENSO ocean slope does not reproduce the iterate price's
+Execution halted

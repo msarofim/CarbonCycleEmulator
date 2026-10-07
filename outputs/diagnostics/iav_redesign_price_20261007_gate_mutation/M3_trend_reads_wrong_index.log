@@ -1,0 +1,11 @@
+calibration/diag_iav_redesign_price.R @6f43a17, 2026-10-07 11:30 | basin B calibration/output/refit_20261006_obj17_basinB_start001_DRYRUN/mode_fit_pumpN.rds | the redesign: ENSO index 'detrend' + gcb_ocean_sink low-pass (df 6, sd 0.4) | 2 workers | ⚠ SMOKE: tiny budgets, NOT A RESULT
+basin B: struct hilda_csl3v0kaidgbemw, stored logpost -1165.224582; module pins P0 lag_enso_land 5.8432, gamma_enso_land_NH 0.6607, gamma_enso_land_SH 0.6332, w_enso_l2 14.7262
+  P1 (the one-pass check at B, outputs/diagnostics/obj17_dryrun_20261006/iav_module_check_DRYRUN.rds): 5.8554, 0.6576, 0.6302, 16.7050
+
+=== 0. GATES ===
+  B under its own label, the shipped index, the wrapper OFF: logpost -1165.224582 vs stored -1165.224582 (+0.0e+00); rows max |diff| 0.0e+00
+  the wrapper ON: the other 25 rows identical() to OFF: TRUE; the full ocean row identical(): TRUE
+  the low-pass ocean row -1.977390 vs diag_obj17_lowpass_ocean_price.R's -1.977390 (+0.0e+00); its high part's cost 4.514590 vs 4.514590 (+0.0e+00)
+  the ENSO index over 1959-2024: shipped trend +0.000124 K/yr, mean -0.0029 K | detrend trend +0.000124 K/yr, mean -0.0029 K
+Error: the shipped index's trend is not the recorded one
+Execution halted

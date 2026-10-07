@@ -1,0 +1,4 @@
+278c278
+<   VS <- with_index(VB, index)
+---
+>   VS <- VB

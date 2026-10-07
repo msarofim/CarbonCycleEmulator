@@ -1,0 +1,4 @@
+126c126
+<   st[[RP_OCEAN_ROW]] <- full + hc
+---
+>   st[[RP_OCEAN_ROW]] <- full + 0 * hc
