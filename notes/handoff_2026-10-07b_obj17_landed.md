@@ -1,5 +1,8 @@
 # HANDOFF 2026-10-07b — OBJECTIVE #17 LANDED AND READ; NEXT: PRICE A REDESIGNED CUT
 
+> ⛔ **SUPERSEDED by `notes/handoff_2026-10-07c_obj18_build.md`.** The pricing below RAN on 2026-10-07 (CHANGELOG
+> 10-07 d, e) and Marcus ruled the build (10-07 f): objective #18 `hilda_csl3v0kaidgbemwt`. Read the new note, not this one.
+
 **Supersedes** `notes/handoff_2026-10-07_obj17_finished.md`, which now points here.
 - Written on Marcus's ruling, verbatim: "Handoff now, continue fresh (Recommended)".
 - The next step is ruled too, verbatim: "Price a redesigned cut (Recommended)". §3 below.

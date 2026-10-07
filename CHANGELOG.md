@@ -2,6 +2,13 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-07 (g) — Handoff: `notes/handoff_2026-10-07c_obj18_build.md` (Marcus: "Handoff now, build fresh (Recommended)"). It supersedes `handoff_2026-10-07b_obj17_landed.md`, which now points to it. It carries #18's build list with its parity targets, read from the pricing's rds.
+
+- **The frozen trees, RULED "Remove both (Recommended)":** `~/ccx_frozen/20261007c_redesign_price` and `~/ccx_frozen/suite_20261007_a6cf879`.
+  - The first's eight files are cmp-identical to the repo (five drivers, three stdout logs).
+  - The second, a detached worktree at `a6cf879`, had no tracked changes. Of its 76 ignored entries, 75 are identical in the repo (the `data-raw/downloads` copies the suite needed); the 76th is `tests/testthat/Rplots.pdf`, a test-run plotting byproduct.
+  - Both were MOVED to the macOS Trash (reversible; emptying it is Marcus's), and the worktree record was pruned.
+
 ## 2026-10-07 (f) — **RULED: BUILD THE FULL REDESIGN as objective #18, `hilda_csl3v0kaidgbemwt`** (AskUserQuestion on the (d)/(e) price). Nothing built yet.
 
 - **Rulings, verbatim:**
