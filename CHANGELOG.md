@@ -325,7 +325,7 @@ Project log: what was done, what was tried and abandoned, and why.
 | step | result |
 |---|---|
 | land | the outdir's 48 files, 28 logs, 26 preflight files, launch.{sh,out} and the port targets: byte-identical; `RUN_PROVENANCE.txt` written; the id-18 statement appended (relative gap 1.578e-8 against `MS_EVAL_TOL` 1e-8) |
-| collect | 18 of 23 live starts converged into 4 basins: **A −1164.8154 ×8** (ids 10, 17, 15, 9, 8, 0, 14, 13), **B −1165.2246 ×8**, id 6 −1198.68, id 23 −1216.36; 5 out of time; id 18 excluded (dead) |
+| collect | 18 of 23 live starts converged into 4 basins: **A −1164.8154 ×8** (ids 10, 17, 15, 9, 8, 0, 14, 13), **B −1165.2246 ×8** (⚠ 5 DISTINCT: ids 3 / 4 / 5 re-ran 1 / 2 / 2 bit for bit; CORRECTED 10-07 k), id 6 −1198.68, id 23 −1216.36; 5 out of time; id 18 excluded (dead) |
 | promote | **id 10**; GATES 1–5 pass; GATE 4 diff −1.78e-6 and **GATE 5 gap −1.78e-6** (the dry run's 2e-14 was luck: below); 0 kinks |
 | Hessian (`--update`, `nice 10`) | −H positive-definite, **condition 2.904e5** (B 2.913e5). ⚠ **`h_ml` UNSTABLE at both basins** (eps/3 vs 3 eps: 17 % at A, 376 % at B; no plateau, the fallback step), where hilda33p's was stable. Widest u-directions: `kz_deep_frac` 1.00, `imb_share_ocean_rest` 0.95, `h_hs` 0.56, `imb_share_land` 0.51, `beta_max` 0.49. \|r\| > 0.8: `k_w`–`hs_asx_frac` −0.82, `npp_frac_NH`–`seas_lag_p_NH` +0.81 |
 
@@ -398,11 +398,11 @@ Project log: what was done, what was tried and abandoned, and why.
   - **`w_enso_l2`**: accept the one pass, iterate (priced above), or redesign (e.g. the low-pass ocean row, after its test);
   - the cut posterior, the app copy and `gamma_diff`'s future stay as in the handoff.
 
-## 2026-10-06 (q) — **STAGE 2 FINISHED (2026-10-07 06:34 EDT, rc 0): 18 of 24 converged, into TWO basins. A at −1164.8154 (eight cold starts; best id 10) beats B at −1165.2246 (eight starts, the incumbent seed among them) by 0.41. They differ mainly in `h_ml`, 58.0 m vs 49.9 m (the known near-degeneracy).** Not landed and not read yet. Marcus, verbatim: "write the handoff and run everything in the next session". Handoff: `notes/handoff_2026-10-07_obj17_finished.md`, which supersedes 10-06d (that note now points to it).
+## 2026-10-06 (q) — **STAGE 2 FINISHED (2026-10-07 06:34 EDT, rc 0): 18 of 24 converged, into TWO basins. A at −1164.8154 (eight cold starts; best id 10) beats B at −1165.2246 (eight starts, the incumbent seed among them; ⚠ five DISTINCT, CORRECTED 10-07 k) by 0.41. They differ mainly in `h_ml`, 58.0 m vs 49.9 m (the known near-degeneracy).** Not landed and not read yet. Marcus, verbatim: "write the handoff and run everything in the next session". Handoff: `notes/handoff_2026-10-07_obj17_finished.md`, which supersedes 10-06d (that note now points to it).
 
 - **The survey** (the 24 start files, read-only; NOT the read):
   - basin A, −1164.8154: ids 10, 17, 15, 9, 8, 0, 14, 13, all COLD dispersed starts;
-  - basin B, −1165.2246: the incumbent seed 1, the new-basin seed 2, seeds 3 / 4 / 5, cold 20 / 16 / 7;
+  - basin B, −1165.2246: the incumbent seed 1, the new-basin seed 2, seeds 3 / 4 / 5, cold 20 / 16 / 7 (⚠ CORRECTED 10-07 k: seeds 3 / 4 / 5 re-ran 1 / 2 / 2 bit for bit, their seeds hitting the module's pinned names, so five DISTINCT starts);
   - converged elsewhere: 6 (−1198.68), 23 (−1216.36); out of time: 11, 12, 19, 18, 21, and 22 (a penalty region,
     −1.56e9).
 - **What separates A from B** (hilda33p's marginal sd): `h_ml` 58.03 vs 49.89 m (+2.67); `sst_seas_amp_SH` +0.76;

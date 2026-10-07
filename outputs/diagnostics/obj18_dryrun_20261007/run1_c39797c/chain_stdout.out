@@ -1,0 +1,22 @@
+dry-run tree /Users/MarcusMarcus/ccx_frozen/20261007i_obj18_dryrun at c39797c
+scratch copies of 8 finished start files (start_000.rds start_001.rds start_002.rds start_003.rds start_004.rds start_005.rds start_006.rds start_007.rds )
+objective #18 landing chain (dryrun) at c39797c, 2026-10-07T19:22:16-0400
+== collect  19:22:16
+   rc 0
+== basins  19:22:16
+   rc 0
+   the basins: LP id 0 (best stored logpost), NAT id 0 (best likelihood + prior)
+== promote_lp  19:22:25
+   rc 0
+   promoted: DRYRUN_refit_20261007_obj18_hilda_csl3v0kaidgbemwt = id 000
+== hessian_id000  19:22:34
+   rc 0
+== read_id000  19:43:45
+   rc 0
+== check_id000  19:44:08
+   rc 0
+== ocean_id000  19:47:53
+   rc 0
+== scorecard  19:52:21
+   rc 0
+== CHAIN DONE (dryrun) 19:53:25. Logs: /Users/MarcusMarcus/ccx_frozen/20261007i_obj18_dryrun/DRYRUN_logs

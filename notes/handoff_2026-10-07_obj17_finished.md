@@ -33,7 +33,7 @@
   | basin | logpost | starts (ids) |
   |---|---|---|
   | **A** | **−1164.8154** | 8, all from COLD dispersed starts: 10 (best), 17, 15, 9, 8, 0, 14, 13 |
-  | B | −1165.2246 | 8: the incumbent seed 1, the new-basin seed 2, seeds 3 / 4 / 5, cold 20 / 16 / 7 |
+  | B | −1165.2246 | 8: the incumbent seed 1, the new-basin seed 2, seeds 3 / 4 / 5, cold 20 / 16 / 7 (⚠ 5 DISTINCT: 3 / 4 / 5 re-ran 1 / 2 / 2; CORRECTED 10-07 k) |
 
   - Also converged, local: id 6 −1198.68 and id 23 −1216.36.
   - Out of time: 11 (−1167.44), 12 (−1171.10), 19 (−1223.04), 18 (−1284.94), 21 (−1837.91), 22 (−1.56e9, a penalty
