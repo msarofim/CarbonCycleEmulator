@@ -1,5 +1,9 @@
 # HANDOFF 2026-10-07c — THE REDESIGN PRICED AND RULED; NEXT: BUILD OBJECTIVE #18
 
+> ⛔ **SUPERSEDED by `notes/handoff_2026-10-07d_obj18_stage2_running.md`.** Items 1–6 below RAN on 2026-10-07 (CHANGELOG
+> 10-07 h, i): #18 built (every parity target exact), stage 1 run, priced, basin B registered as `hilda29w`, and stage 2
+> LAUNCHED on the Mac. Read the new note, not this one.
+
 **Supersedes** `notes/handoff_2026-10-07b_obj17_landed.md`, which now points here.
 - Written on Marcus's ruling, verbatim: "Handoff now, build fresh (Recommended)".
 - The next step is ruled: build #18 `hilda_csl3v0kaidgbemwt` (§3).

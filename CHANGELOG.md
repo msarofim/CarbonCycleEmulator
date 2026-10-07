@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-07 (j) — Handoff: `notes/handoff_2026-10-07d_obj18_stage2_running.md` (Marcus: "write the handoff note."). It supersedes `handoff_2026-10-07c_obj18_build.md`, which now points to it. Its §3 is the landing kit #18 still lacks (the land script, a #18 read, the basin decomposition before promoting, the chain), to be dry-run on the first finished start; stage 2 was running at 15:22 (launcher alive, 8 work processes, no exits).
+
 ## 2026-10-07 (i) — **#17's BASIN B REGISTERED as `hilda29w` (#18's incumbent seed), and OBJECTIVE #18's STAGE 2 LAUNCHED on the Mac** (handoff 10-07c §3 item 6). Torch verdict, said out loud: **Mac, overnight, as ruled.** Nothing adopted.
 
 - **Rulings, verbatim (AskUserQuestion):**
