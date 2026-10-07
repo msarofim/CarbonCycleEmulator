@@ -2,7 +2,49 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
-## 2026-10-07 (d) — **THE REDESIGNED CUT, PRICED AT BASIN B** (handoff 10-07b §3; Marcus: "Price a redesigned cut (Recommended)"). **The redesign removes the main objective's resistance to the module's limb: moving `w_enso_l2` 14.73 → 16.71 costs the WHOLE objective −0.10, against #17's −1.29. Stage 1 does not care about the index: under the detrended index the land answer holds (lag 5.85, ×1.30) and `w` lands at 16.61 at B, where the shipped index put it. Neither objective ratchets the pump. But the detrended index is not free. Re-fitting the land block, the main objective pays −7.6, almost all in the ice cores, and SSP5-8.5 CO₂ in 2300 rises +23 ppm (vvH +11). The cause is `beta_max` falling 7 %: the shipped index's trend was holding it up.** Nothing adopted, built or refitted.
+## 2026-10-07 (e) — **(d)'s "+23 ppm" IS MOSTLY A RIDGE POSITION, not the index.** Profiling `beta_max` with the other four land names re-optimised: under EITHER objective, B's value and B2's differ by only 0.12–0.13 log-units, and by ~17 ppm in SSP5-8.5 2300. **At a fixed `beta_max` the detrended index moves 2300 by +6.3 to +7.2 ppm (vvH +2.0 to +2.9). The rest of B2's +23 is the ridge optimum sliding ~0.6σ. MEASURED on a wide profile (1.50–2.55), 2300 CO₂ along this ridge alone spans about −35 / +35 ppm at 1σ under #17 and −38 / +34 under the redesign (natural space; vvH about ±17).** (d) is corrected in place; nothing adopted.
+
+- **Why the test.** (d)'s +23 ppm was carried by `beta_max` (−7.3 %), and `beta_max`–`fert_k` is a known ρ ≈ 0.998 ridge. On 09-29 (e), converging a re-fit had barely moved its cost but moved the futures by tens of ppm. Two hypotheses: FORCED (the redesign's record prefers the lower `beta_max` by a margin a re-fit cannot give back) or RIDGE (the record is ~indifferent once the other land names follow).
+- **What ran.** `calibration/diag_iav_redesign_ridge.R` @`4f8a95d` → `outputs/diagnostics/iav_redesign_ridge_20261007.{log,rds}` (+ `_stdout.log`), 6.9 min.
+  - Then the WIDE grid, @`78b67e0` (`CCX_RF_EXTRA`, `CCX_RF_TAG=wide`) → `iav_redesign_ridge_20261007_wide.*`, 17.9 min, 14 values over 1.50–2.55. Its six shared points reproduce the first run EXACTLY.
+  - Both read by `diag_iav_redesign_ridge_read.R` @`78b67e0` → `iav_redesign_ridge_read_20261007{,_wide}.*`.
+  - The method: `beta_max` held on six values (B's 2.100, B2's 1.947, and 1.90 / 2.00 / 2.05 / 2.15); `fert_k`, `luc_scale`, `imb_share_land` and `ndep_ret` re-optimised (whitened by B's Hessian block, the B2 method); under #17 as landed and under the redesign (the pricing's emulation, verbatim).
+  - Gates: B reproduces its stored logpost (0). At B's `beta_max` under #17 the four start at whitened slope 0.002, so B is their conditional optimum. At B2's `beta_max` under the redesign the profile reproduces B2's logpost (+1.8e-7; bound 0.025) and its futures (0.00 ppm). Every cell converged.
+
+| `beta_max` | #17: Δlogpost | #17: SSP5-8.5 2300 | redesign: Δlogpost | redesign: SSP5-8.5 2300 |
+|---|---|---|---|---|
+| 1.900 | −0.235 | 1479.47 | −0.014 | 1485.96 |
+| 1.947 (B2) | −0.132 | 1473.98 | **0** | 1480.51 |
+| 2.000 | −0.054 | 1468.02 | −0.016 | 1474.60 |
+| 2.050 | −0.013 | 1462.54 | −0.058 | 1469.17 |
+| 2.100 (B) | **0** | 1457.19 | −0.123 | 1463.87 |
+| 2.150 | −0.013 | 1452.03 | −0.210 | 1458.77 |
+
+- **The width, MEASURED** (the wide profile; where a natural spline through the points drops by ½; SSP5-8.5 CO₂ in 2300 interpolated at the ends):
+
+| | optimum `beta_max` | 1σ interval | SSP5-8.5 2300 about the optimum | vvH |
+|---|---|---|---|---|
+| #17, natural space (likelihood + prior) | 2.163 | 1.844 – ≥2.55 (grid edge) | 1450.8, −35.2 / ≥+35.5 | −16.6 / ≥+17.9 |
+| the redesign, natural space | 1.978 | 1.696 – 2.357 | 1477.1, −37.9 / +34.2 | −18.3 / +17.7 |
+| #17, u-space (the objective) | 2.099 (= B) | 1.818 – 2.434 | 1457.4, −32.1 / +32.1 | −15.3 / +16.3 |
+| the redesign, u-space | 1.947 (= B2) | 1.686 – 2.271 | 1480.5, −33.5 / +32.2 | −16.3 / +16.7 |
+
+  - The NATURAL-space profile removes the five varying names' logit/log Jacobians. It is the density of `beta_max` in its own units ([[basin_rank_by_logit_jacobian]]): `beta_max`'s Jacobian alone moves ~0.5 over the range, the size of the 1σ drop.
+  - That Jacobian also moves #17's optimum from 2.099 (B, the stored u-space mode) to 2.163, about 7 ppm in 2300.
+  - Over the wide range the profiles are NOT quadratic (residuals 0.21–0.25 against a 0.025 gate) and are asymmetric. That is the 10-01 (l) non-Gaussian ridge ([[laplace_fails_on_fertilisation_ridge]]).
+  - Under #17 the LIKELIHOOD alone still rises at 2.55 (+0.25 over B), and in natural space the 1σ interval does not close by 2.55. The u-space objective's upper side (2.434) is closed by `beta_max`'s logit Jacobian near its band edge (3), not by the data.
+  - ⚠ A CONDITIONAL profile: 4 of 29 names follow, and the module is pinned. A width, not a posterior.
+- **Reading it.**
+  - The index tilts the ridge by ~0.25 log-units over 2.10 → 1.95, enough to slide its optimum by ~0.6σ (natural 2.163 → 1.978; +26 ppm in 2300 at the optimum). A full stage-2 refit could land anywhere near there.
+  - So (d)'s futures line was a ridge position plus +6.6 ppm, not "+23 ppm from the index". (d)'s fit cost (−7.6) stands: it is the cost at the redesign's own optimum, and at B's `beta_max` it is 0.12 worse.
+  - Wider than the redesign: **the point futures of #17 itself sit on this ridge.** ±0.13 log-units moves SSP5-8.5 2300 by ~±17 ppm. That bears on how the app quotes futures, and on the cut posterior ("Laplace + propagation", RULED, not built).
+  - The ice cores improve as `beta_max` falls, under both objectives (+0.55 / +0.59 over 2.10 → 1.95). So (d)'s ice-core cost (−7.7 after B2) is not the `beta_max` move: it comes with the switch and the other followers (`ndep_ret` −10 %).
+- **Tried and abandoned:**
+  - reading the ridge's width off two profile points by hand: a derived number must be computed;
+  - the first read's QUADRATIC width (±31.6 / ±34.4 ppm). Its 1σ points (≈1.81 / 2.38) lay OUTSIDE the six-point grid, so it was an extrapolation, and the ridge is known to stiffen away from the mode. The wide grid replaced it with a measured interval. The numbers came out close, and the profile proved non-quadratic;
+  - reading the width in u-space only: the Jacobian is not data.
+
+## 2026-10-07 (d) — **THE REDESIGNED CUT, PRICED AT BASIN B** (handoff 10-07b §3; Marcus: "Price a redesigned cut (Recommended)"). **The redesign removes the main objective's resistance to the module's limb: moving `w_enso_l2` 14.73 → 16.71 costs the WHOLE objective −0.10, against #17's −1.29. Stage 1 does not care about the index: under the detrended index the land answer holds (lag 5.85, ×1.30) and `w` lands at 16.61 at B, where the shipped index put it. Neither objective ratchets the pump. But the detrended index is not free. Re-fitting the land block, the main objective pays −7.6, almost all in the ice cores, and SSP5-8.5 CO₂ in 2300 rises +23 ppm (vvH +11), through `beta_max` falling 7 %.** ⚠ **CORRECTED by (e): only ~+6.6 ppm of that is the index. The rest is a move along the `beta_max`/`fert_k` ridge that the record prices at 0.12 log-units.** Nothing adopted, built or refitted.
 
 - **What ran.** `calibration/diag_iav_redesign_price.R` @`e891fa9` → `outputs/diagnostics/iav_redesign_price_20261007.{log,rds}` (+ `_stdout.log`), from a frozen copy, BLAS pinned, `nice 10`, 15.8 min.
   - Companions: `diag_iav_index_slow_flux.R` @`6f43a17` → `iav_index_slow_flux_20261007.*`; `diag_iav_redesign_futures_attr.R` @`38223f3` → `iav_redesign_futures_attr_20261007.*`.
@@ -82,13 +124,13 @@ Project log: what was done, what was tried and abandoned, and why.
   - Attribution (`diag_iav_redesign_futures_attr.R`; each B2 name set back to B's, one at a time; the rebuilt B2 and B1 reproduce exactly; the sum closes to 3 %):
     - SSP5-8.5: `beta_max` **+31.8 ppm**, `fert_k` −10.2, `ndep_ret` +4.2, `luc_scale` −1.8, `imb_share_land` exactly 0 (a likelihood-side name: the built-in control);
     - vvH: `beta_max` +20.1, `fert_k` −8.5.
-  - **So under the shipped index, #17's futures sit ~23 ppm LOW (SSP5-8.5, 2300) through a fertilisation asymptote the trend held up.** That is the 09-29 (d) φ pattern, priced at #17's amplitude. It is conditional on B2's five-name re-fit.
+  - ~~So under the shipped index, #17's futures sit ~23 ppm LOW (SSP5-8.5, 2300) through a fertilisation asymptote the trend held up.~~ ⚠ **WITHDRAWN by (e):** at a FIXED `beta_max` the index moves 2300 by +6.6 ppm. The other ~17 ppm is where B2 landed on a ridge the record prices at 0.12 log-units.
   - The 09-29 (f) price of the index axis (−1.3 to −2.9, ≤ 1.4 ppm) re-optimised the ENSO coordinates themselves; the cut pins them. It is no price for this.
 - **Reading it (for the decision; nothing ruled):**
   - The redesign has two halves, and they are separable.
     - The LOW-PASS OCEAN ROW alone (shipped index) takes the resistance −1.29 → −0.74. It costs nothing elsewhere: the ocean row's low-pass part IMPROVES (+0.11).
-    - The DETRENDED INDEX takes it on to −0.10. It costs −7.6 in fit and moves the futures +23 ppm, because it removes a slow land flux that vanishes in projections.
-  - The index switch is therefore a physics choice about the futures, not only a fix for `w`.
+    - The DETRENDED INDEX takes it on to −0.10. It costs −7.6 in fit, because it removes a slow land flux that vanishes in projections. ⚠ Its futures move is ~+6.6 ppm, not +23 (see (e)).
+  - The index switch is therefore a physics choice with a fit price, not only a fix for `w`.
 - **Tried and abandoned:**
   - the first draft's non-finite branch returned no `logpost_lp`, which would have stopped the block optimiser at its first −Inf (caught in review, before any run);
   - a misplaced parenthesis in the `saveRDS()` call (caught by the parse check).
