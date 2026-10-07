@@ -1,0 +1,33 @@
+calibration/diag_iav_redesign_ridge.R @4f8a95d, 2026-10-07 11:51 | from outputs/diagnostics/iav_redesign_price_20261007.rds (calibration/diag_iav_redesign_price.R @e891fa9) | basin B calibration/output/refit_20261006_obj17_basinB_start001_DRYRUN/mode_fit_pumpN.rds | held beta_max, followed by fert_k, luc_scale, imb_share_land, ndep_ret | 6 workers
+
+=== 0. GATES ===
+  B under #17 (shipped, year by year): logpost -1165.224582 vs stored -1165.224582 (+0.0e+00)
+  the grid: beta_max = 1.9000, 1.9473, 2.0000, 2.0500, 2.1002, 2.1500 (B 2.10020, B2 1.94726); 12 cells on 6 workers
+  at B's own beta_max under #17 the four start at max whitened slope 0.002 (tol 0.1) and move the logpost +0.0e+00
+  at B2's beta_max under the redesign the profile's logpost -1167.850604 vs the pricing's B2 -1167.850604 (+1.8e-07; bound 0.025); futures +0.00 / +0.00 ppm off B2's
+
+=== THE PROFILES: beta_max held, fert_k, luc_scale, imb_share_land, ndep_ret re-optimised; logpost relative to each profile's best grid point ===
+
+  obj17 (shipped index, ocean row year by year)
+   beta_max   dlogpost      dlik    dprior    fert_k ndep_ret   SSP5-8.5       vvH  icecores   CO2 lvls
+     1.9000     -0.235    -0.424    +0.189    636.63   12.444    1479.47   1018.19     +0.734    -0.213
+     1.9473     -0.132    -0.295    +0.163    655.61   12.286    1473.98   1015.38     +0.548    -0.149  <- B2
+     2.0000     -0.054    -0.175    +0.121    676.91   12.124    1468.02   1012.37     +0.351    -0.088
+     2.0500     -0.013    -0.080    +0.067    697.21   11.985    1462.54   1009.63     +0.172    -0.041
+     2.1002     +0.000    +0.000    +0.000    717.76   11.859    1457.19   1006.99     +0.000    +0.000  <- B
+     2.1500     -0.013    +0.063    -0.077    738.04   11.738    1452.03   1004.47     -0.162    +0.031
+
+  redesign ('detrend' index, ocean row low-pass)
+   beta_max   dlogpost      dlik    dprior    fert_k ndep_ret   SSP5-8.5       vvH  icecores   CO2 lvls
+     1.9000     -0.014    -0.051    +0.038    650.94   10.780    1485.96   1020.49     +0.197    -0.059
+     1.9473     +0.000    +0.000    +0.000    670.59   10.643    1480.51   1017.73     +0.000    +0.000  <- B2
+     2.0000     -0.016    +0.040    -0.056    692.63   10.503    1474.60   1014.78     -0.211    +0.056
+     2.0500     -0.058    +0.065    -0.122    713.63   10.383    1469.17   1012.09     -0.401    +0.100
+     2.1002     -0.123    +0.077    -0.201    734.78   10.272    1463.87   1009.50     -0.585    +0.137  <- B
+     2.1500     -0.210    +0.080    -0.290    755.82   10.170    1458.77   1007.03     -0.759    +0.168
+
+  logpost at B2's beta_max MINUS at B's (the four re-optimised at each): under #17 -0.132, under the redesign +0.123
+  the futures between the same two points (SSP5-8.5 2300, B2's minus B's): +16.78 ppm under #17, +16.63 under the redesign
+
+saved outputs/diagnostics/iav_redesign_ridge_20261007.{log,rds} | 6.9 min
+⛔ ADOPTS NOTHING.
