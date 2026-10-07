@@ -1,0 +1,18 @@
+calibration/diag_obj17_iterate_price.R @03f7efc, 2026-10-07 09:02
+
+=== basin A (calibration/output/refit_20261007_obj17_hilda_csl3v0kaidgbemw/mode_fit_pumpN.rds, md5 9612ed72cc9675dd85162e10ca69f38d) ===
+  the module's pins  lag_enso_land 5.8432, gamma_enso_land_NH 0.6607, gamma_enso_land_SH 0.6332, w_enso_l2 14.7262
+  -> the check's     5.8986, 0.6596, 0.6322, 17.6758  (calibration/output/iav_module_20261007_refit_20261007_obj17_hilda_csl3v0kaidgbemw.rds)
+  MAIN objective, unrefitted: likelihood -2.1768, logpost -2.1768 (stored logpost reproduced: +0.0e+00)
+  the 6 largest rows: gcb_ocean_sink -0.728, co2_level_MLO -0.520, co2_seasonal_SPO -0.354, co2_level_SPO -0.304, co2_seasonal_MLO -0.272, d14c_NH +0.167
+  the module's slope row +0.8771 -> +2.7852; the model's ENSO ocean slope 0.0673 -> 0.1169 (0.58x -> 1.01x obs 0.1153)
+
+=== basin B (calibration/output/refit_20261006_obj17_basinB_start001_DRYRUN/mode_fit_pumpN.rds, md5 081eb16f4fe718692004fb1cf9645891) ===
+  the module's pins  lag_enso_land 5.8432, gamma_enso_land_NH 0.6607, gamma_enso_land_SH 0.6332, w_enso_l2 14.7262
+  -> the check's     5.8554, 0.6576, 0.6302, 16.7050  (outputs/diagnostics/obj17_dryrun_20261006/iav_module_check_DRYRUN.rds)
+  MAIN objective, unrefitted: likelihood -1.2945, logpost -1.2945 (stored logpost reproduced: +0.0e+00)
+  the 6 largest rows: gcb_ocean_sink -0.446, co2_level_MLO -0.384, co2_level_SPO -0.199, co2_seasonal_SPO -0.154, co2_seasonal_MLO -0.124, d14c_NH +0.114
+  the module's slope row +1.8519 -> +2.7855; the model's ENSO ocean slope 0.0817 -> 0.1167 (0.71x -> 1.01x obs 0.1153)
+
+saved outputs/diagnostics/obj17_iterate_price_20261007.{log,rds}
+⛔ ADOPTS NOTHING.
