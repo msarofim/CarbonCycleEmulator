@@ -19,6 +19,8 @@
 #   IC9  THE ESTIMATOR   at the canonical: the preview's detrended series, SSR, r and n_eff reproduce; the
 #                        module's slope row IS the main objective's row
 #   IC10 REFUSALS        a run that stops at the record, ssr_ref <= 0, a slope row absent
+#   IC11 A HAND-BUILT PINNED BASE (found by the 10-06 landing dry run: promote's GATE 5 gap 39.1): ccx_overlay_par()
+#                        keeps the PROCESS's pins over a start's fitted-only par_mode, for #16's ten and #17's fourteen
 # THE FIXTURE IS hilda33p, NAMED: the canonical the cut was previewed and priced on (10-06 l / m). When the
 # canonical moves, these stay on hilda33p: the pricing outputs they read are hilda33p's.
 # =====================================================================
@@ -241,4 +243,24 @@ test_that("IC10 REFUSALS: a run that stops at the record, ssr_ref <= 0, a slope 
   for (bad in list(0, -1, NA_real_, c(1, 2))) expect_error(ccx_iav_module_loglik(R$r$out, R$r$F, ic_obs, ssr_ref = bad), "ssr_ref")
   o2 <- ic_obs; o2$enso_slope <- NULL
   expect_error(ccx_iav_module_loglik(R$r$out, R$r$F, o2, ssr_ref = 1), "ABSENT")
+})
+
+test_that("IC11 A HAND-BUILT PINNED BASE (the 10-06 landing dry run): ccx_overlay_par() keeps the process's pins, not their absent defaults", {
+  md <- ic_md()
+  overlay_on <- function(label, pins) {          # promote_multistart_mode.R's OLD base: pins WRITTEN, no attribute
+    g <- ccx_apply_gate(label); on.exit(ccx_unapply_gate(g), add = TRUE)
+    r <- ccx_apply_pins(pins);  on.exit(ccx_unpin_params(r), add = TRUE, after = FALSE)
+    bp <- ccx_apply_structure(ccx_default_params(), label, seas_ml = md$seas_ml, pump_field = ccx_mode_pump_field(md))
+    for (n in names(pins)) bp[[n]] <- pins[[n]]
+    pm <- md$par_mode[setdiff(names(md$par_mode), names(pins))]   # a start file's par_mode: the FITTED names only
+    ccx_overlay_par(bp, pm)
+  }
+  for (case in list(list(ccx_mode_struct(md), ic_pins(md)), list(IC_LABEL, ic_pins17(md)))) {
+    p <- overlay_on(case[[1]], case[[2]])
+    for (n in intersect(names(case[[2]]), names(p))) expect_identical(p[[n]], case[[2]][[n]], info = paste(case[[1]], n))
+  }
+  # the hand-built path is the canonical path: hilda33p under its own ten pins, overlaid both ways, is the same model list
+  p_hand <- overlay_on(ccx_mode_struct(md), ic_pins(md))
+  p_can  <- ccx_overlay_par(ccx_mode_base(md), ccx_mode_par_with_pins(md))
+  expect_identical(unclass(p_hand)[sort(names(p_hand))], unclass(p_can)[sort(names(p_can))])
 })

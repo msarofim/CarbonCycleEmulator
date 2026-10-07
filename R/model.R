@@ -726,6 +726,13 @@ ccx_overlay_par <- function(p, pm) {
   # C''s pin, by coincidence -- and the vector would print as MIGRATED).
   pins <- attr(p, "pins")
   for (n in names(pins)) if (is.null(pm[[n]])) pm[[n]] <- pins[[n]]
+  # ⛔ (2026-10-06 o) A name this PROCESS holds (ccx_apply_pins(), CCX_PINS) is HELD too, on a base built BY HAND
+  # without the attribute: its value is the base's own, which is where every caller writes a pin (the objective reads
+  # it there). Without this the migration below filled it with its ABSENT default, and the gated loop and the ENSO
+  # resolver copied that over the pin -- so promote_multistart_mode.R's GATE 5 rebuilt objective #17's start with the
+  # land ENSO lag and amplitudes at 0 (a 39.1 gap, found by the landing dry run). Every earlier pin set held its
+  # gated / ENSO names AT their defaults, so nothing it ever built moves (memory pinned_value_reset_by_fitted_resolver).
+  for (n in intersect(names(CCX_PINS), names(p))) if (is.null(pm[[n]])) pm[[n]] <- p[[n]]
   if (!isTRUE(attr(pm, "migrated_done"))) {
     pm <- ccx_migrate_par_set(pm)
     attr(pm, "migrated_done") <- TRUE

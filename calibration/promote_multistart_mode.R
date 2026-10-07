@@ -159,6 +159,9 @@ PMM_PUMP_FIELD <- if (is.na(pf_rec)) "solved" else pf_rec
 cat(sprintf("pump_field %s: '%s'\n", if (is.na(pf_rec)) "INFERRED from the starts' age" else "RECORDED in the starts", PMM_PUMP_FIELD))
 bp <- ccx_apply_structure(ccx_default_params(), PMM_STRUCT, seas_ml = PMM_SEAS_ML, pump_field = PMM_PUMP_FIELD)
 for (n in names(PMM_PINS)) bp[[n]] <- PMM_PINS[[n]]
+# ... and the base CARRIES them as an attribute, as ccx_mode_base() does (2026-10-06 o): ccx_overlay_par() below reads
+# a held name from it. Without it GATE 5 rebuilt objective #17's start with its pinned land ENSO names at 0.
+if (length(PMM_PINS)) attr(bp, "pins") <- PMM_PINS
 bp$pump_mode <- best$pump_mode
 lpf <- ccx_make_logpost(base_params = bp)
 u   <- ccx_par_to_unc(best$par_mode)
