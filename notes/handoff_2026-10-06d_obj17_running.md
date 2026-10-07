@@ -54,6 +54,11 @@ superseded by §5 here.
   ENSO response, so the slope row fell +2.79 → +1.85 at fixed `w`. If the real landing shows the same, the ruled check
   sends it to Marcus: accept the one pass, iterate (another overnight refit at `w` ≈ 16.7), or change the design.
   Evidence: `outputs/diagnostics/obj17_dryrun_20261006/`.
+  - **Which names, UNTESTED:** at start_001 the largest ocean moves were `pump_grad` −0.88 sd, `hs_asx_frac` +0.44, `k_w`
+    −0.41, `kz` +0.40 and `u_hs` −0.34 (hilda33p's marginal sd). My hypothesis: a weaker solved pump leaves a smaller DIC
+    contrast for the limb to move per unit exchange, so the slope falls at fixed `w`. **The test:** at the landed
+    vector, take the slope row's derivative with respect to each moved ocean name (one at a time, the others held) and
+    see whose product with its move accounts for the +2.79 → +1.85 drop. Do it before framing the choice for Marcus.
 
 ## 2. The run
 - **What:** objective #17's stage 2. Label `hilda_csl3v0kaidgbemw`, 14 pins (#16's ten + the module's four), 29 free names.
@@ -140,7 +145,7 @@ superseded by §5 here.
     `outputs/diagnostics/`.
   - `~/ccx_frozen/20261006o_obj17_dryrun` at `0a4e89f`: the dry run's tree (scratch promote dest, its Hessian, the
     read's outputs). Removable once the landing is done; its logs are copied into `outputs/diagnostics/obj17_dryrun_20261006/`.
-  - `~/ccx_frozen/suite_20261006_0a4e89f`: the suite at the fix commit; removable once it has reported.
+  - The suite trees at `0a4e89f` and `0c585fc` are REMOVED. At `0c585fc` the suite is CLEAN, 6598 / 0 / 3 (at `0a4e89f` it failed 2, the mode-struct lint on the new read script, since fixed).
 - **The landing dry run RAN** (21:54-22:16; §1b). Its script `~/ccx_frozen/20261006o_obj17_dryrun.sh` can be re-run by
   hand on any finished start (it reuses its tree).
 - **Early eval rates** (19:27, ~1 min in): 0.31–0.34 CPU-s/eval for the seven warm starts, 1.16 for the cold id 0

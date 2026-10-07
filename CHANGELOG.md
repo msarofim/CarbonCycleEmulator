@@ -15,7 +15,7 @@ Project log: what was done, what was tried and abandoned, and why.
   - **The full suite at `0a4e89f`: 6596 passed, 2 FAILED**, 3 skipped, rc 1 (`outputs/diagnostics/suite_20261006_0a4e89f.log`). Both failures are `test-mode-struct-lint.R`, the ratchet on direct mode-file reads. My new `diag_obj17_refit_read.R` (`8727ea7`) read hilda33p's file and built every base by hand, never through `ccx_mode_base()`. The lint was right, so the SCRIPT was fixed and the ratchet's baseline was not touched.
     - Section 0 now scores each file in its own space on `ccx_mode_base(md)`. The hand-built bases remain only where a vector is deliberately scored under the OTHER objective.
     - The lint passes 5 / 0. The read re-run on the dry run's promoted file reproduces both vectors with diff 0 and every number above.
-    - The full suite at the fix: SUITE_FIX_RESULT.
+    - **The full suite at `0c585fc` (the fix): CLEAN, 6598 passed, 0 failed, 3 skipped (the standing three)**, rc 0, 27.2 min (slower: the refit holds 8 cores), 231 warnings (`outputs/diagnostics/suite_20261006_0c585fc.log`). That is `20a89f8`'s 6573 + IC11's 25, exactly; at `0a4e89f` the same 6598 had split 6596 + 2 failed.
 - **WITH THE FIX THE CHAIN PASSES:**
 
 | step | result |
