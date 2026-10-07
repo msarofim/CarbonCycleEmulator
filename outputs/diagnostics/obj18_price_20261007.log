@@ -1,0 +1,78 @@
+calibration/diag_obj18_price.R @570d194, 2026-10-07 14:25 | hilda_csl3v0kaidgbemwt at basin B (calibration/output/refit_20261006_obj17_basinB_start001_DRYRUN/mode_fit_pumpN.rds) | stage 1 calibration/output/iav_module_20261007_refit_20261006_obj17_basinB_start001_DRYRUN_hilda_csl3v0kaidgbemwt.rds | 4 workers
+module P0  (B's own pins):          lag_enso_land 5.84324, gamma_enso_land_NH 0.66071, gamma_enso_land_SH 0.63322, w_enso_l2 14.72615
+module S18 (stage 1 under #18 at B): lag_enso_land 5.84831, gamma_enso_land_NH 0.65898, gamma_enso_land_SH 0.63156, w_enso_l2 16.60506
+
+=== 0. GATES ===
+  B under its own label (hilda_csl3v0kaidgbemw): logpost -1165.224581807 vs stored -1165.224581807, identical() TRUE; its 26 rows identical() TRUE
+  stage 1: calibration/fit_iav_module.R @5d34d41, base md5 081eb16f4fe718692004fb1cf9645891, hilda_csl3v0kaidgbemw -> hilda_csl3v0kaidgbemwt (index 'detrend'), smoke FALSE
+  stage 1's values vs the pricing mirror's (emulation $stage1$B_detrend): identical() TRUE
+  GATE REF_logpost            REF (#18 minus the index) vs the emulation's REF: +0.000e+00 (tol 1.0e-05) PASS
+  GATE REF_rows               REF's rows vs the emulation's: +0.000e+00 (tol 1.0e-05) PASS
+
+=== 1. UNREFITTED: B1 (the index switch, module at P0) and B1s (+ the module's move to stage 1's values) ===
+  GATE B1_logpost             B1 vs the emulation's B1: +0.000e+00 (tol 1.0e-05) PASS
+  GATE B1_rows                B1's rows vs the emulation's: +0.000e+00 (tol 1.0e-05) PASS
+  GATE B1s_resistance         B1s - B1 vs the emulation's resistance at P1d (redesign's rows): +1.976e-13 (tol 1.0e-05) PASS
+  B1  likelihood -12.342383 against REF (prior +0.000000) -- the emulation's B1 -12.342383
+   co2_level_MLO   d13c_level_MLO    gcb_land_sink   d13c_level_SPO 
+          -7.168            5.933           -2.839           -2.405 
+    d13c_icecore    co2_level_SPO   gcb_ocean_sink      co2_icecore 
+          -1.998           -1.960           -1.768           -0.496 
+co2_seasonal_MLO          d14c_SH 
+           0.328            0.133 
+  B1s likelihood -12.389220 against REF; the module's move P0 -> S18 costs -0.046837 on #18's WHOLE objective (#17 as landed: -1.2945)
+co2_seasonal_SPO    co2_level_MLO co2_seasonal_MLO          d14c_NH 
+          -0.136            0.123           -0.119            0.047 
+         d14c_SH   gcb_ocean_sink    gcb_land_sink  ocean_grad_d13c 
+           0.037            0.036           -0.018           -0.016 
+    d13c_icecore   d13c_level_MLO 
+          -0.013            0.012 
+
+=== 2. RE-FITTED: B2 / B2s (beta_max, fert_k, luc_scale, imb_share_land, ndep_ret re-optimised) and B2f / B2fs (beta_max HELD at B's 2.10020, fert_k, luc_scale, imb_share_land, ndep_ret re-optimised) ===
+  B2    1 round(s), 3.1 min, max whitened slope 2.356 -> 0.079 (converged < 0.1: TRUE); likelihood -7.6640 against REF, prior +0.5234
+        the block: beta_max 1.9473 (B 2.1002); fert_k 670.56 (B 717.76); luc_scale 0.90387 (B 0.92102); imb_share_land 0.67072 (B 0.67932); ndep_ret 10.641 (B 11.859)
+  B2s   1 round(s), 3.5 min, max whitened slope 2.335 -> 0.074 (converged < 0.1: TRUE); likelihood -7.7986 against REF, prior +0.5110
+        the block: beta_max 1.9519 (B 2.1002); fert_k 672.59 (B 717.76); luc_scale 0.90376 (B 0.92102); imb_share_land 0.67105 (B 0.67932); ndep_ret 10.651 (B 11.859)
+  B2f   1 round(s), 2.4 min, max whitened slope 2.629 -> 0.008 (converged < 0.1: TRUE); likelihood -7.5863 against REF, prior +0.3224
+        the block: beta_max 2.1002 (B 2.1002); fert_k 734.78 (B 717.76); luc_scale 0.89771 (B 0.92102); imb_share_land 0.66038 (B 0.67932); ndep_ret 10.272 (B 11.859)
+  B2fs  1 round(s), 2.6 min, max whitened slope 2.615 -> 0.008 (converged < 0.1: TRUE); likelihood -7.7186 against REF, prior +0.3153
+        the block: beta_max 2.1002 (B 2.1002); fert_k 734.79 (B 717.76); luc_scale 0.89782 (B 0.92102); imb_share_land 0.6611 (B 0.67932); ndep_ret 10.291 (B 11.859)
+  GATE B2_vs_emulation        B2 vs the emulation's B2 (logpost): +0.000e+00 (tol 2.5e-02) PASS
+  GATE B2f_vs_ridge           B2f vs the ridge's cell at B's beta_max (logpost): +0.000e+00 (tol 2.0e-02) PASS
+  (exactness, reported: B2's block vs the emulation's max |diff| 0.0e+00; B2f's vs the ridge cell's fert_k +0.0e+00, ndep_ret +0.0e+00)
+  B2 per row against REF:
+     co2_icecore     d13c_icecore   d13c_level_MLO   gcb_ocean_sink 
+          -4.341           -3.372            1.725           -1.227 
+         d14c_NH          d14c_SH co2_seasonal_MLO   d13c_level_SPO 
+          -0.632            0.599            0.547           -0.441 
+    co2_gradient    gcb_land_sink 
+           0.411           -0.357 
+    of which the ice cores -7.713, the CO2 level rows -0.471, the seasonal rows +0.531, the two GCB rows -1.584
+  B2s per row against REF:
+     co2_icecore     d13c_icecore   d13c_level_MLO   gcb_ocean_sink 
+          -4.329           -3.379            1.787           -1.195 
+         d14c_SH          d14c_NH   d13c_level_SPO co2_seasonal_MLO 
+           0.639           -0.588           -0.447            0.428 
+    co2_gradient    gcb_land_sink 
+           0.416           -0.386 
+    of which the ice cores -7.707, the CO2 level rows -0.482, the seasonal rows +0.265, the two GCB rows -1.581
+
+=== 3. THE FUTURES: CO2 (ppm) in 2300, read against the ridge's measured 1-sigma width ===
+  GATE FUT_B                  B's futures vs the emulation's: +0.000e+00 (tol 1.0e-06) PASS
+  GATE FUT_B1                 B1's futures vs the emulation's: +0.000e+00 (tol 1.0e-06) PASS
+  (re-fit cells: B2 vs the emulation's B2 +0.0000 / +0.0000 ppm; B2f vs the ridge's cell +0.0000 / +0.0000 ppm -- reported: a re-fit within its bound may move them)
+  the ridge (redesign, natural space; iav_redesign_ridge_read_20261007_wide.rds): beta_max optimum 1.978, 1-sigma 1.696-2.357 -> SSP5-8.5 +34.2 / -37.9, vvH +17.7 / -18.3 ppm about 1477.1 / 1016.0
+              SSP5-8.5      vs B        vvH      vs B   vs the ridge's 1-sigma (the narrower side)
+  hilda33p     1461.53     +4.33    1010.03     +3.04   
+  B            1457.19     +0.00    1006.99     +0.00   
+  B1           1457.21     +0.02    1007.01     +0.02   0.00 / 0.00 of the width -- INSIDE: not a finding
+  B1s          1457.21     +0.02    1007.01     +0.02   0.00 / 0.00 of the width -- INSIDE: not a finding
+  B2           1480.51    +23.32    1017.73    +10.74   0.68 / 0.61 of the width -- INSIDE: not a finding
+  B2s          1479.92    +22.73    1017.45    +10.45   0.66 / 0.59 of the width -- INSIDE: not a finding
+  B2f          1463.87     +6.68    1009.50     +2.50   0.20 / 0.14 of the width -- INSIDE: not a finding
+  B2fs         1463.82     +6.63    1009.48     +2.49   0.19 / 0.14 of the width -- INSIDE: not a finding
+  the index's own effect at a FIXED beta_max (B2f - B): SSP5-8.5 +6.68, vvH +2.50 (the ridge read at B's beta_max: +6.68 / +2.50)
+  the module's move P0 -> S18 at each cell: B1 -0.00 / -0.00, B2 -0.58 / -0.28, B2f -0.05 / -0.02 ppm
+
+saved outputs/diagnostics/obj18_price_20261007.{log,rds} | 3.7 min
+⛔ ADOPTS NOTHING.

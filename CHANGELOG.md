@@ -2,6 +2,61 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-07 (h) — **OBJECTIVE #18 BUILT, STAGE 1 RUN AND PRICED (handoff 10-07c §3 items 1–5). Every parity target reproduces EXACTLY (difference 0.0, not merely within tolerance).** The built objective at basin B gives the emulation's logpost −1173.052374 and B1 −12.342383. Stage 1 under #18 at B is the pricing mirror's answer bit for bit: lag 5.8483, ×1.29779, `w_enso_l2` 16.6051. The land-block re-fit (B2) and the fixed-`beta_max` cell reproduce the emulation and the ridge to the last bit, futures included. **New: at stage 1's own module values the redesign resists the module's move by −0.047 unrefitted and −0.13 with the land five re-fitted, almost all in the seasonal rows' interannual part (kept, as ruled). The move shifts the 2300 futures by ≤ 0.6 ppm.** Nothing launched, nothing adopted. Stage 2's incumbent needs a ruling first (below).
+
+- **The build** (`3d50312`), as handoff §3 items 1–2 specified:
+  - `R/likelihood.R`: `gcb_ocean_lowpass_df`, the twin of `gcb_land_lowpass_df`. `ccx_err_with_struct()` copies it. The ocean row becomes `row + ccx_land_highpass_cost(tgt_o − g$ocean, year, df, LIK_GCB_OCEAN_SD)`. Absent = the row as before (the same `dn()` call).
+  - `R/calibrate.R`: `ccx_struct_hilda_csl3v0kaidgbemwt()` = #17's block + `enso_index` 1 (`CCX_ENSO_INDEX_CODES[["detrend"]]`) + `gcb_ocean_lowpass_df` 6 (`LIK_LAND_LOWPASS_DF`), registered in `CCX_STRUCT_LABELS` and `ccx_struct_block()`. The cut's two refusal messages now name #17 / #18.
+  - Every forcing consumer already builds its table with `ccx_enso_index_of(params)`. The only builder with a fixed default (`ccx_scaled_forcing(sp = NULL)`, "demean") is refused at run time by `ccx_enso_index_check()`, so a missed consumer STOPS.
+- **Tests:** `test-iav-redesign.R` (IR1–IR7, 92 expectations):
+  - the label (IR1) and the switch (IR2);
+  - B under #17 bit-identical (IR3);
+  - at B with its own pins under #18 the logpost, the likelihood, every row, the reference and B1 reproduce the emulation (IR4). The switch moves ONLY the ocean row, by its high part 4.511551. The low-pass row is rebuilt independently from the row's residuals at its own sd;
+  - the index reaches the objective's and the dg path's forcing, and its trend over its own window (1948–2024) is < 1e-10 K/yr (IR5);
+  - the dg path agrees (IR6), and the cut's guard holds (IR7).
+  - **Mutation-tested on the source:** six mutations, each caught, 12–16 of 92 failing. They are: `err` drops the switch; the row ignores it; the label drops the index; the cost at the land row's sd; df 4; the `relsst_lp` index. Harness and log: `outputs/diagnostics/obj18_build_gate_mutation/`.
+  - **Ledgers extended by name, citing the ruling:** the seven label ledgers (`test-enso-lag`, `-mixing-strat`, `-gated-params`, `-struct-v0`, `-constants-batch` ×2, `-soil-inert`, `-tr-box`).
+    - ⚠ Also `test-iav-cut.R` IC1's "every other label carries none of the cut's three fields". It was not written as a ledger, but it is one in substance: #18 inherits the three by design. It is now an explicit ledger {#17, #18}: #18's three must equal #17's, and every other label is still refused.
+- **Stage 1** (`5d34d41`):
+  - `fit_iav_module.R --struct=<label>`: GATE 0 runs on the base AS STORED under its own label. Then the model list is rebuilt under the label by `dg_vector()`'s resolver, and every module run (the reference SSR included) is under it.
+  - The label must be CHAINED from the base's: it only adds fields and opens no gate. The rebuilt list may differ from the stored one in those fields only, and the runs' forcing must carry the label's index. Absent = the old path.
+  - **The run at B** (`calibration/output/iav_module_20261007_refit_20261006_obj17_basinB_start001_DRYRUN_hilda_csl3v0kaidgbemwt.rds`, 1.3 min, 6 workers; Torch verdict: not needed): lag **5.8483** (1σ 4.46–7.29), ×**1.29779**, `w_enso_l2` **16.6051**, ssr_ref 89.825775.
+  - **`identical()` to the mirror** (`$stage1$B_detrend`): the optimum, the pins, ssr_ref, the Laplace sds and the whole profile.
+- **The pins** (`f0581f0`): `CCX_MODE_OBJ18_PINS` = #16's ten + stage 1's four. They parse to stage 1's doubles bit for bit (no ulp case, unlike #17's `w_enso_l2`). `_STRUCT`, `_MODULE_FILE`; `test-ms-reference-set.R` (13).
+  - **No reference-set rule yet** (see Open). Until one is ruled, the rule refuses these pins, as it must.
+- **THE PRICE** (`calibration/diag_obj18_price.R` @`570d194` → `outputs/diagnostics/obj18_price_20261007.{log,rds}`, 3.7 min).
+  - Likelihood against REF (= #18 minus the index at B's own pins, the emulation's REF), on #18's rows. P0 = B's module pins (#17's stage 1); S18 = stage 1 under #18 (`w` +1.47σ):
+
+| | P0: lik | P0: prior | S18: lik | S18: prior | SSP5-8.5 2300 (P0 / S18) | vvH 2300 (P0 / S18) |
+|---|---|---|---|---|---|---|
+| B (#17 as landed) | — | — | — | — | 1457.19 | 1006.99 |
+| B1, unrefitted | **−12.3424** | 0 | −12.3892 | 0 | +0.02 / +0.02 | +0.02 / +0.02 |
+| B2, the land five re-fitted | **−7.6640** | +0.5234 | −7.7986 | +0.5110 | +23.32 / +22.73 | +10.74 / +10.45 |
+| B2f, `beta_max` held at B's | **−7.5863** | +0.3224 | −7.7186 | +0.3153 | +6.68 / +6.63 | +2.50 / +2.49 |
+
+  - **Gates, all exact:**
+    - B under its own label: `identical()`.
+    - REF, B1 and their rows vs the emulation: 0.0.
+    - B1s − B1 vs the emulation's resistance at P1d: 2e-13.
+    - B2's block vs the emulation's, and B2f vs the ridge's cell at B's `beta_max`: 0.0.
+    - The futures of B, B1, B2 and B2f vs theirs: 0.0.
+  - The first run was stamped `b932d21+dirty`: the stamp counts untracked files under `calibration/`, and stage 1's output was still uncommitted. The outputs were committed (`570d194`) and the pricing re-run there. Its results are `identical()` to the first run's; the first run's outputs were discarded.
+  - **The module's move P0 → S18:**
+    - −0.0468 unrefitted on #18's WHOLE objective (#17 as landed: −1.2945). The seasonal rows −0.263, the CO₂ level rows +0.117, the ocean row +0.036.
+    - With the land five re-fitted: −0.135 (−0.132 with `beta_max` held), the seasonal rows −0.266.
+    - So what is left is the seasonal rows' interannual part, which the ruling kept in the main objective.
+  - **The futures, read against the ridge** (the redesign's natural-space 1σ: SSP5-8.5 +34.2 / −37.9, vvH +17.7 / −18.3 ppm):
+    - every cell is INSIDE the width. B2's +23.3 is 0.68 of it;
+    - at a FIXED `beta_max` the index's own effect is **+6.68 ppm** (vvH +2.50), the ridge read's number exactly;
+    - the module's move shifts the futures by ≤ 0.6 ppm (B2) and ≤ 0.05 (B2f).
+- **The full suite at `3d50312`** (the build commit; frozen detached worktree `~/ccx_frozen/suite_20261007_3d50312`, the downloads APFS-cloned, BLAS pinned, `nice 10`): **6694 passed, 0 failed, 3 skipped** (the standing three), rc 0, 18 min, 231 warnings (`outputs/diagnostics/suite_20261007_3d50312.log`).
+  - That is 6598 + the new file's 92 + one in each of four label loops. Test (13) came later and passed in its file, 0 failed. A suite at the launch commit is owed before stage 2.
+- **Open (Marcus):** stage 2's incumbent seed.
+  - The handoff names basin B's vector, but the multistart takes its incumbent from `CCX_MODE_FILES`, and basin B is not registered there.
+  - Its file meets the registry's invariants: it carries the build, it is pinned, `struct` and the `h_ml` band are recorded, and `h_ml` is 49.9 m, above the 42.5 m floor.
+  - Precedent: #17's hilda33p seed itself converged into basin B.
+- **Tried and abandoned:** IR4's first version had the high part's SIGN reversed. The cost is ADDED to the row, so the low-pass row is the less negative one. Caught on its first run (3 failures); the test was wrong, not the build.
+
 ## 2026-10-07 (g) — Handoff: `notes/handoff_2026-10-07c_obj18_build.md` (Marcus: "Handoff now, build fresh (Recommended)"). It supersedes `handoff_2026-10-07b_obj17_landed.md`, which now points to it. It carries #18's build list with its parity targets, read from the pricing's rds.
 
 - **The frozen trees, RULED "Remove both (Recommended)":** `~/ccx_frozen/20261007c_redesign_price` and `~/ccx_frozen/suite_20261007_a6cf879`.
