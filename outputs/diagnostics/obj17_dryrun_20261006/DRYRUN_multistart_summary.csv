@@ -1,0 +1,2 @@
+"id","logpost","basin","converged","out_of_time","minutes","clock","minutes_wall","n_eval","draws","kind","start_class","host"
+1,-1165.22458180737,1,TRUE,FALSE,143.308033333333,"cpu",144.508937398593,26670,0,"reference: INCUMBENT = hilda33p (OBJECTIVE #17 (the interannual cut, Marcus 2026-10-06): the canonical's pins plus the module's four names at stage 1's values (the canonical, seeded at the pins: a start, not a mode of this objective); scored under this build's objective, periodic spinup, evaluated at seas_ml 1)","reference","MacBook-Pro-2.local"
