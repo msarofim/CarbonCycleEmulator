@@ -30,6 +30,10 @@
 #       file, under #17's label at seas_ml 1 -> the canonical (seeded at the pins: a start) / the control;
 #       the launch string resolves the same; MUTATION: refused under #16's label, at seas_ml 0, with a module
 #       value moved or a module name dropped, and the canonical's ten under #17's label (the module FREE)
+#   (13) OBJECTIVE #18's pins (2026-10-07 f, the redesigned cut; Marcus: "Full redesign (Recommended)"): #16's ten +
+#       the module's four at stage 1's values UNDER #18 at basin B, tied BIT FOR BIT to the stage-1 file, which is
+#       itself the pricing mirror's answer exactly; NO REFERENCE SET IS RULED YET, so the rule refuses them under
+#       #18's label ("no registered incumbent"), and under #17's (MUTATION: #17's branch must not take them)
 # =====================================================================
 ms_cp <- CCX_MODE_CANONICAL_PINS
 ms_ctl <- CCX_MODE_CONTROL_PINS
@@ -239,4 +243,36 @@ test_that("(12) OBJECTIVE #17's pins (2026-10-06 n, the interannual cut): #16's 
   expect_error(ccx_ms_reference_set(ms_cp, "1"), "interannual CUT.*lag_enso_land")
   # ... while under #16's label the ten still take the first branch, as before
   expect_identical(ccx_ms_reference_set(ms_cp, "1", struct = CCX_MODE_OBJ16_STRUCT)$why, "the canonical, under this array's pins")
+})
+
+test_that("(13) OBJECTIVE #18's pins (2026-10-07 f, the redesigned cut): #16's ten + the module's four at stage 1's values under #18 at basin B, tied bit for bit to the stage-1 file and the mirror; refused until a reference set is ruled", {
+  p18 <- CCX_MODE_OBJ18_PINS
+  expect_identical(names(p18), c(names(CCX_MODE_OBJ16_PINS), CCX_IAV_MODULE_NAMES))
+  expect_identical(p18[names(CCX_MODE_OBJ16_PINS)], CCX_MODE_OBJ16_PINS)
+  s1 <- readRDS(ccx_path(CCX_MODE_OBJ18_MODULE_FILE)); x1 <- s1$pins[CCX_IAV_MODULE_NAMES]
+  expect_identical(unname(p18[CCX_IAV_MODULE_NAMES]), unname(x1))                  # bit for bit: no ulp case here
+  expect_identical(unname(p18[CCX_IAV_MODULE_NAMES]), as.numeric(sprintf("%.17g", x1)))
+  # the run: non-smoke, at #17's basin B file, the module fitted UNDER #18 (the switch), the detrended index
+  pv <- s1$provenance
+  expect_false(pv$smoke)
+  expect_identical(pv$base_md5, "081eb16f4fe718692004fb1cf9645891")               # basin B (CHANGELOG 10-07 b / d)
+  expect_identical(pv$base_struct, CCX_MODE_OBJ17_STRUCT)
+  expect_identical(pv$struct, CCX_MODE_OBJ18_STRUCT); expect_true(pv$struct_switched)
+  expect_identical(pv$struct_added, c("enso_index", "gcb_ocean_lowpass_df"))
+  expect_identical(pv$enso_index, "detrend"); expect_identical(pv$n_eff, LIK_IAV_NEFF)
+  # ... and it IS the pricing's stage-1 mirror (diag_iav_redesign_price.R @e891fa9), exactly
+  em <- readRDS(ccx_path("outputs", "diagnostics", "iav_redesign_price_20261007.rds"))
+  expect_identical(em$provenance$commit, "e891fa9")
+  expect_identical(s1$pins, em$stage1$B_detrend$pins); expect_identical(s1$ssr_ref, em$stage1$B_detrend$ssr_ref)
+  # the land pair at hilda33p's NH : SH ratio (one scale, as ruled)
+  expect_equal(p18[["gamma_enso_land_NH"]] / p18[["gamma_enso_land_SH"]], s1$ratio[[1]] / s1$ratio[[2]], tolerance = 1e-14)
+  expect_true(CCX_MODE_OBJ18_STRUCT %in% CCX_STRUCT_LABELS)
+  withr::local_envvar(CCX_MS_STRUCT = CCX_MODE_OBJ18_STRUCT, CCX_MS_PUMP_FIELD = "solved")
+  expect_false(ccx_pins_extend_canonical(p18, "solved")); expect_false(ccx_pins_price_canonical(p18, "solved"))
+  # NOT YET RULED: stage 2's incumbent (the handoff names basin B's vector, which is not registered)
+  expect_error(ccx_ms_reference_set(p18, "1"), "no registered incumbent")
+  # MUTATION: #17's branch must not take #18's pins (its module values differ), under either label
+  expect_error(ccx_ms_reference_set(p18, "1", struct = CCX_MODE_OBJ17_STRUCT), "no registered incumbent")
+  # ... nor #18's label take #17's pins (ruled under #17's own label only)
+  expect_error(ccx_ms_reference_set(CCX_MODE_OBJ17_PINS, "1"), "ruled under")
 })

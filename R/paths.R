@@ -454,6 +454,24 @@ CCX_MODE_OBJ17_PINS      <- c(CCX_MODE_OBJ16_PINS,
                               gamma_enso_land_SH = 0.63322088075695704,
                               w_enso_l2          = 14.726151317112599)
 CCX_MODE_OBJ17_STRUCT    <- "hilda_csl3v0kaidgbemw"
+# OBJECTIVE #18's PINS (2026-10-07 f, Marcus: "Full redesign (Recommended)", the label "hilda_csl3v0kaidgbemwt
+# (Recommended)"; stage 1's base "Basin B (Recommended)"): #16's ten PLUS the module's four at STAGE 1's values UNDER #18 --
+# calibration/fit_iav_module.R @5d34d41 --base=<#17's basin B file> --struct=hilda_csl3v0kaidgbemwt,
+# CCX_MODE_OBJ18_MODULE_FILE. That run reproduced the pricing's stage-1 mirror (diag_iav_redesign_price.R @e891fa9,
+# $stage1$B_detrend) EXACTLY (identical() on the optimum, the pins, ssr_ref, the Laplace sds and the profile). Literals, so
+# this file reads nothing at source time; all four parse to stage 1's doubles BIT FOR BIT (no ulp case, unlike #17's
+# w_enso_l2), and test-ms-reference-set.R (13) ties them to that file.
+# ⚠ NO REFERENCE-SET RULE YET: the handoff names basin B's vector as stage 2's incumbent seed, and the multistart takes its
+# incumbent from CCX_MODE_FILES, where basin B is not registered. Until that is ruled, ccx_ms_reference_set() refuses these
+# pins ("no registered incumbent"), as it must.
+CCX_MODE_OBJ18_MODULE_FILE <- file.path("calibration", "output",
+                                        "iav_module_20261007_refit_20261006_obj17_basinB_start001_DRYRUN_hilda_csl3v0kaidgbemwt.rds")
+CCX_MODE_OBJ18_PINS      <- c(CCX_MODE_OBJ16_PINS,
+                              lag_enso_land      = 5.8483078104595023,
+                              gamma_enso_land_NH = 0.65897731179720698,
+                              gamma_enso_land_SH = 0.63155946220609593,
+                              w_enso_l2          = 16.605064312322234)
+CCX_MODE_OBJ18_STRUCT    <- "hilda_csl3v0kaidgbemwt"
 #' The registered FREE mode nearest the canonical: the canonical itself when it
 #' is free, its parent when it is pinned. For a consumer that needs a vector
 #' ENCODABLE on the full table (an ancestor constructed by dropping names, a
