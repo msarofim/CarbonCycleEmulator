@@ -25,13 +25,23 @@
 #              inside one month of L: the lag's cubic stencil is smooth within a month, kinked at whole months.
 #   + CHECK    with --check=<an earlier stage-1 rds>: how far each name moved, in that run's own 1-sigma
 #              (Marcus: "One pass + check (Recommended)": stop below 0.1 sigma; a larger move goes to him).
+#   + STRUCT   with --struct=<label> (2026-10-07, objective #18; RULED 10-07 f, stage 1 at basin B, a #17 file):
+#              the module is fitted under ANOTHER structure than the base file's. GATE 0 runs on the base AS
+#              STORED, under its own label; THEN the model list is rebuilt under <label> (the file's own vector,
+#              pins, seas_ml and pump field) and every module run, the reference SSR included, is under it. Only
+#              a label CHAINED from the base's is accepted: its block holds the base's block unchanged and only ADDS
+#              fields (#17 -> #18 adds the detrended ENSO index, which the module's runs read, and the low-pass ocean
+#              row, which they do not). The pattern is diag_iav_redesign_price.R's stage1(), whose CONTROL
+#              reproduced both stored stage-1 runs exactly. Absent = the base's own structure, as before.
 #
 # GATES (the driver stops on any): the ratio file is the one the ruling names (md5); the base reproduces its
-# stored rows through the dg path (<= 1e-6); the superposition reproduces a direct run; the profile's best
-# lag is the optimum's; the Hessian is negative definite.
-# OUTPUTS: calibration/output/iav_module_<date>_<base>.rds (the stage-1 RESULT stage 2 pins from) and
-# outputs/diagnostics/iav_module_<date>_<base>.log. ⛔ ADOPTS NOTHING. No RNG.
-# Usage: Rscript calibration/fit_iav_module.R [--base=<mode name or file>] [--check=<stage-1 rds>]
+# stored rows through the dg path (<= IAV_REPRO_TOL, 1e-5); the superposition reproduces a direct run; the
+# profile's best lag is the optimum's; the Hessian is negative definite; a --struct label is chained from the
+# base's, and its runs' forcing carries its ENSO index.
+# OUTPUTS: calibration/output/iav_module_<date>_<base>[_<struct>].rds (the stage-1 RESULT stage 2 pins from) and
+# outputs/diagnostics/iav_module_<date>_<base>[_<struct>].log (the suffix only with --struct). ⛔ ADOPTS NOTHING.
+# No RNG.
+# Usage: Rscript calibration/fit_iav_module.R [--base=<mode name or file>] [--check=<stage-1 rds>] [--struct=<label>]
 #        (CCX_IAV_WORKERS, default 6; CCX_IAV_SMOKE=1 for tiny budgets)
 # =====================================================================
 t_start <- Sys.time()
@@ -46,6 +56,7 @@ iav_arg <- function(key, default) { h <- grep(sprintf("^--%s=", key), IAV_ARGS, 
   if (length(h)) sub(sprintf("^--%s=", key), "", h[1]) else default }
 IAV_BASE     <- iav_arg("base", CCX_MODE_CANONICAL)
 IAV_CHECK    <- iav_arg("check", "")
+IAV_STRUCT   <- iav_arg("struct", "")                           # "" = the base file's own structure
 IAV_SMOKE    <- identical(Sys.getenv("CCX_IAV_SMOKE", ""), "1")
 IAV_WORKERS  <- as.integer(Sys.getenv("CCX_IAV_WORKERS", "6"))
 IAV_GAMMA    <- c("gamma_enso_land_NH", "gamma_enso_land_SH")   # scaled TOGETHER by s
@@ -84,12 +95,32 @@ BASE_FILE <- ccx_mode_file(IAV_BASE); md <- readRDS(BASE_FILE)
 BASE_NAME <- if (file.exists(IAV_BASE)) {
   b <- sub("[.]rds$", "", basename(IAV_BASE)); if (grepl("^mode_fit_pump", b)) basename(dirname(IAV_BASE)) else b
 } else IAV_BASE
-IAV_TAG  <- paste0(IAV_DATE, "_", BASE_NAME, if (IAV_SMOKE) "_SMOKE" else "")
+# + STRUCT: the structure the MODULE is fitted under (see the header). Refused unless CHAINED from the base's:
+# the base's block unchanged, fields only ADDED, and no gate opened (a gate would change the FITTED set).
+IAV_BASE_STRUCT <- ccx_mode_struct(md)
+IAV_RUN_STRUCT  <- if (nzchar(IAV_STRUCT)) IAV_STRUCT else IAV_BASE_STRUCT
+IAV_SWITCH      <- !identical(IAV_RUN_STRUCT, IAV_BASE_STRUCT)
+IAV_ADDED       <- character(0)
+if (IAV_SWITCH) {
+  if (!IAV_RUN_STRUCT %in% CCX_STRUCT_LABELS) stop("--struct: unknown structure label '", IAV_RUN_STRUCT, "'")
+  b_base <- ccx_struct_block(IAV_BASE_STRUCT); b_run <- ccx_struct_block(IAV_RUN_STRUCT)
+  if (!all(names(b_base) %in% names(b_run)) || !identical(b_run[names(b_base)], b_base))
+    stop("--struct=", IAV_RUN_STRUCT, " is not CHAINED from the base's structure '", IAV_BASE_STRUCT,
+         "': it changes or drops a field of the base's block, so the module would run a different model")
+  if (!identical(ccx_gates_open(IAV_RUN_STRUCT), ccx_gates_open(IAV_BASE_STRUCT)))
+    stop("--struct=", IAV_RUN_STRUCT, " opens a gate the base's structure '", IAV_BASE_STRUCT, "' does not: the FITTED set differs")
+  IAV_ADDED <- setdiff(names(b_run), names(b_base))
+}
+IAV_TAG  <- paste0(IAV_DATE, "_", BASE_NAME, if (IAV_SWITCH) paste0("_", IAV_RUN_STRUCT) else "", if (IAV_SMOKE) "_SMOKE" else "")
 IAV_OUT  <- file.path("calibration", "output", sprintf("iav_module_%s.rds", IAV_TAG))
 IAV_LOG  <- file.path("outputs", "diagnostics", sprintf("iav_module_%s.log", IAV_TAG))
 LOGCON <- file(IAV_LOG, open = "wt"); sink(LOGCON, split = TRUE)
 cat(sprintf("%s @%s, %s | base %s (%s) | %d workers%s\n", IAV_DRIVER, COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M"),
-            BASE_NAME, ccx_mode_struct(md), IAV_WORKERS, if (IAV_SMOKE) " | ⚠ SMOKE: tiny budgets, NOT A RESULT" else ""))
+            BASE_NAME, IAV_BASE_STRUCT, IAV_WORKERS, if (IAV_SMOKE) " | ⚠ SMOKE: tiny budgets, NOT A RESULT" else ""))
+if (IAV_SWITCH)
+  cat(sprintf("  ⚠ --struct: the module is fitted under %s, the base's %s + %s; GATE 0 runs on the base AS STORED first\n",
+              IAV_RUN_STRUCT, IAV_BASE_STRUCT, paste(sprintf("%s = %s", IAV_ADDED, vapply(IAV_ADDED, function(n)
+                paste(format(b_run[[n]]), collapse = ","), "")), collapse = ", ")))
 RATIO_FILE <- ccx_mode_file(IAV_RATIO_MODE)
 if (!identical(unname(tools::md5sum(RATIO_FILE)), IAV_RATIO_MD5)) stop("the ratio file is not the one the ruling names")
 mr <- readRDS(RATIO_FILE)
@@ -121,19 +152,38 @@ vec_at <- function(L, s, w) {             # = lib_block_reopt.R br_vec(), for th
 run_at <- function(L, s, w) { v <- vec_at(L, s, w); r <- dg_run(v); r$v <- v; r }
 
 cat("\n=== 0. GATES ===\n")
-R_BASE <- run_at(B0[["L"]], B0[["s"]], B0[["w"]])
-st0 <- unlist(dg_streams(R_BASE, R_BASE$v, obs = OBS)); ms0 <- unlist(md$streams)
+R_ST <- run_at(B0[["L"]], B0[["s"]], B0[["w"]])      # the base AS STORED, under its own label
+st0 <- unlist(dg_streams(R_ST, R_ST$v, obs = OBS)); ms0 <- unlist(md$streams)
 dmax <- max(abs(st0[names(ms0)] - ms0))
 cat(sprintf("  the base's %d stored rows through the dg path: max |diff| %.1e (tol %g)%s\n", length(ms0), dmax, IAV_REPRO_TOL,
             if (!identical(sort(names(st0)), sort(names(ms0)))) " ⚠ the row SETS differ" else ""))
 if (dmax > IAV_REPRO_TOL || !identical(sort(names(st0)), sort(names(ms0)))) stop("the base does not reproduce its stored rows")
+R_BASE <- R_ST
+if (IAV_SWITCH) {
+  # THE SWITCH (+ STRUCT): the file's own vector, pins, seas_ml and pump field, rebuilt under the run's label by the
+  # resolver dg_vector() uses (ccx_mode_base() + ccx_overlay_par()). The model list may then differ from the stored
+  # one in the ADDED fields only, and the runs' forcing must carry the run label's ENSO index.
+  md_run <- md; md_run$struct <- IAV_RUN_STRUCT
+  p_run  <- ccx_overlay_par(ccx_mode_base(md_run), VB$pm); p_run$pump_mode <- md$pump_mode
+  moved  <- Filter(function(n) !identical(p_run[[n]], VB$p[[n]]), union(names(p_run), names(VB$p)))
+  cat(sprintf("  the switch to %s: the model list differs from the stored one in %s (the label's added fields: %s)\n",
+              IAV_RUN_STRUCT, paste(moved, collapse = ", "), paste(IAV_ADDED, collapse = ", ")))
+  if (!setequal(moved, IAV_ADDED)) stop("the switched model list differs from the stored one beyond the label's added fields")
+  VB$p <- p_run
+  R_BASE <- run_at(B0[["L"]], B0[["s"]], B0[["w"]])
+  if (!identical(attr(R_BASE$F, "enso_index"), ccx_enso_index_of(p_run)))
+    stop("the switched run's forcing does not carry the '", ccx_enso_index_of(p_run), "' ENSO index")
+  cat(sprintf("  the switched runs' forcing carries the '%s' ENSO index\n", attr(R_BASE$F, "enso_index")))
+}
 GP_BASE <- ccx_iav_growth_pair(R_BASE$out, R_BASE$F, GRO$monthly)
 SSR_REF <- sum((GP_BASE$mod - GP_BASE$obs)^2)       # the module's reference: the base's own SSR (a constant)
 mod_ll <- function(r) ccx_iav_module_loglik(r$out, r$F, OBS, ssr_ref = SSR_REF, obs_g = GRO$monthly)
 LL_BASE <- mod_ll(R_BASE)
-cat(sprintf("  the module at the base: SSR %.4f (the reference), slope row %+.4f, growth r %.4f\n",
-            LL_BASE[["ssr"]], LL_BASE[["slope_row"]], LL_BASE[["r"]]))
-if ("gcb_ocean_enso_slope" %in% names(st0) && !identical(LL_BASE[["slope_row"]], st0[["gcb_ocean_enso_slope"]]))
+cat(sprintf("  the module at the base%s: SSR %.4f (the reference), slope row %+.4f, growth r %.4f\n",
+            if (IAV_SWITCH) paste0(" under ", IAV_RUN_STRUCT) else "", LL_BASE[["ssr"]], LL_BASE[["slope_row"]], LL_BASE[["r"]]))
+# the module's slope row IS the main objective's row -- checked on the run AS STORED (a switched index moves it)
+if ("gcb_ocean_enso_slope" %in% names(st0) &&
+    !identical((if (IAV_SWITCH) mod_ll(R_ST) else LL_BASE)[["slope_row"]], st0[["gcb_ocean_enso_slope"]]))
   stop("the module's slope row is not the main objective's row")
 f_mod <- function(x) {                    # x = (L, log s, w); -loglik, 1e10 off the support
   if (!is.finite(sum(x)) || x[1] <= 0 || x[1] >= IAV_LAG_MAX || x[3] <= 0 || x[3] >= IAV_W_MAX) return(1e10)
@@ -247,7 +297,7 @@ COV4 <- J %*% COV %*% t(J)
 PINS <- c(lag_enso_land = OPT[["L"]], gamma_enso_land_NH = OPT[["s"]] * G0[[1]], gamma_enso_land_SH = OPT[["s"]] * G0[[2]],
           w_enso_l2 = OPT[["w"]])
 stopifnot(identical(names(PINS), CCX_IAV_MODULE_NAMES))
-cat("\n=== THE STAGE-1 RESULT: the module's four names, to be PINNED in stage 2 ===\n")
+cat(sprintf("\n=== THE STAGE-1 RESULT: the module's four names, to be PINNED in stage 2 (fitted under %s) ===\n", IAV_RUN_STRUCT))
 cat(sprintf("  %s = %.17g\n", names(PINS), PINS), sep = "")
 CHK <- NULL
 if (nzchar(IAV_CHECK)) {
@@ -271,7 +321,9 @@ out <- list(
   check = CHK,
   provenance = list(
     driver = IAV_DRIVER, commit = COMMIT, date = as.character(Sys.Date()), smoke = IAV_SMOKE,
-    base = BASE_NAME, base_file = BASE_FILE, base_md5 = unname(tools::md5sum(BASE_FILE)), base_struct = ccx_mode_struct(md),
+    base = BASE_NAME, base_file = BASE_FILE, base_md5 = unname(tools::md5sum(BASE_FILE)), base_struct = IAV_BASE_STRUCT,
+    struct = IAV_RUN_STRUCT, struct_switched = IAV_SWITCH, struct_added = IAV_ADDED,
+    enso_index = attr(R_BASE$F, "enso_index"),
     ratio_mode = IAV_RATIO_MODE, ratio_md5 = IAV_RATIO_MD5,
     growth_product = LIK_IAV_GROWTH_RDS, growth_sha256 = GRO$provenance$sha256,
     window = LIK_IAV_WIN, trend_df = LIK_IAV_TREND_DF, n_eff = LIK_IAV_NEFF, span_end = LIK_IAV_SPAN_END,
