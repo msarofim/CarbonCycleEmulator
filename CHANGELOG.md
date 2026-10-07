@@ -2,6 +2,96 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-07 (a) — **OBJECTIVE #17 LANDED AND READ** (Marcus: "write the handoff and run everything in the next session"). **The land half of the cut holds through stage 2: the one-pass check moves the lag +0.04σ and the land scale −0.01σ, and GATE V flips FAIL → PASS (in-sample: the module was fitted to the same growth record). The ocean half does not: the check moves `w_enso_l2` 14.73 → 17.68 (+2.31σ). Stage 2 weakens the ocean's ENSO response through `pump_grad` (62 %) and `h_ml` (28 %), and its own rows resist restoring it (−2.18, unrefitted). The basin promote chose, A (id 10), leads the stored logpost by 0.41 only through `h_ml`'s logit Jacobian (+0.69). On LIKELIHOOD, basin B fits better by 0.76.** Nothing adopted.
+
+- **How it ran.** `~/ccx_frozen/20261007_obj17_land_chain.sh` at `1949dff`, 08:14 EDT; steps 0–5 rc 0.
+  - Step 6 (the one-pass check) **stopped at its own gate**: the base's 26 rows reproduced through the dg path to 1.7e-6, against a literal 1e-6. Diagnosed as the objective's numerical noise floor (below), not a defect.
+  - **RULED (Marcus, verbatim): "Raise to 1e-5, named (Recommended)"** → `60eba2a`, `IAV_REPRO_TOL <- 1e-5`, with the measurement as its receipt.
+    - Mutation-tested at A in a frozen tree (`outputs/diagnostics/obj17_landing_20261007/gate_mutation/`). M0, as committed, passes at 1.7e-6. M1 resolves ENSO from the fitted-only `par_mode`, so the pinned land pair drops (the class of [[pinned_value_reset_by_fitted_resolver]]): it **fails at 16**. M2, the old 1e-6, fails.
+    - Power: the gate still fails a 1e-7 relative move of `beta_max` or `q10`, and a 1e-6 move of `kz` / `h_ml` / `pump_grad`.
+    - The failed attempt's log is kept: `check_1949dff_gate1e-6_FAILED.log`.
+  - The check then ran from `60eba2a`. Step 7 (the read at basin B) was run by hand; it is identical to the dry run's apart from the canonical's path line.
+  - Steps 1–6 stamp `+dirty`: the landing's own `calibration/output` entries were untracked while they ran. The code was clean, and the chain's refusal check passed. Everything run after `a2f6d60` stamps clean.
+  - The scorecard and the ocean-climate driver ran at BOTH basins, from a frozen tree at `1949dff` (`~/ccx_frozen/20261007_obj17_drivers`); copied in cmp-identical.
+  - **Not run: the constraint map.** It takes a registered mode name, and a path would land inside its output filename. #16's map was rebuilt at adoption (10-06 a), not at landing.
+- **The steps:**
+
+| step | result |
+|---|---|
+| land | the outdir's 48 files, 28 logs, 26 preflight files, launch.{sh,out} and the port targets: byte-identical; `RUN_PROVENANCE.txt` written; the id-18 statement appended (relative gap 1.578e-8 against `MS_EVAL_TOL` 1e-8) |
+| collect | 18 of 23 live starts converged into 4 basins: **A −1164.8154 ×8** (ids 10, 17, 15, 9, 8, 0, 14, 13), **B −1165.2246 ×8**, id 6 −1198.68, id 23 −1216.36; 5 out of time; id 18 excluded (dead) |
+| promote | **id 10**; GATES 1–5 pass; GATE 4 diff −1.78e-6 and **GATE 5 gap −1.78e-6** (the dry run's 2e-14 was luck: below); 0 kinks |
+| Hessian (`--update`, `nice 10`) | −H positive-definite, **condition 2.904e5** (B 2.913e5). ⚠ **`h_ml` UNSTABLE at both basins** (eps/3 vs 3 eps: 17 % at A, 376 % at B; no plateau, the fallback step), where hilda33p's was stable. Widest u-directions: `kz_deep_frac` 1.00, `imb_share_ocean_rest` 0.95, `h_hs` 0.56, `imb_share_land` 0.51, `beta_max` 0.49. \|r\| > 0.8: `k_w`–`hs_asx_frac` −0.82, `npp_frac_NH`–`seas_lag_p_NH` +0.81 |
+
+- **THE READ, A beside B** (`outputs/diagnostics/obj17_refit_read_20261007{,_basinB}.log`; both vectors reproduce their stored logposts, diff 0):
+
+| | A (id 10, `h_ml` 58.0 m) | B (start_001, `h_ml` 49.9 m) |
+|---|---|---|
+| #17's rows vs REF (hilda33p, its own module values) | **−10.077** | −9.316 |
+| of which `co2_seasonal_MLO` / `_SPO` | −6.15 / −4.99 | −6.16 / −5.07 |
+| #16's 27 rows: #17's vector vs hilda33p's | −41.19 | −39.24 |
+| the module (growth + slope row) vs hilda33p's | +0.61 (slope row +0.88) | +1.61 (slope row +1.85) |
+| SSP5-8.5 / vvH CO₂ in 2300 vs hilda33p | **−1.14 / −1.10 ppm** | −4.33 / −3.04 ppm |
+| the land's net climate effect, 2015–24 | −0.0480 GtC/yr | −0.0428 |
+| largest moves (hilda33p's marginal sd) | `h_ml` +2.80, `pump_grad` −0.96, `luc_scale` +0.69, `q10` +0.63 | `pump_grad` −0.88, `imb_share_land` +0.64, `luc_scale` +0.64 |
+
+- **WHAT CARRIES A's LEAD** (`calibration/diag_obj17_basins.R` → `outputs/diagnostics/obj17_basins_20261007.log`; each vector in #17's own space; the parts close to 9e-14):
+
+| A − B | |
+|---|---|
+| stored logpost | +0.409 |
+| **likelihood** | **−0.761** |
+| priors | +0.504 (`sst_seas_amp_SH` +0.393) |
+| log-Jacobians | +0.666 (**`h_ml` alone +0.686**: B sits 7.4 m above the 42.5 m band floor) |
+| likelihood + prior (no Jacobian) | −0.257 |
+
+  - Rows favouring B: `ocean_grad_d13c` −0.42, `d13c_seasonal_MLO` −0.41, `ocean_grad_dic` −0.38, `gcb_ocean_sink` −0.31. Rows favouring A: `d13c_seasonal_SPO` +0.39, `d13c_level_SPO` +0.18.
+  - ⚠ So the ranking collect and promote use (the u-space logpost) picked the basin the likelihood disfavours, by a term that depends on the `h_ml` BAND, not on data. The two are ~0.4–0.8 log-units apart, the optimiser's own convergence bound being 0.5.
+  - Context: under #14 the deeper-`h_ml` group (55–57 m) was the LOWER one (−1405.50 vs −1405.25 at 49.5 m) [[ccx_obj14_refit_1001]].
+- **THE ONE-PASS CHECK** (RULED tolerance 0.1σ; `outputs/diagnostics/obj17_landing_20261007/check.log`; the dry run's at B for comparison):
+
+| | A | B (dry run) |
+|---|---|---|
+| lag | 5.843 → 5.899 (**+0.044σ**) | 5.843 → 5.855 (+0.010σ) |
+| land scale | 1.3012 → 1.2991 (**−0.007σ**) | 1.3012 → 1.2951 (−0.021σ) |
+| **`w_enso_l2`** | **14.73 → 17.68 (+2.31σ)** | 14.73 → 16.71 (+1.55σ) |
+| VERDICT | goes to Marcus | goes to Marcus |
+
+- **WHY `w_enso_l2` MOVES** (handoff §3.4's test; `calibration/diag_obj17_slope_attribution.R` → `obj17_slope_attribution_20261007_basin{A,B}.log`). At a fixed w the module's slope row falls from +2.786 (hilda33p's names) to +0.877 at A (+1.852 at B). Each name that moved was set back to hilda33p's value, one at a time:
+
+| share of the slope's drop | A (drop −0.0492) | B (drop −0.0348) |
+|---|---|---|
+| `pump_grad` (A −0.96 sd, B −0.88) | **61.9 %** | **84.1 %** |
+| `h_ml` (A +2.80 sd, B +0.14) | **27.7 %** | 1.3 % |
+| `kz` / `hs_asx_frac` / `k_w` | 4.3 / 3.0 / 2.1 % | 9.7 / 3.7 / 2.4 % |
+| restoring the slope needs w (linear) | +2.83 Sv (the check: +2.95) | +1.92 Sv (the check: +1.98) |
+
+  - Gates: the row is the module's own to the digit; the 7 control names (no role in the ¹²C ocean flux) give exactly 0; the one-at-a-time sum matches the drop to 4 % (A) / 1.4 % (B).
+  - So the handoff's hypothesis holds at the level of WHICH NAME: a weaker solved pump. Its MECHANISM (less DIC contrast for the limb's `dV × (c_k − c_ml)`) is not tested: the fast runner exposes only the mixed layer. At A the deeper mixed layer adds its own 28 %, plausibly by dilution (untested).
+- **WHAT A SECOND PASS WOULD COST** (`calibration/diag_obj17_iterate_price.R` → `obj17_iterate_price_20261007.log`). The module's four pins at the check's values on each basin's vector, unrefitted:
+  - the main objective pays **−2.18 at A, −1.29 at B**, mostly `gcb_ocean_sink` (−0.73 / −0.45) and `co2_level_MLO` (−0.52 / −0.38);
+  - the model's ENSO ocean slope returns from 0.58× (A) / 0.71× (B) to **1.01× the observed 0.1153**.
+  - So stage 2's own rows prefer a weaker ocean ENSO response, and a second refit at w ≈ 17.7 would likely move `pump_grad` / `h_ml` again. ⚠ **Hypothesis, UNTESTED:** the cut low-passed `gcb_land_sink` but scores `gcb_ocean_sink` year by year. That leaves the main objective a channel to fight the module over the ocean's interannual response. Test: price `gcb_ocean_sink` on its low-pass part (the land row's projector) at both pin sets.
+- **THE SCORECARD** (`whole_model_scorecard_20261007_hilda33p_obj17{,B}.log`; the three shared arms identical in both):
+  - **GATE V flips FAIL → PASS at both basins: sd 0.820 (A) / 0.813 (B) against 0.933 ± 0.084, z −1.35 / −1.43.** hilda33p reads 0.565, z −4.39. ⚠ **IN-SAMPLE for #17.** GATE V's observable is GCB's annual atmospheric growth, 1959–2024. The module's land amplitude was fitted to NOAA's MBL monthly growth, 1980–2024: the same record over 45 shared years. It shows the module did what it was built to do. It is not an out-of-sample validation ([[heldout_is_a_property_of_the_target_code]]).
+  - Every other verdict is unchanged against hilda33p: H, GL, 5 and D still FAIL; G, Q (n_sd 0.12 / 0.18), 7, S and 6 (z +0.10 / +0.07) still PASS. IRF(100) 0.362 (hilda33p 0.366). The strained priors are the same four (`q10` −2.48, `kz_deep_frac` −2.87, `pump_hs_gcm2` +2.14, `rep_dC` +4.19 at A).
+  - The ENSO ocean response (the scorecard's estimator, on the full gate run): 0.59× obs at A, 0.71× at B, against hilda33p's 0.86×.
+- **THE OCEAN'S CLIMATE EFFECT, like-for-like with GCB's GOBMs** (`ocean_climate_gobm_20261007_obj17{,B}.log`): A −0.380 ± 0.028 GtC/yr (1.90× GCB's −0.20 ± 0.05), B −0.376 (1.88×), #16 −0.375 (1.87×). CHECK 0 passes, and both its mutations fail. The cut does not touch it.
+- **⭐ THE OBJECTIVE's NUMERICAL NOISE FLOOR** (`calibration/diag_objective_noise_floor.R` → `objective_noise_floor_20261007.log`; seeded 20261007, recorded in the output; two runs identical in content):
+  - The objective is deterministic: the same u gives the same value twice. The driver's own end-of-run check reproduced every start (gap 0) except id 18.
+  - Re-encoding `par_mode` moves 9 of A's 29 u entries by ≤ 3.5e-16, and that moves A's logpost by −1.78e-6. That is promote's GATE 4/5 gap. B's 14 changed entries moved nothing.
+  - **Both optima sit on the floor's upper tail.** Every 1e-12 single-name nudge moves them DOWN, 8 of 8 at both: −2.3 to −4.4e-6 at A, −0.6 to −1.9e-6 at B. At three nearby points the optimiser did not choose, the same nudges scatter on BOTH sides (1+/7−, 2+/6−, 5+/3−).
+  - Through the dg path, A misses its stored rows by 1.73e-6, in the three δ¹³C level / ice-core rows. B misses by 1.0e-10, but a 1e-12 `h_ml` nudge moves B's rows by up to 1.6e-6.
+  - **Its SOURCE is not identified** (some iterative solve's stopping rule, untested). Consequences: a ~1e-6 gate is at the floor. The Hessian's smallest steps (1e-5) read noise: 1e-6 / eps² ~ 1e4, visible in the step table's first column. The `h_ml` instability is at least partly this.
+- **Basin B is kept in the repo**: `calibration/output/refit_20261006_obj17_basinB_start001_DRYRUN/` (cmp-identical to the dry-run tree's file, with a PROVENANCE note). Its only copy was in a tree marked removable, and the basin choice is open.
+- **Tried and abandoned:**
+  - **The slope attribution's first draft read the slope on the full gate run (to 2025).** It interpolated 2024's end boundary where the objective extrapolates it, so it read +1.8925 at B against the module's +1.8519. The committed driver reads the objective's span, and the gate against the module's own row is what caught it.
+- **Decisions pending, all Marcus's** (the handoff's §3.6, now with the read):
+  - **which basin**, if #17 is adopted: A (the u-space MAP, 8 cold starts) or B (likelihood +0.76, the incumbent's side, `h_ml` 49.9);
+  - **adopt #17 or not**;
+  - **`w_enso_l2`**: accept the one pass, iterate (priced above), or redesign (e.g. the low-pass ocean row, after its test);
+  - the cut posterior, the app copy and `gamma_diff`'s future stay as in the handoff.
+
 ## 2026-10-06 (q) — **STAGE 2 FINISHED (2026-10-07 06:34 EDT, rc 0): 18 of 24 converged, into TWO basins. A at −1164.8154 (eight cold starts; best id 10) beats B at −1165.2246 (eight starts, the incumbent seed among them) by 0.41. They differ mainly in `h_ml`, 58.0 m vs 49.9 m (the known near-degeneracy).** Not landed and not read yet. Marcus, verbatim: "write the handoff and run everything in the next session". Handoff: `notes/handoff_2026-10-07_obj17_finished.md`, which supersedes 10-06d (that note now points to it).
 
 - **The survey** (the 24 start files, read-only; NOT the read):
