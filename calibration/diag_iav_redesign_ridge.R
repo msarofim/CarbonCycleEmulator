@@ -33,11 +33,18 @@ RF_PRICE   <- if (length(RF_ARGS)) RF_ARGS[1] else file.path("outputs", "diagnos
 RF_HELD    <- "beta_max"
 RF_FOLLOW  <- c("fert_k", "luc_scale", "imb_share_land", "ndep_ret")      # the rest of the pricing's B2 block
 RF_EXTRA   <- c(1.90, 2.00, 2.05, 2.15)                                   # + B's and B2's own values (below)
+# CCX_RF_EXTRA overrides the grid (comma-separated beta_max values; B's and B2's are always added), CCX_RF_TAG suffixes the
+# output. Added 10-07 (e) for the WIDE run: the first grid spans about +/-0.5 sigma of the ridge, so its 1-sigma width was a
+# quadratic EXTRAPOLATION, and the ridge is known to stiffen away from the mode (memory laplace_fails_on_fertilisation_ridge).
+if (nzchar(Sys.getenv("CCX_RF_EXTRA", ""))) RF_EXTRA <- as.numeric(strsplit(Sys.getenv("CCX_RF_EXTRA"), ",")[[1]])
+stopifnot(length(RF_EXTRA) > 0, all(is.finite(RF_EXTRA)))
+RF_TAG     <- Sys.getenv("CCX_RF_TAG", "")
 RF_MODE_TOL <- 0.1; RF_PULL_H <- 0.1; RF_NDEPS <- 0.01; RF_RELTOL <- 1e-12; RF_BFGS_MAXIT <- 200L; RF_NM_MAXIT <- 1500L
 RF_ROUNDS  <- 3L                                                          # = the pricing's B2 settings
 RF_B2_TOL  <- 0.5 * RF_MODE_TOL^2 * (1 + length(RF_FOLLOW))              # B2's own convergence bound on its logpost
 RF_WORKERS <- as.integer(Sys.getenv("CCX_RF_WORKERS", "6"))
-RF_OUT <- file.path("outputs", "diagnostics", sprintf("iav_redesign_ridge_%s", format(Sys.Date(), "%Y%m%d")))
+RF_OUT <- file.path("outputs", "diagnostics", sprintf("iav_redesign_ridge_%s%s", format(Sys.Date(), "%Y%m%d"),
+                                                      if (nzchar(RF_TAG)) paste0("_", RF_TAG) else ""))
 COMMIT <- ccx_git_stamp()
 `%||%` <- function(a, b) if (is.null(a)) b else a
 LOGCON <- file(paste0(RF_OUT, ".log"), open = "wt"); sink(LOGCON, split = TRUE)
@@ -177,7 +184,7 @@ cat(sprintf("  the futures between the same two points (SSP5-8.5 2300, B2's minu
 
 saveRDS(list(table = TAB, cells = RES, grid = GRID, beta_max_b = BM_B, beta_max_b2 = BM_B2,
              provenance = list(driver = RF_DRIVER, commit = COMMIT, price = RF_PRICE, price_commit = PV$commit, mode_b = PV$mode_b,
-                               mode_b_md5 = PV$mode_b_md5, index = PV$index, held = RF_HELD, follow = RF_FOLLOW, grid = GRID,
+                               mode_b_md5 = PV$mode_b_md5, index = PV$index, held = RF_HELD, follow = RF_FOLLOW, grid = GRID, tag = RF_TAG,
                                tols = c(mode = RF_MODE_TOL, pull_h = RF_PULL_H, ndeps = RF_NDEPS, reltol = RF_RELTOL, bfgs = RF_BFGS_MAXIT,
                                         nm = RF_NM_MAXIT, rounds = RF_ROUNDS, b2 = RF_B2_TOL), workers = RF_WORKERS,
                                futures = paste(names(BR_FUT_SPLICE), collapse = "+"), year = BR_FUT_YEAR, date = format(Sys.time(), "%Y-%m-%d %H:%M"),
