@@ -1,0 +1,8 @@
+M1_err_drops_switch      CAUGHT | RESULT failed 16 errors 0 of 92 expectations; failing tests: IR2  IR4  IR6 
+M2_row_ignores_switch    CAUGHT | RESULT failed 14 errors 0 of 92 expectations; failing tests: IR4  IR6 
+M3_label_drops_index     CAUGHT | RESULT failed 16 errors 0 of 92 expectations; failing tests: IR1  IR4  IR5 
+M4_cost_at_land_sd       CAUGHT | RESULT failed 12 errors 0 of 92 expectations; failing tests: IR4 
+M5_wrong_df              CAUGHT | RESULT failed 12 errors 0 of 92 expectations; failing tests: IR4 
+M6_label_index_relsst    CAUGHT | RESULT failed 13 errors 0 of 92 expectations; failing tests: IR1  IR4  IR5 
+source restored: yes
+ALL CAUGHT

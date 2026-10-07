@@ -1,0 +1,50 @@
+calibration/fit_iav_module.R @5d34d41, 2026-10-07 14:08 | base refit_20261006_obj17_basinB_start001_DRYRUN (hilda_csl3v0kaidgbemw) | 6 workers
+  ⚠ --struct: the module is fitted under hilda_csl3v0kaidgbemwt, the base's hilda_csl3v0kaidgbemw + enso_index = 1, gcb_ocean_lowpass_df = 6; GATE 0 runs on the base AS STORED first
+ratio hilda33p (md5 525404989a20ece51ec8bd088c7d4638): gamma_enso_land_NH / gamma_enso_land_SH = 0.5077686 / 0.4866420, NH : SH = 1.0434; base's own: L 5.8432, s 1.30120 (SH's 1.30120), w 14.7262, gamma_diff 0.25
+growth product mbl_global_growth_monthly.rds (sha256 ab0bae11a89f...); window 1980-2024, trend df 5, n_eff 22.5388
+
+=== 0. GATES ===
+  the base's 26 stored rows through the dg path: max |diff| 1.0e-10 (tol 1e-05)
+  the switch to hilda_csl3v0kaidgbemwt: the model list differs from the stored one in enso_index, gcb_ocean_lowpass_df (the label's added fields: enso_index, gcb_ocean_lowpass_df)
+  the switched runs' forcing carries the 'detrend' ENSO index
+  the module at the base under hilda_csl3v0kaidgbemwt: SSR 89.8258 (the reference), slope row +1.8779, growth r 0.6799
+
+=== 1. BASIN: superposition over the lag (s in closed form, w at the base) ===
+  superposition vs a direct run at the scan's best (L 5.75, s 1.263): rms 2.79e-06 ppm/yr against a signal of 0.350
+  the scan's best: L 5.75, s 1.263 (growth-only, w at the base) -- the START of step 2
+
+=== 2. OPTIMUM: Nelder-Mead on real runs of the full module objective ===
+  110 evaluations, convergence 0, 0.4 min
+  L 5.8483 months, s 1.29779 (gamma_enso_land_NH / gamma_enso_land_SH = 0.65898 / 0.63156), w_enso_l2 16.6051
+  module loglik +0.9754 vs the base (growth +0.0671, slope row +1.8779 -> +2.7862); SSR 89.8258 -> 89.2925; growth r 0.6799 -> 0.6835
+  growth peak after Nino 3.4: base +6, optimum +6 months (the record +5)
+  the preview's answer (iav_cut_smoothed_land_20261006_hilda33p.rds, land_ocean, at hilda33p): L 5.8430, s 1.30119, w 14.7263 -> this run's differences +0.0053, -0.00340, +1.8788
+
+=== 3. PROFILE of the lag on real runs (s and w re-optimised at each lag) ===
+       L      s       w      ll conv  n     dll
+  2.0000 1.0224 15.5183 -0.1441    0 65 -2.9973
+  3.0000 1.1369 15.7028  0.9909    0 75 -1.8623
+  4.0000 1.2247 15.9767  1.9944    0 61 -0.8588
+  4.5000 1.2568 16.1354  2.3829    0 59 -0.4703
+  5.0000 1.2799 16.3060  2.6626    0 57 -0.1907
+  5.5000 1.2941 16.4807  2.8168    0 57 -0.0365
+  5.8483 1.2978 16.6051  2.8533    0  0  0.0000
+  6.5000 1.2966 16.8409  2.7469    0 59 -0.1064
+  7.0000 1.2853 17.0110  2.5335    0 61 -0.3197
+  7.5000 1.2655 17.1769  2.2093    0 63 -0.6439
+  8.0000 1.2386 17.3276  1.8129    0 61 -1.0404
+  9.0000 1.1645 17.5876  0.8628    0 65 -1.9904
+ 10.0000 1.0702 17.7836 -0.1392    0 63 -2.9925
+  the lag: 1-sigma 4.46-7.29, 2-sigma 2.88-9.00 months (drops 0.5 / 2.0); the base's 5.84 sits at -0.00
+
+=== 4. LAPLACE: the module's Hessian in (L, s, w), central differences on real runs ===
+  Hessian eigenvalues -0.4078, -0.8247, -11.66 (all must be < 0)
+  Laplace 1-sigma: L 1.247 months, s 0.2939, w 1.452; correlations L-s +0.04, L-w +0.31, s-w -0.05
+
+=== THE STAGE-1 RESULT: the module's four names, to be PINNED in stage 2 (fitted under hilda_csl3v0kaidgbemwt) ===
+  lag_enso_land = 5.8483078104595023
+  gamma_enso_land_NH = 0.65897731179720698
+  gamma_enso_land_SH = 0.63155946220609593
+  w_enso_l2 = 16.605064312322234
+
+saved calibration/output/iav_module_20261007_refit_20261006_obj17_basinB_start001_DRYRUN_hilda_csl3v0kaidgbemwt.rds and outputs/diagnostics/iav_module_20261007_refit_20261006_obj17_basinB_start001_DRYRUN_hilda_csl3v0kaidgbemwt.log | 1.3 min
