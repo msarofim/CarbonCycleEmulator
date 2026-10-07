@@ -66,9 +66,9 @@ for (k in names(LO_MODES)) {
   P1 <- readRDS(LO_CHECKS[[k]])$pins[LO_MODULE]
   r0 <- gcb_rows(with_module(LO_MODES[[k]], P0)); r1 <- gcb_rows(with_module(LO_MODES[[k]], P1))
   cat(sprintf("\n=== basin %s (%s, md5 %s), %d GCB years ===\n", k, LO_MODES[[k]], unname(tools::md5sum(LO_MODES[[k]])), r0[["n"]]))
-  g_o <- r0[["ocean_full"]] - md$streams$gcb_ocean_sink; g_l <- r0[["land_lowpass"]] - md$streams$gcb_land_sink
+  g_o <- r0[["ocean_full"]] - md$streams[["gcb_ocean_sink"]]; g_l <- r0[["land_lowpass"]] - md$streams[["gcb_land_sink"]]
   cat(sprintf("  GATES at stage 1's pins: the rebuilt ocean row %.6f vs stored %.6f (%+.1e); the low-pass land row %.6f vs stored %.6f (%+.1e)\n",
-              r0[["ocean_full"]], md$streams$gcb_ocean_sink, g_o, r0[["land_lowpass"]], md$streams$gcb_land_sink, g_l))
+              r0[["ocean_full"]], md$streams[["gcb_ocean_sink"]], g_o, r0[["land_lowpass"]], md$streams[["gcb_land_sink"]], g_l))
   if (abs(g_o) > LO_TOL || abs(g_l) > LO_TOL) stop("basin ", k, ": the rebuilt GCB rows do not reproduce the stored ones")
   d <- r1 - r0; tot <- PRICE[[k]]$d_lik; d_o_row <- PRICE[[k]]$rows[["gcb_ocean_sink"]]
   if (abs(d_o_row - d[["ocean_full"]]) > LO_TOL) stop("basin ", k, ": the ocean row's change disagrees with diag_obj17_iterate_price.R's")
