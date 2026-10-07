@@ -1,0 +1,22 @@
+calibration/diag_obj17_lowpass_ocean_price.R @2be433f, 2026-10-07 10:13 | projector df 6 (LIK_LAND_LOWPASS_DF), ocean sd 0.4 GtC/yr (LIK_GCB_OCEAN_SD)
+
+=== basin B (calibration/output/refit_20261006_obj17_basinB_start001_DRYRUN/mode_fit_pumpN.rds, md5 081eb16f4fe718692004fb1cf9645891), 66 GCB years ===
+  GATES at stage 1's pins: the rebuilt ocean row -6.491980 vs stored -6.491980 (+0.0e+00); the low-pass land row -22.331161 vs stored -22.331161 (+4.5e-13)
+  pins 5.8432/0.6607/0.6332/14.7262 -> 5.8554/0.6576/0.6302/16.7050
+  gcb_ocean_sink, year by year (as scored): -6.4920 -> -6.9379  (change -0.4459)
+    its HIGH part's cost:                    +4.5146 -> +5.0684  (change +0.5538: the interannual part)
+    its LOW-PASS part (df 6):                -1.9774 -> -1.8695  (change +0.1079: what a low-pass row would see)
+  the main objective's resistance (diag_obj17_iterate_price.R): -1.2945 in all; with a low-pass ocean row it would be -0.7407
+    what remains is the other rows: co2_level_MLO -0.384, co2_level_SPO -0.199, co2_seasonal_SPO -0.154, co2_seasonal_MLO -0.124
+
+=== basin A (calibration/output/refit_20261007_obj17_hilda_csl3v0kaidgbemw/mode_fit_pumpN.rds, md5 9612ed72cc9675dd85162e10ca69f38d), 66 GCB years ===
+  GATES at stage 1's pins: the rebuilt ocean row -6.798946 vs stored -6.798946 (-8.0e-10); the low-pass land row -22.220147 vs stored -22.220147 (-1.8e-10)
+  pins 5.8432/0.6607/0.6332/14.7262 -> 5.8986/0.6596/0.6322/17.6758
+  gcb_ocean_sink, year by year (as scored): -6.7989 -> -7.5268  (change -0.7278)
+    its HIGH part's cost:                    +4.8396 -> +5.7130  (change +0.8734: the interannual part)
+    its LOW-PASS part (df 6):                -1.9593 -> -1.8137  (change +0.1456: what a low-pass row would see)
+  the main objective's resistance (diag_obj17_iterate_price.R): -2.1768 in all; with a low-pass ocean row it would be -1.3034
+    what remains is the other rows: co2_level_MLO -0.520, co2_seasonal_SPO -0.354, co2_level_SPO -0.304, co2_seasonal_MLO -0.272
+
+saved outputs/diagnostics/obj17_lowpass_ocean_price_20261007.{log,rds}
+⛔ ADOPTS NOTHING.
