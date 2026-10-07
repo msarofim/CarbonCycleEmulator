@@ -2,6 +2,13 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-07 (c) — **RULED: price a redesigned cut next; handoff written.** Marcus, verbatim: "Price a redesigned cut (Recommended)" and "Handoff now, continue fresh (Recommended)". Handoff: `notes/handoff_2026-10-07b_obj17_landed.md`, which supersedes `handoff_2026-10-07_obj17_finished.md` (that note now points to it).
+
+- **The redesign to price** (no build, no refit; at basin B; handoff §3): #17 + the DETRENDED ENSO index + a LOW-PASS `gcb_ocean_sink` row. Arithmetic from (b) gives the five rows' resistance to `w_enso_l2` about −0.14 at B, against −1.31.
+  - Price: the main objective's cost unrefitted and block-re-optimised; stage 1 under the detrended index (does the land answer hold, where does w land?); the resistance left on the WHOLE objective; the futures.
+  - Then the design questions go to Marcus WITH the price: the seasonal rows' interannual part, and the label.
+- **Found while writing the handoff:** `promote_multistart_mode.R` has no way to promote a chosen basin. It always takes the best stored logpost (here basin A), so adopting at basin B needs that option first. Not changed.
+
 ## 2026-10-07 (b) — **Marcus's rulings on the landing, APPLIED; the low-pass ocean row PRICED; and the main objective's resistance to `w_enso_l2` SPLIT.** About half is INTERANNUAL: the year-by-year `gcb_ocean_sink` row and the seasonal rows. The other half is the CO₂ level rows at LOW frequency. **That half is the shipped ENSO index's +0.0083 K/yr trend, carried by the limb: on the detrended index it vanishes.** So under the shipped index `w_enso_l2` is not an interannual-only name, which is the cut's premise for it. Nothing adopted; no objective changed.
 
 - **Rulings, verbatim (AskUserQuestion on the landing's read):**

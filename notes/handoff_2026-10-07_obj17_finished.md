@@ -1,5 +1,9 @@
 # HANDOFF 2026-10-07 — OBJECTIVE #17's STAGE 2 FINISHED. LAND IT: everything is ready to run.
 
+> ⛔ **SUPERSEDED by `notes/handoff_2026-10-07b_obj17_landed.md`.** The landing below RAN on 2026-10-07 (CHANGELOG
+> 10-07 a, b). Step 6 stopped at its 1e-6 gate (the objective's noise floor; ruled to 1e-5), and the rest is done.
+> Read the new note, not this one.
+
 **Supersedes** `notes/handoff_2026-10-06d_obj17_running.md`, which now points here.
 - Written on Marcus's instruction, verbatim: "write the handoff and run everything in the next session".
 - So the next session RUNS the landing (§3) and reads it. Adoption stays Marcus's call.
