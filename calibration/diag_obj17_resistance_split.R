@@ -37,14 +37,21 @@ cat(sprintf("%s @%s, %s | projector df %d (LIK_LAND_LOWPASS_DF) for every row\n"
             format(Sys.time(), "%Y-%m-%d %H:%M"), RS_DF))
 OBS <- ccx_prepare_obs(); PRICE <- readRDS(RS_PRICE)
 
-# each row's scored years and sd(s), one entry per coefficient series (ccx_loglik()'s own construction)
-row_spec <- function(row) {
-  if (row == "gcb_ocean_sink") return(NULL)                                      # years from the flux merge, below
-  st <- sub("^co2_(level|seasonal)_", "", row)
-  if (grepl("^co2_level_", row)) { o <- OBS$co2_ann[[st]]; return(list(list(year = o$year, sd = LIK_CO2_REP_ERR))) }
-  o <- OBS$co2_seas[[st]]; list(list(year = o$year, sd = o$sd_a), list(year = o$year, sd = o$sd_b)) }
-split_row <- function(res, row, gcb_years) {
-  sp <- if (row == "gcb_ocean_sink") list(list(year = gcb_years, sd = LIK_GCB_OCEAN_SD)) else row_spec(row)
+# each row's SCORED years and sd(s), one entry per coefficient series: ccx_loglik()'s own matching (obs years with a
+# model value) on dg_streams()'s span (the run and forcing truncated at DG_SINK_LAST + 1). The obs table alone is not
+# the scored set: MLO's level table has 67 years and the row scores 66 (this driver's first run stopped there).
+row_spec <- function(row, o_run, F_run) {
+  if (row == "gcb_ocean_sink") {
+    fl <- ccx_calendar_flux(o_run)
+    yr <- sort(intersect(intersect(OBS$gcb$year, fl$year), ccx_forcing_eluc_annual(F_run)$year))
+    return(list(list(year = yr, sd = LIK_GCB_OCEAN_SD))) }
+  st <- sub("^co2_(level|seasonal)_", "", row); ms <- ccx_model_stats(o_run, OBS)
+  if (grepl("^co2_level_", row)) { o <- OBS$co2_ann[[st]]; yr <- o$year[!is.na(match(o$year, ms$co2[[st]]$year))]
+    return(list(list(year = yr, sd = LIK_CO2_REP_ERR))) }
+  o <- OBS$co2_seas[[st]]; yr <- o$year[!is.na(match(o$year, ms$co2_seas[[st]]$year))]
+  list(list(year = yr, sd = o$sd_a), list(year = yr, sd = o$sd_b)) }
+split_row <- function(res, row, o_run, F_run) {
+  sp <- row_spec(row, o_run, F_run)
   if (length(sp) != length(res)) stop(row, ": ", length(res), " residual series, expected ", length(sp))
   parts <- mapply(function(e, s) {
     if (length(e) != length(s$year)) stop(row, ": ", length(e), " residuals for ", length(s$year), " years")
@@ -55,11 +62,10 @@ split_row <- function(res, row, gcb_years) {
 with_module <- function(F, vals) { V <- dg_vector(F)
   for (n in names(vals)) { if (n %in% names(V$p)) V$p[[n]] <- vals[[n]]; V$pm[[n]] <- vals[[n]] }
   V$p <- ccx_set_enso(V$p, V$pm); V }
-gcb_years_of <- function(r) { fl <- ccx_calendar_flux(r$out[r$out$t < LIK_IAV_SPAN_END + 1, , drop = FALSE])
-  sort(intersect(intersect(OBS$gcb$year, fl$year), ccx_forcing_eluc_annual(r$F)$year)) }
 rows_at <- function(V) { r <- dg_run(V); st <- dg_streams(r, V, obs = OBS, residuals = TRUE); RES <- attr(st, "residuals")
-  gy <- gcb_years_of(r); s <- unlist(st)
-  out <- t(vapply(RS_ROWS, function(row) split_row(RES[[row]], row, gy), numeric(3)))
+  o_run <- r$out[r$out$t < DG_SINK_LAST + 1, ]; F_run <- r$F[r$F$t < DG_SINK_LAST + 1, ]      # = dg_streams()'s span
+  s <- unlist(st)
+  out <- t(vapply(RS_ROWS, function(row) split_row(RES[[row]], row, o_run, F_run), numeric(3)))
   list(streams = s, split = out) }
 
 OUT <- list()
