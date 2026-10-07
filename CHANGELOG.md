@@ -2,6 +2,104 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-07 (d) — **THE REDESIGNED CUT, PRICED AT BASIN B** (handoff 10-07b §3; Marcus: "Price a redesigned cut (Recommended)"). **The redesign removes the main objective's resistance to the module's limb: moving `w_enso_l2` 14.73 → 16.71 costs the WHOLE objective −0.10, against #17's −1.29. Stage 1 does not care about the index: under the detrended index the land answer holds (lag 5.85, ×1.30) and `w` lands at 16.61 at B, where the shipped index put it. Neither objective ratchets the pump. But the detrended index is not free. Re-fitting the land block, the main objective pays −7.6, almost all in the ice cores, and SSP5-8.5 CO₂ in 2300 rises +23 ppm (vvH +11). The cause is `beta_max` falling 7 %: the shipped index's trend was holding it up.** Nothing adopted, built or refitted.
+
+- **What ran.** `calibration/diag_iav_redesign_price.R` @`e891fa9` → `outputs/diagnostics/iav_redesign_price_20261007.{log,rds}` (+ `_stdout.log`), from a frozen copy, BLAS pinned, `nice 10`, 15.8 min.
+  - Companions: `diag_iav_index_slow_flux.R` @`6f43a17` → `iav_index_slow_flux_20261007.*`; `diag_iav_redesign_futures_attr.R` @`38223f3` → `iav_redesign_futures_attr_20261007.*`.
+  - Torch verdict, said before launch: not needed, a ~15-min pricing of 0.2-s runs.
+- **How the redesign is emulated, not built.** The detrended index is the existing structure axis: `bp$enso_index` = 1 on the objective's base, `v$p$enso_index` on the dg path. The low-pass ocean row wraps `ccx_loglik()` in the driver's process only. With the switch on, the row gains its high part's cost `|(I-P)e|²/(2·0.4²)`, from the row's OWN residuals as scored and the land row's projector (df 6). One run therefore scores both row definitions.
+  - Considered instead: the 10-06 preview's `extra` term, which re-runs the model on the dg path. Not used: it doubles the runs and scores the correction on a second evaluation path.
+- **Gates (all pass; six mutated, all six stop at their own gate,** `outputs/diagnostics/iav_redesign_price_20261007_gate_mutation/`**):**
+  - B reproduces its stored logpost and 26 rows exactly (diff 0).
+  - The wrapper ON changes ONLY the ocean row (25 rows `identical()`). That row is the 10-07 (b) dg-path price exactly: −1.977390, high part 4.514590.
+  - The shipped index trends +0.008308 K/yr over 1959–2024 (recorded +0.00831; mean +0.042 K); the detrended one +0.000124 K/yr (mean −0.003 K).
+  - Under the detrended index the objective path reproduces the 10-07 (b) dg-path split rows at P0 and P1 (1.9e-12).
+  - The shipped resistance reproduces `diag_obj17_iterate_price.R` row by row (0) and the low-pass total (2.2e-13).
+  - The ENSO ocean slope reproduces the iterate price's (0).
+  - **CONTROL: the stage-1 mirror reproduces both stored stage-1 runs EXACTLY (0.000σ):** #17's at hilda33p and the dry run's check at B. The smoke runs' tiny budgets missed by 0.11–0.40σ, so the 0.01σ control has power.
+  - Mutations: M1 the wrapper adds nothing; M2 the objective ignores the index; M3 the trend gate reads the wrong index; M4 stage 1 never switches; M5 the resistance at the wrong pins; M6 the slope ignores the pins.
+- **1. RESISTANCE: the module's move at B, unrefitted, on the WHOLE main objective** (P1 = the one-pass check, shipped; P1d = stage 1 at B, detrended):
+
+| | ocean row year by year | ocean row LOW-PASS |
+|---|---|---|
+| shipped index, P0 → P1 | −1.295 (#17 as landed) | −0.741 |
+| detrended index, P0 → P1 | −0.662 | **−0.102 (the redesign)** |
+| detrended index, P0 → P1d (w 16.61) | −0.578 | **−0.047** |
+
+  - The redesign's −0.102 is the five rows' −0.144 (the arithmetic of (b) said −0.14) plus the other 21 rows' +0.042.
+  - What is left is the seasonal rows' interannual part (`co2_seasonal_MLO` −0.140, `_SPO` −0.167), offset by `co2_level_MLO` +0.133, the ocean row's low-pass part +0.037 and the ¹⁴C rows +0.09.
+- **2. STAGE 1 UNDER THE DETRENDED INDEX** (a mirror of `fit_iav_module.R` steps 0–4; its gate runs on the base AS STORED, then the index is switched):
+
+| | lag (months) | land scale | `w_enso_l2` | lag 1σ |
+|---|---|---|---|---|
+| hilda33p, shipped (= #17's stage 1) | 5.8432 | 1.3012 | 14.726 | 4.46–7.28 |
+| hilda33p, detrended | 5.8365 | 1.3027 | 14.679 | 4.45–7.27 |
+| basin B, shipped (= the one-pass check) | 5.8554 | 1.2951 | 16.705 | 4.47–7.30 |
+| basin B, detrended | 5.8483 | 1.2978 | 16.605 | 4.46–7.29 |
+
+  - The switch moves stage 1 by at most 0.08σ (`w` at B −0.078σ; lag and scale ≤ 0.009σ). Its two rows are blind to a trend by construction: the growth is detrended (ns df 5) on both sides, and the slope regression carries a year term.
+  - So the redesign does not change where `w` lands. At B it is still +1.47σ from #17's stage 1, because stage 2 released the pump (10-07 a). It changes whether the main objective fights that.
+- **3b. THE RATCHET TEST** (new; `pump_grad` and `kz`, which carry 94 % of the slope's drop at B, re-optimised at P0 and at P1; B's own marginal sd):
+  - **#17 as landed:** at P1 the pair moves `pump_grad` −0.049 sd, `kz` +0.003 sd. The resistance with the pair re-optimised is −1.285 (unrefitted −1.295). The model's ENSO ocean slope at that optimum is 1.00× obs.
+  - **The redesign:** `pump_grad` −0.008 sd, `kz` +0.005 sd; resistance −0.145 (unrefitted −0.102); slope 1.05× obs (1.04× at P1d).
+  - **So a higher `w` does not make the main objective weaken the ocean's ENSO response again, under either objective.** The one-pass check's +1.55σ therefore looks like a ONE-TIME release, not a ratchet.
+    - The release is INFERRED, not tested: that stage 2 lowered `pump_grad` because the slope row had left the main objective.
+    - Under #17 a second pass would then likely converge on `w`, but at the −1.29 the redesign removes.
+  - Caveat: two names re-optimised, not 29.
+- **4. THE INDEX SWITCH's COST at B** (module at P0; likelihood against B on the same rows):
+
+| | redesign's rows | #17's rows | prior part |
+|---|---|---|---|
+| B1, unrefitted | −12.342 | −12.339 | 0 |
+| B2, the land five re-optimised | **−7.664** | −7.663 | +0.523 |
+| B3, B2 + `pump_grad`, `kz` | −7.583 | −7.611 | +0.474 |
+
+  - B1 by row: `co2_level_MLO` −7.17, `gcb_land_sink` −2.84, `d13c_level_SPO` −2.41, `d13c_icecore` −2.00, `co2_level_SPO` −1.96, the low-pass ocean row −1.77; `d13c_level_MLO` **+5.93**.
+  - B2 recovers the CO₂ levels (−9.13 → −0.47) by weakening the land sink. It moves `beta_max` 2.100 → 1.947 (−7.3 %), `fert_k` 718 → 671, `luc_scale` 0.921 → 0.904 and `ndep_ret` 11.86 → 10.64. The cost moves to the ICE CORES (−7.71: `co2_icecore` −4.34, `d13c_icecore` −3.37), with the ocean row at −1.23.
+  - The ocean pair adds only +0.08.
+  - ⚠ B2 re-fits five names, not 29; a stage-2 refit could spread the compensation differently. The 10-06 B2 preview of #17 (−10.25, −3.5 ppm) landed in the same direction as the refit (basin B: −4.33 ppm).
+- **WHAT THE TREND DID** (`diag_iav_index_slow_flux.R`: shipped minus detrended at B's vector; the gate reproduces B's rows to 1.0e-10):
+
+| GtC/yr, + = more uptake under the shipped index | 1950s | 1970s | 1990s | 2010s | 2020s |
+|---|---|---|---|---|---|
+| land (the land term's share) | +0.117 (+0.103) | −0.031 (−0.033) | −0.073 (−0.067) | −0.094 (−0.084) | −0.100 (−0.089) |
+| ocean (the limb's share) | −0.084 (−0.045) | +0.009 (+0.010) | +0.044 (+0.026) | +0.062 (+0.034) | +0.069 (+0.040) |
+
+  - Global CO₂, shipped minus detrended: −0.31 ppm in 1960, −0.02 in 1990, **+0.48 in 2024** (the land term +0.77, the limb −0.29).
+  - So the trend turned the land ENSO term into a slow land SOURCE late in the record; the fit carried it with a stronger fertilisation sink, and the source vanishes in every projection (the index tapers to 0).
+  - ⚠ The 09-29 (d) audit's "−0.26 → +0.31 GtC/yr" measured the land term itself at an older mode, not this net flux difference. The two are not comparable.
+- **5. THE FUTURES** (CO₂ in 2300, ppm; `br_futures()`):
+
+| | SSP5-8.5 | vvH |
+|---|---|---|
+| hilda33p | 1461.53 | 1010.03 |
+| B (#17 as landed) | 1457.19 | 1006.99 |
+| B1 (the switch alone) | +0.02 vs B | +0.02 |
+| **B2** | **+23.32 vs B** (+18.98 vs hilda33p) | **+10.74** (+7.70) |
+| B3 | +22.84 | +10.57 |
+| B2 at P1d | +23.31 | +10.74 |
+
+  - Attribution (`diag_iav_redesign_futures_attr.R`; each B2 name set back to B's, one at a time; the rebuilt B2 and B1 reproduce exactly; the sum closes to 3 %):
+    - SSP5-8.5: `beta_max` **+31.8 ppm**, `fert_k` −10.2, `ndep_ret` +4.2, `luc_scale` −1.8, `imb_share_land` exactly 0 (a likelihood-side name: the built-in control);
+    - vvH: `beta_max` +20.1, `fert_k` −8.5.
+  - **So under the shipped index, #17's futures sit ~23 ppm LOW (SSP5-8.5, 2300) through a fertilisation asymptote the trend held up.** That is the 09-29 (d) φ pattern, priced at #17's amplitude. It is conditional on B2's five-name re-fit.
+  - The 09-29 (f) price of the index axis (−1.3 to −2.9, ≤ 1.4 ppm) re-optimised the ENSO coordinates themselves; the cut pins them. It is no price for this.
+- **Reading it (for the decision; nothing ruled):**
+  - The redesign has two halves, and they are separable.
+    - The LOW-PASS OCEAN ROW alone (shipped index) takes the resistance −1.29 → −0.74. It costs nothing elsewhere: the ocean row's low-pass part IMPROVES (+0.11).
+    - The DETRENDED INDEX takes it on to −0.10. It costs −7.6 in fit and moves the futures +23 ppm, because it removes a slow land flux that vanishes in projections.
+  - The index switch is therefore a physics choice about the futures, not only a fix for `w`.
+- **Tried and abandoned:**
+  - the first draft's non-finite branch returned no `logpost_lp`, which would have stopped the block optimiser at its first −Inf (caught in review, before any run);
+  - a misplaced parenthesis in the `saveRDS()` call (caught by the parse check).
+- **Decisions pending, all Marcus's** (handoff §3's design questions, now with the price):
+  - the `w_enso_l2` path: the full redesign; the low-pass ocean row alone; iterate #17 (no ratchet expected, at −1.29); or accept the one pass;
+  - the index: detrended for both terms (as priced; one index); the shipped one; or `relsst_lp`, the observational route (09-29 axis, not priced here);
+  - whether the seasonal rows' interannual part also leaves the main objective (−0.31 of what is left; the rest offsets it);
+  - the stage-1 base for a rebuilt objective: hilda33p (#17's choice) or basin B, where the pump is already released;
+  - the label (#18).
+- **Frozen tree:** `~/ccx_frozen/20261007c_redesign_price` (the three drivers, cmp-identical to the commits, and the run's stdout, now in the repo). Removable on Marcus's OK.
+
 ## 2026-10-07 (c) — **RULED: price a redesigned cut next; handoff written.** Marcus, verbatim: "Price a redesigned cut (Recommended)" and "Handoff now, continue fresh (Recommended)". Handoff: `notes/handoff_2026-10-07b_obj17_landed.md`, which supersedes `handoff_2026-10-07_obj17_finished.md` (that note now points to it).
 
 - **The redesign to price** (no build, no refit; at basin B; handoff §3): #17 + the DETRENDED ENSO index + a LOW-PASS `gcb_ocean_sink` row. Arithmetic from (b) gives the five rows' resistance to `w_enso_l2` about −0.14 at B, against −1.31.

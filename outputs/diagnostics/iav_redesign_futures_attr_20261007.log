@@ -1,0 +1,15 @@
+calibration/diag_iav_redesign_futures_attr.R @38223f3, 2026-10-07 11:45 | from outputs/diagnostics/iav_redesign_price_20261007.rds (calibration/diag_iav_redesign_price.R @e891fa9) | basin B calibration/output/refit_20261006_obj17_basinB_start001_DRYRUN/mode_fit_pumpN.rds | index 'detrend'
+GATES: rebuilt B2 vs the pricing's futures, max |diff| 0.0e+00 ppm; B1 (all five at B) 0.0e+00 ppm
+
+CO2 in 2300: B2 ssp585 1480.51, vvH 1017.73; B1 ssp585 1457.21, vvH 1007.01; B2 - B1 ssp585 +23.30, vvH +10.72 ppm
+each name's share: B2 minus B2-with-that-name-at-B's-value (ppm), and its fraction of B2 - B1
+  name                   ssp585          vvH       frac       frac   value B2 (B)
+  beta_max               +31.84       +20.07       1.37       1.87   1.9473 (2.1002)
+  fert_k                 -10.15        -8.51      -0.44      -0.79   670.56 (717.76)
+  luc_scale               -1.83        -2.54      -0.08      -0.24   0.90387 (0.92102)
+  imb_share_land          +0.00        +0.00       0.00       0.00   0.67072 (0.67932)
+  ndep_ret                +4.19        +2.20       0.18       0.21   10.641 (11.859)
+  SUM                    +24.05       +11.22       1.03       1.05   (the one-at-a-time sum; the rest is interaction)
+
+saved outputs/diagnostics/iav_redesign_futures_attr_20261007.{log,rds}
+⛔ ADOPTS NOTHING.
