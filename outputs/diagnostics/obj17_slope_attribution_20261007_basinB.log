@@ -1,0 +1,49 @@
+calibration/diag_obj17_slope_attribution.R @a2f6d60, 2026-10-07 08:58
+  #17 calibration/output/refit_20261006_obj17_basinB_start001_DRYRUN/mode_fit_pumpN.rds (md5 081eb16f4fe718692004fb1cf9645891)
+  B1  = hilda33p's free names + stage 1's module values (the #17 file's pins)
+
+=== GATE: the row at #17 is the module's own slope row ===
+  this driver +1.8518545718 | ccx_iav_module_loglik() +1.8518545718
+
+=== THE DROP ===
+  obs slope 0.11530 (se 0.02457) GtC/yr per unit Nino3.4
+  B1  slope 0.11645  row +2.7861
+  #17 slope 0.08169  row +1.8519   (the drop: slope -0.03476, row -0.9343)
+  d(slope)/d(w_enso_l2) at #17 0.018107 per Sv -> restoring B1's slope needs w_enso_l2 +1.920 (linear; at 14.7262)
+
+=== PER NAME, B1 -> #17 ===
+  name                     move/sd   SWAP share    LIN share   % drop
+  pump_grad                  -0.88    -0.029239    -0.029267    84.1%
+  kz                         +0.40    -0.003373    -0.003342     9.7%
+  hs_asx_frac                +0.44    -0.001286    -0.001263     3.7%
+  k_w                        -0.41    -0.000831    -0.000834     2.4%
+  u_hs                       -0.34    +0.000752    +0.000782    -2.2%
+  h_ml                       +0.14    -0.000450    -0.000450     1.3%
+  fert_k                     -0.24    -0.000262    -0.000270     0.8%
+  luc_scale                  +0.64    +0.000250    +0.000250    -0.7%
+  pump_hs_gcm2               +0.03    +0.000105    +0.000105    -0.3%
+  ndep_ret                   -0.21    +0.000073    +0.000073    -0.2%
+  sst_seas_amp_SH            -0.57    -0.000064    -0.000064     0.2%
+  q10                        +0.29    +0.000063    +0.000063    -0.2%
+  beta_max                   +0.07    -0.000061    -0.000061     0.2%
+  h_hs                       -0.02    +0.000054    +0.000054    -0.2%
+  kz_deep_frac               -0.16    +0.000014    +0.000014    -0.0%
+  sst_seas_amp_NH            -0.06    +0.000002    +0.000002    -0.0%
+  tau_ex                     +0.11    +0.000001    +0.000001    -0.0%
+  seas_lag_p_NH              +0.18    -0.000001    -0.000001     0.0%
+  npp_frac_NH                +0.05    +0.000000    +0.000000    -0.0%
+  seas_T_amp_NH              -0.13    +0.000000    +0.000000    -0.0%
+  seas_T_amp_SH              -0.18    -0.000000    -0.000000     0.0%
+  seas_lag_p_SH              -0.28    -0.000000    -0.000000     0.0%
+  bomb_total                 -0.08    +0.000000    +0.000000    -0.0%
+  sigma_d14c                 -0.03    +0.000000    +0.000000    -0.0%
+  rep_dC                     +0.09    +0.000000    +0.000000    -0.0%
+  grad_off_co2               -0.14    +0.000000    +0.000000    -0.0%
+  grad_off_d13c              +0.11    +0.000000    +0.000000    -0.0%
+  imb_share_land             +0.64    +0.000000    +0.000000    -0.0%
+  imb_share_ocean_rest       +0.29    +0.000000    +0.000000    -0.0%
+  SUM                                 -0.034254    -0.034207   (the drop itself -0.034757; non-additivity -0.000503)
+  CONTROL (bomb_total, sigma_d14c, rep_dC, grad_off_co2, grad_off_d13c, imb_share_land, imb_share_ocean_rest): 7 of 7 exactly 0 in both columns
+
+saved outputs/diagnostics/obj17_slope_attribution_20261007_basinB.{log,rds}
+⛔ ADOPTS NOTHING.

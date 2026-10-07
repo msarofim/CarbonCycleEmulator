@@ -1,0 +1,45 @@
+calibration/diag_obj17_basins.R @a2f6d60, 2026-10-07 08:58
+  basin A  calibration/output/refit_20261007_obj17_hilda_csl3v0kaidgbemw/mode_fit_pumpN.rds (md5 9612ed72cc9675dd85162e10ca69f38d)
+  basin B  calibration/output/refit_20261006_obj17_basinB_start001_DRYRUN/mode_fit_pumpN.rds (md5 081eb16f4fe718692004fb1cf9645891)
+
+=== 0. GATES ===
+  basin A (hilda_csl3v0kaidgbemw): logpost -1164.815380, stored -1164.815380, diff +0.0e+00 (tol 1e-05); h_ml band [42.5, 200]
+  basin B (hilda_csl3v0kaidgbemw): logpost -1165.224582, stored -1165.224582, diff +0.0e+00 (tol 1e-05); h_ml band [42.5, 200]
+  the three parts close the logpost difference to -9.1e-14
+
+=== 1. A - B ===
+  stored logpost        +0.4092
+  likelihood            -0.7608
+  priors                +0.5040
+  log-Jacobians         +0.6660
+  likelihood + prior (the natural-space density, no Jacobian)  -0.2568
+
+=== 2. PER NAME, A - B (the 10 largest |prior + Jacobian|) ===
+  h_ml                 A       58.026  B       49.894   prior  -0.0162  Jacobian  +0.6862
+  sst_seas_amp_SH      A       1.3729  B       1.2345   prior  +0.3933  Jacobian  +0.1063
+  u_hs                 A       21.407  B       22.034   prior  -0.0826  Jacobian  -0.0326
+  npp_frac_NH          A      0.58256  B      0.57504   prior  +0.0932  Jacobian  +0.0081
+  sst_seas_amp_NH      A       1.6747  B       1.7124   prior  -0.0770  Jacobian  -0.0223
+  kz_deep_frac         A    0.0070741  B    0.0072639   prior  +0.0000  Jacobian  -0.0874
+  q10                  A       1.0771  B       1.0686   prior  +0.0706  Jacobian  +0.0079
+  h_hs                 A       280.58  B        284.7   prior  +0.0536  Jacobian  +0.0033
+  hs_asx_frac          A      0.73785  B      0.73181   prior  -0.0513  Jacobian  +0.0037
+  pump_hs_gcm2         A       82.677  B       83.517   prior  +0.0464  Jacobian  -0.0030
+
+=== 3. PER ROW, likelihood A - B (the 12 largest) ===
+  ocean_grad_d13c         -0.4164
+  d13c_seasonal_MLO       -0.4057
+  d13c_seasonal_SPO       +0.3890
+  ocean_grad_dic          -0.3813
+  gcb_ocean_sink          -0.3070
+  d13c_level_SPO          +0.1824
+  d14c_profile_ab         -0.1562
+  gcb_land_sink           +0.1110
+  d13c_level_MLO          +0.1064
+  co2_seasonal_SPO        +0.0857
+  co2_icecore             +0.0760
+  d14c_SH                 -0.0511
+  rows favouring B -1.8491; rows favouring A +1.0884 (26 rows)
+
+saved outputs/diagnostics/obj17_basins_20261007.{log,rds}
+⛔ ADOPTS NOTHING.
