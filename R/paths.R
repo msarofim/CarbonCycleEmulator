@@ -241,7 +241,14 @@ CCX_MODE_FILES <- c(
   hilda31s2 = file.path("calibration", "output", "refit_20260912_hilda31_seasml1_round7",
                         "mode_fit_pumpN.rds"),
   hilda31pe = file.path("calibration", "output", "refit_20260919_hilda31pe_obj13_hilda_c_seasml0",
-                        "mode_fit_pumpN.rds")
+                        "mode_fit_pumpN.rds"),
+  # 2026-10-07 (i): OBJECTIVE #17's BASIN B (RULED, Marcus: "Register B, seed from it (Recommended)"; the name
+  # proposed with it). NOT the canonical and NOT adopted (#17 was landed, not adopted: 10-07 a/b). Registered as
+  # objective #18's stage-2 INCUMBENT SEED (CCX_MODE_OBJ18_INCUMBENT), where stage 1 was based (RULED 10-07 f).
+  # 29 free names (#16's ten pins + the module's four at #17's stage 1); h_ml 49.9 m; logpost -1165.224582 under
+  # #17's label (start_001 of the 20261006o wave, promoted by the 10-06 p dry run; its PROVENANCE.txt).
+  hilda29w = file.path("calibration", "output", "refit_20261006_obj17_basinB_start001_DRYRUN",
+                       "mode_fit_pumpN.rds")
 )
 # THE seas_ml = 0 CONTROL, by name: the diagnostics that compare the seasonal
 # mixed layer ON vs OFF read the OFF arm here rather than through the default
@@ -340,7 +347,8 @@ CCX_MODE_HILDA30S_QUARANTINED <- file.path("calibration", "output", "quarantine"
 # 2026-09-04 -> 2026-09-11 (8) this registry held one arm, then two free arms;
 # the free-vs-pinned comparison it exists to express had no power
 # ([[no_power_null]]). It has power from 09-13 (d): the canonical is PINNED.
-CCX_MODE_PINNED <- c(hilda33p = TRUE, hilda34g = TRUE, hilda33d = TRUE, hilda29l = TRUE, hilda32f = FALSE, hilda31s2 = FALSE, hilda31pe = FALSE)
+CCX_MODE_PINNED <- c(hilda33p = TRUE, hilda34g = TRUE, hilda33d = TRUE, hilda29l = TRUE, hilda32f = FALSE, hilda31s2 = FALSE, hilda31pe = FALSE,
+                     hilda29w = TRUE)   # 2026-10-07 (i): #17's basin B, the module's four pinned (READ names)
 # A PINNED CANONICAL (2026-09-13). When the canonical is a pinned arm, the
 # registry names WHAT it pins (the file's own `pins` must agree -- test-mode-file)
 # and its free PARENT: the same space with the pinned names free, kept
@@ -461,9 +469,10 @@ CCX_MODE_OBJ17_STRUCT    <- "hilda_csl3v0kaidgbemw"
 # $stage1$B_detrend) EXACTLY (identical() on the optimum, the pins, ssr_ref, the Laplace sds and the profile). Literals, so
 # this file reads nothing at source time; all four parse to stage 1's doubles BIT FOR BIT (no ulp case, unlike #17's
 # w_enso_l2), and test-ms-reference-set.R (13) ties them to that file.
-# ⚠ NO REFERENCE-SET RULE YET: the handoff names basin B's vector as stage 2's incumbent seed, and the multistart takes its
-# incumbent from CCX_MODE_FILES, where basin B is not registered. Until that is ruled, ccx_ms_reference_set() refuses these
-# pins ("no registered incumbent"), as it must.
+# THE REFERENCE SET (RULED 2026-10-07 i, Marcus: "Register B, seed from it (Recommended)"): the incumbent is #17's basin B,
+# registered as `hilda29w` (CCX_MODE_OBJ18_INCUMBENT) and SEEDED at these pins -- its module values are #17's stage 1, so it
+# is a START of #18, not a mode of it; the new basin is the seas_ml-0 control, as for #17. Ruled only under #18's label at
+# seas_ml 1 (ccx_ms_reference_set()).
 CCX_MODE_OBJ18_MODULE_FILE <- file.path("calibration", "output",
                                         "iav_module_20261007_refit_20261006_obj17_basinB_start001_DRYRUN_hilda_csl3v0kaidgbemwt.rds")
 CCX_MODE_OBJ18_PINS      <- c(CCX_MODE_OBJ16_PINS,
@@ -472,6 +481,7 @@ CCX_MODE_OBJ18_PINS      <- c(CCX_MODE_OBJ16_PINS,
                               gamma_enso_land_SH = 0.63155946220609593,
                               w_enso_l2          = 16.605064312322234)
 CCX_MODE_OBJ18_STRUCT    <- "hilda_csl3v0kaidgbemwt"
+CCX_MODE_OBJ18_INCUMBENT <- "hilda29w"      # #17's basin B (registered 2026-10-07 i): stage 2's incumbent seed
 #' The registered FREE mode nearest the canonical: the canonical itself when it
 #' is free, its parent when it is pinned. For a consumer that needs a vector
 #' ENCODABLE on the full table (an ancestor constructed by dropping names, a

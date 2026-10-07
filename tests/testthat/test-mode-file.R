@@ -176,7 +176,9 @@ test_that("every named mode is on disk and carries THIS BUILD's parameter set", 
       expect_true(all(names(md$pins) %in% ccx_inert_names(ccx_mode_pump_field(md), ccx_mode_struct(md))), info = paste("mode", a))
     # 2026-10-06 (a): or a GATED name (names(CCX_PARAM_GATED)), which the build fits only under a label that opens
     # the gate -- hilda33p is the first mode to PIN one (npp_tsens = 0, objective #16) (Marcus 2026-10-06: "Approve all (Recommended)")
-    expect_true(all(names(md$pins) %in% c(CCX_PARAM_NAMES, names(CCX_PARAM_GATED))),
+    # 2026-10-07 (i): EVERY gate's names (names(CCX_PARAM_GATED_ALL)), not the D2/D3 gate's only -- hilda29w (#17's basin B,
+    # registered as #18's incumbent seed) pins the LAG gate's lag_enso_land (Marcus 2026-10-07: "Widen to all gates (Recommended)")
+    expect_true(all(names(md$pins) %in% c(CCX_PARAM_NAMES, names(CCX_PARAM_GATED_ALL))),
                 info = paste("mode", a, "pins a name this build does not fit"))
     # THE BAND IS PART OF THE VECTOR'S PROVENANCE, not housekeeping: the driver
     # overrides CCX_PARAM_TABLE$h_ml in-process, and a logpost recomputed under
@@ -193,6 +195,13 @@ test_that("every named mode is on disk and carries THIS BUILD's parameter set", 
     if (md$struct %in% c("hilda_eq", "hilda_tr")) expect_true(ccx_eq_on(ccx_mode_base(md)))
     if (identical(md$struct, "hilda_tr")) expect_true(ccx_tr_on(ccx_mode_base(md)))
   }
+  # MUTATION (2026-10-07 i, the widening above): a name NO gate opens is still refused; the lag gate's name is admitted
+  # now, and the pre-widening set (the D2/D3 gate's names only) refused it -- the case that needed the ruling
+  fits <- c(CCX_PARAM_NAMES, names(CCX_PARAM_GATED_ALL))
+  expect_false("rho" %in% fits)
+  expect_false(all(c("lag_enso_land", "rho") %in% fits))
+  expect_true("lag_enso_land" %in% fits)
+  expect_false("lag_enso_land" %in% c(CCX_PARAM_NAMES, names(CCX_PARAM_GATED)))
 })
 
 test_that("the canonical wins among FREE arms re-scored on today's objective, or is a PINNED arm whose pin the registry names and whose parent is the best free arm", {

@@ -32,8 +32,10 @@
 #       value moved or a module name dropped, and the canonical's ten under #17's label (the module FREE)
 #   (13) OBJECTIVE #18's pins (2026-10-07 f, the redesigned cut; Marcus: "Full redesign (Recommended)"): #16's ten +
 #       the module's four at stage 1's values UNDER #18 at basin B, tied BIT FOR BIT to the stage-1 file, which is
-#       itself the pricing mirror's answer exactly; NO REFERENCE SET IS RULED YET, so the rule refuses them under
-#       #18's label ("no registered incumbent"), and under #17's (MUTATION: #17's branch must not take them)
+#       itself the pricing mirror's answer exactly; under #18's label at seas_ml 1 -> #17's basin B, registered
+#       `hilda29w` (RULED 10-07 i: "Register B, seed from it (Recommended)"; seeded at the pins: a start) / the
+#       control; the launch string resolves the same; MUTATION: refused under #17's label, at seas_ml 0, with a
+#       module value moved or dropped, and the ten under #18's label (the module FREE); #17's pins under #18's label
 # =====================================================================
 ms_cp <- CCX_MODE_CANONICAL_PINS
 ms_ctl <- CCX_MODE_CONTROL_PINS
@@ -245,7 +247,7 @@ test_that("(12) OBJECTIVE #17's pins (2026-10-06 n, the interannual cut): #16's 
   expect_identical(ccx_ms_reference_set(ms_cp, "1", struct = CCX_MODE_OBJ16_STRUCT)$why, "the canonical, under this array's pins")
 })
 
-test_that("(13) OBJECTIVE #18's pins (2026-10-07 f, the redesigned cut): #16's ten + the module's four at stage 1's values under #18 at basin B, tied bit for bit to the stage-1 file and the mirror; refused until a reference set is ruled", {
+test_that("(13) OBJECTIVE #18's pins (2026-10-07 f, the redesigned cut): #16's ten + the module's four at stage 1's values under #18 at basin B, tied bit for bit to the stage-1 file and the mirror, under #18's label at seas_ml 1 -> hilda29w (basin B, seeded) / the control; refused under #17's label, at seas_ml 0, a module value moved or dropped, the module free", {
   p18 <- CCX_MODE_OBJ18_PINS
   expect_identical(names(p18), c(names(CCX_MODE_OBJ16_PINS), CCX_IAV_MODULE_NAMES))
   expect_identical(p18[names(CCX_MODE_OBJ16_PINS)], CCX_MODE_OBJ16_PINS)
@@ -269,10 +271,29 @@ test_that("(13) OBJECTIVE #18's pins (2026-10-07 f, the redesigned cut): #16's t
   expect_true(CCX_MODE_OBJ18_STRUCT %in% CCX_STRUCT_LABELS)
   withr::local_envvar(CCX_MS_STRUCT = CCX_MODE_OBJ18_STRUCT, CCX_MS_PUMP_FIELD = "solved")
   expect_false(ccx_pins_extend_canonical(p18, "solved")); expect_false(ccx_pins_price_canonical(p18, "solved"))
-  # NOT YET RULED: stage 2's incumbent (the handoff names basin B's vector, which is not registered)
-  expect_error(ccx_ms_reference_set(p18, "1"), "no registered incumbent")
-  # MUTATION: #17's branch must not take #18's pins (its module values differ), under either label
-  expect_error(ccx_ms_reference_set(p18, "1", struct = CCX_MODE_OBJ17_STRUCT), "no registered incumbent")
-  # ... nor #18's label take #17's pins (ruled under #17's own label only)
+  # RULED 2026-10-07 (i), Marcus: "Register B, seed from it (Recommended)": the incumbent is #17's basin B, registered as
+  # hilda29w (the file stage 1 was fitted at), seeded at #18's pins; the new basin is the control
+  expect_identical(CCX_MODE_OBJ18_INCUMBENT, "hilda29w")
+  expect_identical(unname(tools::md5sum(ccx_mode_file(CCX_MODE_OBJ18_INCUMBENT))), pv$base_md5)   # = stage 1's base
+  expect_true(CCX_MODE_PINNED[[CCX_MODE_OBJ18_INCUMBENT]])
+  expect_identical(ccx_mode_struct(ccx_mode_file(CCX_MODE_OBJ18_INCUMBENT)), CCX_MODE_OBJ17_STRUCT)
+  r13 <- ccx_ms_reference_set(p18, "1")
+  expect_identical(r13$incumbent, CCX_MODE_OBJ18_INCUMBENT); expect_identical(r13$new_basin, CCX_MODE_SEASML0_CONTROL)
+  expect_match(r13$why, "OBJECTIVE #18.*seeded at the pins")
+  expect_true(all(c(r13$incumbent, r13$new_basin) %in% names(CCX_MODE_FILES)))
+  # the LAUNCH STRING (the values at %.17g, as the launch writes them), through the driver's own parser
+  launch <- paste(sprintf("%s=%.17g", names(p18), p18), collapse = ",")
+  expect_identical(ccx_parse_pins(launch), p18)
+  expect_identical(ccx_ms_reference_set(ccx_parse_pins(launch), "1"), r13)
+  # MUTATION: under #17's label, and at seas_ml 0
+  expect_error(ccx_ms_reference_set(p18, "1", struct = CCX_MODE_OBJ17_STRUCT), "ruled under")
+  expect_error(ccx_ms_reference_set(p18, "0"), "OBJECTIVE #18")
+  # MUTATION: a module value moved (to #17's), or a module name dropped
+  moved <- p18; moved[["w_enso_l2"]] <- CCX_MODE_OBJ17_PINS[["w_enso_l2"]]
+  expect_error(ccx_ms_reference_set(moved, "1"), "no registered incumbent")
+  expect_error(ccx_ms_reference_set(p18[setdiff(names(p18), "lag_enso_land")], "1"), "no registered incumbent")
+  # MUTATION: the canonical's ten under #18's label leave the module FREE -- refused at launch, by name
+  expect_error(ccx_ms_reference_set(ms_cp, "1"), "interannual CUT.*lag_enso_land")
+  # ... and #18's label does not take #17's pins (ruled under #17's own label only)
   expect_error(ccx_ms_reference_set(CCX_MODE_OBJ17_PINS, "1"), "ruled under")
 })

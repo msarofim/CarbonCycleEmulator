@@ -2662,6 +2662,10 @@ ccx_l2_on <- function(p) {
 #'   Marcus: "Build: land + ocean module (Recommended)"), under #17's label at seas_ml 1
 #'                          -> incumbent the canonical (seeded at the pins: a start);
 #'                             new basin the control
+#'   OBJECTIVE #18's pins (#16's + the module's four at stage 1's values UNDER #18 at #17's basin B; 2026-10-07 i,
+#'   Marcus: "Register B, seed from it (Recommended)"), under #18's label at seas_ml 1
+#'                          -> incumbent #17's basin B, registered `hilda29w` (seeded at the pins: a start);
+#'                             new basin the control
 #'   anything else          -> stop: a new objective with no incumbent on disk.
 ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_PUMP_FIELD", "solved"),
                                  struct = Sys.getenv("CCX_MS_STRUCT", "")) {
@@ -2695,6 +2699,21 @@ ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_
          why = paste0("OBJECTIVE #17 (the interannual cut, Marcus 2026-10-06): the canonical's pins plus the module's ",
                       "four names at stage 1's values (the canonical, seeded at the pins: a start, not a mode of this ",
                       "objective)"))
+  } else if (same(pins, CCX_MODE_OBJ18_PINS)) {
+    # OBJECTIVE #18 (2026-10-07, the redesigned cut): #16's pins + the module's four at stage 1's values under #18 at #17's
+    # basin B. RULED 10-07 (i): the incumbent is basin B, registered `hilda29w` and SEEDED at the pins -- its module values
+    # are #17's stage 1, so it is a START here, not a mode; the new basin is the control. Ruled only under #18's own label
+    # and on the canonical's seasonal mixed layer.
+    if (!identical(struct, CCX_MODE_OBJ18_STRUCT))
+      stop("ccx_ms_reference_set(): objective #18's pins '", ccx_pin_label(pins), "' are ruled under ",
+           CCX_MODE_OBJ18_STRUCT, " (the redesigned cut) only; struct '", struct, "' is not a ruled arm.")
+    if (seas_ml != 1L)
+      stop("ccx_ms_reference_set(): OBJECTIVE #18 is ruled at seas_ml 1 (the canonical's seasonal mixed ",
+           "layer); seas_ml ", seas_ml, " is not a ruled arm.")
+    list(incumbent = CCX_MODE_OBJ18_INCUMBENT, new_basin = CCX_MODE_SEASML0_CONTROL,
+         why = paste0("OBJECTIVE #18 (the redesigned cut, Marcus 2026-10-07): the canonical's pins plus the module's four ",
+                      "names at stage 1's values under #18; the incumbent is #17's basin B (", CCX_MODE_OBJ18_INCUMBENT,
+                      "), seeded at the pins: a start, not a mode of this objective"))
   } else if (is.null(pins)) {
     list(incumbent = if (is.null(CCX_MODE_PINNED_PARENT)) CCX_MODE_CANONICAL else CCX_MODE_PINNED_PARENT,
          new_basin = CCX_MODE_SEASML0_CONTROL,
@@ -2741,6 +2760,7 @@ ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_
               "', the control's '", ccx_pin_label(CCX_MODE_CONTROL_PINS),
               "', the layer-2 limb's '", ccx_pin_label(CCX_MODE_L2_ARM_PINS),
               "', objective #17's '", ccx_pin_label(CCX_MODE_OBJ17_PINS),
+              "', objective #18's '", ccx_pin_label(CCX_MODE_OBJ18_PINS),
               "'); rule the reference set for this pin before launching.")
   # 2026-09-20 (r): the canonical FITS w_enso_l2, so its pin set under a structure WITHOUT the limb
   # would leave a name the structure never reads FREE -- the driver refuses such a name, and so
