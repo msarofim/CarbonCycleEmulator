@@ -65,6 +65,13 @@ IAV_PROF_MAXIT <- 150L
 IAV_SIG      <- c(one = 0.5, two = 2)                           # profile drops for the 1 / 2 sigma ranges
 IAV_H_STEP   <- c(L = 0.05, s = 0.01, w = 0.25)                 # 4 LAPLACE: central-difference steps
 IAV_CHECK_TOL <- 0.1                                            # + CHECK: RULED, in each name's own 1 sigma
+# 0 GATES: the base's stored rows through the dg path, max |diff| PER ROW. RULED 2026-10-07 (Marcus: "Raise to 1e-5, named
+# (Recommended)"). It was a literal 1e-6, and it stopped #17's landing check at basin A (id 10: 1.7e-6, in the three d13C
+# level / ice-core rows) on the OBJECTIVE's numerical noise floor, not on a defect: a 1e-12 nudge of one name moves the rows
+# by 0.4-1.6e-6 at BOTH basins, and basin B passed at 1e-10 only because its path crossed no step (CHANGELOG 2026-10-07 a).
+# 1e-5 is the tolerance promote_multistart_mode.R GATE 4 and recompute_hessian.R GATE 1 use for the same question, ~6x the
+# measured per-row floor. Mutation-tested 2026-10-07: a dropped land ENSO pin still fails it.
+IAV_REPRO_TOL <- 1e-5
 IAV_XLAGS    <- -6:18                                           # the timing read (br_timing's BR_XLAGS)
 IAV_PREVIEW  <- file.path("outputs", "diagnostics", "iav_cut_smoothed_land_20261006_hilda33p.rds")  # its land_ocean scope
 if (IAV_SMOKE) { IAV_LAGS_SUP <- c(1, 3, 6, 9); IAV_NM_MAXIT <- 8L; IAV_PROF_LAGS <- c(4, 7); IAV_PROF_MAXIT <- 4L }
@@ -117,9 +124,9 @@ cat("\n=== 0. GATES ===\n")
 R_BASE <- run_at(B0[["L"]], B0[["s"]], B0[["w"]])
 st0 <- unlist(dg_streams(R_BASE, R_BASE$v, obs = OBS)); ms0 <- unlist(md$streams)
 dmax <- max(abs(st0[names(ms0)] - ms0))
-cat(sprintf("  the base's %d stored rows through the dg path: max |diff| %.1e%s\n", length(ms0), dmax,
+cat(sprintf("  the base's %d stored rows through the dg path: max |diff| %.1e (tol %g)%s\n", length(ms0), dmax, IAV_REPRO_TOL,
             if (!identical(sort(names(st0)), sort(names(ms0)))) " ⚠ the row SETS differ" else ""))
-if (dmax > 1e-6 || !identical(sort(names(st0)), sort(names(ms0)))) stop("the base does not reproduce its stored rows")
+if (dmax > IAV_REPRO_TOL || !identical(sort(names(st0)), sort(names(ms0)))) stop("the base does not reproduce its stored rows")
 GP_BASE <- ccx_iav_growth_pair(R_BASE$out, R_BASE$F, GRO$monthly)
 SSR_REF <- sum((GP_BASE$mod - GP_BASE$obs)^2)       # the module's reference: the base's own SSR (a constant)
 mod_ll <- function(r) ccx_iav_module_loglik(r$out, r$F, OBS, ssr_ref = SSR_REF, obs_g = GRO$monthly)
