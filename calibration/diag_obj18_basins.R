@@ -23,6 +23,9 @@
 # prior (Recommended)"): validated on #17's own wave, the likelihood alone picked basin 3 (id 6), 33.9 below on the
 # stored logpost, whose likelihood beats A by +2.38 only because its priors cost -36.6 (seas_lag_p_NH at -2.33).
 # The likelihood ranking is still printed for every basin.
+# ⭐ AND A NEAR-TIE (RULED 10-07 k, Marcus: "Read both within 0.5 (Recommended)"): `NEAR <id>` = the RUNNER-UP on likelihood
+# + prior when it lies within the optimiser's own convergence bound (the starts' recorded `cycle_tol`, 0.5) of the best on
+# it; the chain reads it too. Found on the dry run's 8-start preview: the two basins 0.087 apart on likelihood + prior.
 # GATES: one structure / pin set / seas_ml / pump field / h_ml band across the wave; each representative reproduces
 # its stored logpost (1e-5, the objective's noise floor: memory objective_noise_floor_optimum_on_spike); the three
 # parts close each logpost exactly (1e-8); `LP` is the best converged, in-time, live start; collect's basin 1 holds it.
@@ -65,6 +68,7 @@ one <- function(f, what) { v <- unique(vapply(S, function(s) paste(format(f(s)),
 ST <- one(function(s) s$struct, "the structure"); SMl <- one(function(s) s$seas_ml, "seas_ml")
 PF <- one(function(s) s$pump_field, "the pump field"); PM <- one(function(s) s$pump_mode, "the pump mode")
 HB <- one(function(s) s$hml_bound, "the h_ml band"); PN <- one(function(s) ccx_pin_label(s$pins), "the pins")
+OB_NEAR_GAP <- one(function(s) s$cycle_tol, "the optimiser's convergence bound (cycle_tol)")   # the near-tie window, READ
 PINS <- S[[1]]$pins
 if (!identical(ST, OB_LABEL)) stop("the wave's structure is '", ST, "', not #18's '", OB_LABEL, "'")
 if (!setequal(names(PINS), names(OB_PINS)) || !isTRUE(all.equal(unname(unclass(PINS)[names(OB_PINS)]), unname(OB_PINS))))
@@ -131,10 +135,15 @@ for (i in seq_len(nrow(TAB))) with(TAB[i, ], cat(sprintf(paste0("  basin %d  id 
   paste(sprintf("%s %.5g", OB_SHOW, unlist(TAB[i, OB_SHOW])), collapse = ", "), members)))
 
 LIK_ID <- TAB$id[which.max(TAB$lik)]; NAT_ID <- TAB$id[which.max(TAB$natural)]
+ON <- order(-TAB$natural)                                       # the runner-up on likelihood + prior, if within the bound
+NEAR_ID <- if (length(ON) > 1L && TAB$natural[ON[1]] - TAB$natural[ON[2]] <= OB_NEAR_GAP) TAB$id[ON[2]] else NA_integer_
 cat(sprintf("\n  BEST by stored logpost: id %03d (basin %d) | by LIKELIHOOD: id %03d (basin %d) | by likelihood + prior: id %03d (basin %d)\n",
             LP_ID, TAB$basin[TAB$id == LP_ID], LIK_ID, TAB$basin[TAB$id == LIK_ID], NAT_ID, TAB$basin[TAB$id == NAT_ID]))
-cat(if (identical(LP_ID, NAT_ID)) "  ⇒ the stored logpost and likelihood + prior AGREE on the best basin: the chain promotes it alone\n"
+cat(if (identical(LP_ID, NAT_ID)) "  ⇒ the stored logpost and likelihood + prior AGREE on the best basin\n"
     else "  ⇒ the stored logpost and likelihood + prior DISAGREE: the chain promotes, Hessians and reads BOTH (RULED 10-07 k); the basin choice is Marcus's\n")
+if (length(ON) > 1L) cat(sprintf("  the runner-up on likelihood + prior: basin %d (id %03d), %.4f below the best: %s the near-tie bound %g (the starts' cycle_tol)%s\n",
+  TAB$basin[ON[2]], TAB$id[ON[2]], TAB$natural[ON[1]] - TAB$natural[ON[2]], if (is.na(NEAR_ID)) "OUTSIDE" else "INSIDE", OB_NEAR_GAP,
+  if (is.na(NEAR_ID)) "" else " -- the chain reads it too (RULED 10-07 k: \"Read both within 0.5\")"))
 if (!LIK_ID %in% c(LP_ID, NAT_ID)) {
   pk <- TAB[TAB$id == LIK_ID, ]; p0 <- TAB[TAB$id == NAT_ID, ]
   cat(sprintf("  ⚠ the likelihood ALONE picks basin %d (id %03d): likelihood %+.3f but priors %+.3f against basin %d's. NOT promoted (RULED 10-07 k: likelihood + prior)\n",
@@ -159,8 +168,8 @@ for (k in names(X)) { x <- X[[k]]; if (identical(x$id, LP_ID)) next
   PAIRS[[k]] <- list(d_logpost = x$lp - x0$lp, d_lik = d_lik, d_prior = d_pri, d_jac = d_jac, names = DN, rows = DS) }
 if (!length(PAIRS)) cat("  one basin: nothing to compare\n")
 
-writeLines(c(sprintf("LP %d", LP_ID), sprintf("NAT %d", NAT_ID)), paste0(OB_OUT, ".ids"))
-saveRDS(list(table = TAB, duplicates = DUP, lp_id = LP_ID, lik_id = LIK_ID, nat_id = NAT_ID, pairs = PAIRS,
+writeLines(c(sprintf("LP %d", LP_ID), sprintf("NAT %d", NAT_ID), if (!is.na(NEAR_ID)) sprintf("NEAR %d", NEAR_ID)), paste0(OB_OUT, ".ids"))
+saveRDS(list(table = TAB, duplicates = DUP, lp_id = LP_ID, lik_id = LIK_ID, nat_id = NAT_ID, near_id = NEAR_ID, near_gap = OB_NEAR_GAP, pairs = PAIRS,
              scored = lapply(X, function(x) x[c("id", "lp", "lik", "st", "L", "stored")]),
              provenance = list(driver = OB_DRIVER, commit = COMMIT, wave = OB_WAVE, summary_csv = SM,
                                summary_md5 = unname(tools::md5sum(SM)), n_starts = length(S), struct = ST, pins = PN,
@@ -169,5 +178,5 @@ saveRDS(list(table = TAB, duplicates = DUP, lp_id = LP_ID, lik_id = LIK_ID, nat_
                                date = format(Sys.time(), "%Y-%m-%d %H:%M"), rng = "none",
                                units = "log-density units (stored logpost = likelihood + prior + log-Jacobian)")),
         paste0(OB_OUT, ".rds"))
-cat(sprintf("\nsaved %s.{log,rds,ids}: LP %d, NAT %d\n⛔ ADOPTS NOTHING.\n", OB_OUT, LP_ID, NAT_ID))
+cat(sprintf("\nsaved %s.{log,rds,ids}: LP %d, NAT %d%s\n⛔ ADOPTS NOTHING.\n", OB_OUT, LP_ID, NAT_ID, if (is.na(NEAR_ID)) "" else sprintf(", NEAR %d", NEAR_ID)))
 sink()
