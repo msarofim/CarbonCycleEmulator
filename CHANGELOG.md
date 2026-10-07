@@ -2,6 +2,59 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-07 (b) — **Marcus's rulings on the landing, APPLIED; the low-pass ocean row PRICED; and the main objective's resistance to `w_enso_l2` SPLIT.** About half is INTERANNUAL: the year-by-year `gcb_ocean_sink` row and the seasonal rows. The other half is the CO₂ level rows at LOW frequency. **That half is the shipped ENSO index's +0.0083 K/yr trend, carried by the limb: on the detrended index it vanishes.** So under the shipped index `w_enso_l2` is not an interannual-only name, which is the cut's premise for it. Nothing adopted; no objective changed.
+
+- **Rulings, verbatim (AskUserQuestion on the landing's read):**
+  - adoption: "Not yet: settle w first (Recommended)";
+  - the basin: "B: better likelihood (Recommended)";
+  - `w_enso_l2`: "Test low-pass ocean row first (Recommended)";
+  - the frozen trees: "Remove all three (Recommended)".
+- **The trees.** Every file that existed only in `20261006x_obj17`, `20261006o_obj17_dryrun` and `20261007_obj17_drivers` was checked against the repo:
+  - the outdir's 48 files, the 24 task logs, the exit file, the wave, port-target and pins logs, the 26 preflight files, the dry run's 7 logs and outputs, and the drivers' outputs and mutation harness are all identical;
+  - the four strays were brought in first (`0c1fd4e`): the ocean drivers' stdout, the dry run's one-start `summary.csv`, and the harness's own M2 log;
+  - then `git worktree remove --force` on each. This session's suite tree, `suite_20261007_a6cf879`, remains.
+- **The full suite at `a6cf879` is CLEAN: 6598 passed, 0 failed, 3 skipped (the standing three)**, rc 0, 17.5 min, 231 warnings (`outputs/diagnostics/suite_20261007_a6cf879.log`). That is the same count as `0c585fc`; no test was added. The four lints, run directly: 37 / 0.
+- **THE LOW-PASS OCEAN ROW, PRICED** (`calibration/diag_obj17_lowpass_ocean_price.R` → `obj17_lowpass_ocean_price_20261007.log`).
+  - Method: the cut's own projector (df 6, `LIK_LAND_LOWPASS_DF`), applied unchanged to `gcb_ocean_sink` at its own sd 0.4.
+  - Gates: the rebuilt ocean row is the stored one (B 0, A 8e-10), and the same code on the land row is the stored low-pass `gcb_land_sink` (4.5e-13).
+
+| stage 1's pins → the check's, unrefitted | B | A |
+|---|---|---|
+| `gcb_ocean_sink` as scored (year by year) | −0.446 | −0.728 |
+| its interannual part | −0.554 | −0.873 |
+| its low-pass part | **+0.108** | **+0.146** |
+| the main objective's whole resistance | −1.295 | −2.177 |
+| … with a low-pass ocean row | −0.741 | −1.303 |
+
+- **WHERE THE REST LIVES** (`calibration/diag_obj17_resistance_split.R` → `obj17_resistance_split_20261007{,_detrend}.log`). The same split on every resisting row, from the residuals as scored (`ccx_loglik(residuals = TRUE)`). Gates: the dg rows reproduce the stored ones (B 1.0e-10, A 1.7e-6); the residuals rebuild each row exactly; each row's change matches `diag_obj17_iterate_price.R` (≤ 1.6e-9).
+
+| basin B: change (interannual / low-pass) | the shipped index ("demean") | the DETRENDED index |
+|---|---|---|
+| `gcb_ocean_sink` | −0.446 (−0.554 / +0.108) | −0.523 (−0.560 / +0.037) |
+| `co2_level_MLO` | **−0.384 (+0.114 / −0.498)** | **+0.133 (+0.117 / +0.016)** |
+| `co2_level_SPO` | **−0.199 (+0.080 / −0.279)** | **−0.007 (+0.085 / −0.092)** |
+| `co2_seasonal_MLO` | −0.124 (−0.092 / −0.032) | −0.140 (−0.107 / −0.033) |
+| `co2_seasonal_SPO` | −0.154 (−0.149 / −0.005) | −0.167 (−0.163 / −0.004) |
+| **the five** | −1.306 (−0.601 / **−0.705**) | −0.704 (−0.628 / **−0.076**) |
+
+  - Basin A shows the same pattern: the five rows' low-pass part goes −1.021 → −0.125 on the detrended index.
+  - Under the shipped index the CO₂ level rows resist at LOW frequency; their interannual parts IMPROVE with the stronger limb.
+  - ⚠ Under the detrended index the rows are not the stored ones (7.2 off at P0, a different model by construction), so the two gates against stored numbers are skipped there and say so. Only the P0 → P1 CHANGES are compared.
+- **The mechanism, by elimination:**
+  - **Not the limb's FLOOR** (upwelling cannot go negative). It binds when Niño 3.4 > 27 Sv / w: in 3 / 12 / 16 of 792 months (1959–2024) at w = 14.73 / 16.71 / 17.68.
+  - **Not the index's MEAN.** The shipped index (demeaned over `FORC_ENSO_DEMEAN_WIN` 1948–2024) averages +0.042 K over 1959–2024.
+  - **Its TREND:** +0.00831 K/yr over 1959–2024, the 09-29 (d) audit's +0.0082. That audit found it turned by the land ENSO term into a land source rising −0.26 → +0.31 GtC/yr. The limb turns the same trend into a low-frequency ocean flux, and a larger w makes it larger. The detrended run removes 89 % of the five rows' low-frequency resistance at B.
+- **Reading it** (arithmetic on the split; NOT tested as a design):
+  - with the DETRENDED index and a LOW-PASS ocean row, the five rows' resistance at B would be −0.704 + 0.523 + 0.037 = **−0.14**, almost all of it the seasonal rows' interannual part;
+  - the seasonal rows' per-year harmonic coefficients are the main objective's last channel to the year-to-year ENSO signal.
+  - The 09-29 (f) pricing of the index axis (detrending cost 1.3–2.9 log-units, futures ≤ 1.4 ppm) was at φ = 0 under an older objective, so it is no price for #17.
+- **Tried and abandoned:**
+  - the low-pass ocean driver's first run read `md$streams` as a list; it is an atomic named vector;
+  - the split's first run took each CO₂ row's years from the observation table. MLO's level table has 67 years and the row scores 66. It now matches years as `ccx_loglik()` does, on `dg_streams()`'s span.
+- **Decisions pending, Marcus's:**
+  - the `w_enso_l2` path: a redesigned cut (the detrended index, the low-pass ocean row, and perhaps the seasonal rows' interannual part; it needs a build, a pricing and a new stage 1 + stage 2), or iterate #17 as it is (resistance −1.29 at B), or accept the one pass;
+  - adoption waits on it, as ruled.
+
 ## 2026-10-07 (a) — **OBJECTIVE #17 LANDED AND READ** (Marcus: "write the handoff and run everything in the next session"). **The land half of the cut holds through stage 2: the one-pass check moves the lag +0.04σ and the land scale −0.01σ, and GATE V flips FAIL → PASS (in-sample: the module was fitted to the same growth record). The ocean half does not: the check moves `w_enso_l2` 14.73 → 17.68 (+2.31σ). Stage 2 weakens the ocean's ENSO response through `pump_grad` (62 %) and `h_ml` (28 %), and its own rows resist restoring it (−2.18, unrefitted). The basin promote chose, A (id 10), leads the stored logpost by 0.41 only through `h_ml`'s logit Jacobian (+0.69). On LIKELIHOOD, basin B fits better by 0.76.** Nothing adopted.
 
 - **How it ran.** `~/ccx_frozen/20261007_obj17_land_chain.sh` at `1949dff`, 08:14 EDT; steps 0–5 rc 0.

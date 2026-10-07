@@ -1,0 +1,30 @@
+calibration/diag_obj17_resistance_split.R @f32985f, 2026-10-07 10:17 | projector df 6 (LIK_LAND_LOWPASS_DF) for every row | ENSO index as each file records
+
+=== basin B (calibration/output/refit_20261006_obj17_basinB_start001_DRYRUN/mode_fit_pumpN.rds, md5 081eb16f4fe718692004fb1cf9645891): pins 5.8432/0.6607/0.6332/14.7262 -> 5.8554/0.6576/0.6302/16.7050 ===
+  GATE: the dg rows at P0 vs the stored streams, max |diff| 1.0e-10
+  GATE: the residuals rebuild each row from its sd, max |diff| 0.0e+00
+  GATE: each row's change vs diag_obj17_iterate_price.R, max |diff| 1.7e-12
+  row                    change   interannual part    low-pass part
+  gcb_ocean_sink        -0.4459            -0.5538          +0.1079
+  co2_level_MLO         -0.3837            +0.1138          -0.4975
+  co2_level_SPO         -0.1989            +0.0798          -0.2787
+  co2_seasonal_MLO      -0.1237            -0.0920          -0.0317
+  co2_seasonal_SPO      -0.1541            -0.1488          -0.0053
+  these five            -1.3063            -0.6010          -0.7053
+  the other rows: +0.0118; in all -1.2945 (diag_obj17_iterate_price.R)
+
+=== basin A (calibration/output/refit_20261007_obj17_hilda_csl3v0kaidgbemw/mode_fit_pumpN.rds, md5 9612ed72cc9675dd85162e10ca69f38d): pins 5.8432/0.6607/0.6332/14.7262 -> 5.8986/0.6596/0.6322/17.6758 ===
+  GATE: the dg rows at P0 vs the stored streams, max |diff| 1.7e-06
+  GATE: the residuals rebuild each row from its sd, max |diff| 0.0e+00
+  GATE: each row's change vs diag_obj17_iterate_price.R, max |diff| 1.6e-09
+  row                    change   interannual part    low-pass part
+  gcb_ocean_sink        -0.7278            -0.8734          +0.1456
+  co2_level_MLO         -0.5201            +0.1503          -0.6705
+  co2_level_SPO         -0.3037            +0.1045          -0.4082
+  co2_seasonal_MLO      -0.2720            -0.1914          -0.0806
+  co2_seasonal_SPO      -0.3540            -0.3466          -0.0074
+  these five            -2.1777            -1.1565          -1.0211
+  the other rows: +0.0009; in all -2.1768 (diag_obj17_iterate_price.R)
+
+saved outputs/diagnostics/obj17_resistance_split_20261007.{log,rds}
+⛔ ADOPTS NOTHING.
