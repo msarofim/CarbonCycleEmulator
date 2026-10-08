@@ -1,0 +1,51 @@
+calibration/diag_card4_audit.R | commit d59151a | canonical hilda29e (refit_20261008_hilda29e_obj18p2_hilda_csl3v0kaidgbemwt) | 2026-10-08 12:48
+
+=== 1. LAND ENSO LAG ===
+  runs 5.9293 months (PINNED); module Laplace sd 1.207; profile 1-sigma 4.57-7.39, 2-sigma 2.99-9.11
+  typed 2.5 sits 2.84 Laplace sd away; inside the profile 2-sigma range: FALSE
+
+=== 2. OCEAN LIMB STRENGTH ===
+  w_enso_l2 16.788 Sv per index unit vs observed [14, 25] -> 'inside'; card's word (RV_ENSO_L2_VS_OBS) 'below'
+
+=== 3. OCEAN SINK vs NINO3.4 (1959-2024) ===
+  GCB 0.1153 +/- 0.0246 GtC/yr per unit; model 0.1174 (ratio 1.018); solubility only -0.2050
+
+=== 4. TOTAL WOBBLE ===
+  app estimator (1980-2024): model 0.304 vs observed 0.459 ppm/yr = 66 %; GATE V estimator: ratio 0.854 (PASS)
+
+=== 5. GROWTH PEAK AFTER NINO3.4 (T2(b), monthly) ===
+  model 5 months, observed 5 months
+
+=== 6. DIFFUSE LIGHT (gamma_diff -> 0), |CO2 change| over 1991-1995 ===
+  hilda29l  gamma_diff 0.25 | annual max 1.447 ppm (1993), monthly max 1.493 | 2024 annual -0.728
+  hilda29e  gamma_diff 0.25 | annual max 0.986 ppm (1993), monthly max 1.013 | 2024 annual -0.220
+  reproduction gate: hilda29l 2024 -0.728 vs N8's recorded -0.73 -> REPRODUCES
+
+=== 7. N7: WHERE THE GROWTH MISSES (1959-2024, n 66; residual about a 3-dof smooth, ppm/yr) ===
+  residual vs enso  r -0.188  p 0.131
+  residual vs aod   r +0.216  p 0.081
+  residual vs year  r +0.000  p 1.000
+  decade means -0.063 +0.072 -0.117 +0.125 -0.107 +0.136 -0.118; one year's scatter (sd) 0.376
+  largest overshoots 1991 (+1.03), 1978 (+0.71), 2011 (+0.58); largest undershoots 1987 (-0.88), 1998 (-0.61), 2002 (-0.60)
+  1991 +1.025, 1983 -0.424
+
+=== 8. ANOMALY vs NINO3.4, r (model / observed) ===
+  GATE V estimator (the caption's): 0.479 / 0.290
+  N7 estimator (section 7): 0.189 / 0.298
+
+=== CARD 4 LEDGER at hilda29e ===
+ id                           typed                      measured                                   verdict                  
+ land lag                     2.5 months                 5.93 +/- 1.21 months (PINNED)              STALE (> 1 sd)           
+ limb vs range                'a little below'           16.79 vs [14, 25] = inside                 STALE                    
+ ENSO sensitivity             'close to right'           1.02x GCB (GCB 1 se = 0.21x)               holds (within GCB's 1 se)
+ solubility sign              'still has the wrong sign' -0.205 vs GCB +0.115                       holds                    
+ title share                  about 60%                  66% (app estimator)                        for Marcus (wording)     
+ growth peak timing           model 1 mo vs observed 5   model 5 mo vs observed 5                   STALE                    
+ diffuse light                about 1.5 ppm              1.01 ppm (monthly max; hilda29l 1.49)      for Marcus (wording)     
+ no pattern in misses         none of 3 significant      min p 0.081                                holds                    
+ decades inside scatter       all well inside one year's max |decade| 0.136 vs sd 0.376             holds                    
+ 1991 largest overshoot       1991                       1991                                       holds                    
+ 1983 the other way           1983 undershoots           -0.424                                     holds                    
+ more ENSO-driven than record model > record             gate est 0.48 vs 0.29; N7 est 0.19 vs 0.30 ESTIMATOR-DEPENDENT      
+provenance: calibration/diag_card4_audit.R @d59151a; canonical hilda29e md5 bf4732da67ee22751d87ca9f95484b37; module check iav_module_20261008_refit_20261008_obj18p2_hilda_csl3v0kaidgbemwt_basin1.rds; no RNG
+saved outputs/diagnostics/card4_audit_20261008_hilda29e.{log,rds} | 2.1 min

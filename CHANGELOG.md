@@ -2,6 +2,46 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-08 (g) — **CARD 4 AUDITED at `hilda29e`: THREE typed claims are false, not one.** The lag (known), "a little below the range", and the growth-peak timing. One more is estimator-dependent and two are wording calls. "A little below" was never gated, although `review.R` says it is. No copy, test or model change.
+
+- **Why.** The handoff (§3.1) flagged card 4's "2.5 months" and its skipping guard. Re-measuring the REST of the card before proposing its fix found more. New read-only driver `calibration/diag_card4_audit.R` (`d59151a`); outputs `outputs/diagnostics/card4_audit_20261008_hilda29e.{log,rds}`.
+  - It reads two committed drivers, run at `hilda29e` at `212b7b0` (clean): `enso_growth_fit_20261008_hilda29e` and `app_wobble_shares_20261008_hilda29e`.
+  - Gates:
+    - the module check's `base_md5` = the canonical's mode file;
+    - the lag it was taken at = the lag the canonical runs;
+    - the read outputs are at that mode file and clean;
+    - the `gamma_diff` knockout at `hilda29l` reproduces N8's recorded 2024 value (−0.728 vs −0.73).
+  - Mutation-tested: another basin's module check, and N8 mistyped as −0.70. Both stop.
+- **The ledger** (typed → measured at `hilda29e`):
+
+| claim | typed | measured | verdict |
+|---|---|---|---|
+| land ENSO lag | 2.5 months | 5.93 ± 1.21 (PINNED; module Laplace sd; profile 2σ 2.99–9.11) | **STALE**, 2.84 sd |
+| limb strength vs Meinen | "a little below" | 16.79 vs [14, 25] = inside | **STALE** |
+| growth peak after Niño 3.4 | model 1 mo, record 5 | model **5**, record 5 | **STALE**: the cut fixed the timing miss the card describes |
+| ENSO sensitivity | "close to right" | 1.02× GCB (GCB 1 se = 0.21×) | holds |
+| solubility path alone | wrong sign | −0.205 vs GCB +0.115 | holds |
+| title | "about 60 %" | 66 % (app estimator, 0.304 / 0.459); GATE V 0.854, PASS | wording, Marcus |
+| diffuse light after Pinatubo | "about 1.5 ppm" | 1.01 (monthly max; `hilda29l` 1.49, `hilda33p` 1.01) | wording, Marcus; **stale since `hilda33p`**, not this adoption |
+| N7: no pattern in the misses | none of three significant | min p 0.081 (AOD) | holds |
+| N7: decades inside one year's scatter | yes | max \|decade\| 0.136 vs sd 0.376 | holds |
+| N7: 1991 largest overshoot, 1983 the other way | yes | 1991 +1.03; 1983 −0.42 | holds |
+| "more El Niño-driven than the real record's" | model > record | GATE V estimator 0.48 vs 0.29; N7 estimator 0.19 vs 0.30 | **ESTIMATOR-DEPENDENT** |
+
+- ⛔ **"A LITTLE BELOW" WAS NEVER GATED.** `review.R` says `RV_ENSO_L2_VS_OBS` is recomputed by a test from the mode file, and `2cee507`'s message says "word gated against the mode file". But no test calls `rv_enso_l2_relation()`, and `git log -S` finds only the commit that defined it. The only test naming the constant is `test-app-review-copy`'s phrase ban. So the word went false at adoption with a green suite. This is the same family as card 4's skipping guard (`skip_guard_silent_on_adoption`).
+- ⚠ **The last sentence of card 4 depends on the estimator, and the cause is the estimator, not the index.** Same run, same 66 years, both index versions:
+  - model r is 0.48–0.50 on GATE V's estimator (growth regressed on emissions with a time-varying AF, GtC/yr) and 0.18–0.19 on N7's (ppm/yr about a 3-dof smooth);
+  - observed r is 0.29–0.30 on both;
+  - at `hilda33p` the model was above the record on both estimators (0.64 / 0.33).
+  - Why the estimators split for the model and not the record was NOT investigated. A hypothesis, untested: the model's response now lags 5–6 months, so a calendar-year boundary splits it differently on the two definitions.
+- ⚠ **`calibration/diag_growth_residual_years.R` cannot run at `hilda29e`.** It builds the builder's DEFAULT forcing, so `ccx_enso_index_check()` refuses it: the structure names 'detrend' and the forcing carries 'demean'. That is a loud failure, not a silent one. The audit reruns its arithmetic unchanged on `dg_run`'s forcing; the driver itself is untouched.
+- ⚠ **Correction to the handoff (§3.1 b):** "stage 1's Laplace sd 1.248 mo" is **basin 2's** (`…_id006`, and pass 2's basin 2). Basin 1, the adopted one, gives **1.207** (pass 2's check, `…_obj18p2_…_basin1.rds`; pass 1's gave 1.208).
+- **What-if copy, measured at `hilda29e`** (`app_wobble_shares_20261008_hilda29e`):
+  - ENSO off removes 39 % ("about 40 %" holds);
+  - all three off leaves 29 % (the typed claim is "about a third"; `hilda33p` 32 %);
+  - volcanic light alone removes 1.7 % (`hilda33p` 4.1 %).
+- **For Marcus:** card 4's wording; whether to re-express the lag guard (read the lag the canonical RUNS, with the module's sd when it is pinned); whether to ADD the "a little below" gate the comment promised (it fails until the copy changes).
+
 ## 2026-10-08 (f) — **"Approve all five" APPLIED** (Marcus, verbatim: "Approve all five, then write the handoff note"); the suite is down to ONE failure, by design; the handoff is written. ⛔ Found: card 4 is stale, and its guard SKIPS.
 
 - **Commit `9e22e3b`.** The five items:
