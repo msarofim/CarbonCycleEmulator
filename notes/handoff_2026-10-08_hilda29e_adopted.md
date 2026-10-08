@@ -33,8 +33,10 @@ Written on Marcus's request ("Approve all five, then write the handoff note").
 - **Code** is on `main`, pushed. The last commit before this note is `9e22e3b` (the ledger applied).
 - **The full suite at `9e22e3b`** was running when this note was written: `outputs/diagnostics/suite_20261008_9e22e3b_ledger.log`, tree `~/ccx_frozen/suite_20261008_9e22e3b`.
   - **Expected:** exactly ONE failing test, `test-constraint-map.R` (6) `pv$mode`, by design (§3 item 2).
-  - **Expected skips: 4.** That is the standing three, plus card 4's guard (§3 item 1).
-  - If CHANGELOG (f) lacks the result, read the log's `LEDGER` / `TOTAL` lines. Anything else failing: report it and stop (global CLAUDE.md).
+  - **RESULT (10:11 EDT): 7027 passed, 1 failed (exactly that one), 0 errors, 5 skipped.** The skips:
+    - `{seacarb}` ×2;
+    - the dormant held-at-0 test ×1 (§4);
+    - **card 4's guard ×2** (`test-review-card-numbers.R` lines 33 and 57; §3 item 1). This note first said 4: card 4's guard is TWO tests.
 
 ## 2. Rulings this session (verbatim)
 
@@ -52,7 +54,7 @@ Written on Marcus's request ("Approve all five, then write the handoff note").
 
 1. **⛔ CARD 4 IS STALE, AND ITS GUARD WENT SILENT.**
    - The app's card 4 says the land responds "2.5 months after the index"; `hilda29e` runs 5.93 months.
-   - `test-review-card-numbers.R` (lines 31–61) SKIPS whenever the canonical does not FIT `lag_enso_land`. Under the cut it is pinned, so the guard skipped instead of failing. That is the suite's fourth skip, a silent gate (memory `INDEX_diag.md`).
+   - `test-review-card-numbers.R` (lines 31–61) SKIPS whenever the canonical does not FIT `lag_enso_land`. Under the cut it is pinned, so the guard skipped instead of failing. Its two tests are two of the suite's five skips, a silent gate (memory `skip_guard_silent_on_adoption`).
    - **Do with Marcus:**
      - (a) the card-4 wording (he drafts text; propose numbers only);
      - (b) re-express the guard to read the lag the canonical RUNS, fitted OR pinned, with the module's own sd when pinned (stage 1's Laplace sd 1.248 mo; the check file's `laplace`). Then the test FAILS on stale copy instead of skipping.

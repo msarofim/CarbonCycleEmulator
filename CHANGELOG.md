@@ -2,6 +2,32 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-08 (f) — **"Approve all five" APPLIED** (Marcus, verbatim: "Approve all five, then write the handoff note"); the suite is down to ONE failure, by design; the handoff is written. ⛔ Found: card 4 is stale, and its guard SKIPS.
+
+- **Commit `9e22e3b`.** The five items:
+  1. `APP_RELEASE_MODE` "hilda29e". The app already loaded the canonical.
+  2. **The ledger:**
+     - the `test-ms-seed.R` leak fixed: `ms_arm_open()` undoes the gate and pins on any failure after applying them, and its #16 arm gets its references by name;
+     - premises NAMED at `hilda33p`: `test-l2-enso-limb` P0a, `test-gcb-enso-slope`, `test-enso-demean`'s pricing;
+     - `test-l2-enso-limb`'s held-at-0 test guards on the VALUE (dormant since 09-20 r: no registered mode holds `w_enso_l2` = 0 with the shim at 0);
+     - `test-mode-file` admits every gate's names (`CCX_PARAM_GATED_ALL`);
+     - re-pinned at `hilda29e`, measured: GATE S 8.50 → 9.06 mo (still PASS), the imbalance panel (last decade's miss 0.92 → 1.00, `d_land` +0.482 → +0.507, `d_luc` −0.169 → −0.146);
+     - `test-ms-reference-set` (1) / (2) / (8) / (9) / (11)–(14) and `test-iav-redesign` IR7 re-expressed: #16's ten match no ruled set; pass 2's pins ARE the canonical's; the cut's refusal is exercised on NULL pins.
+  3. `ccx_ms_reference_set()`: when the canonical's pins carry the interannual module, they are ruled ONLY under its own label and seas_ml. ⚠ A canonical without the cut keeps the deliberate looseness that tests (2) and (8) documented. Pass 2's branch removed (unreachable).
+  4. `CCX_MODE_L2_ARM_PINS` = the limb arm's OWN nine (`CCX_MODE_OBJ15_PINS`), and the limb branch removed.
+     - ⚠ This resolves a CONFLICT with 10-06's design: the alias existed to keep that branch unreachable, so that a nine-pin (#15) array stays refused. It still is, now by removal.
+  5. **BLOCKED:** `diag_constraint_map.R`'s own gates refuse `hilda29e`. `CM_FAMILY` carries `gcb_ocean_enso_slope`, a MODULE row under the cut; the union expects `gamma_enso_land_NH/SH` fitted.
+     - Tag reverted, `data/` untouched, `outputs/diagnostics/constraint_map_20261008e_GATES_FAILED.log` kept. The tab still shows `hilda33p`'s map.
+     - **Marcus to rule** how the tab treats the cut's held names.
+- **The full suite at `9e22e3b`** (`outputs/diagnostics/suite_20261008_9e22e3b_ledger.log`): **7027 passed, 1 failed, 0 errors, 5 skipped**, rc 0, 18 min.
+  - The one failure is `test-constraint-map` (6) `pv$mode`, by design until item 5 is ruled.
+  - Skips: `{seacarb}` ×2; the dormant held-at-0 test; card 4's guard ×2.
+- ⛔ **CARD 4 IS STALE AND ITS GUARD WENT SILENT** (memory `skip_guard_silent_on_adoption`).
+  - Card 4 says the land responds "2.5 months after the index"; `hilda29e` runs 5.93.
+  - `test-review-card-numbers.R` (lines 33 and 57) skips unless the canonical FITS `lag_enso_land`; under the cut it is pinned.
+  - 10-07e's "fails BY DESIGN on any adoption that moves the lag" was wrong. Fixing the copy and the guard is Marcus's (handoff §3.1).
+- **Handoff:** `notes/handoff_2026-10-08_hilda29e_adopted.md`. 10-07e's points to it.
+
 ## 2026-10-08 (e) — **PASS 2 PASSED; `hilda29e` ADOPTED** (Marcus: "Basin 1, run the second pass, adopt if it passes"; "hilda29e (Recommended)"). The adoption's test ledger is classified; NO test edited. ⚠ A correction: the app ALREADY loads `hilda29e`.
 
 - **Pass 2** (wave `20261008d`, 07:56–08:21 EDT, rc 0; landed `58ef6fc`, read `79f4966`):
