@@ -1,5 +1,9 @@
 # HANDOFF 2026-10-07d — OBJECTIVE #18 BUILT AND PRICED; STAGE 2 RUNNING; NEXT: BUILD THE LANDING KIT AND LAND IT
 
+> ⛔ **SUPERSEDED by `notes/handoff_2026-10-07e_obj18_landing_armed.md`.** Items 1–6 of §3 below RAN on 2026-10-07 (CHANGELOG
+> 10-07 k): the landing kit was built (promote `--id`, the basin step, the #18 read, one chain script), dry-run twice clean,
+> and the landing ARMED to run when the wave ends. Read the new note, not this one.
+
 **Supersedes** `notes/handoff_2026-10-07c_obj18_build.md`, which now points here.
 - Written on Marcus's request, verbatim: "write the handoff note."
 - Items 1–6 of 10-07c §3 are DONE; its item 7 (the landing) is this note's §3.
