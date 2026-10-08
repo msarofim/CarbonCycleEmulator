@@ -1,0 +1,36 @@
+armed 2026-10-07T20:49:05-0400: waiting on launcher 51496
+launcher 51496 gone 2026-10-08T04:24:10-0400; its end line: objective #18 end 2026-10-08T04:23:31-0400 rc 0
+objective #18 landing chain (land) at 335b886, 2026-10-08T04:24:10-0400
+== land  04:24:10
+   rc 0
+== collect  04:24:11
+   rc 0
+== basins  04:24:11
+   rc 0
+   the basins: LP id 0 (best stored logpost), NAT id 0 (best likelihood + prior), NEAR id 6 (the runner-up on it, within the optimiser convergence bound)
+== promote_lp  04:24:15
+   rc 0
+== promote_id006  04:24:19
+   rc 0
+   promoted: refit_20261008_obj18_hilda_csl3v0kaidgbemwt = id 000
+== hessian_id000  04:24:23
+   rc 0
+== read_id000  04:33:31
+   rc 0
+== check_id000  04:33:42
+   rc 0
+== ocean_id000  04:34:59
+   rc 0
+   promoted: refit_20261008_obj18_hilda_csl3v0kaidgbemwt_id006 = id 006
+== hessian_id006  04:37:06
+   rc 0
+== read_id006  04:46:12
+   rc 0
+== check_id006  04:46:23
+   rc 0
+== ocean_id006  04:47:35
+   rc 0
+== scorecard  04:49:40
+   rc 0
+== CHAIN DONE (land) 04:50:15. Logs: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/obj18_landing_20261008
+armed landing: the chain ended rc 0 2026-10-08T04:50:15-0400

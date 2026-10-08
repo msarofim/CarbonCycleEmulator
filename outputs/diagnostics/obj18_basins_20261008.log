@@ -1,0 +1,79 @@
+calibration/diag_obj18_basins.R @335b886+dirty, 2026-10-08 04:24
+  wave /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261007i_hilda_csl3v0kaidgbemwt_seasml1_pin_obj18_sd1.0452
+  24 start files; structure hilda_csl3v0kaidgbemwt, seas_ml 1, pump field solved, pump mode N, h_ml band [42.5, 200]; pins _pin_ent_seas_amp_SH=0.0000000_w_eq=27.0000000_gamma_eq=1.0000000_pump_export=9.0800000_w_vent=0.0000000_gamma_vent=0.0000000_w_thc=0.0000000_gamma_enso_ocn_NH=0.0000000_gamma_enso_ocn_SH=0.0000000_npp_tsens=0.0000000_lag_enso_land=5.8483078_gamma_enso_land_NH=0.6589773_gamma_enso_land_SH=0.6315595_w_enso_l2=16.6050643
+  DUPLICATES (optimum bit-identical to a lower id): id 3 = id 1; id 4 = id 2; id 5 = id 2
+
+=== 0. GATES ===
+  basin 1 (id 000): logpost -1166.346999, stored -1166.346995, diff -4.0e-06 (tol 1e-05)
+  basin 2 (id 006): logpost -1167.364913, stored -1167.364912, diff -7.2e-07 (tol 1e-05)
+  basin 3 (id 023): logpost -1220.455093, stored -1220.455092, diff -1.2e-06 (tol 1e-05)
+  likelihood + prior + Jacobian close every logpost to <= 1e-08
+
+=== 1. THE BASINS (collect's clustering; each by its best stored-logpost member) ===
+  basin 1  id 000  x9 (9 distinct)  logpost -1166.3470  likelihood -1132.8786  prior -77.0022  Jacobian +43.5338  lik+prior -1209.8808
+            h_ml 64.631, pump_grad 314.76, kz 14151, beta_max 2.0107, fert_k 669.02, q10 1.0919
+            members: 0 8 10 12 14 16 17 19 20
+  basin 2  id 006  x9 (6 distinct)  logpost -1167.3649  likelihood -1132.3130  prior -77.6543  Jacobian +42.6024  lik+prior -1209.9673
+            h_ml 50.011, pump_grad 321.69, kz 14348, beta_max 2.0168, fert_k 674.19, q10 1.0774
+            members: 1 2 3 4 5 6 7 9 21
+  basin 3  id 023  x1 (1 distinct)  logpost -1220.4551  likelihood -1140.4046  prior -123.6046  Jacobian +43.5542  lik+prior -1264.0092
+            h_ml 49.765, pump_grad 291.66, kz 14174, beta_max 1.9107, fert_k 747.98, q10 0.84287
+            members: 23
+
+  BEST by stored logpost: id 000 (basin 1) | by LIKELIHOOD: id 006 (basin 2) | by likelihood + prior: id 000 (basin 1)
+  ⇒ the stored logpost and likelihood + prior AGREE on the best basin
+  the runner-up on likelihood + prior: basin 2 (id 006), 0.0865 below the best: INSIDE the near-tie bound 0.5 (the starts' cycle_tol) -- the chain reads it too (RULED 10-07 k: "Read both within 0.5")
+  ⚠ the likelihood ALONE picks basin 2 (id 006): likelihood +0.566 but priors -0.652 against basin 1's. NOT promoted (RULED 10-07 k: likelihood + prior)
+
+=== 2. EACH BASIN AGAINST THE LOGPOST-BEST (other - best) ===
+  basin 2 (id 006) - basin 1 (id 000): logpost -1.0179 = likelihood +0.5656 + priors -0.6521 + Jacobians -0.9314; lik+prior -0.0865
+    h_ml                       50.011 vs       64.631   prior  +0.1490  Jacobian  -0.9780
+    sst_seas_amp_SH             1.282 vs       1.5552   prior  -0.4640  Jacobian  -0.1932
+    sst_seas_amp_NH            1.6951 vs       1.6321   prior  +0.1416  Jacobian  +0.0378
+    kz_deep_frac            0.0079125 vs    0.0074672   prior  +0.0000  Jacobian  +0.1655
+    u_hs                       24.482 vs        23.13   prior  +0.0737  Jacobian  +0.0612
+    q10                        1.0774 vs       1.0919   prior  -0.1175  Jacobian  -0.0134
+    h_hs                       299.68 vs       291.91   prior  -0.1033  Jacobian  -0.0099
+    pump_grad                  321.69 vs       314.76   prior  -0.1303  Jacobian  +0.0218
+    pump_hs_gcm2               87.195 vs       85.286   prior  -0.1037  Jacobian  +0.0055
+    npp_frac_NH               0.58106 vs      0.59414   prior  -0.0900  Jacobian  -0.0081
+    row ocean_grad_d13c         +0.6784
+    row d13c_seasonal_MLO       +0.6710
+    row ocean_grad_dic          +0.5891
+    row d13c_level_SPO          -0.3784
+    row d13c_seasonal_SPO       -0.3706
+    row d13c_level_MLO          -0.2460
+    row d14c_profile_ab         +0.2288
+    row gcb_land_sink           -0.2230
+    row ocean_grad_alk          -0.1847
+    row co2_seasonal_SPO        -0.1766
+    row co2_icecore             -0.1646
+    row d14c_SH                 +0.1356
+    rows favouring the other basin +2.6257; rows favouring the best -2.0601 (26 rows)
+  basin 3 (id 023) - basin 1 (id 000): logpost -54.1081 = likelihood -7.5260 + priors -46.6025 + Jacobians +0.0204; lik+prior -54.1285
+    seas_lag_p_SH             -3.1018 vs       2.6475   prior -25.3189  Jacobian  +0.0000
+    seas_T_amp_SH              21.302 vs       3.4978   prior -10.1429  Jacobian  +1.8067
+    npp_frac_NH               0.46325 vs      0.59414   prior  -5.7197  Jacobian  -0.6293
+    q10                       0.84287 vs       1.0919   prior  -2.7840  Jacobian  -0.2589
+    seas_T_amp_NH              9.6006 vs       15.239   prior  -1.0905  Jacobian  -0.4620
+    h_ml                       49.765 vs       64.631   prior  +0.1464  Jacobian  -1.0098
+    seas_lag_p_NH              1.1511 vs       1.5845   prior  -0.6798  Jacobian  +0.0000
+    ndep_ret                   12.101 vs       9.0785   prior  -0.9230  Jacobian  +0.2874
+    sst_seas_amp_NH            1.9064 vs       1.6321   prior  +0.4355  Jacobian  +0.1553
+    rep_dC                     4.3109 vs       4.2111   prior  -0.4249  Jacobian  +0.0000
+    row d13c_seasonal_SPO       -4.0052
+    row d13c_level_SPO          -2.7906
+    row co2_seasonal_MLO        +2.5530
+    row d13c_level_MLO          -2.5285
+    row d13c_seasonal_MLO       +2.2715
+    row co2_gradient            -1.3378
+    row gcb_land_sink           -1.2362
+    row d13c_icecore            -1.1729
+    row co2_icecore             +0.7660
+    row co2_level_MLO           -0.6646
+    row co2_seasonal_SPO        +0.6505
+    row ocean_grad_alk          +0.6398
+    rows favouring the other basin +8.0410; rows favouring the best -15.5671 (26 rows)
+
+saved outputs/diagnostics/obj18_basins_20261008.{log,rds,ids}: LP 0, NAT 0, NEAR 6
+⛔ ADOPTS NOTHING.

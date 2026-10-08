@@ -1,0 +1,108 @@
+calibration/diag_obj18_refit_read.R @335b886+dirty, 2026-10-08 04:46
+  incumbent hilda29w (/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261006_obj17_basinB_start001_DRYRUN/mode_fit_pumpN.rds)
+  #18       /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261008_obj18_hilda_csl3v0kaidgbemwt_id006/mode_fit_pumpN.rds (md5 23a3b32c8ec1729e3d6a6f4c00703c28)
+  wave      /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261007i_hilda_csl3v0kaidgbemwt_seasml1_pin_obj18_sd1.0452
+  stage 1   calibration/output/iav_module_20261007_refit_20261006_obj17_basinB_start001_DRYRUN_hilda_csl3v0kaidgbemwt.rds
+  pricing   outputs/diagnostics/obj18_price_20261007.rds
+  ⚠ TAGGED '_id006': read the provenance before quoting anything below
+
+=== 0. EACH VECTOR REPRODUCES ITS STORED LOGPOST IN ITS OWN SPACE (tol 1e-05); THE WAVE ===
+  survey: 24 start files; 19 CONVERGED in time and live, 5 out of time, 1 dead; best -1166.346995 (id 000)
+  DUPLICATES (optimum bit-identical to a lower id): id 3 = id 1; id 4 = id 2; id 5 = id 2
+  converged logposts in clusters split at gaps > 0.05: -1166.3470 x6 (6 distinct) | -1166.4746 x3 (3 distinct) | -1167.3649 x9 (6 distinct) | -1220.4551 x1 (1 distinct)
+  promoted: id 6 at -1167.364913, chosen by id -- 1.017917 below the best (id 0); why: the RUNNER-UP on likelihood + prior, within the optimiser's convergence bound of the best (calibration/diag_obj18_basins.R, outputs/diagnostics/obj18_basins_20261008.ids); read beside the best (Marcus 2026-10-07 k: 'Build --id, read both (Recommended)', 'Likelihood + prior (Recommended)', 'Read both within 0.5 (Recommended)')
+  incumbent hilda29w     logpost -1165.224582 (stored -1165.224582, diff +0.0e+00)  likelihood -1129.2996 on 26 rows
+  objective #18          logpost -1167.364913 (stored -1167.364913, diff +0.0e+00)  likelihood -1132.3130 on 26 rows
+
+=== 1. ON #18's ROWS (the detrended index, the low-pass ocean row): #18 vs REF and the pricing's cells ===
+  REF (hilda29w's vector under #18 minus the index, module at P0) vs the pricing's: logpost +0.0e+00, rows max |diff| 0.0e+00 (tol 1e-05)
+  co2_icecore            REF   -507.731 | #18   -4.558
+  d13c_icecore           REF     66.609 | #18   -3.519
+  d13c_level_MLO         REF     63.611 | #18   +1.198
+  gcb_ocean_sink         REF     -1.977 | #18   -0.842
+  ocean_grad_alk         REF     -4.806 | #18   -0.712
+  d13c_level_SPO         REF     56.324 | #18   +0.579
+  d13c_seasonal_SPO      REF    247.643 | #18   +0.535
+  gcb_land_sink          REF    -22.331 | #18   -0.483
+  co2_gradient           REF    -15.114 | #18   +0.472
+  co2_seasonal_MLO       REF     -1.748 | #18   -0.254
+  d14c_profile_ab        REF     -3.459 | #18   +0.247
+  co2_seasonal_SPO       REF     67.643 | #18   -0.233
+  d14c_SH                REF   -287.279 | #18   +0.217
+  hs_surf_d13c           REF     -2.730 | #18   +0.169
+  d13c_seasonal_MLO      REF    208.429 | #18   -0.142
+  co2_level_SPO          REF    -63.098 | #18   -0.103
+  d14c_NH                REF   -288.219 | #18   -0.066
+  ocean_grad_d13c        REF     -4.292 | #18   +0.062
+  d14c_intcal            REF   -640.572 | #18   -0.047
+  ocean_grad_dic         REF     -6.973 | #18   -0.037
+  d14c_profile_level     REF     -3.223 | #18   -0.033
+  d13c_gradient          REF    105.770 | #18   +0.022
+  excess_c14_ocean       REF     -9.624 | #18   -0.010
+  hs_surf_dic            REF     -4.268 | #18   +0.007
+  co2_level_MLO          REF    -71.181 | #18   +0.005
+  d14c_profile_bd        REF     -2.187 | #18   -0.001
+  TOTAL -7.5280 (REF -1124.7850; #18 -1132.3130). The pricing against the same REF: B1 -12.342, B1s -12.389, B2 -7.664, B2s -7.799, B2f -7.586, B2fs -7.719
+  by group, #18 vs REF (the pricing's B2s, five land names re-fitted at #18's pins): ice_cores -8.077 (-7.707), co2_levels -0.099 (-0.482), seasonal -0.094 (+0.265), gcb_rows -1.325 (-1.581)
+  against its SEED B1s (hilda29w at #18's pins: the same objective and pins): likelihood +4.8612, stored logpost +5.7343
+
+=== 2. ON #17's ROWS (the shipped index, the year-by-year ocean row): #18's vector vs hilda29w's ===
+  d13c_level_MLO         hilda29w     63.611 | #18   -5.923
+  co2_icecore            hilda29w   -507.731 | #18   -4.202
+  co2_level_MLO          hilda29w    -71.181 | #18   +2.861
+  d13c_level_SPO         hilda29w     56.324 | #18   +1.959
+  d13c_icecore           hilda29w     66.609 | #18   -1.550
+  gcb_land_sink          hilda29w    -22.331 | #18   +1.371
+  co2_level_SPO          hilda29w    -63.098 | #18   -1.144
+  ocean_grad_alk         hilda29w     -4.806 | #18   -0.712
+  gcb_ocean_sink         hilda29w     -6.492 | #18   -0.586
+  co2_seasonal_MLO       hilda29w     -1.748 | #18   -0.585
+  d13c_seasonal_SPO      hilda29w    247.643 | #18   +0.538
+  co2_gradient           hilda29w    -15.114 | #18   +0.452
+  TOTAL -7.3574 on #17's 26 rows (#18's free names with #17's module values P0: -6.2652, so the module's move P0 -> S18 there -1.0922)
+
+=== 3. THE MODULE's likelihood (the detrended monthly growth + the slope row) on stage 1's own ssr_ref ===
+  stage 1's point reproduces stage 1's optimum: module loglik diff +0.0e+00 (tol 1e-05)
+  stage 1's point: SSR 89.2925, slope row +2.7862, growth r 0.6835
+  #18:            SSR 89.0519, slope row +1.8980, growth r 0.6859 -> module -0.8577 against stage 1's optimum
+
+=== 4. THE PRIOR LEDGER (the same 29 free names) and THE MOVES in hilda29w's marginal Laplace sd ===
+  priors +0.6882, Jacobians +0.1849 (#18 - hilda29w)
+  pump_grad                  296.48 ->       321.69   +0.75 sd
+  u_hs                       22.034 ->       24.482   +0.62 sd
+  ndep_ret                   11.859 ->       9.2125   -0.61 sd
+  kz                          14924 ->        14348   -0.54 sd
+  hs_asx_frac               0.73181 ->      0.69825   -0.40 sd
+  seas_lag_p_SH              2.5949 ->       2.6229   +0.38 sd
+  seas_lag_p_NH              1.5343 ->       1.5539   +0.36 sd
+  fert_k                     717.76 ->       674.19   -0.33 sd
+  q10                        1.0686 ->       1.0774   +0.33 sd
+  npp_frac_NH               0.57504 ->      0.58106   +0.30 sd
+  luc_scale                 0.92102 ->        0.911   -0.30 sd
+  beta_max                   2.1002 ->       2.0168   -0.27 sd
+  imb_share_land            0.67932 ->      0.66675   -0.11 sd
+  k_w                        1872.8 ->       1884.2   +0.21 sd
+  h_ml                       49.894 ->       50.011   +0.08 sd
+  lag_enso_land              5.8432 ->       5.8483  (PINNED: P0 -> S18,  +0.00 of stage 1's own sd 1.247)
+  gamma_enso_land_NH        0.66071 ->      0.65898  (PINNED: P0 -> S18,  -0.01 of stage 1's own sd 0.1492)
+  gamma_enso_land_SH        0.63322 ->      0.63156  (PINNED: P0 -> S18,  -0.01 of stage 1's own sd 0.143)
+  w_enso_l2                  14.726 ->       16.605  (PINNED: P0 -> S18,  +1.29 of stage 1's own sd 1.452)
+
+=== 5. THE FUTURES: CO2 (ppm) in 2300 (br_futures()), read against the ridge's measured 1-sigma width ===
+  B and B1s vs the pricing's futures: max |diff| 0.0e+00 / 0.0e+00 ppm (tol 1e-06)
+  the ridge's 1-sigma (the pricing's, natural space, the narrower side): SSP5-8.5 34.2, vvH 17.7 ppm
+  canonical  ssp585  1461.53 (  +4.33 vs B) | vvH  1010.03 (  +3.04 vs B)
+  B          ssp585  1457.19 (  +0.00 vs B) | vvH  1006.99 (  +0.00 vs B)
+  B1s        ssp585  1457.21 (  +0.02 vs B) | vvH  1007.01 (  +0.02 vs B)  = 0.00 / 0.00 of the width -- INSIDE: not a finding
+  obj18      ssp585  1469.37 ( +12.18 vs B) | vvH  1010.92 (  +3.93 vs B)  = 0.36 / 0.22 of the width -- INSIDE: not a finding
+  the pricing's re-fit cells vs B: B2s +22.73 / +10.45; B2fs +6.63 / +2.49
+
+=== 6. THE LAND's NET CLIMATE EFFECT, 2015-2024 (TRENDY S2 - S1), GtC/yr ===
+  canonical  net climate effect -0.0378, z +1.09 against GCB 2025's -0.8 +/- 0.7
+  B          net climate effect -0.0428, z +1.08 against GCB 2025's -0.8 +/- 0.7
+  obj18      net climate effect -0.0482, z +1.07 against GCB 2025's -0.8 +/- 0.7
+
+=== THE SEPARATE DRIVERS (run from a frozen copy; each writes its own log) ===
+  THE ONE-PASS CHECK (RULED 0.1 sigma): Rscript calibration/fit_iav_module.R --base=/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261008_obj18_hilda_csl3v0kaidgbemwt_id006/mode_fit_pumpN.rds --check=calibration/output/iav_module_20261007_refit_20261006_obj17_basinB_start001_DRYRUN_hilda_csl3v0kaidgbemwt.rds
+  CCX_SC_EXTRA_MODE="obj18=/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261008_obj18_hilda_csl3v0kaidgbemwt_id006/mode_fit_pumpN.rds" CCX_SC_TAG_SUFFIX=_obj18 Rscript calibration/diag_whole_model_scorecard.R
+  CCX_OC_MODE="obj18=/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261008_obj18_hilda_csl3v0kaidgbemwt_id006/mode_fit_pumpN.rds" Rscript calibration/diag_ocean_climate_gobm.R
