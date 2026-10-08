@@ -36,9 +36,8 @@ rv_need_gates()
 
 # ---- named constants (every label below derives from these) ----------------
 CA_DRIVER       <- "calibration/diag_card4_audit.R"
-# the canonical's OWN stage-1 module check (fit_iav_module.R --check at the adopted basin; 10-08 e). Gated on md5.
-CA_MODULE_CHECK <- file.path("calibration", "output",
-                             "iav_module_20261008_refit_20261008_obj18p2_hilda_csl3v0kaidgbemwt_basin1.rds")
+# the canonical's OWN stage-1 module check (R/paths.R; fit_iav_module.R --check at the adopted basin). Gated on md5.
+CA_MODULE_CHECK <- CCX_MODE_CANONICAL_MODULE_CHECK
 CA_TYPED_LAG    <- 2.5             # card 4: "defined to occur 2.5 months after the index"
 CA_TYPED_SHARE  <- 0.60            # card 4's title: "about 60% of observed"
 CA_TYPED_PEAK   <- c(model = 1L, observed = 5L)   # "peaking a month after ... rather than five months"

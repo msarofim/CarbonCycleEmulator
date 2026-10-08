@@ -399,6 +399,12 @@ CCX_MODE_OBJ18P2_PINS    <- c(CCX_MODE_OBJ16_PINS,
                               gamma_enso_land_SH = 0.6355964031675142,
                               w_enso_l2          = 16.787744029103425)
 CCX_MODE_CANONICAL_PINS  <- CCX_MODE_OBJ18P2_PINS   # 2026-10-08 (e): hilda29e's: #16's ten + the module at pass 2's values
+# The canonical's OWN stage-1 module check (fit_iav_module.R --check, run AT the adopted mode file): where a PINNED
+# module name's uncertainty lives (its `laplace`). NOT CCX_MODE_OBJ18P2_MODULE_FILE, which was taken at #18 pass 1's
+# basin and is the source of the pins. test-review-card-numbers gates its base_md5 against ccx_mode_file(), so an
+# adoption that does not move this FAILS there. MOVE IT AT EVERY ADOPTION of a cut canonical (2026-10-08 g).
+CCX_MODE_CANONICAL_MODULE_CHECK <- file.path("calibration", "output",
+                                             "iav_module_20261008_refit_20261008_obj18p2_hilda_csl3v0kaidgbemwt_basin1.rds")
 # ⚠ RE-DOCUMENTED 2026-10-01 (Marcus, review 10-01c B3b: option (i), "follow recommendations").
 # `hilda32f` is the free parent of the v1.0 canonical, hilda29l (structure hilda_csl3,
 # objective #13). It is NOT a parent of the current canonical: hilda33d (objective #14, the

@@ -285,6 +285,9 @@ RV_ENSO_WIN <- c(1959, 2024)
 # "above", used in card 4's text; rv_enso_l2_relation() is what the test uses
 # to recompute it, so a refit that moves the value fails the suite instead of
 # leaving the sentence false. hilda33d: 11.91 vs [14, 25] -> "below".
+# ⛔ 2026-10-08 (g): that test did NOT exist until then (no caller of
+# rv_enso_l2_relation() anywhere in tests/); hilda29e's 16.79 is "inside" and the
+# word stayed "below" with a green suite. It is now test-review-card-numbers.R.
 RV_ENSO_L2_VS_OBS <- "below"
 rv_enso_l2_relation <- function(w, bracket)
   if (w < bracket[1]) "below" else if (w > bracket[2]) "above" else "inside"
@@ -543,8 +546,9 @@ RV_CARDS <- list(
        # "lands inside the observed range". True at hilda29l (13.71, inside at
        # 1 sd); at hilda33d w_enso_l2 is 11.91 against Meinen's 14-25 Sv per
        # index unit, below the range even one sd up. The relation word is a
-       # named constant, RV_ENSO_L2_VS_OBS, which test-review-cards.R
-       # recomputes from the canonical's mode file and the data product; the
+       # named constant, RV_ENSO_L2_VS_OBS, which test-review-card-numbers.R
+       # recomputes from the canonical's mode file and the data product (since
+       # 10-08 g; before that no test did, whatever this said); the
        # numbers themselves are printed live in card 4b's caption.
        detail = paste("The sensitivity is carried by a physical mechanism -- a",
                       "layer-3 upwelling anomaly driven by the Niño3.4 index,",
@@ -573,8 +577,10 @@ RV_CARDS <- list(
                       "the years after Pinatubo. It is present and the total",
                       "wobble is still short.",
                       # Marcus 2026-10-06 (carbotopecomments.10.2.26): "Change to" -- his wording.
-                      # The fitted lag is 2.61 +/- 0.41 months at hilda33p; test-enso-lag.R fails if
-                      # a refit moves it more than one posterior sd from the 2.5 written here.
+                      # The fitted lag is 2.61 +/- 0.41 months at hilda33p; test-review-card-numbers.R
+                      # fails if the lag the canonical RUNS (fitted, or pinned by the cut's module) is more
+                      # than one sd from the 2.5 written here (this named test-enso-lag.R, which never
+                      # checked it; corrected 10-08 g). hilda29e pins 5.93 +/- 1.21: STALE.
                       "\n\nFor the land uptake, the ENSO response is defined to occur",
                       "2.5 months after the index based on the vegetation model",
                       "response timing from the Global Carbon Budget.",
