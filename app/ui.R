@@ -537,7 +537,7 @@ navbarPage(
         review_card(5, "rv_irf",     "320px", "rv_partition", "300px"),
         review_card(6, NULL),
         review_card(7, NULL),
-        review_card(8, "rv_oclim", "320px", "rv_oclim_stake", "260px"),
+        review_card(8, "rv_oclim", "380px", "rv_oclim_stake", "280px"),
         div(class = "card-issue",
             h4("The stand-ins and the provisional constants, listed"),
             # N12 (Marcus 2026-09-22): two lists, labelled, because they are

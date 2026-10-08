@@ -322,7 +322,7 @@ rv_plot_oclim <- function() rv_guard(rv_ocean_climate(), function(x) {
     geom_line(aes(y = v), linewidth = 0.35, alpha = 0.55) +
     geom_line(aes(y = r), linewidth = 1.0, na.rm = TRUE) +
     scale_colour_manual(values = stats::setNames(c(RV_COL_OBS(), RV_COL_MODEL()), c(lab_g, lab_m))) +
-    labs(x = NULL, y = "Change in ocean uptake from climate (GtC/yr)",
+    labs(x = NULL, y = "Ocean uptake change (GtC/yr)",
          caption = rv_cap(sprintf(paste(
            "%d–%d: %.2f GtC/yr here (%.2f to %.2f across the ten ocean-model setups), %.2f ± %.2f in",
            "the ocean models; per degree of sea-surface warming %.1f ± %.1f times as strong. Below %.1f",
@@ -345,7 +345,7 @@ rv_plot_oclim_stake <- function() rv_guard(rv_ocean_climate(), function(x) {
   ggplot(d, aes(scen, v)) +
     geom_col(fill = RV_COL_MODEL(), width = 0.6) +
     geom_errorbar(aes(ymin = lo, ymax = hi), width = 0.16, colour = "grey25") +
-    labs(x = NULL, y = "CO₂ in 2300 lower by (ppm)",
+    labs(x = NULL, y = "Lower CO₂ in 2300 (ppm)",
          caption = rv_cap(sprintf(paste(
            "Of %s ppm. The model's response to sea-surface warming scaled by %.2f (%.2f to %.2f for the",
            "ocean models' ±1 sd, the bars), nothing refitted: the fit to the past would move too."),
