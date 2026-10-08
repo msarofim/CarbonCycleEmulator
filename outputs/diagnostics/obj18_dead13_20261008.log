@@ -1,4 +1,4 @@
-calibration/diag_obj18_dead13.R @335b886+dirty, 2026-10-08 06:02 | no RNG
+calibration/diag_obj18_dead13.R @86d30e8, 2026-10-08 06:08 | no RNG
   wave calibration/output/multistart_20261007i_hilda_csl3v0kaidgbemwt_seasml1_pin_obj18_sd1.0452
   id 13: md5 286b6771f18988484329fc081578e258, stored logpost -1249.196175612, final_lp_check -1249.196206552, dead TRUE, out_of_time TRUE
   id 10: md5 a547ee98228b1db51b8c69407d28d807, stored logpost -1166.347001431, final_lp_check -1166.347006545, dead FALSE, out_of_time FALSE
@@ -21,5 +21,11 @@ calibration/diag_obj18_dead13.R @335b886+dirty, 2026-10-08 06:02 | no RNG
 === 3. THE MECHANISM: optim() from id 10's u_mode, every evaluated point recorded ===
   BFGS        192 evals | returned par EVALUATED bit for bit: yes (eval 134) | f(par) - (-value) +0.000e+00 | value == min evaluated: FALSE | nearest evaluated point max|du| 0.0e+00
   Nelder-Mead 302 evals | returned par EVALUATED bit for bit: yes (eval 1) | f(par) - (-value) +0.000e+00 | value == min evaluated: TRUE | nearest evaluated point max|du| 0.0e+00
+
+=== 4. HISTORY: the objective at id 10's u_mode after evaluating other points first ===
+  cold         -1166.347006544790  (vs cold +0.000e+00)
+  after_id13   -1166.347006544790  (vs cold +0.000e+00)
+  after_nudge  -1166.347006544790  (vs cold +0.000e+00)
+  after_id0    -1166.347006544790  (vs cold +0.000e+00)
 
   written outputs/diagnostics/obj18_dead13_20261008.{log,rds}

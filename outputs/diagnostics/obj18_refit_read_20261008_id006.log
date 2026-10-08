@@ -1,4 +1,4 @@
-calibration/diag_obj18_refit_read.R @335b886+dirty, 2026-10-08 04:46
+calibration/diag_obj18_refit_read.R @86d30e8, 2026-10-08 06:12
   incumbent hilda29w (/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261006_obj17_basinB_start001_DRYRUN/mode_fit_pumpN.rds)
   #18       /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261008_obj18_hilda_csl3v0kaidgbemwt_id006/mode_fit_pumpN.rds (md5 23a3b32c8ec1729e3d6a6f4c00703c28)
   wave      /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261007i_hilda_csl3v0kaidgbemwt_seasml1_pin_obj18_sd1.0452
