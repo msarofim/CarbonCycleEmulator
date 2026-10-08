@@ -40,7 +40,13 @@ HF_YEARS   <- c(2100L, 2150L, 2300L)
 HF_END     <- 2300L                                # the standing end year
 HF_ALL     <- c(f1 = 1, f_T_hi = 0.724, f_T = 0.613, f_T_lo = 0.502, f_W = 0.296, f0 = 0)
 HF_FUT     <- c(fut_f_T = 0.613, fut_f_W = 0.296)
-HF_REC     <- c(ssp585_2300 = 1461.53)             # 10-05 (p), obj16_refit_read_20261005.log l. 83
+# G1b's reference: SSP5-8.5 (unspliced) CO2 in 2300 at the MODE, produced by ANOTHER path. Keyed by mode (2026-10-08 j):
+#   hilda33p 1461.53 -- 10-05 (p), obj16_refit_read_20261005.log l. 83;
+#   hilda29e 1475.29 -- the APP's own params + spin-up (app_params(), app_spinup()), calibration/diag_app_ssp585_ref.R,
+#                       outputs/diagnostics/app_ssp585_ref_20261008_hilda29e.log (1475.2878).
+HF_REC_BY_MODE <- list(hilda33p = c(ssp585_2300 = 1461.53), hilda29e = c(ssp585_2300 = 1475.29))
+if (is.null(HF_REC_BY_MODE[[HF_MODE]])) stop("no independent SSP5-8.5 2300 reference recorded for ", HF_MODE, ": G1b cannot run")
+HF_REC     <- HF_REC_BY_MODE[[HF_MODE]]
 HF_REC_TOL <- 0.005                                # half its printed last digit
 HF_FROM    <- Sys.getenv("CCX_HF_FROM_RUNS", "")   # a saved _runs.rds: rebuild the tables without re-running
 HF_OUT     <- file.path("outputs", "diagnostics", sprintf("h2_futures_stake_%s_%s", format(Sys.Date(), "%Y%m%d"), HF_MODE))
@@ -101,7 +107,7 @@ g_ref  <- arm_run(NA, "all", "ssp585", FALSE)
 g_f1   <- arm_run(1, "all", "ssp585", FALSE)
 g1a <- identical(g_ref$co2, g_f1$co2)
 g1b <- abs(at(g_ref$co2, HF_END) - HF_REC[["ssp585_2300"]]) <= HF_REC_TOL
-cat(sprintf("G1 f = 1 through the wrapper vs unwrapped: identical() %s; ssp585 %d %.3f vs 10-05 (p) %.2f -> %s\n", g1a, HF_END,
+cat(sprintf("G1 f = 1 through the wrapper vs unwrapped: identical() %s; ssp585 %d %.3f vs the recorded reference %.2f -> %s\n", g1a, HF_END,
             at(g_ref$co2, HF_END), HF_REC[["ssp585_2300"]], if (g1a && g1b) "PASS" else "FAIL"))
 v0 <- V; v0$p$sst_obs <- 0; v0$p$sst_scale <- 0
 g_own0 <- arm_run(NA, "all", "ssp585", FALSE, v = v0, sp = dg_spinup(v0))
