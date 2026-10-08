@@ -45,8 +45,13 @@ GR_AOD_YRS <- 2               # years after a large eruption counted as volcanic
 
 md <- ccx_load_mode(CCX_MODE_CANONICAL)
 sp <- ccx_spinup_from_label(ccx_mode_spinup(md$md))(md$p)
+# the forcing's ENSO index and AOD mode are the STRUCTURE's (2026-10-08), as in dg_run() and the
+# objective. The builder's defaults ("demean", "legacy") were refused at hilda29e ("detrend",
+# "anomaly") by ccx_enso_index_check(). A structure that names neither resolves to those defaults, so
+# its run is unchanged. At hilda29e this run is dg_run()'s bit for bit through 2024 (CHANGELOG 10-08 (k)).
 F  <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = sp$prod_c14,
-                        bomb_total_kmol = md$bomb_total, luc_scale = md$luc_scale)
+                        bomb_total_kmol = md$bomb_total, luc_scale = md$luc_scale,
+                        enso_index = ccx_enso_index_of(md$p), aod_mode = ccx_aod_mode_of(md$p))
 o  <- ccx_run_fast(sp, F)$out
 o$co2_global <- (o$co2_NH + o$co2_SH) / 2
 
@@ -71,6 +76,9 @@ d$res <- d$m_a - d$o_a          # + = the model grew FASTER than observed that y
 
 cat(sprintf("=== N7: where the model's CO2 growth misses, %d-%d (n = %d) ===\n",
             GR_WIN[1], GR_WIN[2], nrow(d)))
+cat(sprintf("  canonical %s (%s) | ENSO index %s | AOD mode %s | commit %s | no RNG\n",
+            CCX_MODE_CANONICAL, basename(dirname(ccx_mode_file())), attr(F, "enso_index"),
+            attr(F, "aod_mode"), ccx_git_stamp()))
 cat(sprintf("  raw model-minus-observed growth: mean %+.3f ppm/yr, sd %.3f\n",
             mean(d$raw), stats::sd(d$raw)))
 cat(sprintf("  interannual residual (about a %d-dof smooth): mean %+.3f, sd %.3f\n",

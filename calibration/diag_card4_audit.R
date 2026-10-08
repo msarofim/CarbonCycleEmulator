@@ -15,8 +15,10 @@
 #   diag_enso_growth_fit.R   -> T2(b), the CO2 growth peak's lag after Nino 3.4 (the card's "a month ... five")
 #   diag_app_wobble_shares.R -> the app estimator's scatter (the title's "about 60%")
 # ⚠ calibration/diag_growth_residual_years.R (the N7 paragraph's driver) builds its forcing with the builder's
-# DEFAULTS and is REFUSED at a detrended-index canonical by ccx_enso_index_check(). Section 6 reruns its
+# DEFAULTS and is REFUSED at a detrended-index canonical by ccx_enso_index_check(). Section 7 reruns its
 # arithmetic unchanged on the structure's run; the driver itself is left as it is.
+# (FIXED 2026-10-08 (k): the driver now builds the structure's ENSO index and AOD mode, and at hilda29e
+# reproduces section 7's correlations and decade means bit for bit.)
 #
 # GATES (stop on any): the module check file's base_md5 is the canonical's mode file; the lag it was fitted at is
 # the lag the canonical RUNS; both read outputs name the canonical's mode file and a clean commit; the gamma_diff

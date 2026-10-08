@@ -2,6 +2,20 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-08 (k) — **The N7 driver runs at `hilda29e` again** (Marcus: make `diag_growth_residual_years.R` build its run and forcing the structure's way, arithmetic unchanged, and match the audit's section 7). It reproduces section 7 BIT FOR BIT. No app copy, test or model change.
+
+- **The fix** (`calibration/diag_growth_residual_years.R`): the forcing is now built with `enso_index = ccx_enso_index_of(md$p)` and `aod_mode = ccx_aod_mode_of(md$p)` (at `hilda29e`, "detrend" and "anomaly"). Before, it used the builder's defaults ("demean", "legacy"), and `ccx_enso_index_check()` refused the run. The arithmetic is untouched. A structure that names neither setting resolves to the defaults, so its run is unchanged. The output's header now prints the canonical, its mode-file directory, the ENSO index, the AOD mode and the commit.
+- **Route chosen: the minimal build, not the gate library.** I tested both. The driver's own build (`ccx_load_mode` + 1750–2024) and `dg_run(dg_vector(...))` (1750–2025, `DG_YEARS`) give **identical** parameters, bomb total, `luc_scale` and spin-up. `co2_NH`, `co2_SH` and the `enso` / `aod_NH` / `aod_SH` columns differ by **exactly 0** through 2024. The detrend window and the AOD background window are fixed constants, so the extra held 2025 year cannot reach back. So the driver stays self-contained and does not source `lib_design_gates.R`.
+- **Matched against the audit** (`outputs/diagnostics/card4_audit_20261008_hilda29e.rds`, made at `d59151a`): the residual-vs-ENSO / AOD / year correlation matrix (r and p) and the seven decade means are `identical()` to the audit's `n7$cor` and `n7$decades`, max |diff| 0. Printed values:
+  - **1991 +1.025**, the largest overshoot; then 1978 +0.707 and 2011 +0.579.
+  - **1983 −0.424.**
+  - residual vs ENSO **r −0.188, p 0.131**; vs AOD r +0.216, p 0.081; vs year r +0.000, p 1.000.
+  - sd 0.376; decade means −0.063 / +0.072 / −0.117 / +0.125 / −0.107 / +0.136 / −0.118.
+- **The bug is reproduced, not assumed:** `HEAD`'s copy of the driver still stops with "ENSO index mismatch: the parameters name 'detrend' but the forcing carries 'demean'".
+- ⚠ **This worktree has no `data-raw/downloads/nuclear14c/`** (gitignored), so its runs zero the nuclear ¹⁴C source. To check it, I linked the main checkout's directory in for one rerun and then removed the link. The driver's stdout was identical apart from the commit stamp, and the audit match still held. CO₂ does not see the ¹⁴C source.
+- `calibration/diag_card4_audit.R`, header comment only: "Section 6" corrected to section 7, and a FIXED note added. Its section 7 is kept as the independent cross-check.
+- Not run: the full suite. No test reads this driver, and no file a test reads was changed.
+
 ## 2026-10-08 (j) — **RULED (Marcus, verbatim): "MCMC band; go ahead with the card and futures re-measurement."** Four MCMC chains are running at `hilda29e`. Known-issues card 8 (the ocean's climate effect) is built. The H2 futures impact is re-measured: larger than at `hilda33p`.
 
 - **The MCMC band, launched 2026-10-08 16:42 EDT** (frozen worktree `~/ccx_frozen/20261008j_mcmc` at `1e00851`; `~/ccx_frozen/20261008j_mcmc_launch.sh`, logs `20261008j_mcmc_chain{1..4}.out`, PIDs `20261008j_mcmc.pids`).
