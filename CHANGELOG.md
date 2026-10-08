@@ -2,6 +2,17 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-08 (c) — **The multistart's (u, best) is a PAIR by construction** (Marcus: "Build the bookkeeping fix"; commit `253fbc9`).
+
+- **The fix** (`calibration/lib_ms_deadline.R` `ms_kept_pair()`; `calibration/run_dispersed_multistart.R`): after every optimiser step `best` is f(the kept u), EVALUATED, never `optim()`'s claim for it. This covers the NM restart and the BFGS polish, and a resumed checkpoint is re-paired. The polish is ACCEPTED on the kept point's own value; at id 13 the claim had beaten `best` by a floor-sized "gain 0.0000". Cost: one evaluation per step. **The optimiser's path is unchanged.**
+- **The DEAD gate now has two branches.** The non-finite branch is unchanged ("DEAD TASK"). The identity branch is **EXACT** (`identical(.final_lp, -best)`) and has its own message ("UNPAIRED BEST": a driver defect, not a property of the point). The 1e-8 relative bound it replaced sat inside the objective's floor. Recorded in every start file: `dead_branch`, `claim_gaps` (per step, f(kept) − claim), `pairing = "kept_pair"`; the checkpoint carries `claim_gaps`.
+- **Why re-evaluate rather than keep the best EVALUATED point:** the latter changes the optimiser's path, and in BFGS it prefers gradient-probe points that scored high BY NOISE (10-08 a §3: BFGS's returned value was not the best it evaluated).
+- **Evidence** (`outputs/diagnostics/ms_kept_pair_20261008/`):
+  - `test-ms-kept-pair.R` (new, KP1–KP3) 69 / 0. KP1 shows the defect in R itself (most seeded BFGS runs return an unevaluated `par`) and the kept pair exact every time. `test-ms-deadline` 50, `test-ms-clock` 47, `test-ms-seed` 66: 0 failures.
+  - six mutations (`mutate.py`, `mutation.log`), all caught; M1 behaviourally, M2–M6 by KP3's lint.
+  - **END TO END** (`e2e_run.{sh,out}`, `e2e_start_001.rds`): one #18-arm task, id 1, 20 CPU-min, from a frozen tree at `253fbc9` with #18's port targets. Port gate (a) reproduces B1s to the digit. NM restart gain 1.84 (claim gap 0, an evaluated point). The BFGS polish **converged normally** (no deadline) to −1167.3649 (basin 2) with **claim gap +2.465e-10**: the unevaluated-`par` case, now paired. Final check **`identical()`**, `dead_branch` "none".
+- Nothing re-run: #18's id 13 stays recorded as `dead` in its start file; the statement at (a) stands. The scratch tree `~/ccx_frozen/kept_pair_e2e_253fbc9` is removed.
+
 ## 2026-10-08 (b) — **#18's worse ocean climate effect is the STRUCTURE (the detrended ENSO index), not the refit** (Marcus: "run the ocean structure-vs-parameter test"); and the wave tree removed (Marcus: "Remove the wave tree").
 
 - **The walk, on one vector and one commit** (`b4930c1`): `calibration/diag_obj18_ocean_struct.R` builds the two middle arms from `hilda29w`'s file and writes them under `outputs/diagnostics/obj18_ocean_struct_20261008/`, flagged `constructed`, NOT modes: the second-order block is dropped, and logpost and streams are re-evaluated in the new space. Then `diag_ocean_climate_gobm.R` runs all four arms:
