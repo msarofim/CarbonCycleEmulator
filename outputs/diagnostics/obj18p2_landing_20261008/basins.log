@@ -1,5 +1,53 @@
-calibration/diag_obj18_basins.R @c017090+dirty, 2026-10-08 08:21
+calibration/diag_obj18_basins.R @58ef6fc, 2026-10-08 08:22
   wave /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261008d_hilda_csl3v0kaidgbemwt_seasml1_pin_obj18p2_sd1.0452
   ⚠ TAGGED '_p2': read the provenance before quoting anything below
-Error: the wave's pins are not CCX_MODE_OBJ18_PINS
-Execution halted
+  pins: #18 pass 2's (CCX_MODE_OBJ18P2_PINS)
+  2 start files; structure hilda_csl3v0kaidgbemwt, seas_ml 1, pump field solved, pump mode N, h_ml band [42.5, 200]; pins _pin_ent_seas_amp_SH=0.0000000_w_eq=27.0000000_gamma_eq=1.0000000_pump_export=9.0800000_w_vent=0.0000000_gamma_vent=0.0000000_w_thc=0.0000000_gamma_enso_ocn_NH=0.0000000_gamma_enso_ocn_SH=0.0000000_npp_tsens=0.0000000_lag_enso_land=5.9293432_gamma_enso_land_NH=0.6631895_gamma_enso_land_SH=0.6355964_w_enso_l2=16.7877440
+  DUPLICATES (optimum bit-identical to a lower id): none
+
+=== 0. GATES ===
+  basin 1 (id 001): logpost -1166.949732, stored -1166.949727, diff -5.2e-06 (tol 1e-05)
+  basin 2 (id 002): logpost -1167.984133, stored -1167.984133, diff +0.0e+00 (tol 1e-05)
+  likelihood + prior + Jacobian close every logpost to <= 1e-08
+
+=== 1. THE BASINS (collect's clustering; each by its best stored-logpost member) ===
+  basin 1  id 001  x1 (1 distinct)  logpost -1166.9497  likelihood -1133.4803  prior -77.0046  Jacobian +43.5352  lik+prior -1210.4849
+            h_ml 64.631, pump_grad 314.74, kz 14151, beta_max 2.0107, fert_k 669.03, q10 1.0919
+            members: 1
+  basin 2  id 002  x1 (1 distinct)  logpost -1167.9841  likelihood -1132.9304  prior -77.6573  Jacobian +42.6036  lik+prior -1210.5877
+            h_ml 50.014, pump_grad 321.56, kz 14348, beta_max 2.0168, fert_k 674.21, q10 1.0774
+            members: 2
+
+  BEST by stored logpost: id 001 (basin 1) | by LIKELIHOOD: id 002 (basin 2) | by likelihood + prior: id 001 (basin 1)
+  ⇒ the stored logpost and likelihood + prior AGREE on the best basin
+  the runner-up on likelihood + prior: basin 2 (id 002), 0.1028 below the best: INSIDE the near-tie bound 0.5 (the starts' cycle_tol) -- the chain reads it too (RULED 10-07 k: "Read both within 0.5")
+  ⚠ the likelihood ALONE picks basin 2 (id 002): likelihood +0.550 but priors -0.653 against basin 1's. NOT promoted (RULED 10-07 k: likelihood + prior)
+
+=== 2. EACH BASIN AGAINST THE LOGPOST-BEST (other - best) ===
+  basin 2 (id 002) - basin 1 (id 001): logpost -1.0344 = likelihood +0.5499 + priors -0.6527 + Jacobians -0.9316; lik+prior -0.1028
+    h_ml                       50.014 vs       64.631   prior  +0.1491  Jacobian  -0.9777
+    sst_seas_amp_SH            1.2816 vs       1.5551   prior  -0.4650  Jacobian  -0.1934
+    sst_seas_amp_NH            1.6951 vs       1.6323   prior  +0.1412  Jacobian  +0.0377
+    kz_deep_frac            0.0079146 vs      0.00747   prior  +0.0000  Jacobian  +0.1650
+    u_hs                       24.484 vs       23.132   prior  +0.0737  Jacobian  +0.0612
+    q10                        1.0774 vs       1.0919   prior  -0.1176  Jacobian  -0.0134
+    h_hs                       299.82 vs       292.02   prior  -0.1036  Jacobian  -0.0100
+    pump_grad                  321.56 vs       314.74   prior  -0.1281  Jacobian  +0.0214
+    pump_hs_gcm2               87.238 vs       85.301   prior  -0.1052  Jacobian  +0.0056
+    npp_frac_NH               0.58106 vs      0.59415   prior  -0.0901  Jacobian  -0.0082
+    row ocean_grad_d13c         +0.6790
+    row d13c_seasonal_MLO       +0.6670
+    row ocean_grad_dic          +0.5870
+    row d13c_seasonal_SPO       -0.3722
+    row d13c_level_SPO          -0.3708
+    row d13c_level_MLO          -0.2469
+    row d14c_profile_ab         +0.2288
+    row gcb_land_sink           -0.2235
+    row co2_seasonal_SPO        -0.1855
+    row ocean_grad_alk          -0.1812
+    row co2_icecore             -0.1623
+    row d14c_SH                 +0.1341
+    rows favouring the other basin +2.6171; rows favouring the best -2.0672 (26 rows)
+
+saved outputs/diagnostics/obj18_basins_20261008_p2.{log,rds,ids}: LP 1, NAT 1, NEAR 2
+⛔ ADOPTS NOTHING.

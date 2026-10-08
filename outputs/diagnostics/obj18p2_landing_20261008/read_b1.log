@@ -1,0 +1,9 @@
+calibration/diag_obj18_refit_read.R @58ef6fc+dirty, 2026-10-08 08:46
+  incumbent hilda29w (/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261006_obj17_basinB_start001_DRYRUN/mode_fit_pumpN.rds)
+  #18       /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261008_obj18p2_hilda_csl3v0kaidgbemwt_basin1/mode_fit_pumpN.rds (md5 bf4732da67ee22751d87ca9f95484b37)
+  wave      /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261008d_hilda_csl3v0kaidgbemwt_seasml1_pin_obj18p2_sd1.0452
+  stage 1   calibration/output/iav_module_20261007_refit_20261006_obj17_basinB_start001_DRYRUN_hilda_csl3v0kaidgbemwt.rds
+  pricing   outputs/diagnostics/obj18_price_20261007.rds
+  ⚠ TAGGED '_p2b1': read the provenance before quoting anything below
+Error: isTRUE(all.equal(unname(unclass(PIN_N)[names(O18_PINS)]), unname(O18_PINS))) is not TRUE
+Execution halted
