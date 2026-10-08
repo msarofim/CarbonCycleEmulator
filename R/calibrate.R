@@ -2714,6 +2714,21 @@ ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_
          why = paste0("OBJECTIVE #18 (the redesigned cut, Marcus 2026-10-07): the canonical's pins plus the module's four ",
                       "names at stage 1's values under #18; the incumbent is #17's basin B (", CCX_MODE_OBJ18_INCUMBENT,
                       "), seeded at the pins: a start, not a mode of this objective"))
+  } else if (same(pins, CCX_MODE_OBJ18P2_PINS)) {
+    # OBJECTIVE #18, PASS 2 (2026-10-08 d; Marcus: "Basin 1, run the second pass, adopt if it passes"): #18's label, the
+    # module at the one-pass check's values at basin 1. Both references are #18's LANDED basins, each a START here (their
+    # module values are pass 1's): the incumbent basin 1 (hilda29a0), the new basin basin 2 (hilda29a6), so one array
+    # re-fits both and re-ranks them. Ruled only under #18's label and on the canonical's seasonal mixed layer.
+    if (!identical(struct, CCX_MODE_OBJ18_STRUCT))
+      stop("ccx_ms_reference_set(): objective #18 PASS 2's pins '", ccx_pin_label(pins), "' are ruled under ",
+           CCX_MODE_OBJ18_STRUCT, " only; struct '", struct, "' is not a ruled arm.")
+    if (seas_ml != 1L)
+      stop("ccx_ms_reference_set(): OBJECTIVE #18 PASS 2 is ruled at seas_ml 1 (the canonical's seasonal mixed ",
+           "layer); seas_ml ", seas_ml, " is not a ruled arm.")
+    list(incumbent = CCX_MODE_OBJ18P2_INCUMBENT, new_basin = CCX_MODE_OBJ18P2_NEW,
+         why = paste0("OBJECTIVE #18 PASS 2 (Marcus 2026-10-08): #18's label, the module at the one-pass check's values at ",
+                      "basin 1; the incumbent is #18's basin 1 (", CCX_MODE_OBJ18P2_INCUMBENT, "), the new basin #18's basin 2 (",
+                      CCX_MODE_OBJ18P2_NEW, "), both seeded at the pins: starts, not modes of this objective"))
   } else if (is.null(pins)) {
     list(incumbent = if (is.null(CCX_MODE_PINNED_PARENT)) CCX_MODE_CANONICAL else CCX_MODE_PINNED_PARENT,
          new_basin = CCX_MODE_SEASML0_CONTROL,
@@ -2761,6 +2776,7 @@ ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_
               "', the layer-2 limb's '", ccx_pin_label(CCX_MODE_L2_ARM_PINS),
               "', objective #17's '", ccx_pin_label(CCX_MODE_OBJ17_PINS),
               "', objective #18's '", ccx_pin_label(CCX_MODE_OBJ18_PINS),
+              "', #18 pass 2's '", ccx_pin_label(CCX_MODE_OBJ18P2_PINS),
               "'); rule the reference set for this pin before launching.")
   # 2026-09-20 (r): the canonical FITS w_enso_l2, so its pin set under a structure WITHOUT the limb
   # would leave a name the structure never reads FREE -- the driver refuses such a name, and so

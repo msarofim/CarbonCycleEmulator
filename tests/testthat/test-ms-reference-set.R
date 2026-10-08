@@ -297,3 +297,44 @@ test_that("(13) OBJECTIVE #18's pins (2026-10-07 f, the redesigned cut): #16's t
   # ... and #18's label does not take #17's pins (ruled under #17's own label only)
   expect_error(ccx_ms_reference_set(CCX_MODE_OBJ17_PINS, "1"), "ruled under")
 })
+
+test_that("(14) #18 PASS 2's pins (2026-10-08 d; Marcus: \"Basin 1, run the second pass, adopt if it passes\"): #16's ten + the module at the one-pass check's values at basin 1, tied bit for bit to the check file, under #18's label at seas_ml 1 -> hilda29a0 (basin 1) / hilda29a6 (basin 2), both seeded; refused under #17's label, at seas_ml 0, a module value moved back to pass 1's, a module name dropped", {
+  p2 <- CCX_MODE_OBJ18P2_PINS
+  expect_identical(names(p2), c(names(CCX_MODE_OBJ16_PINS), CCX_IAV_MODULE_NAMES))
+  expect_identical(p2[names(CCX_MODE_OBJ16_PINS)], CCX_MODE_OBJ16_PINS)
+  s2 <- readRDS(ccx_path(CCX_MODE_OBJ18P2_MODULE_FILE)); x2 <- s2$pins[CCX_IAV_MODULE_NAMES]
+  expect_identical(unname(p2[CCX_IAV_MODULE_NAMES]), unname(x2))                  # bit for bit
+  expect_identical(unname(p2[CCX_IAV_MODULE_NAMES]), as.numeric(sprintf("%.17g", x2)))
+  # the run: the landing's one-pass check at #18's basin 1, under #18's own label (no switch), the detrended index
+  pv <- s2$provenance
+  expect_false(pv$smoke)
+  expect_identical(pv$base_md5, unname(tools::md5sum(ccx_mode_file(CCX_MODE_OBJ18P2_INCUMBENT))))   # = basin 1's file
+  expect_identical(pv$base_struct, CCX_MODE_OBJ18_STRUCT); expect_identical(pv$struct, CCX_MODE_OBJ18_STRUCT)
+  expect_identical(pv$enso_index, "detrend"); expect_identical(pv$n_eff, LIK_IAV_NEFF)
+  # pass 2 is a MOVE from pass 1's values: every module name differs, and w_enso_l2 moved up (the check's +0.126 sigma)
+  expect_true(all(p2[CCX_IAV_MODULE_NAMES] != CCX_MODE_OBJ18_PINS[CCX_IAV_MODULE_NAMES]))
+  expect_gt(p2[["w_enso_l2"]], CCX_MODE_OBJ18_PINS[["w_enso_l2"]])
+  # both references are #18's LANDED basins, registered and PINNED at pass 1's values, under #18's label
+  expect_identical(c(CCX_MODE_OBJ18P2_INCUMBENT, CCX_MODE_OBJ18P2_NEW), c("hilda29a0", "hilda29a6"))
+  for (n in c(CCX_MODE_OBJ18P2_INCUMBENT, CCX_MODE_OBJ18P2_NEW)) {
+    expect_true(CCX_MODE_PINNED[[n]])
+    expect_identical(ccx_mode_struct(ccx_mode_file(n)), CCX_MODE_OBJ18_STRUCT)
+    expect_identical(ccx_pin_label(ccx_mode_pins(ccx_mode_file(n))), ccx_pin_label(CCX_MODE_OBJ18_PINS))
+  }
+  expect_identical(readRDS(ccx_mode_file(CCX_MODE_OBJ18P2_INCUMBENT))$promoted_from$id, 0L)
+  expect_identical(readRDS(ccx_mode_file(CCX_MODE_OBJ18P2_NEW))$promoted_from$id, 6L)
+  r14 <- ccx_ms_reference_set(p2, "1", pump_field = "solved", struct = CCX_MODE_OBJ18_STRUCT)
+  expect_identical(r14$incumbent, CCX_MODE_OBJ18P2_INCUMBENT); expect_identical(r14$new_basin, CCX_MODE_OBJ18P2_NEW)
+  expect_match(r14$why, "PASS 2.*seeded at the pins")
+  # the LAUNCH STRING, through the driver's own parser
+  launch <- paste(sprintf("%s=%.17g", names(p2), p2), collapse = ",")
+  expect_identical(ccx_parse_pins(launch), p2)
+  expect_identical(ccx_ms_reference_set(ccx_parse_pins(launch), "1", pump_field = "solved", struct = CCX_MODE_OBJ18_STRUCT), r14)
+  # MUTATION: under #17's label, at seas_ml 0, a module value moved back to pass 1's, a module name dropped
+  expect_error(ccx_ms_reference_set(p2, "1", pump_field = "solved", struct = CCX_MODE_OBJ17_STRUCT), "PASS 2.*ruled under")
+  expect_error(ccx_ms_reference_set(p2, "0", pump_field = "solved", struct = CCX_MODE_OBJ18_STRUCT), "PASS 2 is ruled at seas_ml 1")
+  back <- p2; back[["w_enso_l2"]] <- CCX_MODE_OBJ18_PINS[["w_enso_l2"]]
+  expect_error(ccx_ms_reference_set(back, "1", pump_field = "solved", struct = CCX_MODE_OBJ18_STRUCT), "no registered incumbent")
+  expect_error(ccx_ms_reference_set(p2[setdiff(names(p2), "w_enso_l2")], "1", pump_field = "solved", struct = CCX_MODE_OBJ18_STRUCT),
+               "no registered incumbent")
+})

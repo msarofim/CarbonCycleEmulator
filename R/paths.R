@@ -248,7 +248,13 @@ CCX_MODE_FILES <- c(
   # 29 free names (#16's ten pins + the module's four at #17's stage 1); h_ml 49.9 m; logpost -1165.224582 under
   # #17's label (start_001 of the 20261006o wave, promoted by the 10-06 p dry run; its PROVENANCE.txt).
   hilda29w = file.path("calibration", "output", "refit_20261006_obj17_basinB_start001_DRYRUN",
-                       "mode_fit_pumpN.rds")
+                       "mode_fit_pumpN.rds"),
+  # 2026-10-08 (d): OBJECTIVE #18's TWO LANDED BASINS (CHANGELOG 10-08 a), registered as PASS 2's reference points (Marcus,
+  # verbatim: "Basin 1, run the second pass, adopt if it passes"). PROVISIONAL names -- 29 free names, landed at 10-08 (a),
+  # wave start id 0 / 6 -- NOT the canonical and NOT adopted; the adopted name is Marcus's (the hilda33p precedent).
+  # hilda29a0 = basin 1 (h_ml 64.6, logpost -1166.346999, LP = NAT); hilda29a6 = basin 2 (h_ml 50.0, -1167.364913, NEAR).
+  hilda29a0 = file.path("calibration", "output", "refit_20261008_obj18_hilda_csl3v0kaidgbemwt", "mode_fit_pumpN.rds"),
+  hilda29a6 = file.path("calibration", "output", "refit_20261008_obj18_hilda_csl3v0kaidgbemwt_id006", "mode_fit_pumpN.rds")
 )
 # THE seas_ml = 0 CONTROL, by name: the diagnostics that compare the seasonal
 # mixed layer ON vs OFF read the OFF arm here rather than through the default
@@ -348,7 +354,8 @@ CCX_MODE_HILDA30S_QUARANTINED <- file.path("calibration", "output", "quarantine"
 # the free-vs-pinned comparison it exists to express had no power
 # ([[no_power_null]]). It has power from 09-13 (d): the canonical is PINNED.
 CCX_MODE_PINNED <- c(hilda33p = TRUE, hilda34g = TRUE, hilda33d = TRUE, hilda29l = TRUE, hilda32f = FALSE, hilda31s2 = FALSE, hilda31pe = FALSE,
-                     hilda29w = TRUE)   # 2026-10-07 (i): #17's basin B, the module's four pinned (READ names)
+                     hilda29w = TRUE,   # 2026-10-07 (i): #17's basin B, the module's four pinned (READ names)
+                     hilda29a0 = TRUE, hilda29a6 = TRUE)   # 2026-10-08 (d): #18's two basins, the module's four pinned
 # A PINNED CANONICAL (2026-09-13). When the canonical is a pinned arm, the
 # registry names WHAT it pins (the file's own `pins` must agree -- test-mode-file)
 # and its free PARENT: the same space with the pinned names free, kept
@@ -482,6 +489,21 @@ CCX_MODE_OBJ18_PINS      <- c(CCX_MODE_OBJ16_PINS,
                               w_enso_l2          = 16.605064312322234)
 CCX_MODE_OBJ18_STRUCT    <- "hilda_csl3v0kaidgbemwt"
 CCX_MODE_OBJ18_INCUMBENT <- "hilda29w"      # #17's basin B (registered 2026-10-07 i): stage 2's incumbent seed
+# OBJECTIVE #18, PASS 2 (2026-10-08 d; Marcus, verbatim: "Basin 1, run the second pass, adopt if it passes"). The SAME label
+# as #18; the module's four at the ONE-PASS CHECK's values at basin 1 (fit_iav_module.R --base=<#18 id 0> --check, the
+# landing's step check_id000 -> CCX_MODE_OBJ18P2_MODULE_FILE, md5 29a041d1...). Every literal parses to that file's double
+# BIT FOR BIT (test-ms-reference-set (14)). The check moved w_enso_l2 +0.126 sigma (> the ruled 0.1), the lag +0.065, the
+# land scale +0.028. PASS 2 = warm refits from BOTH landed basins at these pins (ids 1 / 2), then the check again; the
+# stopping rule is the ruled 0.1 sigma per module name. Ruled only under #18's label at seas_ml 1.
+CCX_MODE_OBJ18P2_MODULE_FILE <- file.path("calibration", "output",
+                                          "iav_module_20261008_refit_20261008_obj18_hilda_csl3v0kaidgbemwt.rds")
+CCX_MODE_OBJ18P2_PINS    <- c(CCX_MODE_OBJ16_PINS,
+                              lag_enso_land      = 5.9293432319444337,
+                              gamma_enso_land_NH = 0.66318950821232669,
+                              gamma_enso_land_SH = 0.6355964031675142,
+                              w_enso_l2          = 16.787744029103425)
+CCX_MODE_OBJ18P2_INCUMBENT <- "hilda29a0"    # #18's basin 1 (RULED 10-08: "Basin 1")
+CCX_MODE_OBJ18P2_NEW       <- "hilda29a6"    # #18's basin 2: the runner-up, refit beside it so the basins are re-ranked
 #' The registered FREE mode nearest the canonical: the canonical itself when it
 #' is free, its parent when it is pinned. For a consumer that needs a vector
 #' ENCODABLE on the full table (an ancestor constructed by dropping names, a
