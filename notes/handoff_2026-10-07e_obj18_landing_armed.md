@@ -1,5 +1,8 @@
 # HANDOFF 2026-10-07e — #18's LANDING KIT BUILT, DRY-RUN TWICE, AND THE LANDING ARMED; NEXT: READ THE LANDING
 
+> ⚠ **SUPERSEDED 2026-10-08 by `notes/handoff_2026-10-08_hilda29e_adopted.md`**: #18 landed, pass 2 passed, `hilda29e` adopted.
+
+
 **Supersedes** `notes/handoff_2026-10-07d_obj18_stage2_running.md`, which now points here.
 - Written on Marcus's request ("Yes" to the offered handoff note).
 - 10-07d's §3 items 1–6 are DONE. Its item 7 (the landing report) is this note's §3.
