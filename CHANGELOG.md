@@ -2,6 +2,22 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-08 (b) — **#18's worse ocean climate effect is the STRUCTURE (the detrended ENSO index), not the refit** (Marcus: "run the ocean structure-vs-parameter test"); and the wave tree removed (Marcus: "Remove the wave tree").
+
+- **The walk, on one vector and one commit** (`b4930c1`): `calibration/diag_obj18_ocean_struct.R` builds the two middle arms from `hilda29w`'s file and writes them under `outputs/diagnostics/obj18_ocean_struct_20261008/`, flagged `constructed`, NOT modes: the second-order block is dropped, and logpost and streams are re-evaluated in the new space. Then `diag_ocean_climate_gobm.R` runs all four arms:
+
+  | arm | effect, GtC/yr (ten-protocol ensemble) | × GCB −0.20 | step |
+  |---|---|---|---|
+  | A `hilda29w`, `…emw`, module P0 | −0.3761 ± 0.0277 | 1.88 (−3.52σ) | (reproduces 10-07's `obj17B` exactly) |
+  | B the same vector, `…emwt`, P0 (the pricing's B1) | −0.4297 ± 0.0335 | 2.15 (−4.59σ) | **−0.0536: the label** |
+  | C + #18's stage-1 module S18 (the pricing's B1s) | −0.4256 ± 0.0345 | 2.13 (−4.51σ) | +0.0041: the module's pins |
+  | D #18's basin 1 (id 0), refit | −0.4329 ± 0.0361 | 2.16 (−4.66σ) | −0.0073: the refit (reproduces the landing exactly) |
+
+  **≈ 94 % of the move (−0.0536 of −0.0568) is the label on an identical vector.** The label changes two settings: `enso_index` demean → detrend (the FORWARD forcing, `ccx_enso_index_of()`), and `gcb_ocean_lowpass_df` NULL → 6, read only in `R/likelihood.R` (scoring). So the forward-model change is the detrended ENSO index alone. **Why** detrending enlarges the protocols' historical-minus-held difference is NOT decomposed.
+- **Gates** (`outputs/diagnostics/obj18_ocean_struct_20261008.log`): every arm reproduces a number the builder did not produce, through the objective (G1) and through the `dg_*` path the ocean driver uses (G2). A: its stored logpost, 0; B: the pricing's B1 −1173.052374, 0 / 1.4e-10; C: the pricing's B1s −1173.099211, 0 / −1.6e-10. Power: B and C differ by 0.0468, 4,700× the 1e-5 tolerance.
+- **Reading it:** the worsening is a property of the RULED index ("Full redesign", 10-07 f), shared by every vector under `…emwt`, whichever basin is adopted. It is not evidence about the basins or the refit.
+- **The wave tree `~/ccx_frozen/20261007i_obj18` is removed**, after checking its untracked files against the committed outdir: 48 outdir files and 53 logs byte-identical, the port targets identical. The other 98 "missing" logs are TRACKED (`logs/torch_17839702/`). ⚠ One file was not copied: `land.sh` copies the preflight FOLDER but not its summary `logs/preflight_20261007i.log`. It is now in the outdir's `logs/` (`32eeb1e`). A future `land.sh` should copy it.
+
 ## 2026-10-08 (a) — **#18 LANDED** (chain rc 0, 04:24–04:50 EDT; committed `a32e6d4`), and **id 13's "DEAD TASK" is a FALSE POSITIVE: R's BFGS returns a `par` it never evaluated.** Nothing is adopted; the decisions are Marcus's (below).
 
 - **The landing, as previewed** (`outputs/diagnostics/obj18_landing_20261008/`, `obj18_basins_20261008.*`, `obj18_refit_read_20261008_id00{0,6}.*`):
