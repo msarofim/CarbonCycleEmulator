@@ -301,3 +301,55 @@ rv_plot_partition <- function() rv_guard(rv_pulse(), function(x) {
 # seasonal cycles and captioned the AIC difference "in the simpler version's
 # favour" whatever its sign. See the note in review.R; id 6 is the bands card since the renumbering.
 # ---------------------------------------------------------------------
+
+# ---------------------------------------------------------------------
+# CARD 8 -- the ocean's climate effect, year by year, against the GCB 2025 ocean models (2026-10-08 j)
+#
+# Both series are GCB's "A - C" (each ocean model's climate as observed minus its own "normal year", CO2
+# prescribed): for this model, the mean over the ten GOBM protocols it emulates. Read from the card's product
+# (rv_ocean_climate()); every number in the captions is the product's. Annual values thin, an RV_OCLIM_RUN-year
+# centred mean thick (the H2 driver's own window, so the line the eye follows is the one the emergence is read on).
+# ---------------------------------------------------------------------
+rv_plot_oclim <- function() rv_guard(rv_ocean_climate(), function(x) {
+  s <- x$shape; e <- x$effect
+  lab_m <- "This model"; lab_g <- "Global Carbon Budget 2025 ocean models"
+  run <- function(v) as.numeric(stats::filter(v, rep(1 / RV_OCLIM_RUN, RV_OCLIM_RUN), sides = 2))
+  d <- rbind(data.frame(year = s$years, v = s$ccx, r = run(s$ccx), who = lab_m),
+             data.frame(year = s$years, v = s$gcb, r = run(s$gcb), who = lab_g))
+  d$who <- factor(d$who, levels = c(lab_g, lab_m))
+  ggplot(d, aes(year, colour = who)) +
+    geom_hline(yintercept = 0, colour = "grey60", linewidth = 0.3) +
+    geom_line(aes(y = v), linewidth = 0.35, alpha = 0.55) +
+    geom_line(aes(y = r), linewidth = 1.0, na.rm = TRUE) +
+    scale_colour_manual(values = stats::setNames(c(RV_COL_OBS(), RV_COL_MODEL()), c(lab_g, lab_m))) +
+    labs(x = NULL, y = "Change in ocean uptake from climate (GtC/yr)",
+         caption = rv_cap(sprintf(paste(
+           "%d–%d: %.2f GtC/yr here (%.2f to %.2f across the ten ocean-model setups), %.2f ± %.2f in",
+           "the ocean models; per degree of sea-surface warming %.1f ± %.1f times as strong. Below %.1f",
+           "GtC/yr from %d here, from %d in the ocean models. Thick lines: %d-year means. A comparison, not a test."),
+           e$window[1], e$window[2], e$ccx[["mean"]], e$ccx[["max"]], e$ccx[["min"]], e$gcb[["mean"]], e$gcb[["sd"]],
+           s$per_K_ratio[["ratio"]], s$per_K_ratio[["se"]], s$emergence[["threshold"]],
+           as.integer(s$emergence[["ccx"]]), as.integer(s$emergence[["gcb"]]), RV_OCLIM_RUN))) +
+    theme_ccx()
+})
+
+# CARD 8b -- what it is worth: CO2 in 2300, lower by this much if this ocean's warming response were the ocean
+# models' size (its sea-surface warming response scaled by f, unrefitted; bars = the ocean models' +-1 sigma).
+RV_OCLIM_SCEN <- c(ssp585 = "SSP5-8.5 (older high scenario)", vvH = "High", vvM = "Medium")
+rv_plot_oclim_stake <- function() rv_guard(rv_ocean_climate(), function(x) {
+  t <- x$stake$table
+  t <- t[match(names(RV_OCLIM_SCEN), t$scenario), ]
+  d <- data.frame(scen = factor(RV_OCLIM_SCEN[t$scenario], levels = RV_OCLIM_SCEN),
+                  v = -t$d_2300, lo = -pmax(t$d_2300_gcb_lo_sd, t$d_2300_gcb_hi_sd),
+                  hi = -pmin(t$d_2300_gcb_lo_sd, t$d_2300_gcb_hi_sd))
+  ggplot(d, aes(scen, v)) +
+    geom_col(fill = RV_COL_MODEL(), width = 0.6) +
+    geom_errorbar(aes(ymin = lo, ymax = hi), width = 0.16, colour = "grey25") +
+    labs(x = NULL, y = "CO₂ in 2300 lower by (ppm)",
+         caption = rv_cap(sprintf(paste(
+           "Of %s ppm. The model's response to sea-surface warming scaled by %.2f (%.2f to %.2f for the",
+           "ocean models' ±1 sd, the bars), nothing refitted: the fit to the past would move too."),
+           paste(sprintf("%.0f", t$base_2300), collapse = " / "), x$stake$f[["f_T"]],
+           x$stake$f[["f_T_lo"]], x$stake$f[["f_T_hi"]]))) +
+    theme_ccx()
+})

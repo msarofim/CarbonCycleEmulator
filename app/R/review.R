@@ -52,6 +52,10 @@ RV_CLASS_GLOSS <- c(
                      "so it is not surprising that we might not match perfectly.",
                      "But the long tail of carbon dioxide is robust."),
   gap        = "something the product does not have yet.",
+  # 2026-10-08 (j), card 8: neither "structural" (the hemispheres' separate oceans) nor "comparison" (written for the
+  # pulse) describes it. ⚠ CLAUDE'S DRAFT, FOR MARCUS'S WORDING.
+  response   = paste("the process is in the model, but it reacts by the wrong amount, and",
+                     "refitting the same model does not fix it."),
   design     = "a choice made when the model was specified.")
 
 # The horizons and windows the cards read. Named here so a caption cannot drift
@@ -419,6 +423,32 @@ rv_stand_ins <- function() rv_memo("stand_ins", function() {
 })
 
 # ---------------------------------------------------------------------
+# CARD 8 -- the ocean's climate effect against the GCB 2025 ocean models (H2; 2026-10-08 j)
+#
+# ⚠ A PRODUCT, NOT A LIVE RUN: emulating the ten GCB ocean-model protocols takes minutes, too slow for a card that
+# renders when opened. calibration/build_ocean_climate_card.R COLLECTS three committed diagnostics made at the
+# canonical (md5-gated) into data/ocean_climate_card.rds; this reads it and REFUSES one made at another mode file,
+# so an adoption that does not rebuild it shows "unavailable" here and fails test-ocean-climate-card.R.
+# ---------------------------------------------------------------------
+RV_OCLIM_FILE <- c("data", "ocean_climate_card.rds")
+RV_OCLIM_RUN  <- 11L     # the running mean drawn over the annual series: diag_h2_time_shape.R's H2_RUN
+#' Why an ocean-climate product cannot back card 8 (character(0) if it can)
+rv_oclim_problems <- function(x, mode_file) {
+  bad <- character(0)
+  if (!identical(x$provenance$mode, CCX_MODE_CANONICAL))
+    bad <- c(bad, sprintf("it was built for %s, not the canonical %s", x$provenance$mode, CCX_MODE_CANONICAL))
+  if (!identical(x$provenance$mode_md5, unname(tools::md5sum(mode_file))))
+    bad <- c(bad, "its mode file is not the canonical's (md5)")
+  bad
+}
+rv_ocean_climate <- function() rv_memo("ocean_climate", function() {
+  x <- readRDS(do.call(ccx_path, as.list(RV_OCLIM_FILE)))
+  p <- rv_oclim_problems(x, ccx_mode_file())
+  if (length(p)) stop(paste(p, collapse = "; "), " -- rebuild it with calibration/build_ocean_climate_card.R")
+  x
+})
+
+# ---------------------------------------------------------------------
 # THE CARD LEDGER
 #
 # `id` is the number a commenter is asked to lead with, so it is a stable
@@ -715,7 +745,32 @@ RV_CARDS <- list(
                       "it higher is the stated prior on how much gas exchange the cold",
                       "high-latitude box gets, and the two cannot both hold."),
        ask = paste("Which of these would you want carried by a real mechanism",
-                   "before you would use the model to teach from?"))
+                   "before you would use the model to teach from?")),
+  # 2026-10-08 (j) (Marcus: "go ahead with the card"): the ocean's climate effect and H2 are ONE issue (CHANGELOG
+  # 10-08 i). ⚠ CLAUDE'S DRAFT, FOR MARCUS'S WORDING -- the numbers are NOT typed here: they are printed live under
+  # the two charts from data/ocean_climate_card.rds. The two qualitative claims ("about twice", "decades earlier")
+  # are tied to that product by test-ocean-climate-card.R.
+  list(id = 8, key = "ocean_climate", class = "response",
+       title = "The ocean loses uptake to warming about twice as strongly as ocean models do",
+       plain = paste("Warmer seawater holds less CO\u2082, so as the sea surface warms the ocean",
+                     "takes up less. In this model that loss is about twice what the ocean",
+                     "models of the Global Carbon Budget show, and it appears decades earlier."),
+       detail = paste("This is a comparison, not a test: those ocean models are models, not",
+                      "measurements, and nothing from them scores this one. The seawater",
+                      "chemistry is not the cause -- how fast CO\u2082 pressure rises with",
+                      "temperature here matches the measured value. Our leading explanation,",
+                      "tested but not settled, is that this model's ocean mixes vertically so",
+                      "strongly that the surface keeps being refilled with carbon-rich water",
+                      "from below, where real surface water would adjust and partly offset the",
+                      "warming. Mixing less is not the fix: the same mixing is what the",
+                      "radiocarbon and the ocean's carbon uptake require, and weakening it",
+                      "shrinks the uptake and this effect together. The model also has no wind",
+                      "effect, which in at least one ocean model is the largest part of the",
+                      "climate effect. The second chart says what it is worth: how much lower",
+                      "CO\u2082 would be in 2300 if this ocean responded like the ocean models."),
+       ask = paste("Is an ocean that over-reacts to warming acceptable for teaching how",
+                   "climate change weakens the carbon sinks, or should it be fixed before",
+                   "the model is used to talk about the future?"))
 )
 # Retired ids, never to be reused. EMPTY since the 2026-10-01 renumbering (pre-deployment);
 # the mechanism is for after deployment, and test-review-cards.R keeps its power on an

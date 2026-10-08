@@ -1198,6 +1198,8 @@ function(input, output, session) {
   output$rv_enso      <- rv_render("rv_enso", rv_plot_enso,      "Running the model with its ENSO mechanisms off")
   output$rv_irf       <- rv_render("rv_irf", rv_plot_irf,       "Releasing a pulse and following it")
   output$rv_partition <- rv_render("rv_partition", rv_plot_partition, "Following the pulse for a thousand years")
+  output$rv_oclim       <- rv_render("rv_oclim", rv_plot_oclim, "Reading the ocean's climate effect")
+  output$rv_oclim_stake <- rv_render("rv_oclim_stake", rv_plot_oclim_stake, "Reading what it is worth in 2300")
 
   # THE STAND-IN LIST IS GENERATED, NOT TYPED. Which names are held, and at what
   # value, is a property of the mode file the app is running; a hand-kept table
