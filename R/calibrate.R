@@ -2671,6 +2671,21 @@ ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_
                                  struct = Sys.getenv("CCX_MS_STRUCT", "")) {
   seas_ml <- ccx_parse_seas_ml(seas_ml)
   same <- function(a, b) identical(ccx_pin_label(a), ccx_pin_label(b))
+  # ⛔ A CUT CANONICAL'S PINS BELONG TO ITS OWN LABEL AND MIXED LAYER (2026-10-08 e; Marcus: "Approve all five"). Since
+  # hilda29e the canonical's pins carry the interannual module's four at stage 1's values, fitted UNDER its label at its
+  # seas_ml; under another label (#17's: a different ENSO index) or seas_ml 0 they are values of a different objective.
+  # #18 pass 2's own branch refused both; the first branch below never checked either (deliberately, for a canonical
+  # without the cut: a structure arm on its pins was legal). So: only when the canonical's pins carry the module.
+  if (all(CCX_IAV_MODULE_NAMES %in% names(CCX_MODE_CANONICAL_PINS)) &&
+      (same(pins, CCX_MODE_CANONICAL_PINS) || ccx_pins_extend_canonical(pins, pump_field, struct))) {
+    .mdc <- readRDS(ccx_mode_file(CCX_MODE_CANONICAL))
+    if (!identical(struct, ccx_mode_struct(.mdc)))
+      stop("ccx_ms_reference_set(): the canonical's pins carry the interannual module's values, fitted under ",
+           ccx_mode_struct(.mdc), "; struct '", struct, "' is not that label (a cut canonical's pins are ruled under its own).")
+    if (seas_ml != ccx_mode_seas_ml(.mdc))
+      stop("ccx_ms_reference_set(): the canonical's pins carry the interannual module's values, fitted at seas_ml ",
+           ccx_mode_seas_ml(.mdc), "; seas_ml ", seas_ml, " is not a ruled arm for them.")
+  }
   res <- if (same(pins, CCX_MODE_CANONICAL_PINS) || ccx_pins_extend_canonical(pins, pump_field, struct)) {
     list(incumbent = CCX_MODE_CANONICAL, new_basin = CCX_MODE_SEASML0_CONTROL,
          why = "the canonical, under this array's pins")
@@ -2714,21 +2729,8 @@ ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_
          why = paste0("OBJECTIVE #18 (the redesigned cut, Marcus 2026-10-07): the canonical's pins plus the module's four ",
                       "names at stage 1's values under #18; the incumbent is #17's basin B (", CCX_MODE_OBJ18_INCUMBENT,
                       "), seeded at the pins: a start, not a mode of this objective"))
-  } else if (same(pins, CCX_MODE_OBJ18P2_PINS)) {
-    # OBJECTIVE #18, PASS 2 (2026-10-08 d; Marcus: "Basin 1, run the second pass, adopt if it passes"): #18's label, the
-    # module at the one-pass check's values at basin 1. Both references are #18's LANDED basins, each a START here (their
-    # module values are pass 1's): the incumbent basin 1 (hilda29a0), the new basin basin 2 (hilda29a6), so one array
-    # re-fits both and re-ranks them. Ruled only under #18's label and on the canonical's seasonal mixed layer.
-    if (!identical(struct, CCX_MODE_OBJ18_STRUCT))
-      stop("ccx_ms_reference_set(): objective #18 PASS 2's pins '", ccx_pin_label(pins), "' are ruled under ",
-           CCX_MODE_OBJ18_STRUCT, " only; struct '", struct, "' is not a ruled arm.")
-    if (seas_ml != 1L)
-      stop("ccx_ms_reference_set(): OBJECTIVE #18 PASS 2 is ruled at seas_ml 1 (the canonical's seasonal mixed ",
-           "layer); seas_ml ", seas_ml, " is not a ruled arm.")
-    list(incumbent = CCX_MODE_OBJ18P2_INCUMBENT, new_basin = CCX_MODE_OBJ18P2_NEW,
-         why = paste0("OBJECTIVE #18 PASS 2 (Marcus 2026-10-08): #18's label, the module at the one-pass check's values at ",
-                      "basin 1; the incumbent is #18's basin 1 (", CCX_MODE_OBJ18P2_INCUMBENT, "), the new basin #18's basin 2 (",
-                      CCX_MODE_OBJ18P2_NEW, "), both seeded at the pins: starts, not modes of this objective"))
+  # (2026-10-08 e) #18 PASS 2's branch is REMOVED: its pins are the canonical's since hilda29e (the first branch takes them,
+  # the canonical as a MODE, with the cut canonical's label / seas_ml guard above), as #16's branch went at hilda33p.
   } else if (is.null(pins)) {
     list(incumbent = if (is.null(CCX_MODE_PINNED_PARENT)) CCX_MODE_CANONICAL else CCX_MODE_PINNED_PARENT,
          new_basin = CCX_MODE_SEASML0_CONTROL,
@@ -2739,21 +2741,9 @@ ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_
   } else if ((same(pins, CCX_MODE_CONTROL_PINS) || ccx_pins_extend(pins, CCX_MODE_CONTROL_PINS, pump_field, struct)) && seas_ml == 1L) {
     list(incumbent = CCX_MODE_PINNED_PARENT, new_basin = CCX_MODE_SEASML0_CONTROL,
          why = "the free parent, under the inert pins")
-  } else if (same(pins, CCX_MODE_L2_ARM_PINS)) {
-    # the layer-2 limb's arm (2026-09-17 k): the canonical's pins + the shim OFF, the
-    # limb's w_enso_l2 fitted in its place -- only under a structure that HAS the limb,
-    # and at seas_ml 1 (prereg s4 PA). Both references are evaluated at THEIR point
-    # with the shim zeroed and w_enso_l2 seeded: starts, not modes of this arm.
-    bp <- ccx_apply_structure(ccx_default_params(), struct, seas_ml = "0", pump_field = pump_field)
-    if (!ccx_l2_on(bp))
-      stop("ccx_ms_reference_set(): the limb's pins '", ccx_pin_label(pins), "' under struct '", struct,
-           "' (k_l2 = 0, no layer-2 limb): the shim would be OFF with nothing in its place -- an ",
-           "unruled arm. Use a structure with the limb (\"hilda_cl2\") or the canonical's pins.")
-    if (seas_ml != 1L)
-      stop("ccx_ms_reference_set(): the limb's arm is preregistered at seas_ml 1 (the canonical's ",
-           "seasonal mixed layer); seas_ml ", seas_ml, " is not a ruled arm.")
-    list(incumbent = CCX_MODE_CANONICAL, new_basin = CCX_MODE_SEASML0_CONTROL,
-         why = "the canonical with the shim pinned OFF and the layer-2 limb's w_enso_l2 in its place")
+  # (2026-10-08 e) THE LAYER-2 LIMB's BRANCH IS REMOVED: unreachable by design since 09-20 r (its pins were an alias of the
+  # canonical's, which the first branch takes), and its constant is now the limb arm's OWN nine (R/paths.R). Keeping the
+  # branch would make it REACHABLE for a nine-pin (#15) array, which the 10-06 ruling refuses until its reference set is ruled.
   } else if (same(pins, CCX_MODE_FREE_PARENT_PINS)) {
     # THE FREE PARENT OF THE LIMB CANONICAL (2026-09-21 g): the six inert names only -- the
     # shim, the ocean ENSO pair and the limb's w_enso_l2 all fitted. Only where the limb
@@ -2773,10 +2763,8 @@ ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_
   } else stop("ccx_ms_reference_set(): no registered incumbent for pins '", ccx_pin_label(pins),
               "' at seas_ml ", seas_ml, " (the canonical's are '", ccx_pin_label(CCX_MODE_CANONICAL_PINS),
               "', the control's '", ccx_pin_label(CCX_MODE_CONTROL_PINS),
-              "', the layer-2 limb's '", ccx_pin_label(CCX_MODE_L2_ARM_PINS),
               "', objective #17's '", ccx_pin_label(CCX_MODE_OBJ17_PINS),
               "', objective #18's '", ccx_pin_label(CCX_MODE_OBJ18_PINS),
-              "', #18 pass 2's '", ccx_pin_label(CCX_MODE_OBJ18P2_PINS),
               "'); rule the reference set for this pin before launching.")
   # 2026-09-20 (r): the canonical FITS w_enso_l2, so its pin set under a structure WITHOUT the limb
   # would leave a name the structure never reads FREE -- the driver refuses such a name, and so

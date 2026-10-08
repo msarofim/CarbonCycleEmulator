@@ -96,8 +96,10 @@ test_that("1. the app's land sink IS the gate's, not a second implementation", {
   # 0.87 (4 and 1.04 at hilda29l). MEASURED; re-pin approved by Marcus.
   # 2026-10-03 (h): at the canonical hilda34g, still 5 decades in the band; the last decade's miss 0.87 ->
   # 0.92 (0.9235). MEASURED (Marcus 2026-10-03: "Approve all (Recommended)").
+  # 2026-10-08 (e): at the canonical hilda29e (#18 pass 2, the interannual cut), still 5 decades in the band; the last
+  # decade's miss 0.92 -> 1.00 (1.0029). MEASURED (Marcus 2026-10-08: "Approve all five").
   expect_equal(sum(s$in_band), 5L)
-  expect_equal(s$miss[nrow(s)], 0.92, tolerance = 0.02)
+  expect_equal(s$miss[nrow(s)], 1.00, tolerance = 0.02)
 
   # ---- the +0.32 decomposition, recomputed (added 2026-09-25) --------------
   # \u26d4 The info box used to TYPE "about 0.3 GtC" and name THREE terms. There
@@ -118,10 +120,12 @@ test_that("1. the app's land sink IS the gate's, not a second implementation", {
   # scale). d_land +0.443 -> +0.482 (0.4824), d_luc -0.208 -> -0.169 (-0.1690); imbal 0.540, cement 0.088,
   # -d_grow +0.059, -d_ocn -0.029 and the decade table (5 in band, last miss 0.930) unchanged within tolerance.
   # MEASURED (Marcus 2026-10-06: "Approve all (Recommended)").
-  expect_equal(z$d_land, +0.482, tolerance = 0.005)
+  # 2026-10-08 (e): the canonical is hilda29e. d_land +0.482 -> +0.507 (0.5074), d_luc -0.169 -> -0.146 (-0.1458); the
+  # other four unchanged within tolerance. MEASURED (Marcus 2026-10-08: "Approve all five").
+  expect_equal(z$d_land, +0.507, tolerance = 0.005)
   expect_equal(z$imbal,  +0.54, tolerance = 0.005)
   expect_equal(z$cement, +0.09, tolerance = 0.005)
-  expect_equal(z$d_luc,  -0.169, tolerance = 0.005)
+  expect_equal(z$d_luc,  -0.146, tolerance = 0.005)
   expect_equal(-z$d_grow, +0.058, tolerance = 0.005)
   expect_equal(-z$d_ocn,  -0.029, tolerance = 0.005)
   # \u26a0 THE CLOSURE IS ASSERTED AT ITS MEASURED SIZE, NOT AT ZERO. It is

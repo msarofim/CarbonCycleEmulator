@@ -205,7 +205,9 @@ edm_crosscheck <- function(md, r) {
 
 test_that("PRICED at the CANONICAL mode: the demean flag is worth -0.0053 under objective #14 with constant interpolation at hilda33d (0.0364 under spline; 9.0242 under #13 at hilda29l); 17.7499 at the seas_ml 0 control hilda31pe", {
   skip_if_no_cpp()
-  md <- readRDS(ccx_mode_file())
+  # 2026-10-08 (e; Marcus: "Approve all five"): NAMED -- hilda33p, the last canonical on the DEMEANED index. hilda29e runs
+  # the DETRENDED index (the cut's label), under which the demean flag is not a switch at all (ccx_build_forcing refuses it)
+  md <- readRDS(ccx_mode_file("hilda33p"))
   # the canonical is a PERIODIC-era file, and says so (stamped 09-10 after GATE 5
   # had proved its streams periodic; calibration/stamp_mode_spinup.R)
   expect_identical(ccx_mode_spinup(md), "periodic")

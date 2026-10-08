@@ -266,7 +266,10 @@ test_that("the canonical wins among FREE arms re-scored on today's objective, or
     # (CCX_PARAM_ABSENT_OK): hilda30h pins the six the hilda_c / solved-field structure never reads
     # 2026-10-06 (a): + the GATED names -- the canonical hilda33p pins npp_tsens, which the #13 parent's
     # pre-gate space cannot carry; the canonicals since hilda33d have no registered free parent of their own (Marcus 2026-10-06: "Approve all (Recommended)")
-    expect_true(all(names(md_c$pins) %in% c(md_p$param_names, CCX_PARAM_ABSENT_OK, names(CCX_PARAM_GATED))))
+    # 2026-10-08 (e; Marcus: "Approve all five"): + EVERY gate's names (CCX_PARAM_GATED_ALL), not only the first's -- hilda29e
+    # pins lag_enso_land, which the LAG gate opens (the 10-01 lesson: "a check that a mode's pins are names this build fits
+    # must admit GATED names", which held for the first gate only)
+    expect_true(all(names(md_c$pins) %in% c(md_p$param_names, CCX_PARAM_ABSENT_OK, names(CCX_PARAM_GATED_ALL))))
     expect_true(ccx_mode_carries_build(md_p))   # the full set, or minus CCX_PARAM_ABSENT_OK only (09-13i)
   } else {
     expect_null(CCX_MODE_CANONICAL_PINS); expect_null(CCX_MODE_PINNED_PARENT)

@@ -456,7 +456,11 @@ CCX_MODE_FREE_PARENT_PINS <- c(w_eq = 27, gamma_eq = 1, pump_export = 9.08, w_ve
 # (2026-10-06: still the canonical's -- now the ten. Freezing it at the nine would make the limb branch
 # REACHABLE for a nine-pin array, a #15 re-run, and give it a limb-arm incumbent it is not; as an alias,
 # that branch stays unreachable and a nine-pin array is refused until its reference set is ruled.)
-CCX_MODE_L2_ARM_PINS     <- CCX_MODE_CANONICAL_PINS
+# (2026-10-08 e; Marcus: "Approve all five") NO LONGER AN ALIAS: since hilda29e the canonical's pins hold w_enso_l2, so the
+# alias stopped describing the limb's arm (w_enso_l2 FITTED, the ENSO pair pinned at 0). It is the limb arm's OWN nine --
+# its 09-20 (r) set, = CCX_MODE_OBJ15_PINS -- and ccx_ms_reference_set()'s limb branch is REMOVED, so a nine-pin array is
+# still refused until its reference set is ruled (the 10-06 reason the alias existed).
+CCX_MODE_L2_ARM_PINS     <- CCX_MODE_OBJ15_PINS
 # OBJECTIVE #16's PINS (2026-10-05, Marcus: "p4"; notes/proposal_2026-10-04_npp_tsens_prior.md, CHANGELOG
 # 10-05 d) are DEFINED ABOVE, beside the canonical's: #15's nine PLUS the greening term `npp_tsens` held at 0.
 # A term whose sign the record cannot fix is not fitted. At 0 the factor is exp(0 * GMST) = 1, the term's

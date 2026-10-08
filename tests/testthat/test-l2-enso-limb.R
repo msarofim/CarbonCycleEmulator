@@ -103,7 +103,9 @@ test_that("P0a ABSENT: the name absent, at 0, or at 25 under k_l2 = 0 is BIT-EXA
 
 test_that("P0a (canonical): the canonical's stored LIKELIHOOD reproduces row by row; w_enso_l2 is the ONLY new fitted name", {
   skip_if_no_cpp()
-  md <- readRDS(ccx_mode_file())
+  # 2026-10-08 (e; Marcus: "Approve all five"): NAMED -- hilda33p, the last canonical that FITS w_enso_l2 (hilda29e pins it,
+  # under the interannual cut); the premise below is "the limb arm", not "the canonical"
+  md <- readRDS(ccx_mode_file("hilda33p"))
   bp <- ccx_mode_base(md); if (!is.null(md$pump_mode)) bp$pump_mode <- md$pump_mode
   # 2026-09-20 (r): the canonical hilda29l IS the limb arm (hilda_csl3, k_l2 = 3): w_enso_l2 FITTED at
   # 13.71, the ocean ENSO pair PINNED at 0. Nothing in the table is new to its file.
@@ -215,7 +217,9 @@ test_that("P0f REFUSALS by name, the exclusions, and the driver-side inert rule"
 
 test_that("a file-HELD name this arm FITS is seeded, not fatal (2026-09-20 o): the canonical holds w_enso_l2 = 0 on the logit floor; the limb's arm fits it", {
   md <- readRDS(ccx_mode_file())
-  skip_if_not("w_enso_l2" %in% names(ccx_mode_pins(md)), "the canonical does not hold w_enso_l2")
+  # 2026-10-08 (e): the premise is the value, held AT 0 on the logit floor -- not merely "held" (hilda29e holds it at 16.79).
+  # No registered mode holds it at 0 with the shim at 0 since 09-20 (r), so this test is DORMANT (it skips), as it was.
+  skip_if_not(isTRUE(unname(ccx_mode_pins(md)["w_enso_l2"]) == 0), "the canonical does not hold w_enso_l2 at 0")
   arm <- CCX_MODE_L2_ARM_PINS                                  # fits w_enso_l2, pins the ENSO pair
   rm <- ccx_apply_pins(arm); on.exit(ccx_unpin_params(rm), add = TRUE)
   pm <- ccx_migrate_par_set(ccx_mode_par_with_pins(md))

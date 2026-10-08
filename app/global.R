@@ -84,7 +84,7 @@ APP_AUTHOR       <- "Marcus C. Sarofim"
 APP_VERSION      <- "v1.0"
 APP_STAGE        <- "beta"
 APP_RELEASE_NAME <- paste(toupper(APP_STAGE), APP_VERSION, APP_TITLE)   # "BETA v1.0 CarboTope"
-APP_RELEASE_MODE <- "hilda33p"   # Marcus 2026-10-06: "Move v1.0 to the new mode (Recommended)" (hilda34g 10-03; hilda33d 10-01)
+APP_RELEASE_MODE <- "hilda29e"   # Marcus 2026-10-08: "Approve all five" (the app already loads the canonical; hilda33p 10-06, hilda34g 10-03, hilda33d 10-01)
 # "frozen at this version" was dropped 2026-10-01: stale since the 09-30
 # unfreeze, and a freeze verdict is Marcus's (the B8 assessment record).
 APP_STAGE_NOTE   <- paste("Beta. What is under review is how much the model's",

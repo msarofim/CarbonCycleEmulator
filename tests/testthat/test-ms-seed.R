@@ -26,18 +26,27 @@ MS_HEAD_KIND16 <- c(
   new_obs  = "seeded: NEW BASIN + the OBSERVATION-implied partition (the ocean ENSO pair PINNED; the limb's w_enso_l2 SET to 25 Sv per index (the HIGH edge of Meinen's bracket); land x1.734)")
 
 # an arm as the driver builds it: the gate, then the pins, then the reference set and its two points
-ms_arm_open <- function(struct, pins) {
-  g <- ccx_apply_gate(struct); r <- ccx_apply_pins(pins)
-  ref <- ccx_ms_reference_set(pins, "1", pump_field = "solved", struct = struct)
-  pt <- function(nm) {
-    p <- NULL
-    utils::capture.output(p <- ccx_seed_unencodable(ccx_migrate_par_set(ccx_mode_par_with_pins(
-      readRDS(ccx_path(CCX_MODE_FILES[[nm]])))), nm))
-    p
-  }
-  list(gate = g, pins_h = r, pins = pins, P_INC = pt(ref$incumbent), P_NEW = pt(ref$new_basin),
-       limb = ccx_l2_on(ccx_apply_structure(ccx_default_params(), struct, 1L, pump_field = "solved")))
+# `refs` NAMES the arm's reference points when no ruled reference set covers its pins (since hilda29e's adoption, 10-08 e,
+# #16's ten pins match no branch; the #16 arm's references were hilda33p / the control, named below).
+# ⛔ STATE-SAFE (10-08 e; Marcus: "Approve all five"): the gate and the pins are applied FIRST, and undone if ANYTHING after
+# them fails. The first cut registered its cleanup only after a reference-set call that later began to stop, and the gate
+# and #16's pins stayed applied for the rest of the suite: 17 unrelated tests failed at hilda29e's adoption.
+ms_arm_open <- function(struct, pins, refs = NULL) {
+  g <- ccx_apply_gate(struct)
+  r <- tryCatch(ccx_apply_pins(pins), error = function(e) { ccx_unapply_gate(g); stop(e) })
+  tryCatch({
+    ref <- if (is.null(refs)) ccx_ms_reference_set(pins, "1", pump_field = "solved", struct = struct) else refs
+    pt <- function(nm) {
+      p <- NULL
+      utils::capture.output(p <- ccx_seed_unencodable(ccx_migrate_par_set(ccx_mode_par_with_pins(
+        readRDS(ccx_path(CCX_MODE_FILES[[nm]])))), nm))
+      p
+    }
+    list(gate = g, pins_h = r, pins = pins, P_INC = pt(ref$incumbent), P_NEW = pt(ref$new_basin),
+         limb = ccx_l2_on(ccx_apply_structure(ccx_default_params(), struct, 1L, pump_field = "solved")))
+  }, error = function(e) { ccx_unpin_params(r); ccx_unapply_gate(g); stop(e) })
 }
+MS_OBJ16_REFS <- list(incumbent = "hilda33p", new_basin = CCX_MODE_SEASML0_CONTROL)   # #16's references, before 10-08 e
 ms_arm_close <- function(a) { ccx_unpin_params(a$pins_h); ccx_unapply_gate(a$gate) }
 ms_slot <- function(sk, a, p = NULL, free = CCX_PARAM_NAMES)
   ms_seed_slot(sk, if (!is.null(p)) p else if (sk == "inc_enso") a$P_INC else a$P_NEW, free = free,
@@ -60,7 +69,7 @@ test_that("MS1: the FREE table seeds the ocean pair (and the land pair for the o
 })
 
 test_that("MS1: objective #16 (ocean pair pinned, limb on) seeds w_enso_l2 with HEAD's labels byte for byte", {
-  a <- ms_arm_open(CCX_MODE_OBJ16_STRUCT, CCX_MODE_OBJ16_PINS); on.exit(ms_arm_close(a), add = TRUE)
+  a <- ms_arm_open(CCX_MODE_OBJ16_STRUCT, CCX_MODE_OBJ16_PINS, MS_OBJ16_REFS); on.exit(ms_arm_close(a), add = TRUE)
   expect_true(a$limb)
   for (sk in MS_SEED_SLOTS) {
     s <- ms_slot(sk, a)
@@ -91,7 +100,7 @@ test_that("MS1: objective #18 (w_enso_l2 and the land pair pinned too) makes ALL
 
 test_that("MS1: a PARTIAL seed says what it dropped; a reference already at the seed, and the limb off, are unseedable", {
   # #16 + the land pair pinned: the obs slot seeds the limb and drops the land, and the label says which
-  a <- ms_arm_open(CCX_MODE_OBJ16_STRUCT, CCX_MODE_OBJ16_PINS); on.exit(ms_arm_close(a), add = TRUE)
+  a <- ms_arm_open(CCX_MODE_OBJ16_STRUCT, CCX_MODE_OBJ16_PINS, MS_OBJ16_REFS); on.exit(ms_arm_close(a), add = TRUE)
   s <- ms_slot("new_obs", a, free = setdiff(CCX_PARAM_NAMES, MS_ENSO_LAND_PAIR))
   expect_true(s$seeded); expect_identical(s$landed, MS_ENSO_L2_NAME); expect_identical(s$dropped, MS_ENSO_LAND_PAIR)
   expect_match(s$kind, "; the land seed NOT applied (gamma_enso_land_NH, gamma_enso_land_SH not fitted by this arm))", fixed = TRUE)

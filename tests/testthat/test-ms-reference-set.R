@@ -39,6 +39,10 @@
 # =====================================================================
 ms_cp <- CCX_MODE_CANONICAL_PINS
 ms_ctl <- CCX_MODE_CONTROL_PINS
+# 2026-10-08 (e; Marcus: "Approve all five"): hilda29e's adoption -- the canonical's pins are #16's ten + the interannual
+# module's four. Premises that read "the canonical's" for #16's ten NAME them (the hilda33p ledger's lesson).
+ms_cp16 <- CCX_MODE_OBJ16_PINS
+ms_cs   <- ccx_mode_struct(readRDS(ccx_mode_file()))       # the canonical's own label (hilda_csl3v0kaidgbemwt)
 
 test_that("the control's pin set is the canonical's without the shim, and the control is registered and FREE", {
   expect_true(!is.null(ms_cp) && "ent_seas_amp_SH" %in% names(ms_cp))
@@ -46,9 +50,12 @@ test_that("the control's pin set is the canonical's without the shim, and the co
   # control has no limb (holds w_enso_l2 = 0) and fits the pair: the two sets differ by exactly those
   # 2026-10-06 (a): + npp_tsens -- the canonical hilda33p pins the greening term (objective #16); the control,
   # on a label that never opens the gate, does not carry it (Marcus 2026-10-06: "Approve all (Recommended)")
-  expect_setequal(setdiff(names(ms_cp), names(ms_ctl)), c("ent_seas_amp_SH", "gamma_enso_ocn_NH", "gamma_enso_ocn_SH", "npp_tsens"))
-  expect_identical(setdiff(names(ms_ctl), names(ms_cp)), "w_enso_l2")
-  shared <- intersect(names(ms_ctl), names(ms_cp)); expect_equal(unname(ms_ctl[shared]), unname(ms_cp[shared]))
+  # 2026-10-08 (e): stated against #16's ten (the canonical's until hilda29e); the canonical = those ten + the module's four
+  expect_setequal(setdiff(names(ms_cp16), names(ms_ctl)), c("ent_seas_amp_SH", "gamma_enso_ocn_NH", "gamma_enso_ocn_SH", "npp_tsens"))
+  expect_identical(setdiff(names(ms_ctl), names(ms_cp16)), "w_enso_l2")
+  shared <- intersect(names(ms_ctl), names(ms_cp16)); expect_equal(unname(ms_ctl[shared]), unname(ms_cp16[shared]))
+  expect_identical(setdiff(names(ms_cp), names(ms_cp16)), CCX_IAV_MODULE_NAMES)
+  expect_identical(ms_cp[names(ms_cp16)], ms_cp16)
   expect_true(CCX_MODE_SEASML0_CONTROL %in% names(CCX_MODE_FILES))
   expect_false(CCX_MODE_PINNED[[CCX_MODE_SEASML0_CONTROL]], info = "the control is a FREE arm (its shim is fitted)")
   md <- readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL))
@@ -58,15 +65,18 @@ test_that("the control's pin set is the canonical's without the shim, and the co
 })
 
 test_that("the five branches return the ruled pairs", {
-  withr::local_envvar(CCX_MS_STRUCT = ccx_mode_struct(readRDS(ccx_mode_file())), CCX_MS_PUMP_FIELD = "solved")   # the canonical's OWN structure (09-20 r: hilda_csl3)
-  r1 <- ccx_ms_reference_set(ms_cp, "1")
+  # 2026-10-08 (e): the NULL / control branches run under #16's label (under the canonical's -- the CUT -- a pin set that
+  # leaves the module free is refused, by design); the canonical's own pins under its own label
+  withr::local_envvar(CCX_MS_STRUCT = CCX_MODE_OBJ16_STRUCT, CCX_MS_PUMP_FIELD = "solved")
+  r1 <- ccx_ms_reference_set(ms_cp, "1", struct = ms_cs)
   expect_identical(r1$incumbent, CCX_MODE_CANONICAL); expect_identical(r1$new_basin, CCX_MODE_SEASML0_CONTROL)
-  r1b <- ccx_ms_reference_set(ms_cp, "0")          # the canonical's pins at seas_ml 0: still the canonical
-  expect_identical(r1b$incumbent, CCX_MODE_CANONICAL)
+  # the canonical's pins at seas_ml 0: the canonical while it had no cut (hilda33p); since hilda29e its module values were
+  # fitted at seas_ml 1, so seas_ml 0 is REFUSED (10-08 e; Marcus: "Approve all five")
+  expect_error(ccx_ms_reference_set(ms_cp, "0", struct = ms_cs), "fitted at seas_ml 1")
   # a REAL extension: under the martin field `pump_grad` is inert (the E array's case)
-  r2 <- ccx_ms_reference_set(c(ms_cp, pump_grad = 314.1031), "1", pump_field = "martin")
+  r2 <- ccx_ms_reference_set(c(ms_cp, pump_grad = 314.1031), "1", pump_field = "martin", struct = ms_cs)
   expect_identical(r2$incumbent, CCX_MODE_CANONICAL)
-  expect_error(ccx_ms_reference_set(c(ms_cp, pump_grad = 314.1031), "1", pump_field = "solved"),
+  expect_error(ccx_ms_reference_set(c(ms_cp, pump_grad = 314.1031), "1", pump_field = "solved", struct = ms_cs),
                "no registered incumbent")   # not inert under the solved field
   r3 <- ccx_ms_reference_set(NULL, "1")
   expect_identical(r3$incumbent, CCX_MODE_PINNED_PARENT); expect_identical(r3$new_basin, CCX_MODE_SEASML0_CONTROL)
@@ -98,44 +108,34 @@ test_that("MUTATION: a foreign pin set, a moved shim value, and a bad seas_ml ar
   expect_error(ccx_ms_reference_set(ms_ctl, "2"), "must be 0")
 })
 
-test_that("the layer-2 limb's arm: the canonical / the control under hilda_cl2 at seas_ml 1; refused without the limb or at seas_ml 0", {
+test_that("the layer-2 limb's arm (2026-10-08 e): its constant is the limb arm's OWN nine and no ruled reference set takes it; the CUT canonical's pins are refused under hilda_cl2", {
   ms_l2 <- CCX_MODE_L2_ARM_PINS
-  # 09-20 (r): the limb's arm IS the canonical's (hilda29l fits w_enso_l2 and pins the pair)
-  expect_identical(ms_l2, ms_cp)
+  # 10-08 (e; Marcus: "Approve all five"): no longer the canonical's alias (hilda29e pins w_enso_l2) -- the limb arm's own
+  # 09-20 (r) set: w_enso_l2 FITTED, the ENSO pair pinned at 0
+  expect_identical(ms_l2, CCX_MODE_OBJ15_PINS)
   expect_false("w_enso_l2" %in% names(ms_l2)); expect_true(all(c("gamma_enso_ocn_NH", "gamma_enso_ocn_SH") %in% names(ms_l2)))
   expect_equal(unname(ms_l2[c("gamma_enso_ocn_NH", "gamma_enso_ocn_SH")]), c(0, 0))
-  withr::local_envvar(CCX_MS_STRUCT = "hilda_cl2", CCX_MS_PUMP_FIELD = "solved")
-  r8 <- ccx_ms_reference_set(ms_l2, "1")
-  expect_identical(r8$incumbent, CCX_MODE_CANONICAL); expect_identical(r8$new_basin, CCX_MODE_SEASML0_CONTROL)
-  expect_true(all(c(r8$incumbent, r8$new_basin) %in% names(CCX_MODE_FILES)))
-  expect_false(identical(r8$incumbent, r8$new_basin))
-  # the struct argument, not only the env
-  r8b <- ccx_ms_reference_set(ms_l2, "1", struct = "hilda_cl2")
-  expect_identical(r8b, r8)
-  # MUTATION: the same pins under a structure WITHOUT the limb are an unruled arm
-  # (09-20 r: the refusal is now the general one -- a pin set that leaves an inert name FREE)
-  expect_error(ccx_ms_reference_set(ms_l2, "1", struct = "hilda_c"), "no layer-2 limb")
-  expect_error(ccx_ms_reference_set(ms_l2, "1", struct = "hilda"), "no layer-2 limb")
+  # the limb branch is REMOVED (unreachable by design since 09-20 r): a nine-pin array is refused under ANY structure and
+  # seas_ml, as the 10-06 ruling refuses a #15 re-run until its reference set is ruled
+  for (st in c("hilda_cl2", "hilda_c", "hilda")) for (sm in c("0", "1"))
+    expect_error(ccx_ms_reference_set(ms_l2, sm, pump_field = "solved", struct = st), "no registered incumbent")
   # the control's pins under a limb structure hold w_enso_l2 OFF -- allowed (nothing inert is free)
   expect_silent(ccx_ms_reference_set(ms_ctl, "0", struct = "hilda_cl2"))
-  # (09-20 r: the limb's arm at seas_ml 0 resolves through the canonical branch now -- the seas_ml-1
-  # prereg refusal lived in the L2 branch, which the canonical's own pins no longer reach)
-  r8c <- ccx_ms_reference_set(ms_l2, "0", struct = "hilda_cl2"); expect_identical(r8c$incumbent, CCX_MODE_CANONICAL)
   # MUTATION: the shim pinned at a non-zero value is not the limb's arm
   moved <- ms_l2; moved[["gamma_enso_ocn_NH"]] <- 0.36
   expect_error(ccx_ms_reference_set(moved, "1", struct = "hilda_cl2"), "no registered incumbent")
-  # the canonical's own pins under hilda_cl2 still take the canonical (the limb's name
-  # is then FREE with the shim free too -- a legal, if unpreregistered, structure arm)
-  r8c <- ccx_ms_reference_set(ms_cp, "1", struct = "hilda_cl2")
-  expect_identical(r8c$incumbent, CCX_MODE_CANONICAL)
+  # the canonical's own pins under hilda_cl2: a legal structure arm while the canonical had no cut; since hilda29e its
+  # module values belong to its own label, so REFUSED (10-08 e)
+  expect_error(ccx_ms_reference_set(ms_cp, "1", struct = "hilda_cl2"), "is not that label")
 })
 
 test_that("(9) the FREE PARENT of the limb canonical (2026-09-21 g): the six inert pins only, under a structure WITH the limb at seas_ml 1 -> the canonical / the control; refused without the limb and at seas_ml 0", {
   fp <- CCX_MODE_FREE_PARENT_PINS
   expect_setequal(names(fp), setdiff(names(CCX_MODE_CONTROL_PINS), "w_enso_l2"))           # the control's minus the limb's name
   # 2026-10-06 (a): FOUR real pins since hilda33p -- the shim, the pair and npp_tsens (Marcus 2026-10-06: "Approve all (Recommended)")
-  expect_setequal(names(fp), setdiff(names(CCX_MODE_CANONICAL_PINS), c("ent_seas_amp_SH", "gamma_enso_ocn_NH", "gamma_enso_ocn_SH", "npp_tsens")))   # the canonical's minus its four real pins
-  expect_equal(unname(fp), unname(CCX_MODE_CANONICAL_PINS[names(fp)]))
+  # 10-08 (e): against #16's ten (the canonical's until hilda29e, whose four module names are not the free parent's either)
+  expect_setequal(names(fp), setdiff(names(ms_cp16), c("ent_seas_amp_SH", "gamma_enso_ocn_NH", "gamma_enso_ocn_SH", "npp_tsens")))   # #16's minus its four real pins
+  expect_equal(unname(fp), unname(ms_cp16[names(fp)]))
   r9 <- ccx_ms_reference_set(fp, "1", struct = "hilda_csl3")
   # 09-22 (k): the parent is registered (hilda32f) and is its own incumbent; the canonical seeded the wave that made it
   expect_identical(r9$incumbent, CCX_MODE_PINNED_PARENT); expect_identical(r9$new_basin, CCX_MODE_SEASML0_CONTROL)
@@ -182,19 +182,21 @@ test_that("(10) a PRICE arm (2026-10-04): the canonical's pins + ONE read name h
 test_that("(11) OBJECTIVE #16's pins ARE the canonical's since 2026-10-06 (hilda33p; Marcus: \"Remove, re-express its test\"): the FIRST branch takes them, the canonical as a MODE; npp_tsens off 0, a pin moved or dropped, and #15's nine are refused", {
   withr::local_envvar(CCX_MS_STRUCT = CCX_MODE_OBJ16_STRUCT, CCX_MS_PUMP_FIELD = "solved")
   p16 <- CCX_MODE_OBJ16_PINS
-  expect_identical(p16, ms_cp, info = "the canonical holds #16's ten")
+  # 2026-10-08 (e): #16's ten WERE the canonical's (hilda33p, 10-06 -> 10-08); hilda29e's are those ten + the module's four
+  expect_identical(ms_cp[names(p16)], p16, info = "the canonical's pins extend #16's ten")
+  expect_identical(setdiff(names(ms_cp), names(p16)), CCX_IAV_MODULE_NAMES)
   expect_identical(names(p16), c(names(CCX_MODE_OBJ15_PINS), "npp_tsens"))
   expect_identical(p16[["npp_tsens"]], 0)
   expect_identical(p16[["npp_tsens"]], CCX_NPP_TSENS_DEFAULT, info = "the pin IS the term's absent default")
   expect_true(CCX_MODE_OBJ16_STRUCT %in% CCX_STRUCT_LABELS)
-  expect_identical(ccx_mode_struct(readRDS(ccx_mode_file())), CCX_MODE_OBJ16_STRUCT, info = "the canonical runs #16's label")
-  r11 <- ccx_ms_reference_set(p16, "1")
-  expect_identical(r11$incumbent, CCX_MODE_CANONICAL); expect_identical(r11$new_basin, CCX_MODE_SEASML0_CONTROL)
-  expect_identical(r11$why, "the canonical, under this array's pins")    # a MODE of #16, not a start
+  expect_identical(ccx_mode_struct(readRDS(ccx_mode_file())), CCX_MODE_OBJ18_STRUCT, info = "the canonical runs #18's label (hilda29e)")
+  # since hilda29e NO ruled reference set takes #16's ten: a #16 re-run rules its own, as #15's nine since 10-06
+  expect_error(ccx_ms_reference_set(p16, "1"), "no registered incumbent")
   # the LAUNCH STRING, through the driver's own parser, resolves the same
   launch <- paste0("ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0,",
                    "gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0,npp_tsens=0")
-  expect_identical(ccx_ms_reference_set(ccx_parse_pins(launch), "1"), r11)
+  expect_identical(ccx_parse_pins(launch), p16)
+  expect_error(ccx_ms_reference_set(ccx_parse_pins(launch), "1"), "no registered incumbent")
   # MUTATION: npp_tsens held OFF 0 is not the ruled pin
   off <- p16; off[["npp_tsens"]] <- 0.004
   expect_error(ccx_ms_reference_set(off, "1"), "no registered incumbent")
@@ -242,9 +244,13 @@ test_that("(12) OBJECTIVE #17's pins (2026-10-06 n, the interannual cut): #16's 
   expect_error(ccx_ms_reference_set(moved, "1"), "no registered incumbent")
   expect_error(ccx_ms_reference_set(p17[setdiff(names(p17), "w_enso_l2")], "1"), "no registered incumbent")
   # MUTATION: the canonical's ten under #17's label leave the module FREE -- refused at launch, by name
-  expect_error(ccx_ms_reference_set(ms_cp, "1"), "interannual CUT.*lag_enso_land")
-  # ... while under #16's label the ten still take the first branch, as before
-  expect_identical(ccx_ms_reference_set(ms_cp, "1", struct = CCX_MODE_OBJ16_STRUCT)$why, "the canonical, under this array's pins")
+  # (10-08 e) #16's ten match no ruled set since hilda29e, so they are refused before the cut's check; the cut's refusal of
+  # a REGISTERED set that leaves the module free is exercised on NULL pins (the free-parent branch)
+  expect_error(ccx_ms_reference_set(ms_cp16, "1"), "no registered incumbent")
+  expect_error(ccx_ms_reference_set(NULL, "1"), "interannual CUT.*lag_enso_land")
+  # ... and under #16's label the ten took the first branch while they were the canonical's; since hilda29e (10-08 e) no
+  # ruled set takes them
+  expect_error(ccx_ms_reference_set(ms_cp16, "1", struct = CCX_MODE_OBJ16_STRUCT), "no registered incumbent")
 })
 
 test_that("(13) OBJECTIVE #18's pins (2026-10-07 f, the redesigned cut): #16's ten + the module's four at stage 1's values under #18 at basin B, tied bit for bit to the stage-1 file and the mirror, under #18's label at seas_ml 1 -> hilda29w (basin B, seeded) / the control; refused under #17's label, at seas_ml 0, a module value moved or dropped, the module free", {
@@ -293,7 +299,10 @@ test_that("(13) OBJECTIVE #18's pins (2026-10-07 f, the redesigned cut): #16's t
   expect_error(ccx_ms_reference_set(moved, "1"), "no registered incumbent")
   expect_error(ccx_ms_reference_set(p18[setdiff(names(p18), "lag_enso_land")], "1"), "no registered incumbent")
   # MUTATION: the canonical's ten under #18's label leave the module FREE -- refused at launch, by name
-  expect_error(ccx_ms_reference_set(ms_cp, "1"), "interannual CUT.*lag_enso_land")
+  # (10-08 e) #16's ten match no ruled set since hilda29e, so they are refused before the cut's check; the cut's refusal of
+  # a REGISTERED set that leaves the module free is exercised on NULL pins (the free-parent branch)
+  expect_error(ccx_ms_reference_set(ms_cp16, "1"), "no registered incumbent")
+  expect_error(ccx_ms_reference_set(NULL, "1"), "interannual CUT.*lag_enso_land")
   # ... and #18's label does not take #17's pins (ruled under #17's own label only)
   expect_error(ccx_ms_reference_set(CCX_MODE_OBJ17_PINS, "1"), "ruled under")
 })
@@ -323,16 +332,20 @@ test_that("(14) #18 PASS 2's pins (2026-10-08 d; Marcus: \"Basin 1, run the seco
   }
   expect_identical(readRDS(ccx_mode_file(CCX_MODE_OBJ18P2_INCUMBENT))$promoted_from$id, 0L)
   expect_identical(readRDS(ccx_mode_file(CCX_MODE_OBJ18P2_NEW))$promoted_from$id, 6L)
+  # 2026-10-08 (e): pass 2 PASSED and its basin-1 refit is the canonical, hilda29e -- pass 2's pins ARE the canonical's, so
+  # the first branch takes them, the canonical as a MODE; pass 2's own branch is removed (the hilda33p precedent)
+  expect_identical(p2, CCX_MODE_CANONICAL_PINS); expect_identical(CCX_MODE_CANONICAL, "hilda29e")
   r14 <- ccx_ms_reference_set(p2, "1", pump_field = "solved", struct = CCX_MODE_OBJ18_STRUCT)
-  expect_identical(r14$incumbent, CCX_MODE_OBJ18P2_INCUMBENT); expect_identical(r14$new_basin, CCX_MODE_OBJ18P2_NEW)
-  expect_match(r14$why, "PASS 2.*seeded at the pins")
+  expect_identical(r14$incumbent, CCX_MODE_CANONICAL); expect_identical(r14$new_basin, CCX_MODE_SEASML0_CONTROL)
+  expect_identical(r14$why, "the canonical, under this array's pins")
   # the LAUNCH STRING, through the driver's own parser
   launch <- paste(sprintf("%s=%.17g", names(p2), p2), collapse = ",")
   expect_identical(ccx_parse_pins(launch), p2)
   expect_identical(ccx_ms_reference_set(ccx_parse_pins(launch), "1", pump_field = "solved", struct = CCX_MODE_OBJ18_STRUCT), r14)
   # MUTATION: under #17's label, at seas_ml 0, a module value moved back to pass 1's, a module name dropped
-  expect_error(ccx_ms_reference_set(p2, "1", pump_field = "solved", struct = CCX_MODE_OBJ17_STRUCT), "PASS 2.*ruled under")
-  expect_error(ccx_ms_reference_set(p2, "0", pump_field = "solved", struct = CCX_MODE_OBJ18_STRUCT), "PASS 2 is ruled at seas_ml 1")
+  # MUTATION (the cut canonical's guard, 10-08 e; the same two refusals pass 2's branch made)
+  expect_error(ccx_ms_reference_set(p2, "1", pump_field = "solved", struct = CCX_MODE_OBJ17_STRUCT), "is not that label")
+  expect_error(ccx_ms_reference_set(p2, "0", pump_field = "solved", struct = CCX_MODE_OBJ18_STRUCT), "fitted at seas_ml 1")
   back <- p2; back[["w_enso_l2"]] <- CCX_MODE_OBJ18_PINS[["w_enso_l2"]]
   expect_error(ccx_ms_reference_set(back, "1", pump_field = "solved", struct = CCX_MODE_OBJ18_STRUCT), "no registered incumbent")
   expect_error(ccx_ms_reference_set(p2[setdiff(names(p2), "w_enso_l2")], "1", pump_field = "solved", struct = CCX_MODE_OBJ18_STRUCT),

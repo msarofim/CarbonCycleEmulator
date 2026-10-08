@@ -208,5 +208,8 @@ test_that("IR7 THE GUARD: under #18 the module's four names must ALL be pinned",
   expect_true(is.function(build(p0)))
   # the launch side: #18's label with the module free is refused by the reference set, by name
   withr::local_envvar(CCX_MS_STRUCT = IR_LABEL, CCX_MS_PUMP_FIELD = "solved")
-  expect_error(ccx_ms_reference_set(ten, "1"), "interannual CUT.*lag_enso_land")
+  # 2026-10-08 (e; Marcus: "Approve all five"): #16's ten match no ruled set since hilda29e, so they are refused BEFORE the
+  # cut's check ("no registered incumbent"); the cut's refusal of a REGISTERED set that leaves the module free is NULL's
+  expect_error(ccx_ms_reference_set(ten, "1"), "no registered incumbent")
+  expect_error(ccx_ms_reference_set(NULL, "1"), "interannual CUT.*lag_enso_land")
 })

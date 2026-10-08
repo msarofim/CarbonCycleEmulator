@@ -1,0 +1,9 @@
+
+calibration/diag_constraint_map.R @c919c49+dirty, 2026-10-08 09:52
+[constraint_map] mode hilda29e, 29 fitted names, 26 streams, step = 1.00 Hessian sd
+=== GATE HARNESS === rebuilt -1166.9497 (shift +0.0000) vs stored -1166.9497 -> PASS
+=== GATE CLOSURE === |sum(streams) - loglik| = 0.000e+00 (tol 1.0e-09) -> PASS
+=== GATE COVER === 29 names in 7 components -> PASS ; 27 streams in 13 families -> *** FAIL ***
+    stream mismatch: only in objective =  ; only in CM_FAMILY = gcb_ocean_enso_slope
+=== GATE UNION === union entries absent from this arm and NOT declared arm-only: 2 -> *** FAIL *** {gamma_enso_land_NH, gamma_enso_land_SH}
+=== GATE STEP === Hessian pd = TRUE, conditional sd finite and positive for 29/29 names, sqrt(diag(solve(-H))) reproduces md$sd_unc to 0.00e+00 -> PASS

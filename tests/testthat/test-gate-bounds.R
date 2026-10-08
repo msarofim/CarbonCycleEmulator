@@ -495,8 +495,11 @@ test_that("GATE S has POWER against its own blind spot: at a seas_ml = 1 canonic
   # re-pin approved by Marcus).
   # At hilda34g (2026-10-03 h, the land ENSO lag fitted): whole limb 0.210 @ 8.50 PASS (8.5037; the
   # scorecard's number); the blind read 4.08, within its tolerance (Marcus 2026-10-03: "Approve all (Recommended)").
+  # At hilda29e (2026-10-08 e, #18 pass 2: the interannual cut, h_ml 64.6): whole limb 0.269 @ 9.06 PASS (the scorecard's
+  # number; whole_model_scorecard_20261008_hilda33p_obj18p2); +0.56 mo, the deeper mixed layer's later SPO limb as at
+  # hilda30s (h_ml 58: 8.98) -- inferred, not tested. Re-pin approved by Marcus ("Approve all five").
   expect_true(full$pass)
-  expect_equal(full$mo,  8.50, tolerance = 0.05, scale = 1)
+  expect_equal(full$mo,  9.06, tolerance = 0.05, scale = 1)
   expect_equal(blind$mo, 4.10, tolerance = 0.05, scale = 1)
   expect_false(dg_gateS_verdict(list(mo = blind$mo, amp = blind$amp))$pass)
 })

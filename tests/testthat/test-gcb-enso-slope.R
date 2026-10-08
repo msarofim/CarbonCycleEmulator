@@ -41,7 +41,9 @@ test_that("(2) the estimator recovers a known slope, ignores the index mean, and
   expect_true(is.na(ccx_enso_slope(yrs, sink, idx, win = c(1990L, 2010L))[["slope"]]))
 })
 
-ges_v <- dg_vector(CCX_MODE_CANONICAL); ges_r <- dg_run(ges_v)
+# 2026-10-08 (e; Marcus: "Approve all five"): NAMED -- hilda33p, where gcb_ocean_enso_slope is a MAIN-objective row. Under
+# the interannual cut (hilda29e) the row moved into the module (R/likelihood.R), so "the canonical" no longer carries it.
+ges_v <- dg_vector("hilda33p"); ges_r <- dg_run(ges_v)
 ges_toggle <- function(on, f) { old <- LIK_USE_GCB_ENSO_SLOPE; assign("LIK_USE_GCB_ENSO_SLOPE", on, envir = globalenv())
   on.exit(assign("LIK_USE_GCB_ENSO_SLOPE", old, envir = globalenv()), add = TRUE); f() }
 
