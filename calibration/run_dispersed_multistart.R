@@ -202,6 +202,9 @@ MS_REF_INC_LABEL <- sprintf("INCUMBENT = %s (%s; scored under this build's objec
                             Sys.getenv("CCX_MS_SEAS_ML", "UNSET"))
 MS_REF_NEW_LABEL <- sprintf("NEW BASIN = %s (%s; registered, evaluated at seas_ml %s)", MS_REF_NEW_NAME,
                             if (identical(MS_REF_NEW_NAME, CCX_MODE_SEASML0_CONTROL)) "seas_ml 0 control, periodic spinup"
+                            # 2026-10-08 (d): a PINNED new basin (#18 pass 2's hilda29a6) is not "the free parent"; the
+                            # text it gets is read off the registry, and every older arm keeps its label byte for byte
+                            else if (isTRUE(CCX_MODE_PINNED[[MS_REF_NEW_NAME]])) "a registered PINNED mode, seeded at this array's pins"
                             else "the free parent, the other h_ml basin",
                             Sys.getenv("CCX_MS_SEAS_ML", "UNSET"))
 # ⚠ THESE THREE NAMES ARE ALSO THE PORT-TARGET KEYS in calibration/torch/
