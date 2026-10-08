@@ -2,6 +2,47 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-08 (i) — **POSTERIOR BANDS: the ruled "Laplace + propagation" is NOT feasible at `hilda29e`. The main fit's Laplace fails its importance check, as `hilda33d`'s did. A curvature-matched Gaussian fails too.** Nothing built, the hold stands. H2 and the ocean's climate effect are ONE issue, re-measured. (Marcus: "Evaluate if the posterior bands are feasible: if so, implement them. Then provide recommendations on H2 and the ocean climate effect.")
+
+- **Why the main fit first.** The cut posterior (ruled 10-06 o) is stage 1's Laplace pushed through the cross-Hessian ON TOP OF the main fit's own Laplace. The fertilisation-ridge names are stage 2's. If stage 2's Gaussian fails, propagation cannot rescue it.
+- **Tooling** (`a47f126`):
+  - `R/importance.R`: ESS, and the Pareto k̂ (Vehtari et al. 2024, JMLR 25(72); reliable below min(1 − 1/log10 S, 0.7) = 0.667 at S = 1000). The tail fit re-implements Zhang & Stephens 2009, since `{loo}` is not installed.
+  - `tests/testthat/test-importance.R`, 17 / 0: tails of known shape recovered; the exact k = 1 − s² of a narrow Gaussian proposal recovered; the rule's verdict right on both sides.
+  - `calibration/diag_cut_laplace_is.R`.
+- **Principal-axis curvature** (`diag_laplace_axes.R`, `laplace_axes_20261008.log`). A Gaussian drops 0.5 log-units at 1 sd. Measured drops:
+  - axis 3 (`beta_max` +0.72, `fert_k` +0.41): **−9.81 / −14.15** (20–28×), already 6–7× at 0.5 sd;
+  - axis 5 (`ndep_ret`, `imb_share_land`, `h_hs`): −8.47 / −6.15;
+  - axis 1: −2.08 / −1.61.
+  - 3 of 29 axes exceed twice the quadratic.
+- **The importance check** (`cut_laplace_is_20261008_hilda29e.{log,rds}`; 1000 draws per proposal, seeds 20261008 / 20261009, scored on the stage-2 logpost with the module pinned):
+
+| proposal | median lp − lp_quad (5 %) | ESS / 1000 | k̂ | verdict |
+|---|---|---|---|---|
+| Laplace (the ruled method) | −20.9 (−624) | **3.3** | **0.90** | NOT RELIABLE |
+| secant: each eigen-axis rescaled to its 1-sd curvature × 1.25 | −8.9 (−177) | **14.8** | **1.06** | NOT RELIABLE (17 failed draws) |
+
+  - `hilda33d` (10-01 l) was −25.5 and ESS 8. The log-weights barely track the worst axis (r −0.11 / −0.01): the non-Gaussianity is joint, so axis-wise rescaling cannot fix it.
+  - Re-run on the committed tree: draws and log-posteriors `identical()`, logs identical apart from the stamp.
+- **Feasible alternatives** (each a methodological change, for Marcus):
+  - (1) an MCMC band at `hilda29e`, conditional on the module at its mode. The module's move shifted the 2300 futures by ≤ 0.6 ppm (10-07 h), against the ridge's ±~33 ppm (10-07 e).
+  - (2) the ridge's profile, measured 10-07 (e): SSP5-8.5 2300 −33.5 / +32.2 ppm at 1σ, vvH −16.3 / +16.7. It is a 1-D profile interval, not a posterior band.
+  - (3) keep holding.
+- **The ocean's climate effect: why detrending enlarged it is ANSWERED.** 10-08 (b) and the handoff said "not decomposed"; its own arm logs decompose it (`ocean_climate_gobm_20261008_os{A,B}*.log`). A → B is the same vector with the demeaned index swapped for the detrended one:
+  - the thermal part does NOT move (−0.4528 → −0.4532);
+  - the ENSO limb's uptake CREDIT falls +0.0942 → +0.0403, which is the whole step (total −0.3761 → −0.4297).
+  - The demeaned index carries a **+0.0081 /yr** trend since 1950 (2015–24 mean minus 1958–67: +0.485; detrended −0.0001 /yr, +0.018; measured from `ccx_build_forcing()`). The limb turned that trend into a spurious uptake credit that had MASKED part of the thermal excess.
+  - ⇒ the 2.16× is the thermal response, which is H2. The two items are one issue.
+  - The remaining +0.047 limb term varies by GOBM protocol (+0.010 for 1958 normal years, +0.068 for 1961). That fits the 2015–24 index against each normal year, i.e. variability, not trend. Not investigated further.
+- **H2 re-measured at `hilda29e`** (`h2_time_shape_20261008_hilda29e.{log,rds,png}`; md5 gate: the canonical's own series; `diag_h2_time_shape.R` now takes `CCX_H2_SERIES`, default unchanged):
+  - per K of SST: CCX −0.532 ± 0.086, GCB −0.295 ± 0.045, **ratio 1.81 ± 0.40** (`hilda33p` 1.63 ± 0.35; OLS se, a floor);
+  - emergence 1971–72 vs 1998–99, **27 years early** (`hilda33p` 26);
+  - the gap at zero warming is −0.059 ± 0.034 (1.7σ; H2 predicts ~0), so part of the gap is a constant offset;
+  - shape r 0.54.
+- **Already on record, relevant to the options** (`ocean_climate_gobm_20261008_obj18p2b1.log`):
+  - halving `kz` (not a refit) moves the effect from −13.38 % to −13.15 % of the CO₂ effect: `kz` scales uptake and climate effect TOGETHER, so a lower-`kz` refit would not fix the ratio;
+  - under FESOM's own protocol, CCX's SST-only part is 3.4× Bunsen et al. (2024)'s WARMING part, while CCX's total is 1.3× their total, which includes a WIND part (0.17) that CCX has no term for.
+- **Stale records:** DESIGN.md's −0.36 / 1.8×; memory's kz elasticity 0.36 (0.213 at `hilda29e`); H2's 1.63× / 26 yr / −24 ppm (all `hilda33p`); "not decomposed" (answered above). The futures stake (−24 ppm) is NOT re-measured: `diag_h2_futures_stake.R`'s reproduction gate is pinned to `hilda33p`'s 1461.53 and needs an independently produced `hilda29e` value.
+
 ## 2026-10-08 (h) — **Both card-4 tests rebuilt, the constraint map rebuilt at `hilda29e`** (Marcus, verbatim: "Both, now (Recommended)"; "Main fit only (Recommended)"). Card 4's two tests now FAIL, by design, until its copy changes. The map's test (6) passes.
 
 - **Card 4's tests** (`24ccf84`, `test-review-card-numbers.R`):

@@ -1,0 +1,32 @@
+calibration/diag_cut_laplace_is.R @a47f126 | canonical hilda29e (refit_20261008_hilda29e_obj18p2_hilda_csl3v0kaidgbemwt) | 2026-10-08 16:29
+GATE harness: lp(u0) -1166.9497 vs stored -1166.9497 -> PASS
+GATE Sigma = solve(-H): max|Sigma (-H) - I| 3.2e-11 -> PASS
+29 fitted names, 14 pinned (the module's four among them: lag_enso_land, gamma_enso_land_NH, gamma_enso_land_SH, w_enso_l2)
+
+=== CURVATURE ONE SD OUT, all eigen-axes (quadratic drop = 0.50) ===
+  axes with mean drop > 1.0 (twice the quadratic's): 3 of 29
+  axis  3 (Laplace sd 0.618; beta_max +0.72, fert_k +0.41, imb_share_land -0.34): drop -9.81 / -14.15 -> ratio 24.0x, proposal scale 0.255
+  axis  5 (Laplace sd 0.579; ndep_ret +0.58, imb_share_land -0.52, h_hs -0.38): drop -8.47 / -6.15 -> ratio 14.6x, proposal scale 0.327
+  axis  1 (Laplace sd 1.035; imb_share_ocean_rest -0.70, kz_deep_frac +0.63, ndep_ret +0.21): drop -2.08 / -1.61 -> ratio 3.7x, proposal scale 0.650
+  axis  6 (Laplace sd 0.414; imb_share_land +0.49, ndep_ret +0.46, pump_hs_gcm2 -0.45): drop -1.02 / -0.84 -> ratio 1.9x, proposal scale 0.915
+  axis  2 (Laplace sd 0.991; kz_deep_frac +0.75, imb_share_ocean_rest +0.58, imb_share_land +0.16): drop -0.90 / -0.76 -> ratio 1.7x, proposal scale 0.968
+  axis  8 (Laplace sd 0.310; pump_hs_gcm2 -0.56, imb_share_land -0.50, u_hs -0.34): drop -0.55 / -0.53 -> ratio 1.1x, proposal scale 1.201
+
+=== PROPOSAL 'laplace' (1000 draws, seed 20261008) ===
+  lp - lp_quad: median -20.91, 5% -623.89, 95% +0.43; failed draws 0
+  ESS 3.3 of 1000 (0.3 %); largest weight 0.543; Pareto k-hat 0.90 (reliable below 0.667) -> NOT RELIABLE
+  log weight vs the most-curved axis's coordinate: r -0.11
+  beta_max  u-space: mode +0.709 | proposal sd 0.510 | weighted mean +0.505, sd 0.289
+  fert_k    u-space: mode -0.718 | proposal sd 0.360 | weighted mean -0.817, sd 0.167
+  ndep_ret  u-space: mode +2.206 | proposal sd 0.542 | weighted mean +2.411, sd 0.222
+
+=== PROPOSAL 'secant' (1000 draws, seed 20261009) ===
+  lp - lp_quad: median -8.88, 5% -176.64, 95% +2.03; failed draws 17
+  ESS 14.8 of 1000 (1.5 %); largest weight 0.134; Pareto k-hat 1.06 (reliable below 0.667) -> NOT RELIABLE
+  log weight vs the most-curved axis's coordinate: r -0.01
+  beta_max  u-space: mode +0.709 | proposal sd 0.287 | weighted mean +0.727, sd 0.225
+  fert_k    u-space: mode -0.718 | proposal sd 0.203 | weighted mean -0.708, sd 0.192
+  ndep_ret  u-space: mode +2.206 | proposal sd 0.409 | weighted mean +2.203, sd 0.195
+
+provenance: calibration/diag_cut_laplace_is.R @a47f126; hilda29e; seeds 20261008 / 20261009 (Mersenne-Twister, before each rnorm); no other RNG
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/cut_laplace_is_20261008_hilda29e.{log,rds}
