@@ -4,9 +4,13 @@
 # where: "Torch (Recommended)").
 #
 # WHAT. Adaptive Metropolis (Haario, Saksman & Tamminen 2001, Bernoulli 7:223)
-# on the canonical's own objective -- the 33 fitted names, the nine held values
-# held, the file's own bands and spin-up: the space the mode and its Laplace
-# covariance live in. The proposal starts as the Laplace covariance scaled by
+# on the canonical's own objective -- its fitted names, its held values held,
+# the file's own bands and spin-up: the space the mode and its Laplace
+# covariance live in. (Written at hilda33d: 33 fitted, nine held. At hilda29e,
+# 2026-10-08 j, Marcus "MCMC band": 29 fitted, 14 held -- the interannual cut's
+# four module names among them, so the chains sample the MAIN FIT CONDITIONAL ON
+# STAGE 1 AT ITS MODE; the module's move shifts the 2300 futures <= 0.6 ppm,
+# CHANGELOG 10-07 h. Nothing below names a count.) The proposal starts as the Laplace covariance scaled by
 # 2.38^2/d and adapts to the chain's running covariance until --adapt, then is
 # FROZEN, so the samples after it are a valid (non-adaptive) Metropolis chain.
 # Each chain starts OVERDISPERSED (u0 + 2 x a Laplace draw) so between-chain
