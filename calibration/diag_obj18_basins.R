@@ -38,7 +38,9 @@ ccx_load_cpp()
 # ---- named constants (every label below derives from these) -------------------------
 OB_DRIVER    <- "calibration/diag_obj18_basins.R"
 OB_LABEL     <- CCX_MODE_OBJ18_STRUCT                       # "hilda_csl3v0kaidgbemwt"
-OB_PINS      <- CCX_MODE_OBJ18_PINS                         # #16's ten + stage 1's four under #18 at basin B
+# THE PIN SETS THIS SCRIPT READS (2026-10-08 d: + #18 PASS 2, the module at the one-pass check's values at basin 1). A wave
+# must match ONE of them exactly; which one is printed. Any other pin set is refused.
+OB_PIN_SETS  <- list(`#18` = CCX_MODE_OBJ18_PINS, `#18 pass 2` = CCX_MODE_OBJ18P2_PINS)
 OB_WAVE_GLOB <- "multistart_20261007i_hilda_csl3v0kaidgbemwt_seasml1_pin_obj18_sd1.0452"
 OB_REPRO_TOL <- 1e-5          # recompute_hessian.R's GATE 1, promote's GATE 4
 OB_CLOSE_TOL <- 1e-8          # the three parts sum to the logpost (diag_obj17_basins.R)
@@ -71,8 +73,13 @@ HB <- one(function(s) s$hml_bound, "the h_ml band"); PN <- one(function(s) ccx_p
 OB_NEAR_GAP <- one(function(s) s$cycle_tol, "the optimiser's convergence bound (cycle_tol)")   # the near-tie window, READ
 PINS <- S[[1]]$pins
 if (!identical(ST, OB_LABEL)) stop("the wave's structure is '", ST, "', not #18's '", OB_LABEL, "'")
-if (!setequal(names(PINS), names(OB_PINS)) || !isTRUE(all.equal(unname(unclass(PINS)[names(OB_PINS)]), unname(OB_PINS))))
-  stop("the wave's pins are not CCX_MODE_OBJ18_PINS")
+OB_PIN_MATCH <- names(Filter(function(P0) setequal(names(PINS), names(P0)) &&
+                                isTRUE(all.equal(unname(unclass(PINS)[names(P0)]), unname(P0))), OB_PIN_SETS))
+if (length(OB_PIN_MATCH) != 1L)
+  stop("the wave's pins match ", length(OB_PIN_MATCH), " of the registered #18 pin sets (", paste(names(OB_PIN_SETS), collapse = ", "),
+       "); exactly one is required")
+OB_PINS <- OB_PIN_SETS[[OB_PIN_MATCH]]
+cat(sprintf("  pins: %s's (%s)\n", OB_PIN_MATCH, if (OB_PIN_MATCH == "#18") "CCX_MODE_OBJ18_PINS" else "CCX_MODE_OBJ18P2_PINS"))
 if (!isTRUE(all.equal(HB, c(CCX_PARAM_TABLE$h_ml$lo, CCX_PARAM_TABLE$h_ml$hi))))
   stop("the wave's h_ml band [", paste(HB, collapse = ", "), "] is not the table's: this script does not re-impose bands")
 cat(sprintf("  %d start files; structure %s, seas_ml %s, pump field %s, pump mode %s, h_ml band [%g, %g]; pins %s\n",
