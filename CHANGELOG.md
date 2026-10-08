@@ -2,6 +2,44 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-08 (j) — **RULED (Marcus, verbatim): "MCMC band; go ahead with the card and futures re-measurement."** Four MCMC chains are running at `hilda29e`. Known-issues card 8 (the ocean's climate effect) is built. The H2 futures impact is re-measured: larger than at `hilda33p`.
+
+- **The MCMC band, launched 2026-10-08 16:42 EDT** (frozen worktree `~/ccx_frozen/20261008j_mcmc` at `1e00851`; `~/ccx_frozen/20261008j_mcmc_launch.sh`, logs `20261008j_mcmc_chain{1..4}.out`, PIDs `20261008j_mcmc.pids`).
+  - `calibration/run_mcmc_check.R` is canonical-generic. At `hilda29e` it samples the 29 fitted names with the 14 held values held, the interannual module among them, so the band is CONDITIONAL ON STAGE 1 AT ITS MODE. The module's move shifted the 2300 futures by ≤ 0.6 ppm (10-07 h).
+  - Settings: `hilda33d`'s production run (n 1e5, adaptation frozen at 3e4, t0 1000, thin 20, checkpoint 500). Exactly resumable.
+  - **Smoke (300 iterations × 2 chains):** the overdispersed starts are finite; 0.24–0.36 s/iteration; acceptance 0.18–0.30. Each chain's harness reproduces the stored logpost (diff 0.0e+00).
+  - **Torch verdict, said out loud: Mac.** The per-iteration cost is no worse than Torch's measured 0.33–1.08 s; four cores are free; no licence or substrate blocker.
+  - ⚠ The first launch passed `--commit`, which stamps "the running copy is not a checkout" (false for a worktree). The chains were killed before their first checkpoint and relaunched without it.
+  - ⚠ **CONTENTION:** a Jupyter kernel in `MAGICC/slr-refresh/notebooks` (not this session's) started 6 min after launch, with several MAGICC workers. Load ~25, and the chains run ~0.6 s/iteration. Left alone.
+  - The plan: read convergence at a common window once ~2e4 post-adaptation iterations exist (`read_mcmc_check.R`), and continue if needed.
+- **The futures re-measurement** (`h2_futures_stake_20261008_hilda29e.{log,rds}` + `_runs.rds`):
+  - ⛔ **Its f values were `hilda33p`'s, typed, and MIS-SIZED at `hilda29e`.** The cut shrank the ENSO limb's credit, and the GCB-sized f moves with it. Found before the first run read any arm; that run was stopped after its gates.
+  - The f values are now DERIVED per mode from the md5-gated ocean-climate product, by the header's own definition: (GCB − other) / thermal. `hilda33p`'s product gives back its typed 0.724 / 0.613 / 0.502 / 0.296 EXACTLY. `hilda29e`: 0.603 / **0.494** / 0.385 / 0.293.
+  - G1's reference is now keyed by mode. `hilda29e`'s **1475.29** ppm comes from an INDEPENDENT path, the app's own `app_params()` / `app_spinup()` (`calibration/diag_app_ssp585_ref.R`, `app_ssp585_ref_20261008_hilda29e.log`). The driver's run gives 1475.288: PASS. G2 and G3 PASS.
+  - **CO₂ in 2300 with a GCB-sized ocean response (unrefitted):**
+
+| scenario | `hilda29e` (GCB ±1σ) | `hilda33p` |
+|---|---|---|
+| SSP5-8.5 (of 1475.3) | **−31.3** (−24.7 to −38.0) | −23.6 |
+| vvH (of 1014.5) | **−24.5** (−19.3 to −29.6) | −18.5 |
+| vvM (of 575.3) | **−14.4** (−11.3 to −17.4) | −11.0 |
+
+  - Futures-only (history untouched): SSP5-8.5 −25.5, vvH −19.0.
+- **Card 8, "The ocean loses uptake to warming about twice as strongly as ocean models do"** (`5696698`, `fd6b122`, `3b19610`):
+  - `calibration/build_ocean_climate_card.R` → `data/ocean_climate_card.rds` COLLECTS the three committed diagnostics at the canonical (md5-gated); nothing is re-derived. The full emulation takes minutes, too slow for a card that renders when opened.
+  - The card's text has no typed numbers. Two charts carry every number in their captions, read from the product:
+    - the A − C series against GCB Fig. S10, with 11-yr means;
+    - CO₂ in 2300 lower by, with the ocean models' ±1σ.
+  - New class `response` (neither "structural" nor "comparison" fits). ⚠ **The card text and the class gloss are CLAUDE'S DRAFT, FOR MARCUS'S WORDING.** The chemistry sentence was checked at `hilda29e`: d ln pCO₂/dT is 0.039–0.046 /K vs Takahashi's 0.0423.
+  - `test-ocean-climate-card.R`, 25 / 0:
+    - the product is the canonical's: it FAILS at an adoption that does not rebuild it, never skips;
+    - the inputs' md5s match;
+    - "about twice" holds: 2 lies inside the 2015–24 ratio's GCB-1σ range (1.73–2.88) AND the per-K ratio ± 1 se (1.81 ± 0.40);
+    - "decades earlier" holds: the lead is 27 years, at least 20;
+    - both charts build; mutations caught.
+  - `test-review-cards` 48 / 0, `test-app-review-copy` 41 / 0, `test-plot-text-fits` 102 / 0.
+  - In the running app: card 8 renders, both charts have real images, the tab shows 0 output errors. The first build's long y titles overlapped the caption and clipped; both were shortened and the heights raised (380 / 280 px), checked offline at the panel's size.
+
 ## 2026-10-08 (i) — **POSTERIOR BANDS: the ruled "Laplace + propagation" is NOT feasible at `hilda29e`. The main fit's Laplace fails its importance check, as `hilda33d`'s did. A curvature-matched Gaussian fails too.** Nothing built, the hold stands. H2 and the ocean's climate effect are ONE issue, re-measured. (Marcus: "Evaluate if the posterior bands are feasible: if so, implement them. Then provide recommendations on H2 and the ocean climate effect.")
 
 - **Why the main fit first.** The cut posterior (ruled 10-06 o) is stage 1's Laplace pushed through the cross-Hessian ON TOP OF the main fit's own Laplace. The fertilisation-ridge names are stage 2's. If stage 2's Gaussian fails, propagation cannot rescue it.
