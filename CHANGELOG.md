@@ -37,6 +37,11 @@ Project log: what was done, what was tried and abandoned, and why.
   - 0 output errors at 1440 × 900 and at 768 × 1024.
   - ⚠ Two "figure margins too large" errors on the Keeling tab appeared ONLY at the preview pane's first render (about 800 × 600) and did not recur at either emulated size. Not investigated further.
 - **Tests:** `test-constraint-map` 131 / 0, `test-constraint-map-panel` 62 / 0, `test-cmap-tie` 23 / 0, `test-review-cards` 46 / 0, `test-app-review-copy` 41 / 0, `test-mode-file` 163 / 0.
+- **The full suite at `1f9f904`** (frozen detached worktree `~/ccx_frozen/suite_20261008_1f9f904`, downloads APFS-cloned, BLAS pinned, `nice 10`, `set_max_fails(Inf)`; `outputs/diagnostics/suite_20261008_1f9f904_card4_cmap.log`): **7037 passed, 2 failed, 0 errors, 3 skipped**, rc 0.
+  - The 2 failures are card 4's, by design: `test-review-card-numbers.R:75` (the lag) and `:85` (the relation word).
+  - The 3 skips are the standing ones: `{seacarb}` ×2 and the dormant held-at-0 test.
+  - At `9e22e3b` it was 7027 / 1 / 0 / 5: the constraint map's (6) now passes, and card 4's two skips became its two failures.
+  - The handoff carries an UPDATE block at its top.
 
 ## 2026-10-08 (g) — **CARD 4 AUDITED at `hilda29e`: THREE typed claims are false, not one.** The lag (known), "a little below the range", and the growth-peak timing. One more is estimator-dependent and two are wording calls. "A little below" was never gated, although `review.R` says it is. No copy, test or model change.
 

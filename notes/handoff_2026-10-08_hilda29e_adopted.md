@@ -1,5 +1,15 @@
 # HANDOFF 2026-10-08 — `hilda29e` ADOPTED (objective #18 pass 2, basin 1); the ledger applied; NEXT: the app text, with Marcus
 
+> **UPDATE, later 10-08 (CHANGELOG (g), (h)): §3 items 1 and 2 are DONE except card 4's COPY.**
+> - (g) Card 4 audited at `hilda29e` (`calibration/diag_card4_audit.R`, `outputs/diagnostics/card4_audit_20261008_hilda29e.log`):
+>   - **three** typed claims are false: the lag; "a little below" (w 16.79 is inside 14–25); the growth-peak timing (model now 5 mo = the record's);
+>   - "more El Niño-driven" is estimator-dependent;
+>   - 60 % → 66 % and 1.5 → 1.0 ppm are wording calls.
+> - §3.1(b)'s "1.248 mo" is basin 2's; the adopted basin 1 gives **1.207**.
+> - (h) Marcus: "Both, now" — the lag test reads the lag the canonical RUNS, and the "a little below" test (promised in `review.R`, never written) exists. **Both FAIL until card 4's copy changes**: that is the remaining item, Marcus drafts.
+> - (h) Marcus: "Main fit only" — the constraint map is REBUILT at `hilda29e` (`CM_DATE` 20261008e), test (6) passes, and a computed caption line says the El Niño settings are fitted separately (Claude's draft).
+> - The suite at `1f9f904`: `outputs/diagnostics/suite_20261008_1f9f904_card4_cmap.log`.
+
 **Supersedes** `notes/handoff_2026-10-07e_obj18_landing_armed.md` (its §3 is fully done).
 Written on Marcus's request ("Approve all five, then write the handoff note").
 
