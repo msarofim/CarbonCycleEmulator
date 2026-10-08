@@ -1,0 +1,32 @@
+
+==== obj16 ====
+id 0  old==new u: TRUE   kind same: TRUE   new class reference draws 0  assert pass
+id 1  old==new u: TRUE   kind same: TRUE   new class reference draws 0  assert pass
+id 2  old==new u: TRUE   kind same: TRUE   new class reference draws 0  assert pass
+id 3  old==new u: TRUE   kind same: TRUE   new class seeded    draws 0  assert pass
+id 4  old==new u: TRUE   kind same: TRUE   new class seeded    draws 0  assert pass
+id 5  old==new u: TRUE   kind same: TRUE   new class seeded    draws 0  assert pass
+id 6  old==new u: TRUE   kind same: TRUE   new class dispersed draws 3  assert pass
+id 7  old==new u: TRUE   kind same: TRUE   new class dispersed draws 2  assert pass
+pairwise identical start vectors among ids 0-7:
+
+==== obj18 ====
+id 0  old==new u: TRUE   kind same: TRUE   new class reference draws 0  assert pass
+id 1  old==new u: TRUE   kind same: TRUE   new class reference draws 0  assert pass
+id 2  old==new u: TRUE   kind same: TRUE   new class reference draws 0  assert pass
+id 3  old==new u: FALSE  kind same: FALSE  new class dispersed draws 3  assert pass
+    old kind: seeded: INCUMBENT with the ocean ENSO pair PINNED; the limb's w_enso_l2 SET to 25 Sv per index (the HIGH edge of Meinen's bracket)
+    new kind: UNSEEDABLE seeded slot 'inc_enso' (the INCUMBENT + the ENSO seed): the ENSO seed: gamma_enso_ocn_NH, gamma_enso_ocn_SH, w_enso_l2 not fitted by this arm -- so this id runs a DISPERSED DRAW instead: dispersed about the COLD init, sd 1.0452
+id 4  old==new u: FALSE  kind same: FALSE  new class dispersed draws 2  assert pass
+    old kind: seeded: NEW BASIN with the ocean ENSO pair PINNED; the limb's w_enso_l2 SET to 14 Sv per index (the LOW edge of Meinen's bracket)
+    new kind: UNSEEDABLE seeded slot 'new_enso' (the NEW BASIN + the ENSO seed): the ENSO seed: gamma_enso_ocn_NH, gamma_enso_ocn_SH, w_enso_l2 not fitted by this arm -- so this id runs a DISPERSED DRAW instead: dispersed about the COLD init, sd 1.0452
+id 5  old==new u: FALSE  kind same: FALSE  new class dispersed draws 1  assert pass
+    old kind: seeded: NEW BASIN + the OBSERVATION-implied partition (the ocean ENSO pair PINNED; the limb's w_enso_l2 SET to 25 Sv per index (the HIGH edge of Meinen's bracket); land x1.734)
+    new kind: UNSEEDABLE seeded slot 'new_obs' (the NEW BASIN + the OBSERVATION-implied partition): the ENSO seed: gamma_enso_ocn_NH, gamma_enso_ocn_SH, w_enso_l2 not fitted by this arm; the land seed: gamma_enso_land_NH, gamma_enso_land_SH not fitted by this arm -- so this id runs a DISPERSED DRAW instead: dispersed about the COLD init, sd 1.0452
+id 6  old==new u: TRUE   kind same: TRUE   new class dispersed draws 2  assert pass
+id 7  old==new u: TRUE   kind same: TRUE   new class dispersed draws 2  assert pass
+pairwise identical start vectors among ids 0-7:
+  OLD DUPLICATE: id 1 == id 3
+  OLD DUPLICATE: id 2 == id 4
+  OLD DUPLICATE: id 2 == id 5
+  OLD DUPLICATE: id 4 == id 5

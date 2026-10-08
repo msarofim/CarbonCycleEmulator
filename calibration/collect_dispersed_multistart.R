@@ -210,7 +210,17 @@ CO_TOL <- local({
 })
 
 # ---- the verdict, as an ORDERING against the incumbent to beat -------
-kB <- which(ids %in% CO_BENCH_IDS)
+# ⚠ AN UNSEEDABLE SEEDED SLOT IS NOT A KNOWN-BASIN START (2026-10-07 m; lib_ms_seed.R): when the arm fits none of a
+# seed's targets, the driver runs that id as a DISPERSED DRAW and records start_class "dispersed". It joins the
+# survey's draws below, never the benchmark, and it is not MISSING either. Older files carry the id's class.
+co_drawn <- vapply(R, function(r) identical(r$start_class, "dispersed"), logical(1))
+co_unseedable <- ids[ids %in% CO_SEED_IDS & co_drawn]
+kB <- which(ids %in% CO_BENCH_IDS & !co_drawn)
+if (length(co_unseedable))
+  cat(sprintf("\n  ⚠ seeded slot%s %s %s UNSEEDABLE under this arm (its seed moves no fitted name) and ran %s:\n    counted with the survey's draws, not in the benchmark.\n",
+              if (length(co_unseedable) == 1L) "" else "s", paste(sort(co_unseedable), collapse = ", "),
+              if (length(co_unseedable) == 1L) "was" else "were",
+              if (length(co_unseedable) == 1L) "a dispersed draw" else "dispersed draws"))
 if (!length(kB)) {
   cat(sprintf("\n%s\n  ⚠ NO VERDICT: not one of the known-basin starts (ids %s) is present, so\n    there is nothing in THIS parameter space to rank a dispersed result against.\n    Run them before reading the table above as a survey result.\n",
               strrep("-", 74), paste(sort(CO_BENCH_IDS), collapse = ", ")))
@@ -219,10 +229,11 @@ if (!length(kB)) {
   bench <- fin[kN]; best <- max(fin); jb <- which.max(fin)
   cat(sprintf("\n%s\n  BEST FOUND      id %d at %.4f\n  TO BEAT         id %d (%s) at %.4f\n  difference      %+.4f log-units\n",
               strrep("-", 74), ids[jb], best, ids[kN], R[[kN]]$kind, bench, best - bench))
-  if (length(kB) < length(CO_BENCH_IDS))
+  co_missing <- setdiff(CO_BENCH_IDS, ids)
+  if (length(co_missing))
     cat(sprintf("  ⚠ the benchmark is the best of only %d of the %d known-basin starts;\n    ids %s are MISSING and one of them could be higher.\n",
-                length(kB), length(CO_BENCH_IDS),
-                paste(sort(setdiff(CO_BENCH_IDS, ids)), collapse = ", ")))
+                length(kB), length(CO_BENCH_IDS) - length(co_unseedable),
+                paste(sort(co_missing), collapse = ", ")))
   # ⭐ ONLY A DISPERSED START CAN ANSWER THE SURVEY'S QUESTION. A fixed start
   # that comes back on top says the known basins are still the best known
   # basins -- which is worth printing, but it is NOT "the survey found
@@ -250,7 +261,10 @@ if (!length(kB)) {
   # kept as UNSEEDED controls beside ids 3/4.
   for (p in list(c("incumbent", "inc_enso"), c("new_basin", "new_enso"))) {
     ku <- which(ids == CO_REF_IDS[[p[1]]]); ks <- which(ids == CO_SEED_IDS[[p[2]]])
-    if (length(ku) && length(ks))
+    if (length(ks) && co_drawn[ks])
+      cat(sprintf("  ENSO seeding at the %-9s: UNSEEDABLE under this arm (id %d ran a dispersed draw)\n",
+                  p[1], ids[ks]))
+    else if (length(ku) && length(ks))
       cat(sprintf("  ENSO seeding at the %-9s: %+.4f log-units (%.4f seeded vs %.4f not)\n",
                   p[1], fin[ks] - fin[ku], fin[ks], fin[ku]))
   }

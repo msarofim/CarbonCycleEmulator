@@ -2,6 +2,26 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-07 (m) — **The duplicate-start fix in the multistart driver, built on branch `ms-seed-fix` while #18's wave runs** (handoff 10-07e §3 item 6; RULED "Records now, driver later (Recommended)"). ⛔ Not merged to `main` until #18's landing is committed: the landing chain runs `calibration/` from `main`, and refuses an uncommitted change there.
+
+- **The rule reads the FITTED set, never a list of pinned cases** (`calibration/lib_ms_seed.R`, new). A seeded slot (ids 3–5) targets only names in `CCX_PARAM_NAMES`: the ocean pair; else the limb's `w_enso_l2` (limb on); plus the land pair for id 5. Whether it seeded is read off the ENCODED vector.
+  - A slot that moves nothing is UNSEEDABLE. It runs its id's own dispersed draw (`set.seed(MS_SEED + id)`), `start_class` "dispersed", `kind` "UNSEEDABLE seeded slot '<slot>' (…): <why> -- so this id runs a DISPERSED DRAW instead: …".
+  - Every label is built from what the encoder saw MOVE: a partial seed names what it dropped and why; a reference already at the seed's value is unseedable and says so.
+- **The refusal:** every task, the preflight included, compares its start with every fixed start that needs no draw and STOPS on an `identical()` one, naming both ids (`ms_assert_distinct_start()`).
+- **The collector:** an unseedable slot joins the survey's draws, not the benchmark, and is not counted MISSING; the seeding line prints "UNSEEDABLE under this arm" where #17 printed the "+0.0000" that was read as a result.
+- Incidental: the obs slot's label drops "(the 09-01 conditional optimum of the 08-31e basin; a perturbation here)", never true of +0.326. A label change only, and only on arms that fit the ocean pair.
+- **Evidence** (`outputs/diagnostics/ms_seed_fix_20261007/`):
+  - **the driver end to end**, old (HEAD `3c0bfd8`) vs new, ids 0–7 under #16 and #18 (`start_harness.R` runs the driver's own code up to `ms_start()`; `compare_grid.log`):
+    - #16: all 8 bit-identical in `u` AND `kind`;
+    - #18: ids 0/1/2/6/7 bit-identical. OLD reproduces the recorded duplicates (1 = 3, 2 = 4 = 5); NEW runs 3/4/5 as labelled draws, no duplicate.
+  - **the real PREFLIGHT**, ids 1/3/4/5/6 under both arms (#18 with the wave's port targets, restored after): all LAUNCHABLE, port VERIFIED; #18's 3/4/5 print "dispersed (an UNSEEDABLE seeded slot)".
+  - **the collector** on #17's 24 landed starts, as is and with 3–5 relabelled (`collect_check_*.log`): the draws count 17 → 20, the benchmark unchanged.
+  - `test-ms-seed.R` (new, MS1–MS3): 66 / 0. `test-ms-clock` 47, `test-ms-deadline` 50, `test-ms-reference-set` 148: 0 failures.
+  - **nine mutations** (`mutate.py`, `mutation.log`), all caught. M2 (the encoder check removed) is also run through the DRIVER: its refusal stops #18's id 3 as "identical() to id 1".
+- ⚠ M7 (the driver passing pinned names as free) is caught only by MS3's text lint. Behaviourally the encoder check still makes those slots unseedable, so the start is never a duplicate.
+- **Considered and dropped:** an all-pairs digest check in the Mac runner's PREFLIGHT mode. Two dispersed draws differ by their seeds and any collapse onto a fixed start is caught per task, so it would re-catch only what the per-task check catches; the per-task check also covers Torch, where no runner aggregates the tasks.
+- Nothing re-run: #17's and #18's records stand as corrected at (k).
+
 ## 2026-10-07 (k) — **#18's LANDING KIT BUILT, VALIDATED ON #17's WAVE, AND DRY-RUN** (handoff 10-07d §3 items 2–6). promote can now promote a NAMED start (`--id`). The basin step decomposes every basin from the wave's start files before anything is promoted. One chain script serves both the dry run and the landing. **Validation on #17's own wave changed the rule: ranked on the likelihood ALONE, the second basin to read was a junk basin, 33.9 below on the stored logpost, whose priors cost −36.6. RULED: rank on likelihood + prior.** Also found: under the cut's pins, seeded starts 3 / 4 / 5 re-run 1 / 2 / 2 bit for bit, in #17's landed wave and in #18's. #17's "basin B ×8" was five distinct starts (corrected in place). Nothing adopted.
 
 - **Rulings this session, verbatim (AskUserQuestion):**

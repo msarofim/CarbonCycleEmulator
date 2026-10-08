@@ -1,0 +1,57 @@
+GATE OPEN (structure 'hilda_csl3v0kaidgbem'): ndep_ret, npp_tsens, imb_share_land, imb_share_ocean_rest, lag_enso_land enter the fitted set
+PINNED (removed from the fitted set, held in the base): ent_seas_amp_SH = 0, w_eq = 27, gamma_eq = 1, pump_export = 9.08, w_vent = 0, gamma_vent = 0, w_thc = 0, gamma_enso_ocn_NH = 0, gamma_enso_ocn_SH = 0, npp_tsens = 0 -> 33 free parameters
+run-time inputs present: 14/14. OK
+OVERRIDE CCX_MS_RESTARTS = 3 (default 3)
+OVERRIDE CCX_MS_CYCLES = 6 (default 6)
+OVERRIDE CCX_MS_MAXIT = 6000 (default 6000)
+OVERRIDE CCX_MS_BUDGET_MIN = 300 (default 180)
+OVERRIDE CCX_MS_CLOCK = cpu (default wall)
+SEEDING ndep_ret for the new basin feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 3.9.
+     The ancestor held no opinion about this coordinate.
+SEEDING imb_share_land for the new basin feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.333333.
+     The ancestor held no opinion about this coordinate.
+SEEDING imb_share_ocean_rest for the new basin feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING lag_enso_land for the new basin feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 6.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_enso_l2 for the new basin feasibility: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 18.7.
+     The file held it OFF; this arm fits it.
+SEEDING ndep_ret for the new basin start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 3.9.
+     The ancestor held no opinion about this coordinate.
+SEEDING imb_share_land for the new basin start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.333333.
+     The ancestor held no opinion about this coordinate.
+SEEDING imb_share_ocean_rest for the new basin start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING lag_enso_land for the new basin start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 6.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_enso_l2 for the new basin start: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 18.7.
+     The file held it OFF; this arm fits it.
+OVERRIDE CCX_MS_SPREAD = 1.0452 (default 0.4653097)
+
+======================================================================
+DISPERSED MULTI-START, id 1, arm N, 33 parameters
+  host MacBook-Pro-2.local   R 4.5.3   seed 2026 + id
+  budget: 3 restarts x 6000 maxit x 6 cycles, CPU 300 min
+  ... on the CPU clock (CCX_MS_CLOCK; RECORDED in the start file): a sleep or a suspension does not spend
+      it. WALL time past 2 x the budget is FLAGGED, never stopped (D4, CHANGELOG 2026-10-05 o).
+  dispersion sd 1.0452 in u-space (measured per-coordinate RMS between
+    the two known basins = 0.4653, pooled over the 33 coordinates at least one of
+    them FITTED; over all 33 it would be 0.4653, diluted by the 0 migrated in BOTH:
+    none)
+  out /private/tmp/claude-501/-Users-MarcusMarcus-Documents-2026-CodeProjects-CarbonCycleEmulator/89dcab37-00e7-43ff-808a-0372773f0b86/scratchpad/ms_seed_harness_obj16_new/start_001.rds
+======================================================================
+  structure: 'hilda_csl3v0kaidgbem' (hs_frac=0.12841, tau_q=538, sst_hs=2, q_attach_from=1, kz_zscale=253, sst_NH=22.321, sst_SH=18.724, alpha_photo_eps=15.6, ml_nh_cycle=0, k_l2=3, w0_l2=27, npp_veg_frac=0, fert_k_prior=1, aod_mode=1, soil_inert_frac=0.19468, d2d3_free=1, imb_treatment=2, imb_with_cement=1, enso_lag_free=1, mix_strat_s=0.052198, mix_strat_q=1, mix_strat_tau=194.94)
+  seasonal mixed layer: seas_ml = 1 (ON -- round 6; from CCX_MS_SEAS_ML, RECORDED in every start file and GATED against the port targets)
+  pump field: 'solved' (the SOLVED GLODAP-shape field -- every registered file; from CCX_MS_PUMP_FIELD, RECORDED in every start file and GATED against the port targets)
+HARNESS id 1 class reference draws 0 assert pass
+  kind: reference: INCUMBENT = hilda33p (the canonical, under this array's pins; scored under this build's objective, periodic spinup, evaluated at seas_ml 1)
