@@ -38,8 +38,30 @@ HF_MODE    <- CCX_MODE_CANONICAL
 HF_SCEN    <- c(vvVL = TRUE, vvLN = TRUE, vvL = TRUE, vvML = TRUE, vvM = TRUE, vvHL = TRUE, vvH = TRUE, ssp585 = FALSE)  # spliced?
 HF_YEARS   <- c(2100L, 2150L, 2300L)
 HF_END     <- 2300L                                # the standing end year
-HF_ALL     <- c(f1 = 1, f_T_hi = 0.724, f_T = 0.613, f_T_lo = 0.502, f_W = 0.296, f0 = 0)
-HF_FUT     <- c(fut_f_T = 0.613, fut_f_W = 0.296)
+# THE f VALUES ARE A PROPERTY OF THE MODE (2026-10-08 j). hilda33p's were typed (below, kept so 10-06 (j) reproduces);
+# carried to hilda29e they mis-size every arm, because the cut shrank the ENSO limb's credit (+0.097 -> +0.047) and the
+# GCB-sized f moves with it (0.613 -> ~0.49). For any mode with a registered diag_ocean_climate_gobm.R product they are
+# DERIVED from it, md5-gated to the mode file, by the header's own definitions:
+#   f_T = (GCB - other) / sst, other = effect - effect_sst_only (the ENSO limb + the feedback), sst = effect_sst_only
+#   (ten-protocol means, 2015-24); f_T_lo / f_T_hi at GCB -/+ its 1 sigma; f_W = Bunsen's warming part / CCX's SST-only
+#   effect under the FESOM protocol (2000-19).
+HF_GCB      <- c(mean = -0.20, sd = 0.05)   # GCB 2025 p. 3242 (VERIFIED in diag_ocean_climate_gobm.R's header)
+HF_BUNSEN_W <- 0.09                         # Bunsen, Nissen & Hauck 2024 GRL s3.1, FESOM 2000-19 warming part (as
+                                            # diag_ocean_climate_gobm.R CHECK 3 cites it; section-cited, not marked verified)
+HF_F_TYPED  <- list(hilda33p = c(f1 = 1, f_T_hi = 0.724, f_T = 0.613, f_T_lo = 0.502, f_W = 0.296, f0 = 0))
+HF_OC_RDS   <- list(hilda29e = file.path("outputs", "diagnostics", "ocean_climate_gobm_20261008_obj18p2b1.rds"))
+hf_derive_f <- function(rds, mode_file) {
+  x <- readRDS(rds)
+  md5 <- sub("^md5 ", "", regmatches(x$provenance, regexpr("md5 [0-9a-f]{32}", x$provenance)))
+  if (!identical(md5, unname(tools::md5sum(mode_file)))) stop("the ocean-climate product ", rds, " is not this mode file's")
+  sst <- mean(x$table[, "effect_sst_only"]); other <- mean(x$table[, "effect"]) - sst
+  fT <- function(g) (g - other) / sst
+  c(f1 = 1, f_T_hi = fT(HF_GCB[["mean"]] - HF_GCB[["sd"]]), f_T = fT(HF_GCB[["mean"]]),
+    f_T_lo = fT(HF_GCB[["mean"]] + HF_GCB[["sd"]]), f_W = HF_BUNSEN_W / abs(x$bunsen_window[["sst_only"]]), f0 = 0)
+}
+HF_ALL <- if (!is.null(HF_OC_RDS[[HF_MODE]])) hf_derive_f(HF_OC_RDS[[HF_MODE]], ccx_mode_file(HF_MODE)) else
+  HF_F_TYPED[[HF_MODE]] %||% stop("no f values for ", HF_MODE, ": register its diag_ocean_climate_gobm.R product")
+HF_FUT     <- c(fut_f_T = HF_ALL[["f_T"]], fut_f_W = HF_ALL[["f_W"]])
 # G1b's reference: SSP5-8.5 (unspliced) CO2 in 2300 at the MODE, produced by ANOTHER path. Keyed by mode (2026-10-08 j):
 #   hilda33p 1461.53 -- 10-05 (p), obj16_refit_read_20261005.log l. 83;
 #   hilda29e 1475.29 -- the APP's own params + spin-up (app_params(), app_spinup()), calibration/diag_app_ssp585_ref.R,
@@ -54,6 +76,8 @@ COMMIT     <- ccx_git_stamp()
 
 LOGCON <- file(paste0(HF_OUT, ".log"), open = "wt"); sink(LOGCON, split = TRUE)
 cat(sprintf("%s @%s | %s | canonical %s | %d workers\n", HF_DRIVER, COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M"), HF_MODE, HF_WORKERS))
+cat(sprintf("f values (%s): %s\n", if (!is.null(HF_OC_RDS[[HF_MODE]])) paste("DERIVED from", HF_OC_RDS[[HF_MODE]]) else "typed (10-06 j)",
+            paste(sprintf("%s %.4f", names(HF_ALL), HF_ALL), collapse = ", ")))
 
 # ---- the vector, the spinup, the scenarios -------------------------------------------------------------------
 MODE_FILE <- ccx_mode_file(HF_MODE)
