@@ -2,6 +2,42 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-08 (h) — **Both card-4 tests rebuilt, the constraint map rebuilt at `hilda29e`** (Marcus, verbatim: "Both, now (Recommended)"; "Main fit only (Recommended)"). Card 4's two tests now FAIL, by design, until its copy changes. The map's test (6) passes.
+
+- **Card 4's tests** (`24ccf84`, `test-review-card-numbers.R`):
+  - **The lag test** reads the lag the canonical RUNS, fitted or pinned. A fitted lag's sd is the mode's Laplace marginal. A pinned one's is the module's own Laplace, from the new `CCX_MODE_CANONICAL_MODULE_CHECK` (R/paths.R; pass 2's basin-1 check, `base_md5` gated to the canonical's mode file). A lag neither fitted nor held is an ERROR. The two `skip_if()`s are gone.
+  - **The "a little below" test, new:** `RV_ENSO_L2_VS_OBS` must equal `rv_enso_l2_relation()` of the strength the canonical runs, and the BUILT card must render that word.
+  - **Mutations:**
+    - the one-sd boundary (0.99 sd passes, 1.01 fails);
+    - a neither-fitted-nor-held lag errors;
+    - #18 pass 1's module check (another mode file) is caught by md5;
+    - the relation word on both sides of the bracket.
+  - **Pass side shown:** against a scratch `review.R` reading "6 months" / "inside" (placeholders, NOT proposed copy), the file passes with 0 failures.
+  - **At `hilda29e`:** 2 failures (5.93 vs 2.5 with sd 1.21; "inside" vs "below"), 0 skipped.
+  - `review.R`: comments only. Three named the wrong test (`test-review-cards.R`, `test-enso-lag.R`) or a test that did not exist.
+- **The constraint map** (`c4a3d6c`; built at `c4a3d6c`, clean):
+  - `CM_FAMILY_ALL` is the union over arms; each arm keeps the streams its objective scores, as the components already did.
+  - `CM_ARM_ONLY_STREAMS` = `gcb_ocean_enso_slope`; `CM_ARM_ONLY_NAMES` += `gamma_enso_land_NH/SH`.
+  - **Two new gates:**
+    - GATE UNION (streams);
+    - GATE MODULE: at a cut arm all of `CCX_IAV_MODULE_NAMES` are held and none fitted, and the rows the main objective lost are declared. The structure's `iav_cut` must agree with the likelihood (no slope stream in the main objective ⇔ cut).
+  - The product records `module` and `provenance$iav_cut`.
+  - **Mutations, run in gates-only mode from scratch copies:** slope row undeclared, a land amplitude undeclared, a module name missing, the cut flag forced FALSE. All FAIL. ⚠ The last one PASSED until the cross-check against the likelihood was added: a wrongly-unset flag would have dropped the caption in silence.
+  - The non-cut arm `hilda33p` passes every gate (33 names / 8 components, 27 streams / 13 families).
+  - ⚠ **`mode=hilda33p gates` RAN THE FULL BUILD**: "gates" was honoured only as the first argument. Its two untracked outputs were moved out of the repo; nothing tracked was touched. Fixed: "gates" now works in any position.
+- **The map at `hilda29e`** (`data/constraint_map.rds`, `outputs/diagnostics/constraint_map_20261008e.log`; `CM_DATE` "20261008e"):
+  - 26 streams × 29 names; every gate PASS; 0 of 29 names nonlinear; pins share **6.8 %** (earlier arms 5.6–6.7 %);
+  - the takeaway's top three: δ¹³C level & gradient (a TIE: input scalings 22 % / high-latitude structure 21 %), CO₂ level (land 34 %), Δ¹⁴C bomb (input scalings 31 %);
+  - the structure prose's numbers: ocean Δ¹⁴C 80 % mixing; the pump 73 % of interior chemistry and 6 % of the CO₂ level; the seasonal rows 68 % / 70 %, with 4 seasonal opposing pairs; land 34 % / 23 %; `beta_max` / `fert_k` 62×.
+- **The caption** (`app_cmap_module_note()`, appended to the map's caveat box; CLAUDE'S DRAFT, FOR MARCUS'S WORDING): "Not on this map: the model's four El Niño settings. They are fitted in a separate step, to the month-to-month wobble in CO₂'s growth rate (1980–2024) and to how strongly the ocean sink follows El Niño, and are held fixed while everything shown here is fitted."
+  - Computed from the product; NULL without the cut; an unknown module row is an error.
+  - `test-constraint-map-panel.R` test 8.
+- **Checked in the running app:**
+  - the tab renders, with the caption in the caveat box and the map image 732 × 430;
+  - 0 output errors at 1440 × 900 and at 768 × 1024.
+  - ⚠ Two "figure margins too large" errors on the Keeling tab appeared ONLY at the preview pane's first render (about 800 × 600) and did not recur at either emulated size. Not investigated further.
+- **Tests:** `test-constraint-map` 131 / 0, `test-constraint-map-panel` 62 / 0, `test-cmap-tie` 23 / 0, `test-review-cards` 46 / 0, `test-app-review-copy` 41 / 0, `test-mode-file` 163 / 0.
+
 ## 2026-10-08 (g) — **CARD 4 AUDITED at `hilda29e`: THREE typed claims are false, not one.** The lag (known), "a little below the range", and the growth-peak timing. One more is estimator-dependent and two are wording calls. "A little below" was never gated, although `review.R` says it is. No copy, test or model change.
 
 - **Why.** The handoff (§3.1) flagged card 4's "2.5 months" and its skipping guard. Re-measuring the REST of the card before proposing its fix found more. New read-only driver `calibration/diag_card4_audit.R` (`d59151a`); outputs `outputs/diagnostics/card4_audit_20261008_hilda29e.{log,rds}`.
