@@ -1,0 +1,40 @@
+CCX_PROJ_DIR  /Users/MarcusMarcus/ccx_frozen/20261007i_obj18
+CCX_MS_OUTDIR /Users/MarcusMarcus/ccx_frozen/20261007i_obj18/calibration/output/multistart_20261007i_hilda_csl3v0kaidgbemwt_seasml1_pin_obj18_sd1.0452
+CCX_MS_STRUCT hilda_csl3v0kaidgbemwt   CCX_MS_SEAS_ML 1   CCX_MS_PUMP_FIELD solved   CCX_MS_SPREAD 1.0452   CCX_MS_PIN 'ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.0800000000000001,w_vent=0,gamma_vent=0,w_thc=0,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0,npp_tsens=0,lag_enso_land=5.8483078104595023,gamma_enso_land_NH=0.65897731179720698,gamma_enso_land_SH=0.63155946220609593,w_enso_l2=16.605064312322234'
+BUDGET 300 min on the cpu clock  RESTARTS 3  CYCLES 6  MAXIT 6000   mode PREFLIGHT   ids [0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 ]   8 at once
+host MacBook-Pro-2.local  started 2026-10-07T14:37:15-0400  uptime: 14:37  up 6 days,  5:02, 4 users, load averages: 7.87 4.19 3.64
+already running at launch (>20% CPU), so a slow eval rate is read as CONTENTION first:
+    99.0       00:25 /Library/Frameworks/R.framework/Resources/bin/exec/R --no-echo --no-restore --file=tests/run_tests.R
+    43.5 06-04:56:01 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/mds
+    42.6 06-04:56:01 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer -daemon
+    38.3       00:01 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared -s mdworker -c M
+    36.6       00:01 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared -s mdworker -c M
+    35.4       00:01 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared -s mdworker -c M
+    28.6 06-04:55:59 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/mds_stores
+all tasks finished 2026-10-07T14:38:06-0400
+exit codes (id rc):
+0 0
+1 0
+2 0
+3 0
+4 0
+5 0
+6 0
+7 0
+8 0
+9 0
+10 0
+11 0
+12 0
+13 0
+14 0
+15 0
+16 0
+17 0
+18 0
+19 0
+20 0
+21 0
+22 0
+23 0
+non-zero exits: 0
