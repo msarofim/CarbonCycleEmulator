@@ -29,6 +29,10 @@
 #   id 4  the NEW BASIN + the same
 #   id 5  the NEW BASIN + the OBSERVATION-implied ENSO partition (land x1.734,
 #         ocean +0.326 each), which the objective conditionally RESISTS
+# ⛔ IDS 3-5 SEED ONLY WHAT THE ARM FITS (2026-10-07 m, calibration/lib_ms_seed.R). A
+# slot whose seed moves no fitted name is UNSEEDABLE under that arm and runs its
+# id's DISPERSED DRAW, labelled UNSEEDABLE, start_class "dispersed"; and no task
+# starts from a vector identical() to another fixed start's (the duplicate refusal).
 # ⚠ THE TARGETS COME FROM FILES THIS SCRIPT DID NOT WRITE ([[gate_reads_its_own_output]]):
 # they are read out of the two mode files, not restated as literals here, and a
 # port that silently changes the objective fails them. Run ids 0-5 FIRST, before
@@ -120,6 +124,7 @@ if (length(MS_PINS)) cat(sprintf("PINNED (removed from the fitted set, held in t
                                  paste(sprintf("%s = %s", names(MS_PINS), MS_PINS), collapse = ", "), length(CCX_PARAM_NAMES)))
 source(ccx_path("calibration", "lib_run_inputs.R"))
 source(ccx_path("calibration", "lib_ms_deadline.R"))   # the in-restart deadline (option A, 2026-10-05)
+source(ccx_path("calibration", "lib_ms_seed.R"))       # the seeded slots + the duplicate-start refusal (2026-10-07 m)
 ccx_require_run_inputs()   # BEFORE the budget's clock starts, and before any target is written
 
 # ---- named constants ------------------------------------------------
@@ -585,46 +590,59 @@ neg_lp <- function(u) {
 # an array of 8 or in an array of 400, and a failed task can be requeued without
 # changing what it was. That is the property `set.seed(ARM_SEED)` gives the
 # serial driver, carried over to a fan-out.
-# ⚠ THE OCEAN-ENSO SEED SEEDS WHAT THIS ARM FITS (2026-09-17 l). Under an arm that
-# PINS the ocean pair (the E array under martin; the limb's arm), setting
-# gamma_enso_ocn_* here is silently DROPPED by ccx_par_to_unc() (a pinned name is
-# not encoded) -- ids 3/4 then DUPLICATE ids 1/2 while their label says "the pair
-# SET to +0.100" (found at the limb arm's preflight: id 3 = id 1 to the digit; the
-# E array's ids 3/4 were the same duplicates). So: with the pair FREE, seed the pair;
-# with the pair PINNED and the LIMB ON, seed the limb's w_enso_l2 at an edge of
-# Meinen's per-index bracket (the product, obs_eq_cell.rds; `edge` "hi" = 25 for the
-# incumbent-side start, "lo" = 14 for the new-basin-side, so the two seeded starts
-# bracket the init 18.7 the references sit at); with the pair pinned and NO limb,
-# nothing can be seeded -- say so in the label rather than run a duplicate.
-.ms_ocn_pinned <- all(c("gamma_enso_ocn_NH", "gamma_enso_ocn_SH") %in% names(MS_PINS))
+# ⚠ A SEED SEEDS WHAT THIS ARM FITS -- read off the FITTED SET, never a list of pinned cases (2026-10-07 m;
+# calibration/lib_ms_seed.R; [[pinned_name_seed_vanishes]]). A seed on a name the arm does not fit is DROPPED by
+# ccx_par_to_unc(), and the "seeded" start IS its reference: 09-17 l found ids 3/4 = ids 1/2 under the pinned ocean
+# pair and seeded the limb's w_enso_l2 instead; the interannual cut (#17, #18) then pinned w_enso_l2 and the land pair
+# too, and ids 3 / 4 / 5 re-ran 1 / 2 / 2 bit for bit in BOTH waves. Now ms_seed_slot() targets only CCX_PARAM_NAMES
+# (the ocean pair; else the limb's w_enso_l2 at an edge of Meinen's per-index bracket, the product obs_eq_cell.rds,
+# "hi" = 25 for the incumbent side and the obs slot, "lo" = 14 for the new-basin side; plus the land pair for the obs
+# slot), and asks the ENCODER whether anything moved. A slot that moved nothing is UNSEEDABLE and runs this id's own
+# dispersed draw, labelled so (RULED: "an unseedable seeded slot becomes a dispersed draw, labelled as such").
 .ms_limb_on    <- ccx_l2_on(bp)                       # bp = the run's own base (structure applied above)
 MS_L2_SEED_SV <- ccx_eq_cell_obs()$w0_prior$interannual$per_index_sv   # c(14, 25) Sv per index, Meinen 2001
-ms_seed_ocn <- function(p, x, edge = c("hi", "lo")) {
-  edge <- match.arg(edge)
-  if (!.ms_ocn_pinned) { p$gamma_enso_ocn_NH <- x; p$gamma_enso_ocn_SH <- x; return(p) }
-  if (.ms_limb_on) { p$w_enso_l2 <- if (edge == "hi") max(MS_L2_SEED_SV) else min(MS_L2_SEED_SV); return(p) }
-  p                                                    # pinned, no limb: nothing to seed
+MS_FIXED_IDS  <- seq.int(0L, MS_DISPERSED_FROM - 1L)  # the ids that are not random draws by NUMBER
+ms_seed <- function(sk) ms_seed_slot(sk, if (identical(sk, "inc_enso")) P_INC else P_NEW,
+                                     free = CCX_PARAM_NAMES, pinned = names(MS_PINS), limb_on = .ms_limb_on,
+                                     l2_edges = MS_L2_SEED_SV, ocn_opt = MS_ENSO_OCN_OPT, ocn_obs = MS_ENSO_OCN_OBS,
+                                     land_mult = MS_ENSO_LAND_OBS)
+# THE DRAW: DETERMINISTIC PER ID (set.seed(MS_SEED + id)), for a dispersed id and for an unseedable seeded slot alike.
+ms_draw <- function(id) {
+  set.seed(MS_SEED + id)
+  for (k in seq_len(MS_DRAW_TRIES)) {
+    stopifnot(identical(names(U_COLD), names(MS_SPREAD_VEC)))
+    u <- U_COLD + MS_SPREAD_VEC * stats::rnorm(length(U_COLD))
+    names(u) <- CCX_PARAM_NAMES
+    if (is.finite(lp_fun(u)))
+      return(list(u = u, kind = sprintf("dispersed about the COLD init, sd %.4f%s", MS_SPREAD,
+                                        if (length(MS_SPREAD_OVERRIDE)) sprintf(" (%s)", paste(sprintf("%s at %.4g", names(MS_SPREAD_OVERRIDE), MS_SPREAD_OVERRIDE), collapse = ", ")) else ""),
+                  draws = k, ref = NA_real_, class = "dispersed"))
+  }
+  # A dispersed start that cannot find a finite point is a fact about the
+  # dispersion, not a task to retry silently.
+  stop("start ", id, ": ", MS_DRAW_TRIES, " draws at sd ", MS_SPREAD,
+       " all gave a non-finite log-posterior. The dispersion is too wide for ",
+       "this parameter table; lower CCX_MS_SPREAD and say so in the output dir.")
 }
-ms_seed_ocn_label <- function(x, edge = c("hi", "lo")) {
-  edge <- match.arg(edge)
-  if (!.ms_ocn_pinned) return(sprintf("the ocean ENSO pair SET to %+0.3f each (the 09-01 conditional optimum of the 08-31e basin; a perturbation here)", x))
-  if (.ms_limb_on) return(sprintf("the ocean ENSO pair PINNED; the limb's w_enso_l2 SET to %g Sv per index (the %s edge of Meinen's bracket)",
-                                  if (edge == "hi") max(MS_L2_SEED_SV) else min(MS_L2_SEED_SV), if (edge == "hi") "HIGH" else "LOW"))
-  "the ocean ENSO pair PINNED and no limb: NOTHING seeded -- this start EQUALS the reference it is named for"
-}
-ms_seed_land <- function(p, m) {
-  p$gamma_enso_land_NH <- p$gamma_enso_land_NH * m
-  p$gamma_enso_land_SH <- p$gamma_enso_land_SH * m; p
+# A FIXED start's vector WITHOUT drawing: the cold init, a reference, or a slot that SEEDED; NULL for a slot that
+# would draw. What rule (2)'s duplicate check compares this task's start against.
+ms_fixed_u <- function(id) {
+  if (id == MS_REF_IDS[["cold"]]) return(U_COLD)
+  if (id == MS_REF_IDS[["incumbent"]]) return(U_INC)
+  if (id == MS_REF_IDS[["new_basin"]]) return(U_NEW)
+  sk <- names(MS_SEED_IDS)[match(id, MS_SEED_IDS)]
+  if (!is.na(sk)) { s <- ms_seed(sk); return(if (s$seeded) s$u else NULL) }
+  NULL
 }
 ms_start <- function(id) {
   if (id == MS_REF_IDS[["cold"]])
-    return(list(u = U_COLD, kind = "reference: COLD hand-set init", draws = 0L, ref = NA_real_))
+    return(list(u = U_COLD, kind = "reference: COLD hand-set init", draws = 0L, ref = NA_real_, class = "reference"))
   if (id == MS_REF_IDS[["incumbent"]])
     return(list(u = U_INC, kind = paste("reference:", MS_REF_INC_LABEL),
-                draws = 0L, ref = .mdI$logpost))
+                draws = 0L, ref = .mdI$logpost, class = "reference"))
   if (id == MS_REF_IDS[["new_basin"]])
     return(list(u = U_NEW, kind = paste("reference:", MS_REF_NEW_LABEL),
-                draws = 0L, ref = .mdN$logpost))
+                draws = 0L, ref = .mdN$logpost, class = "reference"))
   # ---- THE SEEDED STARTS. ⚠ SEEDED IN PARAMETER SPACE, THEN ENCODED, never by
   # adding to `u`: the ENSO entries happen to be `tr = "id"` today, so the two
   # would agree, and that is exactly the coincidence a later transform change
@@ -637,23 +655,16 @@ ms_start <- function(id) {
   # Now: an id the vector names with no branch here stops with the reason, and
   # an id the vector no longer names falls through to the gap guard.
   .sk <- names(MS_SEED_IDS)[match(id, MS_SEED_IDS)]
-  if (!is.na(.sk) && !(.sk %in% c("inc_enso", "new_enso", "new_obs")))
-    stop("MS_SEED_IDS names id ", id, " as '", .sk, "' but ms_start() has no ",
-         "branch that builds it. Add one beside the others.")
-  if (identical(.sk, "inc_enso"))
-    return(list(u = ccx_par_to_unc(ms_seed_ocn(P_INC, MS_ENSO_OCN_OPT, "hi")),
-                kind = paste("seeded: INCUMBENT with", ms_seed_ocn_label(MS_ENSO_OCN_OPT, "hi")),
-                draws = 0L, ref = NA_real_))
-  if (identical(.sk, "new_enso"))
-    return(list(u = ccx_par_to_unc(ms_seed_ocn(P_NEW, MS_ENSO_OCN_OPT, "lo")),
-                kind = paste("seeded: NEW BASIN with", ms_seed_ocn_label(MS_ENSO_OCN_OPT, "lo")),
-                draws = 0L, ref = NA_real_))
-  if (identical(.sk, "new_obs"))
-    return(list(u = ccx_par_to_unc(ms_seed_land(ms_seed_ocn(P_NEW, MS_ENSO_OCN_OBS, "hi"),
-                                                MS_ENSO_LAND_OBS)),
-                kind = sprintf("seeded: NEW BASIN + the OBSERVATION-implied partition (%s; land x%.3f)",
-                               ms_seed_ocn_label(MS_ENSO_OCN_OBS, "hi"), MS_ENSO_LAND_OBS),
-                draws = 0L, ref = NA_real_))
+  if (!is.na(.sk) && !(.sk %in% MS_SEED_SLOTS))
+    stop("MS_SEED_IDS names id ", id, " as '", .sk, "' but ms_seed_slot() has no ",
+         "branch that builds it. Add one beside the others in calibration/lib_ms_seed.R.")
+  if (!is.na(.sk)) {
+    s <- ms_seed(.sk)
+    if (s$seeded) return(list(u = s$u, kind = s$kind, draws = 0L, ref = NA_real_, class = "seeded"))
+    d <- ms_draw(id)
+    d$kind <- ms_unseedable_kind(.sk, s, d$kind)
+    return(d)
+  }
   # ⛔ AN ID BELOW THE DISPERSED FLOOR THAT MATCHED NOTHING ABOVE IS A GAP IN
   # THIS FUNCTION, NOT A DISPERSED START. Falling through would silently turn a
   # fixed start into a random draw and the output file would call it dispersed.
@@ -662,21 +673,7 @@ ms_start <- function(id) {
          "matches no fixed start. The fixed ids are ",
          paste(sort(c(MS_REF_IDS, MS_SEED_IDS)), collapse = ", "),
          "; add the missing one here or raise the floor.")
-  set.seed(MS_SEED + id)
-  for (k in seq_len(MS_DRAW_TRIES)) {
-    stopifnot(identical(names(U_COLD), names(MS_SPREAD_VEC)))
-    u <- U_COLD + MS_SPREAD_VEC * stats::rnorm(length(U_COLD))
-    names(u) <- CCX_PARAM_NAMES
-    if (is.finite(lp_fun(u)))
-      return(list(u = u, kind = sprintf("dispersed about the COLD init, sd %.4f%s", MS_SPREAD,
-                                        if (length(MS_SPREAD_OVERRIDE)) sprintf(" (%s)", paste(sprintf("%s at %.4g", names(MS_SPREAD_OVERRIDE), MS_SPREAD_OVERRIDE), collapse = ", ")) else ""),
-                  draws = k, ref = NA_real_))
-  }
-  # A dispersed start that cannot find a finite point is a fact about the
-  # dispersion, not a task to retry silently.
-  stop("start ", id, ": ", MS_DRAW_TRIES, " draws at sd ", MS_SPREAD,
-       " all gave a non-finite log-posterior. The dispersion is too wide for ",
-       "this parameter table; lower CCX_MS_SPREAD and say so in the output dir.")
+  ms_draw(id)
 }
 
 # ---- PREFLIGHT: prove the whole array is launchable WITHOUT launching it ----
@@ -692,6 +689,9 @@ MS_PREFLIGHT <- nzchar(Sys.getenv("CCX_MS_PREFLIGHT", ""))
 
 # ---- resume, if this task has already run part of its budget ---------
 st <- ms_start(MS_ID)
+# ⛔ RULE (2), BEFORE ANY OBJECTIVE IS SPENT ON THIS START: no two starts of the array are one vector. Compared
+# against every FIXED start that needs no draw (cheap: encodings only), so the preflight refuses a duplicate in ~1 s.
+ms_assert_distinct_start(MS_ID, st$u, stats::setNames(lapply(MS_FIXED_IDS, ms_fixed_u), MS_FIXED_IDS))
 u <- st$u; best <- -lp_fun(u)
 # THE PENALTY, DERIVED FROM THE START (see MS_PENALTY_FLOOR): strictly worse than
 # any value the search begins from, so an infeasible step can never look like a
@@ -976,8 +976,9 @@ if (MS_PROJ_SAFETY * MS_SEC_PER_EVAL * MS_MAXIT / 60 > MS_BUDGET_MIN)
 if (MS_PREFLIGHT) {
   cat(sprintf("PREFLIGHT id %03d on %s: start %s, log-post %.4f, %d draw%s, port %s,\n             %.4f %s => a %d-eval restart takes %.1f %s of a %g %s budget. LAUNCHABLE.\n",
               MS_ID, Sys.info()[["nodename"]],
-              if (MS_ID >= MS_DISPERSED_FROM) "dispersed"
-              else if (MS_ID %in% MS_SEED_IDS) "SEEDED" else "REFERENCE", MS_START_LP,
+              switch(st$class, seeded = "SEEDED", reference = "REFERENCE",
+                     dispersed = if (MS_ID < MS_DISPERSED_FROM) "dispersed (an UNSEEDABLE seeded slot)" else "dispersed"),
+              MS_START_LP,
               st$draws, if (st$draws == 1L) "" else "s",
               if (isTRUE(MS_PORT$checked)) sprintf("VERIFIED rel %.1e (floor %.1e, bound %.1e)", MS_PORT$rel, MS_PORT$floor, MS_PORT$tol)
               else "NOT VERIFIED",
@@ -1223,8 +1224,9 @@ res <- list(id = MS_ID, kind = st$kind, u_mode = u, par_mode = pm, logpost = -be
             # A `start_*.rds` whose `kind` string is the only record of whether
             # it was seeded cannot be grouped by a collector without parsing
             # prose [[recorded_but_never_restored]].
-            start_class = if (MS_ID >= MS_DISPERSED_FROM) "dispersed"
-                          else if (MS_ID %in% MS_SEED_IDS) "seeded" else "reference",
+            # ⚠ FROM THE START ITSELF since 2026-10-07 m, not from the id: an UNSEEDABLE seeded slot ran a draw
+            # and is "dispersed" (its `kind` says UNSEEDABLE and why).
+            start_class = st$class,
             spread_pool = MS_SPREAD_POOL, spread_skipped = MS_SPREAD_SKIP,
             spread_all = MS_SPREAD_ALL,
             enso_seed = c(ocn_opt = MS_ENSO_OCN_OPT, ocn_obs = MS_ENSO_OCN_OBS,

@@ -1,0 +1,12 @@
+M0_as_written            PASSES | RESULT failed 0 errors 0 of 66 expectations; failing tests: 
+M1_l2_ignores_free       CAUGHT | RESULT failed 6 errors 0 of 66 expectations; failing tests: MS1:
+M2_no_encoder_check      CAUGHT | RESULT failed 17 errors 0 of 66 expectations; failing tests: MS1: MS1: || DRIVER: REFUSED: HARNESS id 3 class seeded draws 0 assert DUPLICATE START: id 3's start vector is identical
+M3_refusal_noop          CAUGHT | RESULT failed 3 errors 0 of 66 expectations; failing tests: MS2: MS2:
+M4_land_ignores_free     CAUGHT | RESULT failed 3 errors 0 of 66 expectations; failing tests: MS1: MS1:
+M5_label_typed           CAUGHT | RESULT failed 1 errors 0 of 66 expectations; failing tests: MS1:
+M6_driver_no_refusal     CAUGHT | RESULT failed 1 errors 0 of 66 expectations; failing tests: MS3:
+M7_driver_pins_as_free   CAUGHT | RESULT failed 1 errors 0 of 66 expectations; failing tests: MS3:
+M8_class_from_id         CAUGHT | RESULT failed 2 errors 0 of 66 expectations; failing tests: MS3:
+M9_collector_bench       CAUGHT | RESULT failed 1 errors 0 of 66 expectations; failing tests: MS3:
+source restored (md5): yes
+ALL CAUGHT
