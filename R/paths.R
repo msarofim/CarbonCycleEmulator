@@ -212,7 +212,12 @@
 # PHYSICS: the feedback is cited, the greening term was unidentified (0.99 sd from 0) and extrapolated 6x
 # to 2300. SSP5-8.5 2300 +12.9 ppm; land net climate effect +0.118 -> -0.038 GtC/yr; no gate verdict
 # flips. CHANGELOG 10-05 (p), 10-06 (a). hilda34g stays REGISTERED (the #15 canonical).
-CCX_MODE_CANONICAL <- "hilda33p"
+# 2026-10-08 (e): hilda29e ADOPTED (Marcus, verbatim: "Basin 1, run the second pass, adopt if it passes"; the name
+# "hilda29e (Recommended)": 29 fitted names, 'e' for CHANGELOG 10-08 (e), where pass 2's check passed). Objective #18 PASS 2
+# at basin 1 -- the interannual cut with the DETRENDED ENSO index (hilda_csl3v0kaidgbemwt); #16's ten pins + the module's
+# four at the one-pass check's values (CCX_MODE_OBJ18P2_PINS); the check at it STOPS (every module name < 0.01 sigma).
+# hilda33p (objective #16) stays registered as the previous canonical.
+CCX_MODE_CANONICAL <- "hilda29e"
 # 2026-09-22 (k): `hilda32f` -- THE FREE PARENT OF THE LIMB CANONICAL (Marcus: "Repoint").
 # hilda29l's OWN structure (hilda_csl3, seas_ml 1) with only the six inert names held: the
 # seasonal shim ent_seas_amp_SH (8.24), the ocean ENSO pair (NH 0.240, SH 0.001) and the
@@ -228,6 +233,9 @@ CCX_MODE_CANONICAL <- "hilda33p"
 # named red #1 ("the parent is the best free arm") discharges here; red #2 (the AIC gate)
 # is untouched.
 CCX_MODE_FILES <- c(
+  # 2026-10-08 (e): THE CANONICAL (see CCX_MODE_CANONICAL): #18 pass 2's basin-1 refit (wave 20261008d id 1), the
+  # directory renamed from refit_20261008_obj18p2_hilda_csl3v0kaidgbemwt_basin1 at adoption (the hilda33p precedent).
+  hilda29e = file.path("calibration", "output", "refit_20261008_hilda29e_obj18p2_hilda_csl3v0kaidgbemwt", "mode_fit_pumpN.rds"),
   hilda33p = file.path("calibration", "output", "refit_20261005_hilda33p_obj16_hilda_csl3v0kaidgbem",
                        "mode_fit_pumpN.rds"),
   hilda34g = file.path("calibration", "output", "refit_20261003_hilda34g_obj15_hilda_csl3v0kaidgbe",
@@ -353,7 +361,7 @@ CCX_MODE_HILDA30S_QUARANTINED <- file.path("calibration", "output", "quarantine"
 # 2026-09-04 -> 2026-09-11 (8) this registry held one arm, then two free arms;
 # the free-vs-pinned comparison it exists to express had no power
 # ([[no_power_null]]). It has power from 09-13 (d): the canonical is PINNED.
-CCX_MODE_PINNED <- c(hilda33p = TRUE, hilda34g = TRUE, hilda33d = TRUE, hilda29l = TRUE, hilda32f = FALSE, hilda31s2 = FALSE, hilda31pe = FALSE,
+CCX_MODE_PINNED <- c(hilda29e = TRUE, hilda33p = TRUE, hilda34g = TRUE, hilda33d = TRUE, hilda29l = TRUE, hilda32f = FALSE, hilda31s2 = FALSE, hilda31pe = FALSE,
                      hilda29w = TRUE,   # 2026-10-07 (i): #17's basin B, the module's four pinned (READ names)
                      hilda29a0 = TRUE, hilda29a6 = TRUE)   # 2026-10-08 (d): #18's two basins, the module's four pinned
 # A PINNED CANONICAL (2026-09-13). When the canonical is a pinned arm, the
@@ -383,7 +391,14 @@ CCX_MODE_OBJ15_PINS      <- c(ent_seas_amp_SH = 0, w_eq = 27, gamma_eq = 1, pump
                               w_vent = 0, gamma_vent = 0, w_thc = 0,
                               gamma_enso_ocn_NH = 0, gamma_enso_ocn_SH = 0)
 CCX_MODE_OBJ16_PINS      <- c(CCX_MODE_OBJ15_PINS, npp_tsens = 0)
-CCX_MODE_CANONICAL_PINS  <- CCX_MODE_OBJ16_PINS
+# OBJECTIVE #18 PASS 2's pins (2026-10-08 d; documented with CCX_MODE_OBJ18P2_MODULE_FILE below): #16's ten + the module's
+# four at the one-pass check's values at #18's basin 1, every literal BIT FOR BIT that file's double (test-ms-reference-set).
+CCX_MODE_OBJ18P2_PINS    <- c(CCX_MODE_OBJ16_PINS,
+                              lag_enso_land      = 5.9293432319444337,
+                              gamma_enso_land_NH = 0.66318950821232669,
+                              gamma_enso_land_SH = 0.6355964031675142,
+                              w_enso_l2          = 16.787744029103425)
+CCX_MODE_CANONICAL_PINS  <- CCX_MODE_OBJ18P2_PINS   # 2026-10-08 (e): hilda29e's: #16's ten + the module at pass 2's values
 # ⚠ RE-DOCUMENTED 2026-10-01 (Marcus, review 10-01c B3b: option (i), "follow recommendations").
 # `hilda32f` is the free parent of the v1.0 canonical, hilda29l (structure hilda_csl3,
 # objective #13). It is NOT a parent of the current canonical: hilda33d (objective #14, the
@@ -497,11 +512,8 @@ CCX_MODE_OBJ18_INCUMBENT <- "hilda29w"      # #17's basin B (registered 2026-10-
 # stopping rule is the ruled 0.1 sigma per module name. Ruled only under #18's label at seas_ml 1.
 CCX_MODE_OBJ18P2_MODULE_FILE <- file.path("calibration", "output",
                                           "iav_module_20261008_refit_20261008_obj18_hilda_csl3v0kaidgbemwt.rds")
-CCX_MODE_OBJ18P2_PINS    <- c(CCX_MODE_OBJ16_PINS,
-                              lag_enso_land      = 5.9293432319444337,
-                              gamma_enso_land_NH = 0.66318950821232669,
-                              gamma_enso_land_SH = 0.6355964031675142,
-                              w_enso_l2          = 16.787744029103425)
+# CCX_MODE_OBJ18P2_PINS is DEFINED ABOVE, beside CCX_MODE_OBJ16_PINS (moved 2026-10-08 e: since hilda29e's adoption it is the
+# canonical's set, and CCX_MODE_CANONICAL_PINS / CCX_MODE_L2_ARM_PINS read it before this point).
 CCX_MODE_OBJ18P2_INCUMBENT <- "hilda29a0"    # #18's basin 1 (RULED 10-08: "Basin 1")
 CCX_MODE_OBJ18P2_NEW       <- "hilda29a6"    # #18's basin 2: the runner-up, refit beside it so the basins are re-ranked
 #' The registered FREE mode nearest the canonical: the canonical itself when it

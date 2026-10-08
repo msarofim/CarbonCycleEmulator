@@ -40,6 +40,7 @@ COPYFILE_DISABLE=1 tar --no-xattrs -czf "$OUT" \
   R src data tests \
   data-raw/downloads/nuclear14c \
   calibration/*.R calibration/torch calibration/mac \
+  calibration/output/refit_20261008_hilda29e_obj18p2_hilda_csl3v0kaidgbemwt \
   calibration/output/refit_20261005_hilda33p_obj16_hilda_csl3v0kaidgbem \
   calibration/output/refit_20261003_hilda34g_obj15_hilda_csl3v0kaidgbe \
   calibration/output/refit_20261001_hilda33d_obj14_hilda_csl3v0kaidgb \

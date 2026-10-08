@@ -25,7 +25,17 @@ is a **deal-breaker, fixable, or acceptable** for a pedagogical model. Comments 
 the Substack post the app links to; anyone whose comment changes the model or the
 write-up is credited in the acknowledgements.
 
-**Main branch, 2026-10-06: the canonical is `hilda33p`** (objective #16; 33 fitted names, ten held).
+**Main branch, 2026-10-08: the canonical is `hilda29e`** (objective #18, second pass; 29 fitted names, fourteen held).
+It is `hilda33p`'s model with the interannual "cut": the ENSO terms that shape only the year-to-year variability (the
+land response's lag and amplitude, and the ocean's ENSO limb `w_enso_l2`) are fitted in a separate module to the
+detrended CO₂ growth rate and GCB's ocean ENSO slope, then held while everything else is refit; the ENSO forcing index
+is detrended. The module was iterated to a fixed point: on the second pass every module value moved less than 0.01 of
+its own standard deviation. What it buys: the interannual variability check (GATE V) passes, and the land's ENSO lag
+(about 5.9 months) is the one the growth record shows. What it costs: the ice cores (about −8 log-units) and the ocean's
+climate effect against GCB (2.16× its value, from 1.88×), both from the detrended index. CHANGELOG 2026-10-08 (a)–(e).
+The app's release mode is decided separately (below).
+
+**Previous canonical, 2026-10-06 to 2026-10-08: `hilda33p`** (objective #16; 33 fitted names, ten held).
 It is `hilda34g` plus the stratification feedback (as the surface warms faster than the deep ocean, the
 upper ocean mixes less, so added carbon is carried down more slowly; its strength fixed from observation and
 mixing law, not fitted), with the greening term held at 0 (a term whose sign the record cannot fix is not
