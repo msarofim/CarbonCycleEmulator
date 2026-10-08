@@ -1,0 +1,15 @@
+calibration/diag_app_wobble_shares.R | commit 212b7b0 | canonical hilda29e (refit_20261008_hilda29e_obj18p2_hilda_csl3v0kaidgbemwt) | 2026-10-08 12:16
+gate: the no-switch run vs APP_HIST, max |d growth| 0.0e+00 ppm/yr
+
+window 1980-2024 (the slider's default 1850-2024 inside the observed record 1980-2025); n = 45 years
+observed scatter 0.459 ppm/yr; full model 0.304 (66 % of observed)
+       arm                       switched_off scatter share_removed remaining
+      full                                     0.3039        0.0000    1.0000
+      enso                               enso  0.1841        0.3941    0.6059
+   warming                   warming_feedback  0.2334        0.2321    0.7679
+  volcanic                           volcanic  0.2988        0.0166    0.9834
+ all_three enso + warming_feedback + volcanic  0.0893        0.7063    0.2937
+   revelle                            revelle  0.2709        0.1086    0.8914
+
+the copy's typed claims: ENSO off "about 40 % of the wobble" -> measured 39 % removed; all three off "about a third of the wobble" -> measured 29 % remains
+(no reproduction gate: the recorded values are hilda33d's; this tree's canonical is hilda29e)
