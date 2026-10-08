@@ -1,0 +1,9 @@
+M0_as_written            PASSES | RESULT failed 0 errors 0 of 69 expectations; failing tests: 
+M1_lib_returns_claim     CAUGHT | RESULT failed 14 errors 0 of 69 expectations; failing tests: KP1 KP2
+M2_restart_keeps_claim   CAUGHT | RESULT failed 1 errors 0 of 69 expectations; failing tests: KP3
+M3_polish_on_claim       CAUGHT | RESULT failed 2 errors 0 of 69 expectations; failing tests: KP3
+M4_gate_relative         CAUGHT | RESULT failed 2 errors 0 of 69 expectations; failing tests: KP3
+M5_resume_unpaired       CAUGHT | RESULT failed 1 errors 0 of 69 expectations; failing tests: KP3
+M6_gaps_not_recorded     CAUGHT | RESULT failed 1 errors 0 of 69 expectations; failing tests: KP3
+source restored (md5): yes
+ALL CAUGHT

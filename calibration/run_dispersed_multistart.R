@@ -713,6 +713,9 @@ MS_REF_LP <- -best
 trace <- data.frame(cycle = 0L, restart = 0L, logpost = -best, evals = 0L)
 cyc0 <- 1L
 MS_RESUMED <- FALSE
+# THE KEPT PAIR'S RECORD (2026-10-08 c): per optimiser step, f(kept par) - the value the optimiser CLAIMED for it
+# (ms_kept_pair(), calibration/lib_ms_deadline.R). Non-zero = optim() returned a point it never evaluated.
+claim_gaps <- numeric(0)
 if (file.exists(MS_CKPT)) {
   ck <- readRDS(MS_CKPT)
   if (!identical(ck$id, MS_ID))
@@ -754,6 +757,9 @@ if (file.exists(MS_CKPT)) {
          "CCX_MS_OUTDIR for a new objective; do not mix them in one directory.")
   u <- ck$u; best <- ck$best; trace <- ck$trace; cyc0 <- ck$cycle + 1L
   MS_RESUMED <- TRUE
+  # RE-PAIRED (2026-10-08 c): a checkpoint written before the kept-pair fix stored the optimiser's CLAIM as `best`
+  .kp <- ms_kept_pair(list(par = u, value = best), neg_lp); best <- .kp$value
+  claim_gaps <- c(if (is.null(ck$claim_gaps)) numeric(0) else ck$claim_gaps, .kp$gap)
   cat(sprintf("RESUMED from checkpoint at cycle %d, log-post %.4f\n", ck$cycle, -best))
 }
 # TWO NUMBERS, SAID SEPARATELY. Printing one line for both is how the gate came
@@ -1059,7 +1065,11 @@ for (cyc in seq(cyc0, MS_CYCLES)) {
       cat(sprintf("[%03d] cycle %d restart %2d: STOPPED AT THE DEADLINE after %d evals; the best EVALUATED point is kept\n",
                   MS_ID, cyc, i, n_eval - .n0))
     }
-    gain <- best - fit$value; u <- fit$par; best <- fit$value
+    # ⛔ THE KEPT PAIR (2026-10-08 c): `best` is f(the kept u), evaluated, never optim()'s claim for it -- the two differ
+    # by the objective's noise floor when optim() returns a point it never evaluated (memory
+    # objective_noise_floor_optimum_on_spike; CHANGELOG 2026-10-08 a/c). The optimiser's path is unchanged.
+    .kp <- ms_kept_pair(fit, neg_lp); claim_gaps <- c(claim_gaps, .kp$gap)
+    gain <- best - .kp$value; u <- .kp$par; best <- .kp$value
     cat(sprintf("[%03d] cycle %d restart %2d: log-post = %12.4f (gain %10.4f) evals %d  %.1f %s\n",
                 MS_ID, cyc, i, -best, gain, n_eval, elapsed_min(), MS_MIN_UNIT))
     flag_wall()
@@ -1099,10 +1109,15 @@ for (cyc in seq(cyc0, MS_CYCLES)) {
       cat(sprintf("[%03d] cycle %d polish: STOPPED AT THE DEADLINE after %d evals; the best EVALUATED point is kept\n",
                   MS_ID, cyc, n_eval - .n0))
     }
-    if (!is.null(pc) && pc$value < best) {
-      cat(sprintf("[%03d] cycle %d polish: log-post = %.4f (gain %.4f)\n",
-                  MS_ID, cyc, -pc$value, best - pc$value))
-      u <- pc$par; best <- pc$value
+    # ACCEPTED ON THE KEPT POINT'S OWN VALUE (2026-10-08 c), not on optim()'s claim: at #18's id 13 the claim beat
+    # `best` by a noise-floor amount ("gain 0.0000") and the point it was kept for scored 3.1e-5 BELOW it.
+    if (!is.null(pc)) {
+      .kp <- ms_kept_pair(pc, neg_lp); claim_gaps <- c(claim_gaps, .kp$gap)
+      if (.kp$value < best) {
+        cat(sprintf("[%03d] cycle %d polish: log-post = %.4f (gain %.4f)\n",
+                    MS_ID, cyc, -.kp$value, best - .kp$value))
+        u <- .kp$par; best <- .kp$value
+      }
     }
   } else if (!out_of_time) {
     cat(sprintf("[%03d] cycle %d polish SKIPPED: not even %d BFGS iterations fit the\n      remaining budget. This is the END of the round, not a defect.\n",
@@ -1141,7 +1156,7 @@ for (cyc in seq(cyc0, MS_CYCLES)) {
   # The stamp is the FIXED reference point's own value, not a commit hash: it
   # is derived from the objective itself rather than from a proxy that a
   # comment-only commit would move [[threshold_from_obs_or_law]].
-  saveRDS(list(id = MS_ID, u = u, best = best, cycle = cyc, trace = trace,
+  saveRDS(list(id = MS_ID, u = u, best = best, cycle = cyc, trace = trace, claim_gaps = claim_gaps,
                n_eval = n_eval, seed = MS_SEED + MS_ID,
                param_names = CCX_PARAM_NAMES, ref_logpost = MS_REF_LP, pins = MS_PINS), MS_CKPT)
   # ⛔ A CYCLE THAT RAN NO RESTART IS NOT A CONVERGED CYCLE. It gained 0.0000
@@ -1177,13 +1192,22 @@ zs <- vapply(CCX_PARAM_NAMES,
 # says. A best on the penalty plateau is not a result; before this check it was
 # written as converged = TRUE and exited 0 (ids 9/12/23 of 17343694). RECORDED
 # in the file (so the collector can refuse it) AND fatal below (so SLURM says FAILED).
+# ⭐ TWO BRANCHES SINCE 2026-10-08 c, and the second is EXACT: every `best` is now f(the kept u) (ms_kept_pair()), and
+# the objective is a pure function of u (diag_obj18_dead13.R, sections 1 and 4), so the re-evaluation must be
+# IDENTICAL. The relative 1e-8 bound it replaced sat inside the objective's own floor (3.7e-5 at #18's id 13) and
+# stopped a finite start as "dead"; the message then named the non-finite branch.
 .final_lp <- lp_fun(u)
-dead <- !is.finite(.final_lp) || abs(.final_lp - (-best)) > MS_EVAL_TOL * max(1, abs(best))
+dead_nonfinite <- !is.finite(.final_lp)
+dead_unpaired  <- !dead_nonfinite && !identical(.final_lp, -best)
+dead <- dead_nonfinite || dead_unpaired
 if (dead) converged <- FALSE
 
 res <- list(id = MS_ID, kind = st$kind, u_mode = u, par_mode = pm, logpost = -best,
             logpost_start = trace$logpost[1], converged = converged, dead = dead,
             final_lp_check = .final_lp,
+            # RECORDED (2026-10-08 c): which DEAD branch fired, and every step's claim gap (ms_kept_pair())
+            dead_branch = if (dead_nonfinite) "nonfinite" else if (dead_unpaired) "unpaired" else "none",
+            claim_gaps = claim_gaps, pairing = "kept_pair",
             out_of_time = out_of_time, cycles = if (exists("cyc")) cyc else 0L,
             restarts_done = restarts_done, deadline_stops = deadline_stops,
             trace = trace, n_eval = n_eval, minutes = elapsed_min(),
@@ -1275,12 +1299,17 @@ if (!is.null(.rate)) {
 }
 
 # ---- DEAD-TASK GATE: fatal, AFTER the file is written (see `dead` above).
-if (dead)
+if (dead_nonfinite)
   stop("DEAD TASK id ", MS_ID, ": the reported optimum ", sprintf("%.4f", -best),
        " is not a finite point of the objective (lp_fun there = ", .final_lp,
        "). The search ended on the infeasible-step penalty plateau; this is a ",
        "failure, not a convergence. Its start file has been written for the ",
        "post-mortem but must NOT be collected as a basin.")
+if (dead_unpaired)
+  stop("UNPAIRED BEST, id ", MS_ID, ": the stored best ", sprintf("%.12f", -best), " is not the objective at the stored ",
+       "point (", sprintf("%.12f", .final_lp), ", diff ", sprintf("%+.3e", .final_lp + best), "). Every `best` is ",
+       "f(the kept u) since 2026-10-08 c, so this is a BOOKKEEPING DEFECT in the driver, not a property of the point. ",
+       "The start file is written for the post-mortem; do NOT collect it as a basin until the defect is found.")
 # ---- PORT GATE (b): an ORDERING, which is the only claim available about an
 # OPTIMISED value. A maximiser that returns less than it was handed is broken,
 # and that is true of every start, not only the reference ones -- so this one

@@ -119,6 +119,21 @@ ms_run_step <- function(state, u0, val0, fn, method, control, deadline) {
   })
 }
 
+#' THE KEPT PAIR (2026-10-08 c; Marcus: "Build the bookkeeping fix"): a step's returned point and ITS OWN value,
+#' by evaluating it. ⛔ optim()'s `value` is NOT f(`par`) in general: at NORMAL convergence R's BFGS (vmmin) exits its
+#' line search on "no change" (`10 + X[i] == 10 + b[i]` for all i) and returns that `b`, NEVER EVALUATED, beside
+#' Fmin = f(X), ~1e-16 away (20 / 20 seeded synthetic runs, outputs/diagnostics/obj18_vmmin_synthetic.log). On an
+#' objective with a ~1e-6..1e-5 numerical floor that is a floor-sized lie: #18's id 13 was stopped DEAD on it
+#' (CHANGELOG 2026-10-08 a). Re-evaluating keeps the optimiser's PATH untouched (it already returned `par`) and makes
+#' (par, value) a pair by construction, so the end-of-run identity check can be EXACT. One evaluation per step.
+#' @param step ms_run_step()'s result (par, value)
+#' @param fn the objective the step minimised (the driver's neg_lp: counted, penalty-mapped, deadline-free outside a step)
+#' @return list(par, value = fn(par), claimed = step$value, gap = value - claimed)
+ms_kept_pair <- function(step, fn) {
+  v <- fn(step$par)
+  list(par = step$par, value = v, claimed = step$value, gap = v - step$value)
+}
+
 #' A restart's minutes NORMALISED to a full `maxit_full` restart, by the evaluations it actually made (not the
 #' planned maxit: a Nelder-Mead step that stops early on reltol, or at the deadline, made fewer). NULL when it
 #' made none, so the caller appends nothing.
