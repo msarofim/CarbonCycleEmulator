@@ -2,6 +2,23 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-08 (d) — **RULED: "Basin 1, run the second pass, adopt if it passes"** (Marcus, verbatim). Pass 2 built (`8fc943e`), its preflight caught a label bug (fixed, `3ab4793`), and it is LAUNCHED.
+
+- **The reasoning behind the ruling** (the 10-08 recommendation):
+  - basin 1 because the cut is SELF-CONSISTENT there: `w_enso_l2` +0.126σ, against basin 2's −1.099σ and #17's +2.31σ / +1.55σ. The slope row holds; the Hessian is clean. Likelihood + prior is a tie (0.087, inside 0.5);
+  - a second pass because 0.126σ is over the ruled 0.1σ stopping rule, and adoption was ruled to wait on `w_enso_l2` (10-07 b);
+  - adoption conditional on the pass.
+- **Pass 2** = the module pinned at the ONE-PASS CHECK's values at basin 1, then warm refits from BOTH landed basins, then the check again. The stopping rule is the ruled 0.1σ per module name.
+  - `R/paths.R`: `CCX_MODE_OBJ18P2_PINS` = #16's ten + lag 5.9293432319444337, land 0.66318950821232669 / 0.6355964031675142, w 16.787744029103425. Every literal parses to `CCX_MODE_OBJ18P2_MODULE_FILE`'s double bit for bit (md5 `29a041d1…`; its base md5 = basin 1's file).
+  - #18's two landed basins are registered under PROVISIONAL names: `hilda29a0` (basin 1) and `hilda29a6` (basin 2), PINNED, NOT canonical. The canonical's name at adoption is Marcus's (the `hilda33p` precedent).
+  - `ccx_ms_reference_set()`: the pass-2 branch (incumbent `hilda29a0`, new basin `hilda29a6`, both seeded at the new pins; ruled only under #18's label at seas_ml 1). `test-ms-reference-set` (14): 30 checks, mutations refused; the file 178 / 0. `test-mode-file` 154 / 0, the struct lint 5 / 0.
+- **The preflight caught a typed label**: the driver called any non-control new basin "the free parent, the other h_ml basin", and `hilda29a6` is a pinned #18 basin. The text is now read off the registry: a PINNED new basin is "a registered PINNED mode, seeded at this array's pins"; every older arm's label is byte-identical (`3ab4793`). The first preflight is kept (`logs/preflight_v1/`).
+- **Launched 2026-10-08 07:56 EDT** from `~/ccx_frozen/20261008d_obj18p2` at `3ab4793`, tag `20261008d`, ids 1 / 2, #18's recipe (300 CPU-min, 3 × 6 × 6000, CPU clock). Launcher PID 2348; `~/ccx_frozen/20261008d_obj18p2_launch.{sh,out}`.
+  - Port targets regenerated in the tree: the incumbent −1166.9498 and the new basin −1167.9842, i.e. −0.60 / −0.62 below their pass-1 logposts at the new module values. Preflight 2 / 2 LAUNCHABLE, ports VERIFIED (rel 4.1e-14 / 1.2e-14), 0.22 CPU-s/eval.
+  - **Torch verdict, said out loud: Mac** (two warm tasks on an idle laptop).
+- **The landing chain is written** (`~/ccx_frozen/20261008d_obj18p2_chain.sh`, `…_land.sh`): land (now also copying the preflight SUMMARY log, 10-08 b's gap), collect, the basin decomposition, promote BOTH (`--id=1` basin 1 RULED, `--id=2` the re-rank), each one's Hessian and one-pass CHECK against the pass-2 module file, basin 1's ocean driver, one scorecard (`hilda29w`, `hilda29a0`, both pass-2 refits), then the #18 read, informational only (built for pass 1's references).
+- The full suite at `3ab4793` runs beside it (`outputs/diagnostics/suite_20261008_3ab4793.log`, `set_max_fails(Inf)`).
+
 ## 2026-10-08 (c) — **The multistart's (u, best) is a PAIR by construction** (Marcus: "Build the bookkeeping fix"; commit `253fbc9`).
 
 - **The fix** (`calibration/lib_ms_deadline.R` `ms_kept_pair()`; `calibration/run_dispersed_multistart.R`): after every optimiser step `best` is f(the kept u), EVALUATED, never `optim()`'s claim for it. This covers the NM restart and the BFGS polish, and a resumed checkpoint is re-paired. The polish is ACCEPTED on the kept point's own value; at id 13 the claim had beaten `best` by a floor-sized "gain 0.0000". Cost: one evaluation per step. **The optimiser's path is unchanged.**
