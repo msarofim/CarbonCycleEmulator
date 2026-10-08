@@ -1,0 +1,25 @@
+calibration/diag_obj18_dead13.R @335b886+dirty, 2026-10-08 06:02 | no RNG
+  wave calibration/output/multistart_20261007i_hilda_csl3v0kaidgbemwt_seasml1_pin_obj18_sd1.0452
+  id 13: md5 286b6771f18988484329fc081578e258, stored logpost -1249.196175612, final_lp_check -1249.196206552, dead TRUE, out_of_time TRUE
+  id 10: md5 a547ee98228b1db51b8c69407d28d807, stored logpost -1166.347001431, final_lp_check -1166.347006545, dead FALSE, out_of_time FALSE
+  id  9: md5 9ad83fbf0f68b152322265564791df1c, stored logpost -1167.365005722, final_lp_check -1167.365006263, dead FALSE, out_of_time FALSE
+  id 21: md5 d6a5145ba3d1c4e73915805c38cb1fc2, stored logpost -1167.364974666, final_lp_check -1167.364975326, dead FALSE, out_of_time FALSE
+  id  0: md5 68113210813bfb2ba365e6515ce3419b, stored logpost -1166.346995041, final_lp_check -1166.346995041, dead FALSE, out_of_time FALSE
+
+=== 1. DETERMINISM, FRESH PROCESS: the objective at each stored u_mode, twice ===
+  id | fresh - stored best | fresh - driver's final_lp_check | twice | the DEAD gate's bound
+  13 | -3.094e-05 | +0.000e+00 | +0.0e+00 | 1.25e-05
+  10 | -5.114e-06 | +0.000e+00 | +0.0e+00 | 1.17e-05
+   9 | -5.406e-07 | +0.000e+00 | +0.0e+00 | 1.17e-05
+  21 | -6.602e-07 | +0.000e+00 | +0.0e+00 | 1.17e-05
+   0 | +0.000e+00 | +0.000e+00 | +0.0e+00 | 1.17e-05
+
+=== 2. THE LOCAL FLOOR: 1e-12 single-name nudges of u_mode (tau_ex, hs_asx_frac, h_hs, kz, u_hs, h_ml, beta_max, q10) ===
+  id 13 base -1249.196206552 | d: +1.2e-05 +3.1e-06 -8.7e-06 +8.4e-06 +3.7e-05 +1.7e-05 +2.8e-06 +7.6e-06 | 7+ / 1- / 0 zero | max |d| 3.7e-05
+  id  0 base -1166.346995041 | d: -2.9e-06 -3.7e-06 -6.4e-06 -4.6e-06 -4.7e-06 -4.4e-06 -6.6e-06 -3.0e-06 | 0+ / 8- / 0 zero | max |d| 6.6e-06
+
+=== 3. THE MECHANISM: optim() from id 10's u_mode, every evaluated point recorded ===
+  BFGS        192 evals | returned par EVALUATED bit for bit: yes (eval 134) | f(par) - (-value) +0.000e+00 | value == min evaluated: FALSE | nearest evaluated point max|du| 0.0e+00
+  Nelder-Mead 302 evals | returned par EVALUATED bit for bit: yes (eval 1) | f(par) - (-value) +0.000e+00 | value == min evaluated: TRUE | nearest evaluated point max|du| 0.0e+00
+
+  written outputs/diagnostics/obj18_dead13_20261008.{log,rds}
