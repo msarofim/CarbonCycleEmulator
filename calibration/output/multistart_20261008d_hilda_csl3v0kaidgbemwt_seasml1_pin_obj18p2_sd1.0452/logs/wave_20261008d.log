@@ -1,0 +1,14 @@
+CCX_PROJ_DIR  /Users/MarcusMarcus/ccx_frozen/20261008d_obj18p2
+CCX_MS_OUTDIR /Users/MarcusMarcus/ccx_frozen/20261008d_obj18p2/calibration/output/multistart_20261008d_hilda_csl3v0kaidgbemwt_seasml1_pin_obj18p2_sd1.0452
+CCX_MS_STRUCT hilda_csl3v0kaidgbemwt   CCX_MS_SEAS_ML 1   CCX_MS_PUMP_FIELD solved   CCX_MS_SPREAD 1.0452   CCX_MS_PIN 'ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.0800000000000001,w_vent=0,gamma_vent=0,w_thc=0,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0,npp_tsens=0,lag_enso_land=5.9293432319444337,gamma_enso_land_NH=0.66318950821232669,gamma_enso_land_SH=0.6355964031675142,w_enso_l2=16.787744029103425'
+BUDGET 300 min on the cpu clock  RESTARTS 3  CYCLES 6  MAXIT 6000   mode wave   ids [1 2]   2 at once
+host MacBook-Pro-2.local  started 2026-10-08T07:56:35-0400  uptime:  7:56  up 6 days, 22:22, 4 users, load averages: 3.93 3.58 3.07
+already running at launch (>20% CPU), so a slow eval rate is read as CONTENTION first:
+   100.0       00:05 /Users/MarcusMarcus/.julia/juliaup/julia-1.12.6+0.aarch64.apple.darwin14/Julia-1.12.app/Contents/Resources/julia/bin/julia --project=. scripts
+    97.5    01:01:21 /usr/libexec/duetexpertd
+    43.2 06-22:15:21 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer -daemon
+all tasks finished 2026-10-08T08:21:14-0400
+exit codes (id rc):
+1 0
+2 0
+non-zero exits: 0

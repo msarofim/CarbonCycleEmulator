@@ -1,0 +1,15 @@
+run-time inputs present: 14/14. OK
+reference set: incumbent hilda29a0, new basin hilda29a6 (OBJECTIVE #18 PASS 2 (Marcus 2026-10-08): #18's label, the module at the one-pass check's values at basin 1; the incumbent is #18's basin 1 (hilda29a0), the new basin #18's basin 2 (hilda29a6), both seeded at the pins: starts, not modes of this objective)
+objective label: struct 'hilda_csl3v0kaidgbemwt', seas_ml 1, pump_field 'solved', pins '_pin_ent_seas_amp_SH=0.0000000_w_eq=27.0000000_gamma_eq=1.0000000_pump_export=9.0800000_w_vent=0.0000000_gamma_vent=0.0000000_w_thc=0.0000000_gamma_enso_ocn_NH=0.0000000_gamma_enso_ocn_SH=0.0000000_npp_tsens=0.0000000_lag_enso_land=5.9293432_gamma_enso_land_NH=0.6631895_gamma_enso_land_SH=0.6355964_w_enso_l2=16.7877440' (29 free parameters)
+
+PORT TARGETS written to /Users/MarcusMarcus/ccx_frozen/20261008d_obj18p2/calibration/torch/port_targets.csv
+
+      name           logpost           stored        offset
+      cold -60224.7943682490             <NA>          <NA>
+ incumbent  -1166.9497872756 -1166.3469990821 -0.6027881934
+ new_basin  -1167.9842255020 -1167.3649129642 -0.6193125378
+
+  arm N, 29 parameters, struct 'hilda_csl3v0kaidgbemwt', seas_ml 1, commit 8fc943e, host MacBook-Pro-2.local, R 4.5.3
+  ⚠ `stored` is each mode FILE's own logpost and is NOT the target: each
+    offset (incumbent -0.60, new_basin -0.62) is objective drift since that file was fitted, not a port defect.
+    (This line was a typed '-0.85' until 2026-09-07f; it is now GENERATED.)

@@ -1,0 +1,12 @@
+#18 pass 2 landing chain at c017090, 2026-10-08T08:21:48-0400
+== land  08:21:48
+   rc 0
+== collect  08:21:48
+   rc 0
+== basins  08:21:48
+   FAILED (rc 1): see /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/obj18p2_landing_20261008/basins.log
+calibration/diag_obj18_basins.R @c017090+dirty, 2026-10-08 08:21
+  wave /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261008d_hilda_csl3v0kaidgbemwt_seasml1_pin_obj18p2_sd1.0452
+  ⚠ TAGGED '_p2': read the provenance before quoting anything below
+Error: the wave's pins are not CCX_MODE_OBJ18_PINS
+Execution halted

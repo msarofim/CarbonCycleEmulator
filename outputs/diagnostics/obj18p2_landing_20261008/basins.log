@@ -1,0 +1,5 @@
+calibration/diag_obj18_basins.R @c017090+dirty, 2026-10-08 08:21
+  wave /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261008d_hilda_csl3v0kaidgbemwt_seasml1_pin_obj18p2_sd1.0452
+  ⚠ TAGGED '_p2': read the provenance before quoting anything below
+Error: the wave's pins are not CCX_MODE_OBJ18_PINS
+Execution halted

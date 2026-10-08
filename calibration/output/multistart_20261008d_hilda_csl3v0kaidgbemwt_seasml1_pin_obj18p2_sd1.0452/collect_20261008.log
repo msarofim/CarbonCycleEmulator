@@ -1,0 +1,34 @@
+
+==========================================================================
+DISPERSED MULTI-START SURVEY -- 2 starts under
+  /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261008d_hilda_csl3v0kaidgbemwt_seasml1_pin_obj18p2_sd1.0452
+==========================================================================
+  ⚠ reference start 'cold' (id 0) IS MISSING -- the port is NOT verified
+  reference incumbent  id 1  logpost   -1166.9497  port VERIFIED (rel 4.1e-14)
+  reference new_basin  id 2  logpost   -1167.9841  port VERIFIED (rel 1.2e-14)
+
+  2 of 2 starts CONVERGED, 0 ran out of CPU time (excluded from the
+  basin count, kept in the table), 0 spent their restart budget.
+  cluster radius 0.3073 = 0.25 x the measured inter-basin separation
+
+  ⇒ 2 DISTINCT BASINS among the 2 finished starts.
+
+   rank     id        logpost        vs best    basin  status    min clock  kind
+      1      1     -1166.9497         0.0000        1    conv     17   cpu  reference: INCUMBENT = hilda29a0 (OBJECTIVE #18 PASS 2 (Marcus 2026-10-08): #18's label, the module at the one-pass check's values at basin 1; the incumbent is #18's basin 1 (hilda29a0), the new basin #18's basin 2 (hilda29a6), both seeded at the pins: starts, not modes of this objective; scored under this build's objective, periodic spinup, evaluated at seas_ml 1)
+      2      2     -1167.9841        -1.0344        2    conv     24   cpu  reference: NEW BASIN = hilda29a6 (a registered PINNED mode, seeded at this array's pins; registered, evaluated at seas_ml 1)
+
+--------------------------------------------------------------------------
+  BEST FOUND      id 1 at -1166.9497
+  TO BEAT         id 1 (reference: INCUMBENT = hilda29a0 (OBJECTIVE #18 PASS 2 (Marcus 2026-10-08): #18's label, the module at the one-pass check's values at basin 1; the incumbent is #18's basin 1 (hilda29a0), the new basin #18's basin 2 (hilda29a6), both seeded at the pins: starts, not modes of this objective; scored under this build's objective, periodic spinup, evaluated at seas_ml 1)) at -1166.9497
+  difference      +0.0000 log-units
+  ⚠ the benchmark is the best of only 2 of the 5 known-basin starts;
+    ids 3, 4, 5 are MISSING and one of them could be higher.
+  ⚠ NO DISPERSED START finished, so the survey has not been run yet --
+    the table above is the known basins re-converged, and nothing more.
+  ⚠ A survey bounds what N starts at ONE dispersion found. It is not a
+    proof that no better basin exists ([[no_power_null]]: measure the
+    test's power before believing its null).
+
+  summary written to /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261008d_hilda_csl3v0kaidgbemwt_seasml1_pin_obj18p2_sd1.0452/summary.csv
+⛔ NOTHING IS ADOPTED.
+==========================================================================

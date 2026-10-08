@@ -1,0 +1,39 @@
+task 1  2026-10-08T07:55:43-0400
+GATE OPEN (structure 'hilda_csl3v0kaidgbemwt'): ndep_ret, npp_tsens, imb_share_land, imb_share_ocean_rest, lag_enso_land enter the fitted set
+PINNED (removed from the fitted set, held in the base): ent_seas_amp_SH = 0, w_eq = 27, gamma_eq = 1, pump_export = 9.08, w_vent = 0, gamma_vent = 0, w_thc = 0, gamma_enso_ocn_NH = 0, gamma_enso_ocn_SH = 0, npp_tsens = 0, lag_enso_land = 5.92934323194443, gamma_enso_land_NH = 0.663189508212327, gamma_enso_land_SH = 0.635596403167514, w_enso_l2 = 16.7877440291034 -> 29 free parameters
+run-time inputs present: 14/14. OK
+OVERRIDE CCX_MS_RESTARTS = 3 (default 3)
+OVERRIDE CCX_MS_CYCLES = 6 (default 6)
+OVERRIDE CCX_MS_MAXIT = 6000 (default 6000)
+OVERRIDE CCX_MS_BUDGET_MIN = 300 (default 180)
+OVERRIDE CCX_MS_CLOCK = cpu (default wall)
+OVERRIDE CCX_MS_SPREAD = 1.0452 (default 0.2282558)
+
+======================================================================
+DISPERSED MULTI-START, id 1, arm N, 29 parameters
+  host MacBook-Pro-2.local   R 4.5.3   seed 2026 + id
+  budget: 3 restarts x 6000 maxit x 6 cycles, CPU 300 min
+  ... on the CPU clock (CCX_MS_CLOCK; RECORDED in the start file): a sleep or a suspension does not spend
+      it. WALL time past 2 x the budget is FLAGGED, never stopped (D4, CHANGELOG 2026-10-05 o).
+  dispersion sd 1.0452 in u-space (measured per-coordinate RMS between
+    the two known basins = 0.2283, pooled over the 29 coordinates at least one of
+    them FITTED; over all 29 it would be 0.2283, diluted by the 0 migrated in BOTH:
+    none)
+  out /Users/MarcusMarcus/ccx_frozen/20261008d_obj18p2/calibration/output/preflight_20261008d/start_001.rds
+======================================================================
+  structure: 'hilda_csl3v0kaidgbemwt' (hs_frac=0.12841, tau_q=538, sst_hs=2, q_attach_from=1, kz_zscale=253, sst_NH=22.321, sst_SH=18.724, alpha_photo_eps=15.6, ml_nh_cycle=0, k_l2=3, w0_l2=27, npp_veg_frac=0, fert_k_prior=1, aod_mode=1, soil_inert_frac=0.19468, d2d3_free=1, imb_treatment=2, imb_with_cement=1, enso_lag_free=1, mix_strat_s=0.052198, mix_strat_q=1, mix_strat_tau=194.94, iav_cut=1, gcb_land_lowpass_df=6, gcb_enso_slope_row=0, enso_index=1, gcb_ocean_lowpass_df=6)
+  seasonal mixed layer: seas_ml = 1 (ON -- round 6; from CCX_MS_SEAS_ML, RECORDED in every start file and GATED against the port targets)
+  pump field: 'solved' (the SOLVED GLODAP-shape field -- every registered file; from CCX_MS_PUMP_FIELD, RECORDED in every start file and GATED against the port targets)
+infeasible-step penalty: log-post -1e+06 (= max(1e+06, 10 x |start|)); the start beats it by construction
+start point: reference: INCUMBENT = hilda29a0 (OBJECTIVE #18 PASS 2 (Marcus 2026-10-08): #18's label, the module at the one-pass check's values at basin 1; the incumbent is #18's basin 1 (hilda29a0), the new basin #18's basin 2 (hilda29a6), both seeded at the pins: starts, not modes of this objective; scored under this build's objective, periodic spinup, evaluated at seas_ml 1) (0 draws), log-post there = -1166.9498
+PORT GATE (a) at the incumbent reference point: here -1166.9497872756 vs MacBook-Pro-2.local@8fc943e -1166.9497872756,
+              |diff| 4.752e-11 (rel 4.07e-14)
+              roundoff floor here: max |delta lp| 2.714e-06 over 12 perturbations of u by 1e-12 (median 1.084e-06; 0 non-finite)
+              bound = max(1e-08 x |target| = 1.167e-05, 3 x floor = 8.143e-06) = 1.167e-05; ceiling 1e-06 x |target| = 1.167e-03
+PORT GATE (a) PASSED.
+measured 0.2200 CPU-s/eval (median of 5; range 0.2190-0.2230) => one 6000-eval restart
+  projects to 22.0 CPU-min; CPU budget 300 CPU-min, of which 32.4 CPU-min is RESERVED for the
+  BFGS polish (100 iterations)
+PREFLIGHT id 001 on MacBook-Pro-2.local: start REFERENCE, log-post -1166.9498, 0 draws, port VERIFIED rel 4.1e-14 (floor 2.7e-06, bound 1.2e-05),
+             0.2200 CPU-s/eval => a 6000-eval restart takes 22.0 CPU-min of a 300 CPU-min budget. LAUNCHABLE.
+done 2026-10-08T07:55:50-0400 exit 0
