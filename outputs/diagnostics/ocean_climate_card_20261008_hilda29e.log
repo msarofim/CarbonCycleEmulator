@@ -1,0 +1,14 @@
+calibration/build_ocean_climate_card.R @5696698 | canonical hilda29e (md5 bf4732da67ee22751d87ca9f95484b37) | 2026-10-08 17:05
+GATE inputs at the canonical's mode file: OC PASS, TS PASS, FS PASS
+
+2015-24 climate effect: CCX -0.433 +/- 0.036 GtC/yr (protocols -0.482 to -0.377) vs GCB -0.20 +/- 0.05 -> 2.16x (1.73-2.88x over GCB's 1 sigma)
+  as % of the CO2 effect: CCX -12.0 % vs GCB -7.1 % (models -10.7 to -4.2)
+  parts: thermal -0.459, ENSO limb + stratification +0.027
+per K of SST: CCX -0.532, GCB -0.295 GtC/yr per K -> ratio 1.81 +/- 0.40
+emergence (11-yr mean stays below -0.10): CCX 1972, GCB 1999 -> 27 years earlier
+futures, GCB-sized response (f 0.494; 0.385-0.603 over GCB's 1 sigma), CO2 change in 2300 (2100):
+  ssp585  -31.3 ppm (-38.0 to -24.7) of 1475.3; 2100 -10.9 of 960.2
+  vvH     -24.5 ppm (-29.6 to -19.3) of 1014.5; 2100 -8.2 of 646.6
+  vvM     -14.4 ppm (-17.4 to -11.3) of 575.3; 2100 -7.2 of 564.5
+provenance: calibration/build_ocean_climate_card.R @5696698; canonical hilda29e md5 bf4732da67ee22751d87ca9f95484b37; inputs ocean_climate_gobm_20261008_obj18p2b1.rds, h2_time_shape_20261008_hilda29e.rds, h2_futures_stake_20261008_hilda29e.rds; no RNG
+wrote data/ocean_climate_card.rds
