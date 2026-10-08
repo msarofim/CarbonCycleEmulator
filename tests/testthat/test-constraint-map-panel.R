@@ -208,3 +208,37 @@ test_that("7. a row total never prints as a bare 0, and the prose uses the SAME 
   retired <- sprintf("%.0f", rowSums(cm$MC))
   expect_true(any(retired == "0"))
 })
+
+# 2026-10-08 (h) (Marcus: "Main fit only"). At an interannual-CUT canonical the El Nino settings are fitted in a
+# separate step and are not on the map; the caveat box says so, COMPUTED from the product's `module` record. The
+# failure this guards is the caption silently vanishing (or silently staying) when the cut changes.
+.cmp_mod <- new.env(parent = globalenv())
+for (e in parse(file.path(.cmp_app, "global.R")))
+  if (is.call(e) && length(e) >= 3L && identical(as.character(e[[1]]), "<-") && is.name(e[[2]]) &&
+      as.character(e[[2]]) %in% c("APP_CMAP_MODULE_ROW_TEXT", "app_cmap_module_note")) eval(e, .cmp_mod)
+
+test_that("8. the map says the cut's El Nino settings are not on it -- exactly when the product is a cut arm", {
+  f <- file.path(.root, "data", "constraint_map.rds")
+  if (!file.exists(f)) skip("constraint map not built")
+  cm <- readRDS(f)
+  note <- .cmp_mod$app_cmap_module_note
+  expect_true(is.function(note))
+  # server.R places it in the map's caveat box (code, not a comment)
+  expect_true(any(grepl("app_cmap_module_note(APP_CMAP)", ccx_code_lines(.cmp_srv), fixed = TRUE)))
+  # the product's cut flag decides, and the note follows it
+  expect_true("iav_cut" %in% names(cm$provenance))
+  if (isTRUE(cm$provenance$iav_cut)) {
+    expect_setequal(cm$module$names, CCX_IAV_MODULE_NAMES)
+    expect_length(intersect(CCX_IAV_MODULE_NAMES, colnames(cm$M)), 0L)    # none of them is on the map
+    expect_length(intersect(cm$module$rows, rownames(cm$M)), 0L)           # nor the rows the module scores
+    txt <- note(cm)
+    expect_match(txt, "four El Niño settings", fixed = TRUE)
+    expect_match(txt, sprintf("%d–%d", cm$module$growth_window[1], cm$module$growth_window[2]), fixed = TRUE)
+  } else {
+    expect_null(note(cm))
+  }
+  # MUTATION: without the module record there is nothing to say; an unknown module row is an ERROR, not an omission
+  expect_null(note(within(cm, module <- NULL)))
+  bad <- cm; bad$module <- list(names = CCX_IAV_MODULE_NAMES, rows = "a_new_row", growth_window = c(1980L, 2024L))
+  expect_error(note(bad), "no plain-language text")
+})

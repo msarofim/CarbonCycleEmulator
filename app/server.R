@@ -1005,7 +1005,9 @@ function(input, output, session) {
                           "here is worth %s log-units and the weakest %s, so a bright",
                           "cell in a weak row is a large share of very little."),
                     fmt_cmap_total(max(tot)), fmt_cmap_total(min(tot)))
-          }))
+          }),
+          # 2026-10-08 (h): the cut's El Niño settings are not on the map; NULL (nothing) without the cut
+          app_cmap_module_note(APP_CMAP))
     )
   })
 

@@ -625,6 +625,28 @@ APP_CMAP_NOTE <- paste(
   "conditional Hessian standard deviation, which costs every parameter the same",
   "0.5 log-units. It says which measurements would notice a change, not what a",
   "different model structure would do.")
+# ⭐ 2026-10-08 (h) (Marcus: "Main fit only"). At an interannual-CUT canonical (hilda29e) the El Niño settings
+# are fitted in a SEPARATE step and held while everything on the map is fitted, so they are not on it -- and nor
+# is the measurement that step scores. COMPUTED from the product's `module` record (gated by
+# diag_constraint_map.R's GATE MODULE against the likelihood itself), so a canonical without the cut prints
+# nothing. A module row with no plain-language text here is an ERROR, never a silent omission.
+# ⚠ CLAUDE'S DRAFT, FOR MARCUS'S WORDING.
+APP_CMAP_MODULE_ROW_TEXT <- c(gcb_ocean_enso_slope = "how strongly the ocean sink follows El Niño")
+app_cmap_module_note <- function(cm = APP_CMAP) {
+  m <- cm$module
+  if (is.null(m) || !length(m$names)) return(NULL)
+  miss <- setdiff(m$rows, names(APP_CMAP_MODULE_ROW_TEXT))
+  if (length(miss))
+    stop("app_cmap_module_note(): no plain-language text for module row(s) ", paste(miss, collapse = ", "))
+  n <- length(m$names)
+  nw <- if (n <= 9L) c("one", "two", "three", "four", "five", "six", "seven", "eight", "nine")[n] else
+    as.character(n)
+  sprintf(paste(" Not on this map: the model's %s El Niño settings. They are fitted in a separate",
+                "step, to the month-to-month wobble in CO₂'s growth rate (%d–%d) and to %s, and",
+                "are held fixed while everything shown here is fitted."),
+          nw, m$growth_window[1], m$growth_window[2],
+          paste(APP_CMAP_MODULE_ROW_TEXT[m$rows], collapse = " and "))
+}
 # Which family each parameter belongs to, as a lookup for the parameter-level view.
 APP_CMAP_OF_PAR <- if (is.null(APP_CMAP)) NULL else {
   stats::setNames(rep(names(APP_CMAP$component), lengths(APP_CMAP$component)),

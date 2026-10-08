@@ -66,7 +66,7 @@ ccx_load_cpp()
 
 # ---- NAMED CONSTANTS: every label, filename and threshold derives from here ----
 CM_TAG        <- "constraint_map"
-CM_DATE       <- "20261006a"  # the SHIPPED canonical artifact's tag: hilda33p at its adoption (10-06 a; was 20261003h = hilda34g, 20261001k = hilda33d after the 10-01 (k) flip, 20261001 for that adoption build, 20260925 at hilda29l); see CM4. ⚠ MOVE IT AT EVERY ADOPTION: the canonical's log is named by it, so a stale tag overwrites the previous canonical's record (it did, 10-03, and was restored from git)
+CM_DATE       <- "20261008e"  # the SHIPPED canonical artifact's tag: hilda29e at its adoption (10-08 e; built 10-08 h after Marcus's "Main fit only" ruling; was 20261006a = hilda33p, 20261003h = hilda34g, 20261001k = hilda33d after the 10-01 (k) flip, 20261001 for that adoption build, 20260925 at hilda29l); see CM4. ⚠ MOVE IT AT EVERY ADOPTION: the canonical's log is named by it, so a stale tag overwrites the previous canonical's record (it did, 10-03, and was restored from git)
 # ⛔⛔ CM4  THE ARM (2026-09-26). The map used to be canonical-only. A SECOND
 #       evaluation point answers a question one point cannot: is the pins/pulls
 #       picture a property of the MODEL, or only of THIS FIT?
@@ -178,14 +178,22 @@ CM_ARM_ONLY_NAMES <- c("w_enso_l2",                                  # canonical
                        # and PINNED at 0 by the canonical hilda33p (objective #16, 2026-10-06)
                        "ndep_ret", "npp_tsens", "imb_share_land", "imb_share_ocean_rest",
                        # the LAG gate's name: only the lag label fits it (the canonical hilda34g, 2026-10-03)
-                       "lag_enso_land")
+                       "lag_enso_land",
+                       # the interannual CUT's module (objectives #17 / #18; the canonical hilda29e, 2026-10-08): fitted
+                       # by hilda33p and every earlier canonical, HELD at stage 1's values at a cut arm. With
+                       # w_enso_l2 and lag_enso_land above, that is all of CCX_IAV_MODULE_NAMES (GATE MODULE).
+                       "gamma_enso_land_NH", "gamma_enso_land_SH")
 
 # The observation families. ⚠ Same rule: every stream exactly once, gated.
+# ⚠ 2026-10-08 (h): like the components, this is now the UNION over registered arms (CM_FAMILY_ALL), restricted
+# below to the streams THIS arm's objective has (CM_FAMILY). The cut (iav_cut 1) moved `gcb_ocean_enso_slope` out
+# of the main objective into the stage-1 module, so at hilda29e its family is empty. COVER stays per-arm and
+# strict; GATE UNION now also requires every union stream absent from this arm to be in CM_ARM_ONLY_STREAMS.
 # ⚠ THESE STRINGS ARE READER-FACING: they are the app's own axis labels and
 # the subject of its computed prose, so they are typeset here rather than
 # mapped to pretty names in the app. A second naming table in `global.R` is
 # exactly the caption-sync bug class this project keeps hitting.
-CM_FAMILY <- list(
+CM_FAMILY_ALL <- list(
   "CO₂ level"                 = c("co2_level_MLO", "co2_level_SPO"),
   "CO₂ seasonal cycle"        = c("co2_seasonal_MLO", "co2_seasonal_SPO"),
   "CO₂ north–south gradient"  = c("co2_gradient"),
@@ -203,6 +211,8 @@ CM_FAMILY <- list(
   "Measured land & ocean sinks" = c("gcb_ocean_sink", "gcb_land_sink"),
   "ENSO–sink covariance"       = c("gcb_ocean_enso_slope")
 )
+# Streams a REGISTERED arm other than this one scores in its MAIN objective. Listed by hand, like the names.
+CM_ARM_ONLY_STREAMS <- c("gcb_ocean_enso_slope")   # hilda33p and earlier; the cut's stage-1 module at hilda29e
 
 dir.create(dirname(CM_LOG), showWarnings = FALSE, recursive = TRUE)
 cm_say <- function(...) { txt <- sprintf(...); cat(txt); cat(txt, file = CM_LOG, append = TRUE) }
@@ -294,6 +304,28 @@ cm_gates <- function(b) {
          length(stray), if (p4b) "PASS" else "*** FAIL ***",
          if (length(stray)) paste0(" {", paste(stray, collapse = ", "), "}") else "")
   ok <- ok && p4b
+  # ... and the same for STREAMS (2026-10-08 h): a union stream this arm does not score must be a declared one
+  stray_s <- setdiff(setdiff(unlist(CM_FAMILY_ALL, use.names = FALSE), names(b$streams)), CM_ARM_ONLY_STREAMS)
+  p4c <- length(stray_s) == 0L
+  cm_say("=== GATE UNION (streams) === union streams absent from this arm and NOT declared arm-only: %d -> %s%s\n",
+         length(stray_s), if (p4c) "PASS" else "*** FAIL ***",
+         if (length(stray_s)) paste0(" {", paste(stray_s, collapse = ", "), "}") else "")
+  ok <- ok && p4c
+
+  # MODULE (2026-10-08 h, Marcus: "Main fit only"): at a CUT arm the app says the El Nino settings are fitted in a
+  # separate step and are not on this map. That has to be TRUE of the arm: every module name held, none fitted,
+  # and the rows the main objective lost are declared ones. At an arm without the cut there is nothing to say.
+  # ⚠ The structure's flag is CROSS-CHECKED against the likelihood itself: the cut is exactly the arm whose main
+  # objective has no `gcb_ocean_enso_slope` stream (ccx_enso_slope_row_on). Without this, a wrongly-unset flag
+  # passed the gate trivially and dropped the caption in silence (mutation m4, 10-08 h).
+  slope_in_main <- "gcb_ocean_enso_slope" %in% names(b$streams)
+  p4d <- identical(CM_IAV_CUT, !slope_in_main) && (if (CM_IAV_CUT)
+    setequal(CM_MODULE$names, CCX_IAV_MODULE_NAMES) && !length(intersect(CCX_IAV_MODULE_NAMES, NAMES)) &&
+      length(CM_MODULE$rows) > 0L && all(CM_MODULE$rows %in% CM_ARM_ONLY_STREAMS) else is.null(CM_MODULE))
+  cm_say("=== GATE MODULE === iav_cut %s, slope row in the main objective %s; held module names {%s}; rows scored by the module {%s} -> %s\n",
+         CM_IAV_CUT, slope_in_main, paste(CM_MODULE$names, collapse = ", "), paste(CM_MODULE$rows, collapse = ", "),
+         if (p4d) "PASS" else "*** FAIL ***")
+  ok <- ok && p4d
 
   # SD: the step must exist and be usable for every name.
   # STEP: the sign convention is CHECKED, not assumed -- sqrt(diag(solve(-H)))
@@ -313,12 +345,22 @@ cm_gates <- function(b) {
 
 # ---------------------------------------------------------------------
 base <- cm_streams(u0)
+# CM4 for STREAMS (2026-10-08 h): the arm's own family table = the union restricted to the streams it scores
+CM_FAMILY <- Filter(length, lapply(CM_FAMILY_ALL, function(v) intersect(v, names(base$streams))))
+# The interannual cut: stage 1 fits CCX_IAV_MODULE_NAMES to the monthly detrended global growth (LIK_IAV_WIN) and
+# the rows the main objective dropped; stage 2 (this map) holds them. Recorded for the app's caption, gated above.
+CM_IAV_CUT <- isTRUE(bp[["iav_cut"]] == 1)
+CM_MODULE  <- if (!CM_IAV_CUT) NULL else
+  list(names = intersect(CCX_IAV_MODULE_NAMES, names(pins)),
+       rows = setdiff(unlist(CM_FAMILY_ALL, use.names = FALSE), names(base$streams)),
+       growth_window = LIK_IAV_WIN)
 cm_say("\n%s @%s, %s\n", CM_DRIVER, CM_COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M"))
 cm_say("[%s] mode %s, %d fitted names, %d streams, step = %.2f Hessian sd\n",
        CM_TAG, CM_MODE, length(NAMES), length(base$streams), CM_STEP_SD)
 cm_gates(base)
 
-if (identical(commandArgs(trailingOnly = TRUE)[1], "gates")) { cm_provenance(); quit(save = "no") }
+# "gates" in ANY position (2026-10-08 h): as the first argument only, `mode=hilda33p gates` ran the full build
+if ("gates" %in% commandArgs(trailingOnly = TRUE)) { cm_provenance(); quit(save = "no") }
 
 STREAMS <- names(base$streams)
 DHI <- DLO <- matrix(NA_real_, length(STREAMS), length(NAMES),
@@ -410,14 +452,14 @@ saveRDS(list(
   step_sd = CM_STEP_SD, step_kind = CM_STEP_KIND,
   pin_cut = CM_PIN_CUT,
   nonlin_flag = CM_NONLIN_FLAG, nonlin_flagged = nonlin,
-  component = CM_COMPONENT, family = CM_FAMILY,
+  component = CM_COMPONENT, family = CM_FAMILY, module = CM_MODULE,
   provenance = list(
     tag = CM_TAG, built = format(Sys.time(), "%Y-%m-%dT%H:%M:%S%z"),
     driver = CM_DRIVER, commit = CM_COMMIT,
     mode = CM_MODE, mode_file = ccx_mode_file(CM_MODE),
     stored_logpost = md$logpost, spinup = ccx_mode_spinup(md),
     struct = md$struct, pump_field = ccx_mode_pump_field(md),
-    pins = names(pins), n_eval = 2L * length(NAMES),
+    pins = names(pins), iav_cut = CM_IAV_CUT, n_eval = 2L * length(NAMES),
     step = CM_STEP_LABEL,
     sd_kind = paste("Laplace/Hessian at the mode -- NOT a sampled posterior;",
                     "conditional = 1/sqrt(diag(-H)), marginal = sqrt(diag(cov))"),
