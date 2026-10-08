@@ -31,7 +31,10 @@ for (f in list.files("R", pattern = "[.]R$", full.names = TRUE)) source(f)
 
 # ---- named constants (every label below derives from these) -------------------------------
 H2_DRIVER   <- "calibration/diag_h2_time_shape.R"
-H2_CCX_RDS  <- file.path("outputs", "diagnostics", "ocean_climate_gobm_20261005_obj16.rds")
+# the CCX series: diag_ocean_climate_gobm.R's `series` AT THE CANONICAL (the md5 gate below refuses any other).
+# CCX_H2_SERIES overrides it (2026-10-08 i: hilda29e's is ocean_climate_gobm_20261008_obj18p2b1.rds); the default
+# stays the 10-06 (j) run's, hilda33p's, so that record still reproduces from this file.
+H2_CCX_RDS  <- Sys.getenv("CCX_H2_SERIES", file.path("outputs", "diagnostics", "ocean_climate_gobm_20261005_obj16.rds"))
 H2_GCB_RDS  <- file.path("data", "gcb2025_s10_ocean_climate_global.rds")
 H2_SST_RDS  <- file.path("data", "forcing_sst.rds")
 H2_YEARS    <- 1959:2024
@@ -42,7 +45,7 @@ H2_EMERGE   <- -0.10                          # half of GCB's stated 2015-24 val
 H2_RUN      <- 11L                            # the running mean's width, years (an odd, centred window)
 H2_DECADES  <- list(`1960s` = 1960:1969, `1970s` = 1970:1979, `1980s` = 1980:1989, `1990s` = 1990:1999,
                     `2000s` = 2000:2009, `2010-14` = 2010:2014, `2015-24` = 2015:2024)
-H2_OUT      <- file.path("outputs", "diagnostics", sprintf("h2_time_shape_%s", format(Sys.Date(), "%Y%m%d")))
+H2_OUT      <- file.path("outputs", "diagnostics", sprintf("h2_time_shape_%s_%s", format(Sys.Date(), "%Y%m%d"), CCX_MODE_CANONICAL))
 COMMIT      <- ccx_git_stamp()
 
 LOGCON <- file(paste0(H2_OUT, ".log"), open = "wt"); sink(LOGCON, split = TRUE)
