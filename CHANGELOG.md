@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-07 (l) — Handoff: `notes/handoff_2026-10-07e_obj18_landing_armed.md` (Marcus: "Yes" to the offered handoff note). It supersedes `handoff_2026-10-07d_obj18_stage2_running.md`, which now points to it. Its §3 is the landing's read and report; the landing itself is ARMED (`~/ccx_frozen/20261007i_obj18_land_armed.sh`, PID 73011). The full suite at `5648307` (promote `--id` and the kit) was launched 20:54 EDT in a frozen tree → `outputs/diagnostics/suite_20261007_5648307.log`. **CLEAN: 6814 passed, 0 failed, 3 skipped** (the standing three), rc 0, 29.0 min (the wave holds 8 cores), 231 warnings. That is `c81f285`'s 6747 + `test-promote-id.R`'s 67, exactly. The duplicate-start driver fix (handoff §3 item 6) was then built on branch `ms-seed-fix` while the wave runs: see (m) on that branch; it is merged only after the landing is committed.
+
 ## 2026-10-07 (k) — **#18's LANDING KIT BUILT, VALIDATED ON #17's WAVE, AND DRY-RUN** (handoff 10-07d §3 items 2–6). promote can now promote a NAMED start (`--id`). The basin step decomposes every basin from the wave's start files before anything is promoted. One chain script serves both the dry run and the landing. **Validation on #17's own wave changed the rule: ranked on the likelihood ALONE, the second basin to read was a junk basin, 33.9 below on the stored logpost, whose priors cost −36.6. RULED: rank on likelihood + prior.** Also found: under the cut's pins, seeded starts 3 / 4 / 5 re-run 1 / 2 / 2 bit for bit, in #17's landed wave and in #18's. #17's "basin B ×8" was five distinct starts (corrected in place). Nothing adopted.
 
 - **Rulings this session, verbatim (AskUserQuestion):**

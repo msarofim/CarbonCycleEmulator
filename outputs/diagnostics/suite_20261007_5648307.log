@@ -1,0 +1,1992 @@
+Test passed with 10 successes 🥇.
+run-time inputs present: 14/14. OK
+SKIP: 'test-carbonate.R:17:3' ---------------------
+Reason: {seacarb} is not installed
+
+SKIP: 'test-carbonate.R:36:3' ---------------------
+Reason: {seacarb} is not installed
+
+WARNING: 'test-constants-batch.R:78:3' ------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1902), prod_c14 = sp$prod_c14) at test-constants-batch.R:78:3
+
+WARNING: 'test-conveyor.R:209:5' ------------------
+window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1960, 1961), prod_c14 = s$prod_c14) at test-conveyor.R:209:5
+
+WARNING: 'test-conveyor.R:209:5' ------------------
+window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1960, 1961), prod_c14 = s$prod_c14) at test-conveyor.R:209:5
+
+WARNING: 'test-conveyor.R:209:5' ------------------
+window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1960, 1961), prod_c14 = s$prod_c14) at test-conveyor.R:209:5
+
+WARNING: 'test-d14c-mid.R:65:3' -------------------
+window starts at 1955 with 168.6 GtC of land-use carbon already emitted, so the land's equilibrium is 7.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1955, 1960), prod_c14 = sp$prod_c14) at test-d14c-mid.R:65:3
+
+WARNING: 'test-d14c-profile-gnorm.R:64:3' ----------
+window starts at 1955 with 168.6 GtC of land-use carbon already emitted, so the land's equilibrium is 7.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1955, 1960), prod_c14 = sp$prod_c14) at test-d14c-profile-gnorm.R:64:3
+
+WARNING: 'test-d14c-profile-mvn.R:74:3' -----------
+window starts at 1955 with 168.6 GtC of land-use carbon already emitted, so the land's equilibrium is 7.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1955, 1960), prod_c14 = sp$prod_c14) at test-d14c-profile-mvn.R:74:3
+
+WARNING: 'test-enso-demean.R:74:3' ----------------
+window starts at 1980 with 215.6 GtC of land-use carbon already emitted, so the land's equilibrium is 10.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─edm_enso(c(1980, 2024), TRUE) at test-enso-demean.R:74:3
+ 2.   └─global ccx_build_forcing("historical", yrs, prod_c14 = 0, bomb_total_kmol = 102) at test-enso-demean.R:30:3
+
+SEEDING w_eq for the edm_price: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the edm_price: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the edm_price: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the edm_price: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the edm_price: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_thc for the edm_price: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_enso_l2 for the edm_price: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 18.7.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the fixture: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The file held it OFF; this arm fits it.
+SEEDING gamma_vent for the fixture: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The file held it OFF; this arm fits it.
+SEEDING w_thc for the fixture: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The file held it OFF; this arm fits it.
+WARNING: 'test-eq-cell.R:184:3' -------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1902), prod_c14 = a$prod_c14) at test-eq-cell.R:184:3
+
+WARNING: 'test-eq-cell.R:277:3' -------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1902), prod_c14 = sp$prod_c14) at test-eq-cell.R:277:3
+
+WARNING: 'test-eq-cell.R:280:5' -------------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], pe, fr, sp$grid, sp$aux) at test-eq-cell.R:280:5
+ 2.   └─global carb_constants(sst_hs)
+
+WARNING: 'test-eq-cell.R:280:5' -------------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], pe, fr, sp$grid, sp$aux) at test-eq-cell.R:280:5
+ 2.   └─global carb_constants(sst_hs)
+
+WARNING: 'test-eq-cell.R:300:3' -------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1901), prod_c14 = sp$prod_c14) at test-eq-cell.R:300:3
+
+WARNING: 'test-eq-cell.R:304:3' -------------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(...) at test-eq-cell.R:304:3
+ 2.   └─global carb_constants(sst_hs)
+
+WARNING: 'test-eq-cell.R:411:3' -------------------
+window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1960, 1962), prod_c14 = sp0$prod_c14) at test-eq-cell.R:411:3
+
+WARNING: 'test-fluxes.R:246:3' --------------------
+window starts at 2015 with 275.6 GtC of land-use carbon already emitted, so the land's equilibrium is 12.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(2015, 2024), prod_c14 = s$prod_c14) at test-fluxes.R:246:3
+
+WARNING: 'test-forcing.R:42:3' --------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 2000), prod_c14 = 360) at test-forcing.R:42:3
+
+WARNING: 'test-forcing.R:102:5' -------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing(...) at test-forcing.R:102:5
+
+WARNING: 'test-forcing.R:102:5' -------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing(...) at test-forcing.R:102:5
+
+WARNING: 'test-forcing.R:102:5' -------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing(...) at test-forcing.R:102:5
+
+WARNING: 'test-forcing.R:171:3' -------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1910), prod_c14 = 0) at test-forcing.R:171:3
+
+WARNING: 'test-gcb-enso-slope.R:36:3' -------------
+essentially perfect fit: summary may be unreliable
+Backtrace:
+    ▆
+ 1. └─global ccx_enso_slope(yrs, sink, idx) at test-gcb-enso-slope.R:36:3
+ 2.   ├─base::summary(f)
+ 3.   └─stats::summary.lm(f)
+
+WARNING: 'test-gcb-enso-slope.R:39:3' -------------
+essentially perfect fit: summary may be unreliable
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_equal(...) at test-gcb-enso-slope.R:39:3
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. ├─base::unname(ccx_enso_slope(yrs, sink, idx2)[["slope"]])
+ 5. └─global ccx_enso_slope(yrs, sink, idx2)
+ 6.   ├─base::summary(f)
+ 7.   └─stats::summary.lm(f)
+
+fatal: :(exclude)/var/folders/v2/ms445cpj20171v9g678ngbw80000gn/T//RtmpYRJgJN/elsewhere.rds: '/var/folders/v2/ms445cpj20171v9g678ngbw80000gn/T//RtmpYRJgJN/elsewhere.rds' is outside repository at '/private/var/folders/v2/ms445cpj20171v9g678ngbw80000gn/T/RtmpYRJgJN/git stamp (scratch) 11f4b1769eec3'
+error: bad signature 0x5a5a5a5a
+fatal: index file corrupt
+fatal: Needed a single revision
+WARNING: 'test-hilda-boxes.R:96:3' ----------------
+window starts at 1850 with 41.8 GtC of land-use carbon already emitted, so the land's equilibrium is 2.0 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1850, 1851), prod_c14 = sp$prod_c14) at test-hilda-boxes.R:96:3
+
+WARNING: 'test-hilda-boxes.R:98:3' ----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, 1850, p, fr, sp$grid, sp$aux) at test-hilda-boxes.R:98:3
+ 2.   └─global carb_constants(sst_hs)
+
+WARNING: 'test-hilda-boxes.R:98:3' ----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, 1850, p, fr, sp$grid, sp$aux) at test-hilda-boxes.R:98:3
+ 2.   └─global carb_constants(sst_hs)
+
+SEEDING w_eq for the hml-floor hilda31s2: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the hml-floor hilda31s2: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the hml-floor hilda31s2: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the hml-floor hilda31s2: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the hml-floor hilda31s2: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_thc for the hml-floor hilda31s2: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_enso_l2 for the hml-floor hilda31s2: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 18.7.
+     The ancestor held no opinion about this coordinate.
+WARNING: 'test-hs-asx-frac.R:51:5' ----------------
+window starts at 1955 with 168.6 GtC of land-use carbon already emitted, so the land's equilibrium is 7.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─run(1) at test-hs-asx-frac.R:53:3
+ 2.   └─global ccx_build_forcing("historical", c(1955, 1975), prod_c14 = sp$prod_c14) at test-hs-asx-frac.R:51:5
+
+WARNING: 'test-hs-asx-frac.R:51:5' ----------------
+window starts at 1955 with 168.6 GtC of land-use carbon already emitted, so the land's equilibrium is 7.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─run(0.5) at test-hs-asx-frac.R:53:16
+ 2.   └─global ccx_build_forcing("historical", c(1955, 1975), prod_c14 = sp$prod_c14) at test-hs-asx-frac.R:51:5
+
+WARNING: 'test-hs-asx-frac.R:62:3' ----------------
+window starts at 1850 with 41.8 GtC of land-use carbon already emitted, so the land's equilibrium is 2.0 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1850, 1851), prod_c14 = sp$prod_c14) at test-hs-asx-frac.R:62:3
+
+WARNING: 'test-hs-asx-frac.R:64:3' ----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_equal(...) at test-hs-asx-frac.R:64:3
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. └─global ccx_deriv(sp$y, 1850, p, fr, sp$grid, sp$aux)
+ 5.   └─global carb_constants(sst_hs)
+
+WARNING: 'test-hs-asx-frac.R:64:3' ----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_equal(...) at test-hs-asx-frac.R:64:3
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. └─global ccx_deriv(sp$y, 1850, p, fr, sp$grid, sp$aux)
+ 5.   └─global carb_constants(sst_hs)
+
+WARNING: 'test-hs-surface-rows.R:65:3' ------------
+ccx_model_ocean_gradient(): the run ends at 1760.95833333333, before the gradient epochs (surf 1999.8359144806 / deep 2002.36939862517); the ocean_grad rows are ABSENT for this run.
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_null(ccx_ocean_grad_scored(off$out, off$sp)$hs_surf) at test-hs-surface-rows.R:65:3
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. └─global ccx_ocean_grad_scored(off$out, off$sp)
+ 5.   └─global ccx_model_ocean_gradient(...)
+
+WARNING: 'test-hs-surface-rows.R:65:3' ------------
+ccx_model_ocean_gradient(): the run ends at 1760.95833333333, before the gradient epochs (surf 1999.78376064822 / deep 2002.15572943936); the ocean_grad rows are ABSENT for this run.
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_null(ccx_ocean_grad_scored(off$out, off$sp)$hs_surf) at test-hs-surface-rows.R:65:3
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. └─global ccx_ocean_grad_scored(off$out, off$sp)
+ 5.   └─global ccx_model_ocean_gradient(...)
+
+WARNING: 'test-kz-profile.R:60:3' -----------------
+window starts at 1955 with 168.6 GtC of land-use carbon already emitted, so the land's equilibrium is 7.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1955, 1960), prod_c14 = s1$prod_c14) at test-kz-profile.R:60:3
+
+WARNING: 'test-kz-profile.R:91:3' -----------------
+window starts at 1850 with 41.8 GtC of land-use carbon already emitted, so the land's equilibrium is 2.0 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1850, 1851), prod_c14 = sp$prod_c14) at test-kz-profile.R:91:3
+
+WARNING: 'test-kz-profile.R:93:3' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, 1850, p, fr, sp$grid, sp$aux) at test-kz-profile.R:93:3
+ 2.   └─global carb_constants(sst_hs)
+
+WARNING: 'test-kz-profile.R:93:3' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, 1850, p, fr, sp$grid, sp$aux) at test-kz-profile.R:93:3
+ 2.   └─global carb_constants(sst_hs)
+
+SEEDING w_enso_l2 for the test: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 18.7.
+     The ancestor held no opinion about this coordinate.
+SEEDING ent_seas_amp_SH for the test: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "log" cannot encode. Starting at the table init 6.55246.
+     The file held it OFF; this arm fits it.
+SEEDING w_vent for the test: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The file held it OFF; this arm fits it.
+SEEDING gamma_vent for the test: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The file held it OFF; this arm fits it.
+SEEDING w_thc for the test: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The file held it OFF; this arm fits it.
+WARNING: 'test-l2-enso-limb.R:97:3' ---------------
+window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1960, 1962), prod_c14 = a$prod_c14) at test-l2-enso-limb.R:97:3
+
+WARNING: 'test-l2-enso-limb.R:135:5' --------------
+window starts at 1996 with 242.4 GtC of land-use carbon already emitted, so the land's equilibrium is 11.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1996, 1999), prod_c14 = sp$prod_c14) at test-l2-enso-limb.R:135:5
+
+WARNING: 'test-l2-enso-limb.R:135:5' --------------
+window starts at 1996 with 242.4 GtC of land-use carbon already emitted, so the land's equilibrium is 11.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1996, 1999), prod_c14 = sp$prod_c14) at test-l2-enso-limb.R:135:5
+
+WARNING: 'test-l2-enso-limb.R:135:5' --------------
+window starts at 1996 with 242.4 GtC of land-use carbon already emitted, so the land's equilibrium is 11.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1996, 1999), prod_c14 = sp$prod_c14) at test-l2-enso-limb.R:135:5
+
+SKIP: 'test-l2-enso-limb.R:218:3' -----------------
+Reason: the canonical does not hold w_enso_l2
+
+WARNING: 'test-likelihood.R:76:3' -----------------
+window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1950, 2000), prod_c14 = sp$prod_c14) at test-likelihood.R:76:3
+
+WARNING: 'test-likelihood.R:344:5' ----------------
+window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─run_ll(p) at test-likelihood.R:350:3
+ 2.   └─global ccx_build_forcing("historical", c(1960, 2024), prod_c14 = sp$prod_c14) at test-likelihood.R:344:5
+
+WARNING: 'test-likelihood.R:344:5' ----------------
+window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─run_ll(p2) at test-likelihood.R:356:3
+ 2.   └─global ccx_build_forcing("historical", c(1960, 2024), prod_c14 = sp$prod_c14) at test-likelihood.R:344:5
+
+WARNING: 'test-likelihood.R:415:5' ----------------
+window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─base::vapply(amps, seas_ll, numeric(1), phase = 3.5) at test-likelihood.R:420:3
+ 2.   └─FUN(X[[i]], ...)
+ 3.     └─global ccx_build_forcing("historical", c(1950, 2024), prod_c14 = sp$prod_c14) at test-likelihood.R:415:5
+
+WARNING: 'test-likelihood.R:415:5' ----------------
+window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─base::vapply(amps, seas_ll, numeric(1), phase = 3.5) at test-likelihood.R:420:3
+ 2.   └─FUN(X[[i]], ...)
+ 3.     └─global ccx_build_forcing("historical", c(1950, 2024), prod_c14 = sp$prod_c14) at test-likelihood.R:415:5
+
+WARNING: 'test-likelihood.R:415:5' ----------------
+window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─base::vapply(amps, seas_ll, numeric(1), phase = 3.5) at test-likelihood.R:420:3
+ 2.   └─FUN(X[[i]], ...)
+ 3.     └─global ccx_build_forcing("historical", c(1950, 2024), prod_c14 = sp$prod_c14) at test-likelihood.R:415:5
+
+WARNING: 'test-likelihood.R:415:5' ----------------
+window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─base::vapply(phs, function(ph) seas_ll(20, ph), numeric(1)) at test-likelihood.R:424:3
+ 2.   └─FUN(X[[i]], ...)
+ 3.     └─seas_ll(20, ph) at test-likelihood.R:424:21
+ 4.       └─global ccx_build_forcing("historical", c(1950, 2024), prod_c14 = sp$prod_c14) at test-likelihood.R:415:5
+
+WARNING: 'test-likelihood.R:415:5' ----------------
+window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─base::vapply(phs, function(ph) seas_ll(20, ph), numeric(1)) at test-likelihood.R:424:3
+ 2.   └─FUN(X[[i]], ...)
+ 3.     └─seas_ll(20, ph) at test-likelihood.R:424:21
+ 4.       └─global ccx_build_forcing("historical", c(1950, 2024), prod_c14 = sp$prod_c14) at test-likelihood.R:415:5
+
+WARNING: 'test-likelihood.R:415:5' ----------------
+window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─base::vapply(phs, function(ph) seas_ll(20, ph), numeric(1)) at test-likelihood.R:424:3
+ 2.   └─FUN(X[[i]], ...)
+ 3.     └─seas_ll(20, ph) at test-likelihood.R:424:21
+ 4.       └─global ccx_build_forcing("historical", c(1950, 2024), prod_c14 = sp$prod_c14) at test-likelihood.R:415:5
+
+WARNING: 'test-likelihood.R:722:3' ----------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 2024), prod_c14 = sp$prod_c14) at test-likelihood.R:722:3
+
+WARNING: 'test-luc-scale.R:47:3' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 2024), prod_c14 = 0) at test-luc-scale.R:47:3
+
+WARNING: 'test-luc-scale.R:48:3' ------------------
+window starts at 1900 with 44.0 GtC of land-use carbon already emitted, so the land's equilibrium is 2.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing(...) at test-luc-scale.R:48:3
+
+WARNING: 'test-mixing-strat.R:105:3' --------------
+window starts at 1996 with 242.4 GtC of land-use carbon already emitted, so the land's equilibrium is 11.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing(...) at test-mixing-strat.R:105:3
+
+SEEDING w_eq for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_thc for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_enso_l2 for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 18.7.
+     The ancestor held no opinion about this coordinate.
+
+  [test-mode-file] PINNED canonical hilda33p: likelihood -1089.0969 on 25 common rows; parent hilda32f -1121.5614 (price +32.4644, RECORDED not gated); control hilda31pe -1120.4247 (+31.3278)
+WARNING: 'test-npp-record.R:16:1' -----------------
+window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1950, 1975), prod_c14 = sp_npp$prod_c14) at test-npp-record.R:16:1
+
+WARNING: 'test-ocean-advection.R:86:3' ------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", YRS, prod_c14 = s_new$prod_c14) at test-ocean-advection.R:86:3
+
+WARNING: 'test-ocean-advection.R:101:3' -----------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─run_w(0) at test-ocean-advection.R:101:3
+ 2.   └─run_w_raw(w, years, grad) at test-ocean-advection.R:38:3
+ 3.     └─global ccx_build_forcing("historical", years, prod_c14 = s$prod_c14) at test-ocean-advection.R:45:3
+
+WARNING: 'test-ocean-advection.R:102:3' -----------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─run_w(W_TEST) at test-ocean-advection.R:102:3
+ 2.   └─run_w_raw(w, years, grad) at test-ocean-advection.R:38:3
+ 3.     └─global ccx_build_forcing("historical", years, prod_c14 = s$prod_c14) at test-ocean-advection.R:45:3
+
+WARNING: 'test-ocean-advection.R:140:3' -----------
+window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1960, 1961), prod_c14 = s$prod_c14) at test-ocean-advection.R:140:3
+
+WARNING: 'test-ocean-advection.R:178:3' -----------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─run_w(W_TEST, grad = 0) at test-ocean-advection.R:178:3
+ 2.   └─run_w_raw(w, years, grad) at test-ocean-advection.R:38:3
+ 3.     └─global ccx_build_forcing("historical", years, prod_c14 = s$prod_c14) at test-ocean-advection.R:45:3
+
+WARNING: 'test-ocean-advection.R:179:3' -----------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─run_w_out(W_TEST, grad = 0) at test-ocean-advection.R:179:3
+ 2.   └─global ccx_build_forcing("historical", years, prod_c14 = s$prod_c14) at test-ocean-advection.R:57:3
+
+WARNING: 'test-ocean-advection.R:242:3' -----------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─run_w_out(W_TEST) at test-ocean-advection.R:242:3
+ 2.   └─global ccx_build_forcing("historical", years, prod_c14 = s$prod_c14) at test-ocean-advection.R:57:3
+
+WARNING: 'test-option-e.R:78:3' -------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1902), prod_c14 = a$prod_c14) at test-option-e.R:78:3
+
+WARNING: 'test-option-e.R:151:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-option-e.R:151:5
+
+WARNING: 'test-option-e.R:153:7' ------------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-option-e.R:153:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-option-e.R:153:7' ------------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-option-e.R:153:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-option-e.R:151:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-option-e.R:151:5
+
+WARNING: 'test-option-e.R:153:7' ------------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-option-e.R:153:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-option-e.R:153:7' ------------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-option-e.R:153:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+
+  N-E1: export matching the canonical's PI bottom-minus-ML gradient (366.8 umol/kg): 9.99 GtC/yr (the solved field: 59.0);
+        ocean_grad_dic +0.38, ocean_grad_d13c -2.94 log-units vs the canonical
+        DIC minus ML, solved | martin, umol/kg by layer:
+         55|11  116|20  165|31  208|49  249|77  299|131  347|229  366|326  367|345  367|367 
+WARNING: 'test-param-absent-ok.R:92:3' ------------
+window starts at 1990 with 232.5 GtC of land-use carbon already emitted, so the land's equilibrium is 10.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1990, 1992), prod_c14 = sp$prod_c14) at test-param-absent-ok.R:92:3
+
+WARNING: 'test-parity.R:103:3' --------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1980), prod_c14 = sp$prod_c14) at test-parity.R:103:3
+
+WARNING: 'test-parity.R:162:3' --------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1980), prod_c14 = sp$prod_c14) at test-parity.R:162:3
+
+WARNING: 'test-parity.R:209:3' --------------------
+window starts at 1800 with 15.6 GtC of land-use carbon already emitted, so the land's equilibrium is 0.7 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1800, 1900), prod_c14 = 0) at test-parity.R:209:3
+
+WARNING: 'test-parity.R:221:3' --------------------
+window starts at 1800 with 15.6 GtC of land-use carbon already emitted, so the land's equilibrium is 0.7 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1800, 1900), prod_c14 = 0) at test-parity.R:221:3
+
+WARNING: 'test-parity.R:381:3' --------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1980), prod_c14 = sp$prod_c14) at test-parity.R:381:3
+
+WARNING: 'test-parity.R:411:3' --------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1980), prod_c14 = s0$prod_c14) at test-parity.R:411:3
+
+WARNING: 'test-parity.R:428:3' --------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1905), prod_c14 = sp$prod_c14) at test-parity.R:428:3
+
+SEEDING w_vent for the pinned-arm: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The file held it OFF; this arm fits it.
+SEEDING gamma_vent for the pinned-arm: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The file held it OFF; this arm fits it.
+SEEDING w_thc for the pinned-arm: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The file held it OFF; this arm fits it.
+SEEDING w_vent for the score: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The file held it OFF; this arm fits it.
+SEEDING gamma_vent for the score: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The file held it OFF; this arm fits it.
+SEEDING w_thc for the score: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The file held it OFF; this arm fits it.
+SEEDING w_vent for the score: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The file held it OFF; this arm fits it.
+SEEDING gamma_vent for the score: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The file held it OFF; this arm fits it.
+SEEDING w_thc for the score: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The file held it OFF; this arm fits it.
+WARNING: 'test-prior-z.R:92:3' --------------------
+NaNs produced
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_true(is.na(ccx_prior_z("h_ml", 39.8))) at test-prior-z.R:92:3
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. └─global ccx_prior_z("h_ml", 39.8)
+ 5.   └─global .to_unc(x, s)
+ 6.     └─stats::qlogis((v - s$lo)/(s$hi - s$lo))
+
+WARNING: 'test-pump-hs-seas.R:73:3' ---------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1902), prod_c14 = a$prod_c14) at test-pump-hs-seas.R:73:3
+
+WARNING: 'test-pump-hs-seas.R:132:5' --------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-pump-hs-seas.R:132:5
+
+WARNING: 'test-pump-hs-seas.R:134:7' --------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-hs-seas.R:134:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-hs-seas.R:134:7' --------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-hs-seas.R:134:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-hs-seas.R:132:5' --------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-pump-hs-seas.R:132:5
+
+WARNING: 'test-pump-hs-seas.R:134:7' --------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-hs-seas.R:134:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-hs-seas.R:134:7' --------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-hs-seas.R:134:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-hs-seas.R:132:5' --------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-pump-hs-seas.R:132:5
+
+WARNING: 'test-pump-hs-seas.R:134:7' --------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-hs-seas.R:134:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-hs-seas.R:134:7' --------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-hs-seas.R:134:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-hs-seas.R:132:5' --------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-pump-hs-seas.R:132:5
+
+WARNING: 'test-pump-hs-seas.R:134:7' --------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-hs-seas.R:134:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-hs-seas.R:134:7' --------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-hs-seas.R:134:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-hs-seas.R:132:5' --------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-pump-hs-seas.R:132:5
+
+WARNING: 'test-pump-hs-seas.R:134:7' --------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-hs-seas.R:134:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-hs-seas.R:134:7' --------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-hs-seas.R:134:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-hs-seas.R:132:5' --------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-pump-hs-seas.R:132:5
+
+WARNING: 'test-pump-hs-seas.R:134:7' --------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-hs-seas.R:134:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-hs-seas.R:134:7' --------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-hs-seas.R:134:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-hs-seas.R:132:5' --------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-pump-hs-seas.R:132:5
+
+WARNING: 'test-pump-hs-seas.R:134:7' --------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-hs-seas.R:134:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-hs-seas.R:134:7' --------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-hs-seas.R:134:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-hs-seas.R:132:5' --------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-pump-hs-seas.R:132:5
+
+WARNING: 'test-pump-hs-seas.R:134:7' --------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-hs-seas.R:134:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-hs-seas.R:134:7' --------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-hs-seas.R:134:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:53:3' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1902), prod_c14 = a$prod_c14) at test-pump-seas.R:53:3
+
+WARNING: 'test-pump-seas.R:98:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-pump-seas.R:98:5
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:98:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-pump-seas.R:98:5
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:98:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-pump-seas.R:98:5
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:98:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-pump-seas.R:98:5
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:98:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-pump-seas.R:98:5
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:98:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-pump-seas.R:98:5
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:98:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-pump-seas.R:98:5
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:98:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-pump-seas.R:98:5
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:98:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-pump-seas.R:98:5
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:98:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-pump-seas.R:98:5
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:98:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-pump-seas.R:98:5
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:98:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-pump-seas.R:98:5
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:98:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-pump-seas.R:98:5
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:98:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-pump-seas.R:98:5
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:98:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-pump-seas.R:98:5
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:98:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-pump-seas.R:98:5
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump-seas.R:100:7' -----------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-pump-seas.R:100:7
+ 2.   └─global .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
+ 3.     └─global carb_constants(sst_hs)
+
+WARNING: 'test-pump.R:52:3' -----------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1960), prod_c14 = s0$prod_c14) at test-pump.R:52:3
+
+WARNING: 'test-review-0916-fixes.R:18:3' ----------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-review-0916-fixes.R:18:3
+
+WARNING: 'test-review-0916-fixes.R:58:3' ----------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1902), prod_c14 = sp$prod_c14) at test-review-0916-fixes.R:58:3
+
+SEEDING w_vent for the fixture: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The file held it OFF; this arm fits it.
+SEEDING gamma_vent for the fixture: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The file held it OFF; this arm fits it.
+SEEDING w_thc for the fixture: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The file held it OFF; this arm fits it.
+WARNING: 'test-seas-lag-split.R:251:5' ------------
+NaNs produced
+Backtrace:
+     ▆
+  1. ├─testthat::expect_error(ccx_par_to_unc(mig), "ent_seas_amp_SH") at test-seas-lag-split.R:251:5
+  2. │ └─testthat:::quasi_capture(...)
+  3. │   ├─testthat (local) .capture(...)
+  4. │   │ └─base::withCallingHandlers(...)
+  5. │   └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+  6. └─global ccx_par_to_unc(mig)
+  7.   └─base::vapply(...)
+  8.     └─FUN(X[[i]], ...)
+  9.       └─global .to_unc(p[[n]], CCX_PARAM_TABLE[[n]])
+ 10.         └─stats::qlogis((v - s$lo)/(s$hi - s$lo))
+
+WARNING: 'test-seas-lag-split.R:251:5' ------------
+NaNs produced
+Backtrace:
+     ▆
+  1. ├─testthat::expect_error(ccx_par_to_unc(mig), "ent_seas_amp_SH") at test-seas-lag-split.R:251:5
+  2. │ └─testthat:::quasi_capture(...)
+  3. │   ├─testthat (local) .capture(...)
+  4. │   │ └─base::withCallingHandlers(...)
+  5. │   └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+  6. └─global ccx_par_to_unc(mig)
+  7.   └─base::vapply(...)
+  8.     └─FUN(X[[i]], ...)
+  9.       └─global .to_unc(p[[n]], CCX_PARAM_TABLE[[n]])
+ 10.         └─stats::qlogis((v - s$lo)/(s$hi - s$lo))
+
+WARNING: 'test-seas-lag-split.R:251:5' ------------
+NaNs produced
+Backtrace:
+     ▆
+  1. ├─testthat::expect_error(ccx_par_to_unc(mig), "ent_seas_amp_SH") at test-seas-lag-split.R:251:5
+  2. │ └─testthat:::quasi_capture(...)
+  3. │   ├─testthat (local) .capture(...)
+  4. │   │ └─base::withCallingHandlers(...)
+  5. │   └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+  6. └─global ccx_par_to_unc(mig)
+  7.   └─base::vapply(...)
+  8.     └─FUN(X[[i]], ...)
+  9.       └─global .to_unc(p[[n]], CCX_PARAM_TABLE[[n]])
+ 10.         └─stats::qlogis((v - s$lo)/(s$hi - s$lo))
+
+SEEDING ent_seas_amp_SH for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 6.55246.
+     The ancestor held no opinion about this coordinate.
+SEEDING kz_deep_frac for the test-seas-lag-split: the migration filled 1 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.05.
+     The ancestor held no opinion about this coordinate.
+WARNING: 'test-seas-lag-split.R:263:5' ------------
+NaNs produced
+Backtrace:
+    ▆
+ 1. └─global ccx_seed_unencodable(mig, "test-seas-lag-split") at test-seas-lag-split.R:263:5
+ 2.   └─global .to_unc(p[[nm]], s)
+ 3.     └─stats::qlogis((v - s$lo)/(s$hi - s$lo))
+
+SEEDING pump_hs_gcm2 for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 22.9.
+     The ancestor held no opinion about this coordinate.
+WARNING: 'test-seas-lag-split.R:263:5' ------------
+NaNs produced
+Backtrace:
+    ▆
+ 1. └─global ccx_seed_unencodable(mig, "test-seas-lag-split") at test-seas-lag-split.R:263:5
+ 2.   └─global .to_unc(p[[nm]], s)
+ 3.     └─stats::qlogis((v - s$lo)/(s$hi - s$lo))
+
+SEEDING w_eq for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_thc for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_enso_l2 for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 18.7.
+     The ancestor held no opinion about this coordinate.
+  [from90] unencodable after seeding: h_ml
+WARNING: 'test-seas-lag-split.R:280:7' ------------
+NaNs produced
+Backtrace:
+     ▆
+  1. ├─testthat::expect_error(ccx_par_to_unc(seeded), n, fixed = TRUE) at test-seas-lag-split.R:280:7
+  2. │ └─testthat:::quasi_capture(...)
+  3. │   ├─testthat (local) .capture(...)
+  4. │   │ └─base::withCallingHandlers(...)
+  5. │   └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+  6. └─global ccx_par_to_unc(seeded)
+  7.   └─base::vapply(...)
+  8.     └─FUN(X[[i]], ...)
+  9.       └─global .to_unc(p[[n]], CCX_PARAM_TABLE[[n]])
+ 10.         └─stats::qlogis((v - s$lo)/(s$hi - s$lo))
+
+WARNING: 'test-seas-lag-split.R:251:5' ------------
+NaNs produced
+Backtrace:
+     ▆
+  1. ├─testthat::expect_error(ccx_par_to_unc(mig), "ent_seas_amp_SH") at test-seas-lag-split.R:251:5
+  2. │ └─testthat:::quasi_capture(...)
+  3. │   ├─testthat (local) .capture(...)
+  4. │   │ └─base::withCallingHandlers(...)
+  5. │   └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+  6. └─global ccx_par_to_unc(mig)
+  7.   └─base::vapply(...)
+  8.     └─FUN(X[[i]], ...)
+  9.       └─global .to_unc(p[[n]], CCX_PARAM_TABLE[[n]])
+ 10.         └─stats::qlogis((v - s$lo)/(s$hi - s$lo))
+
+WARNING: 'test-seas-lag-split.R:251:5' ------------
+NaNs produced
+Backtrace:
+     ▆
+  1. ├─testthat::expect_error(ccx_par_to_unc(mig), "ent_seas_amp_SH") at test-seas-lag-split.R:251:5
+  2. │ └─testthat:::quasi_capture(...)
+  3. │   ├─testthat (local) .capture(...)
+  4. │   │ └─base::withCallingHandlers(...)
+  5. │   └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+  6. └─global ccx_par_to_unc(mig)
+  7.   └─base::vapply(...)
+  8.     └─FUN(X[[i]], ...)
+  9.       └─global .to_unc(p[[n]], CCX_PARAM_TABLE[[n]])
+ 10.         └─stats::qlogis((v - s$lo)/(s$hi - s$lo))
+
+SEEDING ent_seas_amp_SH for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 6.55246.
+     The ancestor held no opinion about this coordinate.
+SEEDING kz_deep_frac for the test-seas-lag-split: the migration filled 1 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.05.
+     The ancestor held no opinion about this coordinate.
+WARNING: 'test-seas-lag-split.R:263:5' ------------
+NaNs produced
+Backtrace:
+    ▆
+ 1. └─global ccx_seed_unencodable(mig, "test-seas-lag-split") at test-seas-lag-split.R:263:5
+ 2.   └─global .to_unc(p[[nm]], s)
+ 3.     └─stats::qlogis((v - s$lo)/(s$hi - s$lo))
+
+SEEDING pump_hs_gcm2 for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 22.9.
+     The ancestor held no opinion about this coordinate.
+WARNING: 'test-seas-lag-split.R:263:5' ------------
+NaNs produced
+Backtrace:
+    ▆
+ 1. └─global ccx_seed_unencodable(mig, "test-seas-lag-split") at test-seas-lag-split.R:263:5
+ 2.   └─global .to_unc(p[[nm]], s)
+ 3.     └─stats::qlogis((v - s$lo)/(s$hi - s$lo))
+
+SEEDING w_eq for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_thc for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_enso_l2 for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 18.7.
+     The ancestor held no opinion about this coordinate.
+  [pin90] unencodable after seeding: none
+WARNING: 'test-so-entrainment.R:74:3' -------------
+window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1960, 1990), prod_c14 = sp$prod_c14) at test-so-entrainment.R:74:3
+
+WARNING: 'test-so-entrainment.R:91:3' -------------
+window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1960, 1990), prod_c14 = sp$prod_c14) at test-so-entrainment.R:91:3
+
+WARNING: 'test-so-entrainment.R:101:3' ------------
+window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1960, 1990), prod_c14 = sp$prod_c14) at test-so-entrainment.R:101:3
+
+WARNING: 'test-so-entrainment.R:116:3' ------------
+window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1960, 1990), prod_c14 = sp0$prod_c14) at test-so-entrainment.R:116:3
+
+WARNING: 'test-so-entrainment.R:130:5' ------------
+window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_identical(run(20, 0)$co2_SH, run(0, 0)$co2_SH) at test-so-entrainment.R:135:3
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. └─run(20, 0)
+ 5.   └─global ccx_build_forcing("historical", c(1960, 1990), prod_c14 = sp$prod_c14) at test-so-entrainment.R:130:5
+
+WARNING: 'test-so-entrainment.R:150:3' ------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1990), prod_c14 = sp$prod_c14) at test-so-entrainment.R:150:3
+
+WARNING: 'test-so-entrainment.R:211:3' ------------
+window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1960, 1990), prod_c14 = sp0$prod_c14) at test-so-entrainment.R:211:3
+
+WARNING: 'test-soil-inert.R:112:3' ----------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1980), prod_c14 = sp$prod_c14) at test-soil-inert.R:112:3
+
+WARNING: 'test-soil-inert.R:179:3' ----------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1950), prod_c14 = sp$prod_c14) at test-soil-inert.R:179:3
+
+SEEDING w_vent for the spinup-diagnostics: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The file held it OFF; this arm fits it.
+SEEDING gamma_vent for the spinup-diagnostics: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The file held it OFF; this arm fits it.
+SEEDING w_thc for the spinup-diagnostics: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The file held it OFF; this arm fits it.
+WARNING: 'test-stability.R:62:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_false(...) at test-stability.R:62:5
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. ├─ccx_phys(run_at(0.95 * w, hm, substeps = 4L, retry_na = FALSE)$out)
+ 5. └─run_at(0.95 * w, hm, substeps = 4L, retry_na = FALSE) at test-stability.R:38:13
+ 6.   └─global ccx_build_forcing("historical", years, prod_c14 = sp$prod_c14) at test-stability.R:31:3
+
+WARNING: 'test-stability.R:64:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_true(...) at test-stability.R:64:5
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. ├─ccx_phys(run_at(1.1 * w, hm, substeps = 4L, retry_na = FALSE)$out)
+ 5. └─run_at(1.1 * w, hm, substeps = 4L, retry_na = FALSE) at test-stability.R:38:13
+ 6.   └─global ccx_build_forcing("historical", years, prod_c14 = sp$prod_c14) at test-stability.R:31:3
+
+WARNING: 'test-stability.R:62:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_false(...) at test-stability.R:62:5
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. ├─ccx_phys(run_at(0.95 * w, hm, substeps = 4L, retry_na = FALSE)$out)
+ 5. └─run_at(0.95 * w, hm, substeps = 4L, retry_na = FALSE) at test-stability.R:38:13
+ 6.   └─global ccx_build_forcing("historical", years, prod_c14 = sp$prod_c14) at test-stability.R:31:3
+
+WARNING: 'test-stability.R:64:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_true(...) at test-stability.R:64:5
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. ├─ccx_phys(run_at(1.1 * w, hm, substeps = 4L, retry_na = FALSE)$out)
+ 5. └─run_at(1.1 * w, hm, substeps = 4L, retry_na = FALSE) at test-stability.R:38:13
+ 6.   └─global ccx_build_forcing("historical", years, prod_c14 = sp$prod_c14) at test-stability.R:31:3
+
+WARNING: 'test-stability.R:73:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─run_at(kz) at test-stability.R:73:5
+ 2.   └─global ccx_build_forcing("historical", years, prod_c14 = sp$prod_c14) at test-stability.R:31:3
+
+WARNING: 'test-stability.R:73:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─run_at(kz) at test-stability.R:73:5
+ 2.   └─global ccx_build_forcing("historical", years, prod_c14 = sp$prod_c14) at test-stability.R:31:3
+
+WARNING: 'test-stability.R:73:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─run_at(kz) at test-stability.R:73:5
+ 2.   └─global ccx_build_forcing("historical", years, prod_c14 = sp$prod_c14) at test-stability.R:31:3
+
+WARNING: 'test-stability.R:73:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─run_at(kz) at test-stability.R:73:5
+ 2.   └─global ccx_build_forcing("historical", years, prod_c14 = sp$prod_c14) at test-stability.R:31:3
+
+WARNING: 'test-stability.R:73:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─run_at(kz) at test-stability.R:73:5
+ 2.   └─global ccx_build_forcing("historical", years, prod_c14 = sp$prod_c14) at test-stability.R:31:3
+
+WARNING: 'test-stability.R:86:19' -----------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─base::vapply(...) at test-stability.R:85:3
+ 2.   └─FUN(X[[i]], ...)
+ 3.     ├─ccx_phys(run_at(kz, substeps = 4L, retry_na = FALSE)$out) at test-stability.R:86:19
+ 4.     └─run_at(kz, substeps = 4L, retry_na = FALSE) at test-stability.R:38:13
+ 5.       └─global ccx_build_forcing("historical", years, prod_c14 = sp$prod_c14) at test-stability.R:31:3
+
+WARNING: 'test-stability.R:86:19' -----------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─base::vapply(...) at test-stability.R:85:3
+ 2.   └─FUN(X[[i]], ...)
+ 3.     ├─ccx_phys(run_at(kz, substeps = 4L, retry_na = FALSE)$out) at test-stability.R:86:19
+ 4.     └─run_at(kz, substeps = 4L, retry_na = FALSE) at test-stability.R:38:13
+ 5.       └─global ccx_build_forcing("historical", years, prod_c14 = sp$prod_c14) at test-stability.R:31:3
+
+WARNING: 'test-stability.R:86:19' -----------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─base::vapply(...) at test-stability.R:85:3
+ 2.   └─FUN(X[[i]], ...)
+ 3.     ├─ccx_phys(run_at(kz, substeps = 4L, retry_na = FALSE)$out) at test-stability.R:86:19
+ 4.     └─run_at(kz, substeps = 4L, retry_na = FALSE) at test-stability.R:38:13
+ 5.       └─global ccx_build_forcing("historical", years, prod_c14 = sp$prod_c14) at test-stability.R:31:3
+
+WARNING: 'test-stability.R:99:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─run_at(kz, substeps = ss) at test-stability.R:99:5
+ 2.   └─global ccx_build_forcing("historical", years, prod_c14 = sp$prod_c14) at test-stability.R:31:3
+
+WARNING: 'test-stability.R:100:5' -----------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─run_at(kz, substeps = 2L * ss) at test-stability.R:100:5
+ 2.   └─global ccx_build_forcing("historical", years, prod_c14 = sp$prod_c14) at test-stability.R:31:3
+
+WARNING: 'test-stability.R:99:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─run_at(kz, substeps = ss) at test-stability.R:99:5
+ 2.   └─global ccx_build_forcing("historical", years, prod_c14 = sp$prod_c14) at test-stability.R:31:3
+
+WARNING: 'test-stability.R:100:5' -----------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─run_at(kz, substeps = 2L * ss) at test-stability.R:100:5
+ 2.   └─global ccx_build_forcing("historical", years, prod_c14 = sp$prod_c14) at test-stability.R:31:3
+
+WARNING: 'test-thc-limb.R:88:3' -------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1902), prod_c14 = a$prod_c14) at test-thc-limb.R:88:3
+
+WARNING: 'test-thc-limb.R:142:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-thc-limb.R:142:5
+
+WARNING: 'test-thc-limb.R:144:7' ------------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-thc-limb.R:144:7
+ 2.   └─global carb_constants(sst_hs)
+
+WARNING: 'test-thc-limb.R:144:7' ------------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-thc-limb.R:144:7
+ 2.   └─global carb_constants(sst_hs)
+
+WARNING: 'test-thc-limb.R:142:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-thc-limb.R:142:5
+
+WARNING: 'test-thc-limb.R:144:7' ------------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-thc-limb.R:144:7
+ 2.   └─global carb_constants(sst_hs)
+
+WARNING: 'test-thc-limb.R:144:7' ------------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-thc-limb.R:144:7
+ 2.   └─global carb_constants(sst_hs)
+
+WARNING: 'test-thc-limb.R:142:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-thc-limb.R:142:5
+
+WARNING: 'test-thc-limb.R:144:7' ------------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-thc-limb.R:144:7
+ 2.   └─global carb_constants(sst_hs)
+
+WARNING: 'test-thc-limb.R:144:7' ------------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-thc-limb.R:144:7
+ 2.   └─global carb_constants(sst_hs)
+
+WARNING: 'test-thc-limb.R:142:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-thc-limb.R:142:5
+
+WARNING: 'test-thc-limb.R:144:7' ------------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-thc-limb.R:144:7
+ 2.   └─global carb_constants(sst_hs)
+
+WARNING: 'test-thc-limb.R:144:7' ------------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-thc-limb.R:144:7
+ 2.   └─global carb_constants(sst_hs)
+
+WARNING: 'test-thc-limb.R:142:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-thc-limb.R:142:5
+
+WARNING: 'test-thc-limb.R:144:7' ------------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-thc-limb.R:144:7
+ 2.   └─global carb_constants(sst_hs)
+
+WARNING: 'test-thc-limb.R:144:7' ------------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-thc-limb.R:144:7
+ 2.   └─global carb_constants(sst_hs)
+
+WARNING: 'test-thc-limb.R:142:5' ------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14) at test-thc-limb.R:142:5
+
+WARNING: 'test-thc-limb.R:144:7' ------------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-thc-limb.R:144:7
+ 2.   └─global carb_constants(sst_hs)
+
+WARNING: 'test-thc-limb.R:144:7' ------------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux) at test-thc-limb.R:144:7
+ 2.   └─global carb_constants(sst_hs)
+
+WARNING: 'test-tr-box.R:160:3' --------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1902), prod_c14 = a$prod_c14) at test-tr-box.R:160:3
+
+WARNING: 'test-tr-box.R:243:5' --------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1902), prod_c14 = sp$prod_c14) at test-tr-box.R:243:5
+
+WARNING: 'test-tr-box.R:246:7' --------------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], pt, fr, sp$grid, sp$aux) at test-tr-box.R:246:7
+ 2.   └─global carb_constants(sst_hs)
+
+WARNING: 'test-tr-box.R:246:7' --------------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], pt, fr, sp$grid, sp$aux) at test-tr-box.R:246:7
+ 2.   └─global carb_constants(sst_hs)
+
+WARNING: 'test-tr-box.R:243:5' --------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1902), prod_c14 = sp$prod_c14) at test-tr-box.R:243:5
+
+WARNING: 'test-tr-box.R:246:7' --------------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], pt, fr, sp$grid, sp$aux) at test-tr-box.R:246:7
+ 2.   └─global carb_constants(sst_hs)
+
+WARNING: 'test-tr-box.R:246:7' --------------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(sp$y, F$t[i], pt, fr, sp$grid, sp$aux) at test-tr-box.R:246:7
+ 2.   └─global carb_constants(sst_hs)
+
+WARNING: 'test-tr-box.R:266:3' --------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1901), prod_c14 = sp$prod_c14) at test-tr-box.R:266:3
+
+WARNING: 'test-tr-box.R:268:3' --------------------
+Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+Backtrace:
+    ▆
+ 1. └─global ccx_deriv(...) at test-tr-box.R:268:3
+ 2.   └─global carb_constants(sst_hs)
+
+WARNING: 'test-tr-box.R:430:3' --------------------
+window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1960, 1962), prod_c14 = sp0$prod_c14) at test-tr-box.R:430:3
+
+WARNING: 'test-u-hs-fitted.R:86:3' ----------------
+ccx_model_hs_surface(): the run ends at 1800.95833333333, before the HS-surface epochs (2008 / 2011); the #11 rows are ABSENT for this run.
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_true(is.finite(lp(u0))) at test-u-hs-fitted.R:86:3
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. └─lp(u0)
+ 5.   ├─global ccx_loglik(...)
+ 6.   └─global ccx_ocean_grad_scored(r$out, sp)
+ 7.     └─global ccx_hs_surface_scored(out, spin)
+ 8.       └─global ccx_model_hs_surface(out, spin$aux, tg$dic$epoch, tg$d13c$epoch)
+
+WARNING: 'test-u-hs-fitted.R:86:3' ----------------
+ccx_model_ocean_gradient(): the run ends at 1800.95833333333, before the gradient epochs (surf 1999.8359144806 / deep 2002.36939862517); the ocean_grad rows are ABSENT for this run.
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_true(is.finite(lp(u0))) at test-u-hs-fitted.R:86:3
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. └─lp(u0)
+ 5.   ├─global ccx_loglik(...)
+ 6.   └─global ccx_ocean_grad_scored(r$out, sp)
+ 7.     └─global ccx_model_ocean_gradient(...)
+
+WARNING: 'test-u-hs-fitted.R:86:3' ----------------
+ccx_model_ocean_gradient(): the run ends at 1800.95833333333, before the gradient epochs (surf 1999.78376064822 / deep 2002.15572943936); the ocean_grad rows are ABSENT for this run.
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_true(is.finite(lp(u0))) at test-u-hs-fitted.R:86:3
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. └─lp(u0)
+ 5.   ├─global ccx_loglik(...)
+ 6.   └─global ccx_ocean_grad_scored(r$out, sp)
+ 7.     └─global ccx_model_ocean_gradient(...)
+
+WARNING: 'test-u-hs-fitted.R:86:35' ---------------
+ccx_model_hs_surface(): the run ends at 1800.95833333333, before the HS-surface epochs (2008 / 2011); the #11 rows are ABSENT for this run.
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_true(is.finite(lp(ccx_par_to_unc(pm2)))) at test-u-hs-fitted.R:86:35
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. └─lp(ccx_par_to_unc(pm2))
+ 5.   ├─global ccx_loglik(...)
+ 6.   └─global ccx_ocean_grad_scored(r$out, sp)
+ 7.     └─global ccx_hs_surface_scored(out, spin)
+ 8.       └─global ccx_model_hs_surface(out, spin$aux, tg$dic$epoch, tg$d13c$epoch)
+
+WARNING: 'test-u-hs-fitted.R:86:35' ---------------
+ccx_model_ocean_gradient(): the run ends at 1800.95833333333, before the gradient epochs (surf 1999.8359144806 / deep 2002.36939862517); the ocean_grad rows are ABSENT for this run.
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_true(is.finite(lp(ccx_par_to_unc(pm2)))) at test-u-hs-fitted.R:86:35
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. └─lp(ccx_par_to_unc(pm2))
+ 5.   ├─global ccx_loglik(...)
+ 6.   └─global ccx_ocean_grad_scored(r$out, sp)
+ 7.     └─global ccx_model_ocean_gradient(...)
+
+WARNING: 'test-u-hs-fitted.R:86:35' ---------------
+ccx_model_ocean_gradient(): the run ends at 1800.95833333333, before the gradient epochs (surf 1999.78376064822 / deep 2002.15572943936); the ocean_grad rows are ABSENT for this run.
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_true(is.finite(lp(ccx_par_to_unc(pm2)))) at test-u-hs-fitted.R:86:35
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. └─lp(ccx_par_to_unc(pm2))
+ 5.   ├─global ccx_loglik(...)
+ 6.   └─global ccx_ocean_grad_scored(r$out, sp)
+ 7.     └─global ccx_model_ocean_gradient(...)
+
+WARNING: 'test-u-hs-fitted.R:87:3' ----------------
+ccx_model_hs_surface(): the run ends at 1800.95833333333, before the HS-surface epochs (2008 / 2011); the #11 rows are ABSENT for this run.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_false(isTRUE(all.equal(lp(u0), lp(ccx_par_to_unc(pm2))))) at test-u-hs-fitted.R:87:3
+  2. │ └─testthat::quasi_label(enquo(object), label)
+  3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+  4. ├─base::isTRUE(all.equal(lp(u0), lp(ccx_par_to_unc(pm2))))
+  5. ├─base::all.equal(lp(u0), lp(ccx_par_to_unc(pm2)))
+  6. └─lp(u0)
+  7.   ├─global ccx_loglik(...)
+  8.   └─global ccx_ocean_grad_scored(r$out, sp)
+  9.     └─global ccx_hs_surface_scored(out, spin)
+ 10.       └─global ccx_model_hs_surface(out, spin$aux, tg$dic$epoch, tg$d13c$epoch)
+
+WARNING: 'test-u-hs-fitted.R:87:3' ----------------
+ccx_model_ocean_gradient(): the run ends at 1800.95833333333, before the gradient epochs (surf 1999.8359144806 / deep 2002.36939862517); the ocean_grad rows are ABSENT for this run.
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_false(isTRUE(all.equal(lp(u0), lp(ccx_par_to_unc(pm2))))) at test-u-hs-fitted.R:87:3
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. ├─base::isTRUE(all.equal(lp(u0), lp(ccx_par_to_unc(pm2))))
+ 5. ├─base::all.equal(lp(u0), lp(ccx_par_to_unc(pm2)))
+ 6. └─lp(u0)
+ 7.   ├─global ccx_loglik(...)
+ 8.   └─global ccx_ocean_grad_scored(r$out, sp)
+ 9.     └─global ccx_model_ocean_gradient(...)
+
+WARNING: 'test-u-hs-fitted.R:87:3' ----------------
+ccx_model_ocean_gradient(): the run ends at 1800.95833333333, before the gradient epochs (surf 1999.78376064822 / deep 2002.15572943936); the ocean_grad rows are ABSENT for this run.
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_false(isTRUE(all.equal(lp(u0), lp(ccx_par_to_unc(pm2))))) at test-u-hs-fitted.R:87:3
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. ├─base::isTRUE(all.equal(lp(u0), lp(ccx_par_to_unc(pm2))))
+ 5. ├─base::all.equal(lp(u0), lp(ccx_par_to_unc(pm2)))
+ 6. └─lp(u0)
+ 7.   ├─global ccx_loglik(...)
+ 8.   └─global ccx_ocean_grad_scored(r$out, sp)
+ 9.     └─global ccx_model_ocean_gradient(...)
+
+WARNING: 'test-u-hs-fitted.R:87:3' ----------------
+ccx_model_hs_surface(): the run ends at 1800.95833333333, before the HS-surface epochs (2008 / 2011); the #11 rows are ABSENT for this run.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_false(isTRUE(all.equal(lp(u0), lp(ccx_par_to_unc(pm2))))) at test-u-hs-fitted.R:87:3
+  2. │ └─testthat::quasi_label(enquo(object), label)
+  3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+  4. ├─base::isTRUE(all.equal(lp(u0), lp(ccx_par_to_unc(pm2))))
+  5. ├─base::all.equal(lp(u0), lp(ccx_par_to_unc(pm2)))
+  6. ├─base::all.equal.numeric(lp(u0), lp(ccx_par_to_unc(pm2)))
+  7. │ └─base::attr.all.equal(...)
+  8. │   └─base::mode(current)
+  9. └─lp(ccx_par_to_unc(pm2))
+ 10.   ├─global ccx_loglik(...)
+ 11.   └─global ccx_ocean_grad_scored(r$out, sp)
+ 12.     └─global ccx_hs_surface_scored(out, spin)
+ 13.       └─global ccx_model_hs_surface(out, spin$aux, tg$dic$epoch, tg$d13c$epoch)
+
+WARNING: 'test-u-hs-fitted.R:87:3' ----------------
+ccx_model_ocean_gradient(): the run ends at 1800.95833333333, before the gradient epochs (surf 1999.8359144806 / deep 2002.36939862517); the ocean_grad rows are ABSENT for this run.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_false(isTRUE(all.equal(lp(u0), lp(ccx_par_to_unc(pm2))))) at test-u-hs-fitted.R:87:3
+  2. │ └─testthat::quasi_label(enquo(object), label)
+  3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+  4. ├─base::isTRUE(all.equal(lp(u0), lp(ccx_par_to_unc(pm2))))
+  5. ├─base::all.equal(lp(u0), lp(ccx_par_to_unc(pm2)))
+  6. ├─base::all.equal.numeric(lp(u0), lp(ccx_par_to_unc(pm2)))
+  7. │ └─base::attr.all.equal(...)
+  8. │   └─base::mode(current)
+  9. └─lp(ccx_par_to_unc(pm2))
+ 10.   ├─global ccx_loglik(...)
+ 11.   └─global ccx_ocean_grad_scored(r$out, sp)
+ 12.     └─global ccx_model_ocean_gradient(...)
+
+WARNING: 'test-u-hs-fitted.R:87:3' ----------------
+ccx_model_ocean_gradient(): the run ends at 1800.95833333333, before the gradient epochs (surf 1999.78376064822 / deep 2002.15572943936); the ocean_grad rows are ABSENT for this run.
+Backtrace:
+     ▆
+  1. ├─testthat::expect_false(isTRUE(all.equal(lp(u0), lp(ccx_par_to_unc(pm2))))) at test-u-hs-fitted.R:87:3
+  2. │ └─testthat::quasi_label(enquo(object), label)
+  3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+  4. ├─base::isTRUE(all.equal(lp(u0), lp(ccx_par_to_unc(pm2))))
+  5. ├─base::all.equal(lp(u0), lp(ccx_par_to_unc(pm2)))
+  6. ├─base::all.equal.numeric(lp(u0), lp(ccx_par_to_unc(pm2)))
+  7. │ └─base::attr.all.equal(...)
+  8. │   └─base::mode(current)
+  9. └─lp(ccx_par_to_unc(pm2))
+ 10.   ├─global ccx_loglik(...)
+ 11.   └─global ccx_ocean_grad_scored(r$out, sp)
+ 12.     └─global ccx_model_ocean_gradient(...)
+
+[ FAIL 0 | WARN 231 | SKIP 3 | PASS 6814 ]
