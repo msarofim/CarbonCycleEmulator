@@ -1,0 +1,13 @@
+calibration/diag_obj18_ocean_struct.R @56f958a, 2026-10-08 07:00 | no RNG
+  incumbent hilda29w = /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261006_obj17_basinB_start001_DRYRUN/mode_fit_pumpN.rds (md5 081eb16f4fe718692004fb1cf9645891)
+  pricing   /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/obj18_price_20261007.rds (md5 6d1d2bc6df45261cf06f9a5725a6b300)
+
+=== G1 / G2: each arm reproduces a number this script did not produce (tol 1e-05) ===
+  A hilda29w               G1 logpost -1165.224582 vs hilda29w's stored logpost +0.0e+00 | G2 dg likelihood -1129.299586 vs its own objective +7.0e-12  -> PASS
+  B B_hilda29w_emwt_P0     G1 logpost -1173.052374 vs the pricing's B1 +0.0e+00 | G2 dg likelihood -1137.127378 vs the pricing +1.4e-10  -> PASS
+  C C_hilda29w_emwt_S18    G1 logpost -1173.099211 vs the pricing's B1s +0.0e+00 | G2 dg likelihood -1137.174215 vs the pricing -1.6e-10  -> PASS
+
+  the ocean-driver calls (one commit, like for like):
+    CCX_OC_MODE="osA_hilda29w_emw=/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261006_obj17_basinB_start001_DRYRUN/mode_fit_pumpN.rds" Rscript calibration/diag_ocean_climate_gobm.R
+    CCX_OC_MODE="osB_B_hilda29w_emwt_P0=/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/obj18_ocean_struct_20261008/B_hilda29w_emwt_P0.rds" Rscript calibration/diag_ocean_climate_gobm.R
+    CCX_OC_MODE="osC_C_hilda29w_emwt_S18=/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/obj18_ocean_struct_20261008/C_hilda29w_emwt_S18.rds" Rscript calibration/diag_ocean_climate_gobm.R
