@@ -2,6 +2,35 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-08 (e) — **PASS 2 PASSED; `hilda29e` ADOPTED** (Marcus: "Basin 1, run the second pass, adopt if it passes"; "hilda29e (Recommended)"). The adoption's test ledger is classified; NO test edited. ⚠ A correction: the app ALREADY loads `hilda29e`.
+
+- **Pass 2** (wave `20261008d`, 07:56–08:21 EDT, rc 0; landed `58ef6fc`, read `79f4966`):
+  - both warm refits CONVERGED in one cycle, gain 0.0001 each: the free names do not move when the module does (no ratchet);
+  - basins re-ranked: basin 1 leads on likelihood + prior by 0.103 (pass 1: 0.087); likelihood alone favours basin 2 by 0.550;
+  - **the one-pass check at basin 1 STOPS: lag +0.000σ, land −0.000σ, `w_enso_l2` +0.001σ** (ruled 0.1). The check has POWER: at basin 2 the same procedure moves w −1.224σ. Basin 1 is a fixed point of the two-stage cut; basin 2 is not;
+  - basin 1: Hessian PD, cond 2.98e5, no unstable name; every gate verdict = pass 1's basin 1 (V PASS 0.797); ocean climate effect 2.16× GCB.
+- **Found on the way:**
+  - the landing chain's basin step refused the pass-2 pins (`diag_obj18_basins.R` named pass 1's set only). Fixed in `9fe9a02`; pass 1's output is `identical()` but the stamp. The chain resumed from the basin step, never re-running `land`;
+  - the landed outdir was committed BEFORE the remaining steps, so their stamps are clean (#18's were `+dirty`);
+  - the #18 read is pass-1-specific and refuses pass-2 pins (informational, rc 1).
+- **ADOPTED** (`938c9cb`): `CCX_MODE_CANONICAL` "hilda29e"; `CCX_MODE_CANONICAL_PINS` = `CCX_MODE_OBJ18P2_PINS`, the literals moved up beside `CCX_MODE_OBJ16_PINS` because `CCX_MODE_L2_ARM_PINS` aliases the canonical's before their old line. Directory renamed `refit_20261008_hilda29e_obj18p2_hilda_csl3v0kaidgbemwt`; README; make_bundle. `hilda33p`, `hilda29a0` and `hilda29a6` stay registered.
+- ⛔ **CORRECTION: "the app still runs on `hilda33p`" (said in `938c9cb`'s message and in the session) is FALSE.** `app_params()` and the ribbons check load `ccx_mode_file(CCX_MODE_CANONICAL)`. `APP_RELEASE_MODE` is only the release LABEL, which `test-app-version.R` requires to equal the canonical. So the adoption moved the app to `hilda29e`; the app is not public. Marcus had asked first whether more CarboTope changes are likely. The answer given (a survey, verified against the CHANGELOG):
+  - nothing in flight;
+  - the bundle he ruled for "the next model change" (10-06 j: `ra_ratio` +3.2, measured to leave futures/responses/pools unchanged, and the σ-audit trio, objective changes needing a refit each) is still waiting;
+  - H2 deferred, no ruling (a GCB-sized thermal response would lower SSP5-8.5 2300 by ~24 ppm at `hilda33p`);
+  - `gamma_diff` open. The cut's own text changes are settled.
+- **THE TEST LEDGER** (`suite_20261008_938c9cb_adopt.log`: 6834 passed, 53 failed, 19 errors; 37 tests in 22 files), classified by a read-only subagent; the leak was confirmed by reading the code:
+  - **17 are COLLATERAL** from a state LEAK in `test-ms-seed.R` (written this session): `ms_arm_open()` applies the gate and #16's pins, then calls `ccx_ms_reference_set()`, which now STOPS for #16's pins (no ruled set). The cleanup is never registered, so the rest of the process runs with the wrong table. Each passes alone.
+  - The other 20: 12 premise-by-proxy (tests reading "the canonical" for #16's pins / the free limb / the demeaned index), 4 the reference-set rule (#16's ten now unregistered; pass 2's branch unreachable), 3 numbers tied to `hilda33p` (GATE S phase 8.50 → 9.06 mo with `h_ml` 64.6, still PASS; the imbalance panel; the constraint-map stamp), 1 the app's release label.
+  - **None shows `hilda29e` failing a property any canonical should hold**: stored likelihoods reproduce bit-exactly, GATE S passes, the panel parity holds.
+- **For Marcus's ruling** (not failures):
+  - the app's release label (the app already runs `hilda29e`);
+  - the ledger's re-expressions, including the leak fix in `test-ms-seed.R`;
+  - `ccx_ms_reference_set()`'s first branch checks neither label nor seas_ml, so the canonical's 14 pins are now accepted under #17's label and at seas_ml 0, where pass 2's branch refused both;
+  - `CCX_MODE_L2_ARM_PINS` (an alias of the canonical's) no longer describes the limb's arm, since it now pins `w_enso_l2`;
+  - the unreachable pass-2 branch;
+  - the constraint map, rebuilt at `hilda29e` for the app.
+
 ## 2026-10-08 (d) — **RULED: "Basin 1, run the second pass, adopt if it passes"** (Marcus, verbatim). Pass 2 built (`8fc943e`), its preflight caught a label bug (fixed, `3ab4793`), and it is LAUNCHED.
 
 - **The reasoning behind the ruling** (the 10-08 recommendation):
