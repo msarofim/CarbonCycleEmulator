@@ -2,6 +2,86 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-07 (k) — **#18's LANDING KIT BUILT, VALIDATED ON #17's WAVE, AND DRY-RUN** (handoff 10-07d §3 items 2–6). promote can now promote a NAMED start (`--id`). The basin step decomposes every basin from the wave's start files before anything is promoted. One chain script serves both the dry run and the landing. **Validation on #17's own wave changed the rule: ranked on the likelihood ALONE, the second basin to read was a junk basin, 33.9 below on the stored logpost, whose priors cost −36.6. RULED: rank on likelihood + prior.** Also found: under the cut's pins, seeded starts 3 / 4 / 5 re-run 1 / 2 / 2 bit for bit, in #17's landed wave and in #18's. #17's "basin B ×8" was five distinct starts (corrected in place). Nothing adopted.
+
+- **Rulings this session, verbatim (AskUserQuestion):**
+  - promote: "Build --id, read both (Recommended)";
+  - the duplicate starts: "Records now, driver later (Recommended)";
+  - `test-iav-cut.R` IC1 (flagged at (h), unruled until now): "Keep the ledger (Recommended)";
+  - the two frozen suite worktrees: "Remove both (Recommended)". Removed with `git worktree remove`; their logs were committed at `9018129`;
+  - the second basin's criterion, after the validation below: "Likelihood + prior (Recommended)";
+  - a near-tied runner-up, after the first dry run: "Read both within 0.5 (Recommended)".
+- **promote `--id=N --why="…"`** (`5bed8ac`):
+  - `calibration/lib_ms_promote.R` `pmm_choose_start()`. The default is GATE 3's computed best, unchanged. `--id` picks the named start. It refuses an unknown, duplicated, unconverged, out-of-time or dead id, and a non-integer.
+  - `--why` is required with `--id` and refused without it, before any start file is read. `promoted_from` records `chosen_by`, `best_id`, `best_logpost`, `gap_to_best` and `why`.
+  - `tests/testthat/test-promote-id.R` (PI1–PI3, 67 expectations). End to end on #17's committed wave:
+    - `--id=1` is `identical()` to `hilda29w` in every model field. It now records the whole wave (18 of 24) and the 0.409 gap, where the dry run's scratch copy had recorded "1 of 1";
+    - the default is `identical()` to the landed `refit_20261007_obj17` file.
+  - Mutation-tested: seven mutations of the lib and the driver, each caught (`outputs/diagnostics/promote_id_gate_mutation/`).
+- **⛔ THE DUPLICATE SEEDED STARTS** ([[pinned_name_seed_vanishes]], 09-17 l, RECURRED).
+  - The 09-17 fix seeds `w_enso_l2` when the ocean pair is pinned. It never asks whether `w_enso_l2` itself is pinned, and the cut pins it, with the land pair.
+  - Measured (bit-identical `par_mode`, `trace` and starting logpost), in #17's landed wave and in #18's: id 3 = id 1, id 4 = id 5 = id 2. Their labels say "w_enso_l2 SET to 25 Sv" and "land x1.734".
+  - Collect's line "ENSO seeding at the incumbent: +0.0000 log-units" showed it, and was read as a result.
+  - **Corrected in place:** #17's basin B had **5 distinct starts, not 8**, at CHANGELOG 10-06 (q) ×2 and 10-07 (a), in `handoff_2026-10-07_obj17_finished.md` and in the memory. #18's landing counts DISTINCT starts.
+  - **Owed after #18 lands (ruled):** in the driver, an unseedable seeded slot becomes a dispersed draw, labelled as such, and the preflight refuses duplicate start vectors, with a test.
+- **`calibration/diag_obj18_basins.R`** (`c39797c`, `3a50d21`):
+  - every basin collect found, by its best stored-logpost member, scored in the wave's own space (promote's GATE 4 construction) and split into likelihood / priors / log-Jacobians, per name and per row;
+  - gates: each representative reproduces its stored logpost (1e-5), and the parts close it (1e-8);
+  - writes `<out>.ids`: `LP` = the best stored logpost (promote's default), `NAT` = the best likelihood + prior, `NEAR` = the runner-up on it when within the starts' own `cycle_tol` (0.5).
+  - **VALIDATED on #17's landed wave** (a scratch copy with #17's label and pins):
+    - LP id 10 (basin A), NAT id 2 (basin B, Marcus's pick);
+    - B − A reproduces `diag_obj17_basins.R` to 1e-4 although the representative is id 2, not id 1: likelihood +0.761, priors −0.504, Jacobians −0.666, likelihood + prior +0.257;
+    - **the likelihood ALONE picked basin 3 (id 6), 33.9 below** (likelihood +2.38 over A, priors −36.6: `seas_lag_p_NH` at −2.33, `seas_T_amp_NH` 37.2). Hence the ruling. The project's "compare on likelihood" rule is for comparisons ACROSS objectives. Within one objective the prior is part of the model, and only the Jacobian is the parametrisation's artifact.
+- **`calibration/diag_obj18_refit_read.R`** (`c39797c`), on #17's read:
+  - (0) reproduction and the survey, with distinct starts;
+  - (1) #18's rows against REF and the pricing's six cells, by row group (the ice cores), and against its seed B1s;
+  - (2) #17's rows against `hilda29w`, the module's move separated;
+  - (3) the module on stage 1's `ssr_ref`, gated to reproduce stage 1's optimum;
+  - (4) the ledger and the moves;
+  - (5) the futures against the ridge's width, gated to the pricing's B / B1s;
+  - (6) the land's net climate effect.
+- **The chain:** `~/ccx_frozen/20261007i_obj18_chain.sh dryrun|land`, with `~/ccx_frozen/20261007i_obj18_land.sh` (#17's, retargeted). One script, so the dry run exercises the chain the landing runs. #17's dry run tested its drivers, not its chain.
+  - Steps: collect → basins → promote LP (refused unless it IS the basin step's LP) [+ NAT / NEAR with `--id`] → for each promoted mode: the Hessian, the read, the one-pass check, the ocean-climate driver → one scorecard with every promoted arm beside `hilda29w`.
+- **DRY RUN 1** (`c39797c`, 19:22–19:53, on the 8 starts finished by 19:22; evidence `outputs/diagnostics/obj18_dryrun_20261007/run1_c39797c/`): every step rc 0, 31 min.
+  - collect: 8 of 8 converged into 2 basins; every port VERIFIED.
+  - basins: LP = NAT = id 0, the cold start, `h_ml` 64.6. The incumbent's basin (7 starts, **4 distinct**, `h_ml` 50.0) is 1.018 below on the stored logpost: likelihood +0.566, priors −0.652, Jacobians −0.931. So it is **0.087 below on likelihood + prior**, the near-tie that prompted the NEAR ruling.
+  - Hessian at id 0: positive-definite, condition 2.905e5, **no unstable direction** (`h_ml` was unstable at both #17 basins).
+  - Every read gate exact: both vectors reproduce (diff 0); REF and stage 1's optimum reproduce; B / B1s futures = the pricing's (0.0 ppm).
+  - The check's dg-path reproduction: 3.8e-6, inside the ruled 1e-5. The old 1e-6 gate would have stopped it again.
+  - Ocean climate: CHECK 0 passes, both mutations fail. The scorecard reproduces every arm.
+  - **PREVIEW at id 0 (one basin of a partial wave, NOT the read):**
+    - #18's rows vs REF −8.09 (the pricing's B2s −7.80). **The ice cores −7.87** (B2s −7.71): the full refit does not recover the index's ice-core cost.
+    - Against its seed B1s: likelihood +4.30. On #17's rows vs `hilda29w`: −8.56, of which the module's move −0.94.
+    - **The module's slope row HOLDS:** +2.785 at #18's vector vs stage 1's +2.786 (#17's B fell to +1.85).
+    - **The one-pass check: lag +0.065σ, scale +0.028σ, `w_enso_l2` +0.126σ** (16.61 → 16.79). Over the ruled 0.1σ by 0.026σ; #17's were +2.31σ (A) and +1.55σ (B).
+    - GATE V PASS (sd 0.792, z −1.68; `hilda29w` 0.813). Every other scorecard verdict as `hilda29w`'s.
+    - SSP5-8.5 2300 +18.1 ppm vs B, 0.53 of the ridge's 1σ: inside, not a finding. vvH +7.5.
+    - The land's net climate effect −0.057 GtC/yr.
+    - Moves in `hilda29w`'s sd: `h_ml` +5.95 (49.9 → 64.6), `sst_seas_amp_SH` +1.66.
+- **DRY RUN 2** (`3a50d21`, 19:55–20:48, the same 8 starts, the chain with `NEAR`; evidence `run2_3a50d21/`): every step rc 0.
+  - The basin step named NEAR id 6 (the incumbent's basin). `promote --id=6` recorded the reason and the 1.018 gap; GATE 4 / 5 closed at 7e-7.
+  - **It reproduced dry run 1 byte for byte at id 0:** the promoted mode file with its Hessian is md5-identical (`76d1056a`), and the read / check / Hessian logs are identical apart from timestamps.
+  - **PREVIEW at id 6** (`h_ml` 50.0):
+    - Hessian positive-definite (condition 2.916e5), with **`h_ml` UNSTABLE** (the fallback step), as at both #17 basins.
+    - #18's rows vs REF −7.53 (id 0: −8.09); the ice cores −8.08.
+    - **The module's slope row FALLS to +1.898** (stage 1's +2.786; #17's B fell to +1.85).
+    - **The one-pass check moves `w_enso_l2` −1.10σ (16.61 → 15.01)**, the OPPOSITE sign to #17's; the lag and the scale hold (≤ 0.002σ). At id 6, stage 2 RAISED `pump_grad` +0.75 sd, where #17 had lowered it. So the ocean's ENSO slope plausibly now overshoots and w comes down to restore it. Inferred, not tested.
+    - GATE V PASS (0.776). SSP5-8.5 2300 +12.2 ppm vs B (0.36 of the width). Every scorecard verdict as `hilda29w`'s.
+  - ⇒ **Preview only, but the BASIN now decides whether the cut is self-consistent.** At the likelihood + prior best (id 0), the check nearly passes (+0.126σ). At the incumbent's basin (id 6), w moves −1.10σ.
+- **The wave:** the first 8 starts finished 18:18–19:13, all exit 0.
+  - From ~19:20 another session's `python/ic_ladrillo_vs_brick20.py` (a multiprocessing pool) pushed the load average to ~100–120 on 10 cores, and the work processes fell from ~94 % to ~65 % CPU.
+  - Budgets are on the CPU clock, so nothing is lost, but the end moves later: expected ~05:00–09:00 EDT 10-08, if the contention lasts.
+- **ARMED (20:49):** `~/ccx_frozen/20261007i_obj18_land_armed.sh` (PID 73011; log `~/ccx_frozen/20261007i_obj18_land_armed.out`) waits on the launcher's PID 51496, then runs `chain.sh land` once, under `caffeinate -i -s`.
+  - The chain's step `land` verifies the end line, no work process and 24 exit codes before it copies anything.
+  - It adopts and commits nothing. Logs: `outputs/diagnostics/obj18_landing_<date>/`.
+  - ⛔ **Do not edit a repo script under `R/`, `calibration/` or `tests/` while it runs.** An uncommitted change there also makes it refuse to start.
+- **Open (Marcus):** at the landing, which basin, adoption, and the `w_enso_l2` path; the 0.1σ check is ruled, and the preview misses it at both basins. Owed after the landing: the duplicate-start driver fix (ruled). Carried as in the handoff: the cut posterior, the app copy, `gamma_diff`'s future.
+- **Tried and abandoned:**
+  - **the likelihood alone as the basin criterion**: validation, above;
+  - `test-promote-id.R`'s first end-to-end run failed on its OWN quoting: `system2()` hands its args to the shell unquoted, and the `--why` carried an apostrophe. Fixed with `shQuote()`; the driver was right;
+  - the chain's first draft built the decision file's name from its own start date. A chain crossing midnight would look for yesterday's name, so it now reads the path from the step's own "saved" line;
+  - chain v2 failed `bash -n` on an apostrophe inside `${NEAR:+…}` within double quotes. Reworded.
+
 ## 2026-10-07 (j) — Handoff: `notes/handoff_2026-10-07d_obj18_stage2_running.md` (Marcus: "write the handoff note."). It supersedes `handoff_2026-10-07c_obj18_build.md`, which now points to it. Its §3 is the landing kit #18 still lacks (the land script, a #18 read, the basin decomposition before promoting, the chain), to be dry-run on the first finished start; stage 2 was running at 15:22 (launcher alive, 8 work processes, no exits).
 
 ## 2026-10-07 (i) — **#17's BASIN B REGISTERED as `hilda29w` (#18's incumbent seed), and OBJECTIVE #18's STAGE 2 LAUNCHED on the Mac** (handoff 10-07c §3 item 6). Torch verdict, said out loud: **Mac, overnight, as ruled.** Nothing adopted.
