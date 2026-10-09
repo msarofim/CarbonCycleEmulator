@@ -1,0 +1,64 @@
+=== calibration/read_mcmc_check.R @ea2af1f, 2026-10-09 00:55: outputs/mcmc_check_20261008j_hilda29e_final, drop 0 ===
+4 chains of mode hilda29e (hilda_csl3v0kaidgbemwt), commit 1e00851; n 100000, adapt 30000, thin 20; canonical now hilda29e (the same mode, structure and pins)
+  chain_1.rds: seed 20261002, MacBook-Pro-2.local; iter 100000/100000; kept 3500; acceptance 0.082, post-adapt 0.062; last logpost -1183.89
+  chain_2.rds: seed 20261003, MacBook-Pro-2.local; iter 100000/100000; kept 3500; acceptance 0.085, post-adapt 0.069; last logpost -1186.70
+  chain_3.rds: seed 20261004, MacBook-Pro-2.local; iter 100000/100000; kept 3500; acceptance 0.088, post-adapt 0.069; last logpost -1176.47
+  chain_4.rds: seed 20261005, MacBook-Pro-2.local; iter 100000/100000; kept 3500; acceptance 0.086, post-adapt 0.072; last logpost -1180.99
+
+log-posterior by 5000-iteration block (adaptation ends at 30000). If the posterior were the Laplace
+Gaussian, a converged chain would sit at mode - chi2_29/2: median -1181.1, 95% [-1189.8, -1175.0]
+              chain_1 chain_2 chain_3 chain_4
+     1-  5000 -1180.7 -1199.9 -1182.1 -1179.3
+  5001- 10000 -1178.0 -1179.2 -1179.6 -1179.9
+ 10001- 15000 -1179.9 -1180.1 -1179.8 -1180.3
+ 15001- 20000 -1181.2 -1180.0 -1180.6 -1179.8
+ 20001- 25000 -1184.0 -1180.2 -1179.1 -1182.7
+ 25001- 30000 -1181.4 -1180.0 -1181.4 -1180.7
+ 30001- 35000 -1181.1 -1184.1 -1181.1 -1181.9
+ 35001- 40000 -1181.5 -1181.6 -1179.4 -1181.5
+ 40001- 45000 -1181.0 -1182.0 -1182.3 -1181.0
+ 45001- 50000 -1180.3 -1180.0 -1181.2 -1178.4
+ 50001- 55000 -1187.6 -1181.6 -1182.0 -1181.1
+ 55001- 60000 -1182.1 -1180.7 -1184.2 -1181.0
+ 60001- 65000 -1181.7 -1182.1 -1183.4 -1180.2
+ 65001- 70000 -1181.3 -1185.1 -1184.3 -1182.1
+ 70001- 75000 -1184.0 -1188.3 -1187.4 -1182.0
+ 75001- 80000 -1181.8 -1184.1 -1182.9 -1181.0
+ 80001- 85000 -1183.2 -1185.7 -1182.3 -1181.5
+ 85001- 90000 -1179.6 -1185.6 -1181.3 -1183.4
+ 90001- 95000 -1182.7 -1183.5 -1183.1 -1180.9
+ 95001-100000 -1184.0 -1180.5 -1183.4 -1181.7
+
+window: iterations (30000, 100000], 3500 kept samples per chain (thin 20), 14000 pooled
+
+R-hat: max 1.0976 (h_ml); 21 of 30 quantities above 1.01 [Vehtari et al. 2021's reference]
+ESS: min bulk 42 (h_ml), min tail 25 (beta_max); 17 below 400 in either [their reference: 100 per chain]
+
+worst R-hat first:
+                 name  rhat ess_bulk ess_tail
+                 h_ml 1.098    41.95    25.44
+             ndep_ret 1.082    50.83    48.10
+             beta_max 1.057    52.63    24.75
+              logpost 1.046    76.53   269.40
+            luc_scale 1.041    89.49   214.50
+               fert_k 1.029    81.01   270.20
+      sst_seas_amp_SH 1.028   216.40   678.60
+       imb_share_land 1.026   223.20   644.80
+ imb_share_ocean_rest 1.023   480.50   846.90
+                 u_hs 1.022   237.00   262.60
+
+the posterior against the Laplace approximation (u-space), largest departures first:
+                 name sd_over_laplace shift_in_laplace_sd  rhat ess_bulk
+                 h_ml          5.8160           -5.086000 1.098    41.95
+ imb_share_ocean_rest          1.4030           -0.050430 1.023   480.50
+                 h_hs          1.3570            0.341500 1.009   428.90
+         pump_hs_gcm2          1.3190            0.209400 1.016   346.40
+      sst_seas_amp_SH          1.2640           -1.037000 1.028   216.40
+         kz_deep_frac          1.2170           -0.340400 1.018   406.40
+             ndep_ret          1.2020           -0.469600 1.082    50.83
+               fert_k          0.8575            0.239700 1.029    81.01
+          hs_asx_frac          1.1520            0.331500 1.005   408.20
+            luc_scale          0.8776            0.008434 1.041    89.49
+
+wrote outputs/mcmc_check_20261008j_hilda29e_final/diag_20261009_drop0.csv
+wrote outputs/mcmc_check_20261008j_hilda29e_final/pooled_u.rds: 14000 draws x 29 names (md5 079f6a0c1593985ad1b6e8557adff53f)

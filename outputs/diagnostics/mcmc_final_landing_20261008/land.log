@@ -1,0 +1,14 @@
+=== land.sh start 2026-10-08 22:16:29 @3c754ab ===
+chains exited 00:55:31
+chain 1 COMPLETE: 100000 iterations, 3500 kept samples, acceptance 0.082 (post-adapt 0.062)
+chain 2 COMPLETE: 100000 iterations, 3500 kept samples, acceptance 0.085 (post-adapt 0.069)
+chain 3 COMPLETE: 100000 iterations, 3500 kept samples, acceptance 0.088 (post-adapt 0.069)
+chain 4 COMPLETE: 100000 iterations, 3500 kept samples, acceptance 0.086 (post-adapt 0.072)
+chain_1.rds md5 live fead3a93ae514e09741606db921c54a5 snapshot fead3a93ae514e09741606db921c54a5
+chain_2.rds md5 live d0a413b693a30c97bab72c918f3d1aca snapshot d0a413b693a30c97bab72c918f3d1aca
+chain_3.rds md5 live 2370aab5ef54df27c178771096cc5956 snapshot 2370aab5ef54df27c178771096cc5956
+chain_4.rds md5 live 521db28440736a569735211c8f80b88b snapshot 521db28440736a569735211c8f80b88b
+--- read 00:55:31
+--- build 00:55:32
+--- by chain 03:05:32
+=== land.sh done 2026-10-09 03:05:33 ===
