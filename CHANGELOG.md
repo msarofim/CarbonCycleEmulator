@@ -2,6 +2,12 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-09 (c) — Handoff: `notes/handoff_2026-10-09_mcmc_200k_running.md` (Marcus: "Yes, write the handoff note"). It supersedes `handoff_2026-10-08b_mcmc_band_running.md`, which now points to it.
+
+- At 06:20 EDT the four chains were at 100.5–101k of 200k, running ~0.62 s/iteration under another session's MAGICC/Julia job and a VM (load ~30–40); uncontended it is 0.30.
+- So the chains are done ~23:30 EDT if the load holds, ~14:30 if it clears. The 200k landing (PID 91023) then reads, builds and tests.
+- Its §3 is the 200k read, the report on 50k / 100k / 200k side by side, and Marcus's ruling.
+
 ## 2026-10-09 (b) — **RULED (Marcus, verbatim): "Extend to 200k (Recommended)" and "Thin ×2 within chain (Recommended)".** The four `hilda29e` chains are extending 100k → 200k; the 200k landing is armed. Nothing shipped.
 
 - **`run_mcmc_check.R` could not extend as the handoff said.** Its resume guard refused any changed `--n` (`S$provenance$n == MC_N`). Fixed (`00b1c09`): a chain COMPLETE at its recorded n, past adaptation, may continue to a larger `--n`. The extension is recorded in `provenance$extended` (from, to, commit), and `provenance$n` becomes the new n.

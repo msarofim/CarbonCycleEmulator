@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-08 (b) — the MCMC band is RUNNING at `hilda29e`; card 8 built; the H2 stake re-measured; NEXT: read the chains at 100k, then Marcus rules on shipping
 
+> **SUPERSEDED 2026-10-09 by `notes/handoff_2026-10-09_mcmc_200k_running.md`** (the 50k and 100k reads done; Marcus ruled "Extend to 200k", "Thin ×2 within chain"; the chains are extending and the 200k landing is armed).
+
 **Supersedes** `notes/handoff_2026-10-08_hilda29e_adopted.md`. Its §3 items 1–2 are done except card 4's COPY; its §3.3 / §4 / §5 lists still apply where not listed here.
 Written on Marcus's request ("Yes, write the handoff note"), 2026-10-08 ~21:50 EDT, while the chains and a band build run.
 
