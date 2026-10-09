@@ -15,12 +15,15 @@
 #
 # ⚠ WHAT IT IS NOT. A Gaussian at the mode is not a posterior: the record's
 # widest directions (the h_ml near-degeneracy, the npp_tsens ridge) are the ones
-# it handles worst, and the bands are CONDITIONAL on the nine held values. The
-# label says so (RB_LABEL). MCMC is the ruled check, not yet run.
-# ⚠ THE COVARIANCE WAS COMPUTED BEFORE the 2026-10-01 emissions-interpolation
-# flip (CCX_EMIS_METHOD_DEFAULT spline -> constant), which moved the likelihood
-# by -0.16 at the mode. It is used as stored; the runs themselves use today's
-# default. Recorded in the artifact.
+# it handles worst, and the bands are CONDITIONAL on the file's held values. The
+# label says so (RB_LABEL), and says MCMC when the draws are supplied (--draws).
+# ⚠ WHICH EMISSIONS INTERPOLATION THE STORED COVARIANCE WAS COMPUTED UNDER is a
+# property of the MODE, keyed in RB_COV_EMIS (an unlisted canonical stops the
+# run). hilda33d's predates the 2026-10-01 flip (spline -> constant), which
+# moved the likelihood by -0.16 at the mode; hilda29e's (recompute_hessian.R,
+# 2026-10-08, no override) is under constant, the same as the runs. Until
+# 2026-10-09 the note was hard-coded to hilda33d's case. With supplied draws
+# the covariance enters only the delta-method pre-check. Recorded in the artifact.
 #
 # THE CENTRAL LINE IS THE APP'S, CHECKED. The draw machinery is fed the mode's
 # own vector first and must reproduce the app's central runs (APP_SPIN through
@@ -106,16 +109,31 @@ stopifnot(isTRUE(fs$pd), identical(names(u0), md$param_names),
 k <- length(u0)
 RB_N_HELD <- length(RB_PINS)
 RB_WORDS  <- c("one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
-               "ten", "eleven", "twelve")
-# the ruled label (review 10-01c B7), with the count read off the file's pins
-RB_LABEL <- sprintf("Gaussian approximation at the best fit, conditional on the %s held values",
-                    if (RB_N_HELD <= length(RB_WORDS)) RB_WORDS[RB_N_HELD] else RB_N_HELD)
+               "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen",
+               "seventeen", "eighteen", "nineteen", "twenty")
+RB_HELD_WORD <- if (RB_N_HELD <= length(RB_WORDS)) RB_WORDS[RB_N_HELD] else as.character(RB_N_HELD)
+# the ruled label (review 10-01c B7), with the count read off the file's pins. With --draws it is a
+# PROVENANCE label only, not ruled app copy: a --draws product may not land in data/ (above), so the
+# app never shows it; the shipped wording is Marcus's.
+RB_LABEL <- if (nzchar(RB_DRAWS_FILE))
+  sprintf("MCMC posterior draws (supplied), conditional on the %s held values", RB_HELD_WORD) else
+  sprintf("Gaussian approximation at the best fit, conditional on the %s held values", RB_HELD_WORD)
+# the emissions interpolation each mode's STORED covariance was computed under (see the header)
+RB_COV_EMIS <- c(hilda33d = "spline",     # computed before the 2026-10-01 flip (CHANGELOG 10-01)
+                 hilda29e = "constant")   # recompute_hessian.R 2026-10-08, after the flip, no override
+if (!CCX_MODE_CANONICAL %in% names(RB_COV_EMIS))
+  stop("RB_COV_EMIS does not say which emissions interpolation ", CCX_MODE_CANONICAL,
+       "'s covariance was computed under: check its Hessian's date against the 2026-10-01 flip and add it")
+RB_COV_NOTE <- if (RB_COV_EMIS[[CCX_MODE_CANONICAL]] == CCX_EMIS_METHOD_DEFAULT)
+  sprintf("computed under the %s emissions interpolation, the same as the runs", CCX_EMIS_METHOD_DEFAULT) else
+  sprintf("computed under the %s emissions interpolation; the runs use %s (the 2026-10-01 flip moved the likelihood -0.16 at hilda33d's mode); used as stored",
+          RB_COV_EMIS[[CCX_MODE_CANONICAL]], CCX_EMIS_METHOD_DEFAULT)
+if (nzchar(RB_DRAWS_FILE)) RB_COV_NOTE <- paste0(RB_COV_NOTE, "; with supplied draws it enters only the delta-method pre-check")
 cat(sprintf("mode %s (%s); %d fitted names, %d held; logpost %.6f; covariance PD, cond %.3g\n",
             CCX_MODE_CANONICAL, ccx_mode_struct(md), k, RB_N_HELD, md$logpost,
             max(abs(fs$eigen$values)) / min(abs(fs$eigen$values))))
 cat(sprintf("held: %s\n", paste(sprintf("%s = %g", names(RB_PINS), RB_PINS), collapse = ", ")))
-cat(sprintf("emissions interpolation for the runs: \"%s\" (the covariance predates the 2026-10-01 flip)\n",
-            CCX_EMIS_METHOD_DEFAULT))
+cat(sprintf("label: %s\ncovariance: %s\n", RB_LABEL, RB_COV_NOTE))
 
 # ---- the run for ONE physical vector, by the app's own functions ----------
 run_vector <- function(pv) {
@@ -242,8 +260,7 @@ out <- list(
                    "through the file's own transforms and bands (ccx_adopt_mode_band), the held",
                    "values added back, and run through the full nonlinear model (its own spin-up,",
                    "then app_run_coupled per scenario) by the app's own functions"),
-    covariance_note = paste("computed under the spline emissions interpolation, before the 2026-10-01",
-                            "flip to constant (likelihood -0.16 at the mode); used as stored"),
+    covariance_note = RB_COV_NOTE,
     label = RB_LABEL, n_held = RB_N_HELD, held = RB_PINS,
     n_draws = RB_N, n_ok = sum(ok), n_failed = sum(!ok), n_warnings = nwarn,
     probs = RB_PROBS, scenarios = RB_SCEN, years = range(RB_YEAR), vars = RB_VARS,
