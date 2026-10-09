@@ -2,6 +2,34 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-08 (l) — **The 50k preview band, chain by chain: the chains disagree by up to 7.1 ppm, 46 % of the band's width, twice `hilda33d`'s stage 1 over an equal window. Not widening.** Two driver fixes found on the way; the preview is quarantined for two wrong provenance strings (its numbers are valid). Nothing shipped; the hold stands. (Handoff 10-08b §3 item 3.)
+
+- **`diag_mcmc_band_by_chain.R`** (`155bc28`): its `--laplace` default is `hilda33d`'s held band, and it read the band's CENTRAL line from that file. At `hilda29e` that pairs the MCMC band with another mode's numbers, silently.
+  - Now the central line is the ribbons' own. A Laplace band whose central line differs from the ribbons' by more than the build's 1e-6 tolerance stops the run. `--laplace=none` drops the column; no Laplace band exists at `hilda29e` (10-08 i).
+  - Checked: on `hilda33d`'s stage-1 inputs the guard passes at max |diff| 0 and the CSV is `identical()` to 10-02's. One central cell moved by 2e-6 stops it. `none` runs.
+- **`build_futures_ribbons.R`** (`830d620`): two strings were hard-coded to `hilda33d`'s Laplace case.
+  - `label` read "Gaussian approximation at the best fit" for MCMC draws. It now follows the draws' source. With `--draws` this is a provenance label only while such a product cannot land in `data/`. ⚠ **Once a band ships, the label IS app copy:** `APP_RIBBON_NOTE` (`app/global.R`) renders "Shaded: the 5–95% range of N model runs — a <label>." The current MCMC string would read badly there; the wording is Marcus's (handoff 10-08b §3 item 5 already lists `RB_LABEL`).
+  - `covariance_note` read "predates the 2026-10-01 flip". `hilda29e`'s Hessian was computed 2026-10-08 by `recompute_hessian.R`, with no override, so under "constant", the same as the runs. Now `RB_COV_EMIS` names each mode's interpolation, and an unlisted canonical stops the run.
+  - With supplied draws the covariance enters only the delta-method pre-check, so no band number depended on either string.
+  - Checked: the fixed driver on the snapshot's first 12 draws reproduces the preview's key draws bit for bit, its central line, and every other provenance field. A mutant without `hilda29e` in the table stops with the intended message.
+  - Found while the build ran; the driver was edited only after it exited.
+- **The preview band** (4200 of 4200 draws ran, 61 min, 6 cores; the central line is inside [5 %, 95 %] in 100 % of cells; delta-method / sampled sd 0.79–1.00): moved to `outputs/quarantine/20261008_ribbons_mcmc_provenance_label/` with a README. It is not rebuilt: only the two strings would change, and a rebuild costs ~1 h on 6 cores while the chains run.
+- **The per-chain test** (`mcmc_band_by_chain_hilda29e_snap50k_20261008.{log,csv}`; window (30000, 51000], 4 × 1050). The same window `hilda33d`'s stage 1 had ((30000, 50500]):
+
+| CO₂, 2100 and 2150 | `hilda29e` 50k | `hilda33d` stage 1 (10-02) |
+|---|---|---|
+| between-chain range of an edge or median: max / median | **7.08** (vvH 2150) / 1.5 ppm | 3.42 / 1.31 ppm |
+| as a share of the pooled width: max / median | **46 %** / 32 % | 29 % / 19 % |
+| cell R-hat: max / median | 1.138 / 1.065 | 1.075 / 1.038 |
+| cell ESS bulk min / tail min | 21 / 60 | 55 / 158 |
+| late / early half width (z) | 0.95 (−0.4) | 1.01 (+0.1) |
+
+  - vvH CO₂ 2150: pooled 813.2 / 823.0 / 834.3 ppm (width 21.1), central 824.9. Chain medians 819.6 / 825.3 / 823.2 / 822.6.
+  - The worst cells by share are vvHL 2100 (CO₂ 4.6 of 10.1 ppm; GMST 46 %) and vvLN 2150.
+  - GMST: max 0.031 °C (vvLN 2150), median 0.009 °C; 46 % / 30 % of the width.
+- ⚠ **The GMST bands are 0.02–0.09 °C wide** (vvM 2100: 2.933–2.959 °C). None of the 29 sampled names is a climate-response parameter, so the band carries carbon-cycle uncertainty only. `hilda33d`'s was the same order (0.031 °C at vvM 2100). The app already says so in words (`APP_RIBBON_NOTE_TEMP`: "It varies the carbon cycle only…"). What is left is visual: on the Futures tab a band that thin is nearly invisible. That is a presentation question for Marcus, not a bug.
+- **What the 100k read should show, as an expectation and not a measurement:** the window grows (30000, 51000] → (30000, 100000], 3.3× the draws. If the mixing rate holds, ESS grows ~3.3× and between-chain ranges shrink ~1.8×, putting 7.1 ppm near 4 ppm. Read it, do not assume it.
+
 ## 2026-10-08 (k) — **The N7 driver runs at `hilda29e` again** (Marcus: make `diag_growth_residual_years.R` build its run and forcing the structure's way, arithmetic unchanged, and match the audit's section 7). It reproduces section 7 BIT FOR BIT. No app copy, test or model change.
 
 - **The fix** (`calibration/diag_growth_residual_years.R`): the forcing is now built with `enso_index = ccx_enso_index_of(md$p)` and `aod_mode = ccx_aod_mode_of(md$p)` (at `hilda29e`, "detrend" and "anomaly"). Before, it used the builder's defaults ("demean", "legacy"), and `ccx_enso_index_check()` refused the run. The arithmetic is untouched. A structure that names neither setting resolves to the defaults, so its run is unchanged. The output's header now prints the canonical, its mode-file directory, the ENSO index, the AOD mode and the commit.

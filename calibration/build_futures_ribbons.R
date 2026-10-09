@@ -114,7 +114,8 @@ RB_WORDS  <- c("one", "two", "three", "four", "five", "six", "seven", "eight", "
 RB_HELD_WORD <- if (RB_N_HELD <= length(RB_WORDS)) RB_WORDS[RB_N_HELD] else as.character(RB_N_HELD)
 # the ruled label (review 10-01c B7), with the count read off the file's pins. With --draws it is a
 # PROVENANCE label only, not ruled app copy: a --draws product may not land in data/ (above), so the
-# app never shows it; the shipped wording is Marcus's.
+# app never shows it. ⚠ Once one ships it IS app copy: APP_RIBBON_NOTE (app/global.R) renders
+# "Shaded: the 5–95% range of N model runs — a <label>." The shipped wording is Marcus's.
 RB_LABEL <- if (nzchar(RB_DRAWS_FILE))
   sprintf("MCMC posterior draws (supplied), conditional on the %s held values", RB_HELD_WORD) else
   sprintf("Gaussian approximation at the best fit, conditional on the %s held values", RB_HELD_WORD)
