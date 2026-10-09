@@ -17,9 +17,12 @@
 # equal lengths. The window is printed and recorded with the draws.
 #
 # Usage (repo root, on the Mac, with the chain files brought home from Torch):
-#   Rscript calibration/read_mcmc_check.R [--dir=outputs/mcmc_check] [--drop=0] [--out=<dir>/pooled_u.rds]
+#   Rscript calibration/read_mcmc_check.R [--dir=outputs/mcmc_check] [--drop=0] [--pool-thin=1] [--out=<dir>/pooled_u.rds]
 # --drop: post-adaptation ITERATIONS to discard as further burn-in; read it off the
 #   log-posterior blocks this script prints. Default 0.
+# --pool-thin: keep every k-th kept sample of each chain in the POOLED DRAWS only (the band's input;
+#   Marcus 2026-10-09: "Thin x2 within chain"). The diagnostics always read every kept sample. The pooled
+#   draws stay chain by chain in iteration order; the rule is recorded in their provenance.
 # =====================================================================
 RD_ARGS <- commandArgs(trailingOnly = TRUE)
 rd_arg <- function(key, default) {
@@ -33,16 +36,19 @@ source(file.path("calibration", "lib_mcmc_diag.R"))
 RD_DRIVER   <- "calibration/read_mcmc_check.R"
 RD_DIR      <- rd_arg("dir", file.path("outputs", "mcmc_check"))
 RD_DROP     <- as.integer(rd_arg("drop", 0L))
-RD_OUT      <- rd_arg("out", file.path(RD_DIR, "pooled_u.rds"))
+RD_POOL_THIN <- as.integer(rd_arg("pool-thin", 1L))
+RD_OUT      <- rd_arg("out", file.path(RD_DIR, if (RD_POOL_THIN == 1L) "pooled_u.rds" else
+                                                 sprintf("pooled_u_thin%d.rds", RD_POOL_THIN)))
 RD_DATE     <- format(Sys.Date(), "%Y%m%d")
-RD_LOG      <- file.path(RD_DIR, sprintf("read_%s_drop%d.log", RD_DATE, RD_DROP))
+RD_LOG      <- file.path(RD_DIR, sprintf("read_%s_drop%d%s.log", RD_DATE, RD_DROP,
+                                         if (RD_POOL_THIN == 1L) "" else sprintf("_pool%d", RD_POOL_THIN)))
 RD_CSV      <- file.path(RD_DIR, sprintf("diag_%s_drop%d.csv", RD_DATE, RD_DROP))
 RD_RHAT_REF <- 1.01        # Vehtari et al. 2021's recommendation, printed as theirs
 RD_ESS_REF_PER_CHAIN <- 100L   # ditto, for bulk- and tail-ESS
 RD_LP_BLOCK <- 5000L       # iterations per block in the log-posterior burn-in view
 RD_SHOW     <- 10L         # rows shown in each worst-first list
 RD_COMMIT <- ccx_git_stamp()
-stopifnot(RD_DROP >= 0L)
+stopifnot(RD_DROP >= 0L, RD_POOL_THIN >= 1L)
 sink(RD_LOG, split = TRUE)
 cat(sprintf("=== %s @%s, %s: %s, drop %d ===\n", RD_DRIVER, RD_COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M"),
             RD_DIR, RD_DROP))
@@ -131,11 +137,20 @@ cat(sprintf("\nwrote %s\n", RD_CSV))
 
 # ---- the pooled draws, for build_futures_ribbons.R --draws= -----------------
 if (same_mode) {
-  U <- do.call(rbind, lapply(seq_len(M), function(k) S[[k]]$samples[idx[[k]], , drop = FALSE]))
+  # --pool-thin: a sample kept at iteration adapt + thin * j is pooled when j %% pool_thin == 0 -- one grid for
+  # every chain, so the per-chain counts agree
+  pidx <- lapply(seq_len(M), function(k) {
+    i <- idx[[k]]; i[((S[[k]]$samples_iter[i] - p1$adapt) %/% p1$thin) %% RD_POOL_THIN == 0L] })
+  KP <- unique(lengths(pidx)); stopifnot(length(KP) == 1L, KP >= 1L)
+  if (RD_POOL_THIN > 1L)
+    cat(sprintf("pooled draws thinned x%d within each chain: %d of %d kept samples per chain\n", RD_POOL_THIN, KP, K))
+  U <- do.call(rbind, lapply(seq_len(M), function(k) S[[k]]$samples[pidx[[k]], , drop = FALSE]))
   stopifnot(identical(colnames(U), md$param_names), all(is.finite(U)))
   attr(U, "provenance") <- list(reader = RD_DRIVER, reader_commit = RD_COMMIT, date = RD_DATE,
     chains = basename(fs), chain_md5 = unname(tools::md5sum(fs)), chain_seeds = vapply(P, `[[`, integer(1), "seed"),
-    chain_commit = p1$commit, mode = p1$mode, window = c(lo = lo, hi = hi), drop = RD_DROP, per_chain = K,
+    chain_commit = p1$commit, chain_extended = p1$extended, mode = p1$mode, window = c(lo = lo, hi = hi),
+    drop = RD_DROP, per_chain = KP, pool_thin = RD_POOL_THIN, thin = p1$thin, adapt = p1$adapt,
+    pool_rule = "a sample kept at iteration adapt + thin * j is pooled when j mod pool_thin == 0",
     order = "chain by chain, iteration order within each")
   saveRDS(U, RD_OUT)
   cat(sprintf("wrote %s: %d draws x %d names (md5 %s)\n", RD_OUT, nrow(U), ncol(U), unname(tools::md5sum(RD_OUT))))

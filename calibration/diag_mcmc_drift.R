@@ -16,8 +16,10 @@
 # It REPORTS; Marcus rules.
 #
 # Usage (repo root):
-#   Rscript calibration/diag_mcmc_drift.R --dir=<snapshot with chain_*.rds and pooled_u.rds> --ribbons=<the band
-#       built from that pooled_u.rds> [--tag=hilda29e_final]
+#   Rscript calibration/diag_mcmc_drift.R --dir=<snapshot with chain_*.rds> --ribbons=<the band built from the
+#       pooled draws> [--pooled=<dir>/pooled_u.rds] [--tag=hilda29e_final]
+# The pooled draws may be thinned within each chain (read_mcmc_check.R --pool-thin): the join applies the
+# reader's own rule, read from their provenance. The drift sections (1)-(2) read every kept sample.
 # =====================================================================
 DR_ARGS <- commandArgs(trailingOnly = TRUE)
 dr_arg <- function(key, default) {
@@ -30,6 +32,7 @@ for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 DR_DRIVER  <- "calibration/diag_mcmc_drift.R"
 DR_DIR     <- dr_arg("dir", "")
 DR_RIBBONS <- dr_arg("ribbons", "")
+DR_POOLED  <- dr_arg("pooled", file.path(DR_DIR, "pooled_u.rds"))
 DR_TAG     <- dr_arg("tag", "hilda29e_final")
 DR_DATE    <- format(Sys.Date(), "%Y%m%d")
 DR_LOG     <- file.path("outputs", "diagnostics", sprintf("mcmc_drift_%s_%s.log", DR_TAG, DR_DATE))
@@ -94,26 +97,31 @@ cat(sprintf("  pooled: %.2f -> %.2f (%+.2f)\n", mean(lph[, 1]), mean(lph[, 2]), 
 
 # ---- (3) the leverage on the futures ---------------------------------------
 rb <- readRDS(DR_RIBBONS)
-pu <- file.path(DR_DIR, "pooled_u.rds")
+pu <- DR_POOLED
 if (!grepl(unname(tools::md5sum(pu)), rb$provenance$method, fixed = TRUE))
   stop("the ribbons were not run from ", pu)
-U <- readRDS(pu); K <- attr(U, "provenance")$per_chain
-stopifnot(nrow(D) == nrow(U), M * K == nrow(U))
-# pooled_u is chain by chain in iteration order (read_mcmc_check.R): row i = chain ceiling(i / K), its ((i-1) %% K + 1)-th draw
-D <- D[order(D$chain, D$iter), ]; D$draw <- seq_len(nrow(D))
-# GATE: the pooled draws ARE the chains' samples in that order (drop 0, the window = every kept sample),
-# so draw i's futures belong to D's row i
-X <- do.call(rbind, lapply(S, `[[`, "samples"))   # values and shape only: U carries a provenance attribute
+U <- readRDS(pu); pv <- attr(U, "provenance"); K <- pv$per_chain
+pt <- if (is.null(pv$pool_thin)) 1L else pv$pool_thin      # draws pooled before --pool-thin existed: every sample
+thin <- S[[1]]$provenance$thin
+# the reader's rule (read_mcmc_check.R): the window (lo, hi], and a sample kept at iteration adapt + thin * j is
+# pooled when j mod pool_thin == 0; the pooled draws are chain by chain in iteration order
+in_pool <- function(it) it > pv$window[["lo"]] & it <= pv$window[["hi"]] & ((it - adapt) %/% thin) %% pt == 0L
+D <- D[order(D$chain, D$iter), ]
+DP <- D[in_pool(D$iter), ]; DP$draw <- seq_len(nrow(DP))
+stopifnot(M * K == nrow(U), nrow(DP) == nrow(U))
+# GATE: the pooled draws ARE those samples in that order, so draw i's futures belong to DP's row i
+X <- do.call(rbind, lapply(S, function(s) s$samples[in_pool(s$samples_iter), , drop = FALSE]))
 if (!(identical(dim(U), dim(X)) && identical(colnames(U), colnames(X)) && identical(as.vector(U), as.vector(X))))
-  stop("pooled_u.rds is not the chains' samples stacked chain by chain: the draw-to-row join would be wrong")
-Z <- scale(as.matrix(D[, DRIFT_NAMES]))
+  stop(basename(pu), " is not the chains' samples under the reader's rule: the draw-to-row join would be wrong")
+cat(sprintf("\npooled draws %s: %d per chain (pool thin %d), joined to their samples\n", pu, K, pt))
+Z <- scale(as.matrix(DP[, DRIFT_NAMES]))
 cat("\n--- (3) leverage: each name's effect per posterior sd (one regression, standardised names), and the late - early shift ---\n")
 LV <- do.call(rbind, lapply(DR_CELLS, function(cl) {
   kd <- rb$key_draws[rb$key_draws$scenario == cl[1] & rb$key_draws$var == cl[2] & rb$key_draws$year == as.integer(cl[3]), ]
-  y <- kd$value[match(D$draw, kd$draw)]
+  y <- kd$value[match(DP$draw, kd$draw)]
   fit <- stats::lm(y ~ Z)
   b <- stats::coef(fit)[-1]; names(b) <- DRIFT_NAMES
-  late <- D$iter > mid
+  late <- DP$iter > mid
   dz <- colMeans(Z[late, , drop = FALSE]) - colMeans(Z[!late, , drop = FALSE])
   dy <- stats::median(y[late]) - stats::median(y[!late])
   units <- if (cl[2] == "gmst") "degC" else "ppm"
@@ -128,7 +136,7 @@ LV <- do.call(rbind, lapply(DR_CELLS, function(cl) {
 }))
 saveRDS(list(blocks = D, leverage = LV, lp_halves = lph,
              provenance = list(driver = DR_DRIVER, commit = DR_COMMIT, dir = DR_DIR, ribbons = DR_RIBBONS,
-                               pooled_md5 = unname(tools::md5sum(pu)), mode = CCX_MODE_CANONICAL,
+                               pooled = pu, pooled_md5 = unname(tools::md5sum(pu)), pool_thin = pt, mode = CCX_MODE_CANONICAL,
                                names = DRIFT_NAMES, block = DRIFT_BLOCK, floor_near = DRIFT_FLOOR_NEAR)), DR_RDS)
 cat(sprintf("\nwrote %s\n", DR_RDS))
 sink()
