@@ -67,7 +67,7 @@ RB_CORES      <- as.integer(rb_arg("cores", 8L))
 RB_OUT        <- file.path(RB_ROOT, rb_arg("out", file.path("data", "futures_ribbons.rds")))
 RB_DRAWS_FILE <- rb_arg("draws", "")           # supplied draws instead of the Gaussian (see Usage)
 if (nzchar(RB_DRAWS_FILE) && grepl("^data/", sub(paste0("^", RB_ROOT, "/"), "", RB_OUT)))
-  stop("--draws output must not land in data/: the app reads data/futures_ribbons.rds")
+  stop("--draws output must not land in data/: the app reads data/futures_ribbons.rds; ship a landed MCMC band with calibration/promote_futures_ribbons.R")
 RB_DATE       <- format(Sys.Date(), "%Y%m%d")
 # the log is named after the artifact, so a byte-identity rerun (--out elsewhere) logs apart
 RB_LOG        <- file.path(RB_ROOT, "outputs", "diagnostics",

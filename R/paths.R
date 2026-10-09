@@ -890,6 +890,15 @@ ccx_ribbons_problems <- function(r, mode = CCX_MODE_CANONICAL, scenarios, vars) 
     bad <- c(bad, "built at a different parameter vector from the canonical's par_mode")
   if (is.null(pv[["seed"]]) || is.null(pv[["rng_kind"]]) || is.null(pv[["seed_applied"]]))
     bad <- c(bad, "the seed, the RNG kind or where it is applied is not recorded")
+  # SUPPLIED (MCMC) draws: the builder applied no seed (its `seed` is NA), so the CHAINS' seeds must be
+  # in the artifact itself (2026-10-09 f, calibration/promote_futures_ribbons.R), not only in the chain files
+  if (grepl("^SUPPLIED draws ", if (is.null(pv[["method"]])) "" else pv[["method"]])) {
+    dp <- pv[["draws_provenance"]]
+    cs <- if (is.null(dp)) NULL else dp[["chain_seeds"]]
+    if (!length(cs) || any(!is.finite(cs)) || is.null(dp[["chain_rng_kind"]]) ||
+        !nzchar(paste(dp[["chain_seed_applied"]], collapse = "")))
+      bad <- c(bad, "supplied draws: the chains' seeds, RNG kind or where the seed is applied are not recorded")
+  }
   miss <- setdiff(as.character(scenarios), unique(r$bands$scenario))
   if (length(miss)) bad <- c(bad, sprintf("no bands for scenario(s) %s", paste(miss, collapse = ", ")))
   missv <- setdiff(as.character(vars), unique(r$bands$var))
