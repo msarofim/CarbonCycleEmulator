@@ -16,6 +16,18 @@ Project log: what was done, what was tried and abandoned, and why.
 - `calibration/diag_card4_audit.R`, header comment only: "Section 6" corrected to section 7, and a FIXED note added. Its section 7 is kept as the independent cross-check.
 - Not run: the full suite. No test reads this driver, and no file a test reads was changed.
 
+## 2026-10-08 (k) — **The MCMC chains at 50k: NOT converged by Vehtari et al.'s reference. The band is being built from that snapshot as a preview. Handoff written.**
+
+- **The snapshot read** (`outputs/mcmc_check_20261008j_hilda29e_snap50k/`, `641732c`): the chain files were copied out of the live directory, then `read_mcmc_check.R`; window (30000, 51000], 1050 kept/chain, 4200 pooled.
+  - R-hat max **1.13** (`ndep_ret`), `beta_max` 1.08, all 30 quantities > 1.01. Min bulk ESS **21**, tail 37.
+  - The log-posterior has been stable at the Gaussian level (−1181) since ~5k.
+  - Post-adaptation acceptance is **0.056–0.075** (optimal ~0.23 in 29-D): the frozen proposal mixes slowly.
+  - `hilda33d`'s stage 1 was R-hat 1.21 / ESS 14 on `beta_max`.
+- ⭐ **`h_ml`'s posterior is not the mode's neighbourhood.** Median 57.4 m (90 % 47.5–69.9) against the mode's 64.6, so the mode sits at ~80th percentile. The chains agree (medians 54.5–59.8). 5 % of draws are within 5 m of the 42.5 floor, so it is not piled there. The Laplace UNDERSTATES `h_ml`'s spread ~4× (u-space), while along the fertilisation ridge it OVERstates it: the Gaussian is wrong in both directions.
+- **The band from the snapshot is building:** `build_futures_ribbons.R --draws=… --cores=6`, out `outputs/diagnostics/futures_ribbons_mcmc_20261008j_hilda29e_snap50k.rds`. Next is the per-chain agreement test (`diag_mcmc_band_by_chain.R`), the deliverable-units question that decided `hilda33d`.
+- **The spun-off task landed** (`551928e`, its own session): `diag_growth_residual_years.R` builds the structure's forcing, and at `hilda29e` it reproduces `diag_card4_audit.R` §7 bit for bit.
+- **Handoff:** `notes/handoff_2026-10-08b_mcmc_band_running.md` (Marcus: "Yes, write the handoff note"). The chains finish ~02:00–02:30 EDT 10-09. Shipping is Marcus's ruling.
+
 ## 2026-10-08 (j) — **RULED (Marcus, verbatim): "MCMC band; go ahead with the card and futures re-measurement."** Four MCMC chains are running at `hilda29e`. Known-issues card 8 (the ocean's climate effect) is built. The H2 futures impact is re-measured: larger than at `hilda33p`.
 
 - **The MCMC band, launched 2026-10-08 16:42 EDT** (frozen worktree `~/ccx_frozen/20261008j_mcmc` at `1e00851`; `~/ccx_frozen/20261008j_mcmc_launch.sh`, logs `20261008j_mcmc_chain{1..4}.out`, PIDs `20261008j_mcmc.pids`).

@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-08 — `hilda29e` ADOPTED (objective #18 pass 2, basin 1); the ledger applied; NEXT: the app text, with Marcus
 
+> ⛔ **SUPERSEDED by `notes/handoff_2026-10-08b_mcmc_band_running.md`** (the MCMC band running, card 8, the H2 stake).
+>
 > **UPDATE, later 10-08 (CHANGELOG (g), (h)): §3 items 1 and 2 are DONE except card 4's COPY.**
 > - (g) Card 4 audited at `hilda29e` (`calibration/diag_card4_audit.R`, `outputs/diagnostics/card4_audit_20261008_hilda29e.log`):
 >   - **three** typed claims are false: the lag; "a little below" (w 16.79 is inside 14–25); the growth-peak timing (model now 5 mo = the record's);
