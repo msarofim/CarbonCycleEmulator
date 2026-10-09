@@ -2,6 +2,48 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-09 (a) — **The MCMC band at `hilda29e`, 100k: still NOT converged by Vehtari et al.'s reference, but stable in ppm. `h_ml` is drifting into its 42.5 m floor, and it barely moves the futures.** Nothing shipped; `APP_RIBBONS_HOLD` stands. Marcus rules. (Handoff 10-08b §3 items 1–4.)
+
+- **The landing** (`land.sh`, `3c754ab`; log `outputs/diagnostics/mcmc_final_landing_20261008/`):
+  - all four chains COMPLETE at 00:55 EDT; post-adaptation acceptance 0.062–0.072;
+  - snapshot `outputs/mcmc_check_20261008j_hilda29e_final/`, md5-identical to the live files;
+  - read; build 127 min on 8 cores, 14 000 of 14 000 draws ran, the central line inside [5 %, 95 %] in 100 % of cells, delta-method / sampled sd 0.85–0.99;
+  - per-chain test with `--laplace=none`. Everything `ba08df9`.
+- **The read** (window (30000, 100000], 3500 kept/chain; `read_20261009_drop0.log`):
+  - R-hat max **1.098** (`h_ml`); 21 of 30 quantities > 1.01. Min bulk ESS **42** (`h_ml`), min tail 25 (`beta_max`). The 50k read: 1.13 (`ndep_ret`), 21.
+  - `h_ml`'s posterior: 5.8× the Laplace sd and 5.1 Laplace sd below the mode (50k: 3.8× and 3.6).
+- **The band, chain by chain** (`mcmc_band_by_chain_hilda29e_final_20261009.*`):
+
+| at 2100 and 2150 | 100k | 50k (10-08 l) | `hilda33d` stage 1 (held 10-02) |
+|---|---|---|---|
+| CO₂ between-chain range, max / median | **5.31** (vvLN 2150) / 1.81 ppm | 7.08 / 1.5 ppm | 3.42 / 1.31 ppm |
+| as a share of the width, max / median | **43 %** / 21 % | 46 % / 32 % | 29 % / 19 % |
+| cell R-hat, max / median | 1.077 / 1.034 | 1.138 / 1.065 | 1.075 / 1.038 |
+| cell ESS bulk min | 55 | 21 | 55 |
+| late / early half width (median z) | **1.08**, 1.01–1.34 (+1.0) | 0.95 (−0.4) | 1.01 (+0.1) |
+| GMST between-chain range, max / median | 0.044 / 0.009 °C | 0.031 / 0.009 °C | 0.014 / 0.007 °C |
+
+  - vvH CO₂ 2150: **812.2 / 822.4 / 834.6 ppm** (width 22.5), central 824.9. Chain medians 821.6 / 824.1 / 821.7 / 821.7; edges within 4.1 ppm (18 % of the width); R-hat 1.040.
+  - **50k → 100k:** CO₂ width ×1.06 (median; range 0.99–1.26), median shift −0.04 ppm (max |0.60|, vvH 2150). GMST width ×1.07, max |shift| 0.003 °C.
+  - ⚠ **Every cell's late half is wider than its early half** (1.01–1.34). Cells share draws and so co-move; this is one signal, not 42. With the 50k → 100k widening of +6 % and the `h_ml` drift below, the band is probably still a little narrow.
+- **Why it has not converged: `h_ml` is drifting into its floor** (`calibration/diag_mcmc_drift.R`, `d2bd671`; `mcmc_drift_hilda29e_final_20261009.{log,rds}`):
+  - pooled median by 10k block: 56.8 / 57.5 / 58.2 / 57.8 / **51.8 / 54.5 / 53.8 m** (mode 64.6). Chain 2 reached a block median of 43.2.
+  - Draws within 5 m of the 42.5 floor: **4.8 % in the first half of the window, 24.8 % in the second** (by chain: 19.7 / 48.6 / 18.5 / 12.3 %).
+  - The log-posterior fell with it in all four chains (−0.21 / −2.96 / −1.60 / −1.13; pooled −1.48).
+  - The floor is Marcus's 09-16 (b) ruling: the Holte prior's 16 % point (`CCX_HML_FLOOR_M`, `R/calibrate.R:160`). **The posterior now presses on a ruled box bound.**
+  - `beta_max`, `ndep_ret`, `fert_k` and `luc_scale` wander (`ndep_ret`'s chain block medians span 1.4–13.6) but show no trend.
+- ⭐ **`h_ml` barely moves the futures.** One regression per cell of the drawn values on the five standardised names (R² 0.72–0.95), effects per posterior sd:
+  - vvH CO₂ 2150 (width 22.5 ppm): `beta_max` **−4.7**, `fert_k` −2.3, `luc_scale` −1.3, `h_ml` **+0.58**, `ndep_ret` +0.41 ppm.
+  - vvLN CO₂ 2150 (width 12.3 ppm, the worst between-chain cell): `ndep_ret` **−2.56**, `beta_max` +1.48, `fert_k` −1.48, `h_ml` +0.34 ppm.
+  - The `h_ml` drift's share of the late − early shift is −0.25 ppm (vvH 2150) and −0.14 ppm (vvLN 2150). The regression predicts the observed shifts to within 0.7 ppm (vvH: +0.80 predicted vs +0.13 observed; vvLN −1.10 vs −0.97).
+  - ⇒ the unconverged direction is not the band's; the band's between-chain spread is `ndep_ret`'s and `beta_max`'s slow wandering. Linear in the names, so a check, not a proof.
+- **Options for Marcus** (each a methodological choice):
+  - (1) **extend to 200k**: resumable, the same chains, ~8 h on 4 cores. The band then needs ~5 h on 8 cores for 34 000 draws, or ~2.5 h thinned ×2 within each chain. Expectation, not measurement: ESS ×~2.4 shrinks the between-chain range ~1.5×, to near `hilda33d`'s.
+  - (2) ship the 100k band;
+  - (3) hold.
+  - Separately, the floor is binding in the posterior. Moving it is a ruling on the prior, and the futures barely care.
+- The frozen chain worktree `~/ccx_frozen/20261008j_mcmc` is kept: option (1) resumes from its live files.
+
 ## 2026-10-08 (l) — **The 50k preview band, chain by chain: the chains disagree by up to 7.1 ppm, 46 % of the band's width, twice `hilda33d`'s stage 1 over an equal window. Not widening.** Two driver fixes found on the way; the preview is quarantined for two wrong provenance strings (its numbers are valid). Nothing shipped; the hold stands. (Handoff 10-08b §3 item 3.)
 
 - **`diag_mcmc_band_by_chain.R`** (`155bc28`): its `--laplace` default is `hilda33d`'s held band, and it read the band's CENTRAL line from that file. At `hilda29e` that pairs the MCMC band with another mode's numbers, silently.
