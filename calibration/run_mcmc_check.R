@@ -29,6 +29,13 @@
 # chain an uninterrupted one would have been. --wall_min stops cleanly with a
 # checkpoint before the scheduler kills the job.
 #
+# EXTENDABLE (2026-10-09, Marcus: "Extend to 200k"). A chain COMPLETE at its
+# recorded n may be re-run with a LARGER --n and continues. Past --adapt the
+# proposal is frozen, so n enters nothing but the stopping test, and the
+# extended chain is the uninterrupted --n chain (bit-identity shown on a short
+# chain, CHANGELOG 2026-10-09 b). Each extension is recorded in
+# provenance$extended (from, to, commit); provenance$n becomes the new n.
+#
 # REPRODUCIBILITY: the chain's seed (MC_SEED_BASE + chain), the RNG kind and
 # where the seed is applied are stored IN the output.
 #
@@ -95,6 +102,16 @@ if (!(abs(lp0 - md$logpost) < MC_LP_TOL)) stop("the objective does not reproduce
 sd_scale <- 2.38^2 / d
 if (file.exists(MC_FILE)) {
   S <- readRDS(MC_FILE)
+  # EXTENSION (header): only a chain that finished its recorded n, with adaptation already over
+  if (MC_N > S$provenance$n) {
+    if (!(S$iter == S$provenance$n && S$provenance$n > S$provenance$adapt))
+      stop(sprintf("chain %d: --n %d > its recorded n %d, but it is at iteration %d (adapt %d): only a COMPLETE, post-adaptation chain extends",
+                   MC_CHAIN, MC_N, S$provenance$n, S$iter, S$provenance$adapt))
+    S$provenance$extended <- c(S$provenance$extended,
+                               list(list(from = S$provenance$n, to = MC_N, commit = MC_COMMIT)))
+    cat(sprintf("extending chain %d: %d -> %d iterations\n", MC_CHAIN, S$provenance$n, MC_N))
+    S$provenance$n <- MC_N
+  }
   # t0 and ckpt are checked too: the proposal is refreshed AT checkpoints inside [t0, adapt], so a
   # resume under either one changed is not the uninterrupted chain
   stopifnot(identical(S$provenance$mode_par, md$par_mode), S$provenance$n == MC_N,
