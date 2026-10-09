@@ -2,6 +2,42 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-09 (e) — **The 200k landing (handoff 10-09 §3 item 1). The band's chains now agree to ≤ 3.46 ppm, 21 % of the band's width (median 1.01 ppm / 15 %). That is the same in ppm as `hilda33d` stage 1's 3.42 and smaller as a share (29 %). The band is NOT widening and moved < 0.4 ppm from 100k. Still short of Vehtari et al.'s reference: R-hat max 1.046 (`beta_max`), 8 of 30 above 1.01. `h_ml`'s 100k "drift into the floor" was an EXCURSION, and it came back.** Nothing shipped; `APP_RIBBONS_HOLD` stands. Marcus rules.
+
+- **The landing** (`outputs/diagnostics/mcmc_200k_landing_20261009/`, `land.sh` rc 0, done 16:59 EDT):
+  - all four chains COMPLETE at 200 000 at 14:20 EDT; post-adaptation acceptance 0.059–0.075;
+  - snapshot `outputs/mcmc_check_20261009_hilda29e_200k/`, md5-identical to the live files;
+  - read with `--pool-thin=2`: window (30000, 200000], 8500 kept per chain, 4250 pooled per chain;
+  - build 159 min on 8 cores: 17 000 of 17 000 draws ran, 0 failed. The central line is inside [5 %, 95 %] in 100 % of 5614 cells; delta-method / sampled sd 0.86–0.97 → `futures_ribbons_mcmc_20261009_hilda29e_200k.rds`;
+  - per-chain test `--laplace=none`; drift diagnostic.
+- **The extension is bit-exact on the REAL chains.** In all four, the 100k snapshot is an exact prefix of the 200k chain: kept samples, their iterations and logposts, the lp trace, the seed (`diag_mcmc_band_compare.R` section 5; 10-09 d). `00b1c09` had shown it only on a short chain.
+- **The three reads side by side** (`mcmc_band_compare_hilda29e_20261009.{log,csv}`; CO₂ at 2100 and 2150, all scenarios):
+
+| | `hilda33d` stage 1 (held 10-02 u) | 50k | 100k | **200k** |
+|---|---|---|---|---|
+| parameter R-hat max | 1.208 (`beta_max`) | 1.132 (`ndep_ret`) | 1.098 (`h_ml`) | **1.046 (`beta_max`)** |
+| parameters > 1.01 | 34 of 34 | 30 of 30 | 21 of 30 | **8 of 30** |
+| min ESS bulk / tail | 14 / 15 | 21 / 37 | 42 / 25 | **105 / 62** |
+| CO₂ between-chain range max / median | 3.42 / 1.31 ppm | 7.08 / 1.50 | 5.31 / 1.81 | **3.46 (vvH 2150) / 1.01 ppm** |
+| … as a share of the width, max / median | 29 % / 19 % | 46 % / 32 % | 43 % / 21 % | **21 % / 15 %** |
+| cell R-hat max / median | 1.075 / 1.038 | 1.138 / 1.065 | 1.077 / 1.034 | **1.038 / 1.017** |
+| cell ESS bulk min | 55 | 21 | 55 | **143** |
+| late / early half width, median (range) | 1.01 (0.89–1.20) | 0.95 | 1.08 (1.01–1.34) | **1.01 (0.97–1.05), z +0.1** |
+| GMST between-chain range max / share max | 0.014 °C / 30 % | 0.031 / 46 % | 0.044 / 44 % | **0.018 °C / 19 %** |
+
+  - **100k → 200k:** CO₂ width ×0.973 median (0.95–1.00); median shift +0.007 ppm, max |0.37| (vvH 2150). GMST ×0.973, max |shift| 0.001 °C. The 100k read's "probably a little narrow" (10-09 a) is not borne out: the extra 100k iterations narrowed it by 3 %, within its own noise.
+  - vvH CO₂ 2150: **812.2 / 822.0 / 834.7 ppm** (width 22.5; 100k 812.2 / 822.4 / 834.6), central 824.9. Chain medians 819.9 / 823.1 / 822.4 / 822.5.
+  - ⚠ The 200k band is THINNED ×2 within chain and the 100k one is not. The comparison is of widths and quantiles, never of ESS-dependent noise. The parameters' R-hat / ESS use every sample.
+  - Expected (10-09 a, not measured then): ESS ×~2.4, between-chain range ~1.5× smaller. **Measured:** min bulk ESS ×2.5 (42 → 105); CO₂ range max ×1.53 smaller (5.31 → 3.46), median ×1.8.
+- **`h_ml`: the 100k sink was an excursion** (`mcmc_drift_hilda29e_200k_20261009.{log,rds}`):
+  - pooled block median 51.8–54.5 m at 70–100k, then **56.2–58.3 m in every block from 100k to 200k** (mode 64.6). R-hat 1.098 → 1.017, ESS 42 → 178.
+  - Draws within 5 m of the 42.5 floor, by 10k block: 5 / 5 / 4 / 4 / **25 / 27 / 32** / 4 / 1 / 7 / **24** / 3 / 4 / 9 / 5 / **23** / 7 %. Mostly chain 2 (96 % at 80–90k, 62 % at 130k, 75 % at 180k). Window halves 12.7 % / 9.7 %.
+  - ⇒ the floor is VISITED in recurring excursions (about one draw in ten overall), not sunk into. It still truncates the posterior's lower tail: the bound is binding, but not trending.
+  - The log-posterior is flat: pooled −1182.28 → −1182.33 between the window's halves; chains −0.13 / +0.44 / −0.06 / −0.46.
+  - `h_ml`'s leverage stays small: **+0.51 ppm per posterior sd at vvH 2150** (100k +0.58), against `beta_max` −5.6, `fert_k` −1.2, `luc_scale` −0.8. vvLN 2150: `ndep_ret` −2.6, `beta_max` +1.3, `h_ml` +0.3 ppm.
+- **What is still slow:** `beta_max` (R-hat 1.046, ESS 105 / 62) and `fert_k` (1.030), the fertilisation ridge. `beta_max`'s pooled block median rose to 2.27 / 2.44 at 170–190k (chain 1 at 2.55–2.73), then fell back to 2.17. This is the same slow wandering seen at 100k, not a trend.
+- **Options for Marcus** (each a methodological choice): (1) ship the 200k band; (2) extend further (300k ≈ 7–8 h uncontended on 4 cores, then a 3–4 h build depending on the thinning); (3) hold. Separately, the `h_ml` floor (`CCX_HML_FLOOR_M`, 09-16 b) binds the lower tail; the futures barely care.
+
 ## 2026-10-09 (d) — **`calibration/diag_mcmc_band_compare.R`: the report's side-by-side, built while the 200k chains run** (handoff 10-09 §3 item 2). It READS the landings' outputs and computes nothing about the model. No landing script touched.
 
 - Five sections: (1) the parameters' R-hat / ESS (read_mcmc_check.R's diag csv); (2) the band at 2100 / 2150, between-chain range in ppm / °C beside the width; (3) successive reads of the same chains, per-cell width ratio and median shift; (4) the key cells' 5 / 50 / 95 %; (5) each earlier snapshot an exact PREFIX of the next (kept samples, their iterations and logposts, the lp trace, the seed). (5) is what shows the 100k → 200k extension bit-exact on the REAL chains; `00b1c09` showed it on a short chain only. A failed prefix exits rc 2.

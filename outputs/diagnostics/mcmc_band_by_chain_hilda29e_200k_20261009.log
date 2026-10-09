@@ -1,0 +1,31 @@
+=== calibration/diag_mcmc_band_by_chain.R @b9b58a1, 2026-10-09 16:59 ===
+ribbons outputs/diagnostics/futures_ribbons_mcmc_20261009_hilda29e_200k.rds
+draws   outputs/mcmc_check_20261009_hilda29e_200k/pooled_u_thin2.rds
+laplace none
+ribbons' mode hilda29e (hilda_csl3v0kaidgbemwt)
+4 chains x 4250 draws (window (30000, 200000], drop 0); 17000 of 17000 draws ran, 0 failed
+
+--- the 10-01 (l) cells, chain by chain (5 / 50 / 95 %) ---
+vvH co2_ppm 2150 (ppm): pooled 812.2 / 822 / 834.7, width 22.5; central 824.9
+   chains q05 810.7 813.7 812 813.8 | q50 819.9 823.1 822.4 822.5 | q95 832.4 835 835.9 835.3
+   between-chain range: q05 3.14, q50 3.19, q95 3.46 ppm (15 % of the width); R-hat 1.038, ESS bulk 143 / tail 150
+vvVL co2_ppm 2150 (ppm): pooled 363.8 / 365.8 / 367.7, width 3.91; central 366
+   chains q05 363.8 363.8 363.7 364.1 | q50 365.8 365.7 365.8 366 | q95 367.6 367.6 367.7 368
+   between-chain range: q05 0.37, q50 0.275, q95 0.403 ppm (10 % of the width); R-hat 1.012, ESS bulk 421 / tail 1222
+vvM gmst 2100 (degC): pooled 2.931 / 2.944 / 2.959, width 0.02785; central 2.947
+   chains q05 2.929 2.932 2.931 2.933 | q50 2.942 2.945 2.944 2.945 | q95 2.957 2.959 2.96 2.96
+   between-chain range: q05 0.00352, q50 0.00362, q95 0.00382 degC (14 % of the width); R-hat 1.030, ESS bulk 197 / tail 316
+
+--- co2_ppm, all scenarios at 2100 and 2150 ---
+between-chain range of a band edge or median: max 3.46 ppm (vvH co2_ppm 2150), median 1.01 ppm
+  ... as a share of the pooled band's width: max 21 %, median 15 %
+R-hat of the cell: max 1.038, median 1.017; ESS bulk min 143, tail min 150 [Vehtari et al. 2021's reference: R-hat < 1.01, ESS > 400]
+still WIDENING? late-half / early-half band width: median 1.01, range 0.97-1.05; its own noise (1.82/sqrt(tail-ESS)) median 0.08, so median z +0.1
+
+--- gmst, all scenarios at 2100 and 2150 ---
+between-chain range of a band edge or median: max 0.0184 degC (vvLN gmst 2150), median 0.00499 degC
+  ... as a share of the pooled band's width: max 19 %, median 14 %
+R-hat of the cell: max 1.038, median 1.018; ESS bulk min 144, tail min 162 [Vehtari et al. 2021's reference: R-hat < 1.01, ESS > 400]
+still WIDENING? late-half / early-half band width: median 1.00, range 0.96-1.05; its own noise (1.82/sqrt(tail-ESS)) median 0.07, so median z -0.0
+
+wrote outputs/diagnostics/mcmc_band_by_chain_hilda29e_200k_20261009.csv (42 cells)

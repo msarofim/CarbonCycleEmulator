@@ -1,0 +1,73 @@
+=== calibration/diag_mcmc_band_compare.R @b9b58a1, 2026-10-09 17:01 ===
+stage1   outputs/mcmc_check | diag_20261002_drop0.csv | outputs/diagnostics/mcmc_band_by_chain_stage1_20261002.csv  [precedent: another mode]
+50k      outputs/mcmc_check_20261008j_hilda29e_snap50k | diag_20261008_drop0.csv | outputs/diagnostics/mcmc_band_by_chain_hilda29e_snap50k_20261008.csv
+100k     outputs/mcmc_check_20261008j_hilda29e_final | diag_20261009_drop0.csv | outputs/diagnostics/mcmc_band_by_chain_hilda29e_final_20261009.csv
+200k     outputs/mcmc_check_20261009_hilda29e_200k | diag_20261009_drop0.csv | outputs/diagnostics/mcmc_band_by_chain_hilda29e_200k_20261009.csv
+
+--- (1) the parameters (every kept sample; reference R-hat < 1.01) ---
+read       n/ch            R-hat max      > ref             ESS bulk tail min  
+stage1     1300 R-hat 1.208 (beta_max); 34 of 34 > 1.01; ESS bulk min 14 (beta_max), tail min 15 (beta_max)
+50k        1075 R-hat 1.132 (ndep_ret); 30 of 30 > 1.01; ESS bulk min 21 (ndep_ret), tail min 37 (beta_max)
+100k       3500 R-hat 1.098 (h_ml); 21 of 30 > 1.01; ESS bulk min 42 (h_ml), tail min 25 (beta_max)
+200k       8500 R-hat 1.046 (beta_max); 8 of 30 > 1.01; ESS bulk min 105 (beta_max), tail min 62 (beta_max)
+
+the slow names, R-hat / ESS bulk by read:
+  h_ml       | stage1   1.128 /   23 | 50k      1.058 /   56 | 100k     1.098 /   42 | 200k     1.017 /  178
+  beta_max   | stage1   1.208 /   14 | 50k      1.080 /   37 | 100k     1.057 /   53 | 200k     1.046 /  105
+  ndep_ret   | stage1   1.025 /  100 | 50k      1.132 /   21 | 100k     1.082 /   51 | 200k     1.024 /  173
+  fert_k     | stage1   1.071 /   52 | 50k      1.042 /   48 | 100k     1.029 /   81 | 200k     1.030 /  184
+  luc_scale  | stage1   1.038 /  108 | 50k      1.037 /   52 | 100k     1.041 /   89 | 200k     1.019 /  231
+  logpost    | stage1   1.020 /  133 | 50k      1.044 /  184 | 100k     1.046 /   77 | 200k     1.009 /  549
+
+--- (2) the band at 2100 and 2150: between-chain range IN THE UNITS beside the width ---
+co2_ppm (ppm):
+  stage1   draws/cell  4100 | range max 3.42 (vvH 2150), median 1.31 | share max 29 %, median 19 % | cell R-hat max 1.075, median 1.038 | ESS bulk min 55 | late/early median 1.01 (0.89-1.20)
+  50k      draws/cell  4200 | range max 7.08 (vvH 2150), median 1.5 | share max 46 %, median 32 % | cell R-hat max 1.138, median 1.065 | ESS bulk min 21 | late/early median 0.95 (0.82-1.14)
+  100k     draws/cell 14000 | range max 5.31 (vvLN 2150), median 1.81 | share max 43 %, median 21 % | cell R-hat max 1.077, median 1.034 | ESS bulk min 55 | late/early median 1.08 (1.01-1.34)
+  200k     draws/cell 17000 | range max 3.46 (vvH 2150), median 1.01 | share max 21 %, median 15 % | cell R-hat max 1.038, median 1.017 | ESS bulk min 143 | late/early median 1.01 (0.97-1.05)
+gmst (degC):
+  stage1   draws/cell  4100 | range max 0.014 (vvLN 2150), median 0.00739 | share max 30 %, median 20 % | cell R-hat max 1.071, median 1.040 | ESS bulk min 60 | late/early median 1.00 (0.88-1.19)
+  50k      draws/cell  4200 | range max 0.0313 (vvLN 2150), median 0.009 | share max 46 %, median 30 % | cell R-hat max 1.136, median 1.062 | ESS bulk min 21 | late/early median 0.97 (0.82-1.15)
+  100k     draws/cell 14000 | range max 0.0442 (vvLN 2150), median 0.00936 | share max 44 %, median 23 % | cell R-hat max 1.076, median 1.035 | ESS bulk min 57 | late/early median 1.10 (1.02-1.32)
+  200k     draws/cell 17000 | range max 0.0184 (vvLN 2150), median 0.00499 | share max 19 %, median 14 % | cell R-hat max 1.038, median 1.018 | ESS bulk min 144 | late/early median 1.00 (0.96-1.05)
+
+--- (3) successive reads of the SAME chains: per-cell width ratio and median shift ---
+  50k -> 100k, co2_ppm: width x1.059 median (0.99-1.26); median shift -0.0425 median, max |0.603| ppm (vvH 2150)
+  50k -> 100k, gmst: width x1.072 median (1.01-1.23); median shift -0.000489 median, max |0.00266| degC (vvH 2150)
+  100k -> 200k, co2_ppm: width x0.973 median (0.95-1.00); median shift +0.00677 median, max |0.369| ppm (vvH 2150)
+  100k -> 200k, gmst: width x0.973 median (0.95-1.01); median shift +8.18e-05 median, max |0.00115| degC (vvLN 2150)
+
+--- (4) the key cells, pooled 5 / 50 / 95 % (width) | chain medians | between-chain range ---
+vvH co2_ppm 2150 (ppm):
+  stage1   815 / 825.5 / 837.1 (22.1); central 826.6 | chains 825.7 827.1 825 823.7 | range 3.42 (15 % of width); R-hat 1.026
+  50k      813.2 / 823 / 834.3 (21.1); central 824.9 | chains 819.6 825.3 823.2 822.6 | range 7.08 (34 % of width); R-hat 1.069
+  100k     812.2 / 822.4 / 834.6 (22.5); central 824.9 | chains 821.6 824.1 821.7 821.7 | range 4.13 (18 % of width); R-hat 1.040
+  200k     812.2 / 822 / 834.7 (22.5); central 824.9 | chains 819.9 823.1 822.4 822.5 | range 3.46 (15 % of width); R-hat 1.038
+vvLN co2_ppm 2150 (ppm):
+  stage1   298.8 / 304.7 / 309.3 (10.5); central 304.1 | chains 305.1 304.7 304.8 304.1 | range 1.85 (18 % of width); R-hat 1.037
+  50k      299.1 / 305.5 / 309.4 (10.3); central 304.8 | chains 307.1 304.4 304.9 305.2 | range 3.56 (35 % of width); R-hat 1.099
+  100k     298.2 / 305.6 / 310.5 (12.3); central 304.8 | chains 306.7 305.9 304.6 305.1 | range 5.31 (43 % of width); R-hat 1.077
+  200k     298.6 / 305.7 / 310.5 (11.9); central 304.8 | chains 306.5 305.8 305.3 305.2 | range 2.22 (19 % of width); R-hat 1.022
+vvVL co2_ppm 2150 (ppm):
+  stage1   365.3 / 367.3 / 369 (3.67); central 367.2 | chains 367.8 367 367.3 367.2 | range 0.937 (26 % of width); R-hat 1.075
+  50k      363.8 / 365.8 / 367.8 (4.04); central 366 | chains 365.4 366.3 365.6 366 | range 1.13 (28 % of width); R-hat 1.053
+  100k     363.8 / 365.8 / 367.8 (4.02); central 366 | chains 365.6 365.8 365.9 366 | range 0.82 (20 % of width); R-hat 1.023
+  200k     363.8 / 365.8 / 367.7 (3.91); central 366 | chains 365.8 365.7 365.8 366 | range 0.403 (10 % of width); R-hat 1.012
+vvM gmst 2100 (degC):
+  stage1   2.938 / 2.953 / 2.969 (0.0314); central 2.954 | chains 2.954 2.955 2.953 2.95 | range 0.00473 (15 % of width); R-hat 1.033
+  50k      2.933 / 2.945 / 2.959 (0.0261); central 2.947 | chains 2.941 2.948 2.945 2.945 | range 0.00729 (28 % of width); R-hat 1.054
+  100k     2.931 / 2.944 / 2.959 (0.0279); central 2.947 | chains 2.943 2.946 2.943 2.944 | range 0.00483 (17 % of width); R-hat 1.027
+  200k     2.931 / 2.944 / 2.959 (0.0278); central 2.947 | chains 2.942 2.945 2.944 2.945 | range 0.00382 (14 % of width); R-hat 1.030
+
+--- (5) the chain files: is each earlier read an exact PREFIX of the next? (samples, samples_iter, samples_lp, lp_trace) ---
+  50k -> 100k chain 1: iter 51500 -> 100000, kept 1075 -> 3500; IDENTICAL prefix
+  50k -> 100k chain 2: iter 51000 -> 100000, kept 1050 -> 3500; IDENTICAL prefix
+  50k -> 100k chain 3: iter 53500 -> 100000, kept 1175 -> 3500; IDENTICAL prefix
+  50k -> 100k chain 4: iter 52000 -> 100000, kept 1100 -> 3500; IDENTICAL prefix
+  100k -> 200k chain 1: iter 100000 -> 200000, kept 3500 -> 8500; IDENTICAL prefix
+  100k -> 200k chain 2: iter 100000 -> 200000, kept 3500 -> 8500; IDENTICAL prefix
+  100k -> 200k chain 3: iter 100000 -> 200000, kept 3500 -> 8500; IDENTICAL prefix
+  100k -> 200k chain 4: iter 100000 -> 200000, kept 3500 -> 8500; IDENTICAL prefix
+prefix check: PASS (every chain)
+
+wrote outputs/diagnostics/mcmc_band_compare_hilda29e_20261009.csv (40 rows)
