@@ -2,6 +2,33 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-09 (b) — **RULED (Marcus, verbatim): "Extend to 200k (Recommended)" and "Thin ×2 within chain (Recommended)".** The four `hilda29e` chains are extending 100k → 200k; the 200k landing is armed. Nothing shipped.
+
+- **`run_mcmc_check.R` could not extend as the handoff said.** Its resume guard refused any changed `--n` (`S$provenance$n == MC_N`). Fixed (`00b1c09`): a chain COMPLETE at its recorded n, past adaptation, may continue to a larger `--n`. The extension is recorded in `provenance$extended` (from, to, commit), and `provenance$n` becomes the new n.
+  - Why it is exact: past `--adapt` the proposal is frozen, so n enters only the stopping test.
+  - **Shown, not assumed,** on a short chain under the canonical's objective (adapt 40, t0 5, thin 5, ckpt 10): 100 iterations uninterrupted vs 60 then extended to 100 are `identical()` in all 14 state fields. That includes u, lp, the RNG state, the samples and their trace, C and the adaptation sums, with 16 post-adaptation acceptances. Every provenance field also matches, except the extension record and the commit.
+  - Refused: shrinking n (100 → 80, the existing guard), and extending a chain checkpointed mid-run.
+- **`read_mcmc_check.R --pool-thin=k`** (`b004ef1`): the POOLED draws keep the sample at `adapt + thin·j` when j mod k = 0, chain by chain. The diagnostics still read every sample. The rule and the extension record go into the draws' provenance.
+  - On the 100k snapshot: the diagnostics are `identical()` to the committed read, and thin ×2 is exactly rows 2, 4, … of each chain.
+  - `diag_mcmc_drift.R` joins on the same rule (`--pooled=`); an off-by-one grid stops it.
+  - A preview of the thinning's cost, from the 100k draws: the half-sample gives vvH 2150 width 22.42 vs 22.45 ppm, and `beta_max` −4.72 vs −4.70 ppm/sd.
+- **The extension, launched 06:10 EDT** (`~/ccx_frozen/20261009a_mcmc_extend_launch.sh`):
+  - the frozen worktree `~/ccx_frozen/20261008j_mcmc` moved 1e00851 → `00b1c09`. Between them only `run_mcmc_check.R` and `data/ocean_climate_card.rds` (not read by the objective) differ;
+  - every chain's resume gate reproduced the mode's logpost (diff 0.00e+00), and all four logged "extending … 100000 -> 200000";
+  - R PIDs 89223–89226 (`~/ccx_frozen/20261009a_mcmc_extend.pids`); logs appended to `~/ccx_frozen/20261008j_mcmc_chain{1..4}.out`. Load was 3.9 at launch.
+  - **Torch verdict, said out loud: Mac.** The chain files and their RNG state are here, and four cores are free.
+  - Expected done ~14:30 EDT (~0.30 s/iteration).
+- **The 200k landing, ARMED** (`outputs/diagnostics/mcmc_200k_landing_20261009/land.sh`, `0635ed7`; PID in `~/ccx_frozen/20261009b_land200k.pid`). The steps:
+  - wait on the four PIDs with `kill -0`;
+  - require "COMPLETE: 200000" in every log;
+  - snapshot to `outputs/mcmc_check_20261009_hilda29e_200k/` (md5-checked);
+  - read `--pool-thin=2` (window (30000, 200000], 8500 kept/chain, 4250 pooled/chain);
+  - build 17 000 draws on 8 cores (~2.6 h) → `futures_ribbons_mcmc_20261009_hilda29e_200k.rds`;
+  - per-chain test `--laplace=none`, then the drift diagnostic.
+  - Expected done ~17:00 EDT.
+  - ⚠ Do not edit `read_mcmc_check.R`, `build_futures_ribbons.R`, `diag_mcmc_band_by_chain.R`, `diag_mcmc_drift.R` or `land.sh` until it exits.
+- A copy of the 100k chain files is the committed snapshot `outputs/mcmc_check_20261008j_hilda29e_final/` (md5-identical to the live files at 100k).
+
 ## 2026-10-09 (a) — **The MCMC band at `hilda29e`, 100k: still NOT converged by Vehtari et al.'s reference, but stable in ppm. `h_ml` is drifting into its 42.5 m floor, and it barely moves the futures.** Nothing shipped; `APP_RIBBONS_HOLD` stands. Marcus rules. (Handoff 10-08b §3 items 1–4.)
 
 - **The landing** (`land.sh`, `3c754ab`; log `outputs/diagnostics/mcmc_final_landing_20261008/`):
