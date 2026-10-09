@@ -480,9 +480,15 @@ APP_RIBBONS_FILE <- file.path(CCX_ROOT, "data", "futures_ribbons.rds")
 # The evidence is outputs/diagnostics/futures_ribbons_laplace_held_20261001.rds and
 # futures_ribbons_mcmc_stage1_20261002.rds. While this is set the loader draws NOTHING and
 # says nothing, even if a ribbons file appears in data/; test-futures-ribbons.R asserts it.
-# Lift it (NULL) only with a ruling.
-APP_RIBBONS_HOLD <- paste("held by ruling (2026-10-02, after the MCMC check): the Laplace band failed its check,",
-                          "and the sampler did not converge on the fertilisation ridge")
+# ⭐ SHIP RULED (Marcus 2026-10-09: "Ship the 200k band (Recommended)"; CHANGELOG 10-09 e-f): the
+# hilda29e MCMC band (4 chains to 200k, 17 000 draws; chains agree to <= 3.5 ppm, 21 % of the
+# width) is in data/futures_ribbons.rds (calibration/promote_futures_ribbons.R). The hold now
+# waits ONLY on the copy, which is Marcus's: the band's label (provenance$label, rendered by
+# APP_RIBBON_NOTE), card 6's title and text (app/R/review.R), and the parameter panel's "not yet
+# a posterior" clause above. Lift it (NULL) in the SAME commit as that copy: test-futures-ribbons.R
+# fails a lift while any of the three still says there is no band.
+APP_RIBBONS_HOLD <- paste("held until the copy lands (ship ruled 2026-10-09): the band's label, card 6",
+                          "and the parameter panel still describe an app with no band")
 APP_RIBBONS <- local({
   if (!is.null(APP_RIBBONS_HOLD)) return(list(ok = FALSE, held = TRUE, why = APP_RIBBONS_HOLD))
   if (!file.exists(APP_RIBBONS_FILE))

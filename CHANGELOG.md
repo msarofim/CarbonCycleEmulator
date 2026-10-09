@@ -2,6 +2,32 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-09 (f) — **RULED (Marcus, verbatim): "Ship the 200k band (Recommended)" and "Keep the floor (Recommended)". The band is in `data/futures_ribbons.rds`; the HOLD stays set until Marcus's copy lands, because three things in the app still say there is no band.**
+
+- **Why the hold is not lifted yet** (found while doing the ship steps; my option text had listed "lifting APP_RIBBONS_HOLD" among them). Lifting it today would make three things false or awkward in the app, and all three are Marcus's words:
+  - card 6's title, "There are no uncertainty bands, anywhere" (`app/R/review.R`);
+  - the parameter panel's "A single best fit, not yet a posterior — no uncertainty ranges are shown" (`app/global.R`; its comment says "If a band ever ships, this clause must go with it");
+  - the band's label, which `APP_RIBBON_NOTE` renders as "Shaded: the 5–95% range of 17000 model runs — a MCMC posterior draws (supplied), conditional on the fourteen held values."
+  - ⇒ the lift is ONE line (`APP_RIBBONS_HOLD <- NULL`), to go in the same commit as that copy. The hold's internal string and comment now record the ship ruling and what it waits on; neither is ever shown.
+- **`calibration/promote_futures_ribbons.R`** (`23dc945`) is the deliberate path into `data/`. `build_futures_ribbons.R` still refuses `--draws` output there; its message now names this script.
+  - It copies the landed band's `bands` untouched (`identical()` asserted) and checks the draws file's md5 against the artifact's `method`.
+  - It records the chains' seeds (20261002–05), RNG kind, where the seed is applied, the chain files' md5s, the window and the pooling rule IN THE ARTIFACT (`provenance$draws_provenance`). The builder's own `seed` stays NA: it applied none.
+  - It drops `key_draws`: **22.1 → 0.3 MB in memory** (6.1 MB → 71 KB on disk). The app never reads it; it stays in the committed source, named by md5.
+  - It carries the label with `label_ruled = FALSE` until Marcus words it (re-run with `--label=`).
+  - It refuses unless `ccx_ribbons_problems()` passes at the canonical.
+  - Shown: two runs are BYTE-IDENTICAL. It refuses the 100k draws (md5) and the held Laplace band (not supplied draws).
+  - Run at `23dc945` (clean stamp) → `data/futures_ribbons.rds`, md5 `18c1dea3494ee933311ac63bd455bd4c`; log `outputs/diagnostics/promote_futures_ribbons_20261009.log`.
+- **`ccx_ribbons_problems()`** (`R/paths.R`): a supplied-draws band must also record the chains' seeds, RNG kind and where the seed is applied. Mutation-tested (5 cases, below).
+- **`test-futures-ribbons.R` rewritten** (the ship's "tests 1–6"; 23 → 52 expectations, all pass):
+  - (1) the hold, plus `.fr_lift_problems()`: whenever the hold is NULL, the label must be ruled and neither the card 6 title nor the panel clause may remain. **Mutation on a scratch copy of the tree with only the hold lifted: FAILS on all three counts.**
+  - (2) the shipped band passes the app's own check at the canonical, and was built for `hilda29e` (named, not read back);
+  - (3) it IS the landing's: bands `identical()` to the committed source, `from_md5` = the source's md5, `key_draws` dropped;
+  - (4) the ruled method: 17 000 = 4 chains × (200000 − 30000) / thin 20 / pool-thin 2, the chain seeds and their placement, the draws' md5 in `method`, < 1 % failed, the central check;
+  - (5) width at the run's end; (6) the held Laplace evidence, still valid at `hilda33d` and REFUSED at the canonical;
+  - mutations: another vector, a missing scenario or seed, disordered quantiles, another mode; and (new) MCMC draws without chain seeds, with an NA seed, without RNG kind, without placement, or without any draws provenance.
+- **`h_ml` floor: KEPT** (09-16 b stands; `CCX_HML_FLOOR_M`). Nothing to change.
+- **Still Marcus's, for the lift:** the label wording; card 6 (facts: `notes/card6_facts_2026-10-02.md`, which predates the 200k numbers); the panel clause; how to present the 0.02–0.09 °C GMST band.
+
 ## 2026-10-09 (e) — **The 200k landing (handoff 10-09 §3 item 1). The band's chains now agree to ≤ 3.46 ppm, 21 % of the band's width (median 1.01 ppm / 15 %). That is the same in ppm as `hilda33d` stage 1's 3.42 and smaller as a share (29 %). The band is NOT widening and moved < 0.4 ppm from 100k. Still short of Vehtari et al.'s reference: R-hat max 1.046 (`beta_max`), 8 of 30 above 1.01. `h_ml`'s 100k "drift into the floor" was an EXCURSION, and it came back.** Nothing shipped; `APP_RIBBONS_HOLD` stands. Marcus rules.
 
 - **The landing** (`outputs/diagnostics/mcmc_200k_landing_20261009/`, `land.sh` rc 0, done 16:59 EDT):

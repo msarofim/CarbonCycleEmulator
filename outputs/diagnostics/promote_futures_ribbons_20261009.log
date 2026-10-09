@@ -1,0 +1,8 @@
+=== calibration/promote_futures_ribbons.R @23dc945 ===
+from  outputs/diagnostics/futures_ribbons_mcmc_20261009_hilda29e_200k.rds (md5 9d5baeefb09d1ae054d20c2d65c74817)
+draws outputs/mcmc_check_20261009_hilda29e_200k/pooled_u_thin2.rds (md5 0df17c051e7f8b09016d99d358c83de4)
+mode hilda29e; 17000 draws (17000 ok); 5614 band rows; chains seeded 20261002 20261003 20261004 20261005 (Mersenne-Twister/Inversion/Rejection)
+label (NOT YET RULED: the builder's provenance label): MCMC posterior draws (supplied), conditional on the fourteen held values
+dropped key_draws: 22.1 MB -> 0.3 MB in memory
+ccx_ribbons_problems() at the canonical: none
+wrote data/futures_ribbons.rds (md5 18c1dea3494ee933311ac63bd455bd4c)
