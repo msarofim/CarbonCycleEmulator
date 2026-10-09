@@ -2,6 +2,13 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-09 (d) — **`calibration/diag_mcmc_band_compare.R`: the report's side-by-side, built while the 200k chains run** (handoff 10-09 §3 item 2). It READS the landings' outputs and computes nothing about the model. No landing script touched.
+
+- Five sections: (1) the parameters' R-hat / ESS (read_mcmc_check.R's diag csv); (2) the band at 2100 / 2150, between-chain range in ppm / °C beside the width; (3) successive reads of the same chains, per-cell width ratio and median shift; (4) the key cells' 5 / 50 / 95 %; (5) each earlier snapshot an exact PREFIX of the next (kept samples, their iterations and logposts, the lp trace, the seed). (5) is what shows the 100k → 200k extension bit-exact on the REAL chains; `00b1c09` showed it on a short chain only. A failed prefix exits rc 2.
+- **Reproduces every logged number** on 50k / 100k / `hilda33d` stage 1: R-hat 1.098 (`h_ml`), 21 of 30, ESS 42 / 25; CO₂ range 5.31 ppm / 43 % (100k), 7.08 / 46 % (50k), 3.42 / 29 % (stage 1); 50k → 100k width ×1.059 (0.99–1.26), max |shift| 0.60 ppm at vvH 2150.
+- **50k → 100k prefix: IDENTICAL in all four chains.** Mutation-tested: one sample ×(1 + 1e-12), or one lp-trace value +1e-9, in a scratch copy of chain 3 → "DIFFERS", FAIL, rc 2.
+- At 08:06 EDT the chains were at ~114k of 200k at ~0.3 s/iteration (load down to ~8), so they should finish ~15:15 and the landing ~18:00.
+
 ## 2026-10-09 (c) — Handoff: `notes/handoff_2026-10-09_mcmc_200k_running.md` (Marcus: "Yes, write the handoff note"). It supersedes `handoff_2026-10-08b_mcmc_band_running.md`, which now points to it.
 
 - At 06:20 EDT the four chains were at 100.5–101k of 200k, running ~0.62 s/iteration under another session's MAGICC/Julia job and a VM (load ~30–40); uncontended it is 0.30.
