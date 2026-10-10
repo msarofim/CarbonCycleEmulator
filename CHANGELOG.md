@@ -2,6 +2,15 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-09 (g) — **The full suite at `e1711dc` (the ship): 7107 passed, 5 failed, 0 errors, 3 skipped.** Card 4's two failures are by design (as at `3c754ab`). The three new ones are two lint ratchets doing their job: one is MY bug, fixed; one is an older driver's, REPORTED, not fixed.
+
+- Run: frozen detached worktree `~/ccx_frozen/suite_20261009_e1711dc`, downloads APFS-cloned, BLAS pinned, `nice 10`, `set_max_fails(Inf)`, 17.7 min → `outputs/diagnostics/suite_20261009_e1711dc.log`. The stray "index file corrupt" git line is in `3c754ab`'s log too.
+- **`test-git-stamp-lint.R:47` — MINE, FIXED.** `calibration/diag_mcmc_band_compare.R` (10-09 d) ran `git rev-parse` through `system()` (2 calls). It now uses `ccx_git_stamp()`. Re-run on the three reads, its log is identical to the committed one apart from the header line; the lint file passes 6 / 6.
+- **`test-mode-struct-lint.R:71, :78` — NOT FIXED, reported.** `calibration/diag_mcmc_drift.R` (`d2bd671`, 10-09 a, written after the last full suite) reads `readRDS(ccx_mode_file(...))` and never calls `ccx_mode_base()`: a NEW file in the ratchet, 33 > 32.
+  - It never RUNS the model: it reads the mode's `h_ml` bound and `par_mode`, adopts the band and decodes five names. So the struct bug the lint guards (a HILDA mode run as a column) does not bite here.
+  - The decode does skip the gate, pins and decode check that `build_futures_ribbons.R` applies before it decodes.
+  - Per `~/.claude/CLAUDE.md` (a previously passing test fails → report, do not edit the test), neither the baseline nor the driver was touched. The two ways out are Marcus's: convert the driver (resolve the mode as the builder does, then show its 100k and 200k logs reproduce), or list it in `MS_BASELINE` (a test edit).
+
 ## 2026-10-09 (f) — **RULED (Marcus, verbatim): "Ship the 200k band (Recommended)" and "Keep the floor (Recommended)". The band is in `data/futures_ribbons.rds`; the HOLD stays set until Marcus's copy lands, because three things in the app still say there is no band.**
 
 - **Why the hold is not lifted yet** (found while doing the ship steps; my option text had listed "lifting APP_RIBBONS_HOLD" among them). Lifting it today would make three things false or awkward in the app, and all three are Marcus's words:

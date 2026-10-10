@@ -30,6 +30,7 @@ cmp_arg <- function(key, default) {
   hit <- grep(sprintf("^--%s=", key), CMP_ARGS, value = TRUE)
   if (length(hit)) sub(sprintf("^--%s=", key), "", hit[1]) else default
 }
+for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)   # ccx_git_stamp()
 CMP_VARS      <- c("co2_ppm", "gmst")
 CMP_UNITS     <- c(co2_ppm = "ppm", gmst = "degC")
 CMP_YEARS     <- c(2100L, 2150L)
@@ -42,6 +43,7 @@ CMP_TAG  <- cmp_arg("tag", "hilda29e")
 CMP_DATE <- format(Sys.Date(), "%Y%m%d")
 CMP_LOG  <- cmp_arg("log", file.path("outputs", "diagnostics", sprintf("mcmc_band_compare_%s_%s.log", CMP_TAG, CMP_DATE)))
 CMP_CSV  <- sub("\\.log$", ".csv", CMP_LOG)
+CMP_COMMIT <- ccx_git_stamp()
 
 cmp_parse <- function(s) {
   if (is.na(s) || !nzchar(s)) return(list())
@@ -65,7 +67,7 @@ PREC  <- ALL[seq_along(PREC)]; READS <- ALL[length(PREC) + seq_along(READS)]
 dir.create(dirname(CMP_LOG), showWarnings = FALSE, recursive = TRUE)
 sink(CMP_LOG, split = TRUE)
 cat(sprintf("=== calibration/diag_mcmc_band_compare.R @%s, %s ===\n",
-            system("git rev-parse --short HEAD", intern = TRUE), format(Sys.time(), "%Y-%m-%d %H:%M")))
+            CMP_COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M")))
 for (r in ALL) cat(sprintf("%-8s %s | %s | %s%s\n", r$label, r$dir, basename(r$diag), r$bychain,
                            if (r$label %in% vapply(PREC, `[[`, "", "label")) "  [precedent: another mode]" else ""))
 
@@ -186,7 +188,7 @@ cols <- unique(unlist(lapply(list(P1, P2, P3, P4, P5), names)))
 pad <- function(d) { for (cc in setdiff(cols, names(d))) d[[cc]] <- NA; d[cols] }
 OUT <- do.call(rbind, lapply(list(P1, P2, P3, P4, P5), pad))
 OUT$provenance <- sprintf("calibration/diag_mcmc_band_compare.R @%s; reads %s; precedent %s",
-                          system("git rev-parse --short HEAD", intern = TRUE),
+                          CMP_COMMIT,
                           paste(sprintf("%s=%s", vapply(READS, `[[`, "", "label"), vapply(READS, `[[`, "", "dir")), collapse = " "),
                           if (length(PREC)) paste(sprintf("%s=%s", vapply(PREC, `[[`, "", "label"), vapply(PREC, `[[`, "", "dir")), collapse = " ") else "none")
 utils::write.csv(OUT, CMP_CSV, row.names = FALSE)
