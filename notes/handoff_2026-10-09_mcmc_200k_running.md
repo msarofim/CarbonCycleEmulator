@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-09 — the `hilda29e` MCMC chains are EXTENDING to 200k; the 200k landing is ARMED; NEXT: read what it lands, then Marcus rules on shipping
 
+> ⚠ **SUPERSEDED** by `notes/handoff_2026-10-10_band_shipped_hold_on_copy.md` (the 200k band landed, was ruled shipped, and sits in `data/`; the hold waits on Marcus's copy).
+
 **Supersedes** `notes/handoff_2026-10-08b_mcmc_band_running.md`. Its §3 items 1–3 are DONE (the 50k and 100k reads, both bands, both per-chain tests). Its item 4 was reported, and Marcus ruled (below). Items 5–6 still apply unchanged.
 Written on Marcus's request ("Yes, write the handoff note"), 2026-10-09 ~06:20 EDT, while the extended chains run.
 

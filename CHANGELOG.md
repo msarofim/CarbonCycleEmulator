@@ -2,6 +2,14 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-10 (a) — Handoff: `notes/handoff_2026-10-10_band_shipped_hold_on_copy.md` (Marcus: "write the handoff note"). It supersedes `handoff_2026-10-09_mcmc_200k_running.md`, which now points to it.
+
+- Nothing is running.
+- Its §3:
+  - Marcus's copy (the band's label, card 6, the parameter-panel clause, the GMST band), then lift `APP_RIBBONS_HOLD` in the same commit;
+  - his ruling on the mode-struct lint for `diag_mcmc_drift.R` (convert, recommended, or baseline);
+  - the older pending wording (card 4, card 8, the constraint-map caption, the What-if blurb).
+
 ## 2026-10-09 (g) — **The full suite at `e1711dc` (the ship): 7107 passed, 5 failed, 0 errors, 3 skipped.** Card 4's two failures are by design (as at `3c754ab`). The three new ones are two lint ratchets doing their job: one is MY bug, fixed; one is an older driver's, REPORTED, not fixed.
 
 - Run: frozen detached worktree `~/ccx_frozen/suite_20261009_e1711dc`, downloads APFS-cloned, BLAS pinned, `nice 10`, `set_max_fails(Inf)`, 17.7 min → `outputs/diagnostics/suite_20261009_e1711dc.log`. The stray "index file corrupt" git line is in `3c754ab`'s log too.
