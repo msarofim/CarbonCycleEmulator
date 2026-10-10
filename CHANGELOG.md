@@ -2,6 +2,32 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-10 (c) — **RULED (Marcus, verbatim): "Omit it on temperature". The Futures band is drawn on the CO₂ view only. The temperature view gets a sentence in words instead, which is Marcus's to write, so the hold now waits on FOUR pieces of copy.** (`dff90c5`; handoff 10-10 §3 item 1 D.)
+
+- **What prompted the ruling: a scratch preview, not committed.** The shipped band was shown in the running app with the hold lifted only in a copy under the scratchpad (a symlinked root plus a copied `app/`). A temporary `ccx-band-preview` launch entry was reverted after each use. Screenshots were sent to Marcus.
+  - Default selection (Low / Medium / High), in an 800 px viewport.
+  - CO₂ view: the band shows only on High, ≈ 8 px at 2150.
+  - Temperature view: ≈ 40 px per °C, so High's 0.083 °C at 2150 is ≈ 3 px, about the line's own width.
+- **`app/global.R`** (behind the hold):
+  - `APP_RIBBON_YVARS <- "co2_ppm"`; `app_future_bands()` returns NULL off it.
+  - `app_ribbon_note()` gives `APP_RIBBON_NOTE_TEMP` on the other views, in place of the "Shaded: …" label.
+  - `APP_RIBBON_NOTE_TEMP` is **NULL, pending Marcus's wording**. The old sentence ("It varies the carbon cycle only…") was my B7 draft, never ruled or shown, and it described a DRAWN band.
+  - The hold's internal string and comment now name the fourth item.
+  - The artifact is unchanged and still carries the GMST bands: `ccx_ribbons_problems()` checks every `APP_FUTURE_YVARS`.
+- **`test-futures-ribbons.R`: 52 → 65, all pass.** Extended for the new ruling; no existing assertion was weakened.
+  - `.fr_lift_problems()` has a fourth blocker: the temperature sentence is unworded (NULL, "", blank, NA, or not length 1). Each form is mutation-tested. ⚠ `nzchar(NA)` is TRUE in R, so the first draft let NA through; caught while writing it.
+  - A new behavioural test parses the app's own `app_future_bands()` / `app_ribbon_note()` out of `global.R` and runs them on the shipped band with the hold simulated as lifted:
+    - CO₂: a band and the label;
+    - GMST: NULL and the temperature sentence, although the artifact has the band.
+  - Its power, both ways: with the constant widened, or with the helper's guard cut, the GMST band comes back.
+    - ⚠ The guard-cut mutation first missed, because `deparse()` wraps long lines and the cut matched nothing. The test's own `expect_false` caught that, and it now deparses at `width.cutoff = 500`.
+- **Other tests that read `global.R`, all pass** (13 files, 559 expectations): `test-app-version`, `-app-review-copy`, `-cmap-tie`, `-constraint-map-panel`, `-fair-overlay`, `-future-span`, `-future-yvar`, `-mode-file`, `-luc-regrowth-panel`, `-pulse-linearity`, `-review-cards`, `-stylised-takeaway`, `-ui-year-bounds-lint`.
+- **Checked in the browser:**
+  - The real app (hold set): Futures draws no band and no "Shaded" sentence, and the console is clean.
+  - The scratch copy (hold lifted): the CO₂ band and label are present; the temperature view has no band and no band sentence.
+  - The real app's server log has two "figure margins too large" warnings, on `k_plot` and `k_seasonal`, at the first render of a tab opened in the background. These are the known transient (10-08, CHANGELOG ~L347) and unrelated to this change.
+- **Facts for the new sentence:** `notes/ship_copy_facts_2026-10-09.md`, §D, now marked RULED. §A also gains two observations from the preview: the count prints "17000" with no thousands separator, and the band is visible only on High at the default selection.
+
 ## 2026-10-10 (b) — **RULED (Marcus, verbatim): "Convert the driver (Recommended)". `calibration/diag_mcmc_drift.R` now resolves `hilda29e` as `run_mcmc_check.R` ran the chains, and reproduces both of its committed logs. The mode-struct lint is back to 32; the test was not touched.** (`4b03446`; handoff 10-10 §3 item 2.)
 
 - **What changed.** The driver had read the mode file and adopted its bands, then decoded. It now follows the MCMC driver's order: `ccx_mode_base`, the gate, the pins, `ccx_require_param_set`, the band, then `ccx_check_mode_decode`.

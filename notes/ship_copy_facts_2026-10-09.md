@@ -12,9 +12,9 @@
 - A. the label;
 - B. card 6;
 - C. the parameter panel's clause;
-- D. how to present the temperature band.
+- D. ~~how to present the temperature band~~ **RULED 2026-10-10: "Omit it on temperature"** (`dff90c5`). What it now waits on is **the temperature view's sentence** (`APP_RIBBON_NOTE_TEMP`, NULL until worded). See D below.
 
-`test-futures-ribbons.R` fails a lift while A, B or C still describes an app with no band.
+`test-futures-ribbons.R` fails a lift while A, B or C still describes an app with no band, or while D's sentence is unworded.
 
 ---
 
@@ -40,6 +40,8 @@
 ## A. The label
 
 The caption renders: "Shaded: the 5–95% range of 17000 model runs — a `<label>`."
+- Seen in a scratch preview with the hold lifted (2026-10-10): the count prints as **"17000"**, with no thousands separator (`sprintf("%d")` in `APP_RIBBON_NOTE`). The frame around the label is also unruled template text. Both are yours to change along with the label.
+- On the CO₂ view, at the default selection (Low / Medium / High), the band is visible **only on High**: about 8 px at 2150 in an 800 px viewport.
 
 The current string, carried with `label_ruled = FALSE`: "MCMC posterior draws (supplied), conditional on the fourteen held values". It is the builder's provenance label and was never ruled copy.
 
@@ -93,9 +95,16 @@ What is true after the lift:
 - The Futures tab shows a sampled band around them.
 - Nothing else in the app has a range.
 
-## D. The temperature band
+## D. The temperature band: RULED "Omit it on temperature" (Marcus 2026-10-10)
 
+**What is built** (`dff90c5`, behind the hold):
+- The band is drawn on the CO₂ view only (`APP_RIBBON_YVARS <- "co2_ppm"`).
+- On the temperature view, the caption's band sentence is replaced by `APP_RIBBON_NOTE_TEMP`. Per the ruling, that sentence says in words that the temperature spread comes only through CO₂ and is not shown.
+- **The wording is yours.** It is NULL until you write it, and the lift gate blocks while it is NULL.
+- The artifact still carries the GMST bands; the app just does not draw them.
+
+**The facts for that sentence:**
 - **0.02–0.10 °C wide at 2100–2150**, against lines 1.25–4.61 °C apart.
-- At the app's scale it will be close to invisible.
-- `APP_RIBBON_NOTE_TEMP` already says, in words, that the band varies the carbon cycle only.
-- The presentation choice (draw it / omit it on the temperature view / something else) is open.
+- At the app's scale that is ≈ 3 px for the widest default-selection band (High, 2150, 0.083 °C, at ≈ 40 px per °C in an 800 px viewport), about the line's own width.
+- The draws vary only the 29 fitted carbon-cycle parameters. The climate response (fitted to FaIR) and the non-CO₂ forcing are fixed, so temperature moves only through the CO₂ it is handed.
+- The previous draft, never ruled or shown, was mine (B7, 10-01): "It varies the carbon cycle only: how much the world warms for a given amount of CO₂ is held at the model's one fitted value." It described a DRAWN band, so it no longer fits.

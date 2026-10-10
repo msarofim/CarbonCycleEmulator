@@ -4,6 +4,11 @@
 
 Written on Marcus's request ("write the handoff note"), 2026-10-10. **Nothing is running.**
 
+> **UPDATE 2026-10-10, later the same day (CHANGELOG 10-10 b, c).**
+> - §3 item 2 is DONE. Marcus ruled "Convert the driver (Recommended)": `diag_mcmc_drift.R` was converted and gated, and both of its logs reproduce (`4b03446`).
+> - §3 item 1 D is RULED: "Omit it on temperature" (`dff90c5`). The band is drawn on CO₂ only.
+> - The lift now waits on FOUR pieces of Marcus's copy: A the label, B card 6, C the panel clause, and **D′ the temperature view's sentence** (`APP_RIBBON_NOTE_TEMP`, NULL until worded). The facts are in `notes/ship_copy_facts_2026-10-09.md` §D.
+
 **Start here.**
 1. CHANGELOG **2026-10-09 (g)**, **(f)**, **(e)**, **(d)**, in that order. (g) is the newest.
 2. `notes/ship_copy_facts_2026-10-09.md`: the facts for the copy the hold-lift waits on.
