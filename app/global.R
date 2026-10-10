@@ -484,11 +484,13 @@ APP_RIBBONS_FILE <- file.path(CCX_ROOT, "data", "futures_ribbons.rds")
 # hilda29e MCMC band (4 chains to 200k, 17 000 draws; chains agree to <= 3.5 ppm, 21 % of the
 # width) is in data/futures_ribbons.rds (calibration/promote_futures_ribbons.R). The hold now
 # waits ONLY on the copy, which is Marcus's: the band's label (provenance$label, rendered by
-# APP_RIBBON_NOTE), card 6's title and text (app/R/review.R), and the parameter panel's "not yet
-# a posterior" clause above. Lift it (NULL) in the SAME commit as that copy: test-futures-ribbons.R
-# fails a lift while any of the three still says there is no band.
+# APP_RIBBON_NOTE), card 6's title and text (app/R/review.R), the parameter panel's "not yet
+# a posterior" clause above, and (2026-10-10, "Omit it on temperature") the temperature view's
+# sentence, APP_RIBBON_NOTE_TEMP below. Lift it (NULL) in the SAME commit as that copy:
+# test-futures-ribbons.R fails a lift while any of the four is still open.
 APP_RIBBONS_HOLD <- paste("held until the copy lands (ship ruled 2026-10-09): the band's label, card 6",
-                          "and the parameter panel still describe an app with no band")
+                          "and the parameter panel still describe an app with no band, and the",
+                          "temperature view's sentence is not yet worded")
 APP_RIBBONS <- local({
   if (!is.null(APP_RIBBONS_HOLD)) return(list(ok = FALSE, held = TRUE, why = APP_RIBBONS_HOLD))
   if (!file.exists(APP_RIBBONS_FILE))
@@ -509,21 +511,27 @@ APP_RIBBON_NOTE <- if (isTRUE(APP_RIBBONS$ok)) with(APP_RIBBONS$provenance, spri
   100 * probs[1], 100 * probs[length(probs)], n_ok, label)) else
   if (isTRUE(APP_RIBBONS$held)) NULL else       # held: silent -- card 6 (the bands card) says why there is no band
   sprintf("No uncertainty band is drawn: %s.", APP_RIBBONS$why)
-# ⚠ THE TEMPERATURE BAND IS NARROW FOR A REASON THE READER MUST BE TOLD. The draws
-# vary the CARBON CYCLE's fitted parameters only; the climate module (fitted to
-# FaIR) and the non-CO2 forcing are fixed, so temperature moves only through the
-# CO2 it is handed -- sd ~0.01-0.04 degC at 2150 against ~2-8 ppm of CO2 (the
-# 2026-10-01 trial). A razor-thin band with no sentence would read as "the
-# warming is known this precisely".
-APP_RIBBON_NOTE_TEMP <- paste("It varies the carbon cycle only: how much the world",
-                              "warms for a given amount of CO₂ is held at the",
-                              "model's one fitted value.")
+# ⚠ THE TEMPERATURE BAND IS NOT DRAWN (RULED 2026-10-10, Marcus: "Omit it on
+# temperature"). The draws vary the CARBON CYCLE's fitted parameters only; the
+# climate module (fitted to FaIR) and the non-CO2 forcing are fixed, so
+# temperature moves only through the CO2 it is handed. The shipped band is
+# 0.02-0.10 degC wide at 2100-2150 (notes/ship_copy_facts_2026-10-09.md, D),
+# about 3 px at the app's scale: a razor-thin band reads as "the warming is
+# known this precisely". So the band is drawn on APP_RIBBON_YVARS only. The
+# artifact still carries the GMST bands (ccx_ribbons_problems() checks every
+# APP_FUTURE_YVARS); the app just does not draw them.
+APP_RIBBON_YVARS <- "co2_ppm"
+# The temperature view's sentence in place of the band's label: in words, its
+# spread comes only through CO2 and is not shown. MARCUS'S WORDING, PENDING: NULL
+# until it lands, and test-futures-ribbons.R blocks a lift while it is NULL.
+APP_RIBBON_NOTE_TEMP <- NULL
 app_ribbon_note <- function(yvar)
-  if (isTRUE(APP_RIBBONS$ok) && identical(yvar, "gmst")) paste(APP_RIBBON_NOTE, APP_RIBBON_NOTE_TEMP) else APP_RIBBON_NOTE
+  if (isTRUE(APP_RIBBONS$ok) && !yvar %in% APP_RIBBON_YVARS) APP_RIBBON_NOTE_TEMP else APP_RIBBON_NOTE
 #' The ribbons for the selected scenarios and y-variable, in plot_future()'s
-#' `bands` shape, labelled with the DISPLAY names the runs carry; NULL if none.
+#' `bands` shape, labelled with the DISPLAY names the runs carry; NULL if none
+#' (always NULL off APP_RIBBON_YVARS).
 app_future_bands <- function(scen_ids, yvar) {
-  if (!isTRUE(APP_RIBBONS$ok) || !length(scen_ids)) return(NULL)
+  if (!isTRUE(APP_RIBBONS$ok) || !length(scen_ids) || !yvar %in% APP_RIBBON_YVARS) return(NULL)
   b <- APP_RIBBONS$bands
   b <- b[b$scenario %in% scen_ids & b$var == yvar, , drop = FALSE]
   if (!nrow(b)) return(NULL)

@@ -10,11 +10,15 @@
 #   each run through the full model by calibration/build_futures_ribbons.R and PROMOTED into data/ by
 #   calibration/promote_futures_ribbons.R (bands untouched, chain seeds recorded, key_draws dropped).
 #
+# - 2026-10-10 (Marcus): "Omit it on temperature". The band is drawn on the CO2 view only
+#   (APP_RIBBON_YVARS); the temperature view says in words that its spread comes only through CO2 and is
+#   not shown (APP_RIBBON_NOTE_TEMP, his wording). The artifact still carries both variables.
+#
 # ⛔ THE HOLD IS LIFTED ONLY WITH THE COPY. Three things in the app say there is no band: the band's
 # own label (app copy once shown: "Shaded: ... — a <label>."), card 6's title, and the parameter
-# panel's "not yet a posterior" clause (app/global.R). All three are Marcus's words. .fr_lift_problems()
-# lists what still blocks a lift; it is asserted EMPTY whenever the hold is NULL, and mutation-tested by
-# simulating a lift on today's texts.
+# panel's "not yet a posterior" clause (app/global.R). A fourth is not yet written: the temperature
+# view's sentence. All four are Marcus's words. .fr_lift_problems() lists what still blocks a lift; it
+# is asserted EMPTY whenever the hold is NULL, and mutation-tested by simulating a lift on today's texts.
 #
 # ⛔ WHAT THIS GUARDS. A band is a claim about the FIT it surrounds. Built at one parameter vector and
 # drawn around another's line, it would look exactly as plausible and be wrong -- so the artifact must
@@ -36,7 +40,8 @@
 if (file.exists(.fr_global))
   for (e in parse(.fr_global))
     if (is.call(e) && length(e) >= 3L && identical(as.character(e[[1]]), "<-") &&
-        is.name(e[[2]]) && as.character(e[[2]]) %in% c("APP_SCENARIOS", "APP_FUTURE_YVARS", "APP_RIBBONS_HOLD"))
+        is.name(e[[2]]) && as.character(e[[2]]) %in% c("APP_SCENARIOS", "APP_FUTURE_YVARS", "APP_RIBBONS_HOLD",
+                                                        "APP_RIBBON_YVARS", "APP_RIBBON_NOTE_TEMP"))
       eval(e, .fr_env)
 .fr_ship_have <- file.exists(.fr_ship_file)
 .fr_ship <- if (.fr_ship_have) readRDS(.fr_ship_file) else NULL
@@ -56,14 +61,18 @@ FR_SHIP_POOL_THIN <- 2L
 FR_N_SHIP         <- FR_SHIP_CHAINS * diff(FR_SHIP_WINDOW)[[1]] / FR_SHIP_THIN / FR_SHIP_POOL_THIN   # 17 000
 FR_NO_BAND_TITLE  <- "There are no uncertainty bands, anywhere"     # card 6's title while no band ships
 FR_NO_BAND_PANEL  <- "not yet a posterior — no"                      # the parameter panel's clause
+FR_RIBBON_YVARS_RULED <- "co2_ppm"          # the views that DRAW the band ("Omit it on temperature", 10-10)
 
 # What still blocks lifting the hold: each a string, empty when a lift is consistent with the app's copy.
-.fr_lift_problems <- function(ship, global_txt, review_txt) {
+# `note_temp` is APP_RIBBON_NOTE_TEMP as parsed from global.R (NULL until Marcus words it).
+.fr_lift_problems <- function(ship, global_txt, review_txt, note_temp) {
   bad <- character(0)
   if (is.null(ship)) return("no shipped band in data/")
   if (!isTRUE(ship$provenance$label_ruled)) bad <- c(bad, "the band's label (app copy) is not yet ruled")
   if (grepl(FR_NO_BAND_PANEL, global_txt, fixed = TRUE)) bad <- c(bad, "the parameter panel still says no ranges are shown")
   if (grepl(FR_NO_BAND_TITLE, review_txt, fixed = TRUE)) bad <- c(bad, "card 6 still says there are no bands")
+  if (!(is.character(note_temp) && length(note_temp) == 1L && !is.na(note_temp) && nzchar(trimws(note_temp))))
+    bad <- c(bad, "the temperature view's sentence is not yet worded")
   bad
 }
 
@@ -77,7 +86,7 @@ test_that("the HOLD: the loader draws nothing while it is set, and it is lifted 
   g2 <- sub("if (!is.null(APP_RIBBONS_HOLD)) return(list(ok = FALSE, held = TRUE", "", g, fixed = TRUE)
   expect_false(grepl("if (!is.null(APP_RIBBONS_HOLD)) return(list(ok = FALSE, held = TRUE", g2, fixed = TRUE))
   if (is.null(.fr_env$APP_RIBBONS_HOLD)) {
-    p <- .fr_lift_problems(.fr_ship, g, rv)
+    p <- .fr_lift_problems(.fr_ship, g, rv, .fr_env$APP_RIBBON_NOTE_TEMP)
     expect_equal(p, character(0), info = paste("APP_RIBBONS_HOLD was lifted, but:", paste(p, collapse = " | ")))
   } else {
     expect_true(is.character(.fr_env$APP_RIBBONS_HOLD) && nzchar(.fr_env$APP_RIBBONS_HOLD))
@@ -85,11 +94,54 @@ test_that("the HOLD: the loader draws nothing while it is set, and it is lifted 
   # MUTATION (the lift gate's POWER): simulated on today's texts, a lift is blocked on every count still open
   skip_if_not(.fr_ship_have, "no shipped band")
   unruled <- .fr_ship; unruled$provenance$label_ruled <- FALSE
-  expect_true(any(grepl("label", .fr_lift_problems(unruled, "", ""), fixed = TRUE)))
-  expect_true(any(grepl("parameter panel", .fr_lift_problems(.fr_ship, FR_NO_BAND_PANEL, ""), fixed = TRUE)))
-  expect_true(any(grepl("card 6", .fr_lift_problems(.fr_ship, "", FR_NO_BAND_TITLE), fixed = TRUE)))
+  worded <- "a worded sentence"
+  expect_true(any(grepl("label", .fr_lift_problems(unruled, "", "", worded), fixed = TRUE)))
+  expect_true(any(grepl("parameter panel", .fr_lift_problems(.fr_ship, FR_NO_BAND_PANEL, "", worded), fixed = TRUE)))
+  expect_true(any(grepl("card 6", .fr_lift_problems(.fr_ship, "", FR_NO_BAND_TITLE, worded), fixed = TRUE)))
   ruled <- .fr_ship; ruled$provenance$label_ruled <- TRUE
-  expect_equal(.fr_lift_problems(ruled, "", ""), character(0))
+  for (nt in list(NULL, "", "  ", NA_character_, c(worded, worded)))
+    expect_true(any(grepl("temperature view", .fr_lift_problems(ruled, "", "", nt), fixed = TRUE)))
+  expect_equal(.fr_lift_problems(ruled, "", "", worded), character(0))
+})
+
+# The app's two band helpers, PARSED out of global.R and run against the shipped band with the hold
+# simulated as lifted (sourcing global.R would compile the core and run a spin-up).
+.fr_helpers <- function(ribbon_yvars = .fr_env$APP_RIBBON_YVARS, fn_txt_edit = identity) {
+  h <- new.env(parent = baseenv())
+  h$APP_RIBBONS <- c(list(ok = TRUE), .fr_ship)
+  h$APP_SCENARIOS <- .fr_env$APP_SCENARIOS
+  h$APP_RIBBON_YVARS <- ribbon_yvars
+  h$APP_RIBBON_NOTE <- "LABEL"; h$APP_RIBBON_NOTE_TEMP <- "TEMP"
+  for (e in parse(.fr_global))
+    if (is.call(e) && length(e) >= 3L && identical(as.character(e[[1]]), "<-") && is.name(e[[2]]) &&
+        as.character(e[[2]]) %in% c("app_future_bands", "app_ribbon_note"))
+      eval(parse(text = fn_txt_edit(paste(deparse(e, width.cutoff = 500L), collapse = "\n"))), h)
+  h
+}
+
+test_that("RULED 10-10, \"Omit it on temperature\": the band is drawn on the CO2 view only", {
+  skip_if_not(file.exists(.fr_global) && .fr_ship_have, "app sources or the shipped band are not present")
+  expect_identical(.fr_env$APP_RIBBON_YVARS, FR_RIBBON_YVARS_RULED)
+  h <- .fr_helpers()
+  expect_true(is.function(h$app_future_bands) && is.function(h$app_ribbon_note))
+  sc <- unname(.fr_env$APP_SCENARIOS)
+  for (yv in .fr_env$APP_FUTURE_YVARS) {
+    b <- h$app_future_bands(sc, yv)
+    if (yv %in% FR_RIBBON_YVARS_RULED) {
+      expect_true(is.data.frame(b) && nrow(b) > 0L, info = yv)
+      expect_identical(h$app_ribbon_note(yv), "LABEL")
+    } else {
+      expect_null(b, info = yv)                                  # the artifact HAS this band; the app omits it
+      expect_true(any(.fr_ship$bands$var == yv), info = yv)
+      expect_identical(h$app_ribbon_note(yv), "TEMP")            # ... and says so in words instead of the label
+    }
+  }
+  # MUTATION (the test's POWER): with the omission undone, either in the constant or in the helper's
+  # guard, the temperature band comes back and the assertions above would fail
+  h_all <- .fr_helpers(ribbon_yvars = .fr_env$APP_FUTURE_YVARS)
+  expect_false(is.null(h_all$app_future_bands(sc, "gmst")))
+  h_cut <- .fr_helpers(fn_txt_edit = function(x) sub("|| !yvar %in% APP_RIBBON_YVARS", "", x, fixed = TRUE))
+  expect_false(is.null(h_cut$app_future_bands(sc, "gmst")))
 })
 
 test_that("the shipped band passes the app's own check at the canonical, built for the mode it was ruled for", {
