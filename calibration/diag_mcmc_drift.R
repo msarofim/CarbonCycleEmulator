@@ -49,12 +49,30 @@ sink(DR_LOG, split = TRUE)
 cat(sprintf("=== %s @%s, %s ===\ndir %s\nribbons %s\n", DR_DRIVER, DR_COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M"),
             DR_DIR, DR_RIBBONS))
 
-# ---- the chains, decoded the way the band decodes them ---------------------
+# ---- the chains' space: the canonical resolved as run_mcmc_check.R ran them ---------
+# Converted 2026-10-10 (Marcus: "Convert the driver (Recommended)"; test-mode-struct-lint.R). This
+# driver runs NO model, so the base is not run: it is read for the values the chains HELD, below.
 fs <- sort(list.files(DR_DIR, pattern = "^chain_[0-9]+\\.rds$", full.names = TRUE))
 S <- lapply(fs, readRDS); M <- length(S)
 md <- readRDS(ccx_mode_file(CCX_MODE_CANONICAL))
-stopifnot(all(vapply(S, function(s) identical(s$provenance$mode, CCX_MODE_CANONICAL), logical(1))))
+DR_BASE <- ccx_mode_base(md)               # the file's OWN structure, with its pins in the base
+invisible(ccx_apply_gate(ccx_mode_struct(md)))
+DR_PINS <- ccx_mode_pins(md); invisible(ccx_apply_pins(DR_PINS))
+ccx_require_param_set(md, DR_DRIVER)
 invisible(ccx_adopt_mode_band(md))         # the file's h_ml / kz bands, before any decode (as build_futures_ribbons.R)
+ccx_check_mode_decode(md)                  # GATE: u_mode decodes to the file's own par_mode
+# GATE: every chain ran in THIS space -- the mode and its structure, the fitted names in order, its
+# par_mode, and held values equal to what the resolved base carries for each held name.
+dr_held_ok <- function(h) identical(names(h), names(DR_PINS)) &&
+  identical(as.numeric(h), vapply(names(h), function(n) as.numeric(DR_BASE[[n]]), numeric(1), USE.NAMES = FALSE))
+for (k in seq_len(M)) {
+  pv_k <- S[[k]]$provenance
+  if (!(identical(pv_k$mode, CCX_MODE_CANONICAL) && identical(pv_k$struct, ccx_mode_struct(md)) &&
+        identical(colnames(S[[k]]$samples), CCX_PARAM_NAMES) && identical(pv_k$mode_par, md$par_mode) &&
+        dr_held_ok(pv_k$held)))
+    stop(basename(fs[k]), " was not run in ", CCX_MODE_CANONICAL, "'s space (mode, structure, fitted names, ",
+         "par_mode or held values differ): its samples would decode wrongly here")
+}
 hml_floor <- md$hml_bound[1]
 cat(sprintf("mode %s; h_ml band [%g, %g] (mode %.2f m)\n", CCX_MODE_CANONICAL, md$hml_bound[1], md$hml_bound[2],
             md$par_mode$h_ml))
