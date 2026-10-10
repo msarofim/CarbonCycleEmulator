@@ -2,6 +2,17 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-10 (b) — **RULED (Marcus, verbatim): "Convert the driver (Recommended)". `calibration/diag_mcmc_drift.R` now resolves `hilda29e` as `run_mcmc_check.R` ran the chains, and reproduces both of its committed logs. The mode-struct lint is back to 32; the test was not touched.** (`4b03446`; handoff 10-10 §3 item 2.)
+
+- **What changed.** The driver had read the mode file and adopted its bands, then decoded. It now follows the MCMC driver's order: `ccx_mode_base`, the gate, the pins, `ccx_require_param_set`, the band, then `ccx_check_mode_decode`.
+- **What the base is FOR here.** The driver runs no model, and `ccx_mode_fit_stats()`'s comment says calling `ccx_mode_base()` for a list nobody uses would be gaming this lint. So the base feeds a new GATE: every chain must record this mode, its structure, the fitted names in order, its `par_mode`, and held values equal to what the resolved base carries for each held name. Otherwise the driver stops before decoding.
+- **Mutation-tested** on scratch copies of the 100k chains, with one field broken in chain 2 each time: a held value (`w_eq` +0.5), a dropped held name, the structure, two fitted names swapped, `beta_max` in `par_mode` ×1.001, and the mode name. **All six refuse**; the unmutated copy passes. The scratch outputs were moved out of `outputs/`.
+- **Reproduced at the clean commit** (`mcmc_drift_hilda29e_{final,200k}_convrepro_20261010.log`):
+  - 200k: the log is identical apart from the header line and the output path;
+  - 100k: likewise, plus one "pooled draws … joined to their samples" line, which `b004ef1` added after `d2bd671` wrote that log (not this change);
+  - the saved `leverage` and `lp_halves` are `identical()`, and so is `blocks` on its shared columns. The 100k `blocks` also had a `draw` column, which `b004ef1` moved. The duplicate `.rds` files were not kept.
+- **Tests:** `test-mode-struct-lint.R` 5 / 5, `test-overlay-idiom-lint.R` 8, `test-git-stamp-lint.R` 6, `test-ui-year-bounds-lint.R` 18. No other test reads the driver.
+
 ## 2026-10-10 (a) — Handoff: `notes/handoff_2026-10-10_band_shipped_hold_on_copy.md` (Marcus: "write the handoff note"). It supersedes `handoff_2026-10-09_mcmc_200k_running.md`, which now points to it.
 
 - Nothing is running.
