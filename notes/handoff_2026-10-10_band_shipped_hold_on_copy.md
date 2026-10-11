@@ -4,6 +4,8 @@
 
 Written on Marcus's request ("write the handoff note"), 2026-10-10. **Nothing is running.**
 
+> ⛔ **SUPERSEDED 2026-10-11** by `notes/handoff_2026-10-11_comments_fair_pd100.md` (Marcus's 10-11 comments worked through; card 5's FaIR PD100 line is next). Read that one.
+>
 > **UPDATE 2026-10-10, later the same day (CHANGELOG 10-10 b, c).**
 > - §3 item 2 is DONE. Marcus ruled "Convert the driver (Recommended)": `diag_mcmc_drift.R` was converted and gated, and both of its logs reproduce (`4b03446`).
 > - §3 item 1 D is RULED: "Omit it on temperature" (`dff90c5`). The band is drawn on CO₂ only.

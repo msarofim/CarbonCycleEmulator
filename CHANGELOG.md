@@ -2,6 +2,12 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-11 (b) — Handoff: `notes/handoff_2026-10-11_comments_fair_pd100.md` (Marcus: "Yes, write the handoff note"). It supersedes `handoff_2026-10-10_band_shipped_hold_on_copy.md`, which now points to it.
+
+- After CHANGELOG (a), and before this note, three rulings were applied (`76f6bf4`): **"Re-pin both (Recommended)"**, **"Temperature only (Recommended)"** and **"Run FaIR on Joos's PD100 (Recommended)"**. The FaIR run is NOT started; its open protocol choices and the FaIRtoFrEDI branch question are in the note's §3.
+- Nothing is running except the local preview and the spun-off audit session ("Audit app constants measured at a retired mode").
+- No full suite this session; the touched files were run on their own and pass.
+
 ## 2026-10-11 (a) — **Marcus's `CarboTopecomments.10.11.26.docx`. The What-if crash he hit is FIXED: 16 of the 127 switch combinations crashed, now none do. The cause was the ocean switch acting inside the spin-up. Also: a second crash found by sweeping every control; his copy edits; the pulse lines now start from zero; and the pulse-lab numbers, which were hilda33p's behind a SILENT gate.** Two test re-pins await his approval. (`4e819ad`, `fa6bb86`.)
 
 **THE CRASH** ("I get an error when selecting warming, ENSO, volcanoes, and ocean sink").
