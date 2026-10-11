@@ -2,6 +2,73 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-11 (a) — **Marcus's `CarboTopecomments.10.11.26.docx`. The What-if crash he hit is FIXED: 16 of the 127 switch combinations crashed, now none do. The cause was the ocean switch acting inside the spin-up. Also: a second crash found by sweeping every control; his copy edits; the pulse lines now start from zero; and the pulse-lab numbers, which were hilda33p's behind a SILENT gate.** Two test re-pins await his approval. (`4e819ad`, `fa6bb86`.)
+
+**THE CRASH** ("I get an error when selecting warming, ENSO, volcanoes, and ocean sink").
+- **Reproduced:** "Lapack routine dgesv: system is exactly singular: U[36,36] = 0", raised in `ccx_periodic_spinup()`'s ¹³C solve. Box 36 is `SH_hs`.
+- **Swept all 127 combinations** (`app_run_mechanisms`, hilda29e):
+  - 16 crashed. Every one had `ocean_sink` together with `warming_feedback` or `revelle`; none had `fertilisation` off.
+  - 8 more raised a periodic-spin-up non-convergence warning.
+- **Mechanism:** every switch also acted on the SPIN-UP. With `k_w = OCEAN_OFF_K_W` (1e-3):
+  - the periodic carbon Newton never converged: 40 iterations at |resid| ~1e-5 against `PS_TOL` 1e-9;
+  - it ended at NEGATIVE Southern deep-ocean carbon (`SH_oc10` −8700 GtC);
+  - the ¹³C operator was then rank 35 of 38.
+- **Premise checked per switch:** does the switch move the spun-up 1750 state?
+  - ENSO, volcanic, emissions: bit-identical.
+  - Fertilisation, warming, Revelle: < 1 GtC.
+  - Ocean: 268 GtC, and the solved ¹⁴C production fell to 7 %, a different preindustrial world.
+- **Fix:** the ocean switch acts on the RUN only.
+  - `CCX_MECH_RUN_ONLY` and `ccx_mechanism_spinup()` in `R/mechanisms.R`: spin up without the run-only switches, then hand the run the fully switched `p` with `aux` rebuilt from it; the grid is asserted unchanged. `app_run_mechanisms()` calls it.
+  - Old vs new, all 127 combinations: **0 errors, 0 warnings**. The 63 without the ocean switch are **bit-identical**. The 48 with it that ran before move CO₂ by **≤ 0.098 ppm** anywhere in 1750–2024, which is invisible at the app's ppm resolution.
+  - Re-run after the refactor into `R/`: identical.
+- **Regression test** (`test-mechanisms.R`, at the canonical): the reported combination plus the two minimal pairs spin up and run, the start state is the open-ocean one (`identical`), and a POWER check confirms the old construction still fails ("singular"). The file passes 105 / 105.
+
+**"Check all combinations and perturbations."** A `shiny::testServer` sweep drove the REAL server function:
+- all 128 switch states × 4 year windows × 10 What-if outputs;
+- Scenarios (none / one / all × both variables × FaIR);
+- Build-your-own (every kind at its extremes × 7 backgrounds × 2 variables);
+- the pulse lab (7 backgrounds × size {10, 100, 500} × year {2030, 2050, 2100} × 2 variables);
+- the other tabs' sliders at their ends.
+
+In total 6490 renders.
+- ⚠ The harness's first run was INVALID: Shiny auto-loads `app/R/`, and the harness had sourced `global.R` only. It was fixed before any result was read.
+- **One more real crash:** on "Where does the carbon go?", a window ending before 1959 (e.g. 1750–1751) crashed the regrowth chart ("arguments imply differing number of rows: 0, 1"). It now shows a `validate()` message, which survives a deployed app's error sanitising.
+- **Final sweep: 0 errors in 6490 renders.** The only blanks are the `req()`s, by design: no scenarios ticked, and panels that belong to another mode.
+
+**"That math doesn't work: there's still noise without these 4 mechanisms."** Measured, not changed:
+- With warming, ENSO, volcanic and emissions off, the model's growth is ~1e-12 ppm/yr (float zero), so "0.00 (100% less)" is arithmetically right. The forcing columns still varying (bomb/nuclear ¹⁴C, fossil δ¹³C, SST anomalies) move no carbon with those switches off.
+- The visible noise is in the RESIDUAL strip: model minus measured there is −(measured growth), which carries all of the record's own wobble. Reported to Marcus as a copy question.
+
+**Copy (his wording):**
+- Keeling: "it only adjusts".
+- The non-additivity sentence, replaced with his.
+- Mid-sentence switch names in lower case: `app_mech_inline()`, keeping "El Niño", "CO₂" and "Revelle"; the one sentence-start use is capitalised.
+- The harmonisation sentence deleted, and `APP_SPLICE_STEP` with it (it fed nothing else).
+- The pulse box's two "Change"s.
+- His pulse paragraph REPLACES three: "total, not the rate", the measured caveat, and "barely depends on when you look", whose claim his last clause carries. Two fixes to it: "form" → "from" and "dC" → "°C". Every number now comes from the named constants. `app_or_list()` was removed.
+- "GCB doesn't add up, three times; we only need two": I cut MY paragraph that restated his ("The leftover carbon in the measured budget is positive …", in the "Why a bigger sink can be the closer one" box). His two are kept.
+
+**Pulse lab: the lines start at zero** (`pulse_from_release()`). The rows are annual means: 0.446 for the release year, 0.903 the year after. Each now sits at mid-year, and the line starts from an exact 0 on 1 January of the release. The "constant" emissions method is causal, and the pre-pulse difference is 0. The plot's clip comment, which still described the September spline ringing, was updated.
+
+**⛔ The pulse-lab numbers were hilda33p's** (found by a subagent asked to check his paragraph).
+- `test-pulse-linearity.R` read the NEWEST `pulse_vs_tcre_*.csv` and never asked which mode had made it. After the 10-08 adoption it kept passing against hilda33p's file, so the app quoted 2.5 % when the true figure was 2.3 %.
+- Re-measured at `4e819ad` (`pulse_vs_tcre_20261011.{csv,log}`):
+  - spread **2.3 %**;
+  - horizons 1.438 / 1.370 / 1.353 / 1.401, all within the ruled 0.1 of "about 1.4";
+  - the headline 1.353 rounds to 1.4.
+- The constants are updated, and the test now requires the CSV's mode to be `CCX_MODE_CANONICAL`. Mutation: with only the hilda33p CSV present it FAILS. A spun-off task audits the other constant-vs-artifact gates for the same flaw.
+- ⚠ **His sentence says the effects "on concentrations and temperature" are insensitive to pulse size.** CO₂ per GtC spreads **6.4–7.0 %** across 10–500 GtC (+20 to +200 yr), about three times the temperature figure, because the logarithmic forcing offsets the larger airborne fraction. Applied as written, and the question put to Marcus.
+
+**Answered, not edited** (subagents; facts only):
+- Card 4's timing sentence is STALE at hilda29e: the model peaks at +5 months, the record at +5 (audit 10-08 §5). `test-app-review-copy` C4t pins the phrase.
+- Cards 2/3 and ¹⁴C:
+  - the post-1980 NH−SH Δ¹⁴C gradient matches Hua (−7.4 vs −8.1 ‰ in the 2010s), but the bomb era misses (gate 5 FAILS);
+  - the air-sea Δ¹⁴C disequilibrium is neither fitted nor gated: model 41 ‰ vs about 52 ‰ observed (1997, 0–100 m);
+  - the ocean's bomb-¹⁴C inventory overshoots: 83.8 vs 55.5 kmol in 1995.
+- Card 5's FaIR line: FaIR's CO₂ partition fractions and lifetimes ARE Joos's Table 5. No existing FaIR pulse matches card 5's protocol, so a new FaIR run is needed.
+
+**Pending Marcus:** two test re-pins (`test-future-yvar` "clipped": 252 vs 251 points; `test-app-review-copy` A2's "barely depends on when you look"); the concentrations clause; card 5's FaIR choices; the ¹⁴C and card-4 wording; and the band copy (unchanged from 10-10).
+
 ## 2026-10-10 (c) — **RULED (Marcus, verbatim): "Omit it on temperature". The Futures band is drawn on the CO₂ view only. The temperature view gets a sentence in words instead, which is Marcus's to write, so the hold now waits on FOUR pieces of copy.** (`dff90c5`; handoff 10-10 §3 item 1 D.)
 
 - **What prompted the ruling: a scratch preview, not committed.** The shipped band was shown in the running app with the hold lifted only in a copy under the scratchpad (a symlinked root plus a copied `app/`). A temporary `ccx-band-preview` launch entry was reverted after each use. Screenshots were sent to Marcus.
