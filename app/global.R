@@ -593,13 +593,25 @@ takeaway <- function(...) div(class = "takeaway", ...)
 # ⚠ At n = 1 the key is byte-identical to what the tab printed before, so
 # the single-switch case is unchanged.
 
-#' The labels of a set of mechanism switches, as an English list
-app_mech_list <- function(off) {
+# Marcus 2026-10-11 (CarboTopecomments.10.11.26): "don't capitalize Warming, Volcanic, or Our".
+# The labels are written for the checkboxes and the legend, where they start a line; inside a
+# sentence each takes its lower-case form unless it begins with a proper noun or a symbol.
+MECH_LABEL_KEEP_CASE <- c("El Niño", "CO₂", "Revelle")
+app_mech_inline <- function(lb) {
+  keep <- vapply(lb, function(x) any(startsWith(x, MECH_LABEL_KEEP_CASE)), logical(1),
+                 USE.NAMES = FALSE)
+  ifelse(keep, lb, paste0(tolower(substr(lb, 1L, 1L)), substring(lb, 2L)))
+}
+
+#' The labels of a set of mechanism switches, as an English list for use INSIDE a
+#' sentence; `sentence_start = TRUE` capitalises its first letter only.
+app_mech_list <- function(off, sentence_start = FALSE) {
   if (!length(off)) return("")
-  lb <- vapply(off, function(n) CCX_MECHANISMS[[n]]$label, character(1),
-               USE.NAMES = FALSE)
-  if (length(lb) == 1L) return(lb)
-  paste(paste(utils::head(lb, -1L), collapse = ", "), "and", utils::tail(lb, 1L))
+  lb <- app_mech_inline(vapply(off, function(n) CCX_MECHANISMS[[n]]$label, character(1),
+                               USE.NAMES = FALSE))
+  s <- if (length(lb) == 1L) lb else
+    paste(paste(utils::head(lb, -1L), collapse = ", "), "and", utils::tail(lb, 1L))
+  if (sentence_start) paste0(toupper(substr(s, 1L, 1L)), substring(s, 2L)) else s
 }
 
 # The resolution of the "What if...?" takeaway's ppm sentence. ⚠ It is the
@@ -726,20 +738,14 @@ APP_LUC_SPLIT_NOTE <- if (is.null(APP_LUC_SPLIT)) NULL else paste(
 # the data rather than typed, so a GCB update moves the handover and every label
 # below with it.
 APP_SPLICE_YEAR <- max(APP_EMIS_HIST$year)
-# ⚠ REWORDED 2026-09-29 for van Vuuren. The SSPs reported DECADAL nodes, so the
-# handover was a ramp to the next node; the markers are ANNUAL, so it is a
-# one-year step, and its size is read off the data here rather than described.
-APP_SPLICE_STEP <- local({
-  h <- APP_EMIS_HIST[APP_EMIS_HIST$year == APP_SPLICE_YEAR, ]
-  s <- APP_SCEN_EMIS[APP_SCEN_EMIS$year == APP_SPLICE_YEAR + 1L, ]
-  max(abs((s$fossil_GtC + s$luc_GtC) - (h$fossil_GtC + h$luc_GtC)))
-})
+# Marcus 2026-10-11 (CarboTopecomments.10.11.26): the second sentence -- the scenarios were
+# harmonised a couple of years earlier, so the handover steps total emissions by at most
+# APP_SPLICE_STEP (0.5 GtC/yr) -- was DELETED "as extraneous detail", and the step's
+# computation with it (it fed nothing else).
 APP_SPLICE_NOTE <- sprintf(paste(
   "History is the observed carbon budget (GCB) through %d on every tab; the",
-  "scenario takes over from %d. The scenarios were harmonised to emissions a",
-  "couple of years earlier, so at the handover total CO\u2082 emissions step by",
-  "at most %.1f GtC a year."),
-  APP_SPLICE_YEAR, APP_SPLICE_YEAR + 1L, APP_SPLICE_STEP)
+  "scenario takes over from %d."),
+  APP_SPLICE_YEAR, APP_SPLICE_YEAR + 1L)
 
 #' Replace a scenario's historical segment with the observed budget
 #'
@@ -892,12 +898,13 @@ app_fair_overlay <- function(scenarios, yvar) {
 # ---------------------------------------------------------------------
 
 #' Run with a set of mechanisms switched off, over the historical period
+#' (the ocean switch acts on the run only: ccx_mechanism_spinup(), R/mechanisms.R, 2026-10-11)
 app_run_mechanisms <- function(off = character(), years = APP_HIST_YEARS,
                                scenario = "historical") {
   F0 <- suppressWarnings(
     app_build_forcing(scenario, years, prod_c14 = 0))
-  m <- ccx_apply_mechanisms(APP_PARAMS, F0, off)
-  sp <- app_spinup(m$p)
+  ms <- ccx_mechanism_spinup(APP_PARAMS, F0, off, app_spinup)
+  m <- ms$m; sp <- ms$spin
   F <- m$F; F$c14_cosmo <- sp$prod_c14
   r <- ccx_run_fast(sp, F)
   r$out$co2_global <- (r$out$co2_NH + r$out$co2_SH) / 2
@@ -1008,9 +1015,7 @@ APP_PULSE_PER1000_ABOUT <- 1.4
 # would have changed his sentence; the ruled meaning is every horizon within 0.1 of the figure. The
 # 100 GtC +100 yr headline must still ROUND to it (1.361).
 APP_PULSE_PER1000_ABOUT_TOL <- 0.1
-#' "20, 50, 100 or 200": an English disjunction, for the horizon list above
-app_or_list <- function(x) if (length(x) < 2L) as.character(x) else
-  paste(paste(utils::head(x, -1L), collapse = ", "), "or", utils::tail(x, 1L))
+# (app_or_list(), the horizon sentence's "20, 50, 100 or 200", removed 2026-10-11 with that sentence.)
 
 app_stylised_tail_clause <- function(kind, rate_pct, emissions, e0, climate = NULL) {
   y_end <- max(emissions$year)

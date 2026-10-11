@@ -86,7 +86,8 @@ function(input, output, session) {
                   "emissions, global temperature, an ENSO index, volcanic aerosol",
                   "light diffusion and nitrogen deposition, and its calibration data include the CO₂ level and",
                   "seasonal cycle at both Mauna Loa and the South Pole. But it is",
-                  "not an abstract regression: it can only adjust quantities that",
+                  # Marcus 2026-10-11 (CarboTopecomments.10.11.26): "it only adjusts", verbatim.
+                  "not an abstract regression: it only adjusts quantities that",
                   "stand for physical things."),
             o$co2_NH[i0], floor(o$t[i0]), o$co2_NH[i1], last_obs)
   })
@@ -214,12 +215,11 @@ function(input, output, session) {
       takeaway(textOutput("w_imbalance_takeaway", inline = TRUE)),
       plotOutput("w_imbalance_plot", height = "330px"),
       div(class = "caveat", tags$strong("What the band is: "), IMB_BAND_NOTE),
+      # Marcus 2026-10-11: the tab said GCB's budget does not add up three times, "we probably
+      # only need two". This box's first paragraph ("The leftover carbon in the measured budget is
+      # positive ...") was cut: it restated his own paragraph under APP_IMBALANCE_HEADING (ui.R),
+      # and the band note (IMB_BAND_NOTE) is the other one kept.
       info_box("Why a bigger sink can be the closer one",
-               p("The leftover carbon in the measured budget is positive: the",
-                 "budget's own sinks are too small to account for everything",
-                 "emitted. So a model that takes up more land carbon than the",
-                 "budget reports is moving toward closing it, not away from it.",
-                 "Running above the published line is not by itself a fault."),
                p(local({
                  z <- imbalance_id()
                  # \u26a0 THE WORD CARRIES THE SIGN, so the magnitudes print
@@ -303,8 +303,18 @@ function(input, output, session) {
     )
   })
 
-  output$w_regrowth_plot <- renderPlotFit("w_regrowth_plot", 
-    plot_luc_gross_split(APP_LUC_SPLIT, input$w_years))
+  # ⛔ FOUND 2026-10-11 by the all-controls sweep (Marcus: "check all combinations and
+  # perturbations"): a "Years shown" window that ends before the split is observed
+  # (e.g. 1750-1751) left the chart no rows and it crashed ("arguments imply differing
+  # number of rows: 0, 1"). validate() rather than stop(): its message survives the
+  # error sanitising a deployed app applies.
+  output$w_regrowth_plot <- renderPlotFit("w_regrowth_plot", {
+    validate(need(input$w_years[2] >= APP_LUC_SPLIT$obs_window[1],
+                  sprintf(paste("The deforestation and regrowth estimates begin in %d.",
+                                "Move the end of “Years shown” to %d or later to see them."),
+                          APP_LUC_SPLIT$obs_window[1], APP_LUC_SPLIT$obs_window[1])))
+    plot_luc_gross_split(APP_LUC_SPLIT, input$w_years)
+  })
 
   # /!\ THE LAST SENTENCE IS MEASURED, NOT ASSERTED. Which half moved is the
   # interesting fact -- the net land-use flux has fallen while gross clearing
@@ -498,11 +508,10 @@ function(input, output, session) {
     # here because computing the individual effects would mean N more model runs
     # on every click, and the measured example that IS available lives in
     # R/mechanisms.R's enso entry rather than in this window.
+    # Marcus 2026-10-11 (CarboTopecomments.10.11.26): "Change to", verbatim.
     if (length(off) > 1L)
-      txt <- paste(txt, sprintf(paste("⚠ These %d switches do not add up — they",
-                                      "interact, so the combined figure above is the",
-                                      "one to read, not the sum of the individual",
-                                      "claims beside each box."), length(off)))
+      txt <- paste(txt, paste("The combined figure above includes interactions between",
+                              "the different climate effects."))
     txt
   })
 
@@ -619,7 +628,7 @@ function(input, output, session) {
     # OUTPUT under a heading that says "driver".
     if (length(nod))
       bits <- c(bits, list(div(class = "caveat",
-        tags$strong(sprintf("%s %s no driver to show. ", app_mech_list(nod),
+        tags$strong(sprintf("%s %s no driver to show. ", app_mech_list(nod, sentence_start = TRUE),
                             if (length(nod) == 1L) "has" else "have")),
         paste("Switches like this do not remove an input — they change how",
               "strongly the model responds to carbon it already has. The two",
@@ -922,38 +931,27 @@ function(input, output, session) {
                       "later \u2014 %.2f \u00b0C per 1000 GtC \u2014 and by %s of its own peak",
                       "warming still at %d, %d years after release."),
                 pr$gtc, at(y100), per1000, fmt_pct(keep), yend, yend - pr$year)),
+      # Marcus 2026-10-11 (CarboTopecomments.10.11.26), his two "Change"s, verbatim.
       p("Two things are worth separating here. The first is that the warming",
-        "barely decays: carbon released once keeps warming the world for as",
-        "long as this model runs, so on any human timescale the temperature a",
-        "tonne of CO\u2082 buys is permanent rather than borrowed."),
-      p("The second is that it is the",  tags$em("total"), "carbon emitted that",
-        "sets the warming, not the rate at which it was emitted. That is why a",
-        "per-tonne number is a meaningful thing to quote at all, and why the",
-        "chart above can be read as \u201cwhat one more tonne does\u201d regardless of",
-        "what else is happening in the background scenario."),
-      # ⭐ 2026-09-26: this caveat used to end "the proportionality above is
-      # stated, not shown: demonstrating it would take a second pulse size."
-      # It took five, and the claim now carries its measurement. The numbers
-      # come from named constants in global.R, gated against the driver's own
-      # CSV, so the sentence cannot outlive the measurement.
-      p(tags$em(sprintf(paste("Measured from the two runs behind this panel, at a",
-                              "%d GtC pulse released in %d. The proportionality is",
-                              "measured, not assumed: across pulses from %g to %g GtC",
-                              "the figure above moves by only %.1f%% (%s), so one",
-                              "tonne really does do the same work as the next."),
-                        pr$gtc, pr$year, APP_PULSE_LIN_SIZES[1], APP_PULSE_LIN_SIZES[2],
-                        APP_PULSE_LIN_SPREAD, APP_PULSE_LIN_SRC))),
-      # THE HORIZON (Marcus 2026-10-01, review 10-01c A2: "Say about 1.4 dC per
-      # 1000 GtC"). At hilda29l the per-1000 figure fell by a quarter between
-      # +20 and +200 yr and this sentence said "flat in pulse size but NOT in
-      # when you look"; at hilda33d it is nearly flat in horizon too (global.R,
-      # APP_PULSE_PER1000_BY_HORIZON), so the box now gives the one figure. The
-      # horizons named are the measured ones, read off the constant's names.
-      p(tags$em(sprintf(paste("And it barely depends on when you look: about %.1f",
-                              "°C per 1000 GtC whether you read it %s years",
-                              "after release."),
-                        APP_PULSE_PER1000_ABOUT,
-                        app_or_list(names(APP_PULSE_PER1000_BY_HORIZON))))))
+        "barely decays: a pulse of carbon emissions keeps warming the world for as",
+        "long as this model runs, so on any human timescale the temperature",
+        "resulting from a tonne of CO₂ is permanent."),
+      # ⭐ Marcus 2026-10-11: his paragraph REPLACES the "total, not the rate" paragraph, the
+      # measured-proportionality caveat and the horizon sentence ("And it barely depends on when
+      # you look"), whose claim his last clause now carries. His wording, verbatim except "form"
+      # -> "from", "dC" -> "°C", and every NUMBER read from the named constants in global.R
+      # (gated by test-pulse-linearity.R against the driver's own CSV), so the sentence cannot
+      # outlive the measurement: his draft's "2.5%" was hilda33p's. The horizon range is the
+      # measured horizons' range, read off the constant's names.
+      p(sprintf(paste("The effects of a pulse of carbon emissions on concentrations and",
+                      "temperature are insensitive to the size of the pulse in this model.",
+                      "Across pulses from %g to %g GtC, the figure above moves by only %.1f%%,",
+                      "and the impact on temperature is about %.1f °C per 1000 GtC from any",
+                      "time period between %d and %d years after release."),
+                APP_PULSE_LIN_SIZES[1], APP_PULSE_LIN_SIZES[2], APP_PULSE_LIN_SPREAD,
+                APP_PULSE_PER1000_ABOUT,
+                min(as.integer(names(APP_PULSE_PER1000_BY_HORIZON))),
+                max(as.integer(names(APP_PULSE_PER1000_BY_HORIZON))))))
   })
 
   output$f_notes <- renderUI({

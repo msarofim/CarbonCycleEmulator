@@ -1454,11 +1454,23 @@ plot_future <- function(runs, yvar, ylab, view = NULL, fair = NULL, bands = NULL
 # readable as two, and that the line on top stays the dominant mark.
 FUTURE_BAND_ALPHA <- 0.18
 
+# Marcus 2026-10-11 (CarboTopecomments.10.11.26): "start the line at zero when the pulse
+# starts". The climate rows are ANNUAL MEANS -- measured 2026-10-11 (vvM, 100 GtC in 2050): the
+# airborne share is 0.446 for 2050, the release year's own average, and 0.903 for 2051 -- so the
+# clipped series used to begin mid-air at the release year's mean, drawn at its integer year.
+# Each mean now sits at MID-YEAR, and the line starts from an exact zero on 1 January of the
+# release year: the pulse is spread evenly through that year (APP_PULSE_EMIS_METHOD =
+# "constant"), and before it the two runs do not differ (test-future-yvar.R (c)).
+pulse_from_release <- function(year, v, pulse_year) {
+  k <- year >= pulse_year
+  data.frame(year = c(pulse_year, year[k] + 0.5), v = c(0, v[k]))
+}
+
 plot_pulse_decay <- function(base_cl, pulse_cl, pulse_year, pulse_gtc) {
-  d <- data.frame(year = base_cl$year,
-                  frac = (pulse_cl$co2_ppm - base_cl$co2_ppm) /
-                    (pulse_gtc / ccx_const("GtC_PER_PPM")))
-  d <- d[d$year >= pulse_year, ]
+  d <- pulse_from_release(base_cl$year,
+                          (pulse_cl$co2_ppm - base_cl$co2_ppm) /
+                            (pulse_gtc / ccx_const("GtC_PER_PPM")), pulse_year)
+  names(d)[2] <- "frac"
   ggplot(d, aes(year, frac)) +
     geom_hline(yintercept = 0, colour = "grey75", linewidth = 0.3) +
     geom_line(colour = PAL[["pulse"]], linewidth = 0.9) +
@@ -1489,10 +1501,13 @@ plot_pulse_decay <- function(base_cl, pulse_cl, pulse_year, pulse_gtc) {
 #' points at +100 yr, so the numbers stand and the defect is presentational.
 #' The fix is Marcus's call -- it lives either in the model's forcing path or
 #' in the app's pulse construction, and only the second is free.
+#' ⭐ 2026-10-11: the clip now removes only ZEROS. The pulse pair is built with
+#' APP_PULSE_EMIS_METHOD = "constant" (Marcus's app-only fix, 2026-09-24), which is
+#' causal, so the pre-pulse ringing described above is gone (test-future-yvar.R (c),
+#' (c2)). The line starts from zero at the release (pulse_from_release(), above).
 plot_pulse_warming <- function(base_cl, pulse_cl, pulse_year, pulse_gtc) {
-  d <- data.frame(year = base_cl$year,
-                  dT = pulse_cl$gmst - base_cl$gmst)
-  d <- d[d$year >= pulse_year, ]
+  d <- pulse_from_release(base_cl$year, pulse_cl$gmst - base_cl$gmst, pulse_year)
+  names(d)[2] <- "dT"
   ggplot(d, aes(year, dT)) +
     geom_hline(yintercept = 0, colour = "grey75", linewidth = 0.3) +
     geom_line(colour = PAL[["pulse"]], linewidth = 0.9) +

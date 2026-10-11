@@ -346,6 +346,44 @@ CCX_MECHANISMS <- list(
 # that the ocean takes up ~nothing on a century timescale.
 OCEAN_OFF_K_W <- 1e-3
 
+# ⛔ THE OCEAN SWITCH IS SPUN UP WITH THE OCEAN OPEN (2026-10-11; Marcus's comments 10-11: "I get
+# an error when selecting warming, ENSO, volcanoes, and ocean sink"). Every switch used to act on
+# the spin-up too. That is harmless for the others at the canonical: ENSO, volcanoes and
+# emissions leave the 1750 state bit-identical, and fertilisation, warming and Revelle move it
+# by < 1 GtC. But closing the air-sea interface (k_w = OCEAN_OFF_K_W) IN THE SPIN-UP built a
+# different preindustrial world: 268 GtC moved inside the ocean, and the solved ¹⁴C production
+# fell to 7 % of the real one. With warming's effect or Revelle also off, the periodic carbon
+# solve did not converge at all: 40 Newton steps at |resid| ~1e-5 against 1e-9, ending at
+# NEGATIVE Southern deep-ocean carbon (SH_oc10 -8700 GtC). The ¹³C solve was then singular
+# ("Lapack routine dgesv: system is exactly singular"), and 16 of the 127 combinations crashed.
+# The switch asks what happens when the ocean stops absorbing OUR carbon, so the spin-up keeps
+# the ocean open and the run closes it from the first step. Measured at hilda29e over all 127
+# combinations: 0 errors; the 63 without the ocean switch are bit-identical to before; the 48
+# with it that ran before move CO2 by <= 0.098 ppm anywhere in 1750-2024.
+CCX_MECH_RUN_ONLY <- "ocean_sink"
+
+#' The start state for a counterfactual run with switches `off`
+#'
+#' Spins up with every switch in `off` EXCEPT the run-only ones (CCX_MECH_RUN_ONLY), then
+#' hands the run the fully switched parameters, with `aux` rebuilt from them (the
+#' run-prepare marshal gate checks that pair). The ocean grid depends on `h_ml` only,
+#' which no switch moves; that is asserted.
+#' @param p parameters; @param F an assembled forcing table; @param off switch names
+#' @param spinup_fn the spin-up the caller runs under (e.g. ccx_spinup_from_label(...))
+#' @return list(spin = the start state, m = ccx_apply_mechanisms(p, F, off))
+ccx_mechanism_spinup <- function(p, F, off, spinup_fn) {
+  m <- ccx_apply_mechanisms(p, F, off)
+  p_spin <- ccx_apply_mechanisms(p, F, setdiff(off, CCX_MECH_RUN_ONLY))$p
+  sp <- spinup_fn(p_spin)
+  if (!identical(p_spin, m$p)) {
+    aux <- ccx_prepare(m$p)
+    if (!identical(aux$grid, sp$grid))
+      stop("ccx_mechanism_spinup(): the run-only switches changed the ocean grid")
+    sp$params <- m$p; sp$aux <- aux
+  }
+  list(spin = sp, m = m)
+}
+
 #' Apply a set of mechanism switches
 #' @param off character vector of names from CCX_MECHANISMS to switch OFF
 #' @return list(p = parameters, F = forcing, caveats = character vector)

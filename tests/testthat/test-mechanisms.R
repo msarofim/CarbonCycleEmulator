@@ -288,3 +288,41 @@ test_that("every switch carries user-facing copy", {
   expect_equal(length(ch), length(CCX_MECHANISMS))
   expect_true(all(nzchar(names(ch))))
 })
+
+test_that("the ocean switch is RUN-ONLY: the combinations that crashed spin up and run at the CANONICAL", {
+  # Marcus 2026-10-11 (CarboTopecomments.10.11.26): "I get an error when selecting warming, ENSO,
+  # volcanoes, and ocean sink." With the ocean switch applied IN THE SPIN-UP, the periodic carbon
+  # solve did not converge and the 13C solve was singular: 16 of 127 combinations crashed, every one
+  # with ocean_sink plus warming_feedback or revelle (R/mechanisms.R, CCX_MECH_RUN_ONLY). The fix spins
+  # up with the ocean open and closes it for the run (ccx_mechanism_spinup(), which the app calls).
+  skip_if_no_cpp()
+  md <- readRDS(ccx_mode_file())
+  rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm), add = TRUE)
+  bp <- ccx_mode_base(md); bp$pump_mode <- md$pump_mode
+  p <- ccx_overlay_par(bp, md$par_mode)
+  sp_fn <- ccx_spinup_from_label(ccx_mode_spinup(md))
+  F0 <- suppressWarnings(ccx_build_forcing("historical", c(1750, 2024), prod_c14 = 0,
+          bomb_total_kmol = md$par_mode$bomb_total, luc_scale = md$par_mode$luc_scale,
+          enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p)))
+  expect_identical(CCX_MECH_RUN_ONLY, "ocean_sink")
+  # the reported combination, and the two minimal pairs the 127-combination sweep found
+  for (off in list(c("warming_feedback", "enso", "volcanic", "ocean_sink"),
+                   c("warming_feedback", "ocean_sink"), c("ocean_sink", "revelle"))) {
+    ms <- ccx_mechanism_spinup(p, F0, off, sp_fn)
+    expect_identical(ms$spin$params, ms$m$p)              # the RUN carries every switch ...
+    expect_identical(ms$spin$params$k_w, OCEAN_OFF_K_W)   # ... the ocean's included
+    FF <- ms$m$F; FF$c14_cosmo <- ms$spin$prod_c14
+    out <- ccx_run_fast(ms$spin, FF)$out
+    expect_true(all(is.finite(out$co2_NH)) && all(is.finite(out$co2_SH)), label = paste(off, collapse = "+"))
+  }
+  # the start state is the OPEN-ocean one: exactly the spin-up without the ocean switch
+  a <- ccx_mechanism_spinup(p, F0, c("warming_feedback", "ocean_sink"), sp_fn)$spin
+  b <- sp_fn(ccx_apply_mechanisms(p, F0, "warming_feedback")$p)
+  expect_identical(a$y, b$y)
+  expect_identical(a$prod_c14, b$prod_c14)
+  # POWER: the old construction (the switch inside the spin-up) still fails on the minimal pair, so
+  # the assertions above are not passing vacuously. If a model change ever makes this converge, the
+  # test has lost its power, not the app its fix -- re-measure before deleting it.
+  expect_error(suppressWarnings(sp_fn(ccx_apply_mechanisms(p, F0, c("warming_feedback", "ocean_sink"))$p)),
+               "singular")
+})
