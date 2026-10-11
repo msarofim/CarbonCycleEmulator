@@ -943,8 +943,11 @@ function(input, output, session) {
       # (gated by test-pulse-linearity.R against the driver's own CSV), so the sentence cannot
       # outlive the measurement: his draft's "2.5%" was hilda33p's. The horizon range is the
       # measured horizons' range, read off the constant's names.
-      p(sprintf(paste("The effects of a pulse of carbon emissions on concentrations and",
-                      "temperature are insensitive to the size of the pulse in this model.",
+      # RULED 2026-10-11 (Marcus: "Temperature only (Recommended)"): "on concentrations and
+      # temperature" -> "on temperature". At hilda29e the CO2 response per GtC spreads 6.4-7.0 % across
+      # 10-500 GtC (pulse_vs_tcre_20261011.log), ~3x the temperature figure this sentence quotes.
+      p(sprintf(paste("The effects of a pulse of carbon emissions on temperature are",
+                      "insensitive to the size of the pulse in this model.",
                       "Across pulses from %g to %g GtC, the figure above moves by only %.1f%%,",
                       "and the impact on temperature is about %.1f °C per 1000 GtC from any",
                       "time period between %d and %d years after release."),

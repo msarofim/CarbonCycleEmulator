@@ -132,15 +132,22 @@ test_that("(a) a radio value that is not a column is REJECTED", {
 })
 
 # ---- (b) the temperature view draws TEMPERATURE ---------------------
-test_that("plot_pulse_warming draws the two runs' GMST difference, clipped", {
+# RE-PINNED 2026-10-11 (Marcus: "Re-pin both (Recommended)", on his 10-11 comment "start the line at
+# zero when the pulse starts"). Was: the clipped annual means at their integer years, so the line began
+# mid-air at the release year's own mean. Now: an exact 0 on 1 January of the release, then each
+# annual mean at MID-YEAR (pulse_from_release(), app/R/plots.R).
+test_that("plot_pulse_warming draws the two runs' GMST difference, from zero at the release", {
   d <- ggplot2::ggplot_build(
     .f4_warm(.f4$base, .f4$pulse, .f4$year, .f4$gtc))$data[[2]]  # layer 2 = line
-  want <- data.frame(year = .f4$base$year,
-                     dT = .f4$pulse$gmst - .f4$base$gmst)
-  want <- want[want$year >= .f4$year, ]
+  k <- .f4$base$year >= .f4$year
+  want <- data.frame(year = c(.f4$year, .f4$base$year[k] + 0.5),
+                     dT = c(0, (.f4$pulse$gmst - .f4$base$gmst)[k]))
   expect_equal(nrow(d), nrow(want))
   expect_equal(round(d$y, 10), round(want$dT, 10))
-  expect_equal(min(d$x), as.numeric(.f4$year))
+  expect_equal(round(d$x, 10), round(want$year, 10))
+  # the start IS the release, at exactly zero, and the first mean sits half a year later
+  expect_identical(d$y[1], 0)
+  expect_equal(d$x[1:2], as.numeric(.f4$year) + c(0, 0.5))
 })
 
 test_that("(b) a temperature view reading the CARBON column is REJECTED", {

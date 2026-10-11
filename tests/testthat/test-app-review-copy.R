@@ -110,7 +110,9 @@ AC_CHECKS <- list(
 AC_CHECKS_1001 <- list(
   c("A1 card 6 retired (title)",          "A simpler version of the model fits the data better", NA),
   c("A1 card 6 retired (caption)",        "in the simpler version's favour", NA),
-  c("A2 pulse box: one figure",           "NOT in when you look", "barely depends on when you look"),
+  # RE-PINNED 2026-10-11 (Marcus: "Re-pin both (Recommended)"): his 10-11 paragraph replaced the
+  # horizon sentence and carries its claim ("about 1.4 degC per 1000 GtC from any time period ...").
+  c("A2 pulse box: one figure",           "NOT in when you look", "per 1000 GtC from any"),
   c("A3/B5 '(the land sink)' label gone", "CO₂ fertilisation (the land sink)", NA),
   c("A3/B5 'IS the land sink' gone",      "IS the land sink", NA),
   c("A3 'single cause' gone",            "sink has a single cause", NA),
