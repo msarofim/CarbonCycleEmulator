@@ -37,9 +37,26 @@ test_that("the permanence box's constants are all defined", {
   if (!length(f)) NULL else f[order(basename(f), decreasing = TRUE)][1]
 })
 
+# ⛔ THE CSV MUST BE THE CANONICAL'S (2026-10-11). This gate read the NEWEST CSV and never asked
+# which mode had made it, so after hilda29e was adopted (10-08) it kept checking the constants against
+# the hilda33p file and passing: the app quoted hilda33p's 2.5 % for five days (the true figure was
+# 2.3 %). Every assertion below now runs only on a measurement of the mode the app loads.
+.csv_mode_ok <- function(R) identical(unique(as.character(R$mode)), CCX_MODE_CANONICAL)
+
+test_that("the measurement is OF THE CANONICAL (and the check can fail)", {
+  skip_if(is.null(.csv), "no pulse_vs_tcre CSV built; run calibration/diag_pulse_vs_tcre.R")
+  R <- utils::read.csv(.csv)
+  expect_true(.csv_mode_ok(R), info = sprintf("%s was made at %s; the app loads %s -- re-run calibration/diag_pulse_vs_tcre.R",
+                                              basename(.csv), paste(unique(R$mode), collapse = ", "), CCX_MODE_CANONICAL))
+  # MUTATION: the stale file's mode, and a CSV mixing two modes, are both refused
+  R2 <- R; R2$mode <- "hilda33p"; expect_false(.csv_mode_ok(R2))
+  R3 <- R; R3$mode[1] <- "hilda33p"; expect_false(.csv_mode_ok(R3))
+})
+
 test_that("APP_PULSE_LIN_* still describe the driver's own measurement", {
   skip_if(is.null(.csv), "no pulse_vs_tcre CSV built; run calibration/diag_pulse_vs_tcre.R")
   R <- utils::read.csv(.csv)
+  skip_if_not(.csv_mode_ok(R), "the newest pulse_vs_tcre CSV is not the canonical's (the test above fails)")
   h <- .env$APP_PULSE_LIN_HORIZON
   v <- R$per1000[R$horizon == h]
   expect_gt(length(v), 1L)                       # a spread needs >1 size
@@ -55,6 +72,7 @@ test_that("APP_PULSE_LIN_* still describe the driver's own measurement", {
 test_that("the HORIZON table still matches, and every horizon is 'about' the box's one figure", {
   skip_if(is.null(.csv), "no pulse_vs_tcre CSV built")
   R <- utils::read.csv(.csv)
+  skip_if_not(.csv_mode_ok(R), "the newest pulse_vs_tcre CSV is not the canonical's (the test above fails)")
   tab <- .env$APP_PULSE_PER1000_BY_HORIZON
   ref <- max(R$gtc[R$gtc <= 100])                # the size the box quotes
   for (nm in names(tab)) {
