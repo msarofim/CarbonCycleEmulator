@@ -2,6 +2,10 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (d) — Lint approved and handoff written (Marcus: "Approve the lint update, then write the handoff note").
+- The overlay-idiom lint is tightened as its ratchet asked (`1ef8d7e`): `diag_joos_irf.R` is off `OI_BASELINE`, and `OI_BASELINE_N` drops 59 → 58. The file passes 8 / 0. The suite's expected failures are now 3: the cmap-tie deliberate RED and card 4's two.
+- Handoff: `notes/handoff_2026-10-12_pd100_free_climate.md`. It supersedes `handoff_2026-10-11_comments_fair_pd100.md`, which now points to it.
+
 ## 2026-10-12 (c) — **The full suite at `0e57110`: 7204 passed, 5 failed, 0 errors, 3 skipped (18.2 min).** Three failures are expected; two are a lint ratchet asking to be tightened, which is Marcus's to approve.
 - ⚠ **Lettering:** a concurrent session wrote 10-12 (a) (its tidy-ups, `c540110`) before my entry. The entry that commit `0e57110`'s message calls "(a)" is therefore (b), and this one is (c). Commit `df6a6d1` carries this run's log but, by my slip, not this entry.
 - Run: frozen detached worktree `~/ccx_frozen/suite_20261012_0e57110`, downloads APFS-cloned, BLAS pinned, `nice 10`, `set_max_fails(Inf)` (as 10-09) → `outputs/diagnostics/suite_20261012_0e57110.log`.

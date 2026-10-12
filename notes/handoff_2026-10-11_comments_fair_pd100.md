@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-11 — Marcus's 10-11 CarboTope comments are worked through; NEXT is card 5's FaIR PD100 line (ruled)
 
+> **UPDATE 2026-10-12: SUPERSEDED** by `notes/handoff_2026-10-12_pd100_free_climate.md`. §3's FaIR PD100 is DONE and drawn, and card 5 is now climate FREE (Marcus: "free everywhere").
+
 **Supersedes** `notes/handoff_2026-10-10_band_shipped_hold_on_copy.md`. Everything in its §3 that is still open is restated in §4 below.
 
 Written on Marcus's request ("Yes, write the handoff note"), 2026-10-11. Nothing is running except the local app preview and the separate audit session (§5).
