@@ -1,0 +1,84 @@
+
+=== constraint_map_arms (20261012) ===
+
+-- the arms, and what each one differs from the reference BY --
+  hilda29e   names 29  seas_ml 1   spinup periodic  logpost -1166.949732  pins 14  <- REFERENCE (the shipped arm)
+  hilda29a6  names 29  seas_ml 1   spinup periodic  logpost -1167.364913  pins 14  <- A2 like-for-like: same structure and names, objective #18's other basin
+  hilda31pe  names 31  seas_ml 0   spinup periodic  logpost -1231.074742  pins  7  <- A3 STRUCTURE contrast: NOT an answer to the fit question
+  hilda31pe  compared on the 26 shared streams: dropped arm-only gcb_ocean_enso_slope (family ENSO–sink covariance)
+
+=== GATE CUT === pin cut 0.5 in all 3 arms (this script assumes 0.50) -> PASS
+=== GATE STEP === step kind conditional in all arms -> PASS
+=== GATE STREAMS === all arms carry the same 26 streams -> PASS
+=== GATE ANCHOR === reference top-opposed = seas_lag_p_NH at 2.316; the app prints seas_lag_p_NH at 2.32 -> PASS
+
+-- PINS vs PULLS: the headline, on each arm's FULL name set and on the SHARED names --
+   arm          n_full n_shared   pin_full   pin_shared
+   hilda29e         29       29       6.8 %       6.8 %
+   hilda29a6        29       29       6.8 %       6.8 %
+   hilda31pe        31       26       5.6 %       5.2 %
+   ⭐ the claim under test is that PULLS dominate, i.e. the fitted values sit where
+      opposing pulls cancel. It survives if every arm is far below 50 %.
+
+-- TOTAL LEVERAGE per parameter: does the ordering survive the arm? --
+   hilda29a6  n=29  Spearman 0.979  Pearson 0.989  | argmax: k_w (ref) vs k_w (hilda29a6)
+   hilda31pe  n=26  Spearman 0.945  Pearson 0.954  | argmax: k_w (ref) vs k_w (hilda31pe)
+   ⚠ `k_w` having the HIGHEST total leverage of all names is a shipped claim
+     (`ccx_constraint_map_tab`): the argmax column above is that claim, per arm.
+
+-- THE OPPOSED PAIRS (the informative cells), top 6, on the SHARED names --
+   hilda29e:
+      seas_lag_p_NH          2.32   wants HIGHER: CO₂ seasonal cycle       wants LOWER: δ¹³C seasonal cycle
+      seas_T_amp_NH          1.14   wants HIGHER: δ¹³C seasonal cycle     wants LOWER: CO₂ seasonal cycle
+      q10                    1.09   wants HIGHER: δ¹³C seasonal cycle     wants LOWER: CO₂ seasonal cycle
+      tau_ex                 0.83   wants HIGHER: CO₂ north–south gradient wants LOWER: δ¹³C level & gradient
+      rep_dC                 0.71   wants HIGHER: CO₂ level                wants LOWER: δ¹³C level & gradient
+      seas_lag_p_SH          0.70   wants HIGHER: δ¹³C seasonal cycle     wants LOWER: CO₂ seasonal cycle
+   hilda29a6:
+      seas_lag_p_NH          2.29   wants HIGHER: CO₂ seasonal cycle       wants LOWER: δ¹³C seasonal cycle
+      seas_T_amp_NH          1.11   wants HIGHER: δ¹³C seasonal cycle     wants LOWER: CO₂ seasonal cycle
+      q10                    1.08   wants HIGHER: δ¹³C seasonal cycle     wants LOWER: CO₂ seasonal cycle
+      tau_ex                 0.83   wants HIGHER: CO₂ north–south gradient wants LOWER: δ¹³C level & gradient
+      seas_lag_p_SH          0.73   wants HIGHER: δ¹³C seasonal cycle     wants LOWER: CO₂ seasonal cycle
+      rep_dC                 0.72   wants HIGHER: CO₂ level                wants LOWER: δ¹³C level & gradient
+   hilda31pe:
+      seas_lag_p_NH          2.10   wants HIGHER: CO₂ seasonal cycle       wants LOWER: δ¹³C seasonal cycle
+      seas_T_amp_NH          1.00   wants HIGHER: δ¹³C seasonal cycle     wants LOWER: CO₂ seasonal cycle
+      q10                    0.89   wants HIGHER: δ¹³C seasonal cycle     wants LOWER: CO₂ seasonal cycle
+      tau_ex                 0.79   wants HIGHER: CO₂ north–south gradient wants LOWER: δ¹³C level & gradient
+      hs_asx_frac            0.69   wants HIGHER: δ¹³C level & gradient   wants LOWER: Δ¹⁴C in the air (bomb)
+      k_w                    0.69   wants HIGHER: δ¹³C level & gradient   wants LOWER: Δ¹⁴C in the air (bomb)
+
+-- ROW SHARES: who holds each observation family (%), reference vs arms --
+   CO₂ level                     Land uptake         33.9  Land uptake         34.3  Land uptake         24.7
+   CO₂ seasonal cycle            Seasonal cycle      68.0  Seasonal cycle      69.0  Seasonal cycle      72.0
+   CO₂ north–south gradient    Mixed layer & vert  54.8  Mixed layer & vert  55.0  Mixed layer & vert  36.9
+   CO₂ in ice cores              Land uptake         22.2  Land uptake         22.3  Seasonal cycle      21.5
+   δ¹³C in ice cores            Seasonal cycle      55.2  Seasonal cycle      56.4  Seasonal cycle      41.7
+   δ¹³C level & gradient        Input scalings & r  22.3  Input scalings & r  22.2  Input scalings & r  19.7
+   δ¹³C seasonal cycle          Seasonal cycle      69.6  Seasonal cycle      69.9  Seasonal cycle      68.1
+   Δ¹⁴C in the air (bomb)      Input scalings & r  31.2  Input scalings & r  31.6  Input scalings & r  28.2
+   Δ¹⁴C in the air (pre-bomb)  High-latitude stru  28.7  High-latitude stru  28.6  High-latitude stru  28.3
+   Δ¹⁴C in the ocean           Mixed layer & vert  80.0  Mixed layer & vert  80.3  Mixed layer & vert  82.8
+   Ocean interior chemistry        Biological pump     72.8  Biological pump     71.3  Biological pump     73.3
+   Measured land & ocean sinks     Input scalings & r  49.3  Input scalings & r  49.8  ENSO response       51.0
+   (each cell: the component holding the LARGEST share of that row, and that share)
+
+-- THE TIE CUT, RE-MEASURED: the reference's top-two margin per row, and whether the winner FLIPS --
+   shipped: flip max 0.845, stable min 3.018, cut 1.597 pp (3 arms x 12 rows, calibration/diag_constraint_map_arms.R, 2026-09-26)
+   δ¹³C level & gradient       margin   0.94 pp  hilda29e: Input scalings & r hilda29a6: Input scalings & r hilda31pe: Input scalings & r
+   CO₂ in ice cores             margin   2.05 pp  hilda29e: Land uptake        hilda29a6: Land uptake        hilda31pe: Seasonal cycle      flips at A3 only
+   Δ¹⁴C in the air (bomb)     margin   2.28 pp  hilda29e: Input scalings & r hilda29a6: Input scalings & r hilda31pe: Input scalings & r
+   Δ¹⁴C in the air (pre-bomb) margin   4.37 pp  hilda29e: High-latitude stru hilda29a6: High-latitude stru hilda31pe: High-latitude stru
+   CO₂ level                    margin  12.94 pp  hilda29e: Land uptake        hilda29a6: Land uptake        hilda31pe: Land uptake       
+   CO₂ north–south gradient   margin  25.25 pp  hilda29e: Mixed layer & vert hilda29a6: Mixed layer & vert hilda31pe: Mixed layer & vert
+   Measured land & ocean sinks    margin  26.63 pp  hilda29e: Input scalings & r hilda29a6: Input scalings & r hilda31pe: ENSO response       flips at A3 only
+   δ¹³C in ice cores           margin  36.77 pp  hilda29e: Seasonal cycle     hilda29a6: Seasonal cycle     hilda31pe: Seasonal cycle    
+   δ¹³C seasonal cycle         margin  53.38 pp  hilda29e: Seasonal cycle     hilda29a6: Seasonal cycle     hilda31pe: Seasonal cycle    
+   Ocean interior chemistry       margin  55.60 pp  hilda29e: Biological pump    hilda29a6: Biological pump    hilda31pe: Biological pump   
+   CO₂ seasonal cycle           margin  55.88 pp  hilda29e: Seasonal cycle     hilda29a6: Seasonal cycle     hilda31pe: Seasonal cycle    
+   Δ¹⁴C in the ocean          margin  69.20 pp  hilda29e: Mixed layer & vert hilda29a6: Mixed layer & vert hilda31pe: Mixed layer & vert
+   A2 only      flippers  0, largest margin   - ; stable 12, smallest 0.940 -> NO FLIPPER: the cut has no lower endpoint
+   every arm    flippers  2, largest margin 26.626; stable 10, smallest 0.940 -> *** NOT SEPARATED ***
+
+wrote outputs/diagnostics/constraint_map_arms_20261012.log

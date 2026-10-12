@@ -2,6 +2,28 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (f) — **The constraint-map arms re-measured at `hilda29e`, with `hilda29a6` as the like-for-like arm (Marcus: "hilda29a6 (Recommended)"). NO row's winner flips between the two basins. The tie cut's 09-26 derivation therefore has no lower endpoint and cannot be re-applied. The cmap-tie RED stands; the method is Marcus's.**
+- **Why the arm changed:** `hilda32f` (A2 on 09-26) no longer qualifies.
+  - It is structure `hilda_csl3`, not `hilda29e`'s `hilda_csl3v0kaidgbemwt`.
+  - It lacks 3 of `hilda29e`'s 29 names: `ndep_ret`, `imb_share_land` and `imb_share_ocean_rest`.
+  - `hilda29a6` is objective #18's other basin, with the same structure and the same 29 names; h_ml is 50.0 against 64.6. Measured from the mode files.
+- **Maps built** (`calibration/diag_constraint_map.R @9a89f5e`, frozen copy; every gate PASS):
+  - `constraint_map_hilda29a6.rds` (new, 26 × 29);
+  - `constraint_map_hilda31pe.rds`, REBUILT, 27 × 31. Its 09-26 map was stale: the arm's objective has since been restamped (stored logpost −1425.02 → −1231.07, with `d13c_icecore` added), and shared cells moved by up to 0.69. The 09-26 version is in git.
+- **`diag_constraint_map_arms.R`:**
+  - A2 → `hilda29a6`.
+  - The anchor is now 2.316. That is `app_cmap_tensions(APP_CMAP)`'s top row at `hilda29e`, read from the app loaded by `loadSupport()`; the 09-26 value of 2.34 was `hilda29l`'s and would fail its 0.01 tolerance.
+  - **Shared streams:** an arm's extra streams are dropped only if DECLARED arm-only and in a family of their own; otherwise the script stops. Here that is `hilda31pe`'s `gcb_ocean_enso_slope`, a family on its own; at `hilda29e` the module scores it.
+  - **New section, THE TIE CUT RE-MEASURED.** Log: `outputs/diagnostics/constraint_map_arms_20261012.log`.
+- **Result:**
+  - **A2 only:** 0 flippers. Stable 12, the smallest margin 0.94 pp (δ¹³C level & gradient). The 09-26 flippers no longer flip: δ¹³C level 0.94 and Δ¹⁴C bomb 2.28 keep their winners.
+  - **With A3:** 2 flips, CO₂ in ice cores (2.05 pp) and measured sinks (**26.6 pp**). NOT separated.
+    - ⚠ A 26.6 pp flip is a STRUCTURE difference, not a tie: `hilda31pe` lacks the imbalance-share names that hold that row at the canonical.
+    - This is the A3 caveat in the script's own header ([[iso_deep_control_licenses_one_comparison]]).
+  - **Margin shift between basins:** median 0.51 pp, max 1.92. The closest row moved away from a flip (0.94 → 1.29).
+- **Not changed:** `APP_CMAP_TIE_*` and `test-cmap-tie.R`. The gate's clearance rule ("re-derive from the two endpoints") cannot be applied, because one endpoint does not exist. Options are with Marcus.
+- Also in this commit: the PD100-held quarantine's §1 wording.
+
 ## 2026-10-12 (e) — **The first scorecard at `hilda29e`, PD100 climate free, reproduces card 5 exactly. All 52 earlier scorecard files are quarantined for the held builder's SST defect; their other sections are valid. FaIRtoFrEDI is pushed.** (Marcus, verbatim: "Re-run + quarantine (Recommended)", "Push now".)
 - **Push:** FaIRtoFrEDI `heat-ed-morbidity` `8984a13..964aa12`, 28 commits, level with origin. His unstaged `egu_sprm` docx edits are untouched.
 - **Scorecard** `outputs/diagnostics/whole_model_scorecard_20261012_hilda29e.{log,rds}`, `@6dadf00`, run from a frozen copy in under a minute.

@@ -7,12 +7,17 @@
 # single fit with no way to say whether it would survive a different one.
 # This script evaluates the SAME map at further arms and compares.
 #
-# ⛔⛔ THE ARM CHOICE IS THE WHOLE METHOD, AND IT WAS MEASURED (09-26).
-#   A2  hilda32f  -- THE LIKE-FOR-LIKE ARM. Same structure (seas_ml 1), same
-#       periodic spinup, and its 32 names are a clean SUPERSET of the
-#       canonical's 29: it FREES the three the canonical pins. So a difference
-#       between its map and the canonical's is about WHERE THE FIT SITS, which
-#       is the question asked.
+# ⛔⛔ THE ARM CHOICE IS THE WHOLE METHOD, AND IT WAS MEASURED (09-26; re-chosen 10-12).
+#   A2  hilda29a6 -- THE LIKE-FOR-LIKE ARM (2026-10-12, Marcus: "hilda29a6 (Recommended)").
+#       Objective #18's OTHER landed basin: the SAME structure as the canonical
+#       (hilda_csl3v0kaidgbemwt, seas_ml 1, periodic spinup) and the SAME 29 names,
+#       h_ml 50.0 against 64.6. Its four module pins are pass 1's values (w_enso_l2
+#       16.61 vs 16.79, lag_enso_land 5.85 vs 5.93). So a difference between its map
+#       and the canonical's is about WHERE THE FIT SITS, which is the question asked.
+#       No free SUPERSET exists at #18: the module holds those four names by design.
+#       ⚠ WAS hilda32f (09-26), the free parent of hilda29l. At hilda29e it is
+#       neither the same structure (hilda_csl3) nor a superset: it lacks ndep_ret,
+#       imb_share_land and imb_share_ocean_rest. Measured 10-12, not assumed.
 #   A3  hilda31pe -- THE STRUCTURE CONTRAST, reported but NOT an answer to the
 #       question. It is seas_ml **0** and NOT a superset (it lacks `w_enso_l2`;
 #       28 of 29 shared). A difference could be the fit OR the structure and the
@@ -26,6 +31,11 @@
 # shared streams. A pin share over 29 names is not comparable to one over 32 --
 # different denominators, and the three extra names are exactly the ones the
 # canonical pins, so they are not a random sample of the space.
+# ⚠ STREAMS (2026-10-12): at hilda29e the ENSO-slope row is scored by the module,
+# not the main fit, so hilda31pe carries one stream more (27). An arm's extra
+# streams are DROPPED only if every one is DECLARED arm-only (CA_ARM_ONLY_STREAMS)
+# and forms a family of its own, so that no shared row's share changes. Anything
+# else stops the script.
 #
 # ⭐ WHY A CROSS-ARM COMPARISON IS MEANINGFUL AT ALL: the step is one
 # CONDITIONAL Hessian sd, an equal-difficulty step by construction (predicted
@@ -46,7 +56,7 @@ for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 CA_TAG        <- "constraint_map_arms"
 CA_DATE       <- format(Sys.Date(), "%Y%m%d")
 CA_REF        <- CCX_MODE_CANONICAL                 # the shipped arm
-CA_LIKE       <- "hilda32f"                          # A2, like-for-like
+CA_LIKE       <- "hilda29a6"                         # A2, like-for-like (was hilda32f to 10-12)
 CA_CONTRAST   <- CCX_MODE_SEASML0_CONTROL            # A3, structure contrast
 CA_ARMS       <- c(CA_LIKE, CA_CONTRAST)
 CA_REF_RDS    <- file.path("data", "constraint_map.rds")
@@ -60,8 +70,19 @@ CA_NTOP       <- 6L      # rows of the opposed table, = the app's own n
 # diagnostic must reproduce ONE number the app already prints before any arm is
 # read, or every arm can be mutually consistent and still not be what was asked.
 CA_ANCHOR_PAR <- "seas_lag_p_NH"
-CA_ANCHOR_OPP <- 2.34
+# app_cmap_tensions(APP_CMAP)'s top row at hilda29e, read 2026-10-12 from the app loaded by
+# shiny::loadSupport() (2.3159883). It was 2.34 at hilda29l (09-26). It MOVES AT EVERY ADOPTION.
+CA_ANCHOR_OPP <- 2.316
 CA_ANCHOR_TOL <- 0.01
+# streams an arm may carry and the reference does not: diag_constraint_map.R's CM_ARM_ONLY_STREAMS
+CA_ARM_ONLY_STREAMS <- c("gcb_ocean_enso_slope")
+CA_ROLE <- c(ref      = "<- REFERENCE (the shipped arm)",
+             like     = "<- A2 like-for-like: same structure and names, objective #18's other basin",
+             contrast = "<- A3 STRUCTURE contrast: NOT an answer to the fit question")
+# the tie cut being re-measured (app/global.R), and the matrices a stream restriction must subset
+CA_TIE_CONSTS <- c("APP_CMAP_TIE_FLIP_MAX", "APP_CMAP_TIE_STABLE_MIN", "APP_CMAP_TIE_PP", "APP_CMAP_TIE_SRC")
+CA_STREAM_MATS <- c("M", "DHI", "DLO", "CURV", "SLOPE", "PINS")
+CA_FAMILY_MATS <- c("MC", "RS", "CS")
 
 dir.create(dirname(CA_LOG), showWarnings = FALSE, recursive = TRUE)
 ca_say <- function(...) { txt <- sprintf(...); cat(txt); cat(txt, file = CA_LOG, append = TRUE) }
@@ -83,9 +104,31 @@ for (m in ALL) {
   ca_say("  %-10s names %2d  seas_ml %-2s  spinup %-9s logpost %12.6f  pins %2d  %s\n",
          m, ncol(CM[[m]]$M), as.character(bp$seas_ml), p$spinup, p$stored_logpost,
          length(p$pins),
-         if (m == CA_REF) "<- REFERENCE (the shipped arm)"
-         else if (m == CA_LIKE) "<- A2 like-for-like: same structure, frees 3 pins"
-         else "<- A3 STRUCTURE contrast: NOT an answer to the fit question")
+         if (m == CA_REF) CA_ROLE[["ref"]] else if (m == CA_LIKE) CA_ROLE[["like"]] else CA_ROLE[["contrast"]])
+}
+
+# ---------------------------------------------------------------------
+# SHARED STREAMS (2026-10-12): an arm's extra streams are dropped only if each is
+# DECLARED arm-only and sits in a family of its own; otherwise STOP.
+# ---------------------------------------------------------------------
+S0 <- rownames(CM[[CA_REF]]$M)
+for (m in CA_ARMS) {
+  cm <- CM[[m]]
+  extra <- setdiff(rownames(cm$M), S0); missing <- setdiff(S0, rownames(cm$M))
+  if (length(missing)) stop(sprintf("%s lacks reference streams: %s", m, paste(missing, collapse = ", ")))
+  if (!length(extra)) next
+  undeclared <- setdiff(extra, CA_ARM_ONLY_STREAMS)
+  if (length(undeclared)) stop(sprintf("%s carries UNDECLARED extra streams: %s", m, paste(undeclared, collapse = ", ")))
+  drop_fam <- names(cm$family)[vapply(cm$family, function(s) any(s %in% extra), logical(1))]
+  mixed <- drop_fam[!vapply(cm$family[drop_fam], function(s) all(s %in% extra), logical(1))]
+  if (length(mixed)) stop(sprintf("%s: family %s mixes shared and arm-only streams; its share cannot be restricted",
+                                  m, paste(mixed, collapse = ", ")))
+  for (nm in CA_STREAM_MATS) cm[[nm]] <- cm[[nm]][S0, , drop = FALSE]
+  for (nm in CA_FAMILY_MATS) cm[[nm]] <- cm[[nm]][setdiff(rownames(cm[[nm]]), drop_fam), , drop = FALSE]
+  cm$family <- cm$family[setdiff(names(cm$family), drop_fam)]
+  CM[[m]] <- cm
+  ca_say("  %-10s compared on the %d shared streams: dropped arm-only %s (family %s)\n",
+         m, length(S0), paste(extra, collapse = ", "), paste(drop_fam, collapse = ", "))
 }
 
 # ---------------------------------------------------------------------
@@ -200,5 +243,45 @@ for (f in fams) {
   ca_say("\n")
 }
 ca_say("   (each cell: the component holding the LARGEST share of that row, and that share)\n")
+
+# ---------------------------------------------------------------------
+# THE TIE CUT, RE-MEASURED (2026-10-12; test-cmap-tie.R "THE GAP", app/global.R).
+# The margin is the REFERENCE row's top-two share gap, computed exactly as
+# app_cmap_holder_phrase() does: the cut is applied to the reference's rows, and
+# the gap gate reads them. A row FLIPS if its winner differs at an arm.
+# Two definitions: A2 only (the like-for-like answer) and every arm (09-26's).
+# ---------------------------------------------------------------------
+TIE <- new.env()
+for (e in parse(ccx_path("app", "global.R")))
+  if (is.call(e) && identical(as.character(e[[1]]), "<-") && is.name(e[[2]]) &&
+      as.character(e[[2]]) %in% CA_TIE_CONSTS) eval(e, TIE)
+ca_margin <- function(r) { v <- sort(100 * r / sum(r), decreasing = TRUE); v[[1]] - v[[2]] }
+ca_winner <- function(r) names(which.max(r))
+MC0 <- CM[[CA_REF]]$MC
+mg  <- apply(MC0, 1, ca_margin)
+win <- sapply(ALL, function(m) apply(CM[[m]]$MC[rownames(MC0), , drop = FALSE], 1, ca_winner))
+flip_like <- win[, CA_LIKE] != win[, CA_REF]
+flip_any  <- apply(win[, CA_ARMS, drop = FALSE] != win[, CA_REF], 1, any)
+ca_say("\n-- THE TIE CUT, RE-MEASURED: the reference's top-two margin per row, and whether the winner FLIPS --\n")
+ca_say("   shipped: flip max %.3f, stable min %.3f, cut %.3f pp (%s)\n",
+       TIE$APP_CMAP_TIE_FLIP_MAX, TIE$APP_CMAP_TIE_STABLE_MIN, TIE$APP_CMAP_TIE_PP, TIE$APP_CMAP_TIE_SRC)
+o <- order(mg)
+for (i in o)
+  ca_say("   %-30s margin %6.2f pp  %s%s\n", rownames(MC0)[i], mg[[i]],
+         paste(sprintf("%s: %-18s", ALL, substr(win[i, ], 1, 18)), collapse = " "),
+         if (flip_like[[i]]) "  FLIPS at A2" else if (flip_any[[i]]) "  flips at A3 only" else "")
+ca_endpoints <- function(flip, lab) {
+  fm <- if (any(flip)) max(mg[flip]) else NA_real_
+  sm <- if (any(!flip)) min(mg[!flip]) else NA_real_
+  sep <- !is.na(fm) && !is.na(sm) && fm < sm
+  ca_say("   %-12s flippers %2d, largest margin %s; stable %2d, smallest %s -> %s%s\n", lab,
+         sum(flip), if (is.na(fm)) "  - " else sprintf("%.3f", fm), sum(!flip),
+         if (is.na(sm)) "  - " else sprintf("%.3f", sm),
+         if (sep) "SEPARATED" else if (is.na(fm)) "NO FLIPPER: the cut has no lower endpoint" else "*** NOT SEPARATED ***",
+         if (sep) sprintf(", geometric-mean cut %.3f pp", sqrt(fm * sm)) else "")
+  invisible(c(flip_max = fm, stable_min = sm))
+}
+EP_LIKE <- ca_endpoints(flip_like, "A2 only")
+EP_ANY  <- ca_endpoints(flip_any, "every arm")
 
 ca_say("\nwrote %s\n", CA_LOG)
