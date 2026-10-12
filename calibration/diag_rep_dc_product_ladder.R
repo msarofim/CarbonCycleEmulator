@@ -1,3 +1,10 @@
+# ⛔ HELD-ERA RECORD (2026-10-12). This script builds its Joos PD100 by hand with the climate HELD
+# (`gmst <- gmst[1]`), which is no longer the live protocol: card 5, gate L, the scorecard and
+# diag_joos_irf.R now run R/joos_irf.R ccx_pd100() with the climate FREE (Marcus 2026-10-12, "free
+# everywhere"; scope "Builder + live consumers"). Its hand-held table also leaves the observed-SST
+# columns running and restarts T_deep at 0 -- both FIXED in the builder (ccx_pulse_forcings,
+# ccx_pulse_ref_state), NOT here. Kept unconverted as the record of what it printed: do not quote its
+# IRFs or partitions as the canonical's.
 # =====================================================================
 # diag_rep_dc_product_ladder.R -- T1 (the R2 test menu, 2026-09-22):
 # "what would the PRODUCTS look like if `rep_dC` were forced down?"
@@ -196,7 +203,9 @@ rpl_products <- function(u) {
   gl <- dg_gateGL_verdict(gh, RPL_H_OBS)
   g7 <- dg_gate7(r); g7v <- dg_gate7_verdict(g7, RPL_G7_TGT)
   g4 <- dg_gate4(r, v)
-  pt <- dg_gateL_partition(v)
+  # HELD-ERA RECORD (2026-10-12): this ladder's IRF column (rpl_irf above) is hand-built with the
+  # climate held, so its partition is pinned to the held protocol too; the live default is free.
+  pt <- dg_gateL_partition(v, climate = "held")
   ir <- rpl_irf(v)
   list(
     scalar = c(

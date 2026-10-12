@@ -138,12 +138,42 @@ joos_release_check <- function(o) {
                  o$t[1], o$irf[1], JOOS_IRF0_TOL))
   invisible(o)
 }
-ccx_irf_pd <- function(sp_ref, F_hold) {
-  pre <- F_hold$t < JOOS_PULSE_YR
-  if (!any(pre) || all(pre)) stop("ccx_irf_pd: F_hold must span JOOS_PULSE_YR (", JOOS_PULSE_YR, ")")
-  sp_rel <- sp_ref
-  sp_rel$y <- ccx_run_fast(sp_ref, F_hold[pre, , drop = FALSE])$state
-  joos_release_check(ccx_irf(sp_rel, F_hold[!pre, , drop = FALSE]))
+ccx_irf_pd <- function(sp_ref, F_hold, pulse = JOOS_PULSE, release = JOOS_PULSE_YR) {
+  pre <- F_hold$t < release
+  if (!any(pre) || all(pre)) stop("ccx_irf_pd: F_hold must span the release year (", release, ")")
+  climate <- attr(F_hold, "pd_climate")
+  # A table WITHOUT the stamp is a HELD-ERA call: test-pulse.R and the held-era diagnostics build
+  # their own held table and were written for that protocol, so it means "held" -- said, not
+  # assumed silently. The live consumers all go through ccx_pd100(), which stamps it.
+  if (is.null(climate)) {
+    message("ccx_irf_pd: no pd_climate on F_hold -- a held-era call, run HELD (ccx_pd100() is the live, free runner)")
+    climate <- "held"
+  }
+  # T_deep is carried across the release seam too (2026-10-12; it was restarted at 0 here)
+  sp_rel <- ccx_pulse_continue(sp_ref, F_hold[pre, , drop = FALSE])
+  Fp <- F_hold[!pre, , drop = FALSE]
+  pp <- ccx_pulse_pair(sp_rel, Fp, pulse, climate)
+  b <- ccx_pd_co2(pp$b)
+  joos_release_check(list(t = Fp$t - Fp$t[1], irf = (ccx_pd_co2(pp$q) - b) / (pulse / JOOS_PPM_PER),
+                          base = b, b = pp$b, q = pp$q, dT = pp$dT, iter = pp$iter,
+                          converged = pp$converged, climate = climate))
+}
+
+#' THE PD100, END TO END: history to JOOS_REF_YEAR, the background held (CO2 by diagnosed
+#' emissions) with its climate FREE or HELD, and the pulse released at JOOS_PULSE_YR. The one
+#' runner card 5a, gate L / card 5b, the scorecard and diag_joos_irf.R share (2026-10-12).
+ccx_pd100 <- function(spin, end_year, bomb_total_kmol, luc_scale, climate = CCX_PD_CLIMATE_DEFAULT,
+                      pulse = JOOS_PULSE, verbose = FALSE) {
+  pf <- ccx_pulse_forcings(spin, c(JOOS_REF_YEAR, end_year), bomb_total_kmol, luc_scale)
+  sp_ref <- ccx_pulse_ref_state(spin, pf$F_hist)
+  F_bkg <- ccx_pulse_background(sp_ref, pf$F_fwd, climate)
+  F_hold <- ccx_hold_forcing(sp_ref, F_bkg, verbose = verbose)
+  attr(F_hold, "pd_climate") <- climate
+  o <- ccx_irf_pd(sp_ref, F_hold, pulse)
+  o$hold_dev <- attr(F_hold, "dev"); o$target <- attr(F_hold, "target")
+  o$bkg <- attr(F_bkg, "pd_bkg"); o$gmst_fwd <- F_hold$gmst; o$t_fwd <- F_hold$t
+  o$sp_ref <- sp_ref
+  o
 }
 
 # ---------------------------------------------------------------------
@@ -293,6 +323,169 @@ ccx_pulse_forcings <- function(spin, years_fwd, bomb_total_kmol, luc_scale) {
                               enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p)))
   for (cc in c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH", "enso", "c14_bomb", "c14_nuclear"))
     F_fwd[[cc]] <- 0
-  F_fwd$gmst <- F_fwd$gmst[1]
+  # ⛔ FIXED 2026-10-12 (Marcus: "Fix both in the builder (Recommended)"). This line was
+  # `F_fwd$gmst <- F_fwd$gmst[1]` -- the hand idiom ccx_hold_climate() exists to replace: it held
+  # GMST and left the observed-SST columns running (NH 0.72 K in 2010 -> 1.29 K in 2024, then flat),
+  # and the ocean reads SST, not GMST (sst_obs = 1). Card 5's "held" IRF was +0.20 % at 100 yr and
+  # +0.30 % at 300 yr from it. This is the HELD background; ccx_pulse_background() frees it.
+  F_fwd <- ccx_hold_climate(F_fwd)
   list(F_hist = F_hist, F_fwd = ccx_pulse_hold_ndep(F_fwd, F_hist))
+}
+
+# =====================================================================
+# ⭐ THE PD100 CLIMATE: FREE (Joos's protocol, the default) OR HELD -- 2026-10-12
+#
+# RULED (Marcus 2026-10-12): "free everywhere" -- "if climate/carbon feedbacks are relevant for
+# Card 5, they'd also be relevant for the Futures tab", which already runs them (app_run_coupled
+# -> ccx_run_coupled). Scope "Builder + live consumers": card 5a, gate L / card 5b, the scorecard,
+# tl_land_share and diag_joos_irf.R. Gate L releases at JOOS_PULSE_YR like card 5a ("Release at
+# 2015"). Joos et al. 2013 p. 2798: "the climate is evolving freely". The HELD mode is kept, with
+# the two fixes above and below, for decompositions and the held-era diagnostics.
+#
+# FREE, built so that a held-forcing world gets the MODEL's climate after the reference year:
+#  * the background GMST comes from the FaIR-fitted climate module, integrated FROM 1750 (so the
+#    committed warming is there) on this run's own historical CO2 + FaIR's non-CO2 ERF, then on the
+#    HELD CO2 + the non-CO2 ERF held at its reference-year value; spliced to observed GMST over the
+#    last CCX_PD_GMST_SPLICE_YR years of the history, as ccx_run_coupled() splices;
+#  * the SST columns follow that GMST by ccx_sst_anom_from_gmst()'s ratio rule, seam-matched at the
+#    reference year. NOT ccx_sst_anom_from_gmst() itself: it keeps OBSERVED SST through the record's
+#    end (2024), i.e. real 2010-2024 warming driven by forcing this experiment holds;
+#  * the pulse's OWN warming is iterated to convergence (CLIM_TOL, CLIM_MAX_ITER), as the coupled
+#    runner iterates, with GMST piecewise-constant within the year (causal; the spline rings);
+#  * T_deep (the stratification lag) is CARRIED across every seam. Without it a free run STOPS
+#    (ccx_mix_g_series refuses a varying opening), and a held run silently restarts T_deep at 0
+#    (0.148 K at 2010 at hilda29e) -- the second fix.
+# Measured at hilda29e (prototype, 2026-10-11): free vs held IRF +4.9 % at 100 yr, +8.3 % at 300;
+# almost all of it the pulse's own +0.15 K, the background's warming alone <= 0.2 %.
+# =====================================================================
+CCX_PD_CLIMATES        <- c("free", "held")
+CCX_PD_CLIMATE_DEFAULT <- "free"
+CCX_PD_GMST_SPLICE_YR  <- 11L   # = ccx_run_coupled()'s obs splice window (`last - 10 .. last`)
+
+ccx_pd_co2 <- function(o) (o$co2_NH + o$co2_SH) / 2
+ccx_pd_annual <- function(t, x) {
+  y <- floor(t + 1e-9)
+  as.numeric(tapply(x, y, mean))
+}
+
+#' Advance a state over a forcing table, carrying T_deep with it
+ccx_pulse_continue <- function(sp, F) {
+  s2 <- sp
+  s2$y <- ccx_run_fast(sp, F)$state
+  if (ccx_mix_on(sp$params)) s2$tdeep0 <- ccx_mix_tdeep_after(F$gmst, F$t, sp$params, sp$tdeep0)
+  s2
+}
+
+#' The reference state at the end of the history, with T_deep and the annual history the free
+#' background needs (CO2 from this run, GMST and SST from the table it ran on)
+ccx_pulse_ref_state <- function(spin, F_hist) {
+  r <- ccx_run_fast(spin, F_hist)
+  sp <- spin
+  sp$y <- r$state
+  if (ccx_mix_on(spin$params)) sp$tdeep0 <- ccx_mix_tdeep_after(F_hist$gmst, F_hist$t, spin$params, spin$tdeep0)
+  co2 <- ccx_pd_co2(r$out)
+  sp$pd_hist <- list(year = sort(unique(floor(F_hist$t + 1e-9))),
+                     co2 = ccx_pd_annual(r$out$t, co2), co2_end = co2[length(co2)],
+                     gmst = ccx_pd_annual(F_hist$t, F_hist$gmst),
+                     sst_NH = ccx_pd_annual(F_hist$t, F_hist$sst_anom_NH),
+                     sst_SH = ccx_pd_annual(F_hist$t, F_hist$sst_anom_SH))
+  sp
+}
+
+#' Write an ANNUAL GMST path into a forcing table, with SST following it by the ratio rule
+#' seam-matched to the history (or to zero, for a preindustrial background with no history)
+ccx_pulse_set_climate <- function(F, g, hist = NULL) {
+  ny <- length(g)
+  if (nrow(F) != 12L * ny) stop("ccx_pulse_set_climate: ", nrow(F), " rows for ", ny, " years")
+  mon <- function(a) ccx_annual_to_monthly(seq_len(ny), a, seq_len(ny), method = "constant")
+  if (is.null(hist)) { so <- c(NH = 0, SH = 0); sg <- 0 } else {
+    k <- hist$year > max(hist$year) - CCX_SST_SPLICE_YR
+    so <- c(NH = mean(hist$sst_NH[k]), SH = mean(hist$sst_SH[k])); sg <- mean(hist$gmst[k])
+  }
+  F$gmst <- mon(g)
+  F$sst_anom_NH <- mon(so[["NH"]] + CCX_SST_RATIO_NH * (g - sg))
+  F$sst_anom_SH <- mon(so[["SH"]] + CCX_SST_RATIO_SH * (g - sg))
+  F
+}
+
+#' The background's climate, FREE or HELD, stamped on the table (attr "pd_climate").
+#' `F` is a HELD forward table (ccx_pulse_forcings()$F_fwd, or a preindustrial one at GMST 0).
+#' Free with a history: the module's response to the held CO2 (`co2_held`, default the state's
+#' own CO2 at the end of the history -- what ccx_hold_forcing() then holds) and the non-CO2 ERF held
+#' at its last historical value. Free with NO history (a preindustrial background): the forcing
+#' anomaly is zero, so the background stays at GMST 0 -- only the pulse warms.
+#' `coupled = TRUE` is for a background whose CO2 is NOT held (diag_joos_irf.R's "decaying" rows):
+#' its GMST must follow its OWN CO2, so the run and the climate are iterated as ccx_run_coupled()
+#' iterates. A preindustrial background (no history) is the spun-up equilibrium and stays at GMST 0
+#' either way: with zero emissions its CO2 does not move.
+ccx_pulse_background <- function(sp_ref, F, climate = CCX_PD_CLIMATE_DEFAULT, co2_held = NULL,
+                                 coupled = FALSE) {
+  climate <- match.arg(climate, CCX_PD_CLIMATES)
+  if (climate == "free") {
+    h <- sp_ref$pd_hist
+    ny <- nrow(F) / 12
+    if (is.null(h)) {
+      if (any(F$gmst != 0)) stop("ccx_pulse_background: no history and a non-zero GMST -- not a preindustrial background")
+      F <- ccx_pulse_set_climate(F, rep(0, ny), NULL)
+    } else {
+      mod <- ccx_climate_module()
+      nh <- length(h$year)
+      nc <- ccx_erf_nonco2("historical", h$year)
+      w <- h$year > max(h$year) - CCX_PD_GMST_SPLICE_YR
+      gmst_of <- function(co2_fwd) {             # annual forward CO2 -> annual forward GMST
+        erf <- c(ccx_erf_co2(h$co2, mod) + nc, ccx_erf_co2(co2_fwd, mod) + nc[nh])
+        Tm <- ccx_temperature_from_erf(erf, seq(h$year[1], length.out = length(erf)), mod)
+        off <- mean(h$gmst[w]) - mean(Tm[seq_len(nh)][w])
+        list(g = Tm[nh + seq_len(ny)] + off, off = off)
+      }
+      c_hold <- if (is.null(co2_held)) h$co2_end else co2_held
+      gg <- gmst_of(rep(c_hold, ny)); it <- 0L; delta <- 0
+      if (isTRUE(coupled)) repeat {
+        it <- it + 1L
+        r <- ccx_run_fast(sp_ref, ccx_pulse_set_climate(F, gg$g, h))$out
+        new <- gmst_of(ccx_pd_annual(r$t, ccx_pd_co2(r)))
+        delta <- max(abs(new$g - gg$g)); gg <- new
+        if (delta < CLIM_TOL || it >= CLIM_MAX_ITER) break
+      }
+      if (isTRUE(coupled) && delta >= CLIM_TOL)
+        warning(sprintf("ccx_pulse_background: the coupled background did not converge (%.2e K)", delta), call. = FALSE)
+      F <- ccx_pulse_set_climate(F, gg$g, h)
+      attr(F, "pd_bkg") <- list(co2_held = if (isTRUE(coupled)) NA_real_ else c_hold, coupled = isTRUE(coupled),
+                                iter = it, erf_nonco2_held = nc[nh], splice_offset = gg$off)
+    }
+  }
+  attr(F, "pd_climate") <- climate
+  F
+}
+
+#' Baseline and pulse runs on one background. FREE: the pulse's own warming is fed back, iterated
+#' to convergence; HELD: both runs see the background's climate. Returns the two full outputs.
+ccx_pulse_pair <- function(sp, F, pulse = JOOS_PULSE, climate = attr(F, "pd_climate")) {
+  if (is.null(climate)) stop("ccx_pulse_pair: the table carries no pd_climate; build it with ccx_pulse_background()")
+  climate <- match.arg(climate, CCX_PD_CLIMATES)
+  b <- ccx_run_fast(sp, F)$out
+  spp <- ccx_pulse_state(sp, pulse)
+  if (climate == "held")
+    return(list(b = b, q = ccx_run_fast(spp, F)$out, dT = NULL, iter = 0L, converged = TRUE))
+  mod <- ccx_climate_module()
+  ny <- nrow(F) / 12
+  if (ny != round(ny)) stop("ccx_pulse_pair: the table is not whole years")
+  mon <- function(a) ccx_annual_to_monthly(seq_len(ny), a, seq_len(ny), method = "constant")
+  erf_b <- ccx_erf_co2(ccx_pd_annual(b$t, ccx_pd_co2(b)), mod)
+  dT <- rep(0, ny); it <- 0L
+  repeat {
+    it <- it + 1L
+    dm <- mon(dT); Fq <- F
+    Fq$gmst <- F$gmst + dm
+    Fq$sst_anom_NH <- F$sst_anom_NH + CCX_SST_RATIO_NH * dm
+    Fq$sst_anom_SH <- F$sst_anom_SH + CCX_SST_RATIO_SH * dm
+    q <- ccx_run_fast(spp, Fq)$out
+    new <- ccx_climate_irf_filter(ccx_erf_co2(ccx_pd_annual(q$t, ccx_pd_co2(q)), mod) - erf_b, mod)
+    delta <- max(abs(new - dT)); dT <- new
+    if (delta < CLIM_TOL || it >= CLIM_MAX_ITER) break
+  }
+  if (delta >= CLIM_TOL)
+    warning(sprintf("ccx_pulse_pair: the pulse's warming did not converge (%.2e K after %d passes)", delta, it),
+            call. = FALSE)
+  list(b = b, q = q, dT = dT, iter = it, converged = delta < CLIM_TOL)
 }

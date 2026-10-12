@@ -293,42 +293,39 @@ spin <- ccx_spinup(p0)
 # prints has changed. Do NOT re-inline them: a local copy that drifts would
 # silently make the two diagnostics disagree about the same protocol.
 
-# Historical spin-up to the reference year, then the held background.
-F_hist <- joos_build_forcing("historical", c(1750, JOOS_REF_YEAR), prod_c14 = spin$prod_c14)
-sp_ref <- spin
-sp_ref$y <- ccx_run_fast(spin, F_hist)$state
-
-F_fwd <- suppressWarnings(
-  joos_build_forcing("historical", c(JOOS_REF_YEAR, JOOS_REF_YEAR + JOOS_HORIZON + 10),
-                    prod_c14 = spin$prod_c14, bomb_total_kmol = 0))
-for (cc in c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH", "enso",
-             "c14_bomb", "c14_nuclear")) F_fwd[[cc]] <- 0
-F_fwd$gmst <- F_fwd$gmst[1]          # climate held at the reference year
-F_fwd <- ccx_pulse_hold_ndep(F_fwd, F_hist)   # N deposition too (2026-10-01; R/joos_irf.R)
-
-F_hold <- ccx_hold_forcing(sp_ref, F_fwd, verbose = TRUE)
-# Joos releases the pulse 5 yr after the reference year, on an already-settled
-# background. ccx_irf_pd() does exactly that (R/joos_irf.R). ⛔ Until 2026-09-27
-# this line pulsed at 2010 and then SHIFTED the clock by 5 yr, which discarded
-# the first five years after release instead of waiting for them -- see the
-# block above ccx_irf_pd() for what that cost.
-o_pd   <- ccx_irf_pd(sp_ref, F_hold)
+# ⭐ THE ONE PD100 RUNNER (R/joos_irf.R ccx_pd100, 2026-10-12): history to the reference year,
+# the background CO2 held by diagnosed emissions, the pulse released at JOOS_PULSE_YR. Climate
+# FREE as in Joos (Marcus 2026-10-12, "free everywhere"; Joos p. 2798 "the climate is evolving
+# freely"): the background's GMST from the climate module, the pulse's own warming fed back. The
+# HELD protocol every record before 10-12 used is run too and printed beside it, for comparison.
+# The forcing is the same as before: ccx_pulse_forcings() takes this run's bomb_total and
+# luc_scale, and the structure's ENSO index and AOD mode from spin$params (= p0), as
+# joos_build_forcing() did. ⛔ Until 2026-09-27 the pulse went in at 2010 and the clock was then
+# SHIFTED by 5 yr -- see the block above ccx_irf_pd() for what that cost.
+JOOS_CLIMATE <- CCX_PD_CLIMATE_DEFAULT
+o_pd   <- ccx_pd100(spin, JOOS_REF_YEAR + JOOS_HORIZON + 10, JOOS_BOMB_TOTAL, JOOS_LUC_SCALE,
+                    climate = JOOS_CLIMATE, verbose = TRUE)
+o_held <- ccx_pd100(spin, JOOS_REF_YEAR + JOOS_HORIZON + 10, JOOS_BOMB_TOTAL, JOOS_LUC_SCALE,
+                    climate = "held")
+sp_ref <- o_pd$sp_ref
 keep   <- o_pd$t >= 0
 irf    <- o_pd$irf[keep]; irf_t <- o_pd$t[keep]
 
-cat(sprintf("\n=== 1. BACKGROUND CHECK (Joos run 1: CO2 held constant) ===\n"))
+cat(sprintf("\n=== 1. BACKGROUND CHECK (Joos run 1: CO2 held constant); climate %s ===\n", JOOS_CLIMATE))
 cat(sprintf("  target %.2f ppm; max deviation over %d yr: %.3f ppm (%.2f %%)\n",
-            attr(F_hold, "target"), JOOS_HORIZON, attr(F_hold, "dev"),
-            100 * attr(F_hold, "dev") / attr(F_hold, "target")))
+            o_pd$target, JOOS_HORIZON, o_pd$hold_dev, 100 * o_pd$hold_dev / o_pd$target))
 cat(sprintf("  Joos's PD100 background is 389 ppm; this model's is %.0f ppm at %d.\n",
-            attr(F_hold, "target"), JOOS_REF_YEAR))
+            o_pd$target, JOOS_REF_YEAR))
+if (identical(JOOS_CLIMATE, "free"))
+  cat(sprintf("  background GMST %.3f K at the hold -> %.3f K at the end (held forcing); the pulse's own warming %.3f K at +100 yr, %d passes\n",
+              o_pd$gmst_fwd[1], o_pd$gmst_fwd[length(o_pd$gmst_fwd)], o_pd$dT[min(101, length(o_pd$dT))], o_pd$iter))
 
 at_yr <- function(v, tt, y) v[which.min(abs(tt - y))]
 cat("\n=== 2. POINT IRF vs JOOS TABLE 5 (multi-model mean) ===\n")
-cat(sprintf("%8s %12s %12s %10s\n", "yr", "this model", "Joos T5", "diff"))
+cat(sprintf("%8s %12s %12s %10s %14s\n", "yr", "this model", "Joos T5", "diff", "climate HELD"))
 for (y in JOOS_MARKS) {
   m <- at_yr(irf, irf_t, y); j <- joos_irf(y)
-  cat(sprintf("%8.0f %12.3f %12.3f %+10.3f\n", y, m, j, m - j))
+  cat(sprintf("%8.0f %12.3f %12.3f %+10.3f %14.3f\n", y, m, j, m - j, at_yr(o_held$irf, o_held$t, y)))
 }
 
 integ <- function(o, th) { k <- o$t <= th & o$t >= 0
@@ -347,12 +344,12 @@ cat("    Joos is another MODEL, and no observation constrains a CO2 perturbation
 cat("    lifetime, so the long tail is something the model should EMERGE, not\n")
 cat("    something it should be made to pass. 'inside/BELOW/ABOVE' below is a\n")
 cat("    reading, not a verdict, and nothing here is chased in a refit.\n")
-cat(sprintf("%6s %12s %12s %18s %10s  %s\n", "TH", "this model", "Joos best",
-            "Joos 5-95 %", "vs floor", "verdict"))
+cat(sprintf("%6s %12s %12s %18s %10s %8s  %s\n", "TH", "this model", "Joos best",
+            "Joos 5-95 %", "vs floor", "held", "verdict"))
 for (i in seq_len(nrow(JOOS_T4))) {
   th <- JOOS_T4$th[i]; m <- integ(o_pd_shifted, th)
-  cat(sprintf("%6.0f %12.2f %12.1f %8.1f - %-7.1f %+9.2f%%  %s\n", th, m, JOOS_T4$best[i],
-              JOOS_T4$lo[i], JOOS_T4$hi[i], 100 * (m - JOOS_T4$lo[i]) / JOOS_T4$lo[i],
+  cat(sprintf("%6.0f %12.2f %12.1f %8.1f - %-7.1f %+9.2f%% %8.2f  %s\n", th, m, JOOS_T4$best[i],
+              JOOS_T4$lo[i], JOOS_T4$hi[i], 100 * (m - JOOS_T4$lo[i]) / JOOS_T4$lo[i], integ(o_held, th),
               if (m >= JOOS_T4$lo[i] && m <= JOOS_T4$hi[i]) "inside"
               else if (m < JOOS_T4$lo[i]) "BELOW -- decays too fast"
               else "ABOVE -- decays too slowly"))
@@ -411,23 +408,32 @@ cat(sprintf("    Joos T5's t -> infinity limit is a0 = %.4f; a single exponentia
 # 4. What the BACKGROUND PROTOCOL is worth -- held vs decaying, PD vs PI.
 # Joos sec. 4.4.1 reports 34-47 yr (PI) against 45-62 yr (PD) at TH = 100.
 # ---------------------------------------------------------------------
-F_pi <- suppressWarnings(joos_build_forcing("historical", c(1750, 1750 + JOOS_HORIZON + 10),
+# 2026-10-12: every case through the runner, climate JOOS_CLIMATE, and RELEASED after the same
+# 5-yr hold as the headline (it pulsed at the first row, 2010 or 1750). PI releases at
+# PI_RELEASE = 1750 + (JOOS_PULSE_YR - JOOS_REF_YEAR). ⛔ The PI table held GMST at 0 by hand and
+# left the observed-SST columns running -- HadSST's real 20th-century warming inside a
+# "preindustrial" background; ccx_hold_climate(value = 0) holds them too.
+PI_RELEASE <- 1750 + (JOOS_PULSE_YR - JOOS_REF_YEAR)
+pf4  <- ccx_pulse_forcings(spin, c(JOOS_REF_YEAR, JOOS_REF_YEAR + JOOS_HORIZON + 10), JOOS_BOMB_TOTAL, JOOS_LUC_SCALE)
+F_pi <- suppressWarnings(joos_build_forcing("historical", c(1750, PI_RELEASE + JOOS_HORIZON + 10),
                                            prod_c14 = spin$prod_c14, bomb_total_kmol = 0))
 for (cc in c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH", "enso",
              "c14_bomb", "c14_nuclear")) F_pi[[cc]] <- 0
-F_pi$gmst <- 0
+F_pi <- ccx_hold_climate(F_pi, value = 0)
 F_pi <- ccx_pulse_hold_ndep(F_pi, NULL)       # preindustrial: no deposition (2026-10-01)
+held_pd <- function(sp, Fb) { Fh <- ccx_hold_forcing(sp, Fb); attr(Fh, "pd_climate") <- attr(Fb, "pd_climate"); Fh }
 
 cases <- list(
-  "PD, background HELD"     = list(sp = sp_ref, F = ccx_hold_forcing(sp_ref, F_fwd)),
-  "PD, background decaying" = list(sp = sp_ref, F = F_fwd),
-  "PI, background HELD"     = list(sp = spin,   F = ccx_hold_forcing(spin, F_pi)),
-  "PI, background decaying" = list(sp = spin,   F = F_pi))
-cat("\n=== 4. THE BACKGROUND PROTOCOL IS NOT A DETAIL ===\n")
+  "PD, background HELD"     = function() o_pd,
+  "PD, background decaying" = function() ccx_irf_pd(sp_ref, ccx_pulse_background(sp_ref, pf4$F_fwd, JOOS_CLIMATE, coupled = TRUE)),
+  "PI, background HELD"     = function() ccx_irf_pd(spin, held_pd(spin, ccx_pulse_background(spin, F_pi, JOOS_CLIMATE)), release = PI_RELEASE),
+  "PI, background decaying" = function() ccx_irf_pd(spin, ccx_pulse_background(spin, F_pi, JOOS_CLIMATE), release = PI_RELEASE))
+cat(sprintf("\n=== 4. THE BACKGROUND PROTOCOL IS NOT A DETAIL (climate %s; release after a %d-yr hold) ===\n",
+            JOOS_CLIMATE, JOOS_PULSE_YR - JOOS_REF_YEAR))
 cat(sprintf("%-26s %8s %8s %8s | %14s\n", "case", "IRF@20", "IRF@100", "IRF@300",
             "int IRF @100"))
 for (nm in names(cases)) {
-  cc <- cases[[nm]]; o <- ccx_irf(cc$sp, cc$F)
+  o <- cases[[nm]]()
   cat(sprintf("%-26s %8.3f %8.3f %8.3f | %14.1f\n", nm,
               at_yr(o$irf, o$t, 20), at_yr(o$irf, o$t, 100),
               at_yr(o$irf, o$t, 300), integ(o, 100)))

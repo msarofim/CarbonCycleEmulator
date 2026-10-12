@@ -175,13 +175,12 @@ enso_slope <- function(r) { s <- dg_annual_sinks(r); d <- merge(data.frame(year 
 ENSO <- list(); for (a in an) { full <- enso_slope(R[[a]]); v2 <- ARMS[[a]]; v2$p$gamma_enso_ocn_NH <- 0; v2$p$gamma_enso_ocn_SH <- 0; if (!is.null(v2$p$w_enso_l2)) v2$p$w_enso_l2 <- 0; sol <- enso_slope(dg_run(v2)); ENSO[[a]] <- list(full = full, sol = sol)
   cat(sprintf("  %-8s full model slope %+.4f ± %.4f (r %+.3f) = %.2fx obs;  solubility-only %+.4f (r %+.3f)  [gamma_enso_ocn NH %+.3f SH %+.3f; w_enso_l2 %.2f]\n", a, full["slope"], full["se"], full["r"], full["slope"] / coef(fo)[["nino34_anom"]], sol["slope"], sol["r"], ARMS[[a]]$p$gamma_enso_ocn_NH, ARMS[[a]]$p$gamma_enso_ocn_SH, if (is.null(ARMS[[a]]$p$w_enso_l2)) 0 else ARMS[[a]]$p$w_enso_l2)) }
 
-cat("\n=== 4. COMPARISONS, NOT GATES (Marcus 09-08h: nothing from Joos may score the model) ===\n")
+cat(sprintf("\n=== 4. COMPARISONS, NOT GATES (Marcus 09-08h: nothing from Joos may score the model); PD100 climate %s ===\n", CCX_PD_CLIMATE_DEFAULT))
 irf_of <- function(v) { spin <- dg_spinup(v)
-  # ONE builder for the protocol (R/joos_irf.R ccx_pulse_forcings, 2026-10-01): enso/aod modes + held N deposition
-  pf <- ccx_pulse_forcings(spin, c(JOOS_REF_YEAR, JOOS_REF_YEAR + SC_JOOS_HORIZON + 10), v$bomb_total, v$luc_scale)
-  sp_ref <- spin; sp_ref$y <- ccx_run_fast(spin, pf$F_hist)$state
-  F_hold <- ccx_hold_forcing(sp_ref, pf$F_fwd, verbose = FALSE)
-  o <- ccx_irf_pd(sp_ref, F_hold); k <- o$t >= 0; at <- function(y) o$irf[k][which.min(abs(o$t[k] - y))]
+  # THE ONE PD100 RUNNER (R/joos_irf.R ccx_pd100, 2026-10-12): climate FREE as in Joos (Marcus
+  # 2026-10-12, "free everywhere"); before 10-12 this section's IRFs were climate-HELD
+  o <- ccx_pd100(spin, JOOS_REF_YEAR + SC_JOOS_HORIZON + 10, v$bomb_total, v$luc_scale, climate = CCX_PD_CLIMATE_DEFAULT)
+  k <- o$t >= 0; at <- function(y) o$irf[k][which.min(abs(o$t[k] - y))]
   c(irf20 = at(20), irf100 = at(100), irf300 = at(300)) }
 IRF <- list(); for (a in an) { x <- try_or(irf_of(ARMS[[a]]), paste("IRF", a)); IRF[[a]] <- x
   if (!is.null(x)) cat(sprintf("  12 IRF   %-8s IRF(20) %.3f  IRF(100) %.3f  IRF(300) %.3f   (Joos 2013 multi-model: %.3f / %.3f / %.3f)\n", a, x["irf20"], x["irf100"], x["irf300"], joos_irf(20), joos_irf(100), joos_irf(300))) }

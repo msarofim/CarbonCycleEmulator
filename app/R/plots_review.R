@@ -248,13 +248,20 @@ rv_plot_enso <- function() rv_guard(rv_enso_slope(), function(x) {
 # ---------------------------------------------------------------------
 rv_plot_irf <- function() rv_guard(rv_pulse(), function(x) {
   lab_m <- "This model"; lab_j <- "Joos et al. 2013 multi-model mean"
+  # FaIR on the same PD100 protocol (2026-10-12): dashed, as standard FaIR is on the Futures tab
+  lab_f <- x$fair_label
   d <- rbind(
     data.frame(t = x$t, f = x$irf, who = lab_m),
-    data.frame(t = x$t, f = joos_irf(x$t), who = lab_j))
-  ggplot(d, aes(t, f, colour = who)) +
+    data.frame(t = x$t, f = joos_irf(x$t), who = lab_j),
+    data.frame(t = x$fair$t, f = x$fair$irf, who = lab_f))
+  labs3 <- c(lab_m, lab_j, lab_f)
+  d$who <- factor(d$who, levels = labs3)
+  ggplot(d, aes(t, f, colour = who, linetype = who)) +
     geom_line(linewidth = 0.8) +
-    scale_colour_manual(values = stats::setNames(c(RV_COL_MODEL(), RV_COL_OBS()),
-                                                 c(lab_m, lab_j))) +
+    scale_colour_manual(values = stats::setNames(c(RV_COL_MODEL(), RV_COL_OBS(), RV_COL_ALT()), labs3)) +
+    scale_linetype_manual(values = stats::setNames(c("solid", "solid", "22"), labs3)) +
+    # two rows: on one, the FaIR label is clipped at card width (rendered 2026-10-12)
+    guides(colour = guide_legend(nrow = 2, byrow = TRUE), linetype = guide_legend(nrow = 2, byrow = TRUE)) +
     labs(x = "Years after the pulse",
          y = "Fraction of the pulse still in the air",
          caption = rv_cap(paste0(

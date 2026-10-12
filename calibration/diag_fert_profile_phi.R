@@ -1,3 +1,10 @@
+# ⛔ HELD-ERA RECORD (2026-10-12). This script builds its Joos PD100 by hand with the climate HELD
+# (`gmst <- gmst[1]`), which is no longer the live protocol: card 5, gate L, the scorecard and
+# diag_joos_irf.R now run R/joos_irf.R ccx_pd100() with the climate FREE (Marcus 2026-10-12, "free
+# everywhere"; scope "Builder + live consumers"). Its hand-held table also leaves the observed-SST
+# columns running and restarts T_deep at 0 -- both FIXED in the builder (ccx_pulse_forcings,
+# ccx_pulse_ref_state), NOT here. Kept unconverted as the record of what it printed: do not quote its
+# IRFs or partitions as the canonical's.
 # =====================================================================
 # diag_fert_profile_phi.R -- the fertilisation-shape profile under both land
 # structures: hilda_csl3 (phi 0.5, shipped) and hilda_csl3v0 (phi 0, 2026-09-28).

@@ -2113,8 +2113,9 @@ dg_gateS_verdict <- function(g, lo = DG_S_LO, w = DG_S_LAG_MAX) {
 # JOOS_REF_YEAR, the background CO2 HELD there by diagnosed emissions
 # (ccx_hold_forcing), the pulse added to the held state at its own isotopic
 # ratios (ccx_pulse_state), and the partition read as the PAIRED DIFFERENCE
-# pulse - baseline in each reservoir. The pulse is added at the reference
-# year's state (t = 0 of the series); the horizon counts from there.
+# pulse - baseline in each reservoir. ⭐ 2026-10-12: through ccx_pd100(), with the
+# pulse RELEASED AT JOOS_PULSE_YR after the 5-yr hold (it was added to the 2010
+# state) and the climate FREE by default; the horizon counts from the release.
 #
 # WHY A GATE ON THE LAND SHARE. The IRF miss is a comparison, not a gate
 # (09-04e). But option H (assessment 09-08f) found the model's 100-yr land
@@ -2146,15 +2147,19 @@ DG_L_COMPARISON <- paste("COMPARISON, NOT A GATE (Marcus 2026-09-08h): 'Do not u
                          "we fit to.' Use dg_compareL() for the reported z's; nothing passes or fails here.")
 DG_L_EXTRA_YR <- 10   # forcing built this far past the horizon so the read is interior
 
-dg_gateL_partition <- function(v, horizon = DG_L_HORIZON, pulse = JOOS_PULSE) {
+dg_gateL_partition <- function(v, horizon = DG_L_HORIZON, pulse = JOOS_PULSE,
+                               climate = CCX_PD_CLIMATE_DEFAULT) {
   spin <- dg_spinup(v)
-  # the protocol's two forcings from ONE builder (R/joos_irf.R, 2026-10-01): the structure's
-  # enso/aod modes, and N deposition held at the reference year with GMST
-  pf <- ccx_pulse_forcings(spin, c(JOOS_REF_YEAR, JOOS_REF_YEAR + horizon + DG_L_EXTRA_YR), v$bomb_total, v$luc_scale)
-  sp_ref <- spin; sp_ref$y <- ccx_run_fast(spin, pf$F_hist)$state
-  F_hold <- ccx_hold_forcing(sp_ref, pf$F_fwd, verbose = FALSE)
-  b <- ccx_run_fast(sp_ref, F_hold)$out
-  q <- ccx_run_fast(ccx_pulse_state(sp_ref, pulse), F_hold)$out
+  # ⭐ THE ONE PD100 RUNNER (R/joos_irf.R ccx_pd100, 2026-10-12). Two changes, both ruled 10-12:
+  #  * climate FREE by default ("free everywhere"); `climate = "held"` keeps the held-era protocol
+  #    (with the SST and T_deep fixes) for the diagnostics that stay held-era records;
+  #  * the pulse is released at JOOS_PULSE_YR after the 5-yr hold, as card 5a and Joos do ("Release
+  #    at 2015, like 5a and Joos"). It was added to the 2010 state, so 5a and 5b ran two protocols.
+  # The baseline and pulse runs are the runner's pair, so under free climate the pulse run carries
+  # its own iterated warming -- they no longer share one forcing table.
+  o <- ccx_pd100(spin, JOOS_PULSE_YR + horizon + DG_L_EXTRA_YR, v$bomb_total, v$luc_scale,
+                 climate = climate, pulse = pulse)
+  b <- o$b; q <- o$q
   gpp <- ccx_const("GtC_PER_PPM")
   d <- data.frame(t = b$t - b$t[1],
                   air   = ((q$co2_NH + q$co2_SH) - (b$co2_NH + b$co2_SH)) / 2 * gpp,
@@ -2163,8 +2168,8 @@ dg_gateL_partition <- function(v, horizon = DG_L_HORIZON, pulse = JOOS_PULSE) {
   d$closure <- (d$air + d$ocean + d$land) / pulse
   at <- function(h) d[which.min(abs(d$t - h)), ]
   share_at <- function(h) { r <- at(h); 100 * c(land = r$land, ocean = r$ocean, air = r$air) / pulse }
-  list(series = d, horizon = horizon, pulse = pulse, hold_dev = attr(F_hold, "dev"),
-       share = share_at(horizon), share_at = share_at, closure = at(horizon)$closure)
+  list(series = d, horizon = horizon, pulse = pulse, hold_dev = o$hold_dev, climate = o$climate,
+       converged = o$converged, share = share_at(horizon), share_at = share_at, closure = at(horizon)$closure)
 }
 
 # The REPORTED comparison: where the model's pulse partition sits against the

@@ -62,6 +62,12 @@ RV_CLASS_GLOSS <- c(
 # from the number under it.
 RV_IRF_HORIZON   <- 1000    # yr followed for the partition (= DG_L_HORIZON)
 RV_IRF_READ      <- c(20, 100, 300)
+# card 5's PD100 climate (Marcus 2026-10-12: "free everywhere", as Joos: "the climate is evolving freely")
+RV_PD_CLIMATE    <- CCX_PD_CLIMATE_DEFAULT
+# card 5a's FaIR line (Marcus 2026-10-11: FaIR on Joos's PD100, 841-config mean, climate free);
+# built by data-raw/build_fair_pd100.R, its protocol pinned by tests/testthat/test-fair-pd100.R
+RV_FAIR_PD100_FILE <- "fair_pd100.rds"
+RV_FAIR_LAB_FMT    <- "%s, %d-configuration mean"   # legend: the file's own label and config count
 RV_SEAS_WINDOW   <- c(2000, 2024)   # the climatology window for the seasonal panels
 RV_GRAD_WINDOW   <- c(2000, 2024)   # where the MLO-SPO gradients are read
 
@@ -372,19 +378,25 @@ rv_pulse <- function() rv_memo("pulse", function() {
   rv_need_gates()
   v <- rv_arm(CCX_MODE_CANONICAL)
   spin <- dg_spinup(v)
-  # the protocol's two forcings from ONE builder (R/joos_irf.R ccx_pulse_forcings, 2026-10-01):
-  # the structure's enso/aod modes, N deposition held at the reference year with GMST
-  pf <- ccx_pulse_forcings(spin, c(JOOS_REF_YEAR, JOOS_REF_YEAR + max(RV_IRF_READ) + 10),
-                           v$bomb_total, v$luc_scale)
-  sp_ref <- spin; sp_ref$y <- ccx_run_fast(spin, pf$F_hist)$state
-  o <- ccx_irf_pd(sp_ref, ccx_hold_forcing(sp_ref, pf$F_fwd, verbose = FALSE))
+  # THE ONE PD100 RUNNER (R/joos_irf.R ccx_pd100, 2026-10-12), climate FREE as in Joos (Marcus
+  # 2026-10-12, "free everywhere"): the background's GMST from the climate module, the pulse's own
+  # warming fed back. Was held at the 2010 GMST (with the observed SST left running).
+  o <- ccx_pd100(spin, JOOS_REF_YEAR + max(RV_IRF_READ) + 10, v$bomb_total, v$luc_scale,
+                 climate = RV_PD_CLIMATE)
   k <- o$t >= 0
   at <- function(y) o$irf[k][which.min(abs(o$t[k] - y))]
-  part <- dg_gateL_partition(v, horizon = RV_IRF_HORIZON)
+  part <- dg_gateL_partition(v, horizon = RV_IRF_HORIZON, climate = RV_PD_CLIMATE)
+  fair <- readRDS(ccx_path("data", RV_FAIR_PD100_FILE))
+  fp <- attr(fair, "provenance")
+  if (!startsWith(fp$climate, RV_PD_CLIMATE))
+    stop("card 5: the FaIR line's climate (", fp$climate, ") is not the card's (", RV_PD_CLIMATE, ")")
   list(t = o$t[k], irf = o$irf[k],
        read = vapply(RV_IRF_READ, at, numeric(1)),
        joos = vapply(RV_IRF_READ, joos_irf, numeric(1)),
-       horizons = RV_IRF_READ,
+       fair = data.frame(t = fair$t, irf = fair$irf_mean),
+       fair_label = sprintf(RV_FAIR_LAB_FMT, fp$label, as.integer(fp$n_configs)),
+       fair_read = vapply(RV_IRF_READ, function(y) stats::approx(fair$t, fair$irf_mean, y)$y, numeric(1)),
+       horizons = RV_IRF_READ, climate = o$climate,
        partition = dg_compareL(part), closure = part$closure,
        joos_src = DG_L_JOOS$src)
 })

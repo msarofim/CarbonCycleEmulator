@@ -107,6 +107,17 @@ ccx_erf_co2 <- function(co2_ppm, mod = ccx_climate_module()) {
 #'   so the anomaly is returned relative to the first year and flagged.
 ccx_temperature_from_erf <- function(erf, years, mod = ccx_climate_module(),
                                      baseline = mod$baseline) {
+  T <- ccx_climate_irf_filter(erf, mod)
+  k <- years >= baseline[1] & years <= baseline[2]
+  if (any(k)) T - mean(T[k]) else T - T[1]
+}
+
+#' The module's 3-timescale response to an annual forcing series, from a ZERO initial state
+#' and with NO baseline subtracted. Split out of ccx_temperature_from_erf() 2026-10-12 (same
+#' arithmetic, bit-identical) for the PD100 runner, which needs the response to a forcing
+#' PERTURBATION that starts at the pulse: there, subtracting T[1] (what the caller above does for
+#' a window opening after the baseline) would delete the first year's real warming.
+ccx_climate_irf_filter <- function(erf, mod = ccx_climate_module()) {
   q <- mod$irf_q; d <- mod$irf_d
   decay <- exp(-1 / d); gain <- q * (1 - decay)
   S <- numeric(length(q)); T <- numeric(length(erf))
@@ -114,8 +125,7 @@ ccx_temperature_from_erf <- function(erf, years, mod = ccx_climate_module(),
     S <- S * decay + gain * erf[i]
     T[i] <- sum(S)
   }
-  k <- years >= baseline[1] & years <= baseline[2]
-  if (any(k)) T - mean(T[k]) else T - T[1]
+  T
 }
 
 #' Prescribed non-CO2 forcing for a background scenario, on a year grid
