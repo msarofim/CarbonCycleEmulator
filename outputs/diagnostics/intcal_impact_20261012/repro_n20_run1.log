@@ -1,0 +1,128 @@
+=== calibration/diag_intcal_sigma_impact.R @1b16747 (frozen git worktree; data-raw/downloads symlinked to the main tree), root /Users/MarcusMarcus/ccx_frozen/intcal_impact_1b16747, run 2026-10-12 13:30 ===
+Sys.getenv: VECLIB_MAXIMUM_THREADS=1 OPENBLAS_NUM_THREADS=1
+run-time inputs present: 14/14. OK
+
+[1] data-raw/downloads/intcal20/intcal20.14c: 9501 data rows, sha256 974a66649f2ac8a53e6c99e256b019ac6982f999b12dcf7193162d4c1c09168e (checked); column 5 'sig_d14c_permil' used
+[ccx_adopt_mode_band] h_ml -> [42.5, 200] (mode 64.6311); kz -> [1161.6, 27808] (mode 14151.3467)
+    scored window: 1750 <= year < 1941 (ic_end READ from the Hua rows), n = 191
+    coded err (14C-age yr): 9-11; published Delta14C sigma: 1.2-1.3 permil; LIK_D14C_REP_OTHER = 4 permil
+    sd used, mean over the window: coded 10.573, corrected 4.177 permil (weight ratio mean(1/sd^2) 6.37x)
+    CHECK (not a change): CCX's converted d14c vs published column 4: max |diff| 0.106 permil (scored window), 0.106 (all 251 rows 1700-1950)
+
+[2] the canonical mode
+    GATE mode logpost: recomputed -1166.949732, stored in file -1166.949732, task-stated -1166.949732 (diff 0.00e+00)
+    GATE identity: recomputed coded row -640.6155066397 vs the objective's d14c_intcal -640.6155066397 (diff 0.00e+00)
+    IntCal row log-lik: coded -640.62, corrected -543.83 (Delta +96.79; a normalisation shift plus the residual term)
+    chi2/n: coded 0.155, corrected 0.997 (n = 191)
+    residual obs - model: mean -3.05, RMS 4.17 permil; trend +0.58 permil/century over 1750-1940
+    residual mean by period: 1750-1849 -2.98; 1850-1899 -4.48; 1900-1940 -1.48
+    Suess decline, 1750s mean minus 1931-40 mean: obs 21.37, model 18.64 permil (model - obs -2.72)
+    at the mode: MLO CO2 2024 (scored line) 422.842 ppm; 2010-2019 mean ocean sink 3.088, land sink (gross, GCB convention) 2.845 GtC/yr
+    GATE central line: decoded mode vs the app's APP_SPIN vvM run, co2_ppm max |diff| 1.82e-08 (tol 1e-06)
+
+[3] draws: outputs/mcmc_check_20261009_hilda29e_200k/pooled_u_thin2.rds (md5 0df17c051e7f8b09016d99d358c83de4), rows (S %/% N) * (1:N) of the pooled file: step 850, rows 850..17000 of 17000; each mapped to its chain sample (identical u: 20/20)
+    20 of 20 draws evaluated (0.1 min on 6 workers, 1.62 s/draw/worker)
+    GATE identity per draw: max |recomputed coded row - objective's row| 0.00e+00 (tol 1e-09)
+    CHECK: recomputed logpost vs the chain's stored samples_lp: max |diff| 0 over 20 draws
+
+    Delta-l across draws: mean 97.16, sd 0.91, range [95.43, 98.31]
+    ccx_is_diagnostics: S 20, failed 0, ESS 13.1 (65.4 %), max w 0.114, k-hat Inf (reliable below 0.231): k_ok FALSE
+
+    parameters (natural scale), ranked by |mean shift| in unweighted-posterior sd:
+                 name    mean_u    mean_w      sd_u shift_sd     q05_u
+            luc_scale 9.256e-01 9.381e-01 3.136e-02  0.39640 8.764e-01
+        seas_lag_p_SH 2.621e+00 2.660e+00 1.047e-01  0.37341 2.433e+00
+                   kz 1.404e+04 1.379e+04 7.699e+02 -0.32445 1.212e+04
+         kz_deep_frac 8.613e-03 9.826e-03 3.839e-03  0.31620 5.070e-03
+               tau_ex 8.960e-01 8.800e-01 5.397e-02 -0.29613 8.268e-01
+ imb_share_ocean_rest 3.758e-01 4.267e-01 1.730e-01  0.29451 5.665e-02
+                  k_w 1.846e+03 1.830e+03 5.572e+01 -0.29122 1.740e+03
+               fert_k 6.776e+02 6.441e+02 1.331e+02 -0.25161 4.458e+02
+         grad_off_co2 2.454e-01 2.690e-01 1.029e-01  0.22982 4.527e-02
+        seas_lag_p_NH 1.582e+00 1.594e+00 5.341e-02  0.22488 1.503e+00
+                  q10 1.098e+00 1.105e+00 2.839e-02  0.22251 1.059e+00
+           bomb_total 1.185e+02 1.184e+02 5.869e-01 -0.22156 1.175e+02
+      sst_seas_amp_NH 1.674e+00 1.609e+00 2.964e-01 -0.21931 1.123e+00
+         pump_hs_gcm2 8.686e+01 9.117e+01 2.041e+01  0.21123 6.421e+01
+        grad_off_d13c 6.493e-02 6.354e-02 6.745e-03 -0.20689 5.388e-02
+                 h_hs 3.279e+02 3.434e+02 7.960e+01  0.19428 2.147e+02
+       imb_share_land 7.047e-01 7.269e-01 1.234e-01  0.18019 5.280e-01
+               rep_dC 4.266e+00 4.308e+00 2.469e-01  0.16866 3.839e+00
+            pump_grad 3.137e+02 3.203e+02 4.198e+01  0.15836 2.340e+02
+             ndep_ret 8.216e+00 7.614e+00 4.022e+00 -0.14955 1.368e+00
+          hs_asx_frac 7.477e-01 7.596e-01 9.230e-02  0.12991 5.785e-01
+             beta_max 2.083e+00 2.049e+00 2.924e-01 -0.11662 1.544e+00
+                 h_ml 5.813e+01 5.897e+01 8.892e+00  0.09413 4.535e+01
+        seas_T_amp_NH 1.408e+01 1.390e+01 2.362e+00 -0.07471 1.004e+01
+        seas_T_amp_SH 3.682e+00 3.610e+00 1.091e+00 -0.06655 2.333e+00
+           sigma_d14c 5.598e+00 5.577e+00 3.950e-01 -0.05306 4.929e+00
+                 u_hs 2.393e+01 2.407e+01 4.033e+00  0.03461 1.927e+01
+      sst_seas_amp_SH 1.359e+00 1.353e+00 2.407e-01 -0.02384 9.625e-01
+          npp_frac_NH 5.901e-01 5.905e-01 2.530e-02  0.01743 5.531e-01
+     q50_u     q95_u     q05_w     q50_w     q95_w
+ 9.224e-01 9.726e-01 8.891e-01 9.368e-01 9.741e-01
+ 2.607e+00 2.806e+00 2.436e+00 2.675e+00 2.839e+00
+ 1.419e+04 1.499e+04 1.194e+04 1.410e+04 1.485e+04
+ 7.048e-03 1.703e-02 5.182e-03 8.004e-03 2.006e-02
+ 8.872e-01 1.001e+00 8.263e-01 8.706e-01 9.701e-01
+ 3.904e-01 6.009e-01 6.936e-02 4.585e-01 6.092e-01
+ 1.852e+03 1.924e+03 1.718e+03 1.839e+03 1.923e+03
+ 6.761e+02 8.931e+02 4.432e+02 6.331e+02 8.475e+02
+ 2.557e-01 3.904e-01 7.865e-02 2.761e-01 4.075e-01
+ 1.588e+00 1.670e+00 1.510e+00 1.594e+00 1.665e+00
+ 1.091e+00 1.149e+00 1.065e+00 1.095e+00 1.149e+00
+ 1.185e+02 1.196e+02 1.175e+02 1.184e+02 1.198e+02
+ 1.692e+00 2.172e+00 1.014e+00 1.675e+00 2.119e+00
+ 8.501e+01 1.339e+02 6.913e+01 8.661e+01 1.355e+02
+ 6.384e-02 7.845e-02 5.352e-02 6.210e-02 7.635e-02
+ 3.185e+02 4.630e+02 1.984e+02 3.424e+02 4.654e+02
+ 7.150e-01 9.133e-01 5.267e-01 7.490e-01 9.127e-01
+ 4.370e+00 4.547e+00 3.851e+00 4.396e+00 4.547e+00
+ 3.162e+02 3.876e+02 2.477e+02 3.192e+02 3.848e+02
+ 7.901e+00 1.460e+01 1.300e+00 7.492e+00 1.365e+01
+ 7.377e-01 9.139e-01 5.775e-01 7.584e-01 9.165e-01
+ 2.122e+00 2.549e+00 1.542e+00 2.142e+00 2.487e+00
+ 5.827e+01 7.390e+01 4.540e+01 6.048e+01 7.409e+01
+ 1.418e+01 1.767e+01 1.056e+01 1.394e+01 1.712e+01
+ 3.389e+00 6.097e+00 2.405e+00 3.193e+00 6.098e+00
+ 5.567e+00 6.228e+00 4.903e+00 5.590e+00 6.144e+00
+ 2.354e+01 3.227e+01 1.992e+01 2.437e+01 2.805e+01
+ 1.338e+00 1.792e+00 8.942e-01 1.350e+00 1.732e+00
+ 5.926e-01 6.320e-01 5.543e-01 5.923e-01 6.216e-01
+
+    outputs, unweighted vs reweighted:
+                  quantity    mean_u    mean_w     sd_u  shift_sd     q05_u
+              co2_mlo_2024 422.81068 422.79411 0.168615 -0.098297 422.50649
+      ocean_sink_2010_2019   3.08403   3.08517 0.038162  0.030051   3.03070
+ land_sink_gross_2010_2019   2.87332   2.89376 0.054833  0.372853   2.77640
+                   res_rms   4.16131   4.14560 0.023641 -0.664496   4.13135
+                  res_mean  -3.03280  -3.00846 0.037373  0.651370  -3.09938
+     res_trend_per_century   0.61121   0.63965 0.063789  0.445701   0.47802
+                chi2n_corr   0.99286   0.98537 0.011283 -0.663911   0.97860
+              vvM_co2_2100 564.27815 564.55302 1.580332  0.173930 561.91948
+              vvM_co2_2150 617.89766 618.38142 2.805969  0.172404 613.95872
+     q50_u     q95_u     q05_w     q50_w     q95_w  width_u
+ 422.82293 423.12622 422.51578 422.81941 422.90633 0.619730
+   3.08567   3.15965   3.02319   3.08720   3.15900 0.128947
+   2.87786   2.96877   2.81874   2.89698   2.98996 0.192371
+   4.15900   4.20138   4.13117   4.13724   4.18235 0.070025
+  -3.02873  -2.98070  -3.06450  -3.00136  -2.97628 0.118677
+   0.61206   0.73466   0.58326   0.62785   0.74251 0.256647
+   0.99173   1.01202   0.97852   0.98138   1.00289 0.033426
+ 564.48032 566.91358 562.03579 564.63792 567.31929 4.994100
+ 618.02390 622.91519 614.10880 618.36031 623.68711 8.956477
+ max_q_shift_over_width
+               0.354807
+               0.058261
+               0.220099
+               0.310832
+               0.293919
+               0.410085
+               0.309548
+               0.081239
+               0.086185
+    CHECK vs the shipped band's per-draw values (outputs/diagnostics/futures_ribbons_mcmc_20261009_hilda29e_200k.rds, vvM): max |diff| 2100: 0, 2150: 0 ppm
+
+[4] VERDICT: UNRELIABLE: k-hat Inf (limit 0.231), ESS 13.1 of 20 -- the reweighting cannot answer; only a refit can.
+
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/intcal_impact_20261012/repro_n20_run1.rds; total 2.3 min

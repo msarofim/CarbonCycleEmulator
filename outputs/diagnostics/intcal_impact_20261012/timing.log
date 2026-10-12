@@ -1,0 +1,24 @@
+=== calibration/diag_intcal_sigma_impact.R @1b16747 (frozen git worktree; data-raw/downloads symlinked to the main tree), root /Users/MarcusMarcus/ccx_frozen/intcal_impact_1b16747, run 2026-10-12 13:27 ===
+Sys.getenv: VECLIB_MAXIMUM_THREADS=1 OPENBLAS_NUM_THREADS=1
+run-time inputs present: 14/14. OK
+
+[1] data-raw/downloads/intcal20/intcal20.14c: 9501 data rows, sha256 974a66649f2ac8a53e6c99e256b019ac6982f999b12dcf7193162d4c1c09168e (checked); column 5 'sig_d14c_permil' used
+[ccx_adopt_mode_band] h_ml -> [42.5, 200] (mode 64.6311); kz -> [1161.6, 27808] (mode 14151.3467)
+    scored window: 1750 <= year < 1941 (ic_end READ from the Hua rows), n = 191
+    coded err (14C-age yr): 9-11; published Delta14C sigma: 1.2-1.3 permil; LIK_D14C_REP_OTHER = 4 permil
+    sd used, mean over the window: coded 10.573, corrected 4.177 permil (weight ratio mean(1/sd^2) 6.37x)
+    CHECK (not a change): CCX's converted d14c vs published column 4: max |diff| 0.106 permil (scored window), 0.106 (all 251 rows 1700-1950)
+
+[2] the canonical mode
+    GATE mode logpost: recomputed -1166.949732, stored in file -1166.949732, task-stated -1166.949732 (diff 0.00e+00)
+    GATE identity: recomputed coded row -640.6155066397 vs the objective's d14c_intcal -640.6155066397 (diff 0.00e+00)
+    IntCal row log-lik: coded -640.62, corrected -543.83 (Delta +96.79; a normalisation shift plus the residual term)
+    chi2/n: coded 0.155, corrected 0.997 (n = 191)
+    residual obs - model: mean -3.05, RMS 4.17 permil; trend +0.58 permil/century over 1750-1940
+    residual mean by period: 1750-1849 -2.98; 1850-1899 -4.48; 1900-1940 -1.48
+    Suess decline, 1750s mean minus 1931-40 mean: obs 21.37, model 18.64 permil (model - obs -2.72)
+    at the mode: MLO CO2 2024 (scored line) 422.842 ppm; 2010-2019 mean ocean sink 3.088, land sink (gross, GCB convention) 2.845 GtC/yr
+    GATE central line: decoded mode vs the app's APP_SPIN vvM run, co2_ppm max |diff| 1.82e-08 (tol 1e-06)
+
+[3] draws: outputs/mcmc_check_20261009_hilda29e_200k/pooled_u_thin2.rds (md5 0df17c051e7f8b09016d99d358c83de4), rows (S %/% N) * (1:N) of the pooled file: step 17, rows 17..17000 of 17000; each mapped to its chain sample (identical u: 1000/1000)
+TIMING (serial, vvm TRUE): 4 draws, 0.77 s/draw (range 0.73-0.83); projected 1000 draws on 6 workers: 2.1 min (assuming linear scaling)

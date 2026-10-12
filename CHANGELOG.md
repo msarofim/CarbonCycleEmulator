@@ -2,6 +2,42 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (u) — **The IntCal σ bug's impact, MEASURED** (Marcus: "Measure impact first (Recommended)"). Nothing canonical changed: `data/` is untouched and the canonical logpost still reproduces. Driver `calibration/diag_intcal_sigma_impact.R`, run from the frozen tree `~/ccx_frozen/intcal_impact_1b16747`; results in `outputs/diagnostics/intcal_impact_20261012/` (README, per-draw `.rds` with provenance, logs).
+
+**Gates.**
+- The canonical logpost recomputes to −1166.949732 (Δ 0), and all 1000 draws' logposts equal the chains' stored `samples_lp`.
+- The per-draw vvM CO₂ equals the shipped band's `key_draws`.
+- The window, sha256 and stored-logpost gates each fired under mutation.
+- Two N = 20 runs are byte-identical.
+
+**At the mode** (191 rows, 1750–1940):
+
+| | coded σ | corrected σ |
+|---|---|---|
+| mean σ | 10.57 ‰ | 4.18 ‰ |
+| χ²/n | 0.155 | 0.997 |
+
+- The residual (obs − model) has mean −3.05 ‰ and RMS 4.17 ‰. The decadal means run from +1.0 to −8.9 ‰ (the 1790s), so it is not a slope error.
+- CCX's converted Δ¹⁴C is within 0.106 ‰ of IntCal's published column 4.
+
+**Reweighting.** N = 1000 draws, every 17th of the 17 000 pooled, with raw weights exp(Δℓ).
+- `ccx_is_diagnostics()`: **ESS 437 / 1000, k-hat 0.149** (limit 0.667), so the reweighting is reliable.
+- Parameter shifts, in posterior sd: **`luc_scale` +0.67, `bomb_total` −0.54, `rep_dC` +0.53**; `imb_share_land` +0.43; `ndep_ret` −0.38.
+- Outputs:
+  - **vvM CO₂ 2100: 563.8 → 564.0 ppm**, band [561.2, 566.9] → [561.4, 567.2];
+  - vvM CO₂ 2150: 617.1 → 617.4, band [612.8, 622.4] → [612.9, 623.0];
+  - the largest quantile shift is 0.066 × the band width;
+  - MLO 2024: 422.78 → 422.73;
+  - 2010–19 land sink: 2.861 → 2.907 GtC/yr (+0.6 sd);
+  - ocean sink: 3.080 → 3.078.
+
+**What this does and does not say.** It is the corrected POSTERIOR, not the refitted MODE, and the app's central line is the mode. The base sample is thin: min bulk ESS about 105, R-hat about 1.05. The fix itself is still owed:
+- the published Δ¹⁴C σ (column 5) in `data-raw/build_calibration_data.R`;
+- a `download_data.R` / `MANIFEST.csv` entry (URL above, accessed 2026-10-12, sha256 `974a6664…168e`);
+- then a refit.
+
+**The decision (refit now, or ship and document) is Marcus's.** ⚠ Six in-objective constants on the citation list (`notes/constants_citation_needs_2026-10-12.md`) would also change on adoption. A refit, if one happens, should take them together.
+
 ## 2026-10-12 (t) — **The five wrong app numbers from the code review are fixed** (Marcus: "Scenarios span (Recommended), Keeling year + land crossing, Keeling 'today' like-for-like, Box diagram ocean arrow"). Only the numbers changed; every sentence's wording is Marcus's and is untouched. Measured at the canonical, in the app's own `global.R`:
 
 | what the app prints | was | now |
