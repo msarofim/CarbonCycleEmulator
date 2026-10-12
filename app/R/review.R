@@ -670,6 +670,9 @@ RV_CARDS <- list(
                       # 2026-10-01): the ocean is now LARGER too, and every term
                       # sits within two-thirds of one s.d. (|z| <= 0.63). The difference is in
                       # the timing, largest early: IRF(20) 0.508 vs 0.596.
+                      # ⭐ RE-CHECKED 2026-10-12 at hilda29e on the climate-FREE protocol (ccx_pd100):
+                      # 1000-yr split 17.4 / 57.6 / 25.0 % (z +0.20 / -0.23 / -0.01); IRF 20/100/300
+                      # 0.522 / 0.379 / 0.295 vs Joos 0.596 / 0.409 / 0.322. Every claim below holds.
                       "point. Where the difference sits is visible in the two",
                       "charts: the pulse leaves the air faster here, most of all",
                       "in the first few decades, but after a thousand years the",
