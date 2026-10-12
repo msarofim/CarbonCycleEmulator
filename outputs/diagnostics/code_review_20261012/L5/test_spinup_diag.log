@@ -1,0 +1,16 @@
+Test passed with 10 successes 🎉.
+run-time inputs present: 14/14. OK
+SEEDING w_vent for the spinup-diagnostics: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The file held it OFF; this arm fits it.
+SEEDING gamma_vent for the spinup-diagnostics: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The file held it OFF; this arm fits it.
+SEEDING w_thc for the spinup-diagnostics: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The file held it OFF; this arm fits it.
+[ FAIL 0 | WARN 0 | SKIP 0 | PASS 44 ]
+
+real	0m4.807s
+user	0m4.285s
+sys	0m0.224s

@@ -1,0 +1,6 @@
+source("/private/tmp/claude-501/-Users-MarcusMarcus-Documents-2026-CodeProjects-CarbonCycleEmulator/fa6620c3-fcfb-49a4-a787-90d23c00188e/scratchpad/review/L2/setup.R")
+aux <- readRDS(file.path(SCR, "aux_canon.rds"))
+cat("pump_field:", if (is.null(p$pump_field)) "NULL(solved)" else p$pump_field, "\n")
+for (h in HEMIS) cat(h, "LS org sum", sum(aux$pump[[h]]$org), " carb sum", sum(aux$pump[[h]]$carb), " neg layers", sum(aux$pump[[h]]$org < 0), " | up org", sum(aux$pump_up[[h]]$org), " | HS org", aux$pump_hs[[h]]$org, " carb", aux$pump_hs[[h]]$carb, "\n")
+cat("kz_int:", signif(aux$kz_int, 5), "\n"); cat("kz_up:", signif(aux$kz_up, 5), "\n")
+cat("kz_zscale:", p$kz_zscale, "\n")

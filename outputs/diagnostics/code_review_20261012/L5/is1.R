@@ -1,0 +1,5 @@
+source("/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/R/importance.R")
+lw <- c(rep(-Inf, 999), 0.3)
+d <- ccx_is_diagnostics(lw); cat(sprintf("999 failed + 1 ok: n_failed %d ess %.2f k_hat %s k_ok %s\n", d$n_failed, d$ess, d$k_hat, d$k_ok))
+lw <- c(rep(-Inf, 998), 0.3, 0.2)
+d <- ccx_is_diagnostics(lw); cat(sprintf("998 failed + 2 ok: k_hat %s k_ok %s\n", d$k_hat, d$k_ok))

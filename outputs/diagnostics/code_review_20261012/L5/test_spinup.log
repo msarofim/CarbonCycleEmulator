@@ -1,0 +1,7 @@
+Test passed with 10 successes 🥇.
+run-time inputs present: 14/14. OK
+[ FAIL 0 | WARN 0 | SKIP 0 | PASS 18 ]
+
+real	0m12.624s
+user	0m11.784s
+sys	0m0.419s

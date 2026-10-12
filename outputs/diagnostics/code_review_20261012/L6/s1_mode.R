@@ -1,0 +1,8 @@
+for (f in list.files("R", pattern="\\.R$", full.names=TRUE)) source(f)
+md <- readRDS(ccx_mode_file())
+cat("file:", ccx_mode_file(), "\n")
+str(md[setdiff(names(md), c("streams","hessian","cov","fit_stats","trace"))], max.level=1, give.attr=FALSE, list.len=100)
+cat("\nstruct:", ccx_mode_struct(md), " seas_ml:", ccx_mode_seas_ml(md), " spinup:", ccx_mode_spinup(md), " pump_field:", ccx_mode_pump_field(md), "\n")
+cat("pins:\n"); print(ccx_mode_pins(md))
+cat("bands:\n"); print(ccx_mode_bands(md))
+cat("stored logpost:", md$logpost, "\n")

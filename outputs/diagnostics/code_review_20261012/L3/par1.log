@@ -1,0 +1,58 @@
+spinup s: 2.522 
+rows: 3300  substeps: 4 
+retried pre: FALSE 4 
+tdeep0 at 1955: 0.02550182 
+C++ s: 0.011  retried: FALSE 
+There were 50 or more warnings (use warnings() to see the first 50)
+R s: 8.223 
+mix_g range: 0.9898282 1 
+enso range: -1.923575 1.752686  aod max: 0.03382721 
+state C    max abs 1.705e-13  rel(to max|state|) 3.077e-17  worst box SH_oc1
+state C13  max abs 3.553e-15  rel(to max|state|) 5.728e-17  worst box NH_oc8
+state C14  max abs 5.684e-13  rel(to max|state|) 1.269e-16  worst box SH_oc3
+              maxabs      rel nNAmismatch
+co2_NH      1.14e-13 3.36e-16           0
+co2_SH      1.71e-13 5.10e-16           0
+d13c_NH     5.55e-13 7.14e-14           0
+d13c_SH     6.66e-13 8.82e-14           0
+d14c_NH     6.82e-13 7.87e-16           0
+d14c_SH     4.55e-13 6.49e-16           0
+ocean_C     7.28e-12 1.93e-16           0
+land_C      4.55e-13 2.22e-16           0
+ocean_C14   7.28e-12 2.23e-16           0
+land_C14    6.82e-13 3.60e-16           0
+atm_C14     4.55e-13 3.75e-16           0
+ml_C_NH     2.84e-14 1.33e-16           0
+ml_C13_NH   8.88e-16 3.71e-16           0
+deep_C_NH   0.00e+00 0.00e+00           0
+deep_C13_NH 0.00e+00 0.00e+00           0
+hs_C_NH     2.84e-14 1.86e-16           0
+hs_C13_NH   4.44e-16 2.60e-16           0
+eq_C_NH           NA       NA          NA
+eq_C13_NH         NA       NA          NA
+tr_C_NH           NA       NA          NA
+tr_C13_NH         NA       NA          NA
+ml_pco2_NH  1.53e-12 4.31e-15           0
+hs_pco2_NH  2.16e-12 7.13e-15           0
+eq_pco2_NH        NA       NA          NA
+tr_pco2_NH        NA       NA          NA
+ml_C_SH     2.27e-13 4.67e-16           0
+ml_C13_SH   3.55e-15 6.51e-16           0
+deep_C_SH   0.00e+00 0.00e+00           0
+deep_C13_SH 0.00e+00 0.00e+00           0
+hs_C_SH     2.84e-14 1.40e-16           0
+hs_C13_SH   8.88e-16 3.91e-16           0
+eq_C_SH           NA       NA          NA
+eq_C13_SH         NA       NA          NA
+tr_C_SH           NA       NA          NA
+tr_C13_SH         NA       NA          NA
+ml_pco2_SH  2.73e-12 8.05e-15           0
+hs_pco2_SH  2.73e-12 8.98e-15           0
+eq_pco2_SH        NA       NA          NA
+tr_pco2_SH        NA       NA          NA
+npp diff: 1.421085e-14 
+cols only in R:   only in C:  
+
+real	0m10.956s
+user	0m10.428s
+sys	0m0.227s

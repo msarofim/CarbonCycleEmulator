@@ -1,0 +1,5 @@
+setwd("/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator")
+for (f in list.files("R", pattern="\\.R$", full.names=TRUE)) source(f)
+d <- ccx_default_params()
+for (n in c("seas_drivers","seas_ml","hs_frac","soil_inert_frac","k_l2","mix_strat_s","ndep_ret","sst_obs","pump_grad","f_luc_wood","gamma_diff","w_up","w_enso_l2")) cat(n, "=", if (is.null(d[[n]])) "NULL" else format(d[[n]]), "\n")
+a <- ccx_prepare(d); cat("pump null:", is.null(a$pump), " nboxes:", nrow(ccx_new_state()), " hs_on:", a$hs_on, " l2_on:", a$l2_on, " mix_on:", a$mix_on, " inert:", a$inert_on, "\n")

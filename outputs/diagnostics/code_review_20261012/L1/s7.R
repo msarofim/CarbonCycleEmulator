@@ -1,0 +1,8 @@
+setwd("/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator")
+for (f in list.files("R", pattern="\\.R$", full.names=TRUE)) source(f)
+ccx_check_constants()
+p <- readRDS("/private/tmp/claude-501/-Users-MarcusMarcus-Documents-2026-CodeProjects-CarbonCycleEmulator/fa6620c3-fcfb-49a4-a787-90d23c00188e/scratchpad/review/L1/p_canon.rds")
+aux <- ccx_prepare(p, ccx_ocean_grid(p$h_ml))
+cat("pump on:", !is.null(aux$pump), " pump_hs on:", !is.null(aux$pump_hs), " alk_hs:", format(aux$alk_hs), "\n")
+print(table(sapply(CCX_CONSTANTS, function(k) k$status)))
+cat("alpha_photo used:", aux$alpha_photo, "\n")

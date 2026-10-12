@@ -1,0 +1,5 @@
+setwd("/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator")
+source("R/aaa_root.R"); source("R/paths.R")
+for (m in c("hilda31", "hilda31s", "hilda30c", "hilda30h", "hilda31p", "hilda30e", "hilda30s"))
+  cat(sprintf("%-9s -> %s\n", m, substr(tryCatch(ccx_mode_file(m), error = function(e) conditionMessage(e)), 1, 70)))
+cat("RETIRED names:", names(CCX_MODE_RETIRED), "\n")

@@ -1,0 +1,6 @@
+setwd("/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator")
+for (f in list.files("R", pattern="\\.R$", full.names=TRUE)) source(f)
+mc <- readRDS(ccx_path(CCX_MODE_CANONICAL_MODULE_CHECK)); str(mc$provenance, max.level = 1)
+cat("canonical md5:", unname(tools::md5sum(ccx_mode_file())), "\n")
+m2 <- readRDS(ccx_path(CCX_MODE_OBJ18P2_MODULE_FILE)); cat("obj18p2 pins vs literals:\n"); print(m2$pins); print(identical(unname(m2$pins[c("lag_enso_land","gamma_enso_land_NH","gamma_enso_land_SH","w_enso_l2")]), unname(CCX_MODE_OBJ18P2_PINS[c("lag_enso_land","gamma_enso_land_NH","gamma_enso_land_SH","w_enso_l2")])))
+cat("canonical check's optimum (the module at the canonical):\n"); print(mc$optimum); print(mc$check)

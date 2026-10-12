@@ -1,0 +1,49 @@
+Test passed with 10 successes 🎊.
+run-time inputs present: 14/14. OK
+WARNING: 'test-parity.R:103:3' --------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1980), prod_c14 = sp$prod_c14) at test-parity.R:103:3
+
+WARNING: 'test-parity.R:162:3' --------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1980), prod_c14 = sp$prod_c14) at test-parity.R:162:3
+
+WARNING: 'test-parity.R:209:3' --------------------
+window starts at 1800 with 15.6 GtC of land-use carbon already emitted, so the land's equilibrium is 0.7 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1800, 1900), prod_c14 = 0) at test-parity.R:209:3
+
+WARNING: 'test-parity.R:221:3' --------------------
+window starts at 1800 with 15.6 GtC of land-use carbon already emitted, so the land's equilibrium is 0.7 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1800, 1900), prod_c14 = 0) at test-parity.R:221:3
+
+WARNING: 'test-parity.R:381:3' --------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1980), prod_c14 = sp$prod_c14) at test-parity.R:381:3
+
+WARNING: 'test-parity.R:411:3' --------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1980), prod_c14 = s0$prod_c14) at test-parity.R:411:3
+
+WARNING: 'test-parity.R:428:3' --------------------
+window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+Backtrace:
+    ▆
+ 1. └─global ccx_build_forcing("historical", c(1900, 1905), prod_c14 = sp$prod_c14) at test-parity.R:428:3
+
+[ FAIL 0 | WARN 7 | SKIP 0 | PASS 82 ]
+
+real	4m38.064s
+user	4m34.306s
+sys	0m1.516s

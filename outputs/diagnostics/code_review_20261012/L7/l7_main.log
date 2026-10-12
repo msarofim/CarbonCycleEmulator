@@ -1,0 +1,82 @@
+
+Attaching package: ‘bslib’
+
+The following object is masked from ‘package:utils’:
+
+    page
+
+
+==== startup 125.0485 secs ====
+
+==== A. canonical switches ====
+CCX_MODE_CANONICAL: hilda29e  mode file: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261008_hilda29e_obj18p2_hilda_csl3v0kaidgbemwt/mode_fit_pumpN.rds 
+app_params source/status: posterior mode / single best fit 
+spinup: periodic  bomb_total: 118.8737  luc_scale: 0.91394  rep_dC: 4.211537 
+mode struct: hilda_csl3v0kaidgbemwt 
+     inert         tr         eq         hs    seas_ml seas_ml_ls seas_ml_hs 
+      TRUE      FALSE      FALSE       TRUE       TRUE       TRUE      FALSE 
+       mix         l2 
+      TRUE       TRUE 
+enso_index: detrend  aod_mode: anomaly  pump_mode: N 
+n fitted: 29  n pins: 14 
+APP_PARAMS identical to ccx_mode_run_params()$p: TRUE  bomb: TRUE  luc: TRUE 
+
+==== F. ribbons ====
+APP_RIBBONS$ok: FALSE  held: TRUE 
+bands NULL co2: TRUE  gmst: TRUE 
+APP_RIBBON_NOTE NULL: TRUE  note(co2) NULL: TRUE  note(gmst) NULL: TRUE 
+ribbons file problems:  
+ribbon provenance names: driver, commit, mode, struct, mode_file, mode_logpost, par_mode, u_center, method, covariance_note, label, n_held, held, n_draws, n_ok, n_failed, n_warnings, probs, scenarios, years, vars, emis_method, seed, rng_kind, seed_applied, central_check_max_abs, central_check_tol, label_ruled, draws_provenance, promoted 
+   mode : hilda29e 
+   label : MCMC posterior draws (supplied), conditional on the fourteen held values 
+   method : SUPPLIED draws outputs/mcmc_check_20261009_hilda29e_200k/pooled_u_thin2.rds (md5 0df17c051e7f8b09016d99d358c83de4), each run like a Laplace draw 
+   years : 1750 2150 
+   emis_method : constant 
+   n_ok : 17000 
+   probs : 0.05 0.50 0.95 
+   commit : b9b58a1 
+
+==== D. scenarios: all 7 ====
+                                         year     co2  gmst
+Very low (net zero by mid-century)       2150 366.023 1.522
+Low-to-negative (cuts, then net removal) 2150 304.821 1.251
+Low (net zero after mid-century)         2150 366.954 1.658
+Medium-to-low (net zero around 2100)     2150 406.584 2.099
+Medium (roughly flat to 2100)            2150 618.256 3.630
+High-to-low (rises, then deep cuts)      2150 439.895 2.327
+High (rising to 2100)                    2150 824.930 4.610
+takeaway(all 7): By 2150 these scenarios span 366 to 825 ppm and 1.5 to 4.6 °C. The spread is a choice, not a forecast. 
+sel vvM,vvHL,vvH -> true CO2 span 440-825  true GMST span 2.3-4.6 
+   takeaway: By 2150 these scenarios span 618 to 825 ppm and 3.6 to 4.6 °C. The spread is a choice, not a forecast. 
+sel vvVL,vvLN -> true CO2 span 305-366  true GMST span 1.3-1.5 
+   takeaway: By 2150 these scenarios span 305 to 366 ppm and 1.3 to 1.5 °C. The spread is a choice, not a forecast. 
+sel vvL,vvM,vvH -> true CO2 span 367-825  true GMST span 1.7-4.6 
+   takeaway: By 2150 these scenarios span 367 to 825 ppm and 1.7 to 4.6 °C. The spread is a choice, not a forecast. 
+sel vvVL,vvLN,vvL -> true CO2 span 305-367  true GMST span 1.3-1.7 
+   takeaway: By 2150 these scenarios span 366 to 367 ppm and 1.5 to 1.7 °C. The spread is a choice, not a forecast. 
+APP_FAIR null: FALSE  overlay rows: 1102  labels: Low (net zero after mid-century) | Medium (roughly flat to 2100) 
+APP_FAIR scenarios: ssp119,ssp126,ssp245,ssp370,ssp585,vvH,vvHL,vvL,vvLN,vvM,vvML,vvVL 
+
+==== G. splice / cross-tab past ====
+APP_SPLICE_YEAR: 2024  APP_HIST_YEARS: 1750 2024 
+  Very low (net zero by mid-century)            past max|d| 0.0222 ppm (yr 1849), d@2024 -0.0077
+  Low-to-negative (cuts, then net removal)      past max|d| 0.0222 ppm (yr 1849), d@2024 -0.0077
+  Low (net zero after mid-century)              past max|d| 0.0222 ppm (yr 1849), d@2024 -0.0069
+  Medium-to-low (net zero around 2100)          past max|d| 0.0222 ppm (yr 1849), d@2024 -0.0075
+  Medium (roughly flat to 2100)                 past max|d| 0.0222 ppm (yr 1849), d@2024 -0.0077
+  High-to-low (rises, then deep cuts)           past max|d| 0.0222 ppm (yr 1849), d@2024 -0.0067
+  High (rising to 2100)                         past max|d| 0.0222 ppm (yr 1849), d@2024 -0.0059
+  gmst column: hist forcing vs vvM coupled F (no F returned?) names(rs[[1]]): state,out,npp,substeps,substeps_requested,retried,climate,iterations,converged,tag 
+
+==== C. pulse lab (vvM, 2050, 100) ====
+pulse runs took 2.935696 secs 
+pre-pulse annual: max|dCO2| 0  max|dT| 0 
+pre-pulse monthly: max|dco2_NH| 0  max|dland_C| 0 
+tagged vs pulse: max|dco2_NH| 0  max|dland| 0  max|docean| 0  max|dT| 0 
+iterations base/pulse/tagged: 5 5 5  converged: TRUE TRUE TRUE 
+tag gtc: 100  s_mid: 2050.493 
+Error in ccx_global_co2(pr$pulse$out) : 
+  could not find function "ccx_global_co2"
+Calls: testServer ... <Anonymous> -> force -> <Anonymous> -> .handleSimpleError -> h
+In addition: There were 50 or more warnings (use warnings() to see the first 50)
+Execution halted

@@ -1,0 +1,139 @@
+
+Attaching package: ‘bslib’
+
+The following object is masked from ‘package:utils’:
+
+    page
+
+
+==== startup 135.3726 secs ====
+
+==== W. w_luc_note crossing ====
+w_luc_note: Land-use change (agriculture, deforestation, and so forth) has been a net source to the atmosphere for the whole record. However, over time the natural land sink has been growing due to CO₂ fertilisation, and so the total land contribution switched from a net source to a net sink around 1989 (based on the Global Carbon Budget, GCB) or in 1970 (based on our model — see “Is the model's land sink too high?” below). 
+app construction (diff of annual means, labelled y): 1970 
+calendar-year construction (app_sinks_annual, GCB convention): 1969 
+GCB: 1989 
+   year     app calendar
+1  1960 -0.5371  -0.4945
+2  1961 -0.5615  -0.6102
+3  1962 -0.6340  -0.6284
+4  1963 -0.5803  -0.4930
+5  1964 -0.4217  -0.3647
+6  1965 -0.3274  -0.2809
+7  1966 -0.2090  -0.1247
+8  1967 -0.0733  -0.0523
+9  1968 -0.1133  -0.1390
+10 1969 -0.0630   0.0014
+11 1970  0.0715   0.1251
+12 1971  0.1663   0.2149
+13 1972  0.2438   0.2593
+14 1973  0.2295   0.2116
+15 1974  0.2178   0.2100
+16 1975  0.2489   0.3000
+
+==== C. pulse lab (vvM, 2050, 100) ====
+pulse runs took 3.199281 secs 
+pre-pulse annual: max|dCO2| 0  max|dT| 0 
+pre-pulse monthly: max|dco2_NH| 0  max|dland_C| 0 
+tagged vs pulse: max|dco2_NH| 0  max|dland| 0  max|docean| 0  max|dT| 0 
+iterations base/pulse/tagged: 5 5 5  converged: TRUE TRUE TRUE 
+tag gtc: 100  s_mid: 2050.493 
+GtC_PER_PPM: 2.124  system carbon diff at end: 100  at 2051.04: 100 
+  year ccx_af fair_af fair_dppm fair_implied_GtC_per_ppm
+1 2050 0.4461  0.4646    21.821                   2.1291
+2 2051 0.9034  0.8840    41.519                   2.1291
+3 2055 0.7459  0.6999    32.873                   2.1291
+4 2060 0.6719  0.6328    29.722                   2.1291
+5 2075 0.5772  0.5596    26.283                   2.1291
+6 2100 0.5307  0.5243    24.626                   2.1291
+7 2150 0.5031  0.5137    24.128                   2.1291
+8 2200 0.4759  0.5051    23.725                   2.1291
+9 2300 0.4098  0.4707    22.106                   2.1291
+takeaway co2: Release 100 GtC in 2050 and 50% of it is still in the air a century later; 41% after 250 years. Unlike other greenhouse gases (methane, nitrous oxide), which are chemically or photochemically destroyed, emitted carbon is not destroyed; it just moves between sinks. The result of this is that a share of carbon emissions is effectively permanent on a human timescale. 
+fair note: <div class="caveat">FaIR is shown for the same pulse on the same scenario. Before 2025 this model follows the observed carbon budget and FaIR its own history, so the two release the pulse into slightly different worlds.</div> 
+takeaway gmst: Release 100 GtC in 2050 and the world is 0.14 °C warmer a century later, and 0.14 °C warmer after 250 years. Over that stretch the warming keeps 104% of its century-later value and the airborne carbon keeps 81%, so the warming is the longer-lived of the two. 
+permanence html:  
+   What this says about carbon and temperature 
+   
+     This 100 GtC pulse warms the world by 0.135 °C a century later — 1.35 °C per 1000 GtC — and by 98% of its own peak warming still at 2300, 250 years after release. 
+     
+      Two things are worth separating here. The first is that the warming
+      barely decays: a pulse of carbon emissions keeps warming the world for as
+      long as this model runs, so on any human timescale the temperature
+      resulting from a tonne of CO₂ is permanent.
+     
+     The effects of a pulse of carbon emissions on temperature are insensitive to the size of the pulse in this model. Across pulses from 10 to 500 GtC, the figure above moves by only 2.3%, and the impact on temperature is about 1.4 °C per 1000 GtC from any time period between 20 and 200 years after release. 
+   
+  
+why(vvM,2050,100): NULL 
+why(vvM,2050,110): FaIR was run for a 100 GtC pulse released in 2030-2100, every 10 years; set the pulse to one of those to compare. 
+why(vvM,2050,100+1e-9): NULL 
+why(vvH,2100,100): NULL 
+  year pulse_base scen_tab     d dT
+1 2024    425.331  425.331 0e+00  0
+2 2025    428.080  428.080 0e+00  0
+3 2026    430.380  430.380 0e+00  0
+4 2030    440.116  440.116 0e+00  0
+5 2050    480.073  480.073 0e+00  0
+6 2100    564.501  564.501 0e+00  0
+7 2150    618.257  618.256 2e-04  0
+
+==== C2. pulse lab (vvH, 2100, 500) ====
+takeaway co2: Release 500 GtC in 2100 and 66% of it is still in the air a century later; 63% after 200 years. Unlike other greenhouse gases (methane, nitrous oxide), which are chemically or photochemically destroyed, emitted carbon is not destroyed; it just moves between sinks. The result of this is that a share of carbon emissions is effectively permanent on a human timescale. 
+fair note:  FaIR was run for a 100 GtC pulse released in 2030-2100, every 10 years; set the pulse to one of those to compare.  
+notes:  
+   How this is computed:  
+  the model runs twice — once with the pulse and once without, from 
+  identical starting conditions — and the difference between the two 
+  is the pulse's effect.
+  
+takeaway gmst: Release 500 GtC in 2100 and the world is 0.56 °C warmer a century later, and 0.59 °C warmer after 200 years. Over that stretch the warming keeps 105% of its century-later value and the airborne carbon keeps 95%, so the warming is the longer-lived of the two. 
+permanence:  
+   What this says about carbon and temperature 
+   
+     This 500 GtC pulse warms the world by 0.561 °C a century later — 1.12 °C per 1000 GtC — and by 100% of its own peak warming still at 2300, 200 years after release. 
+     
+      Two things are worth separating here. The first is that the warming
+      barely decays: a pulse of carbon emissions keeps warming the world for as
+      long as this model runs, so on any human timescale the temperature
+      resulting from a tonne of CO₂ is perm 
+after moving sliders w/o pressing, takeaway: Release 500 GtC in 2100 and 66% of it is still in the air a century later; 63% a 
+fair note after moving sliders:  FaIR was run for a 100 GtC pulse released in 2030-2100, every 10 years; set the pulse to one of those to compare.  
+
+==== J. build your own ====
+stylised takeaway: Your pathway reaches 699 ppm and +4.0 °C by 2150. Fossil emissions never stop on this pathway — they hold at today's 10.5 GtC a year all the way to 2150 — so carbon keeps being added to what is already up there. Carbon emissions have to drop to near zero for concentrations to stay stable. 
+stylised past vs hist max|d|: 0.02217685 
+future_runs() with no scenario: shiny.silent.error  
+
+==== I. Keeling / isotope takeaway ====
+k i0 t: 1957.958333  neighbours: 1957.875000 1957.958333 1958.041667  abs: 0.125 0.041666666666742458 0.041666666666742458 
+k_takeaway: The model produces 317 ppm in 1957, rising to 427 ppm today; the measured value is about 424 ppm. The model's inputs are emissions, global temperature, an ENSO index, volcanic aerosol light diffusion and nitrogen deposition, and its calibration data include the CO₂ level and seasonal cycle at both Mauna Loa and the South Pole. But it is not an abstract regression: it only adjusts quantities that stand for physical things. 
+MLO years >=2023: 2023-2026  n: 39 
+model NH last month t: 2024.958  co2_NH: 427.2131  NH 2024 annual mean: 427.0532  minus rep_dC: 422.8416 
+MLO 2024 annual mean: 424.3475  MLO mean(2023+): 424.4392 
+i_takeaway i0 t: 1849.958333 
+i_takeaway: δ¹³C has fallen 2.38‰ since 1850 as fossil carbon diluted the air — the fingerprint that the extra CO₂ is fossil. Δ¹⁴C tells a different story: weapons testing nearly doubled it by 1964, and the rate at which it declines provides information about the speed of carbon exchange between pools. 
+
+==== E. what-if ====
+mechanisms: fertilisation, warming_feedback, enso, volcanic, ocean_sink, emissions, revelle 
+empty-switch rerun vs APP_HIST: max|dco2_NH| 0  max|dd14c_NH| 0  max|dd13c_NH| 0  ( 0.244415 secs )
+empty-switch forcing columns differing:  
+  [fertilisation] ok co2@end 483.60 (base 426.21) caveats 1; takeaway: With CO₂ fertilisation switched off, CO₂ today would be 484 ppm instead of 426 — a difference of +57 ppm. (0.6s)
+  [warming_feedback] ok co2@end 420.18 (base 426.21) caveats 1; takeaway: With warming's effect on the carbon cycle switched off, CO₂ today would be 420 ppm instead of 426 — a differen (0.6s)
+  [enso] ok co2@end 426.12 (base 426.21) caveats 1; takeaway: With El Niño / La Niña switched off, CO₂ today is unchanged to the nearest ppm — these are year-to-year mechan (0.7s)
+  [volcanic] ok co2@end 426.42 (base 426.21) caveats 1; takeaway: With volcanic haze (the diffuse-light effect) switched off, CO₂ today is unchanged to the nearest ppm — these  (0.7s)
+  [ocean_sink] ok co2@end 496.09 (base 426.21) caveats 1; takeaway: With the ocean sink switched off, CO₂ today would be 496 ppm instead of 426 — a difference of +70 ppm. (0.6s)
+  [emissions] ok co2@end 280.88 (base 426.21) caveats 1; takeaway: With our emissions switched off, CO₂ today would be 281 ppm instead of 426 — a difference of -145 ppm. (0.7s)
+  [revelle] ok co2@end 411.93 (base 426.21) caveats 1; takeaway: With Revelle buffering (ocean saturation) switched off, CO₂ today would be 412 ppm instead of 426 — a differen (0.6s)
+  [fertilisation+warming_feedback+enso+volcanic+ocean_sink+emissions+revelle] ok co2@end 276.09 (base 426.21) caveats 7; takeaway: With CO₂ fertilisation, warming's effect on the carbon cycle, El Niño / La Niña, volcanic haze (the diffuse-li (0.9s)
+  [enso+volcanic+warming_feedback] ok co2@end 420.31 (base 426.21) caveats 3; takeaway: With El Niño / La Niña, volcanic haze (the diffuse-light effect) and warming's effect on the carbon cycle swit (0.9s)
+  [warming_feedback+emissions+enso+volcanic] ok co2@end 276.17 (base 426.21) caveats 4; takeaway: With warming's effect on the carbon cycle, our emissions, El Niño / La Niña and volcanic haze (the diffuse-lig (0.9s)
+  [emissions+enso+warming_feedback+volcanic+revelle] ok co2@end 276.20 (base 426.21) caveats 5; takeaway: With our emissions, El Niño / La Niña, warming's effect on the carbon cycle, volcanic haze (the diffuse-light  (0.9s)
+  [warming_feedback+emissions+enso+fertilisation+ocean_sink] ok co2@end 275.37 (base 426.21) caveats 5; takeaway: With warming's effect on the carbon cycle, our emissions, El Niño / La Niña, CO₂ fertilisation and the ocean s (1.0s)
+  [warming_feedback+revelle+volcanic] ok co2@end 410.88 (base 426.21) caveats 3; takeaway: With warming's effect on the carbon cycle, Revelle buffering (ocean saturation) and volcanic haze (the diffuse (0.7s)
+  [enso+volcanic+fertilisation] ok co2@end 483.79 (base 426.21) caveats 3; takeaway: With El Niño / La Niña, volcanic haze (the diffuse-light effect) and CO₂ fertilisation switched off, CO₂ today (0.7s)
+  [none] takeaway: Nothing is switched off: this is the full model, at 426 ppm today. Tick a mechanism to see what the model does without it. 
+
+==== done 167.0981 secs ====
+There were 50 or more warnings (use warnings() to see the first 50)
+EXIT 0

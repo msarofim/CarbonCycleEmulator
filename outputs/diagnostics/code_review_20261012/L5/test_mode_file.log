@@ -1,0 +1,30 @@
+Test passed with 10 successes 😀.
+run-time inputs present: 14/14. OK
+SEEDING w_eq for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_thc for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_enso_l2 for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 18.7.
+     The ancestor held no opinion about this coordinate.
+
+  [test-mode-file] PINNED canonical hilda29e: likelihood -1108.1126 on 24 common rows; parent hilda32f -1124.3448 (price +16.2322, RECORDED not gated); control hilda31pe -1123.1607 (+15.0481)
+[ FAIL 0 | WARN 0 | SKIP 0 | PASS 163 ]
+
+real	0m6.600s
+user	0m5.891s
+sys	0m0.314s

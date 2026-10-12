@@ -1,0 +1,48 @@
+There were 50 or more warnings (use warnings() to see the first 50)
+box sentence constants: about 1.4 +- 0.1 ; spread 2.3 % over 10 500 ; src: calibration/diag_pulse_vs_tcre.R, 2026-10-11 (vvM background, hilda29e) 
+     bg year gtc per1000_100 per1000_20 per1000_200
+1  vvLN 2030  10       1.585      1.515       1.604
+2  vvLN 2030 100       1.580      1.500       1.603
+3  vvLN 2030 500       1.557      1.433       1.597
+4  vvLN 2050  10       1.607      1.539       1.590
+5  vvLN 2050 100       1.602      1.523       1.589
+6  vvLN 2050 500       1.580      1.454       1.584
+7  vvLN 2100  10       1.646      1.692       1.541
+8  vvLN 2100 100       1.641      1.674       1.540
+9  vvLN 2100 500       1.620      1.597       1.537
+10  vvM 2030  10       1.361      1.490       1.391
+11  vvM 2030 100       1.356      1.475       1.388
+12  vvM 2030 500       1.331      1.410       1.372
+13  vvM 2050  10       1.359      1.452       1.405
+14  vvM 2050 100       1.353      1.438       1.401
+15  vvM 2050 500       1.327      1.373       1.385
+16  vvM 2100  10       1.365      1.368       1.426
+17  vvM 2100 100       1.359      1.353       1.423
+18  vvM 2100 500       1.330      1.291       1.405
+19  vvH 2030  10       1.270      1.474       1.184
+20  vvH 2030 100       1.265      1.459       1.180
+21  vvH 2030 500       1.241      1.395       1.162
+22  vvH 2050  10       1.237      1.411       1.185
+23  vvH 2050 100       1.231      1.397       1.181
+24  vvH 2050 500       1.205      1.334       1.160
+25  vvH 2100  10       1.157      1.252       1.212
+26  vvH 2100 100       1.150      1.239       1.207
+27  vvH 2100 500       1.121      1.182       1.182
+    bg year spread_pct_10_to_500
+1  vvH 2030             2.304025
+2 vvLN 2030             1.778907
+3  vvM 2030             2.223320
+4  vvH 2050             2.613667
+5 vvLN 2050             1.691376
+6  vvM 2050             2.376826
+7  vvH 2100             3.150525
+8 vvLN 2100             1.589566
+9  vvM 2100             2.590035
+vvVL  co2: central outside [q05,q95] in 0 of 251 view years; max |central - q50| 0.343 ppm; width@2150 3.9 ppm
+vvLN  co2: central outside [q05,q95] in 0 of 251 view years; max |central - q50| 0.880 ppm; width@2150 11.9 ppm
+vvL   co2: central outside [q05,q95] in 0 of 251 view years; max |central - q50| 0.276 ppm; width@2150 5.0 ppm
+vvML  co2: central outside [q05,q95] in 0 of 251 view years; max |central - q50| 0.363 ppm; width@2150 4.3 ppm
+vvM   co2: central outside [q05,q95] in 0 of 251 view years; max |central - q50| 1.127 ppm; width@2150 9.9 ppm
+vvHL  co2: central outside [q05,q95] in 0 of 251 view years; max |central - q50| 1.407 ppm; width@2150 8.7 ppm
+vvH   co2: central outside [q05,q95] in 0 of 251 view years; max |central - q50| 2.932 ppm; width@2150 22.5 ppm
+EXIT 0

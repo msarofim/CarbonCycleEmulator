@@ -1,0 +1,10 @@
+setwd("/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator")
+for (f in list.files("R", pattern="\\.R$", full.names=TRUE)) source(f)
+lm <- ccx_load_mode(); p <- lm$p
+F <- ccx_build_forcing("historical", c(1750, 1752), prod_c14 = 0, bomb_total_kmol = lm$bomb_total, luc_scale = lm$luc_scale, enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p))
+print(names(F))
+num <- sapply(F, is.numeric)
+print(round(t(sapply(F[1:3, num, drop=FALSE], identity)), 5))
+Fq <- ps_year_forcing(0)
+cat("quiet cols differing from hist row1 (nonzero hist):\n")
+for (n in intersect(names(Fq), names(F)[num])) if (!isTRUE(all.equal(F[[n]][1], Fq[[n]][1]))) cat(sprintf("  %-14s hist %.6g quiet %.6g\n", n, F[[n]][1], Fq[[n]][1]))

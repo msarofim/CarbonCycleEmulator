@@ -1,0 +1,30 @@
+Test passed with 10 successes 😀.
+run-time inputs present: 14/14. OK
+                                                                        test nb
+1                                       single derivative agrees to roundoff  2
+2                             the pro-rata land-use debit agrees to roundoff  3
+3                                multi-decade trajectories agree to roundoff 23
+4                        parity holds with the frozen-Revelle switch engaged  4
+5                          frozen Revelle does what it claims, and only that 10
+6                  the C++ core conserves carbon exactly, independently of R  2
+7  the single-step flat forcing vector is complete, and AOD reaches the core 18
+8           the seasonal mixed layer agrees between the cores at seas_ml = 1 16
+9       seas_ml = 1 is a DIFFERENT trajectory from seas_ml = 0 in BOTH cores  3
+10         the two hemispheres are in ANTIPHASE in the C++ core, not swapped  2
+11              mutating p after ccx_prepare() does not desync the two cores  3
+12      the spinup equilibrium does not depend on seas_ml -- it is aseasonal  1
+13    a p/aux pair that disagrees about seas_ml is REFUSED, not run silently  2
+   failed skipped error warning    real
+1       0   FALSE FALSE       0   2.587
+2       0   FALSE FALSE       0   0.043
+3       0   FALSE FALSE       1  20.858
+4       0   FALSE FALSE       1  18.013
+5       0   FALSE FALSE       1   0.148
+6       0   FALSE FALSE       1   0.042
+7       0   FALSE FALSE       0   0.061
+8       0   FALSE FALSE       1 113.614
+9       0   FALSE FALSE       1 127.898
+10      0   FALSE FALSE       1   0.035
+11      0   FALSE FALSE       0   0.030
+12      0   FALSE FALSE       0   0.044
+13      0   FALSE FALSE       0   0.028

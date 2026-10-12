@@ -2,6 +2,26 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (q) — **Pre-beta code review** (Marcus, verbatim: "Do one more full code review of the model to make sure there are no bugs or inconsistencies. Then push it."). The record is `notes/code_review_2026-10-12.md`; the reviewers' scripts are in `outputs/diagnostics/code_review_20261012/` (unreviewed as code). **NOT tagged and NOT pushed as a release: the review found a live bug in the objective.**
+
+- **Clean at the canonical:**
+  - conservation ≤ 1e-13;
+  - R↔C++ parity ≤ 1.3e-16 on the final state;
+  - stability margin z 1.56 / 2.785;
+  - periodic spin-up 1.4e-10, ¹⁴C production equal to decay;
+  - mode resolution;
+  - logpost reproduces with Δ = 0;
+  - every app loader refuses a mismatch;
+  - pulse pairing exact.
+- ⛔ **LIVE, objective:** the IntCal20 row's σ is the ¹⁴C-AGE sigma (9–11 yr), used as ‰. The published Δ¹⁴C sigma is 1.2–1.4 ‰ (intcal.org file, read 10-12). The row is weighted about 6.4× too lightly; χ²/n is 0.155 as coded vs 0.995. It touches the fitted mode, the logposts and the band: **Marcus's decision.**
+- ⛔ **LIVE, app numbers (code, not copy):**
+  - the Scenarios span is first/last, not min/max;
+  - the Keeling 1957/1958 tie;
+  - Keeling "today" is the raw box month against a typed 2023+ obs window;
+  - the land-use crossing year uses the 09-24 (o) half-year-offset construction (1970 vs 1969);
+  - the box diagram's "to the deep" double-counts the cold route, misses the L2 limb, and aliases the seasonal ML.
+- **Plus:** live rule-2 debts (provisional/uncited constants), about 40 stale comments/labels, 13 dormant bugs, and test-coverage gaps (conservation, parity, spin-up and fluxes tests run defaults, not the canonical).
+
 ## 2026-10-12 (p) — **The beta copy worklist: `notes/beta_copy_worklist_2026-10-12.md`.** Marcus, verbatim: "Are any of these easy improvements? If not, I think I want to finalize this model version and work on the text so I can release the beta version."
 
 **The answer given: none of the three is easy.**
