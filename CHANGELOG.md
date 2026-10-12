@@ -2,6 +2,10 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (g) — Card 5a facts note (Marcus: "Write the facts note (Recommended)"): `notes/card5a_caption_facts_2026-10-12.md`. No caption prose. Also, measured for Marcus's new card-5 question: **CarboTope sits ABOVE FaIR's 841-config 95th percentile for the first 27.5 yr (0.522 vs 0.515 at 20 yr) and inside it from 28.5 to 300 yr. FaIR's own mean TH20 (11.83 yr) sits below Joos Table 4's 5 % floor (12.2); CarboTope is inside Joos's range at all three horizons (12.85 / 26.85 / 46.95).**
+- The FaIR envelope already exists: `data/fair_pd100.rds` carries `irf_p05` / `irf_p95`, and the driver ran all 841 configs. No new FaIR run is needed to draw it.
+- ⚠ The present caption's "nothing from this source" is singular, but the card now has two sources. And "decays faster here than in the multi-model mean" is the reverse of the FaIR comparison: this model decays SLOWER than FaIR at every horizon.
+
 ## 2026-10-12 (f) — **The constraint-map arms re-measured at `hilda29e`, with `hilda29a6` as the like-for-like arm (Marcus: "hilda29a6 (Recommended)"). NO row's winner flips between the two basins. The tie cut's 09-26 derivation therefore has no lower endpoint and cannot be re-applied. The cmap-tie RED stands; the method is Marcus's.**
 - **Why the arm changed:** `hilda32f` (A2 on 09-26) no longer qualifies.
   - It is structure `hilda_csl3`, not `hilda29e`'s `hilda_csl3v0kaidgbemwt`.
@@ -22,7 +26,7 @@ Project log: what was done, what was tried and abandoned, and why.
     - This is the A3 caveat in the script's own header ([[iso_deep_control_licenses_one_comparison]]).
   - **Margin shift between basins:** median 0.51 pp, max 1.92. The closest row moved away from a flip (0.94 → 1.29).
 - **Not changed:** `APP_CMAP_TIE_*` and `test-cmap-tie.R`. The gate's clearance rule ("re-derive from the two endpoints") cannot be applied, because one endpoint does not exist. Options are with Marcus.
-- Also in this commit: the PD100-held quarantine's §1 wording.
+- ⚠ Corrected after `ec8946f`: this entry first said the commit also changed the quarantine README. It did not.
 
 ## 2026-10-12 (e) — **The first scorecard at `hilda29e`, PD100 climate free, reproduces card 5 exactly. All 52 earlier scorecard files are quarantined for the held builder's SST defect; their other sections are valid. FaIRtoFrEDI is pushed.** (Marcus, verbatim: "Re-run + quarantine (Recommended)", "Push now".)
 - **Push:** FaIRtoFrEDI `heat-ed-morbidity` `8984a13..964aa12`, 28 commits, level with origin. His unstaged `egu_sprm` docx edits are untouched.
