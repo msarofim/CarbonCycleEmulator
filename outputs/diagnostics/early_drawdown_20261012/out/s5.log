@@ -1,0 +1,35 @@
+commit: 64dfc20+dirty  mode: hilda29e 
+
+=== drawdown of the airborne fraction per window (start minus end) ===
+    0-  1 yr: CarboTope 0.1209  Joos T5 0.0655  excess +0.0555 | ocean gain CCX 7.54 vs Joos 3.47, land gain CCX 4.51 vs Joos 2.57 GtC
+    1-  2 yr: CarboTope 0.0713  Joos T5 0.0534  excess +0.0179 | ocean gain CCX 3.70 vs Joos 2.83, land gain CCX 3.44 vs Joos 2.22 GtC
+    2-  5 yr: CarboTope 0.1118  Joos T5 0.1099  excess +0.0019 | ocean gain CCX 5.20 vs Joos 5.79, land gain CCX 5.99 vs Joos 5.06 GtC
+    5- 20 yr: CarboTope 0.1735  Joos T5 0.1750  excess -0.0015 | ocean gain CCX 7.66 vs Joos 8.54, land gain CCX 9.70 vs Joos 9.42 GtC
+   20-100 yr: CarboTope 0.1428  Joos T5 0.1868  excess -0.0440 | ocean gain CCX 10.29 vs Joos 12.71, land gain CCX 3.99 vs Joos 4.41 GtC
+  100-300 yr: CarboTope 0.0847  Joos T5 0.0874  excess -0.0026 | ocean gain CCX 8.85 vs Joos 13.79, land gain CCX -0.37 vs Joos -5.27 GtC
+
+=== TEST F: Joos's Eq. 11 fit applied to CarboTope's own response ===
+
+  IRF: a0 0.249 | a 0.22 0.2559 0.2752 | tau 189.6 16.52 2.787 | mean rel. error 0.28 %
+     t=  1 raw 0.8791  own-fit 0.9009  (fit-raw +0.0218)   Joos T5 fit 0.9345
+     t=  2 raw 0.8078  own-fit 0.8276  (fit-raw +0.0199)   Joos T5 fit 0.8811
+     t=  5 raw 0.6959  own-fit 0.6980  (fit-raw +0.0021)   Joos T5 fit 0.7712
+     t= 20 raw 0.5224  own-fit 0.5234  (fit-raw +0.0010)   Joos T5 fit 0.5962
+     t=100 raw 0.3796  own-fit 0.3794  (fit-raw -0.0002)   Joos T5 fit 0.4094
+
+  Ocean (GtC): a0 73.86 | a -39.9 -14.08 -19.88 | tau 1123 63.63 3.201 | mean rel. error 0.21 %
+     t=  1 raw 7.5420  own-fit 5.5894  (fit-raw -1.9526)   Joos T5 fit 3.4758
+     t=  2 raw 11.2398  own-fit 9.7442  (fit-raw -1.4956)   Joos T5 fit 6.3035
+     t=  5 raw 16.4432  own-fit 16.9539  (fit-raw +0.5107)   Joos T5 fit 12.0941
+     t= 20 raw 24.1030  own-fit 24.3467  (fit-raw +0.2437)   Joos T5 fit 20.6292
+     t=100 raw 34.3960  own-fit 34.4376  (fit-raw +0.0415)   Joos T5 fit 33.3409
+
+  Land (GtC): a0 -7.59 | a 51.68 -18.26 -25.83 | tau 1424 308.8 7.472 | mean rel. error 0.70 %
+     t=  1 raw 4.5109  own-fit 3.2591  (fit-raw -1.2518)   Joos T5 fit 2.5538
+     t=  2 raw 7.9469  own-fit 6.1126  (fit-raw -1.8343)   Joos T5 fit 4.7787
+     t=  5 raw 13.9326  own-fit 12.7164  (fit-raw -1.2162)   Joos T5 fit 9.8363
+     t= 20 raw 23.6346  own-fit 24.4823  (fit-raw +0.8477)   Joos T5 fit 19.2516
+     t=100 raw 27.6293  own-fit 27.3820  (fit-raw -0.2473)   Joos T5 fit 23.6634
+
+  Joos T5 for comparison: IRF tau 394.4/36.54/4.304; ocean tau 390.5/100.5/4.551; land tau 74.76/70.31/6.139
+  IRF at 1000 yr: CarboTope 0.2494, Joos T5 0.2350 ; ocean 57.62 vs 58.24 ; land 17.43 vs 17.07

@@ -1,0 +1,65 @@
+commit: 64dfc20+dirty  mode: hilda29e 
+
+=== TEST A: Joos-style smoothing of CarboTope's IRF (annual point samples) ===
+  t=  1 raw 0.8792  smoothed 0.8869  (diff +0.0078)   Joos T5 0.9345
+  t=  2 raw 0.8080  smoothed 0.8099  (diff +0.0019)   Joos T5 0.8811
+  t=  5 raw 0.6963  smoothed 0.6958  (diff -0.0005)   Joos T5 0.7712
+  t= 10 raw 0.6092  smoothed 0.6092  (diff -0.0000)   Joos T5 0.6775
+  t= 20 raw 0.5220  smoothed 0.5204  (diff -0.0016)   Joos T5 0.5962
+  t= 50 raw 0.4312  smoothed 0.4312  (diff -0.0000)   Joos T5 0.4865
+  t=100 raw 0.3791  smoothed 0.3791  (diff -0.0000)   Joos T5 0.4094
+  t=300 raw 0.2948  smoothed 0.2942  (diff -0.0006)   Joos T5 0.3221
+  TH20: monthly 12.851, annual-trapezoid raw 12.861, smoothed 12.832
+  annual-MEAN variant: year 1 mean 0.9388, year 2 0.8446, year 20 0.5253
+
+=== TEST B: k_w 1870 (canonical) vs 1446 (Naegler 2009 centre) and x0.905 of it (the constant's own -10 % caveat) ===
+                                 label   irf1   irf5  irf20 irf100 irf300
+                             canonical 0.8792 0.6963 0.5220 0.3791 0.2948
+                 process-only k_w 1446 0.8899 0.7042 0.5247 0.3797 0.2946
+   whole-run k_w 1446 (others at mode) 0.8900 0.7046 0.5253 0.3803 0.2951
+                 process-only k_w 1309 0.8939 0.7078 0.5260 0.3800 0.2945
+   whole-run k_w 1309 (others at mode) 0.8940 0.7084 0.5269 0.3808 0.2953
+ surface-only ocean (kz, u_hs -> 1e-3) 0.8907 0.7661 0.6503 0.5552 0.5109
+             k_w 1446 + beta_max x0.80 0.8985 0.7271 0.5545 0.4033 0.3125
+             k_w 1446 + beta_max x0.70 0.9028 0.7389 0.5704 0.4162 0.3223
+   dIRF20   dIRF100      r  th20 th100    oc5   ld5  oc20  ld20  oc100 ld100
+ 0.000000 0.0000000    NaN 12.85 46.95 16.427 13.91 24.12 23.65 34.419 27.65
+ 0.002716 0.0005691 4.7722 12.97 47.15 15.473 14.07 23.67 23.83 34.291 27.72
+ 0.003288 0.0011299 2.9099 12.97 47.21 15.462 14.04 23.65 23.80 34.262 27.69
+ 0.004027 0.0008561 4.7042 13.02 47.25 15.045 14.14 23.46 23.91 34.228 27.75
+ 0.004837 0.0016546 2.9233 13.03 47.33 15.032 14.10 23.43 23.86 34.188 27.71
+ 0.128243 0.1760941 0.7283 14.65 61.30  8.731 14.62  7.40 27.54  6.374 38.08
+ 0.032477 0.0241737 1.3435 13.46 49.78 15.802 11.45 24.69 19.83 36.254 23.40
+ 0.048408 0.0370985 1.3048 13.71 51.19 15.970 10.11 25.23 17.70 37.321 21.04
+ target
+  393.6
+  393.6
+  394.5
+  393.6
+  394.9
+  393.6
+  393.6
+  393.6
+Joos T5: irf1 0.9345 irf5 0.7712 irf20 0.5962 irf100 0.4094 irf300 0.3221 ; ocean5/20/100 12.09/20.63/33.34 land 9.84/19.25/23.66
+surface-only ocean uptake series (GtC):  t0.25=2.37 t0.5=4.10 t1=6.37 t2=8.10 t5=8.73 t10=8.18 t20=7.40 
+
+=== FIRST PRINCIPLES (annual means over the first year after release, baseline run) ===
+   box C_mean   f_range  dic    T  alk      R pco2_calc pco2_out       g tau_yr
+ NH ml  216.6 1.00-1.00 2015 23.1 2300  9.897     392.0    392.3 0.09255 0.6027
+ NH hs  154.0 1.00-1.00 2152  2.0 2300 14.245     346.7    359.2 0.01891 1.5919
+ SH ml  292.5 0.54-1.68 2043 19.5 2300 10.520     390.0    390.2 0.13557 0.5256
+ SH hs  204.7 1.00-1.00 2152  2.0 2300 14.250     347.0    359.4 0.02513 1.5905
+     cap
+ 0.02617
+ 0.01293
+ 0.03326
+ 0.01718
+sum capacity dC_surf/dC_atm = 0.0895 -> equilibrium surface share of a 100 GtC pulse = 8.22 GtC
+initial gas-exchange-limited ocean uptake g_tot * (100/2.124 ppm) = 12.81 GtC/yr (Joos ocean fit slope at 0: 3.83 GtC/yr)
+combined atm+surface e-fold 1/(g_tot/gpp + sum g R p / C) = 0.202 yr
+Joos land fit slope at 0: 2.77 GtC/yr ; model initial dNPP = dNPP/dchi x 100/gpp
+  npp0 60.00 GtC/yr, f(bkg) 1.2987, dNPP/dchi 0.1307 GtC/yr/ppm -> initial dNPP 6.15 GtC/yr ; d lnNPP/d lnCO2 0.660
+model mean uptake rate over the first 0.25 / 1 yr: ocean 10.14 / 7.54 GtC/yr, land 3.77 / 4.50 GtC/yr
+
+=== TEST E: 2015-2023 mean sinks (GtC/yr): model ocean 3.119 land 3.156 | GCB bare ocean 3.202 land 2.410 | GCB + the mode's D3 imbalance shares (land 0.662, ocean 0.117) ocean 3.247 land 2.666
+gate-7 sigmas: land 0.500 ocean 0.400
