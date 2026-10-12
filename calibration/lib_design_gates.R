@@ -560,7 +560,9 @@ DG_LEDGER <- list(
          "
             the band is [9, 23] % (16 +/- 7). 1 sd, not 2, because the sd is a spread of",
          "
-            models, not a measurement's sampling error -- a CHOICE, stated.",
+            models, not a measurement's sampling error -- a CHOICE, stated, and",
+         "
+            RATIFIED 2026-10-12 (Marcus: 'Keep DG_L_NSD at 1 sd').",
          "
             (Was '[2, 30] %' until 2026-10-12: that is Joos's published +/- 2 s.d.)"),
        scored = "NO -- no stream sees a pulse; the land sink rows see 2015-2023 only",
@@ -2128,14 +2130,15 @@ dg_gateS_verdict <- function(g, lo = DG_S_LO, w = DG_S_LAG_MAX) {
 #
 # ⚠ THE BOUND IS 1 sd OF THE MULTI-MODEL SPREAD, two-sided: [9, 23] % (16 +/- 7).
 # Not the 2 x se every observational gate uses: this sd is a spread of models,
-# not a sampling error. A CHOICE, stated here and in the ledger, for Marcus to
-# ratify or move.
+# not a sampling error. A CHOICE, stated here and in the ledger. ⭐ RATIFIED
+# 2026-10-12 (Marcus, verbatim: "Keep DG_L_NSD at 1 sd"), after the example
+# below was found not to argue for it.
 # ⛔ CORRECTED 2026-10-12 (Marcus: "Fix the two ledger strings"). This said "2 sd of it
 # ([-12, 44] %) would admit the canonical". It was written 09-08, before the 10-02 fix, when `sd`
 # held Joos's +/- 2 s.d. half-width (14), so [-12, 44] % is +/- 4 TRUE s.d. At the true width
 # +/- 2 s.d. is [2, 30] %, and the then-canonical hilda31's 32.2 % (handoff 09-08h sec.1.3) lies
 # OUTSIDE it (z +2.31). The example therefore no longer argues for 1 sd over 2. The choice itself
-# (DG_L_NSD) is unchanged. CHANGELOG 2026-10-12 (m).
+# (DG_L_NSD) is unchanged, and was ratified as 1 sd the same day. CHANGELOG 2026-10-12 (m), (n).
 # =====================================================================
 DG_L_HORIZON <- 1000
 # ⛔ CORRECTED 2026-10-02 (Marcus: "Fix it (Recommended)"). Joos et al.'s abstract gives these as
@@ -2148,7 +2151,7 @@ DG_L_JOOS <- list(land  = c(mean = 16, sd = 7,   pm2sd = 14),
                   ocean = c(mean = 59, sd = 6,   pm2sd = 12),
                   air   = c(mean = 25, sd = 4.5, pm2sd = 9),
                   src = "Joos et al. 2013 ACP 13:2793, abstract (SOURCED, notes/assessment_2026-09-08_acceptable_state.md)")
-DG_L_NSD <- 1            # kept for the comparison's z-band label only
+DG_L_NSD <- 1            # kept for the comparison's z-band label only; 1 sd RATIFIED 2026-10-12 (Marcus)
 DG_L_RES <- c("land", "ocean", "air")
 DG_L_COMPARISON <- paste("COMPARISON, NOT A GATE (Marcus 2026-09-08h): 'Do not use Joos as a scoring",
                          "mechanism: the long lifetime is meant to be an emergent property, not something",
