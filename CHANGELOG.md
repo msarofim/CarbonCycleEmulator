@@ -2,6 +2,29 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (cc) — **Obsolete material cleared to the Trash, and every citation item RULED; handoff written** (Marcus: "Delete any obsolete material and then walk me through the citation list rulings"; "Yes, write the handoff note" → `notes/handoff_2026-10-12d_citation_rulings_refit_plan.md`, which the 10-12c handoff now points to).
+
+- **Cleanup, nothing hard-deleted.**
+  - `~/ccx_frozen` (42 GB, ~90 run copies and worktrees) → `~/.Trash/ccx_frozen_20261012/`, after a git-blob audit: 132,690 of 134,312 files were already in the repo. The 427 non-junk files that were not (run and preflight logs, launch scripts, smoke outputs) are in `~/ccx_frozen_records_20261012.tar.gz`, byte-verified, with a README and the dropped stash's patch.
+  - The 10-08j MCMC chains equal the committed `outputs/mcmc_check_20261009_hilda29e_200k/` (md5).
+  - The two merged `.claude/worktrees` (whose downloads copies were cmp-identical to the main tree), `outputs/diagnostics/smoke/`, `outputs/mcmc_smoke/` and `tests/testthat/_problems/` → `~/.Trash/ccx_repo_cleanup_20261012/`.
+  - Three merged `claude/*` local branches deleted. stash@{0} (08-22, `diag_rep_dC_gates.R`) dropped: HEAD carries the same fix.
+  - Kept: Marcus's `.docx` files, every quarantine directory, the old handoffs.
+  - ⚠ The Trash frees no space until it is emptied (disk 95 % full).
+- **Citations: every item ruled**, in five rounds plus two read-only literature searches. The ledger is `notes/citation_rulings_2026-10-12.md` (`6a09169`, `731da8a`, `cd6206d`).
+  - **The refit will adopt:**
+    - ALK 2303.4 and salinity 34.760 (GLODAPv2.2023, one recipe; the salinity was measured this session);
+    - ocean depth 3682.2 m;
+    - per-hemisphere SST lags (SH 1.536, verified: read `peak_month − 0.5`);
+    - a per-year nuclear ¹⁴C NH share;
+    - photo ε 16.2 (Still 2003's Δ 16.5);
+    - pump organic ε −22 ‰ (Claret 2021);
+    - two newly FITTED names: the bomb NH share, U[0.77, 0.98], and the respiration lag, U[0, 6] months;
+    - and the IntCal σ fix.
+  - Kept and cited: NPP₀ 60, the bomb prior sd 0.10, carbonate +1, PHI_EFF and the whole agreeing sweep.
+  - Diagnostic only: `P_canon` 1.88.
+- **Not implemented.** The first implementation question is the handoff's §4: route the changed constants through a NEW structure label, so the registered modes stay bit-exact (the `hilda_c` idiom), or change them globally and restamp. That is Marcus's call, and so is the label's name.
+
 ## 2026-10-12 (bb) — **The full suite at `eb9a256` (after y–aa): 7469 passed, 2 failed, 3 skipped, 18.1 min** (`outputs/diagnostics/suite_20261012_eb9a256.log`). The 2 failures are card 4's, by design, the same two as at `d36cda1`. The extra 148 passes are the new and extended tests of (y)–(aa). Run from the frozen worktree `~/ccx_frozen/suite_20261012_eb9a256` (downloads symlinked per entry), with BLAS threads pinned to 1. The review note's STATUS block is updated.
 
 ## 2026-10-12 (aa) — **The code review's §6 gap is closed: gates 1–2 and R↔C++ parity now run ON THE CANONICAL** (Marcus, verbatim: "§6 canonical-path tests"). New `tests/testthat/test-canonical-contracts.R`, 27 / 0, ~13 s. It runs whatever `ccx_mode_file()` names, so it follows the next adoption with no edit.

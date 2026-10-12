@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-12 (c) — the pre-beta code review: the model's mechanics are clean; ONE live objective bug (IntCal σ) is measured, not fixed; five wrong app numbers are fixed; stale text corrected; the citation list is compiled; `v1.1-hilda29e` is NOT tagged
 
+> ⚠ **SUPERSEDED** by `notes/handoff_2026-10-12d_citation_rulings_refit_plan.md` (2026-10-12). Read that one first; its §4 restates everything still open here. Review §4–§6 are now DONE, and every citation item is RULED.
+
 **Supersedes** `notes/handoff_2026-10-12b_tagged_pulse_fair_grid.md`. Everything still open from its §4 is restated in §4 below.
 
 Written on Marcus's request ("Yes, write the handoff note"), 2026-10-12. **Nothing is running** except the local app preview (§5). main = origin/main = `6e211d0` before this note's commit.
