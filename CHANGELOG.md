@@ -2,6 +2,17 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (e) — **The first scorecard at `hilda29e`, PD100 climate free, reproduces card 5 exactly. All 52 earlier scorecard files are quarantined for the held builder's SST defect; their other sections are valid. FaIRtoFrEDI is pushed.** (Marcus, verbatim: "Re-run + quarantine (Recommended)", "Push now".)
+- **Push:** FaIRtoFrEDI `heat-ed-morbidity` `8984a13..964aa12`, 28 commits, level with origin. His unstaged `egu_sprm` docx edits are untouched.
+- **Scorecard** `outputs/diagnostics/whole_model_scorecard_20261012_hilda29e.{log,rds}`, `@6dadf00`, run from a frozen copy in under a minute.
+  - Every arm reproduces its stored streams: `hilda29e` +5.2e-06, `hilda31pe` −6.7e-07.
+  - §4 at `hilda29e`: IRF 20/100/300 **0.522 / 0.379 / 0.295**; 1000-yr split 17 / 58 / 25 %, z +0.20 / −0.23 / −0.01. That is card 5's `rv_pulse()`, to the printed digit.
+- **Quarantine** `outputs/quarantine/20261012_pd100_held_sst/` (README). 52 files moved with `git mv`: every scorecard log/rds from 09-08 to 10-08, and `tl_land_share_gate_20260908.*`.
+  - The defect predates every scorecard. Observed SST has fed the ocean since 08-18 (`98fd871`), and the 10-01 builder was bit-identical to its predecessors at `hilda29l` (`1d754e8`).
+  - ⚠ My question to Marcus said this before I had checked it. I checked it afterwards, and it holds.
+  - Left in place: three scorecard rds files inside dry-run bundles, where moving one would break its bundle.
+  - Reader updated: `diag_ta1_enso_thermocline_limb.R`'s `TA1_P0_REF`, which reads only the valid ENSO section.
+
 ## 2026-10-12 (d) — Lint approved and handoff written (Marcus: "Approve the lint update, then write the handoff note").
 - The overlay-idiom lint is tightened as its ratchet asked (`1ef8d7e`): `diag_joos_irf.R` is off `OI_BASELINE`, and `OI_BASELINE_N` drops 59 → 58. The file passes 8 / 0. The suite's expected failures are now 3: the cmap-tie deliberate RED and card 4's two.
 - Handoff: `notes/handoff_2026-10-12_pd100_free_climate.md`. It supersedes `handoff_2026-10-11_comments_fair_pd100.md`, which now points to it.

@@ -31,7 +31,8 @@ ccx_load_cpp(); source(ccx_path("calibration", "lib_design_gates.R"))
 TA1_GAMMA   <- c(-1, 0.5, 1, 2, 3, 4, 8)   # m/yr per Nino3.4 unit; 0 is the reference (C++ and R)
 TA1_WIN     <- c(1959, 2024)               # = SC_ENSO_WIN (diag_whole_model_scorecard.R)
 TA1_P0_TOL  <- 1e-6                        # ppm, R-vs-C++ at gamma_A 0
-TA1_P0_REF  <- ccx_path("outputs", "diagnostics", "whole_model_scorecard_20260913_hilda30c.rds")
+# 2026-10-12: moved to the held-PD100 quarantine (its README). Only its ENSO section is read here, which is valid.
+TA1_P0_REF  <- ccx_path("outputs", "quarantine", "20261012_pd100_held_sst", "whole_model_scorecard_20260913_hilda30c.rds")
 TA1_P2_R    <- 0.3;  TA1_P2_GAMMA <- 3     # prereg P2
 TA1_P3_TOL  <- 0.10                        # P3 mirror tolerance (fraction)
 TA1_P4_LIK  <- -10                         # P4: price at the obs-matching gamma_A, log-units
