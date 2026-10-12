@@ -521,9 +521,14 @@ app_sinks_annual <- function(out, F) {
     diff(y)
   }
   eluc <- ccx_forcing_eluc_annual(F)
+  land_net <- stock(o$land_C)
+  # `land_net` (2026-10-12 code review) is the land's NET calendar-year uptake, land-use emissions
+  # included -- the quantity the land-use note's source-to-sink crossing year reads. It had its own
+  # copy of the arithmetic, on differenced ANNUAL MEANS: the half-year offset fixed here on 09-24 (o).
   data.frame(yr = yrs,
              ocean_sink = stock(o$ocean_C),
-             land_sink  = stock(o$land_C) + eluc$eluc[match(yrs, eluc$year)])
+             land_sink  = land_net + eluc$eluc[match(yrs, eluc$year)],
+             land_net   = land_net)
 }
 
 plot_gcb_bars <- function(out, gcb, F, window = c(2014, 2023)) {
@@ -1638,6 +1643,12 @@ plot_box_diagram <- function(fx, stock, p) {
     col = c(PAL[["atm"]], PAL[["land"]], PAL[["land"]], PAL[["ocean"]], PAL[["ocean"]]))
   as_down <- fx$as_down - if (hs_on) fx$hs_as_down else 0
   as_up   <- fx$as_up   - if (hs_on) fx$hs_as_up   else 0
+  # ⛔ THE WARM "TO THE DEEP" ARROW IS THE WARM ROUTE ONLY (2026-10-12 pre-beta code review). It drew
+  # `ml_int` + `pump`, channels over EVERY surface box, so the cold box's export and flush were on it
+  # AND on the cold arrow below (2024: "63 down / 61 up" for a warm-only ~59 / ~59). The air-sea pair
+  # above already took the cold box out; this is the same correction, from R/fluxes.R, which owns the
+  # channel definitions. The identity with the structure off.
+  wr <- ccx_flux_warm_route(fx)
   # x/xend/yend and the flux each segment carries, kept in ONE table so a
   # moved arrow cannot end up with another arrow's number.
   # ⛔ LAND CLEARING IS ITS OWN ARROW SINCE 2026-09-22 (Marcus). It used to be
@@ -1667,7 +1678,7 @@ plot_box_diagram <- function(fx, stock, p) {
     # (`ml_int`, negative = upward) PLUS the biological pump's export (`pump`, a
     # channel of its own). Shown as one net number with the export named, so the
     # arrow cannot read "-40 to the deep" (which it did until 2026-09-08g).
-    val  = c(fx$gpp, fx$litter, fx$rh, as_down, as_up, fx$ml_int + fx$pump,
+    val  = c(fx$gpp, fx$litter, fx$rh, as_down, as_up, wr[["ml_int"]] + wr[["pump"]],
              fx$foss, fx$luc),
     hj   = c(1.15, 0.5, -0.1, 0.5, 0.5, -0.15, -0.2, -0.12),
     vj   = c(0.5,  -0.6, 0.5, 1.5, -1.0, 0.5, 0.5, 0.5),
@@ -1678,7 +1689,7 @@ plot_box_diagram <- function(fx, stock, p) {
     nm   = c("photosynthesis", "litterfall", "respiration",
              if (hs_on) "air to warm sea" else "air to sea",
              if (hs_on) "warm sea to air" else "sea to air",
-             sprintf("to the deep, net\n(%.0f down as the biological\npump, %.0f back up by mixing)", fx$pump, -fx$ml_int),
+             sprintf("to the deep, net\n(%.0f down as the biological\npump, %.0f back up by mixing)", wr[["pump"]], -wr[["ml_int"]]),
              "fossil fuels",
              tolower(CCX_FLUX_CHANNELS[["luc"]])))
   xmax <- 6.1

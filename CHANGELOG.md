@@ -2,6 +2,51 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (t) — **The five wrong app numbers from the code review are fixed** (Marcus: "Scenarios span (Recommended), Keeling year + land crossing, Keeling 'today' like-for-like, Box diagram ocean arrow"). Only the numbers changed; every sentence's wording is Marcus's and is untouched. Measured at the canonical, in the app's own `global.R`:
+
+| what the app prints | was | now |
+|---|---|---|
+| Scenarios span, all 7 ticked (2150) | "366 to 825 ppm, 1.5 to 4.6 °C" (first and last ticked) | min/max over every ticked run: 305–825 ppm, 1.3–4.6 °C (L7's measurement) |
+| Keeling start | "317 ppm in 1957" (`which.min(abs(t - 1958))` tied; took Dec 1957) | **315 ppm in 1958** |
+| Keeling "today" | 427 (one December, raw box: the chart's FAINT line) | **423** (2024 mean of the scored line, box − `rep_dC`) |
+| Keeling measured | "about 424" (MLO over a typed `year >= 2023`: 39 months, past the run's end) | **424** (MLO 2024 mean, the run's own last year) |
+| δ¹³C drop since 1850 | 2.38 ‰ (Dec 1849 vs Dec 2024) | **2.35 ‰** (calendar-year means, both ends) |
+| land source → sink crossing (model) | 1970 (differenced annual means) | **1969** (calendar years, `app_sinks_annual()$land_net`) |
+| box diagram, warm "to the deep" | "63 down … 61 back up" | **"59 down … 58 back up"** (warm route; exact trace) |
+
+**Choices made here, stated (say if any should differ):**
+- The Keeling numbers are all CALENDAR-YEAR means of the SCORED line, the 1958 one included. Mixing a raw-box start with a scored "today" would not be like-for-like.
+- The δ¹³C "since 1850" uses annual means at both ends. Fixing only its tie would have compared a January with a December, across the seasonal cycle.
+- The year "today" is read from the run, not typed.
+
+**The box diagram had three defects; all three are fixed.**
+- **(a) Double counting.** The warm arrow drew `ml_int + pump`, which include the cold box's flush and export; the cold arrow draws those again. It now draws `ccx_flux_warm_route()` (`R/fluxes.R`, which owns the channel definitions).
+- **(b) The L2 ENSO limb was outside the flux tap.** It now records like `add_diffusion()`: recording only, `dy` untouched, `record` FALSE on every calibration path. `fluxes.R:96`'s "hs_hd_net inside ml_int" was half wrong (the pump part is inside `pump`) and is corrected.
+- **(c) The trace was one snapshot per month at the opening state, which aliased the SH seasonal mixed layer's entrainment.**
+  - The new trace (`ccx_run(..., flux_method = "rk4")`) weights every RK4 stage's recorded fluxes as RK4 weights its derivatives. A month's fluxes therefore integrate to its state change to roundoff.
+  - ⛔ **I first made that the default, and `test-npp-record.R` FAILED** (0.0959 vs 1e-10). It holds the trace's `gpp − ra` to the NPP record, which is an opening-state snapshot in BOTH cores, and NPP is a likelihood option.
+  - The test was NOT touched. I narrowed the change: the snapshot stays the default for every existing caller, and the app's diagram opts into `"rk4"`.
+  - **Whether to move the default (and the NPP record with it) is Marcus's.**
+
+**Start-up.**
+- `APP_FLUX` now traces only the year the app reads (2024): the C++ core runs to Dec 2023, and the R core continues with the ENSO history and T_deep (the `test-enso-lag.R` SEGMENT continuation).
+- The block takes **0.8 s**. A full-record R-path run takes 190 s with the RK4 trace, against about 110 s before with the snapshot.
+- The split's 2024 trace equals a full-record R run's to **1.5e-12**.
+
+**Tests.**
+- **New `test-flux-trace-exact.R`** (16 / 0), at the canonical, over the 1997–98 El Niño:
+  - the trajectory is unchanged;
+  - ocean, land and surface-box fluxes integrate to the state change within 1000 ulps of the stock;
+  - POWER: the old snapshot misses by more than 1e6× that;
+  - the tap is complete in an El Niño month;
+  - the warm route equals a direct edge sum.
+  - **Two code mutations were caught:** dropping the L2 record fails the identity and the completeness test; dropping the warm route's flush fails the direct sum.
+- **New `test-takeaway-arithmetic.R`** (26 / 0). It uses synthetic inputs built so that each OLD construction gives a different answer, which is the power check; for example, a mid-year kink gives a calendar-year land_net of 0 / 0.5 / 1 against the old construction's 0.125 / 0.875.
+- **Unchanged and green:**
+  - fluxes 65, enso-lag 196, npp-record 8, imbalance-panel 38;
+  - app-review-copy 41, ui-year-bounds-lint 18, stylised-takeaway 63, review-cards 48;
+  - the three lints.
+
 ## 2026-10-12 (s) — **Pre-beta code review** (Marcus, verbatim: "Do one more full code review of the model to make sure there are no bugs or inconsistencies. Then push it."). The record is `notes/code_review_2026-10-12.md`; the reviewers' scripts are in `outputs/diagnostics/code_review_20261012/` (unreviewed as code). **NOT tagged and NOT pushed as a release: the review found a live bug in the objective.**
 
 *Lettered (q) in commit `fce3601`; relettered (s) when origin/main, which had used (q) and (r) for the merged PR #1, was merged in.*

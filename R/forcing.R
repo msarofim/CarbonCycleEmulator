@@ -1236,7 +1236,12 @@ ccx_fill_prod_c14 <- function(F, spin) {
   F
 }
 
-ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE, edge_fn = NULL) {
+ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE, edge_fn = NULL,
+                    flux_method = c("snapshot", "rk4")) {
+  # `flux_method` (2026-10-12): "snapshot" (the default, unchanged) evaluates the trace at each
+  # month's opening state, the instant the NPP record reads; "rk4" weights every RK4 stage as the
+  # integrator does, so a month's fluxes integrate to its state change (R/fluxes.R).
+  flux_method <- match.arg(flux_method)
   F <- ccx_fill_prod_c14(F, spin)
   # `edge_fn(fl, y, t)` (2026-09-15b): an OPT-IN per-month hook on the
   # derivative's recorded attribute at the month's OPENING state -- the same
@@ -1289,15 +1294,17 @@ ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE, edge_fn = NULL) 
       tr = if (isTRUE(aux$tr_on == 1L)) aux$idx[[h]]$tr else NA_integer_))
   names(obox) <- HEMIS
   gpp <- ccx_const("GtC_PER_PPM") / 2
-  # Flux trace (R/fluxes.R): OPT-IN, and evaluated at each month's OPENING state
-  # rather than inside the RK4 substeps. It is a diagnostic; the substep-mean
-  # would differ only by within-month curvature, and paying for it on every
-  # likelihood evaluation would be the wrong trade entirely.
+  # Flux trace (R/fluxes.R): OPT-IN, and never on a likelihood path. "snapshot" evaluates it at
+  # each month's OPENING state; "rk4" (2026-10-12) takes the RK4-WEIGHTED MEAN over every stage the
+  # integrator evaluated (ccx_step_rk4_traced()), so a month's fluxes integrate to its state change.
+  # The snapshot aliases the seasonal mixed layer's entrainment (CHANGELOG 2026-10-12 (t)).
   nppm <- matrix(NA_real_, n, length(HEMIS), dimnames = list(NULL, paste0("npp_", HEMIS)))
-  ystore <- if (fluxes) vector("list", n) else NULL
+  rk4_trace <- fluxes && flux_method == "rk4"
+  ystore <- if (fluxes && !rk4_trace) vector("list", n) else NULL
+  vmat <- NULL
   etrace <- if (!is.null(edge_fn)) vector("list", n) else NULL
   for (i in seq_len(n)) {
-    if (fluxes) ystore[[i]] <- y
+    if (!is.null(ystore)) ystore[[i]] <- y
     out$co2_NH[i]  <- y[atmN, "C"] / gpp
     out$co2_SH[i]  <- y[atmS, "C"] / gpp
     out$d13c_NH[i] <- 1000 * (y[atmN, "C13"] / (y[atmN, "C"] * ccx_const("R13_VPDB")) - 1)
@@ -1344,12 +1351,23 @@ ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE, edge_fn = NULL) 
       out[[paste0("tr_pco2_", h)]][i] <- .fl$pco2_tr[[h]]
       nppm[i, paste0("npp_", h)] <- .fl$npp[[h]]
     }
-    y <- ccx_step_rk4(y, F$t[i], 1 / 12, p, fi, grid, aux, substeps, k1 = k1)
+    if (rk4_trace) {
+      st <- ccx_step_rk4_traced(y, F$t[i], 1 / 12, p, fi, grid, aux, substeps,
+                                k1 = k1, v1 = ccx_flux_stage_vec(.fl, y, aux))
+      y <- st$y
+      if (is.null(vmat)) vmat <- matrix(NA_real_, n, length(st$v), dimnames = list(NULL, names(st$v)))
+      vmat[i, ] <- st$v
+    } else {
+      y <- ccx_step_rk4(y, F$t[i], 1 / 12, p, fi, grid, aux, substeps, k1 = k1)
+    }
   }
   # NPP per hemisphere, GtC/yr, at each month's opening state (twin of the C++
   # `npp` matrix; test-npp-record.R holds the two together).
   res <- list(state = y, out = out, npp = data.frame(t = F$t, nppm))
-  if (fluxes) res$fluxes <- ccx_flux_trace(ystore, F, p, grid, aux)
+  if (fluxes) {
+    res$fluxes <- if (rk4_trace) ccx_flux_trace_rk4(vmat, F$t[seq_len(n)], aux) else
+      ccx_flux_trace(ystore, F, p, grid, aux)
+  }
   if (!is.null(edge_fn)) res$edge_trace <- etrace
   res
 }

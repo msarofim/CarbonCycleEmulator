@@ -432,14 +432,27 @@ app_hist <- local({
 })
 APP_HIST <- app_hist
 
-# Annual flux trace for the box diagram and the turnover-time readout. Computed
-# once at startup on the pure-R path (ccx_run_fast has no flux tap: the trace is
-# a diagnostic and the C++ core is the thing the sampler calls). ~2 s, and it is
-# the only place the app learns that photosynthesis is ~70 GtC/yr against ~11
-# GtC/yr of emissions -- which is the whole residence-time lesson.
+# Annual flux trace for the box diagram and the turnover-time readout -- the only
+# place the app learns that photosynthesis is ~70 GtC/yr against ~11 GtC/yr of
+# emissions, which is the whole residence-time lesson. ccx_run_fast() has no flux
+# tap (the trace is a diagnostic; the C++ core is what the sampler calls), so the
+# traced year runs on the pure-R path.
+# ⭐ ONLY THE LAST YEAR IS TRACED (2026-10-12 pre-beta code review). Both readers
+# take APP_FLUX_NOW, the last row, yet the whole 1750-2024 record ran on the R path
+# (~110 s at the canonical, not the "~2 s" this comment said). The trace is now the
+# exact RK4-weighted one (flux_method = "rk4", R/fluxes.R), which costs more per
+# month, so the C++ core runs to the traced year and the R core continues from its
+# state, carrying the ENSO history and T_deep -- the continuation test-enso-lag.R
+# SEGMENT proves equal to the unsplit run, and test-flux-trace-exact.R runs.
 APP_FLUX <- local({
   F <- app_build_forcing("historical", APP_HIST_YEARS, prod_c14 = APP_SPIN$prod_c14)
-  ccx_flux_annual(ccx_run(APP_SPIN, F, fluxes = TRUE)$fluxes)
+  k <- which(floor(F$t + 1e-9) == APP_HIST_YEARS[2])[1] - 1L
+  F1 <- F[seq_len(k), ]; F2 <- F[(k + 1L):nrow(F), ]
+  sp <- APP_SPIN
+  sp$y <- ccx_run_fast(APP_SPIN, F1)$state
+  sp$enso_hist <- ccx_enso_hist_after(F1$enso, APP_SPIN$enso_hist)
+  if (ccx_mix_on(sp$params)) sp$tdeep0 <- ccx_mix_tdeep_after(F1$gmst, F1$t, sp$params, APP_SPIN$tdeep0)
+  ccx_flux_annual(ccx_run(sp, F2, fluxes = TRUE, flux_method = "rk4")$fluxes)
 })
 APP_FLUX_NOW <- APP_FLUX[nrow(APP_FLUX), ]
 
@@ -981,6 +994,56 @@ app_run_mechanisms <- function(off = character(), years = APP_HIST_YEARS,
   # (x)). Same choke-point argument as app_run_coupled() above.
   r$forcing <- F
   r
+}
+
+# ---- TAKEAWAY ARITHMETIC (2026-10-12 pre-beta code review, notes/code_review_2026-10-12.md §2) ----
+# Gated in tests/testthat/test-takeaway-arithmetic.R. These compute the NUMBERS the takeaways print;
+# the wording around them is Marcus's and is not touched.
+#
+# ⛔ A YEAR IS ADDRESSED BY ITS MONTHS, NEVER BY ITS DISTANCE TO AN INTEGER. Run times are month
+# CENTRES (y + (m - 0.5) / 12), so December of y - 1 and January of y are EXACTLY equidistant from y,
+# and `which.min(abs(t - y))` returned the December: the Keeling takeaway printed "in 1957" for 1958,
+# and "since 1850" read December 1849.
+app_year_mask <- function(t, year) {
+  m <- floor(t + 1e-9) == year
+  if (!any(m)) stop(sprintf("app_year_mask(): the run has no month in %d", year))
+  m
+}
+#' Annual mean of a monthly run column over one calendar year
+app_annual_mean_of <- function(t, v, year) mean(v[app_year_mask(t, year)])
+
+#' The span the Scenarios takeaway reports: the MIN and MAX end values over EVERY ticked run.
+#' ⛔ It used the first and last ticked run, but the menu is not ordered by outcome (vvLN ends below
+#' vvVL; vvHL below vvM), so all seven ticked printed "366 to 825 ppm" for a true 305-825.
+app_scenario_span <- function(rs) {
+  end_of <- function(r, v) r$climate[[v]][nrow(r$climate)]
+  yrs <- vapply(rs, function(r) max(r$climate$year), numeric(1))
+  if (length(unique(yrs)) != 1L) stop("app_scenario_span(): the runs end in different years")
+  list(year = yrs[[1]],
+       co2  = range(vapply(rs, end_of, numeric(1), v = "co2_ppm")),
+       gmst = range(vapply(rs, end_of, numeric(1), v = "gmst")))
+}
+
+#' The Keeling takeaway's three numbers, LIKE FOR LIKE (Marcus 2026-10-12: "Keeling 'today'
+#' like-for-like"). Every model number is the SCORED line -- the NH box less the representation
+#' offset `rep_dC`, which is the chart's solid line -- and every number is a CALENDAR-YEAR MEAN.
+#' "Today" is the run's last full year, read from the run, and the measured value is Mauna Loa's mean
+#' over that SAME year. It was one December of the raw box (the chart's faint line) against a typed
+#' `year >= 2023` window of 39 months running past the run's end, so most of its 3 ppm "gap" was
+#' `rep_dC` itself.
+app_keeling_numbers <- function(out, obs_mlo, rep_dC, start_year = 1958) {
+  off <- if (is.null(rep_dC) || !is.finite(rep_dC)) 0 else rep_dC
+  y_now <- max(floor(out$t + 1e-9))
+  if (sum(app_year_mask(out$t, y_now)) != 12L)
+    stop(sprintf("app_keeling_numbers(): %d is not a full year of the run", y_now))
+  m_obs <- obs_mlo$year == y_now
+  if (sum(m_obs) != 12L)
+    stop(sprintf("app_keeling_numbers(): Mauna Loa has %d months in %d, not 12", sum(m_obs), y_now))
+  list(start_year = start_year,
+       start      = app_annual_mean_of(out$t, out$co2_NH, start_year) - off,
+       now_year   = y_now,
+       now        = app_annual_mean_of(out$t, out$co2_NH, y_now) - off,
+       obs_now    = mean(obs_mlo$co2_ppm[m_obs]))
 }
 
 # The tail clause's "flat" bands, DERIVED FROM THE FORMATS, not picked: the sentence prints the

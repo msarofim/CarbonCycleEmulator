@@ -63,10 +63,11 @@ function(input, output, session) {
   output$k_seasonal <- renderPlotFit("k_seasonal", plot_seasonal(APP_HIST$out, APP_OBS))
 
   output$k_takeaway <- renderText({
-    o <- APP_HIST$out
-    i0 <- which.min(abs(o$t - 1958)); i1 <- nrow(o)
-    obs_mlo <- APP_OBS$co2[APP_OBS$co2$station == "MLO", ]
-    last_obs <- mean(obs_mlo$co2_ppm[obs_mlo$year >= 2023])
+    # 2026-10-12 code review: the three numbers come from app_keeling_numbers() (global.R) -- the
+    # scored line, calendar-year means, the observations over the run's own last year. It was
+    # which.min(abs(t - 1958)) (a tie that picked December 1957), one December of the raw box, and
+    # a typed `year >= 2023` window running past the run's end.
+    kn <- app_keeling_numbers(APP_HIST$out, APP_OBS$co2[APP_OBS$co2$station == "MLO", ], APP_REP_DC)
     # ⚠ WHAT THIS SENTENCE MAY NOT SAY (Marcus 2026-09-22, review K1/K2). It
     # read "Given only emissions ... Nothing here was tuned to the shape of this
     # curve", and both halves were false. The model is driven by emissions AND
@@ -89,7 +90,7 @@ function(input, output, session) {
                   # Marcus 2026-10-11 (CarboTopecomments.10.11.26): "it only adjusts", verbatim.
                   "not an abstract regression: it only adjusts quantities that",
                   "stand for physical things."),
-            o$co2_NH[i0], floor(o$t[i0]), o$co2_NH[i1], last_obs)
+            kn$start, kn$start_year, kn$now, kn$obs_now)
   })
 
   # ---- 2. Where does it go -------------------------------------------
@@ -164,9 +165,11 @@ function(input, output, session) {
       if (i[1] == which(!is.na(sm))[1]) return(NA_integer_)
       year[i[1]]
     }
-    pt <- partition()
-    a <- stats::aggregate(list(g = pt$land_gross), list(year = floor(pt$t)), mean)
-    mod <- cross(a$year[-1], diff(a$g))
+    # 2026-10-12 code review: the model's net land flux on CALENDAR-YEAR boundaries, from
+    # app_sinks_annual() -- the construction GCB's numbers (and this tab's other two panels) use. It
+    # diffed annual MEANS of the land stock, a half-year offset (printed 1970; calendar years 1969).
+    ann <- app_sinks_annual(APP_HIST$out, hist_F())
+    mod <- cross(ann$yr, ann$land_net)
     obs <- cross(APP_GCB$year, APP_GCB$land_sink - APP_GCB$luc)
     # Marcus 2026-10-02 (carbotopecomment), his paragraph. The two years stay COMPUTED, by the
     # same 11-year rule as before (1989 GCB / 1969 model at hilda33d); a missing one drops its
@@ -682,7 +685,11 @@ function(input, output, session) {
 
   output$i_takeaway <- renderText({
     o <- APP_HIST$out
-    i0 <- which.min(abs(o$t - 1850)); i1 <- nrow(o)
+    # 2026-10-12 code review: both ends are CALENDAR-YEAR MEANS. `which.min(abs(t - 1850))` tied and
+    # took December 1849, against the run's last month; fixing only the tie would have compared a
+    # January with a December, across the seasonal cycle.
+    d13c_drop <- app_annual_mean_of(o$t, o$d13c_NH, 1850) -
+                 app_annual_mean_of(o$t, o$d13c_NH, max(floor(o$t + 1e-9)))
     ip <- which.max(o$d14c_NH)
     sprintf(paste("δ¹³C has fallen %.2f‰ since 1850 as fossil carbon diluted the",
                   "air — the fingerprint that the extra CO₂ is fossil. Δ¹⁴C tells",
@@ -690,7 +697,7 @@ function(input, output, session) {
                   # Marcus 2026-10-02 (carbotopecomment), his wording
                   "the rate at which it declines provides information about the",
                   "speed of carbon exchange between pools."),
-            o$d13c_NH[i0] - o$d13c_NH[i1],
+            d13c_drop,
             if (o$d14c_NH[ip] > 500) "doubled" else "spiked",
             floor(o$t[ip]))
   })
@@ -886,14 +893,12 @@ function(input, output, session) {
       sprintf("Your pathway reaches %.0f ppm and %+.1f °C by %d. %s",
               cl$co2_ppm[nrow(cl)], cl$gmst[nrow(cl)], max(cl$year), tail_clause)
     } else {
-      rs <- future_runs()
-      lo <- rs[[1]]$climate; hi <- rs[[length(rs)]]$climate
+      # 2026-10-12 code review: min/max over EVERY ticked run (app_scenario_span, global.R); it read
+      # the first and last ticked run, and the menu is not ordered by outcome.
+      sp <- app_scenario_span(future_runs())
       sprintf(paste("By %d these scenarios span %.0f to %.0f ppm and %.1f to",
                     "%.1f °C. The spread is a choice, not a forecast."),
-              max(lo$year), min(lo$co2_ppm[nrow(lo)], hi$co2_ppm[nrow(hi)]),
-              max(lo$co2_ppm[nrow(lo)], hi$co2_ppm[nrow(hi)]),
-              min(lo$gmst[nrow(lo)], hi$gmst[nrow(hi)]),
-              max(lo$gmst[nrow(lo)], hi$gmst[nrow(hi)]))
+              sp$year, sp$co2[1], sp$co2[2], sp$gmst[1], sp$gmst[2])
     }
   })
 

@@ -3607,9 +3607,15 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # idiom: antisymmetric, so every tracer is conserved; bulk, no
     # fractionation. NOT through add_flux: a negative flux there takes the
     # ratio from the RECEIVING box, and the anomaly of a REDUCED exchange must
-    # remove layer-k-ratio carbon from the ML's inflow. Not in the flux trace
-    # (ml <-> interior only; ocean_net is untouched). l2_on = 0 emits NOTHING.
+    # remove layer-k-ratio carbon from the ML's inflow. l2_on = 0 emits NOTHING.
     # The C++ block is the twin.
+    # ⭐ RECORDED in the flux trace since 2026-10-12 (pre-beta code review), the
+    # way add_diffusion() records: it had been left out ("not in the flux trace"),
+    # so at the canonical the trace's per-box sums missed dy by up to 1.9 GtC/yr in
+    # an ENSO month and "surface ocean to deep" missed 0.28 GtC/yr in 2024 --
+    # against fluxes.R's contract that the trace sums to dy EXACTLY. Recording
+    # only: dy is untouched, and `record` is FALSE on every calibration path.
+    # The C14 kind is NULL, not "diff": an advective exchange, not diffusion.
     if (aux$l2_on == 1L) {
       fac <- max(0, 1 - (p[["w_enso_l2"]] / aux$w0_l2) * forc$enso)
       dV  <- aux$w0_l2 * CCX_SV_TO_M3YR * aux$l2_share[[h]] * (fac - 1)
@@ -3619,6 +3625,9 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
         Vm <- aux$a_ml[[h]] * gr$dz[1]
         for (tr in CCX_TRACERS) {
           F_t <- dV * (y[ik, tr] / Vk - y[iml, tr] / Vm)
+          if (record && tr == "C" && F_t != 0) .rec(ik, iml, F_t, NULL)
+          if (record && tr == "C14" && F_t != 0) .rec14(ik, iml, F_t, NULL)
+          if (record && tr == "C13" && F_t != 0) .rec13(ik, iml, F_t)
           dy[ik, tr]  <- dy[ik, tr]  - F_t
           dy[iml, tr] <- dy[iml, tr] + F_t
         }

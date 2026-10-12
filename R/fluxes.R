@@ -93,7 +93,11 @@ CCX_FLUX_DERIVED <- c(
 # off, so annual means and the completeness test need no special case.
 #   hs_as_down / hs_as_up  gross air-sea into / out of the HS boxes (inside as_down/as_up)
 #   hs_pump                the HS biological export HS -> HD (inside `pump`)
-#   hs_hd_net              NET HS -> HD carbon, flush + pump (inside ml_int)
+#   hs_hd_net              NET HS -> HD carbon, flush + pump. ⛔ CORRECTED 2026-10-12: this said
+#                          "(inside ml_int)". Only the FLUSH part (hs_hd_net - hs_pump) is inside
+#                          ml_int; the pump part is inside `pump` (a labelled edge goes to its label's
+#                          channel, but every edge, labelled or not, is in `edges`). See
+#                          ccx_flux_warm_route().
 #   hd_int_net             NET HD -> low-latitude interior, the conduit (inside int_exch)
 CCX_FLUX_HS <- c(
   hs_as_down = "Air to cold surface (gross)",
@@ -212,9 +216,13 @@ ccx_flux_snapshot <- function(y, t, p, forc, grid, aux) {
 #' reported turnover time. Seasonal NEP is excluded for a different reason --
 #' it integrates to zero over a year and is signed, so it belongs to neither
 #' direction.
-ccx_flux_derive <- function(ch, y, aux) {
-  atm <- unlist(lapply(HEMIS, function(h) aux$idx[[h]]$atm))
-  m_atm <- sum(y[atm, "C"])
+ccx_flux_derive <- function(ch, y, aux, m_atm = NULL) {
+  # `m_atm` given = the month-mean atmospheric carbon of the RK4-weighted trace (ccx_flux_trace());
+  # absent = read off the state, as a single snapshot does.
+  if (is.null(m_atm)) {
+    atm <- unlist(lapply(HEMIS, function(h) aux$idx[[h]]$atm))
+    m_atm <- sum(y[atm, "C"])
+  }
   atm_out <- ch[["gpp"]] + ch[["as_down"]]
   c(ch,
     # `- ch[["enso"]]` DROPPED 2026-09-02 with the channel: the ENSO land
@@ -227,12 +235,68 @@ ccx_flux_derive <- function(ch, y, aux) {
     tau_turn  = unname(if (atm_out > 0) m_atm / atm_out else NA_real_))
 }
 
-#' Monthly flux trace over a run, as a data.frame
+#' What one derivative evaluation contributes to the trace
 #'
-#' Called by ccx_run(fluxes = TRUE). Evaluated ONCE PER MONTH, at the month's
-#' opening state -- not once per RK4 substep -- because this is a diagnostic and
-#' the substep-mean would differ from it only by the within-month curvature the
-#' plots cannot show anyway.
+#' Everything LINEAR in the fluxes -- the channels and the cold-box flows -- plus
+#' the atmospheric carbon the turnover time divides by. Being linear is what lets
+#' ccx_step_rk4_traced() average them with the integrator's own weights.
+ccx_flux_stage_vec <- function(fl, y, aux) {
+  atm <- unlist(lapply(HEMIS, function(h) aux$idx[[h]]$atm))
+  c(fl$channels, ccx_flux_hs_derive(fl$edges, fl$pump_edges, aux), .m_atm = sum(y[atm, "C"]))
+}
+
+#' One month of RK4, ALSO returning the month-mean of every traced flux
+#'
+#' ⭐ THE TRACE AS THE INTEGRAL THE INTEGRATOR TOOK (2026-10-12, pre-beta code
+#' review; ccx_run(flux_method = "rk4")). The default trace is ONE snapshot per
+#' month, at the month's opening state, on the claim that the substep mean "would
+#' differ only by within-month curvature". Measured at the canonical it does not:
+#' the SH seasonal mixed layer entrains hard within a month, and the snapshot's
+#' mixed-layer budget read 1.208 GtC/yr in 2024 against an integrated 0.431 -- the
+#' error landing in "surface ocean to deep", which the app's box diagram prints.
+#' Here every stage's recorded fluxes are weighted exactly as RK4 weights its
+#' derivatives (h/6 x 1, 2, 2, 1), so, the derivative being the sum of its recorded
+#' edges, a month's integrated fluxes reproduce its state change to roundoff
+#' (test-flux-trace-exact.R). The snapshot stays the default because the NPP
+#' record (both cores) is a snapshot and test-npp-record.R holds the two together;
+#' whether to move the default is Marcus's (CHANGELOG 2026-10-12 (t)).
+#' The STATE path is ccx_step_rk4()'s, expression for expression: recording does
+#' not change a derivative (test-fluxes.R), and `fluxes = TRUE` leaves `out`
+#' identical.
+#' @param k1,v1 the first stage's derivative (attribute stripped) and stage vector,
+#'   already computed by the caller at the month's opening state
+#' @return list(y = the month-end state, v = the month-mean stage vector)
+ccx_step_rk4_traced <- function(y, t, dt, p, forc, grid, aux, substeps, k1, v1) {
+  h <- dt / substeps
+  stage <- function(yy, tt) {
+    d <- ccx_deriv(yy, tt, p, forc, grid, aux, record = TRUE)
+    v <- ccx_flux_stage_vec(attr(d, "fluxes"), yy, aux)
+    attr(d, "fluxes") <- NULL
+    list(d = d, v = v)
+  }
+  acc <- 0
+  for (s in seq_len(substeps)) {
+    a1 <- if (s == 1L) list(d = k1, v = v1) else stage(y, t)
+    a2 <- stage(y + h / 2 * a1$d, t + h / 2)
+    a3 <- stage(y + h / 2 * a2$d, t + h / 2)
+    a4 <- stage(y + h * a3$d,     t + h)
+    y <- y + h / 6 * (a1$d + 2 * a2$d + 2 * a3$d + a4$d)
+    acc <- acc + h / 6 * (a1$v + 2 * a2$v + 2 * a3$v + a4$v)
+    t <- t + h
+  }
+  list(y = y, v = acc / dt)
+}
+
+#' Monthly flux trace over a run, as a data.frame -- the SNAPSHOT trace
+#'
+#' Called by ccx_run(fluxes = TRUE) with the default flux_method = "snapshot".
+#' Evaluated ONCE PER MONTH, at the month's opening state -- the same instant the
+#' NPP record (both cores) and the edge hook read, which test-npp-record.R holds
+#' together. ⚠ It is NOT the month's integral: at the canonical the SH seasonal
+#' mixed layer entrains hard within a month, and the snapshot's mixed-layer budget
+#' read 1.208 GtC/yr in 2024 against an integrated 0.431 (2026-10-12 pre-beta code
+#' review). Anything that splits ocean carbon between surface and deep, or must
+#' integrate to a state change, uses flux_method = "rk4" (ccx_flux_trace_rk4()).
 ccx_flux_trace <- function(y_list, F, p, grid, aux) {
   n <- length(y_list)
   nm <- c(names(CCX_FLUX_CHANNELS), names(CCX_FLUX_DERIVED), names(CCX_FLUX_HS))
@@ -241,6 +305,42 @@ ccx_flux_trace <- function(y_list, F, p, grid, aux) {
     m[i, ] <- ccx_flux_snapshot(y_list[[i]], F$t[i], p, ccx_forcing_at(F, i),
                                 grid, aux)[nm]
   cbind(data.frame(t = F$t[seq_len(n)]), as.data.frame(m))
+}
+
+#' Monthly flux trace over a run, as a data.frame -- the EXACT (RK4-weighted) trace
+#'
+#' Called by ccx_run(fluxes = TRUE, flux_method = "rk4") with the month-mean
+#' stage vectors from ccx_step_rk4_traced(), one row per month. The derived
+#' quantities are computed from the month means (they are linear in the channels,
+#' except the turnover time, which divides the month-mean atmospheric carbon by
+#' the month-mean gross outflux).
+#' @param vmat matrix, one row per month, columns = ccx_flux_stage_vec()'s names
+#' @param t the months' times
+ccx_flux_trace_rk4 <- function(vmat, t, aux) {
+  nm <- c(names(CCX_FLUX_CHANNELS), names(CCX_FLUX_DERIVED), names(CCX_FLUX_HS))
+  ch_nm <- names(CCX_FLUX_CHANNELS); hs_nm <- names(CCX_FLUX_HS)
+  m <- matrix(NA_real_, nrow(vmat), length(nm), dimnames = list(NULL, nm))
+  for (i in seq_len(nrow(vmat))) {
+    v <- vmat[i, ]
+    m[i, ] <- c(ccx_flux_derive(v[ch_nm], NULL, aux, m_atm = v[[".m_atm"]]), v[hs_nm])[nm]
+  }
+  cbind(data.frame(t = t), as.data.frame(m))
+}
+
+#' The LOW-LATITUDE ("warm") surface-to-deep route, for a diagram that draws the
+#' cold boxes separately
+#'
+#' ⛔ `ml_int` and `pump` are channels over EVERY surface box, the cold one
+#' included (ccx_flux_boxclass() folds HS into "ml" and HD into "int"): the cold
+#' box's export is inside `pump` (`hs_pump`) and its mixing flush inside `ml_int`
+#' (`hs_hd_net - hs_pump`). The app's warm "to the deep" arrow drew both totals
+#' while its cold arrow drew the cold route again (2026-10-12 pre-beta code
+#' review). The hs_* flows are zero with the structure off, so this is the
+#' identity there.
+#' @param fx a row of the trace (or a named vector) carrying pump, ml_int, hs_pump, hs_hd_net
+ccx_flux_warm_route <- function(fx) {
+  flush <- fx[["hs_hd_net"]] - fx[["hs_pump"]]
+  c(pump = fx[["pump"]] - fx[["hs_pump"]], ml_int = fx[["ml_int"]] - flush)
 }
 
 #' Annual means of a monthly flux trace
