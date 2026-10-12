@@ -25,11 +25,17 @@
 # ccx_irf_pd()'s construction. Each knock-out RE-DIAGNOSES its own held
 # background, and the realised hold deviation is printed per row.
 #
-# THE BENCHMARK FOR THE SPLIT is Joos et al. 2013 sec.3.2 ("Response in ocean
-# and land carbon"), multi-model mean +/- 1 sd, PD100, ACP 13:2793, pp.2806-2807
+# THE BENCHMARK FOR THE SPLIT is Joos et al. 2013 sec.4.3 ("Response in ocean
+# and land carbon"), multi-model mean +/- 2 sd, PD100, ACP 13:2793, pp.2806-2807
 # (PDF in ~/Documents/2026/ClaudeDocs/Papers/, read 2026-09-27):
 #   ocean 20 +/- 7 GtC by yr 20, 33 +/- 12 by 100, 59 +/- 12 by 1000
 #   land  19 +/- 16 GtC by yr 20, 23 +/- 20 by 100, 16 +/- 14 by 1000
+# ⛔ CORRECTED 2026-10-12: this said "sec.3.2" (that is the Bern3D-LPJ model description, p.2799)
+# and "+/- 1 sd". Sec. 4.3 states no convention, but its +/- are the half-widths of Fig. 3's grey
+# band, whose legend reads "multi-model mean +/- 2σ" (p.2806; caption "As Fig. 1", whose band is
+# the "±two standard deviation range"). Measured from the figure's vector paths: ocean 6.8 / 12.0
+# / 12.4, land 16.2 / ~22 / 14.1 GtC at 20 / 100 / ~1000 yr. So these are +/- 2 sd; one sd is
+# half. Only the label changed -- no number here was ever used as a z. CHANGELOG 2026-10-12 (l).
 # ⚠ Joos's land includes each model's climate-carbon feedback (their Fig. 3b
 # has ensemble members that LOSE land carbon to a pulse); the held-GMST rows
 # here do not, which is why row B adds the pulse's own warming.
@@ -49,10 +55,11 @@ ATTR_Q10_BOUND <- 2                       # q10 for the warming-feedback BOUND r
                                           # an illustrative ceiling, not a proposal
 ATTR_FERTK_SAT <- 120                     # ppm; the 2026-08-14 shortlist cell
                                           # (ccx_saturating_fert), not a fit
-JOOS_SPLIT <- data.frame(yr = c(20, 100, 1000),
-                         ocean = c(20, 33, 59), ocean_sd = c(7, 12, 12),
-                         land  = c(19, 23, 16), land_sd  = c(16, 20, 14))
-JOOS_SPLIT_SRC <- "Joos et al. 2013 ACP 13:2793, sec.3.2 pp.2806-2807, multi-model mean +/- 1 sd"
+JOOS_SPLIT <- data.frame(yr = c(20, 100, 1000),   # *_pm2sd = the published +/- 2 sd half-widths
+                         ocean = c(20, 33, 59), ocean_pm2sd = c(7, 12, 12),
+                         land  = c(19, 23, 16), land_pm2sd  = c(16, 20, 14))
+JOOS_SPLIT_PM  <- "+/- 2 sd"
+JOOS_SPLIT_SRC <- paste("Joos et al. 2013 ACP 13:2793, sec.4.3 pp.2806-2807, multi-model mean", JOOS_SPLIT_PM)
 
 # ---- the arm: same contract as diag_joos_irf.R (no default) ----------
 ATTR_ARM <- commandArgs(TRUE)[1]
@@ -149,9 +156,9 @@ show(sprintf("E  fert_k %g, beta_max %.3f", ATTR_FERTK_SAT, bmS), re)
 cat(sprintf("%-36s", "   Joos 2013 multi-model mean"))
 for (y in ATTR_MARKS) { j <- JOOS_SPLIT[JOOS_SPLIT$yr == y, ]
   cat(if (nrow(j)) sprintf(" | %5.1f %5.1f %5.1f", 100 * joos_irf(y), j$ocean, j$land) else sprintf(" | %5.1f %11s", 100 * joos_irf(y), "")) }
-cat(sprintf("\n%-36s", "   (+/- 1 sd)"))
+cat(sprintf("\n%-36s", sprintf("   (%s)", JOOS_SPLIT_PM)))
 for (y in ATTR_MARKS) { j <- JOOS_SPLIT[JOOS_SPLIT$yr == y, ]
-  cat(if (nrow(j)) sprintf(" | %5s %5.0f %5.0f", "", j$ocean_sd, j$land_sd) else sprintf(" | %17s", "")) }
+  cat(if (nrow(j)) sprintf(" | %5s %5.0f %5.0f", "", j$ocean_pm2sd, j$land_pm2sd) else sprintf(" | %17s", "")) }
 cat("\n   (Joos atm = 100 x the Table 5 IRF fit; the split and the IRF are different\n")
 cat("    model subsets, so atm + ocean + land need not sum to 100 on that row)\n")
 cat(sprintf("\n   B's warming, dT @ %s yr = %s K (CCX's FaIR-fitted module)\n",

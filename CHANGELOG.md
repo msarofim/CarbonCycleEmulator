@@ -2,6 +2,45 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (l) — **Joos 2013's land/ocean ± are ±2 s.d.; `diag_pulse_land_attribution.R` labelled them ±1 s.d. and cited the wrong section.** Two files disagreed on how to read the ± on Joos et al. 2013 (ACP 13:2793) pulse-partition numbers. **`lib_design_gates.R`'s 10-02 (w) reading (±2 s.d.) is correct, and no gate, z or app number changes.** The diag script's label was wrong and is fixed as a label only. Two stale band strings in `lib_design_gates.R` are listed below for Marcus; they were NOT changed.
+
+**What the PDF says** (`~/Documents/2026/ClaudeDocs/Papers/joos.carboncycle.2013.acp-13-2793-2013`, read 2026-10-12; printed page = PDF page + 2792):
+
+| where | what it covers | convention, as printed |
+|---|---|---|
+| p. 2793, abstract | 1000-yr split 25 ± 9 / 59 ± 12 / 16 ± 14 % | **none stated** |
+| p. 2801, §4.1 | IRF at 20 / 100 yr, then "more than 25 % (± 9 %)" airborne at 1000 yr, same paragraph | "0.60 ± 0.14 (± two sdv) at year 20" |
+| p. 2802, Table 4 caption | time-integrated IRF only | "errors of the multi-model mean represent ±two standard deviations" |
+| p. 2804, Fig. 1 caption | the grey band | "corresponding ±two standard deviation range is shown by the black solid line" |
+| p. 2806, Fig. 3 (ocean a, land b) | caption "As Fig. 1, but for the time-integrated perturbation in air-to-sea (a)…"; legend | "multi-model mean +/- 2σ" |
+| pp. 2806–2807, **§4.3** "Response in ocean and land carbon" | ocean 20 ± 7 / 33 ± 12 / 59 ± 12, land 19 ± 16 / 23 ± 20 / 16 ± 14 GtC at 20 / 100 / 1000 yr | **none stated** |
+| p. 2800 and p. 2801, §3 model descriptions | the **GENIE ensemble**, not the multi-model mean | "404 ± 50 ppm (mean ± 1 sdv)"; "27 ± 18 % (mean ± 1 sdv)" |
+
+⚠ So "the paper's convention is ±2 s.d." (the 10-02 comment in `lib_design_gates.R`) is too broad. The paper uses **1 s.d. for its GENIE-ensemble statements**. The 2 s.d. convention is the one for the **multi-model mean**, and neither the abstract nor §4.3 states it. Nor is §3.2 the right section: that is the Bern3D-LPJ model description (p. 2799).
+
+**The test that settles §4.3.** Fig. 3's grey band is the labelled ±2σ band of exactly the quantities §4.3 quotes. I read it from the figure's vector paths: `pdftocairo -svg` on PDF page 14 gives 2001 grey strips in page coordinates, and the axes were calibrated from the tick-label centres (`pdftotext -tsv`). The scratch script was `fig3_band.R` in the session scratchpad, not the repo. Two checks on the reading: the band midpoints reproduce §4.3's means, and panel a's two y-axes agree at year 100 (33.0 vs 33.1).
+
+| GtC | §4.3 text | Fig. 3 band: mid, half-width | half-width ÷ text ± |
+|---|---|---|---|
+| ocean, 20 yr | 20 ± 7 | 20.2, **6.8** | 0.97 |
+| ocean, 100 yr | 33 ± 12 | 33.0, **12.0** | 1.00 |
+| ocean, ~1000 yr (990–998) | 59 ± 12 | 58.4, **12.4** | 1.03 |
+| land, 20 yr | 19 ± 16 | 19.5, **16.2** | 1.01 |
+| land, 100 yr | 23 ± 20 | 22.7–24.4, **21.5–22.6** | 1.08–1.13 |
+| land, ~1000 yr (990) | 16 ± 14 | 15.6, **14.1** | 1.01 |
+
+Had §4.3's ± been 1 s.d., every ratio would be ~2. The land band steps at year 100, where the three ESMs end (p. 2806 says they "were run over the first 100 yr only"), so the 100-yr ratio is a little high. **Verdict: §4.3's ± are ±2 s.d. half-widths.** The abstract's 59 ± 12 and 16 ± 14 are the same numbers. Its 25 ± 9 is the "(± 9 %)" of the p. 2801 paragraph headed "(± two sdv)".
+
+**Per file, per number:**
+- `calibration/diag_pulse_land_attribution.R`, `JOOS_SPLIT` (all six ±, at 20 / 100 / 1000 yr): these are **±2 s.d. half-widths, labelled "±1 sd" and "sec.3.2"**. They are printed only (one row of the comparison table); no z-score, gate or downstream file reads them, as a grep for `JOOS_SPLIT` / `ocean_sd` / `land_sd` shows. **FIXED, label only:** the section is now 4.3; the label "+/- 2 sd" comes from a new constant `JOOS_SPLIT_PM`, used for both the source string and the printed row; the columns are renamed `ocean_pm2sd` / `land_pm2sd`, matching `DG_L_JOOS`'s `pm2sd`, so the 10-02 bug class (2 s.d. stored under the name `sd`) cannot recur here. **Proof that no number moved:** the definition and print block was evaluated from HEAD and from the edit, with the same stub IRF, and diffed. Only the two label strings differ; every printed number is byte-identical. The whole file still parses. 1 s.d., had anyone wanted it: ocean 3.5 / 6 / 6, land 8 / 10 / 7 GtC.
+- `calibration/lib_design_gates.R`, `DG_L_JOOS` (1000-yr land 16 ± 14, ocean 59 ± 12, air 25 ± 9 %): **±2 s.d. — the 10-02 (w) fix is right**, so `sd` 7 / 6 / 4.5 stands. Card 5b's bars and `dg_compareL()`'s z's are unchanged. The direct evidence is Fig. 3's band at ~1000 yr (land 14.1, ocean 12.4) for land and ocean, and the p. 2801 paragraph for air. The Table 4 caption it cites is indirect, since Table 4 is the integrated IRF only.
+
+**Stale text left for Marcus (numbers, so NOT changed):**
+1. `lib_design_gates.R` ledger entry `L` (`bound`, ≈ L559–563): "|z_land| <= DG_L_NSD (1) … the band is [2, 30] %. 1 sd, not 2". Since 10-02, `sd` is 7, so **[2, 30] % is the ±2 s.d. band; the ±1 s.d. band is [9, 23] %**.
+2. `lib_design_gates.R` header above `DG_L_HORIZON` (≈ L2126–2130): "2 sd of it ([-12, 44] %) would admit the canonical". [-12, 44] is 16 ± 28, which is **±4 true s.d.; ±2 s.d. is [2, 30] %**. This sentence's argument for 1 s.d. was made at the pre-10-02 width, against `hilda31`'s land share, so it needs Marcus's re-reading, not a mechanical number swap. Neither string reaches the app or any log (grep of `app/`, `outputs/`).
+3. CHANGELOG 2026-09-27 (§2 table, "Joos 2013 §3.2 (mean ± sd)"): the same mislabel, left in place because the log is append-only. This entry supersedes it. Its "inside Joos's ranges" claims hold against the published ±2 s.d. ranges. Under the 1-s.d. reading, row C's ocean (40.6 vs 33 ± 12 at 100 yr) would be +1.27 s.d., outside a 1-s.d. band.
+4. Five logs, `outputs/diagnostics/pulse_land_attribution_{20260927d,phi0_basin2_20260928,phi0_refit_20260928,v0k_basin1_20260928,v0k_basin2_20260928}.log`, carry "sec.3.2 … +/- 1 sd" and the "(+/- 1 sd)" row. Their numbers are right and only the label is wrong. **They were left in place: whether a label-only error warrants quarantine is Marcus's call.** (The `alignment_screen_*` logs' "+/- 1 sd" is Koven 2022, not Joos, and is out of scope.)
+
 ## 2026-10-12 (k) — **FaIR on the pulse lab's OWN pulse** (Marcus, verbatim: "Keep card 5; FaIR on same pulse (Recommended)"). Card 5 stays in Review. The pulse lab draws FaIR's mean and 5–95 % band for the same scenario pulse, only on a grid point; otherwise the note says why. **On the default pulse (`vvM`, 100 GtC in 2050), CarboTope is INSIDE FaIR's band at +1 / +20 / +100 / +250 yr:**
 
 | after the release | CarboTope | FaIR mean (5–95 %) |
