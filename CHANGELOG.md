@@ -2,6 +2,12 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (m) — **The two stale Joos band strings in `lib_design_gates.R` are fixed** (Marcus, verbatim: "Fix the two ledger strings; leave the logs in place"). These are items 1–2 of (l). Text only: `DG_L_JOOS`, `DG_L_NSD`, every z and every app number are unchanged.
+- **Ledger entry `L`, `bound`:** "the band is [2, 30] %" → **"[9, 23] % (16 +/- 7)"**. A dated note keeps the old string and says it was Joos's published ±2 s.d.
+- **Header above `DG_L_HORIZON`:** "2 sd of it ([-12, 44] %) would admit the canonical" is removed. The 1-sd band [9, 23] % is now stated, and a ⛔ CORRECTED block explains the change. The sentence was written 09-08, before the 10-02 fix, so [-12, 44] % is ±4 true s.d. At the true width, ±2 s.d. is [2, 30] %. The then-canonical `hilda31`'s 1000-yr land share was 32.2 % (`notes/handoff_2026-09-08h_phase1_results.md` §1.3), which is **outside** [2, 30] % (z +2.31). **So the example no longer argues for 1 s.d. over 2.** The choice itself, `DG_L_NSD` = 1, is unchanged and still Marcus's to ratify. The current canonical, `hilda29e`, is at 17.4 % (z +0.20; `app/R/review.R` card-5 comment, re-checked 10-12), inside both bands.
+- **Checks:** the bands were recomputed from the constants themselves: `DG_L_JOOS$land` gives [9, 23] % at 1 s.d. and [2, 30] % at 2 s.d., with `pm2sd/sd` = 2. The file parses. Every test file that sources the lib passes: `test-gate-bounds.R` 212/0, `test-gates-w4.R` 173/0, `test-pd100-runner.R` 22/0.
+- **Left in place, as ruled:** the five `outputs/diagnostics/pulse_land_attribution_*.log` files that carry the "±1 sd" label (item 4 of (l)). Their numbers are right; read their "±1 sd" as ±2 s.d.
+
 ## 2026-10-12 (l) — **Joos 2013's land/ocean ± are ±2 s.d.; `diag_pulse_land_attribution.R` labelled them ±1 s.d. and cited the wrong section.** Two files disagreed on how to read the ± on Joos et al. 2013 (ACP 13:2793) pulse-partition numbers. **`lib_design_gates.R`'s 10-02 (w) reading (±2 s.d.) is correct, and no gate, z or app number changes.** The diag script's label was wrong and is fixed as a label only. Two stale band strings in `lib_design_gates.R` are listed below for Marcus; they were NOT changed.
 
 **What the PDF says** (`~/Documents/2026/ClaudeDocs/Papers/joos.carboncycle.2013.acp-13-2793-2013`, read 2026-10-12; printed page = PDF page + 2792):
