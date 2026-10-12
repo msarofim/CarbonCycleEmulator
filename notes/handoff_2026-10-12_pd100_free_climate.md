@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-12 — Card 5's FaIR line is drawn and the PD100 is climate FREE everywhere it is live; the suite is at 3 expected failures
 
+> **UPDATE 2026-10-12 (later): SUPERSEDED** by `notes/handoff_2026-10-12b_tagged_pulse_fair_grid.md`. From §4 these are now DONE: the scorecard re-run (+ quarantine), the FaIRtoFrEDI push, and card 5a's FaIR band and facts note. The constraint-map tie RED is cleared (the basin-spread cut).
+
 **Supersedes** `notes/handoff_2026-10-11_comments_fair_pd100.md`. Everything still open from its §4 is restated in §4 below.
 
 Written on Marcus's request ("Approve the lint update, then write the handoff note"), 2026-10-12. Nothing is running except the local app preview.

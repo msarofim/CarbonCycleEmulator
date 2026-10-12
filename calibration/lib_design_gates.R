@@ -2138,7 +2138,7 @@ dg_gateS_verdict <- function(g, lo = DG_S_LO, w = DG_S_LAG_MAX) {
 # held Joos's +/- 2 s.d. half-width (14), so [-12, 44] % is +/- 4 TRUE s.d. At the true width
 # +/- 2 s.d. is [2, 30] %, and the then-canonical hilda31's 32.2 % (handoff 09-08h sec.1.3) lies
 # OUTSIDE it (z +2.31). The example therefore no longer argues for 1 sd over 2. The choice itself
-# (DG_L_NSD) is unchanged, and was ratified as 1 sd the same day. CHANGELOG 2026-10-12 (m), (n).
+# (DG_L_NSD) is unchanged, and was ratified as 1 sd the same day. CHANGELOG 2026-10-12 (q), (r).
 # =====================================================================
 DG_L_HORIZON <- 1000
 # ⛔ CORRECTED 2026-10-02 (Marcus: "Fix it (Recommended)"). Joos et al.'s abstract gives these as

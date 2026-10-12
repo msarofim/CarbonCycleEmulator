@@ -35,7 +35,7 @@
 # band, whose legend reads "multi-model mean +/- 2σ" (p.2806; caption "As Fig. 1", whose band is
 # the "±two standard deviation range"). Measured from the figure's vector paths: ocean 6.8 / 12.0
 # / 12.4, land 16.2 / ~22 / 14.1 GtC at 20 / 100 / ~1000 yr. So these are +/- 2 sd; one sd is
-# half. Only the label changed -- no number here was ever used as a z. CHANGELOG 2026-10-12 (l).
+# half. Only the label changed -- no number here was ever used as a z. CHANGELOG 2026-10-12 (n).
 # ⚠ Joos's land includes each model's climate-carbon feedback (their Fig. 3b
 # has ensemble members that LOSE land carbon to a pulse); the held-GMST rows
 # here do not, which is why row B adds the pulse's own warming.
