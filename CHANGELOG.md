@@ -2,6 +2,11 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (l) — **The full suite at `54dde08`: 7279 passed, 2 failed, 3 skipped.** Both failures are card 4's by design (`test-review-card-numbers.R:75`, `:85`). The cmap-tie deliberate RED is GONE (10-12 h).
+- Run: frozen detached worktree `~/ccx_frozen/suite_20261012_54dde08`, downloads APFS-cloned, BLAS pinned, `nice 10`, `set_max_fails(Inf)` → `outputs/diagnostics/suite_20261012_54dde08.log`.
+- Passes are up 75 from `0e57110`'s 7204: the three new files (`test-c14-tag` 26, `test-fair-pulse-grid` 35) and the re-expressed `test-cmap-tie`.
+- Skips unchanged (3, including `{seacarb}` absent).
+
 ## 2026-10-12 (k) — **FaIR on the pulse lab's OWN pulse** (Marcus, verbatim: "Keep card 5; FaIR on same pulse (Recommended)"). Card 5 stays in Review. The pulse lab draws FaIR's mean and 5–95 % band for the same scenario pulse, only on a grid point; otherwise the note says why. **On the default pulse (`vvM`, 100 GtC in 2050), CarboTope is INSIDE FaIR's band at +1 / +20 / +100 / +250 yr:**
 
 | after the release | CarboTope | FaIR mean (5–95 %) |
