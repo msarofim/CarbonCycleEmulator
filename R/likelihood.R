@@ -62,6 +62,10 @@
 #    is already pinned by the CO2 series, so using GCB's full budget again would
 #    double-count. Only the OCEAN sink enters at its stated uncertainty; the LAND
 #    sink is deliberately given inflated uncertainty (Marcus, Q1 default).
+#    ⚠ SUPERSEDED 2026-09-16 (d): LIK_LAND_SINK_INFLATE is 1.0 since then (it
+#    was 3.0), so BOTH sinks now enter at GCB's own stated 1 sigma, no
+#    multiplier -- see the LIK_LAND_SINK_INFLATE block below. The sentence above
+#    is the original Q1 design, kept as history (corrected 2026-10-12, code review).
 #
 # 3. D14C ZONE AGGREGATION CARRIES REPRESENTATION ERROR LARGER THAN THE
 #    MEASUREMENT ERROR. Hua's five zones are bounded by the polar jet and the
@@ -150,6 +154,12 @@ LIK_D13C_REP_ERR   <- 0.05           # permil
 # d13C level offset would have swallowed it whole and reported a good fit.
 # Tying the two species together means absorbing the d13C bias costs 4.2 sd on
 # the prior AND is rejected by the CO2 level stream, which sees the same knob.
+# ⚠ SUPERSEDED AS A DESCRIPTION OF THE CANONICAL (code review 2026-10-12; the
+# arm-N reasoning above is kept as history): the canonical `hilda29e` fits
+# rep_dC = +4.21 ppm -- the OPPOSITE sign to the -4.19 this paragraph says
+# absorbing the d13C bias would need -- and its CO2 level rows still fit at rms
+# z 0.53 (review-measured), so the level stream did not reject a ~4 ppm offset.
+# What rep_dC is absorbing at the canonical has not been re-diagnosed here.
 #
 # ABSENCE CONTRACT, same as `deep` and the gradient offsets: a NULL `rep_dC`
 # SKIPS the offset rather than defaulting it to zero -- except that here zero IS
@@ -437,6 +447,9 @@ ccx_with_obj14_ice <- function(expr) {
 # recorded as such in CHANGELOG -- it is a constant tracking its source, not a
 # reweighting. The soft-constraint POLICY is separate and unchanged: DESIGN sec.9
 # Q1's inflation multiplier still rides on top (LIK_LAND_SINK_INFLATE).
+# ⚠ SUPERSEDED 2026-09-16 (d): the multiplier still multiplies, but it is 1.0
+# (no inflation) since that entry -- the land row is scored at GCB's bare 0.5
+# (corrected 2026-10-12, code review).
 LIK_GCB_OCEAN_SD   <- 0.4            # GtC/yr, GCB 2025 stated ocean-sink 1 sigma
 LIK_GCB_LAND_SD    <- 0.5            # GtC/yr, GCB 2025 stated land-sink 1 sigma
 
@@ -2244,6 +2257,18 @@ ccx_ll_ar1_SUPERSEDED <- function(r, sd, rho) {
 # shares one design matrix and the whole reduction is a 4x12 by 12xN product.
 # test-likelihood.R gates the fast path against ccx_year_harmonic() so the two
 # cannot drift apart.
+#
+# ⚠ INSTANTS AGAINST MEANS -- UNDOCUMENTED UNTIL THE 2026-10-12 CODE REVIEW; THE
+# ESTIMATOR IS UNCHANGED. The model rows reduced here are INSTANTANEOUS states at
+# the month centres (ccx_run() records the state at F$t[i]); the station
+# observations are monthly MEANS. Averaging a sinusoid over one month multiplies
+# its first harmonic by sinc(pi/12) = sin(pi/12) / (pi/12) = 0.98862, so the
+# seasonal rows compare a model amplitude ~1.1 % larger than its own monthly-mean
+# equivalent with the observed one. Priced at the mode by the review
+# (outputs/diagnostics/code_review_20261012/L6/s4_demo.R [2]; row with the model
+# harmonic x 0.98862 minus the row as coded): co2_seasonal_MLO +0.66,
+# co2_seasonal_SPO -0.38, d13c_seasonal_MLO -1.17, d13c_seasonal_SPO +0.24
+# log-units. The level and trend rows are unaffected to first order.
 .ccx_month_design <- local({
   phi <- (seq_len(12) - 0.5) / 12                 # month centres within a year
   X   <- cbind(1, phi - 0.5, sin(2 * pi * phi), cos(2 * pi * phi))

@@ -183,7 +183,6 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
   )
 }
 
-#' Parameters in the flat form the C++ unpacks
 #' Refuse a `p`/`aux` pair that disagrees about the seasonal mixed layer.
 #'
 #' ⛔ The 2026-09-09t defect had a mirror image: `p` says the mechanism is ON
@@ -211,6 +210,7 @@ ccx_seas_ml_marshal_check <- function(p, aux) {
   invisible(TRUE)
 }
 
+#' Parameters in the flat form the C++ unpacks
 ccx_cpp_par <- function(p) {
   # ⚠ RESOLVED THROUGH ccx_gamma_enso(), NOT with four literals here -- the same
   # rule seas_lag_p follows twenty lines down, and for the same reason: the R
@@ -474,6 +474,10 @@ ccx_cpp_forcing <- function(F) {
 #'   count that keeps the explicit diffusion term stable -- see the stability
 #'   section of R/model.R. "auto" resolves to 4 at every ordinary parameter
 #'   value, so this default does not change any existing result.
+#'   ⚠ (code review 2026-10-12) Not under the seasonal mixed layer: there it
+#'   is 4 at the canonical's h_ml (64.63) but 5 / 6 / 9 / 13 at h_ml 68 / 70 /
+#'   72 / 73 and more toward the P8 bound -- see the stability section of
+#'   R/model.R. A retried run is -Inf in the objective since 2026-09-16 (d).
 #' @param retry_na if the run still produces NAs (the air-sea corner, which the
 #'   diffusion criterion deliberately does not cover), double the substep count
 #'   and try again, up to CCX_SUBSTEPS_MAX. A NA that survives that is a real

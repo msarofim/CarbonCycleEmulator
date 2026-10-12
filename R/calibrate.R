@@ -606,6 +606,12 @@ CCX_PARAM_TABLE <- list(
                         dlnorm(x, log(pr$centre_gcm2), pr$log_sd, log = TRUE) }),
   # THE BIOLOGICAL PUMP'S MAGNITUDE -- the 20th parameter (Marcus 2026-08-16d).
   # The preindustrial surface-to-bottom DIC gradient the pump holds, umol/kg.
+  # ⚠ (code review 2026-10-12) EXACTLY that only in the pure LS column. Under the
+  # HILDA HS conduit (tau_q > 0) the SPUN-UP bottom-box-minus-mixed-layer DIC at
+  # the canonical hilda29e is 372.6 (NH) / 363.0 (SH) umol/kg against its fitted
+  # pump_grad 314.7; with tau_q = 0 it is 315.4 / 315.6 (review-measured). So
+  # under the conduit `pump_grad` is the SOLVED FIELD's magnitude knob, not the
+  # model's realised gradient (see ccx_pump_export() in R/model.R).
   # Everything else about the pump stays structural: the export SHAPE is GLODAP's
   # own profile solved against the model's diffusion, and the carbonate share is
   # PINNED by GLODAP's alkalinity gradient. This is the one number the data are
@@ -983,6 +989,11 @@ CCX_PARAM_TABLE <- list(
   # bias needs rep_dC = -4.19 ppm = 4.2 sd, AND would drag the CO2 level stream
   # 4 ppm off its own 0.6 ppm fit. The prior admits a representation constant
   # and resists a structural error wearing its clothes -- the grad_off_co2 idiom.
+  # ⚠ SUPERSEDED AS A DESCRIPTION OF THE CANONICAL (code review 2026-10-12; the
+  # paragraph above is kept as history): `hilda29e` fits rep_dC = +4.21 ppm, the
+  # OPPOSITE sign to the -4.19 above, and its CO2 level rows fit at rms z 0.53
+  # (review-measured) -- the level stream did not reject it. See the matching
+  # note in R/likelihood.R's rep_dC block.
   #
   # NOTE the prior body resolves LIK_CO2_REP_ERR at CALL time. R/calibrate.R is
   # sourced before R/likelihood.R (alphabetical), so the constant does not exist
@@ -3105,6 +3116,17 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
 
 # ---- MCMC driver -----------------------------------------------------
 #' Run adaptive-Metropolis chains
+#'
+#' ⛔⛔ (CORRECTED 2026-10-12, code review) IT CANNOT SAMPLE THE CANONICAL AS IT
+#' STANDS. With default arguments at `hilda29e` it STOPS inside
+#' ccx_make_logpost() ("the structure OPENS the gate ... not in the fitted
+#' set"): the canonical's structure opens the parameter gates, and this function
+#' never calls ccx_apply_gate(), never applies the file's pins, never adopts its
+#' bands, and starts every chain from the TABLE inits (ccx_init_unc()), not the
+#' mode. The live posterior band was produced by calibration/run_mcmc_check.R,
+#' which does those steps itself. The paragraph below states the 2026-09-12
+#' INTENT (and is true of what it fixed: the base list does come from the mode
+#' file), not a working path to the canonical.
 #'
 #' ⛔ SAMPLES THE CANONICAL MODE'S STRUCTURE, NOT THE COLUMN (2026-09-12, review
 #' A14). Until then this called ccx_make_logpost(years, obs) with the default

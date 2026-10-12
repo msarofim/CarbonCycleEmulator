@@ -110,6 +110,7 @@ Every `file:line` below was found by grep in the checkout at `f0def17`. None is 
 - "well-behaved enough to quote individual standard errors". F2: near 1× along fertilisation; 5.2× for `h_ml`; 1.4× for three others.
 - "Running a real sampler is planned … no sampler has yet converged". F3: "A sampler HAS run." R-hat max 1.046 (`beta_max`), 8 of 30 above 1.01, min bulk ESS 105. The chains agree to ≤ 3.5 ppm CO₂ (21 % of the band's width).
 - "There is no posterior, so there are no ribbons". Once the hold lifts, a band IS drawn: F4, F5, and "What the band IS".
+- **The title "There are no uncertainty bands, anywhere" (`review.R:707`) is ALREADY false, even under the hold** (added 2026-10-12 from the code review, lane L7): FaIR's 5–95 % bands are drawn now on card 5a (10-12 i) and in the pulse lab (10-12 k). The hold suppresses only the futures ribbons, so the title is wrong today, not only once the hold lifts.
 
 **Gate:** `test-futures-ribbons.R:79` via `.fr_lift_problems()`. ⚠ It checks ONLY the title string, which it holds as `FR_NO_BAND_TITLE` (`:62`, `"There are no uncertainty bands, anywhere"`). Nothing gates the plain, detail or ask. `test-review-cards.R` also applies to every card:
 - `:40`: the ledger is valid and rendered, so all four fields must be non-empty;

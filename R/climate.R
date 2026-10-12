@@ -16,8 +16,11 @@
 #
 # so a user's emissions change CO2, which changes forcing, which changes
 # temperature, which feeds back into the carbon cycle. Both pieces are fitted in
-# data-raw/build_climate_module.R against FaIR 2.2.4 (calibration 1.4.5), 841
-# configs, ensemble mean, GMST relative to 1850-1900.
+# data-raw/build_climate_module.R against FaIR 2.2.4 (calib 1.6.0), 841
+# configs, ensemble mean, GMST relative to 1850-1900. (Rebuilt on calib 1.6.0
+# 2026-09-24, CHANGELOG 2026-09-24 (g); data/climate_module.rds's `provenance`
+# says so. It was calib 1.4.5, built 2026-08-10, before that -- this line said
+# 1.4.5 until the 2026-10-12 code review.)
 #
 # WHY THE NON-CO2 HALF IS PRESCRIBED. This model has no methane, no N2O, no
 # aerosols, no ozone. Those are ~1.1 W/m2 of SSP2-4.5's 4.7 W/m2 at 2100 and
@@ -87,7 +90,9 @@ ccx_climate_module <- function() {
 #' data-raw/build_climate_module.R; see the note there on why interpolating the
 #' pooled pairs was wrong.
 #'
-#' Outside the fitted range (278-1687 ppm) this extrapolates; ccx_run_coupled()
+#' Outside the fitted range (278-1797 ppm, the module's `co2_erf_range` since
+#' the 2026-09-24 (g) rebuild; this line said 278-1687 until the 2026-10-12 code
+#' review) this extrapolates; ccx_run_coupled()
 #' warns rather than failing silently, because the app lets users build
 #' scenarios FaIR never saw.
 ccx_erf_co2 <- function(co2_ppm, mod = ccx_climate_module()) {
@@ -186,7 +191,11 @@ ccx_climate_scenarios <- function() {
 #'   is a real assumption the app has to surface, not a default to bury.
 #' @param gmst_obs  observed GMST to use where it exists (IGCC, per the standing
 #'   obs convention). The computed path is used only where observations run out,
-#'   spliced with an offset so the join is continuous. Set NULL to run the
+#'   spliced with an offset that matches the two paths' 11-YEAR MEANS over the
+#'   last 11 observed years (the standing multi-year baseline convention). ⚠ The
+#'   join is therefore continuous in the multi-year mean, NOT year to year: the
+#'   annual series can step at the seam (measured by the 2026-10-12 code review:
+#'   -0.121 K from 2024 to 2025 on vvM, because 2024 was a warm year). Set NULL to run the
 #'   modelled climate over the whole period, which is what the validation test
 #'   in test-climate.R does.
 #' @param emissions optional data.frame(year, fossil_GtC, luc_GtC) overriding the
@@ -268,9 +277,14 @@ ccx_run_coupled <- function(spin, scenario = "ssp245", years = c(1750, 2100),
 
     if (!is.null(obs_g) && nrow(obs_g)) {
       # Splice: observations where they exist, modelled climate after, joined on
-      # the last OBS_SPLICE_YEARS of overlap so the seam has no step. Baselining
-      # the splice to a single year would import that year's noise as a
-      # permanent offset (standing rule: never baseline to one year).
+      # the last 11 years of overlap (the literal `last - 10` below) so the two
+      # paths' 11-YEAR MEANS agree. Baselining the splice to a single year would
+      # import that year's noise as a permanent offset (standing rule: never
+      # baseline to one year). ⚠ CORRECTED 2026-10-12 (code review): this used to
+      # say the seam "has no step" and cite OBS_SPLICE_YEARS. There is no such
+      # constant -- the window is the literal below, and R/joos_irf.R keeps a
+      # second copy of it -- and matching MEANS leaves an ANNUAL step at the seam
+      # (-0.121 K from 2024 to 2025 on vvM, 2024 being a warm year).
       last <- max(obs_g$year)
       w <- yrs >= (last - 10) & yrs <= last
       off <- mean(obs_g$gmst_anom[obs_g$year >= last - 10]) - mean(tnew[w])

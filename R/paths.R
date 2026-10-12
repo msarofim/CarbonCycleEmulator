@@ -682,14 +682,6 @@ ccx_mode_bands <- function(md) {
   out
 }
 
-#' Parameters at a fitted mode, decoded under the band that FOUND it
-#'
-#' Use this instead of `ccx_unc_to_par(md$u_mode)` whenever the parameters are
-#' meant to BE the mode. Returns the refit's own `par_mode` when present, which
-#' is already correct by construction, and otherwise falls back to decoding
-#' `u_mode` under `md$hml_bound` if that is recorded.
-#'
-#' @param md a loaded mode file, or a mode name/path for `ccx_mode_file()`
 #' The STRUCTURE a mode file was fitted under, and the base list it needs
 #'
 #' `struct` is recorded by run_dispersed_multistart.R (from 2026-09-08f) and
@@ -749,7 +741,8 @@ ccx_mode_base <- function(md) {
 #' unread names + the limb's, under hilda_c / solved) is a FREE arm of the reduced
 #' space: nothing the objective sees is held, its likelihood is the free arm's, and
 #' CCX_MODE_PINNED says FALSE for it (hilda31pe: seven inert pins, the shim fitted).
-#' The canonical hilda30e holds the shim, which the model reads -- PINNED. test-mode-file
+#' The then-canonical hilda30e (at 2026-09-19 m; the canonical is hilda29e since 2026-10-08 e)
+#' holds the shim, which the model reads -- PINNED. test-mode-file
 #' compares this to CCX_MODE_PINNED; a consumer still APPLIES a file's pins to encode it.
 ccx_mode_pinned <- function(md) {
   pins <- ccx_mode_pins(md)
@@ -757,7 +750,6 @@ ccx_mode_pinned <- function(md) {
   inert <- ccx_inert_names(ccx_mode_pump_field(md), ccx_mode_struct(md))
   any(!names(pins) %in% inert)
 }
-#' The pins a mode file was fitted under (NULL = a free arm). Read, never inferred.
 #' The file's FIT DIAGNOSTICS: the Hessian at the mode and what derives from it
 #'
 #' ⚠ THE SIGN CONVENTION IS THE POINT OF THIS ACCESSOR. `md$hessian` is the
@@ -788,6 +780,7 @@ ccx_mode_fit_stats <- function(md = CCX_MODE_CANONICAL) {
        param_names = md$param_names, logpost = md$logpost)
 }
 
+#' The pins a mode file was fitted under (NULL = a free arm). Read, never inferred.
 ccx_mode_pins <- function(md) {
   if (is.character(md)) md <- readRDS(ccx_mode_file(md))
   p <- md$pins
@@ -886,8 +879,10 @@ ccx_ribbons_problems <- function(r, mode = CCX_MODE_CANONICAL, scenarios, vars) 
   if (!identical(pv[["mode"]], mode))
     bad <- c(bad, sprintf("built for mode '%s', %s '%s'", pv[["mode"]],
                           if (identical(mode, CCX_MODE_CANONICAL)) "the canonical is" else "checked against", mode))
+  # (code review 2026-10-12) `md` is the `mode` ARGUMENT's file, which need not be the canonical;
+  # the message said "the canonical's". "different parameter vector" is matched by test-futures-ribbons.R.
   if (!identical(pv[["par_mode"]], md$par_mode))
-    bad <- c(bad, "built at a different parameter vector from the canonical's par_mode")
+    bad <- c(bad, "built at a different parameter vector from the checked mode's par_mode")
   if (is.null(pv[["seed"]]) || is.null(pv[["rng_kind"]]) || is.null(pv[["seed_applied"]]))
     bad <- c(bad, "the seed, the RNG kind or where it is applied is not recorded")
   # SUPPLIED (MCMC) draws: the builder applied no seed (its `seed` is NA), so the CHAINS' seeds must be
@@ -941,6 +936,14 @@ ccx_cmap_problems <- function(cm, mode = CCX_MODE_CANONICAL) {
   bad
 }
 
+#' Parameters at a fitted mode, decoded under the band that FOUND it
+#'
+#' Use this instead of `ccx_unc_to_par(md$u_mode)` whenever the parameters are
+#' meant to BE the mode. Returns the refit's own `par_mode` when present, which
+#' is already correct by construction, and otherwise falls back to decoding
+#' `u_mode` under `md$hml_bound` if that is recorded.
+#'
+#' @param md a loaded mode file, or a mode name/path for `ccx_mode_file()`
 ccx_mode_params <- function(md = CCX_MODE_CANONICAL) {
   if (is.character(md)) md <- readRDS(ccx_mode_file(md))
   # WITH the file's pins (2026-09-13): the vector the mode RAN at, held names

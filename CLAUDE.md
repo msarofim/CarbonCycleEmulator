@@ -52,8 +52,10 @@ Separate project from FaIRtoFrEDI — no FaIR/FrEDI/BRICK dependencies.
 ## Hard rules
 
 1. **Stack is R end-to-end.** Model, MCMC, Shiny all in R. Rcpp core allowed only with a
-   bit-parity test against the pure-R reference implementation.
-2. **Number provenance:** every physical constant lives in `data-raw/constants.R` with a
+   roundoff-parity test against the pure-R reference implementation (the cores agree to
+   roundoff, not bit for bit -- see the `src/ccx_core.cpp` header; measured <= 1.3e-16 relative
+   on the canonical's final state, code review 2026-10-12).
+2. **Number provenance:** every physical constant lives in `R/constants.R` with a
    citation (paper + table, or dataset + access date). DESIGN.md marks unverified working
    values as [VERIFY] — none of those may be used in code until cited. No literature
    numbers from memory.

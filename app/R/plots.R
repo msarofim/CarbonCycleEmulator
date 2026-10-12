@@ -1041,6 +1041,12 @@ ccx_global_co2 <- function(o) {
 #' observations under one name in one app -- the caption-sync bug class -- and
 #' they would not agree: `atm_growth` is a global mass budget, a station is a
 #' point. It is GtC/yr in the file and is divided by GtC_PER_PPM here.
+#' ⛔ SUPERSEDED 2026-09-26 (noted 2026-10-12, code review): the paragraph above is
+#' the retired wiring. The observed series this panel draws is NOW the NOAA marine
+#' boundary layer (MBL) global reference, differenced as annual means
+#' (APP_OBS_GROWTH = data/mbl_global_growth.rds, via app_obs_growth() below),
+#' NOT GCB's `atm_growth`; see app_obs_growth()'s header and
+#' data-raw/build_mbl_global_growth.R for why. Review card 4 (GATE V) still uses GCB.
 #'
 #' ⚠ THE MODEL SERIES IS A DIFFERENCE OF ANNUAL MEANS, not of monthly values at a
 #' fixed month. A December-to-December difference carries the seasonal cycle's own

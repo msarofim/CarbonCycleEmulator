@@ -27,7 +27,8 @@
 # BOTH isotopes enter the derivative LINEARLY -- and 12C's evolution does not
 # depend on them -- so their one-year maps are AFFINE and are built exactly, one
 # column per box, rather than iterated. That is the same split `ccx_spinup()`
-# already makes (`iso_operator()`, R/spinup.R:246-256); the only change is that
+# already makes (`iso_operator()` inside ccx_spinup(), R/spinup.R -- cited here
+# as lines 246-256 until 2026-10-12; they had drifted, so cite it by name); the only change is that
 # the operator is the MONODROMY matrix of the one-year map rather than the
 # instantaneous Jacobian.
 #
@@ -74,9 +75,12 @@
 #     say. A refit under the aseasonal seed and one under this are NOT comparable.
 #
 # ⚠ AND THERE IS NO "BIT-IDENTICAL AT `seas_ml` = 0" GATE, because there cannot
-# be. `ccx_spinup()` zeroes FOUR seasonal paths in its `p0` -- `seas_amp_NH`,
-# `seas_amp_SH`, `seas_drivers` AND `seas_ml` -- so at `seas_ml` = 0 the model
-# still has a full seasonal cycle to rectify. The gate that IS available, and is
+# be. `ccx_spinup()` switches off FOUR seasonal paths in its `p0` -- `seas_amp_NH`,
+# `seas_amp_SH`, `seas_drivers` AND, through it, `seas_ml` -- so at `seas_ml` = 0
+# the model still has a full seasonal cycle to rectify. ⚠ (corrected 2026-10-12,
+# code review) It ZEROES THREE: `seas_amp_NH`, `seas_amp_SH` and `seas_drivers`.
+# `seas_ml` is not touched; it is off anyway because ccx_seas_ml_on() requires
+# `seas_drivers > 0`. The gate that IS available, and is
 # in `test-spinup-diagnostics.R`, is the one with ALL FOUR off: then there is no
 # seasonality, the one-year map's fixed point and the instantaneous fixed point
 # are the SAME STATE, and the two spinups must agree at solver tolerance.
@@ -313,6 +317,11 @@ ccx_periodic_spinup <- function(p = ccx_default_params(),
                      C14 = max(abs(rfin$state[, "C14"] - y[, "C14"]))),
     # the ANNUAL MEAN over the orbit -- the quantity the 12C pin is stated on.
     # The start-of-year instant differs from it by the seasonal amplitude.
+    # ⚠ (noted 2026-10-12, code review) ONLY co2_ppm is an annual mean. Every
+    # other atmospheric row -- `d13c_atm`, `d14c_atm` -- is computed from the
+    # state `y`, i.e. the START-OF-YEAR instant on the orbit, so
+    # ccx_report_spinup() prints e.g. d13C -6.473 against a target of -6.469 that
+    # the ANNUAL MEAN meets exactly. Its labels do not say so (left unchanged).
     co2_ppm   = mean(rfin$out$co2_NH + rfin$out$co2_SH) / 2)
 
   list(y = y, prod_c14 = prod, aux = aux, grid = grid, params = p,

@@ -136,8 +136,10 @@ test_that("`by_stream` does not move the scalar, and its parts sum to the whole"
 
 test_that("THE NO-OP GATE THAT IS AVAILABLE: with NO seasonality the two spinups agree", {
   # ⛔ THERE IS NO "BIT-IDENTICAL AT `seas_ml` = 0" GATE AND THERE CANNOT BE.
-  # `ccx_spinup()` zeroes FOUR seasonal paths in its `p0` (`seas_amp_NH`,
-  # `seas_amp_SH`, `seas_drivers`, `seas_ml`), so at `seas_ml` = 0 alone the model
+  # `ccx_spinup()` switches off FOUR seasonal paths in its `p0` (`seas_amp_NH`,
+  # `seas_amp_SH`, `seas_drivers`, `seas_ml`) -- ⚠ (corrected 2026-10-12, code
+  # review) by zeroing THREE: `seas_ml` is not touched and is off only because
+  # ccx_seas_ml_on() requires `seas_drivers > 0` -- so at `seas_ml` = 0 alone the model
   # still has a full seasonal cycle to rectify and the aseasonal state is still
   # not a point on the orbit ⇒ [[verify_the_quantity_not_the_word]]. The gate that
   # IS available is the one with ALL FOUR off: no seasonality, so the one-year

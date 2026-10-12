@@ -298,14 +298,25 @@ CCX_CONSTANTS <- list(
   # the land sink's isotopic signature -- the quantity that separates land from
   # ocean uptake in every d13C row -- so it belongs in the constants batch of the
   # NEXT refit (review 09-14 g §B5 item 3), not in a point edit of the canonical.
+  # ⚠ SUPERSEDED IN PRACTICE (code review 2026-10-12, text-only fix): 18 is now
+  # only the ABSENT-FIELD DEFAULT -- ccx_prepare() reads this ledger value when
+  # `p$alpha_photo_eps` is NULL (ccx_default_params() and the plain "hilda"
+  # block leave it absent). Every adopted mode since 09-14 h, the canonical
+  # `hilda29e` included, runs 15.6 permil: the `hilda_c` structure block sets
+  # `alpha_photo_eps` = CCX_ALPHA_PHOTO_EPS_BIOSPHERE (R/calibrate.R,
+  # ccx_struct_hilda_c(); the ruled mid-bracket, cited there). Measured
+  # 2026-10-12: the canonical's run parameters carry alpha_photo_eps 15.6. The
+  # `source` string below says so (its "IN USE: 18" was corrected 2026-10-12).
   ALPHA_PHOTO_EPS = list(
     value = 18, units = "permil",
     status = "provisional",
     source = paste("Lloyd & Farquhar (1994) Oecologia 99:201-215: C3 GPP-weighted",
                    "13C discrimination 17.8 permil; C4 3.6; total 14.8 at 25 % C4.",
                    "Still et al. (2003) GBC 17:1006 / Suits et al. (2005) GBC 19:GB1017:",
-                   "15-18 permil. IN USE: 18 (the C3-only value); the biosphere-wide",
-                   "14.8-16.5 is the refit-batch revision (review 2026-09-14 g).")),
+                   "15-18 permil. LEDGER DEFAULT 18 (the C3-only value), read only where a parameter",
+                   "set leaves alpha_photo_eps absent. The biosphere-wide 14.8-16.5 is the refit-batch",
+                   "revision (review 2026-09-14 g); every adopted mode since 09-14 h, the canonical",
+                   "included, runs its mid-bracket 15.6 (CCX_ALPHA_PHOTO_EPS_BIOSPHERE, R/calibrate.R).")),
 
   # ---- THE MARTIN REMINERALISATION EXPONENT (registered 2026-09-14 h, option
   # D + E) ----
@@ -451,11 +462,16 @@ CCX_CONSTANTS <- list(
                    "water-vapour term; the model applies k_w over the whole ocean area and takes",
                    "pCO2 = xCO2, so its equivalent is ~3-10 % lower (1309-1446). NOT the 15.9 +- 3.2",
                    "an earlier record quotes: that is Naegler's average of the UNcorrected originals.")),
+  # ⚠ CORRECTED 2026-10-12 (code review): the `source` below said "+-3.2 cm/h on 16.5", but
+  # KW_PRIOR_CENTRE's own source puts the +-3.2 on the UNcorrected 15.9, not on the corrected
+  # 16.5. On 15.9 the arithmetic is CV 3.2 / 15.9 = 0.201, sqrt(log(1 + 0.201^2)) = 0.199 --
+  # so the ruled 0.2 stands either way; only the attribution in the string was wrong.
   KW_PRIOR_LOGSD = list(
     value = 0.2, units = "log-sd",
     status = "derived",
-    source = paste("Width of the k_w prior (ruled 2026-10-02): Naegler (2009)'s +-3.2 cm/h on 16.5",
-                   "(CV 0.194, sqrt(log(1 + 0.194^2)) = 0.19) and Wanninkhof (2014) L&O Methods",
+    source = paste("Width of the k_w prior (ruled 2026-10-02): Naegler (2009)'s +-3.2 cm/h, which belongs to",
+                   "the UNcorrected 15.9 (CV 0.201, sqrt(log(1 + 0.201^2)) = 0.199; on the corrected 16.5",
+                   "it would be 0.19) and Wanninkhof (2014) L&O Methods",
                    "12:351, doi:10.4319/lom.2014.12.351, abstract, +-20 % (0.198); 0.2. Replaces 0.4,",
                    "2.1x the literature's width, which had no recorded reason.")),
   TAU_EX_PRIOR_CENTRE = list(
@@ -473,7 +489,8 @@ CCX_CONSTANTS <- list(
                    "abstract; Denning 1999 obs 1.34; Patra 2009 BRW+MLO vs SMO+SPO 1.33 +- 0.18;",
                    "Patra et al. 2011 ACP 11:12813 1.39 +- 0.18; Yang et al. 2019 GRL ~1.4); the models'",
                    "mass/station ratio is ~0.6 (Denning 1999 Table 4: 0.42-0.79), surface stations",
-                   "seeing vertically trapped air. The canonical hilda33d fitted 0.898 yr.")),
+                   "seeing vertically trapped air. The then-canonical hilda33d fitted 0.898 yr (2026-10-02);",
+                   "hilda29e, canonical since 2026-10-08 (e), fits 0.893 (measured 2026-10-12).")),
   TAU_EX_PRIOR_LOGSD = list(
     value = 0.26, units = "log-sd",
     status = "derived",
@@ -759,7 +776,13 @@ CCX_CONSTANTS <- list(
                    "eps_DIC-g and 1 % of its temperature slope.")),
   # THE KINETIC LIMB, linear through the paper's two measured temperatures.
   # ⚠ TWO POINTS ONLY -- this line is an interpolation the paper does not
-  # itself draw, and it is used only inside its own 5-21 degC span.
+  # itself draw. ⚠ CORRECTED 2026-10-12 (code review, CHANGELOG 2026-10-12 (s)):
+  # this comment used to say the line is "used only inside its own 5-21 degC
+  # span". It is NOT -- nothing clamps the SST, and at the canonical it
+  # EXTRAPOLATES at both ends: the NH low-latitude SST is above 21 degC in 85 %
+  # of months, and every HS-box evaluation sits at 1.6-3.3 degC (measured by the
+  # review). The line's slope is (-0.81 - -0.95) / 16 = 0.00875 permil/K, so
+  # each degree beyond an end moves eps_k by under 0.01 permil.
   ALPHA_AS_KIN_5 = list(
     value = -0.95, units = "permil",
     status = "data",

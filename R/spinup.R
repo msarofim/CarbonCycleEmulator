@@ -10,9 +10,13 @@
 # HOW IT IS SET. Production is NOT prescribed from the literature. It is solved
 # for, as the rate that holds atmospheric Delta14C at its 1750 value in steady
 # state given the model's own carbon inventory and ventilation. That makes the
-# canonical cosmogenic estimate (~2.0 atoms/cm2/s ~ 545 mol 14C/yr) an
+# canonical cosmogenic estimate (2.04 atoms/cm2/s ~ 545 mol 14C/yr, the `P_canon`
+# literal in ccx_spinup_diagnostics()) an
 # INDEPENDENT VALIDATION of the model's inventory and 14C bookkeeping rather
 # than an input -- see ccx_spinup()$diagnostics and test-spinup.R.
+# ⚠ (2026-10-12, code review) This header said "~2.0"; the code uses 2.04. The
+# 2.04 is UNCITED (as are the Earth area 5.1e14 m2 beside it) and is on the
+# constants citation worklist; it is a comparison value only, never an input.
 #
 # The 12C equilibrium is analytic; the 13C and 14C equilibria are obtained by
 # exact linear solves, because both tracers enter the derivative LINEARLY once the
@@ -523,6 +527,11 @@ ccx_stock_readout <- function(y, aux) {
 
 #' Pretty-print the spinup diagnostics
 ccx_report_spinup <- function(s) {
+  # ⚠ TWO LABEL CAVEATS (code review 2026-10-12; labels left unchanged). (1) For a
+  # PERIODIC spinup the d13C / D14C rows are the START-OF-YEAR instant on the orbit,
+  # not annual means (only CO2 is; see R/periodic_spinup.R step 3). (2) The depth
+  # ranges "1314-3700" / "2627-3700" are the layer edges at h_ml = 75 m; the real
+  # edges move with h_ml (the canonical's is 64.63), so read them as nominal.
   d <- s$diagnostics
   cat("=== preindustrial spinup ===\n")
   cat(sprintf("  residual |dC/dt|     %.3e GtC/yr  (must be ~0)\n", d$max_abs_dCdt))

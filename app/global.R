@@ -173,6 +173,12 @@ APP_LUC_SMOOTH_YR <- 11   # centred years; the land-sink series is noisy enough
 # `emissions-interp-constant` branch's ledger, and Marcus chose the app-only fix
 # 2026-09-24. BOTH ARMS of the pair must use it or the runs differ by more than
 # the pulse.
+# ⚠ SUPERSEDED 2026-10-01 (k) (noted 2026-10-12, code review): the heading above is
+# no longer true. CCX_EMIS_METHOD_DEFAULT (R/constants.R) was flipped to
+# "constant" model-wide that day (Marcus: "apply it now"), so EVERY tab -- the
+# objective, ccx_run_coupled() and the futures runs included -- now interpolates
+# emissions piecewise-constant. The pulse lab's explicit "constant" below is now
+# the same as the default; it is kept so the tab does not depend on the default.
 APP_PULSE_EMIS_METHOD <- "constant"
 APP_PULSE_GtC_DEFAULT <- 100
 APP_PULSE_GTC_RANGE   <- c(10, 500, 10)   # the pulse-size slider: min, max, step (ui.R)

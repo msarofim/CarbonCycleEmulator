@@ -671,6 +671,10 @@ ccx_build_forcing <- function(scenario = "historical",
   # `emissions-interp-constant` branch's ledger to pay, and this parameter is
   # the same switch, so that branch becomes a DEFAULT change rather than a code
   # change. Callers that need causality -- the app's pulse lab -- opt in.
+  # ⚠ SUPERSEDED 2026-10-01 (k) (noted 2026-10-12, code review): the default WAS
+  # flipped that day -- CCX_EMIS_METHOD_DEFAULT is "constant" (R/constants.R),
+  # restamped on every registered mode at its priced move, no refit -- so every
+  # caller that names no method is now causal; the pulse lab no longer differs.
   foss <- ccx_annual_to_monthly(e$year, e$fossil_GtC, yrs, method = emis_method)
   luc  <- ccx_annual_to_monthly(e$year, e$luc_GtC,    yrs, method = emis_method)
 
@@ -1219,6 +1223,9 @@ ccx_forcing_at <- function(F, i) {
 #' @param substeps RK4 substeps per month, or "auto" to pick the smallest count
 #'   that keeps the explicit diffusion term stable (see ccx_substeps_for()).
 #'   "auto" resolves to CCX_SUBSTEPS_MIN = 4 at every ordinary parameter value.
+#'   ⚠ (code review 2026-10-12) Not under the seasonal mixed layer: 4 at the
+#'   canonical's h_ml (64.63), 5 / 6 / 9 / 13 at h_ml 68 / 70 / 72 / 73 -- see
+#'   the stability section of R/model.R. This R path has no NA-retry.
 #' @return list(state = final state, out = data.frame of monthly diagnostics)
 #' Fill an unset cosmogenic-14C production from the spinup that seeds the run
 #'
@@ -1305,6 +1312,11 @@ ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE, edge_fn = NULL,
   etrace <- if (!is.null(edge_fn)) vector("list", n) else NULL
   for (i in seq_len(n)) {
     if (!is.null(ystore)) ystore[[i]] <- y
+    # ⚠ INSTANTS, NOT MONTHLY MEANS (documented 2026-10-12, code review). Each row is
+    # the state at the instant F$t[i] (the month-centre label), before this month's
+    # step. The station observations the likelihood compares these with are monthly
+    # MEANS; see the note above .ccx_month_design in R/likelihood.R for what that
+    # does to the seasonal rows (first harmonic x sinc(pi/12) = 0.98862).
     out$co2_NH[i]  <- y[atmN, "C"] / gpp
     out$co2_SH[i]  <- y[atmS, "C"] / gpp
     out$d13c_NH[i] <- 1000 * (y[atmN, "C13"] / (y[atmN, "C"] * ccx_const("R13_VPDB")) - 1)

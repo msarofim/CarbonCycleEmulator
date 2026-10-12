@@ -52,7 +52,8 @@ Scientific goals, in order:
 
 **Number-provenance convention for this doc:** values marked **[VERIFY]** are my working
 recollections of literature values. Each must be replaced by a cited value (paper + table,
-or dataset + access date) in `data-raw/constants.R` before any code uses it. Values marked
+or dataset + access date) in `R/constants.R` (the registry; it was planned as
+`data-raw/constants.R`, corrected 2026-10-12) before any code uses it. Values marked
 **[CAL]** are calibrated parameters. Unmarked values are definitional or arithmetic.
 
 ---
@@ -107,6 +108,12 @@ d M_atm[h]/dt =
 ### 3.3 Land (per hemisphere)
 
 - **NPP with CO₂ fertilization:** NPP[h] = NPP₀[h] · (1 + β · ln(χ[h]/χ₀)), β [CAL].
+  > ⚠ **Superseded as the running form (note added 2026-10-12, code review).** The default
+  > became **Michaelis–Menten** on 2026-08-14 (CHANGELOG "2026-08-14 (cont.) — DECISION 2
+  > TAKEN: the default IS the saturating form"): NPP = NPP₀ · (1 + β_max · Δχ / (K + Δχ)),
+  > Δχ = χ − χ₀, fitted names `beta_max` and `fert_k` (`ccx_fert_factor()` in `R/model.R`).
+  > The canonical `hilda29e` runs MM (fert_form 1; β_max 2.01, K 669 ppm). The log form above
+  > is kept reachable (`fert_form` = 0) so pre-2026-08-14 results reproduce.
   NPP₀ global ≈ 60 GtC/yr [PROVISIONAL, cited 2026-09-29 as PRESENT-DAY ~60 (IPCC TAR §3.2.1;
   bracketed by Haberl 2007, Ito 2011, MOD17); no 1750 source exists — see R/constants.R. ~~To be
   FITTED against a modern-NPP prior (Marcus, option 4)~~ **RETIRED 2026-10-02 (Marcus: "Retire the
@@ -610,7 +617,9 @@ CHANGELOG 10-05.
   [VERIFY]), Δ¹⁴C_atm ≡ 0 ‰ by construction, δ¹³C_atm at its preindustrial value.
 - Performance target: one 1750–2100 monthly run in **≤50 ms** so MCMC (10⁵–10⁶ evals) and
   live app sliders are comfortable. Pure-R vectorized first; Rcpp core with R
-  reference-implementation bit-parity test if needed (flagged question Q4).
+  reference-implementation roundoff-parity test if needed (flagged question Q4). (Was
+  "bit-parity"; the cores agree to roundoff, not bit for bit — `src/ccx_core.cpp` header;
+  measured ≤ 1.3e-16 relative on the canonical's final state, code review 2026-10-12.)
 
 ---
 
@@ -721,6 +730,9 @@ fractionation constants, ocean areas/depth/layering, SST-anomaly scaling of GMST
   CO₂ series, so GCB sink series add *partition* information, not growth information. Use
   GCB S_ocean at stated uncertainty; give S_land inflated uncertainty (soft constraint)
   (flagged question Q1).
+  > ⚠ **Superseded 2026-09-16 (d)** (noted 2026-10-12, code review): `LIK_LAND_SINK_INFLATE`
+  > is **1.0** since that entry (it was 3.0). Both sink rows are now scored at GCB's own stated
+  > 1 σ (ocean 0.4, land 0.5 GtC/yr), with no multiplier. The sentence above is the original spec.
   - **Objective #14, the imbalance allocation, D3 (spec change 2026-09-30, Marcus: "the calibration
     should have freedom to move it where it helps the model solve best"; canonical from `hilda33d`).**
     GCB's budget imbalance I(t) (11-yr centred smooth of imbalance + cement carbonation, ruled) moves
@@ -1414,9 +1426,16 @@ Julia world — verify the R estimator's defaults rather than assuming).
 ### 5.5 Compute
 
 Local Mac, single machine. If pure-R forward model exceeds ~50 ms/run, write the core in
-Rcpp with a bit-parity test against the R reference implementation (both stay in-repo).
+Rcpp with a roundoff-parity test against the R reference implementation (both stay in-repo).
+(Was "bit-parity"; see the header of `src/ccx_core.cpp` for why the cores agree to roundoff
+only — measured ≤ 1.3e-16 relative on the canonical's final state, code review 2026-10-12.)
 
 ## 6. Sanity gates (all must pass before headline claims)
+
+> ⚠ **STALE CANONICAL (banner added 2026-10-12, code review; numbers below NOT rewritten).** The ledger
+> below was measured at `hilda30c`. The canonical is **`hilda29e`** since 2026-10-08 (CHANGELOG 2026-10-08 (e)),
+> and the current whole-model scorecard is `outputs/diagnostics/whole_model_scorecard_20261012_hilda29e.log`.
+> Read every "at `hilda30c`" / "the canonical" below as the 09-14 state, not today's.
 
 > ⭐⭐ **THE LIVE ACCEPTANCE LEDGER (rewritten 2026-09-14 g — option J of the 09-12 assessment; the canonical is `hilda30c`
 > since 2026-09-13 d).** Measured by `calibration/diag_whole_model_scorecard.R` →
@@ -2210,12 +2229,13 @@ CarbonCycleEmulator/
 ├── CHANGELOG.md         project log incl. abandoned approaches
 ├── CLAUDE.md            session context for Claude Code
 ├── data-raw/            download scripts (URL + access date + checksum) & raw files
-│   └── constants.R      every [VERIFY] number, with citation, single source of truth
 ├── data/                processed calibration inputs (.rds, versioned)
 ├── R/                   model core, forcings, likelihood, utilities
+│   └── constants.R      every [VERIFY] number, with citation, single source of truth
+│                        (it is R/constants.R; this tree put it under data-raw/ until 2026-10-12)
 ├── calibration/         MCMC drivers, posterior outputs, calibration report
 ├── app/                 Shiny application
-└── tests/               testthat: conservation, sanity gates, (bit-parity if Rcpp)
+└── tests/               testthat: conservation, sanity gates, (roundoff parity if Rcpp)
 ```
 
 Conventions inherited from global CLAUDE.md: labels derive from named constants; output
@@ -2230,7 +2250,8 @@ provenance stamps; commit per unit of work; quarantine-don't-delete for bugged o
 - **Q3.** SSP emissions: reuse the RCMIP-format CSVs already in your FaIR world for
   consistency across projects? (Non-blocking; default = yes.)
 - **Q4.** Rcpp core acceptable within "R end-to-end" if pure R misses the 50 ms target?
-  (Non-blocking; default = yes, with bit-parity test.)
+  (Non-blocking; default = yes, with a parity test -- roundoff parity, not bit-parity: see the
+  `src/ccx_core.cpp` header.)
 
 ## 10. v2 backlog (explicitly out of v1)
 

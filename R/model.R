@@ -6,6 +6,11 @@
 #   leaf, wood, soil_fast, soil_slow 4  land pools (see LAND STRUCTURE below)
 #   ml + interior                   11  ocean column: mixed layer + NL layers
 # = 16 boxes/hemisphere x 2 = 32; x 3 tracers = 96 states.
+# ⚠ THAT IS THE BASE COLUMN ONLY (ccx_default_params()). The count depends on the
+# STRUCTURE: the HILDA high-latitude boxes (hs, hd), the equatorial cell (eq), the
+# tropical box (tr) and the inert soil pool each append boxes per hemisphere -- see
+# ccx_box_names(). The canonical hilda29e (hs + inert) has 19 per hemisphere, 38
+# boxes, 114 states (measured 2026-10-12; noted by the code review).
 #
 # LAND STRUCTURE. Four pools, not two, because two CANNOT hold the observed
 # carbon stock and the observed bomb-14C inventory at the same time. Naegler &
@@ -239,8 +244,11 @@ CCX_F_LUC_WOOD_DEFAULT <- 0
 #'
 #' SH is UNFITTED: the offline work fitted MLO only (SPO's 0.55 ppm cycle is
 #' substantially oceanic, which this land-only term does not model).
-#' CCX_SEAS_PHI_EFF["SH"] is the SH land centroid, and seas_T_amp_SH is free
+#' CCX_SEAS_PHI_EFF["SH"] (-30) is the SH SHAPE latitude, and seas_T_amp_SH is free
 #' to absorb the amplitude. Revisit if the SPO seasonal stream misfits.
+#' ⚠ (corrected 2026-10-12, code review) This line used to call -30 "the SH land
+#' centroid". It is not: the measured SH NPP-weighted centroid is -15.12 (the
+#' block directly below, 2026-08-20); -30 is a shape latitude like the NH's 75.
 #'
 #' The old sine remains REACHABLE at seas_drivers = 0 (the f_luc_perm escape
 #' idiom): every pre-2026-08-18 result -- including mode_fit_pump{N,D}.rds --
@@ -342,18 +350,6 @@ ccx_insol <- function(phi_deg, tt) {
   (h0 * sin(phi) * sin(dec) + cos(phi) * cos(dec) * sin(h0)) / pi
 }
 
-#' Unit-mean normalisers for the two driver shapes, on a 720-POINT midpoint
-#' grid. BOTH cores must use exactly this definition (the C++ core precomputes
-#' it in unpack_par) or bit-parity breaks.
-#'
-#' WHY 720 AND NOT 12 (measured 2026-08-18, /tmp-scratch drift decomposition,
-#' numbers preserved in the CHANGELOG entry): the insolation shape has KINKS at
-#' the polar-night edges of the 75 N effective latitude, so a 12-point norm
-#' disagrees with the integrator's effective annual mean by enough to leak
-#' +0.22 ppm over 275 zero-emission years -- pure quadrature, on top of the
-#' +0.25 ppm the fertilisation rectifier genuinely produces. At 720 points the
-#' norm is the continuous mean to well beyond the integrator's own accuracy,
-#' and only the physical rectifier remains.
 # Months of phenology lag of NPP behind insolation, when nothing says otherwise.
 CCX_SEAS_LAG_P_DEFAULT <- 2.25
 
@@ -528,12 +524,6 @@ ccx_gamma_enso <- function(p) {
     ocn_NH  = ocn("NH"),  ocn_SH  = ocn("SH"))
 }
 
-#' Copy the four ENSO coefficients from a fitted vector onto a parameter list
-#'
-#' THROUGH THE RESOLVER, so a legacy source migrates by the same contract both
-#' cores use rather than by a second opinion at the call site. This function
-#' exists because the retired one-name assignment was written at a dozen sites
-#' and one name became four -- the shape of `recorded_but_never_restored`.
 #' Air-sea 13C fractionation factors at a given SST
 #'
 #' @param sst temperature in degC -- the LOCAL, seasonally varying one, which is
@@ -553,6 +543,12 @@ ccx_alpha_as <- function(sst, aux) {
   list(down = 1 + eps_k / 1000, up = 1 + (eps_k - eps_dicg) / 1000)
 }
 
+#' Copy the four ENSO coefficients from a fitted vector onto a parameter list
+#'
+#' THROUGH THE RESOLVER, so a legacy source migrates by the same contract both
+#' cores use rather than by a second opinion at the call site. This function
+#' exists because the retired one-name assignment was written at a dozen sites
+#' and one name became four -- the shape of `recorded_but_never_restored`.
 ccx_set_enso <- function(p, src) {
   g <- ccx_gamma_enso(src)
   # DROP the retired scalar off the TARGET. Writing the four onto a legacy list
@@ -789,6 +785,18 @@ ccx_hs_sst_frac <- function(p) {
   as.numeric(v)
 }
 
+#' Unit-mean normalisers for the two driver shapes, on a 720-POINT midpoint
+#' grid. BOTH cores must use exactly this definition (the C++ core precomputes
+#' it in unpack_par) or bit-parity breaks.
+#'
+#' WHY 720 AND NOT 12 (measured 2026-08-18, /tmp-scratch drift decomposition,
+#' numbers preserved in the CHANGELOG entry): the insolation shape has KINKS at
+#' the polar-night edges of the 75 N effective latitude, so a 12-point norm
+#' disagrees with the integrator's effective annual mean by enough to leak
+#' +0.22 ppm over 275 zero-emission years -- pure quadrature, on top of the
+#' +0.25 ppm the fertilisation rectifier genuinely produces. At 720 points the
+#' norm is the continuous mean to well beyond the integrator's own accuracy,
+#' and only the physical rectifier remains.
 ccx_seas_norms <- function(p) {
   mid <- (seq_len(720) - 0.5) / 720
   lag <- ccx_seas_lag_p(p)
@@ -957,7 +965,10 @@ ccx_fert_factor <- function(chi, p, chi0 = ccx_const("CO2_PI_PPM")) {
     return(1 + p$beta * log(pmax(chi, 1e-6) / chi0))
   # MM. The denominator is floored because dchi -> -fert_k is a pole: it sits at
   # chi = chi0 - fert_k, ~106 ppm at the provisional default, which no scenario
-  # reaches but a sampler or an app slider could. Below the pole NPP would flip
+  # reaches but a sampler or an app slider could. ⚠ STALE NUMBER (code review
+  # 2026-10-12): 106 ppm is chi0 - 171. At today's default fert_k = 120 the pole
+  # is 276.88 - 120 = 156.9 ppm; at the canonical hilda29e's fitted fert_k (669)
+  # it sits at negative CO2 and cannot be reached. Below the pole NPP would flip
   # sign, so the factor is floored at 0 as well -- NPP cannot be negative, and
   # a hard floor fails visibly where an unguarded pole fails as a fitted value.
   # (The log path is left EXACTLY as it was, pole and all, so this commit cannot
@@ -1346,18 +1357,6 @@ ccx_seas_ml_hs_on <- function(p) {
   TRUE
 }
 
-#' THE GEOMETRY STOPPING CONDITION (prereg P8), asserted rather than assumed
-#'
-#' Layer 1 absorbs the whole seasonal excursion, so the design is only valid
-#' while the winter mixed layer stays INSIDE layer 1. It does at the canonical
-#' (fitted h_ml 49.15 m, ML max 82.7 m, layer-1 base 101.4 m -- 27 m of margin),
-#' but max/mean of the climatology is ~1.68 while layer 1's base grows only
-#' ~0.99 x h_ml + a constant, so the two cross at h_ml ~= 76 m.
-#'
-#' ⛔ THIS IS NOT HYPOTHETICAL: `ent26`'s h_ml was 134.15 m. A refit that walks
-#' h_ml up would silently read carbon out of a layer the mixed layer has already
-#' swallowed, so this STOPS rather than clamping -- a clamp would turn a design
-#' violation into a quiet bias. See calibration/diag_seasonal_ml_geometry.R.
 #' THE HS GEOMETRY CONDITION (option B). HD is everything below HS, so the
 #' winter cold box can never outgrow its column; what CAN go wrong is the
 #' SUMMER box: at the NH shape's f_min 0.078 a 175 m h_hs is 13.7 m in June,
@@ -1399,6 +1398,22 @@ ccx_seas_ml_shapes <- function(p, co) {
   if (!is.null(p$ml_nh_cycle) && isTRUE(p$ml_nh_cycle == 0)) co$NH <- ccx_mld_flat(co$NH)
   co
 }
+#' THE GEOMETRY STOPPING CONDITION (prereg P8), asserted rather than assumed
+#'
+#' Layer 1 absorbs the whole seasonal excursion, so the design is only valid
+#' while the winter mixed layer stays INSIDE layer 1. It does at the canonical
+#' `hilda29e` (fitted h_ml 64.63 m; deepest winter mixed layer, the SH's, 109.07
+#' m; layer-1 base 116.70 m -- 7.6 m of margin; measured 2026-10-12), but
+#' max/mean of the climatology is ~1.69 (SH f_max 1.6876) while layer 1's base
+#' grows only ~0.99 x h_ml + a constant, so the two cross at h_ml ~= 75.5 m.
+#' ⚠ (code review 2026-10-12) Until then this read "fitted h_ml 49.15 m, ML max
+#' 82.7 m, layer-1 base 101.4 m -- 27 m of margin", an earlier canonical's
+#' numbers; the margin at the canonical is now under a quarter of that.
+#'
+#' ⛔ THIS IS NOT HYPOTHETICAL: `ent26`'s h_ml was 134.15 m. A refit that walks
+#' h_ml up would silently read carbon out of a layer the mixed layer has already
+#' swallowed, so this STOPS rather than clamping -- a clamp would turn a design
+#' violation into a quiet bias. See calibration/diag_seasonal_ml_geometry.R.
 ccx_seas_ml_guard <- function(grid) {
   co   <- ccx_mld_shape("ls")
   base <- cumsum(grid$dz)[2]                      # layer-1 base, annual mean
@@ -1579,6 +1594,11 @@ ccx_default_params <- function() {
     # across the four pools (SHIPPED).
     f_luc_wood = CCX_F_LUC_WOOD_DEFAULT,
     k_w       = 1500,     # m/yr, gas transfer velocity
+    # ⚠ (code review 2026-10-12) does NOT track the cited prior centre, 1446
+    # (R/constants.R KW_PRIOR_CENTRE = CCX_PARAM_TABLE$k_w's init). k_w is FITTED
+    # on every registered mode (the canonical hilda29e: 1870), so this default
+    # reaches only uncalibrated runs. Whether to move it is Marcus's call
+    # (CHANGELOG 2026-10-12 (s)); the value is deliberately unchanged here.
     h_ml      = 75,       # m, mixed-layer depth
     # OVERTURNING, m/yr. 0 = the pure-diffusion ocean, reproduced EXACTLY (no
     # flux is emitted at all), which is what every result before 2026-08-13 was
@@ -2029,6 +2049,12 @@ ccx_default_params <- function() {
                           # track CCX_PARAM_TABLE$kz's init and [lo, hi] -- see
                           # the derivation in that entry. Default-parameter 14C
                           # numbers computed before this date are at kz 4000.
+                          # ⚠ IT DOES NOT TRACK (code review 2026-10-12): the
+                          # table's init is 5683.5, not 5000. kz is FITTED on
+                          # every registered mode (the canonical hilda29e: 14151),
+                          # so this default reaches only uncalibrated runs. Whether
+                          # to move it is Marcus's call (CHANGELOG 2026-10-12 (s));
+                          # the value is deliberately unchanged here.
     # DEPTH-DEPENDENT K (2026-09-06b, prereg
     # notes/prereg_2026-09-06b_kz_profile_with_conduit.md). At interface k,
     #     K(z_k) = kz * [ f + (1 - f) * exp(-(z_k - h_ml) / kz_zscale) ]
@@ -2051,6 +2077,12 @@ ccx_default_params <- function() {
     kz_deep_frac = 1,     # f in (0, 1]; 1 = uniform K, the model as before
     kz_zscale    = 253,   # m; HILDA's z0. INERT at f = 1.
     tau_ex    = 1.3,      # yr, interhemispheric atmospheric exchange
+    # ⚠ (code review 2026-10-12) 1.3 is the STATION-pair SF6 basis that the
+    # 2026-10-02 ruling REJECTED for this model (R/constants.R TAU_EX_PRIOR_CENTRE:
+    # the mass basis, prior centre 0.8 = CCX_PARAM_TABLE$tau_ex's init). tau_ex is
+    # FITTED on every registered mode (the canonical hilda29e: 0.893), so this
+    # default reaches only uncalibrated runs. Whether to move it is Marcus's call
+    # (CHANGELOG 2026-10-12 (s)); the value is deliberately unchanged here.
     # SEASONAL MODULATION OF THE EXCHANGE, added 2026-08-31 as a DIAGNOSTIC.
     # ⚠ DEFAULT 0 = OFF = the model bit for bit. NOT adopted, NOT fitted, and
     # NOT one of the 22: it exists to test whether a seasonally-varying exchange
@@ -2060,12 +2092,18 @@ ccx_default_params <- function() {
     # cross-equatorial exchange really is seasonal.
     tau_ex_seas_amp = 0,     # fractional amplitude on the RATE, |amp| < 1
     tau_ex_seas_phase = 0,   # months, peak-exchange phase
+                             # ⚠ (code review 2026-10-12) NOT the peak: ccx_tau_ex_rate()
+                             # uses sin(2 pi (t - phase/12)), which peaks a quarter
+                             # cycle LATER, at month phase + 3; `phase` is the rising
+                             # zero-crossing. Dormant (amp 0, unfitted).
     sst_NH    = 18,       # degC, hemispheric-mean SST (inside the K1/K2 fit range).
     sst_SH    = 16,       #   ⚠ TYPED, not measured: the whole-LS annual mean is
                           #   23.0/19.4 (1991-2020; 22.3/18.7 re-based) -- the
                           #   `hilda_c` block carries the measured pair (09-14 h).
                           #   `alpha_photo_eps` (permil) is ABSENT here on purpose: absent = the
-                          #   ledger's ALPHA_PHOTO_EPS (ccx_prepare()); `hilda_c` sets it.
+                          #   ledger's ALPHA_PHOTO_EPS (ccx_prepare()); `hilda_c` sets it
+                          #   (15.6, CCX_ALPHA_PHOTO_EPS_BIOSPHERE in R/calibrate.R --
+                          #   what every adopted mode, the canonical included, runs).
     sst_scale = 0.8,      # SST anomaly per unit GMST anomaly
     npp_frac_NH = 0.60,   # NH share of global NPP
     # THE SINE'S KNOBS, live only at seas_drivers = 0 (the escape hatch; see
@@ -2075,6 +2113,10 @@ ccx_default_params <- function() {
     seas_amp_NH = 12,     # GtC/yr, seasonal NEP amplitude (sine path only)
     seas_amp_SH = 2,
     seas_phase_NH = 3.5,  # month of peak uptake (sine path only)
+                          # ⚠ (code review 2026-10-12) NOT the peak month: the sine
+                          # path's sin(2 pi (t - phase/12)) peaks at month phase + 3
+                          # (6.5 here; 12.5 = 0.5 for the SH's 9.5); `phase` is the
+                          # rising zero-crossing. Dormant (seas_drivers = 0 only).
     seas_phase_SH = 9.5,
     # THE DRIVER PATH'S KNOBS (see CCX_SEAS_PHI_EFF block for the physics and
     # the offline provenance of the inits).
@@ -2148,6 +2190,12 @@ ccx_default_params <- function() {
     # BIT. It is switched on deliberately, by a scan or a fit, never by
     # accident.
     #
+    # ⚠ HISTORY, SUPERSEDED THE NEXT DAY (noted 2026-10-12, code review): the
+    # paragraph from here to "what that ancestor RAN" is the 2026-09-03 state,
+    # when the default was held at 0. It was FLIPPED to the table init on
+    # 2026-09-04 (the "⭐ FLIPPED" paragraph below), which is what the code
+    # does: the default is CCX_PARAM_TABLE$ent_seas_amp_SH$init, NOT 0. The
+    # numbers quoted in it are also the pre-2026-09-09w ones (see "SCALE").
     # ⭐ IT IS IN CCX_PARAM_TABLE SINCE 2026-09-03 (Marcus) -- 25 -> 26 fitted
     # parameters -- AND THIS DEFAULT DELIBERATELY STAYS 0. Those are not in
     # conflict; they are two different statements:
@@ -2172,6 +2220,10 @@ ccx_default_params <- function() {
     # REGISTRY, COMPUTED FROM NAMED INPUTS: ENT_SEAS_AMP_SH_INBAND (29.68
     # umol/kg within 40-90 S) and ENT_SEAS_AMP_SH_DERIV (10.95, that value
     # diluted onto the SH box by ENT_SEAS_BAND_AREA_FRAC). Read them there.
+    # ⚠ STALE NUMBERS (code review 2026-10-12): 29.68 / 10.95 are the values
+    # before the registry's inputs moved on 2026-09-09w. The LIVE values
+    # (ccx_const(), measured 2026-10-12) are 17.757 in band and 6.552 on the SH
+    # box -- the latter is the table init and therefore this default.
     # ⚠ This comment previously carried the chain in prose beside a TYPED
     # `value = 30`, and the prose and the number had already drifted: computing
     # it gives 29.68 and 10.95, not 30 and 11.07. That is the whole reason the
@@ -2195,6 +2247,8 @@ ccx_default_params <- function() {
     # (ENT_SEAS_AMP_SH_INBAND x ENT_SEAS_BAND_AREA_FRAC) had ALREADY drifted from
     # a typed copy once -- 30 -> 29.68 and 11.07 -> 10.9524 -- which is the
     # incident that produced the "DERIVED must mean COMPUTED" rule.
+    # ⚠ (2026-10-12) The canonical `hilda29e` does not fit it at all: it PINS
+    # ent_seas_amp_SH = 0 (its pins list), so the channel is OFF at the canonical.
     # ⚠ It is the PRIOR CENTRE, not the fitted 19.0291: `ccx_default_params()` is
     # the UNCALIBRATED reference vector (`sst_seas_amp_SH` is 1.2 here against a
     # fitted 1.85), and putting a fitted number in it would make the gates'
@@ -2721,6 +2775,11 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # 1.136 is +0.054 % of respiration = 0.032 GtC/yr against the SH term's
     # 1.025 -- 3.2 %. Weak because q10 rides GLOBAL mean temperature where the
     # physics is TROPICAL LAND temperature and moisture.
+    # ⚠ STALE NUMBERS (code review 2026-10-12): q10 = 1.136 is an earlier mode's.
+    # The canonical hilda29e fits q10 = 1.0919 (measured 2026-10-12), which
+    # makes the respiration response SMALLER still (ln q10 0.088 vs 0.128); the
+    # 0.054 % / 0.032 GtC/yr / 1.025 / 3.2 % chain was computed at the old mode
+    # and is stale; not re-measured.
     # ⚠ FIRE -- the third limb of the observed 2015-16 attribution -- is
     # unrepresented here and was unrepresented before. This change does not
     # touch that.
@@ -2897,6 +2956,10 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # it adds is OCEAN-signatured. That is the entire point: the model's SPO
     # seasonal cycle is too photosynthetic, and this is the one channel that can
     # add ocean-signatured CO2 in austral winter.
+    # ⚠ (2026-10-12, code review) Since the T-dependent alphas of 2026-09-02 the
+    # evasion limb carries ccx_alpha_as(sst, aux)$up; the scalar aux$alpha_as_up
+    # (0.99, the retired -10 permil) is read only at alpha_as_tdep = 0, and the
+    # canonical runs alpha_as_tdep = 1. The carbon is ocean-signatured either way.
     #
     # The driver is zero-mean; the response is not, because carbonate chemistry
     # is nonlinear in DIC. That rectification is ACCEPTED AS PHYSICS -- the same
@@ -3114,6 +3177,11 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
         # mode, carrying 0.4 % of the field's gross magnitude (0.039 of 9.58
         # GtC/yr). The field does NOT sum to zero: it nets +12.3 GtC/yr into
         # the interior, balanced in steady state by upward diffusion.
+        # ⚠ STALE NUMBERS (code review 2026-10-12): 9.58 / 12.3 / 0.039 are an
+        # earlier mode's. At the canonical hilda29e (solved field, measured
+        # 2026-10-12) the LS field nets +60.84 GtC/yr into the interior (NH
+        # 26.12, SH 34.72), with 2 of 10 layers negative in each hemisphere
+        # carrying 0.0022 of 60.85 GtC/yr gross (~0.004 %).
         # The add_flux guard fires here, correctly: on a negative layer this sends carbon
         # UP to the mixed layer and depletes it by a further eps_org, which is
         # not what "organic matter sinks and remineralises" means.
@@ -3929,6 +3997,11 @@ ccx_pump_export <- function(p, aux, grid, kz_override = NULL) {
   # span makes `pump_grad` mean exactly what its name says: the model's
   # preindustrial bottom-box-minus-mixed-layer DIC gradient, directly comparable
   # with the target the likelihood scores.
+  # ⚠ (code review 2026-10-12) "Exactly" holds for the diffusive LS column the
+  # field is solved against, NOT for the spun-up model under the HILDA HS
+  # conduit: at the canonical hilda29e the realised bottom-minus-ML DIC is 372.6
+  # (NH) / 363.0 (SH) umol/kg against pump_grad 314.7, and 315.4 / 315.6 with
+  # tau_q = 0 (review-measured): switching the conduit off removes the excess.
   span <- shape[length(shape)] - shape[1]
   if (!is.finite(span) || span <= 0) return(NULL)
   prof <- (shape - shape[1]) / span * p$pump_grad
@@ -4725,6 +4798,12 @@ ccx_pump_export_hs <- function(p, aux, grid) {
 # hard-coding 4 and hoping. At every ordinary parameter value the answer is
 # still 4 -- kz has to exceed ~155,000 m2/yr (+6.2 sigma on its prior) before
 # the count moves -- so no existing result changes. See test-stability.R.
+# ⚠ (code review 2026-10-12) TRUE FOR THE ASEASONAL COLUMN, NOT UNDER THE
+# SEASONAL MIXED LAYER. With seas_ml on, the bound is taken at BOTH extremes of
+# the cycle (ccx_substeps_for()), and at the canonical's other values the count
+# measured 2026-10-12 is 4 at h_ml 65 (the canonical, 64.63), then 5 / 6 / 9 / 13
+# at h_ml 68 / 70 / 72 / 73, climbing steeply toward the P8 bound (h_ml ~ 75.5):
+# 61 at 75 (the review recorded 22 there; the count is near-singular that close).
 #
 # AIR-SEA IS NOT COVERED BY THIS CRITERION, deliberately. Gas exchange can
 # dominate the Jacobian at low kz (measured up to 15x the diffusion eigenvalue
@@ -4733,6 +4812,10 @@ ccx_pump_export_hs <- function(p, aux, grid) {
 # a second closed form whose Revelle-driven growth along the trajectory (up to
 # 3.9x, measured on SSP5-8.5 to 2100) would need its own fudge factor, the
 # air-sea corner is caught by the NA-retry escalation in ccx_run_fast().
+# ⚠ (code review 2026-10-12) "CAUGHT" NEEDS QUALIFYING. Since CHANGELOG
+# 2026-09-16 (d) a run that had to retry is scored -Inf by the objective
+# (R/calibrate.R: `if (isTRUE(r$retried)) return(-Inf)`), so the retry rescues
+# diagnostics, not the fit; and the pure-R path (ccx_run()) has no retry at all.
 
 # |h*lambda| stability limit of classical RK4 on the negative real axis: the
 # largest z > 0 with |1 - z + z^2/2 - z^3/6 + z^4/24| <= 1.
@@ -4861,13 +4944,6 @@ ccx_tr_box_eigbound <- function(p, grid) {
 # can size the residual mixed layer without repeating ccx_prepare())
 a_eq_of <- function(p, a_oc) if (ccx_eq_on(p)) a_oc * c(p$eq_frac_NH, p$eq_frac_SH) else c(0, 0)
 
-#' The ventilation loop's contribution to the stability bound (2026-09-14 h)
-#'
-#' Two rates per ventilated layer: the ML's drain W w_k / (a_ml h_ml) and the
-#' layer's W w_k / (a_ls dz_k); the ML's is the sum over the band. La Nina
-#' multiplies both by up to 1 + gamma_vent |enso|, the cell's form. Gershgorin
-#' 2 x rate. `grid` is the grid at ONE seasonal extreme (the caller passes
-#' each): the ML and layer 1 move under seas_ml. Exactly 0 at w_vent = 0.
 #' The HS-route deep return's Gershgorin bound (2026-09-15 d): the limb drains
 #' every box it touches at W_h / volume -- the ML (over a_ml and h_ml NOW),
 #' HS (a_hs h_hs), HD (a_hs dz_hd) and each interior layer from the return
@@ -4887,6 +4963,13 @@ ccx_thc_eigbound <- function(p, grid) {
               max(outer(Wh / a_ls, 1 / grid$dz[seq.int(kt, grid$nl) + 1L])))
   2 * rate
 }
+#' The ventilation loop's contribution to the stability bound (2026-09-14 h)
+#'
+#' Two rates per ventilated layer: the ML's drain W w_k / (a_ml h_ml) and the
+#' layer's W w_k / (a_ls dz_k); the ML's is the sum over the band. La Nina
+#' multiplies both by up to 1 + gamma_vent |enso|, the cell's form. Gershgorin
+#' 2 x rate. `grid` is the grid at ONE seasonal extreme (the caller passes
+#' each): the ML and layer 1 move under seas_ml. Exactly 0 at w_vent = 0.
 ccx_e_loop_eigbound <- function(p, grid) {
   w <- if (is.null(p$w_vent)) 0 else p$w_vent
   # the loop EXISTS only under the prescribed field (ccx_prepare's e_on)

@@ -2,6 +2,38 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (v) — **The stale comments and docs from the code review are corrected** (Marcus, verbatim: "Fix all text-only (Recommended)"; the `CLAUDE.md` line was approved in the same answer). **The full suite at `56b5ceb` (the app-number fixes, 10-12 t): 7321 passed, 2 failed, 3 skipped, 18.8 min** (`outputs/diagnostics/suite_20261012_56b5ceb.log`). The 2 failures are card 4's, by design. The extra 42 passes over `54dde08` are exactly the two new files (16 + 26).
+
+- **The comment pass was a subagent's, under a mechanical gate.** For each of the 14 `.R` files it touched, `deparse(parse(f, keep.source = FALSE))` is IDENTICAL before and after, so no code or string changed. A deliberate value change and a deliberate string change each tripped the gate.
+- **What it covered:**
+  - the constants registry's notes;
+  - `climate.R` (calib 1.6.0, the 278–1797 ppm range, the splice matching 11-yr means rather than being "continuous", and the non-existent `OBS_SPLICE_YEARS`);
+  - the land-sink "inflation" (1.0 since 09-16 d) and the `rep_dC` sign (+4.21);
+  - the defaults that do not track `CCX_PARAM_TABLE` (annotated, not changed);
+  - the P8 margin (7.63 m, trips at h_ml 75.50), the entrainment amplitudes, the fertilisation pole, and the box count (38 / 114);
+  - the "auto = 4" claim, measured as 5 / 6 / 9 / 13 / **61** at h_ml 68–75 on the canonical's parameters (the review's 22 was at the defaults; both are recorded);
+  - the NA-retry corner, `pump_grad` under the HS conduit, and `ccx_run_mcmc()`'s docstring;
+  - the seasonal rows' instant-vs-monthly-mean sinc(π/12);
+  - PD100's one-year label offset and its 0.76 ppm hold;
+  - the spin-up comments, the causal-interpolation claim, and the NOAA-MBL label;
+  - seven misplaced roxygen blocks;
+  - the DESIGN path, parity wording, §6 banner (measured at `hilda30c`; the canonical is `hilda29e`), and the MM fertilisation note;
+  - worklist A2 (card 6's title is already false under the hold).
+- **Three registry `source` strings and one validator message** were beyond the gate, and I fixed them myself:
+  - `ALPHA_PHOTO_EPS` ("IN USE: 18" → the ledger default, read only when the parameter is absent; every adopted mode runs 15.6);
+  - `KW_PRIOR_LOGSD` (the ±3.2 belongs to the uncorrected 15.9; 0.2 stands);
+  - `TAU_EX_PRIOR_CENTRE` (the then-canonical `hilda33d`);
+  - `paths.R`'s "the canonical's par_mode" → "the checked mode's" ("different parameter vector", which `test-futures-ribbons.R` matches, is kept).
+  - Proof that no value moved: sourced before and after, every non-`source` registry field and every other object is identical (functions compared by deparse). `test-constants.R` 414 / 0, `test-futures-ribbons.R` 65 / 0.
+- **`CLAUDE.md`:** the constants path is now `R/constants.R`, and "bit-parity" is now "roundoff-parity" (≤ 1.3e-16 measured on the canonical).
+- **Noticed, not fixed:** `ccx_run`'s roxygen block is fused onto the next function's (`forcing.R` ~1220).
+- **Code items listed in the review and not touched here:**
+  - `CCX_MODE_RETIRED` missing five names;
+  - the dead fallback mode path in `app/global.R`;
+  - the typed `APP_HIST_YEARS`;
+  - the periodic spin-up's start-of-year δ¹³C / Δ¹⁴C report;
+  - the dormant bugs (review §5).
+
 ## 2026-10-12 (u) — **The IntCal σ bug's impact, MEASURED** (Marcus: "Measure impact first (Recommended)"). Nothing canonical changed: `data/` is untouched and the canonical logpost still reproduces. Driver `calibration/diag_intcal_sigma_impact.R`, run from the frozen tree `~/ccx_frozen/intcal_impact_1b16747`; results in `outputs/diagnostics/intcal_impact_20261012/` (README, per-draw `.rds` with provenance, logs).
 
 **Gates.**

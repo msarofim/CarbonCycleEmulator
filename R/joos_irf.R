@@ -318,6 +318,13 @@ ccx_pulse_forcings <- function(spin, years_fwd, bomb_total_kmol, luc_scale) {
   F_hist <- ccx_build_forcing("historical", c(1750, JOOS_REF_YEAR), prod_c14 = spin$prod_c14,
                               bomb_total_kmol = bomb_total_kmol, luc_scale = luc_scale,
                               enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p))
+  # ⚠ THE FORWARD TABLE'S CLOCK RUNS ONE YEAR BEHIND REAL TIME (documented 2026-10-12, code review;
+  # behaviour unchanged). F_hist ends at t = JOOS_REF_YEAR + 0.958 (Dec 2010), and the state continues
+  # from the END of 2010; but years_fwd starts at JOOS_REF_YEAR, so F_fwd's first row is labelled
+  # t = JOOS_REF_YEAR + 0.042 (Jan 2010). Every forward label is therefore one year early: the AOD
+  # column (the only time-varying background column left after the holds below) enters a year early,
+  # and ccx_irf_pd()'s "release at JOOS_PULSE_YR" happens at real time JOOS_PULSE_YR + 1 (2016.0, not
+  # 2015.0). Measured negligible by the review: IRF(100) 0.37912 -> 0.37921 with the clock aligned.
   F_fwd <- suppressWarnings(ccx_build_forcing("historical", years_fwd, prod_c14 = spin$prod_c14,
                               bomb_total_kmol = 0, luc_scale = luc_scale,
                               enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p)))
@@ -385,6 +392,11 @@ ccx_pulse_ref_state <- function(spin, F_hist) {
   if (ccx_mix_on(spin$params)) sp$tdeep0 <- ccx_mix_tdeep_after(F_hist$gmst, F_hist$t, spin$params, spin$tdeep0)
   co2 <- ccx_pd_co2(r$out)
   sp$pd_hist <- list(year = sort(unique(floor(F_hist$t + 1e-9))),
+                     # ⚠ (documented 2026-10-12, code review) `co2_end` is the LAST OUTPUT ROW, i.e.
+                     # the instantaneous state at t = 2010.958 -- the OPENING state of December 2010,
+                     # before that month's step (392.86 ppm at the canonical). The CO2 that
+                     # ccx_hold_forcing() then holds is the end-of-history state, 393.62 ppm: the free
+                     # background's climate is computed for a CO2 0.76 ppm below the one held.
                      co2 = ccx_pd_annual(r$out$t, co2), co2_end = co2[length(co2)],
                      gmst = ccx_pd_annual(F_hist$t, F_hist$gmst),
                      sst_NH = ccx_pd_annual(F_hist$t, F_hist$sst_anom_NH),
@@ -412,7 +424,9 @@ ccx_pulse_set_climate <- function(F, g, hist = NULL) {
 #' `F` is a HELD forward table (ccx_pulse_forcings()$F_fwd, or a preindustrial one at GMST 0).
 #' Free with a history: the module's response to the held CO2 (`co2_held`, default the state's
 #' own CO2 at the end of the history -- what ccx_hold_forcing() then holds) and the non-CO2 ERF held
-#' at its last historical value. Free with NO history (a preindustrial background): the forcing
+#' at its last historical value. ⚠ (2026-10-12, code review) Not quite: the default, `pd_hist$co2_end`,
+#' is the Dec-2010 OPENING state (392.86 ppm at the canonical), while ccx_hold_forcing() holds the
+#' end-of-history state (393.62) -- 0.76 ppm apart; see ccx_pulse_ref_state(). Free with NO history (a preindustrial background): the forcing
 #' anomaly is zero, so the background stays at GMST 0 -- only the pulse warms.
 #' `coupled = TRUE` is for a background whose CO2 is NOT held (diag_joos_irf.R's "decaying" rows):
 #' its GMST must follow its OWN CO2, so the run and the climate are iterated as ccx_run_coupled()
