@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-12 (b) — the pulse lab shows a TAGGED pulse beside the perturbation, and FaIR on the SAME pulse; card 5a draws FaIR's band; the tie cut is the basin spread; the suite is at card 4's two
 
+> ⚠ **SUPERSEDED** by `notes/handoff_2026-10-12c_code_review.md` (2026-10-12). Read that one first; its §4 restates everything still open here.
+
 **Supersedes** `notes/handoff_2026-10-12_pd100_free_climate.md`. Everything still open from its §4 is restated in §4 below.
 
 Written on Marcus's request ("Yes, write the handoff note"), 2026-10-12. **Nothing is running** except the local app preview and one background session (§5).

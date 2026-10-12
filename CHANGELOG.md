@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (x) — Handoff: `notes/handoff_2026-10-12c_code_review.md` (Marcus: "Yes, write the handoff note"). It supersedes `handoff_2026-10-12b_tagged_pulse_fair_grid.md`, which now points to it. New memory `ccx_flux_trace_snapshot_aliases`; the suite logs at `56b5ceb` and `d36cda1` are committed.
+
 ## 2026-10-12 (w) — **The full suite at `d36cda1`, the pushed state after the review's fixes: 7321 passed, 2 failed, 3 skipped, 19.1 min** (`outputs/diagnostics/suite_20261012_d36cda1.log`). The 2 failures are card 4's, by design. It is identical to `56b5ceb`'s, so the text-only batch (v) changed no behaviour.
 
 **The live app was verified in the browser at 1024 px** after a restart on this code, with 0 `shiny-output-error`. The fixed numbers read as follows:
