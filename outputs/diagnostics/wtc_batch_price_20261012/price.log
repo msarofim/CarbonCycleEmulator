@@ -1,0 +1,29 @@
+mode hilda29e (struct hilda_csl3v0kaidgbemwt), commit 9967a63
+G1  #18 at hilda29e: logpost -1166.949732 vs stored -1166.949732 (shift 0.000000): diff 0.00e+00
+G2  gate opened at the legacy values (0.90, 2.0): likelihood diff vs all-items 0.00e+00
+
+likelihood at hilda29e under #18: -1133.4803 on 26 streams
+item                       d loglik
+alk_surface                 -0.0457
+carb_salinity               -0.0082
+ocean_depth                 +0.0937
+sst_seas_lags               -0.2728
+nuc_share_ts                -0.0110
+alpha_photo_eps             +7.3171
+pump_eps13_org              +3.0633
+intcal_sigma               +96.7867
+ALL (sum of streams)      +106.9490
+interaction (ALL - sum of items): +0.0258
+
+largest stream moves per item:
+  alk_surface      co2_level_SPO +0.529; co2_level_MLO -0.383; d13c_level_MLO +0.244; d14c_SH -0.209; co2_icecore -0.200; d13c_level_SPO -0.180
+  carb_salinity    d13c_level_MLO -0.307; co2_level_SPO +0.228; d13c_level_SPO +0.220; d14c_SH +0.177; co2_level_MLO -0.146; d14c_NH -0.133
+  ocean_depth      d14c_profile_ab +0.287; co2_level_SPO -0.127; ocean_grad_d13c -0.116; ocean_grad_dic -0.095; co2_level_MLO +0.071; d14c_profile_level +0.067
+  sst_seas_lags    co2_icecore -0.639; d13c_seasonal_SPO +0.322; d13c_icecore +0.091; co2_seasonal_SPO -0.037; d13c_seasonal_MLO -0.037; co2_seasonal_MLO +0.014
+  nuc_share_ts     d14c_NH -0.017; d14c_SH +0.006; excess_c14_ocean +0.000
+  alpha_photo_eps  d13c_level_MLO +2.400; d13c_seasonal_MLO +2.291; d13c_level_SPO +1.794; d13c_icecore +1.723; d13c_seasonal_SPO -0.744; d13c_gradient -0.080
+  pump_eps13_org   ocean_grad_d13c +3.208; hs_surf_d13c -0.172; d13c_seasonal_SPO -0.113; d13c_seasonal_MLO +0.096; d13c_icecore +0.085; d13c_level_SPO -0.061
+  intcal_sigma     d14c_intcal +96.787
+  ALL              d14c_intcal +96.726; ocean_grad_d13c +3.114; d13c_level_MLO +2.407; d13c_seasonal_MLO +2.337; d13c_icecore +1.867; d13c_level_SPO +1.745
+
+written /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/wtc_batch_price_20261012/price.rds
