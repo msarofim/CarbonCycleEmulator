@@ -39,7 +39,10 @@ test_that("OFF: ndep_ret 0 ignores even a loud deposition column, bit for bit", 
   sp <- ccx_spinup(ccx_default_params())
   F0 <- suppressWarnings(ccx_build_forcing("historical", c(1900, 1980), prod_c14 = sp$prod_c14))
   expect_true(all(c("ndep_NH", "ndep_SH") %in% names(F0)))
-  expect_identical(length(CCX_FORCING_COLS), 19L)
+  # RE-EXPRESSED 2026-10-12 (Marcus: "Re-express both (Recommended)"): the property this guards is that the
+  # deposition columns are IN the C++ layout, at their place -- not the total count, which test-forcing.R
+  # pins (it moved 19 -> 20 when nuc_share_NH was appended for label hilda_csl3v0kaidgbemwtc)
+  expect_identical(CCX_FORCING_COLS[18:19], c("ndep_NH", "ndep_SH"))
   a <- suppressWarnings(ccx_run_fast(sp, F0))
   b <- suppressWarnings(ccx_run_fast(sp, .nd_forcing(sp)))
   expect_identical(a$out, b$out)

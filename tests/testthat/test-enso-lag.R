@@ -263,8 +263,12 @@ test_that("GATE: the ledger, the spec tied to its constants, apply / undo exact"
   expect_error(ccx_apply_gate("hilda_csl3v0kaidgb"), "applied ONCE")   # a PARTIAL re-apply too
   ccx_unapply_gate(h); h <- character(0)
   expect_identical(CCX_PARAM_TABLE, tab0); expect_identical(CCX_PARAM_NAMES, nm0)
-  # the order a pinned lag returns to
-  expect_identical(utils::tail(.CCX_PARAM_ORDER, 1), "lag_enso_land")
+  # the order a pinned lag returns to: last of the first two gates' names. RE-EXPRESSED 2026-10-12
+  # (Marcus: "Re-express both (Recommended)"): the citation batch's gate (CCX_PARAM_GATED_WTC) appends
+  # its two names after the lag, so the lag is no longer last OVERALL; its own place is unchanged.
+  expect_identical(utils::tail(setdiff(.CCX_PARAM_ORDER, names(CCX_PARAM_GATED_WTC)), 1), "lag_enso_land")
+  expect_identical(utils::tail(.CCX_PARAM_ORDER, length(CCX_PARAM_GATED_WTC) + 1L),
+                   c("lag_enso_land", names(CCX_PARAM_GATED_WTC)))
 })
 
 test_that("GATE: the objective refuses the lag fitted under kaidgb, and missing under kaidgbe", {
