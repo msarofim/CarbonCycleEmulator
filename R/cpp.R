@@ -591,7 +591,10 @@ ccx_run_prepared <- function(y, prep, F, retry_na = TRUE, enso_hist = NULL, tdee
   if (!prep$hs_on) guard_cols <- grep("^hs_", guard_cols, invert = TRUE, value = TRUE)
   if (!isTRUE(prep$eq_on)) guard_cols <- grep("^eq_", guard_cols, invert = TRUE, value = TRUE)
   if (!isTRUE(prep$tr_on)) guard_cols <- grep("^tr_", guard_cols, invert = TRUE, value = TRUE)
-  while (retry_na && anyNA(r$out[, guard_cols]) && ss < CCX_SUBSTEPS_MAX) {
+  # ... AND THE FINAL STATE (2026-10-12, code review sec.5): `out` holds month-OPENING states, so
+  # a NaN made during the LAST month reached only `state` and escaped the guard. The state holds
+  # only the boxes the structure has, so it is never NA by contract.
+  while (retry_na && (anyNA(r$out[, guard_cols]) || anyNA(r$state)) && ss < CCX_SUBSTEPS_MAX) {
     ss <- min(2L * ss, CCX_SUBSTEPS_MAX)
     r  <- one(ss)
   }

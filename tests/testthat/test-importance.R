@@ -27,6 +27,21 @@ test_that("ESS is exact on equal and on one-hot weights; a failed draw has zero 
   expect_equal(d2$n_failed, 2L); expect_equal(d2$ess, 2)
 })
 
+test_that("ONE surviving draw, a few equal survivors, or none at all is a FAIL, never a pass", {
+  # THE DEFECT (code review 2026-10-12 sec.5): with one surviving draw the tail window had no cutoff
+  # draw, the exceedances were EMPTY, all() of an empty vector is TRUE, and k-hat came back -Inf with
+  # k_ok TRUE. Each case below PASSED before the fix (measured), so each line has power.
+  d1 <- ccx_is_diagnostics(c(0, rep(-Inf, 999)))
+  expect_identical(d1$k_hat, Inf); expect_false(d1$k_ok); expect_equal(d1$ess, 1)
+  d4 <- ccx_is_diagnostics(c(rep(0, 4), rep(NA, 996)))      # four equal survivors: M = 1, "no tail"
+  expect_identical(d4$k_hat, Inf); expect_false(d4$k_ok)
+  d0 <- expect_silent(ccx_is_diagnostics(rep(-Inf, 50)))   # every draw failed: no warning, no NaN
+  expect_identical(d0$k_hat, Inf); expect_false(d0$k_ok)
+  expect_equal(d0$ess, 0); expect_equal(d0$n_failed, 50L); expect_identical(d0$w, numeric(50))
+  # and the legitimate "no tail" pass still holds where the window is a real tail (M >= 5)
+  expect_true(ccx_is_diagnostics(rep(0, 25))$k_ok)          # M = ceiling(min(5, 15)) = 5
+})
+
 test_that("a proposal WIDER than the target passes the k rule; a NARROWER one fails it", {
   # target N(0, 1) in 1-D; proposal N(0, s^2). Wider (s = 1.5): bounded weights. Narrower: the weights
   # exp(x^2 (1/s^2 - 1) / 2) have a Pareto tail with k = 1 - s^2 EXACTLY -- the textbook failure, with a known

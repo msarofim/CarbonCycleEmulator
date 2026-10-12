@@ -495,6 +495,11 @@ ccx_scenario_emissions <- function(scenario) {
 #'   hemispheric split, monthly interpolation, annual-total conservation -- is
 #'   applied identically to a custom path and to an SSP. `scenario` still names
 #'   the run for labelling and still selects the non-CO2 climate background.
+#'   ⚠ ITS `luc_GtC` IS MULTIPLIED BY `luc_scale` like any other land-use series
+#'   (code review 2026-10-12 sec.5): a 100 GtC LAND-USE pulse placed in this column
+#'   arrives as 100 x luc_scale (91.4 GtC at hilda29e). No caller does this -- the
+#'   app's pulses are fossil -- so it is documented, not changed; divide a land-use
+#'   perturbation by `luc_scale`, or put it in `fossil_GtC`, to keep its size.
 #' @param sink_rate,sink_mode the artificial mid-century sink (2026-08-23c).
 #'   ARGUMENTS, not just env constants, so a diagnostic can build all three arms
 #'   in ONE process -- CCX_ARTIFICIAL_SINK_{RATE,MODE} are resolved when this
@@ -675,6 +680,20 @@ ccx_build_forcing <- function(scenario = "historical",
   # flipped that day -- CCX_EMIS_METHOD_DEFAULT is "constant" (R/constants.R),
   # restamped on every registered mode at its priced move, no refit -- so every
   # caller that names no method is now causal; the pulse lab no longer differs.
+  # ⛔ PAST THE LAST YEAR OF DATA THE SERIES IS HELD FLAT (approx(rule = 2) inside
+  # ccx_annual_to_monthly()), which used to happen with nothing said (code review 2026-10-12
+  # sec.5). Every registered run stays inside its data (GCB to its last year, van Vuuren to
+  # 2500); a run past the end now says so, as the GMST block below already did -- in the same
+  # "held FLAT" words, so lib_design_gates.R's dg_run(), whose final year is held BY DESIGN,
+  # muffles both with its one filter.
+  for (nm in c("fossil_GtC", "luc_GtC")) {
+    e_end <- max(e$year[is.finite(e[[nm]])])
+    if (max(yrs) > e_end)
+      warning(sprintf(paste0("%s (%s) ends %d; years %d-%d are held FLAT at the %d value. ",
+                             "Supply the series to %d, or end the run at %d."),
+                      nm, src, e_end, e_end + 1L, max(yrs), e_end, max(yrs), e_end),
+              call. = FALSE)
+  }
   foss <- ccx_annual_to_monthly(e$year, e$fossil_GtC, yrs, method = emis_method)
   luc  <- ccx_annual_to_monthly(e$year, e$luc_GtC,    yrs, method = emis_method)
 
@@ -1414,8 +1433,21 @@ ccx_sst_anom_from_gmst <- function(F) {
     if (FORC_SST_PRE1850_MEAN && any(before)) v[before] <- mean(ocol[so$year <= min(so$year) + 50])
     beyond <- F$year > last
     if (any(beyond)) {
-      seam_o <- mean(ocol[so$year > last - CCX_SST_SPLICE_YR])
-      seam_g <- mean(F$gmst[F$year > last - CCX_SST_SPLICE_YR & F$year <= last])
+      # ⛔ ONE WINDOW FOR BOTH MEANS, AND A REFUSAL WHEN THERE IS NONE (code review 2026-10-12
+      # sec.5). The obs mean ran over the whole seam window while the GMST mean ran over the
+      # window's years the FORCING covers: a run starting inside the window matched means over
+      # DIFFERENT years, and one starting after it took mean(empty) = NaN -- NaN SST, which the
+      # core silently replaced with sst_scale x gmst. Both means now run over the covered years,
+      # which is the whole window (and the identical arithmetic) for every run that starts by then.
+      cov <- intersect(so$year[so$year > last - CCX_SST_SPLICE_YR], unique(F$year))
+      if (!length(cov))
+        stop(sprintf(paste0("ccx_sst_anom_from_gmst(): the forcing (%d-%d) covers none of the SST ",
+                            "seam window %d-%d, so the post-%d SST cannot be matched to the record. ",
+                            "Start the run by %d."),
+                     min(F$year), max(F$year), last - CCX_SST_SPLICE_YR + 1L, last, last, last),
+             call. = FALSE)
+      seam_o <- mean(ocol[so$year %in% cov])
+      seam_g <- mean(F$gmst[F$year %in% cov])
       v[beyond] <- seam_o + ratio * (F$gmst[beyond] - seam_g)
     }
     F[[paste0("sst_anom_", h)]] <- v

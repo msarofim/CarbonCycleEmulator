@@ -528,8 +528,20 @@ ccx_comparable_rows <- function(rows, structs) {
   # row's target, so two arms differing only in it still run one set of rows
   gates <- vapply(structs, ccx_gate_open, logical(1))
   if (length(unique(gates)) > 1L) common <- setdiff(common, LIK_IMB_ROWS)
+  # ⛔ THE LOW-PASS SWITCHES TOO (2026-10-12, code review sec.5). Under objective #17 / #18 a GCB
+  # sink row is scored on its LOW-PASS part (ccx_land_highpass_cost()); an arm without the switch
+  # scores the same NAME year by year -- a different row with a different normalisation. Dropped
+  # when the arms' switches differ (an absent switch = year by year). Live pairs this bites:
+  # hilda29e vs hilda33p / hilda34g / hilda33d (both rows) and vs hilda29w (the ocean row).
+  sw_of <- function(s, f) { v <- ccx_struct_block(s)[[f]]; if (is.null(v)) NA_real_ else as.numeric(v) }
+  for (row in names(LIK_LOWPASS_SWITCHES)) {
+    v <- vapply(structs, sw_of, numeric(1), f = LIK_LOWPASS_SWITCHES[[row]])
+    if (length(unique(v)) > 1L) common <- setdiff(common, row)
+  }
   common
 }
+# Each GCB sink row and the structure field that switches it to its low-pass part.
+LIK_LOWPASS_SWITCHES <- c(gcb_land_sink = "gcb_land_lowpass_df", gcb_ocean_sink = "gcb_ocean_lowpass_df")
 
 #' GCB's imbalance as the D3 rows use it: data.frame(year, I), one row per GCB year
 #'
@@ -2663,7 +2675,16 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
     m <- ms$d14[[hh]]
     if (is.null(m)) next
     k <- match(o$year, m$year); good <- !is.na(k)
-    sd <- sqrt(o$sd[good]^2 + err$sigma_d14c^2)
+    # ⛔ A NULL sigma_d14c ZEROED THE ROW (2026-10-12, code review sec.5): sqrt(o$sd^2 + NULL^2) is
+    # numeric(0), dnorm() with a zero-length sd is numeric(0), and its sum is 0 -- so both D14C rows
+    # vanished from the objective with nothing said. The objective always supplies it; ~80
+    # diagnostics build `err` by hand. `[[` and not `$`: a partial match would read another name.
+    s14 <- err[["sigma_d14c"]]
+    if (any(good) && (!is.numeric(s14) || length(s14) != 1L || !is.finite(s14) || s14 < 0))
+      stop("ccx_loglik(): err$sigma_d14c is ", if (is.null(s14)) "NULL" else format(s14),
+           " -- the d14c_", hh, " row needs one finite, non-negative value (permil); a missing ",
+           "one used to drop the row silently.")
+    sd <- sqrt(o$sd[good]^2 + s14^2)
     pred <- m$mean[k[good]]
     mon  <- if (hh == "NH") obs$d14_nh else obs$d14_sh
     if (!is.null(mon) && !is.null(o$n) && any(o$n[good] < 12L)) {

@@ -1410,6 +1410,10 @@ NumericMatrix ccx_deriv_cpp(NumericMatrix y, double t, List p, NumericVector f, 
   if (f.size() != N_FORCING)
     Rcpp::stop("ccx_deriv_cpp(): forcing vector has %d element(s), N_FORCING is %d", (int) f.size(), N_FORCING);
   Aux A = unpack_aux(aux); Par P = unpack_par(p);
+  // STATE GUARD (2026-10-12, code review sec.5): y is read by POSITION as NB x 3 (IX()), and NB
+  // is only known once unpack_aux() has run. See ccx_run_cpp().
+  if (y.nrow() != NB || y.ncol() != 3)
+    Rcpp::stop("ccx_deriv_cpp(): state is %d x %d; the prepared structure needs %d x 3", y.nrow(), y.ncol(), NB);
   NumericMatrix dy(NB, 3);
   deriv(y.begin(), t, P, f.begin(), land_enso, mix_g, A, dy.begin());
   return dy;
@@ -1435,6 +1439,12 @@ List ccx_run_cpp(NumericMatrix y0, List p, NumericMatrix forcing,
   if (mix_g.size() != forcing.nrow())
     Rcpp::stop("ccx_run_cpp(): mix_g has %d value(s) for %d forcing row(s)", (int) mix_g.size(), forcing.nrow());
   Aux A = unpack_aux(aux); Par P = unpack_par(p);
+  // STATE GUARD (2026-10-12, code review sec.5). y0 is copied by POSITION into an NB x 3
+  // column-major state, and NB is set by unpack_aux() above. A state with EXTRA rows ran
+  // silently with every tracer column shifted (two extra rows: d13c_NH -734 permil); one with
+  // too FEW was an out-of-bounds read. Neither language reported either.
+  if (y0.nrow() != NB || y0.ncol() != 3)
+    Rcpp::stop("ccx_run_cpp(): state is %d x %d; the prepared structure needs %d x 3", y0.nrow(), y0.ncol(), NB);
   const int n = forcing.nrow();
   const int NS = NB * 3;
 

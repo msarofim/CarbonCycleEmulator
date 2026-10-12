@@ -456,3 +456,17 @@ test_that("the comparable-row rule drops the D3-moved rows exactly when the obje
   # MUTATION: unequal inputs are refused, not silently recycled
   expect_error(ccx_comparable_rows(list(r_c), c(s_c, s_ctl)), "one row-name vector per structure")
 })
+
+test_that("the comparable-row rule drops a GCB sink row whose LOW-PASS switch differs (code review 2026-10-12 sec.5)", {
+  # Labels only, no model run. Both arms below have the D2/D3 gate OPEN, so the D3 rule keeps the
+  # sink rows; before this fix they were summed although one arm scored them low-pass and the other
+  # year by year.
+  rows <- c("co2_MLO", "gcb_land_sink", "gcb_ocean_sink")
+  emwt <- "hilda_csl3v0kaidgbemwt"; emw <- "hilda_csl3v0kaidgbemw"; em <- "hilda_csl3v0kaidgbem"
+  expect_true(all(vapply(c(emwt, emw, em), ccx_gate_open, logical(1))))   # precondition: one D3 state
+  expect_setequal(ccx_comparable_rows(list(rows, rows), c(emwt, em)), "co2_MLO")              # both switches differ
+  expect_setequal(ccx_comparable_rows(list(rows, rows), c(emwt, emw)), c("co2_MLO", "gcb_land_sink"))  # ocean only
+  expect_setequal(ccx_comparable_rows(list(rows, rows), c(emwt, emwt)), rows)                 # same switches: keep all
+  # every switch named in LIK_LOWPASS_SWITCHES is a field some structure actually sets
+  expect_true(all(LIK_LOWPASS_SWITCHES %in% names(ccx_struct_block(emwt))))
+})

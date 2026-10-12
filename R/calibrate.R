@@ -380,8 +380,14 @@ CCX_PARAM_TABLE <- list(
   # init = the GEOMETRIC centre, sqrt(1161.6 * 27808.0) = 5683.5, because the
   # arithmetic centre (14485) of a 24x box is 2.3x the working arm's 6356 and
   # would start the cold control with the deep far too young.
+  # ⛔ THE PRIOR READS THE TABLE'S OWN BOX (2026-10-12, code review sec.5). It was the literal
+  # dunif(x, 1161.6, 27808.0): ccx_adopt_mode_band() moves `lo`/`hi` to a mode file's recorded
+  # `kz_bracket` and could not move a literal, so a file fitted under a WIDER bracket would decode
+  # kz outside the literal box and score a prior of -Inf. Dormant: every registered mode records
+  # exactly this box (checked 2026-10-12), so the value is unchanged everywhere.
   kz          = list(tr = "logit", lo = 1161.6, hi = 27808.0, init = 5683.5,
-                     prior = function(x) dunif(x, 1161.6, 27808.0, log = TRUE)),
+                     prior = function(x) dunif(x, CCX_PARAM_TABLE[["kz"]]$lo,
+                                           CCX_PARAM_TABLE[["kz"]]$hi, log = TRUE)),
   # ---- THE FITTED STRUCTURE PARAMETERS (2026-09-06d; 26 -> 28; h_hs 09-07;
   # u_hs 09-08d) ----------
   # Marcus's ruling on prereg_2026-09-07 sec.3-4: HILDA's attachment, z_K,

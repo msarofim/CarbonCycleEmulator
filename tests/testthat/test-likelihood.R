@@ -1159,3 +1159,20 @@ test_that("the NEP amplitude factors are the measured scale of the SHIPPED phi",
   expect_false(isTRUE(all.equal(refit("NH_psnnet", 50), ccx_const("SEAS_NPP_AMP_NH"),
                                 tolerance = 1e-3)))
 })
+
+test_that("a missing or non-finite sigma_d14c is REFUSED, not scored as two empty D14C rows", {
+  # THE DEFECT (code review 2026-10-12 sec.5): sqrt(o$sd^2 + NULL^2) is numeric(0), so with
+  # err$sigma_d14c absent both D14C rows summed to exactly 0 and left the objective silently.
+  skip_if_no_cpp()
+  f <- lik_fixture()
+  ps <- ccx_loglik(f$out, f$obs, f$err, by_stream = TRUE)
+  # PRECONDITION (power): the fixture scores both rows, and neither is 0 -- the value the bug wrote
+  expect_true(all(c("d14c_NH", "d14c_SH") %in% names(ps)))
+  expect_true(all(ps[c("d14c_NH", "d14c_SH")] != 0))
+  for (bad in list(NULL, NA_real_, Inf, c(4, 5), -1)) {
+    e <- f$err; e["sigma_d14c"] <- list(bad)
+    if (is.null(bad)) e$sigma_d14c <- NULL
+    expect_error(ccx_loglik(f$out, f$obs, e), "sigma_d14c",
+                 info = paste("sigma_d14c =", deparse(bad)))
+  }
+})

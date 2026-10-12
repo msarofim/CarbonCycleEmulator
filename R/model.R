@@ -974,8 +974,15 @@ ccx_fert_factor <- function(chi, p, chi0 = ccx_const("CO2_PI_PPM")) {
   # (The log path is left EXACTLY as it was, pole and all, so this commit cannot
   # move a single existing number.)
   d  <- chi - chi0
-  kk <- max(p$fert_k, 1e-6)
-  pmax(1 + p$beta_max * d / pmax(kk + d, 1e-6), 0)
+  # `[[` AND A PRESENCE CHECK, not `$` (code review 2026-10-12 sec.4): `fert_k` PREFIXES
+  # `fert_k_prior`, so with `fert_k` absent `p$fert_k` partial-matched the prior SWITCH and ran
+  # K = 1 with nothing said (demonstrated; latent, as every live list carries `fert_k`).
+  kk <- p[["fert_k"]]
+  if (is.null(kk))
+    stop("ccx_fert_factor(): the saturating (MM) form needs `fert_k`, which is absent from the ",
+         "parameter list.")
+  kk <- max(kk, 1e-6)
+  pmax(1 + p[["beta_max"]] * d / pmax(kk + d, 1e-6), 0)
 }
 
 #' Pro-rata shares of the four land pools, by preindustrial equilibrium stock.
@@ -4184,6 +4191,18 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     stop("ccx_prepare(): q_conv > 0 cannot be combined with the HILDA boxes (hs_frac > 0): the ",
          "conveyor's legs are per a_oc while the boxes are a_ls / a_ml, so the declared Sv is ",
          "wrong by (1 - hs_frac). The conveyor is retired (DESIGN 3.4a D).")
+  # ... and the conveyor SINKING INTO LAYER 1 under the seasonal mixed layer (code review
+  # 2026-10-12 sec.5). The interhemispheric deep limb sits OUTSIDE the hemisphere loop and divides
+  # by the STATIC grid$dz[cg$s + 1]; under the seasonal ML layer 1's thickness moves with h_ml(t)
+  # (ccx_grid_at_h_ml(): only dz[1] and dz[2] move), so at conv_sink = 1 the limb read the wrong
+  # concentration all year. Both cores do the same. Refused rather than fixed in both: the conveyor
+  # is retired, and every deeper sink layer is static and unaffected.
+  .cg <- ccx_conveyor_geom(p, grid)
+  if (!is.null(.cg) && .cg$s == 1L && ccx_seas_ml_ls_on(p))
+    stop("ccx_prepare(): q_conv > 0 with conv_sink = 1 cannot be combined with the seasonal mixed ",
+         "layer (seas_ml = 1): the conveyor's deep limb divides by layer 1's STATIC thickness, which ",
+         "the seasonal mixed layer moves. Sink deeper (conv_sink >= 2). The conveyor is retired ",
+         "(DESIGN 3.4a D).")
   bn  <- ccx_box_names(grid$nl, hs_on, eq_on, tr_on, inert_on)
   idx <- lapply(HEMIS, function(h) {
     v <- list(

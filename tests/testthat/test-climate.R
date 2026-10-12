@@ -115,7 +115,9 @@ test_that("the carbon-climate feedback is actually engaged", {
   # cannot hide.
   sp <- cl_sp()
   on  <- cl_run585()$climate
-  off <- ccx_run_coupled(sp, "ssp585", c(1750, 2100), max_iter = 1L)$climate
+  # one pass is unconverged BY DESIGN here, and since 2026-10-12 (code review sec.5) it says so
+  off <- expect_warning(ccx_run_coupled(sp, "ssp585", c(1750, 2100), max_iter = 1L),
+                        "did NOT converge")$climate
   k <- on$year == 2100
   expect_gt(on$co2_ppm[k] - off$co2_ppm[k], 30)
   expect_gt(on$gmst[k] - off$gmst[k], 0.1)

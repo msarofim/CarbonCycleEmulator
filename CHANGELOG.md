@@ -2,6 +2,50 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (aa) — **The code review's §6 gap is closed: gates 1–2 and R↔C++ parity now run ON THE CANONICAL** (Marcus, verbatim: "§6 canonical-path tests"). New `tests/testthat/test-canonical-contracts.R`, 27 / 0, ~13 s. It runs whatever `ccx_mode_file()` names, so it follows the next adoption with no edit.
+
+Every bound is an existing one: DESIGN §6 gate 1's ~1e-10, `test-conservation.R`'s 1e-12 relative to the largest tendency, and `test-parity.R`'s tolerances, all unchanged. Measured at `hilda29e`:
+
+| contract | measured | bound | power check (must FAIL the bound) |
+|---|---|---|---|
+| gate 1, `ccx_deriv` with sources off: spun-up 1750, Dec-1997 El Niño, min-ENSO month | 12C ≤ 5.4e-16, 13C ≤ 6.2e-16, 14C (with decay) ≤ 7.5e-16 | 1e-12 | sources ON: ΣdC equals the fossil source (7.91 GtC/yr) to 7.9e-16 |
+| gate 2, 50 quiet years on the periodic orbit, every box and tracer, relative | 8.5e-12 (NH atmosphere) | 1e-10 | the same 50 years from the ASEASONAL fixed point: **0.56** (the 09-09v F2 defect) |
+| parity, 1955–1975 from one transient state (lagged land ENSO and stratification memory carried) | CO₂ ≤ 5.1e-16 rel; δ¹³C 6.7e-13 ‰; Δ¹⁴C 6.8e-13 ‰; final state ≤ 1.3e-16 rel | 1e-13 rel; 1e-9 / 1e-8 ‰ | a one-month shift of the start state: 1.6e-5 |
+
+- The canonical exercises everything the defaults did not: HS/HD, inert soil, the seasonal mixed layer and entrainment, the L2 limb, N deposition, the ENSO terms and the land lag, and the stratification feedback.
+- **Noticed, not changed:** the R core warns "Temperature outside fitted range [2.0, 35.0] degC" 480 times in those 20 years. The HS box sits at 1.6–3.3 °C, below the carbonate-constant fit's range (`R/carbonate.R:53`). Both cores extrapolate identically (parity holds), and only R says so. The test muffles that exact text. This is the carbonate fit's range, a second one beside the kinetic α_as line the review noted (§4).
+
+## 2026-10-12 (z) — **The code review's §5 dormant bugs: twelve of thirteen are now errors or warnings, and one is documented** (Marcus, verbatim: "§5 dormant-bug guards"). The `$` partial match the review demonstrated in `ccx_fert_factor` is fixed with them. **No canonical number moved:**
+- `test-mode-file` (the stored streams reproduce) is 229 / 0, and its comparison prints −1108.1126 on 24 rows, as before;
+- the Futures-tab sweep (Scenarios with all 7 ticked, Build-your-own at every extreme, the pulse lab on 3 backgrounds × 2 years × 2 sizes × FaIR on/off) gave **186 renders, 0 errors, and 0 of the new warnings**.
+
+**New tests.** `tests/testthat/test-dormant-guards.R` is 24 / 0. **Every block FAILS on the pre-fix code** (run at `e6de59c` in a worktree: 10 failures across all its blocks). The guards that live beside their own subjects are tested there.
+
+| # | defect (review §5) | now | test |
+|---|---|---|---|
+| 1 | `ccx_is_diagnostics()` with ONE surviving draw: an empty tail read as "no tail", k-hat −Inf, `k_ok` TRUE. 2–4 equal survivors passed the same way. | k-hat = Inf whenever the tail window has < 5 draws, the fit's own 5-exceedance rule. All-failed returns a stated FAIL, not NaN. | `test-importance` 29 / 0; 9 failures pre-fix |
+| 2 | `ccx_run_mcmc()` cannot sample the canonical | **unchanged**: it already stops loudly, and its docstring was corrected in (v) | — |
+| 3 | a NULL `sigma_d14c` zeroed both Δ¹⁴C rows (`numeric(0)` sd sums to 0) | refused by name, as are NA, Inf, a vector or a negative value; read with `[[` | `test-likelihood` 248 / 0; 5 / 5 fail pre-fix |
+| 4 | `kz`'s prior was a literal box that `ccx_adopt_mode_band()` could not move | it reads the table's live `lo`/`hi`. **Identical values**: all 11 registered modes record the literal box | dormant-guards |
+| 5 | `ccx_comparable_rows()` ignored the low-pass switches | it drops a GCB sink row when the arms' `gcb_*_lowpass_df` differ. The live pairs this bites: `hilda29e` vs `33p` / `34g` / `33d` (both rows), vs `29w` (ocean). `test-mode-file`'s arm set already dropped them through the D3 gate. | `test-mode-file`; mutation 2 failures |
+| 6 | the C++ core never checked the state's row count (two extra rows ran with d13c_NH −734 ‰) | `ccx_run_cpp` and `ccx_deriv_cpp` stop on anything but NB × 3 | dormant-guards |
+| 7 | the NA-retry read only month-opening rows, so a NaN made in the final month escaped | the final state is guarded too; the state is never NA by contract | dormant-guards; mutation caught |
+| 8 | the SST seam: a start after the window gave NaN SST, and the core silently swapped formulas. A start inside the window matched means over DIFFERENT years. | Both means run over the covered years, which is the whole window, **bit-identical** for every run that starts by 2016. No coverage stops. | dormant-guards (identity + refusal) |
+| 9 | emissions held flat past the data end with nothing said | warned, in the GMST warning's own "held FLAT" words, so `lib_design_gates.R`'s `dg_run()` (whose 2025 is held BY DESIGN) muffles both with its one filter. My first wording ("HELD FLAT") slipped past that filter; the sweep caught it on the review tab. | dormant-guards |
+| 10 | `ccx_temperature_from_erf()` did not flag a late start, contrary to its docs | warned (a single-year baseline) | dormant-guards |
+| 11 | `ccx_run_coupled()` returned `converged = FALSE` silently | warned. `test-climate`'s deliberate one-pass run now asserts the warning. | `test-climate` 35 / 0 |
+| 12 | the retired conveyor's deep limb divides by STATIC `dz` | `conv_sink = 1` under the seasonal ML is refused in `ccx_prepare()`; deeper layers are static and allowed | dormant-guards |
+| 13 | a land-use pulse in `emissions` is scaled by `luc_scale` (100 → 91.4 GtC) | **documented on `@param emissions`, not changed**: no caller does it (the app's pulses are fossil) | — |
+| §4 | `p$fert_k` partial-matched `fert_k_prior` when `fert_k` was absent (K = 1) | `[[` plus a presence check. The other prefix pairs (`beta`, `kz`, `tau_ex`, `sst_eq`, `sst_tr`) stay latent; a generic guard would refuse names that are legitimately absent and already read with `[[` (the `w_e` / `w_eq` case). | dormant-guards |
+
+- **C++ rebuilt** (`src/ccx_core.cpp`, guards only). `test-parity` 82 / 0.
+- **Still open for Marcus:** the app never reads `retried` or `converged`. Both now reach the console as warnings, but nothing on screen says so; that would be copy.
+- **Citation sources (the 7 with nothing on disk):** a read-only subagent's report, `notes/constants_citation_sources_7_2026-10-12.md`. I spot-checked three locators against the fetched PDFs:
+  - Kovaltsov 2012: **1.88** atoms cm⁻² s⁻¹ is the 1750–1900 mean (1.64 is 1951–2010). My first recollection of it was wrong; the report is right.
+  - Charette & Smith 2010 Table 2: 3682.2 m.
+  - IERS 2010: 84381.406″.
+  - HTML-sourced locators were not checked.
+
 ## 2026-10-12 (y) — **The code review's §4 code items are fixed** (Marcus, verbatim: "Review §4 code items", in the same answer as "Citations first, one refit (Recommended)"). No app number and no stored logpost changed: `test-mode-file.R` (the canonical's streams reproduce) is 224 / 0.
 
 - **`CCX_MODE_RETIRED` gains the five names it lacked** (`R/paths.R`): `hilda30c`, `hilda30h`, `hilda31p`, `hilda30e`, `hilda30s`.

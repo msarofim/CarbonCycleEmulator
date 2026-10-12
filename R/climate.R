@@ -114,7 +114,13 @@ ccx_temperature_from_erf <- function(erf, years, mod = ccx_climate_module(),
                                      baseline = mod$baseline) {
   T <- ccx_climate_irf_filter(erf, mod)
   k <- years >= baseline[1] & years <= baseline[2]
-  if (any(k)) T - mean(T[k]) else T - T[1]
+  if (any(k)) return(T - mean(T[k]))
+  # FLAGGED, as the doc above always said (code review 2026-10-12 sec.5: it was not). The
+  # anomaly is then relative to the FIRST year, a single-year baseline the standing rule forbids.
+  warning(sprintf(paste0("ccx_temperature_from_erf(): the run (%d-%d) starts after the %d-%d ",
+                         "baseline, so the anomaly is relative to %d, a SINGLE year."),
+                  min(years), max(years), baseline[1], baseline[2], years[1]), call. = FALSE)
+  T - T[1]
 }
 
 #' The module's 3-timescale response to an annual forcing series, from a ZERO initial state
@@ -330,6 +336,12 @@ ccx_run_coupled <- function(spin, scenario = "ssp245", years = c(1750, 2100),
                     rng[1], rng[2], CLIM_ERF_RANGE_SLACK,
                     mod$co2_erf_range[1], mod$co2_erf_range[2]), call. = FALSE)
 
+  # NOT CONVERGED IS SAID, not only returned (code review 2026-10-12 sec.5): `converged` was
+  # FALSE silently and the app never reads it. The result is the LAST pass.
+  if (!(delta < tol))
+    warning(sprintf(paste0("ccx_run_coupled(): the climate loop did NOT converge in %d pass(es) ",
+                           "(max |change| %.2g K, tolerance %.0e K); the result is the last pass."),
+                    iter, delta, tol), call. = FALSE)
   c(r, list(climate = data.frame(year = yrs, co2_ppm = co2_yr,
                                  erf_co2 = ccx_erf_co2(co2_yr, mod),
                                  erf_nonco2 = erf_nc, gmst = gmst_path),

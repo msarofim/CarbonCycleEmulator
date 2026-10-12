@@ -47,6 +47,12 @@ ccx_gpdfit <- function(x, wip = TRUE, min_grid_pts = 30L) {
 #' @return list(S, n_failed, ess, ess_frac, max_w, k_hat, k_ok_below, k_ok, w = normalised weights)
 ccx_is_diagnostics <- function(lw) {
   S <- length(lw); ok <- is.finite(lw)
+  k_lim <- min(1 - 1 / log10(S), 0.7)
+  # EVERY draw failed (2026-10-12, code review sec.5): no weights at all -- a FAIL, stated, rather
+  # than NaN weights and a max() warning.
+  if (!any(ok))
+    return(list(S = S, n_failed = S, ess = 0, ess_frac = 0, max_w = 0,
+                k_hat = Inf, k_ok_below = k_lim, k_ok = FALSE, w = numeric(S)))
   lwo <- lw[ok] - max(lw[ok])
   w <- numeric(S); w[ok] <- exp(lwo); w <- w / sum(w)
   ess <- 1 / sum(w^2)
@@ -58,8 +64,13 @@ ccx_is_diagnostics <- function(lw) {
   # a tail with fewer than 5 distinct exceedances is DEGENERATE: a handful of draws carry the weight, and no
   # tail shape can be fitted -- that is the failure, so it reads as k-hat = Inf, never as an error or a pass.
   # (All-zero exceedances = equal top weights = no tail at all: -Inf, a pass.)
-  k_hat <- if (all(exc <= 0)) -Inf else if (sum(exc > 0) < 5L) Inf else ccx_gpdfit(exc[exc > 0])$k
-  k_lim <- min(1 - 1 / log10(S), 0.7)
+  # ⛔ BUT ONLY ON A TAIL OF AT LEAST 5 DRAWS (2026-10-12, code review sec.5). With ONE surviving draw
+  # M = 1, there is no cutoff draw, `exc` is EMPTY, all(exc <= 0) is TRUE of an empty vector, and the
+  # diagnostic returned k-hat -Inf and k_ok TRUE -- a pass for the worst possible proposal. Two to four
+  # equal survivors passed the same way. The 5 is the SAME rule as the fit's own (fewer than 5
+  # exceedances cannot be fitted), applied to the window rather than to the exceedances.
+  k_hat <- if (M < 5L || So <= M) Inf else if (all(exc <= 0)) -Inf else
+    if (sum(exc > 0) < 5L) Inf else ccx_gpdfit(exc[exc > 0])$k
   list(S = S, n_failed = sum(!ok), ess = ess, ess_frac = ess / S, max_w = max(w),
        k_hat = k_hat, k_ok_below = k_lim, k_ok = isTRUE(k_hat < k_lim), w = w)
 }
