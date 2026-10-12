@@ -287,12 +287,15 @@ CCX_CONSTANTS <- list(
   # ccx_prepare()'s aux (`alpha_photo`), whose comment cited "the constants.R
   # note" -- a note that never existed (review 09-14 g, root cause #3). The
   # VALUE is the C3 GPP-weighted global mean; the WHOLE-biosphere value is
-  # lower because C4 plants (~25 % of GPP) discriminate ~3.6 permil:
+  # lower because C4 plants (~20-23 % of GPP) discriminate ~3.6 permil:
   #   Lloyd & Farquhar (1994) Oecologia 99:201-215, abstract: C3 GPP-weighted
   #   17.8 permil (12.9 xerophytic woods/shrub to 19.6 cool deciduous forest);
-  #   C4 3.6; TOTAL 14.8 at 25 % C4. Later work brackets the total at 15-18
-  #   (Still et al. 2003 GBC 17:1006, C4 ~23 % of GPP; Suits et al. 2005 GBC
-  #   19:GB1017; Scholze et al. 2003 GRL 30:1097).
+  #   C4 3.6; TOTAL 14.8 at 21 % C4. Still et al. 2003 GBC 17:1006 give 16.5 at
+  #   C4 = 23 % of GPP; Suits et al. 2005 GBC 19:GB1017 15.9 (C3 19.2).
+  #   ⚠ CORRECTED 2026-10-12 (citation rulings rows 11-12; notes/photo_eps_sources_
+  #   2026-10-12.md): this note had "25 % C4" for Lloyd & Farquhar (it is 21 %) and a
+  #   "15-18" bracket attributed to Still / Suits that is in NEITHER paper.
+  #   The label hilda_csl3v0kaidgbemwtc reads ALPHA_PHOTO_EPS_STILL2003 (16.2).
   # STATUS PROVISIONAL DELIBERATELY: the number in use (18) is the C3-only
   # value, ~3 permil ABOVE the biosphere-wide 14.8-16.5, and moving it re-scales
   # the land sink's isotopic signature -- the quantity that separates land from
@@ -311,12 +314,13 @@ CCX_CONSTANTS <- list(
     value = 18, units = "permil",
     status = "provisional",
     source = paste("Lloyd & Farquhar (1994) Oecologia 99:201-215: C3 GPP-weighted",
-                   "13C discrimination 17.8 permil; C4 3.6; total 14.8 at 25 % C4.",
-                   "Still et al. (2003) GBC 17:1006 / Suits et al. (2005) GBC 19:GB1017:",
-                   "15-18 permil. LEDGER DEFAULT 18 (the C3-only value), read only where a parameter",
-                   "set leaves alpha_photo_eps absent. The biosphere-wide 14.8-16.5 is the refit-batch",
-                   "revision (review 2026-09-14 g); every adopted mode since 09-14 h, the canonical",
-                   "included, runs its mid-bracket 15.6 (CCX_ALPHA_PHOTO_EPS_BIOSPHERE, R/calibrate.R).")),
+                   "13C discrimination 17.8 permil; C4 3.6; total 14.8 at 21 % C4 (corrected 2026-10-12",
+                   "from '25 %'). Still et al. (2003) GBC 17:1006: 16.5 at C4 23 %; Suits et al. (2005)",
+                   "GBC 19:GB1017: 15.9 (the old '15-18' bracket is in neither). LEDGER DEFAULT 18 (the",
+                   "C3-only value), read only where a parameter set leaves alpha_photo_eps absent. Labels",
+                   "from 09-14 h to #18 (the canonical hilda29e included) run 15.6, the mid-point of",
+                   "14.8-16.5 (CCX_ALPHA_PHOTO_EPS_BIOSPHERE); label hilda_csl3v0kaidgbemwtc runs",
+                   "ALPHA_PHOTO_EPS_STILL2003 (16.2).")),
 
   # ---- THE MARTIN REMINERALISATION EXPONENT (registered 2026-09-14 h, option
   # D + E) ----

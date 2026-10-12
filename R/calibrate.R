@@ -2339,8 +2339,9 @@ ccx_struct_hilda_tr <- function() {
 #'                       0.128) for the uniform-sphere 0.16. ⚠ The BOUNDARY stays
 #'                       57.14 deg (the product's mask); only the AREA share moves.
 #'   alpha_photo_eps  <- 15.6 permil, the MID-BRACKET of the biosphere-wide value
-#'                       (Lloyd & Farquhar 1994 total 14.8 at 25 % C4; Still 2003 /
-#'                       Suits 2005 15-18 -> 14.8-16.5) for the C3-only 18 the
+#'                       (Lloyd & Farquhar 1994 total 14.8 at 21 % C4 -- "25 %" until the
+#'                       2026-10-12 correction; Still 2003 16.5 -> 14.8-16.5; the "15-18"
+#'                       once quoted here is in neither Still nor Suits) for the C3-only 18 the
 #'                       ledger keeps (ALPHA_PHOTO_EPS stays provisional until a
 #'                       refit adopts). A RULED CHOICE, not a measurement.
 #' A NEW LABEL rather than an edit of CCX_STRUCT_HILDA: that block is what every
