@@ -911,6 +911,36 @@ ccx_ribbons_problems <- function(r, mode = CCX_MODE_CANONICAL, scenarios, vars) 
   bad
 }
 
+#' Is a constraint-map artifact (calibration/diag_constraint_map.R) valid for THIS fit? (2026-10-11 b.)
+#'
+#' ONE check, shared by the app's loader (which then shows no map and says why) and
+#' test-constraint-map.R (which then fails). ⛔ Until 2026-10-11 the loader read
+#' data/constraint_map.rds with no check at all, unlike the ribbons (above) and the ocean card
+#' (rv_oclim_problems): only test-constraint-map 6 stood between a map built at a retired mode and
+#' the tab -- the silent-artifact shape test-pulse-linearity.R had (fa6bb86). The product stamps no
+#' parameter vector, so the FIT is compared through what it does stamp: the name, the stored
+#' log-posterior (identical, not near), the structure and the held set.
+#' @param cm the artifact (readRDS of data/constraint_map.rds)
+#' @param mode the mode the map must describe (a name for ccx_mode_file())
+#' @return character(0) if valid, else one string per problem
+ccx_cmap_problems <- function(cm, mode = CCX_MODE_CANONICAL) {
+  # [[ ]], never $ -- `$` partial-matches (see ccx_ribbons_problems)
+  pv <- cm[["provenance"]]
+  if (is.null(pv) || is.null(cm[["MC"]])) return("not a constraint-map artifact (no provenance or no MC)")
+  bad <- character(0)
+  if (!identical(pv[["mode"]], mode))
+    bad <- c(bad, sprintf("built for mode '%s', %s '%s'", format(pv[["mode"]]),
+                          if (identical(mode, CCX_MODE_CANONICAL)) "the canonical is" else "checked against", mode))
+  if (!identical(pv[["stored_logpost"]], ccx_mode_fit_stats(mode)$logpost))
+    bad <- c(bad, "built at a different fit (its stored log-posterior is not the mode file's)")
+  if (!identical(pv[["struct"]], ccx_mode_struct(mode)))
+    bad <- c(bad, sprintf("built under structure '%s', the mode runs '%s'", format(pv[["struct"]]), ccx_mode_struct(mode)))
+  held <- names(ccx_mode_pins(mode))
+  if (length(pv[["pins"]]) != length(held) || !setequal(pv[["pins"]], held))
+    bad <- c(bad, "built with a different held set from the mode file's pins")
+  bad
+}
+
 ccx_mode_params <- function(md = CCX_MODE_CANONICAL) {
   if (is.character(md)) md <- readRDS(ccx_mode_file(md))
   # WITH the file's pins (2026-09-13): the vector the mode RAN at, held names

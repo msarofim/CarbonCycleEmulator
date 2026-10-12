@@ -2,6 +2,56 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-11 (c) — **Adoption audit, the follow-up to `fa6bb86`: does any OTHER test check an app number against an artifact from a retired mode? No test repeats the pulse-linearity failure. But two things were unguarded, and both are now gated. (1) The constraint-map tie cut's premise is BROKEN at `hilda29e`: three rows sit in the gap it was derived from, and the new gate is a deliberate RED. (2) The app loaded `data/constraint_map.rds` with no mode check; it now refuses a map that is not the canonical's.** (Marcus: "Go ahead", and on the gate's scope "is there a reason not to do all 12?" — no.)
+
+**THE AUDIT** (read-only first, reported, then the two fixes on his go-ahead).
+- **"Newest file" selection:** `test-pulse-linearity.R` is the only test that picks a file that way, and `fa6bb86` guards it. Its CSV, `pulse_vs_tcre_20261011.csv`, is stamped `hilda29e` @4e819ad.
+- **App artifacts, read from their own stamps:** `constraint_map.rds` (@c4a3d6c), `futures_ribbons.rds` (@b9b58a1) and `ocean_climate_card.rds` (@5696698) are all `hilda29e`. The ribbons and the ocean card refuse another mode at load; the map did not (fix 2).
+- **Every other test read of a non-canonical mode or diagnostic is a deliberately named historical fixture.** Three test titles still call `hilda33p` fixtures "canonical": enso-demean L207, iav-cut IC9, gcb-enso-slope L64. Not changed.
+- **Displayed copy resting on a retired mode, all already in 10-08 (g)'s card-4 ledger and Marcus's to word:**
+  - card 4's lag, range word, growth-peak timing, title "about 60%" (66% at `hilda29e`) and Pinatubo "about 1.5 ppm" (1.01);
+  - the What-if "about a third" (29% at `hilda29e`).
+  - ⚠ The title, the Pinatubo figure and "about a third" are pinned or checked by NO test.
+  - ⚠ `test-app-review-copy.R:144` REQUIRES the "2.5 months" sentence while `test-review-card-numbers.R:75` requires it within 1 sd of 5.93. Card 4's copy fix and that pin must land together.
+- **Card 5 holds at `hilda29e`:** the 1000-yr split is 17.1 / 60.8 / 22.2 against Joos's 16 / 59 / 25, |z| ≤ 0.63. ⚠ Source: `whole_model_scorecard_20261008_hilda33p_obj18p2.rds`, arm `obj18p2b1` (the pre-rename basin-1 path, logpost −1166.95); the file is tagged `hilda33p_obj18p2` and stamped `58ef6fc+dirty`.
+- **Provenance gaps, noted and not fixed:**
+  - the canonical's pins module (`335b886+dirty`) and its module check (`58ef6fc+dirty`) were built from dirty trees;
+  - five fixture `.rds` files carry no provenance block (`seas_ml_hemisphere_split_20260919`, `hilda28_basins_20260907`, `alignment_screen_d2ret_20260930`, `tau_soil_slow_profile_…_20260929`, `kz_bracket_hilda36_20260906`).
+
+**FIX 1 — THE TIE GAP, A DELIBERATE RED** (`test-cmap-tie.R`, "THE GAP" + its MUTATION test).
+- `APP_CMAP_TIE_PP` rests on a separation measured on 2026-09-26 over 12 rows at `hilda29l` / `hilda32f` / `hilda31pe`: flippers ≤ 0.845 pp, stable rows ≥ 3.018 pp, nothing between.
+- The file's header said "these tests assert the SEPARATION still holds", but nothing read the canonical's rows; the only check compared the two constants with each other.
+- **At `hilda29e` three rows sit in the gap:** δ¹³C level & gradient 0.94, Δ¹⁴C bomb 2.28, CO₂ in ice cores 2.05. The first two are among the takeaway's top three.
+- **All 12 rows**, not the top three: the separation was measured over all 12, and which rows are the top three moves with every refit.
+- ⚠ A row in the gap is not proof that its winner flips. The gap was defined by CROSS-ARM behaviour and the gate reads one arm, so it is a trigger to re-measure.
+- It runs only on a map that passes `ccx_cmap_problems()`, so it cannot check a retired arm.
+- **Mutation:** synthetic rows, one in the gap, are caught by name, and the endpoints are not. On the real rows, pushing every in-gap row out passes, and pushing the most stable row in is caught.
+- **Clears when:** `calibration/diag_constraint_map_arms.R` is re-run with `hilda29e` as the reference and the cut is re-derived from the new endpoints. Which comparison arms to use is Marcus's.
+
+**FIX 2 — THE MAP'S LOAD-TIME MODE CHECK.**
+- `ccx_cmap_problems()` (`R/paths.R`, beside `ccx_ribbons_problems()`) is shared by the loader and `test-constraint-map.R` 7.
+- The product stamps no parameter vector, so the FIT is compared through what it does stamp: the name, the stored log-posterior (identical), the structure and the held set.
+- `APP_CMAP_LOAD` (`app/global.R`): a refused map gives `APP_CMAP` NULL plus `APP_CMAP_WHY`, and the tab says "The constraint map is not shown: <why>" (`server.R`). The old text, "not built in this checkout", would have been false for a refusal.
+- **Test 7 (14 expectations)** checks each field mutated one at a time, the map asked about `hilda33p`, and global.R's OWN loader expression evaluated on the real file and on a doctored copy.
+- **Mutation of the CODE**, each restored byte-identical:
+
+| broken | test 7 |
+|---|---|
+| loader unchecked | 2 failed + error |
+| mode name ignored | 3 failed + error |
+| fit ignored | 2 failed |
+| held set ignored | 2 failed |
+| structure ignored | 1 failed |
+
+- ⚠ **Tried and corrected:** the first "mode name ignored" mutation SURVIVED, because its regex matched `ccx_ribbons_problems()`'s identical line first, so my check was never broken. It was re-aimed and then killed. A surviving mutation is a claim about the mutation before it is one about the gate.
+- **The real app, headlessly:** `shiny::testServer` on the real `server.R`, after `loadSupport()`. With the canonical map the plot and takeaway render; with a map stamped `hilda33p` there is no plot and the reason is printed. The browser preview could not start: port 7788 belongs to another session's server, and the tracked `launch.json` was left alone.
+
+**Tests** (not the full suite):
+- `test-constraint-map` 145 / 0;
+- `test-cmap-tie` 28 pass / **1 fail (THE GAP, by design)**;
+- 0 failures in each of these 18 files: `-constraint-map-panel`, `-app-version`, `-app-review-copy`, `-fair-overlay`, `-future-span`, `-future-yvar`, `-mode-file`, `-luc-regrowth-panel`, `-pulse-linearity`, `-review-cards`, `-stylised-takeaway`, `-ui-year-bounds-lint`, `-futures-ribbons`, `-ocean-climate-card`, `-mode-struct-lint`, `-overlay-idiom-lint`, `-git-stamp-lint` and `-plot-text-fits`.
+- The worktree's git-ignored `data-raw/downloads` was APFS-cloned from the main checkout so that `setup.R`'s run-input gate passes.
+
 ## 2026-10-11 (b) — Handoff: `notes/handoff_2026-10-11_comments_fair_pd100.md` (Marcus: "Yes, write the handoff note"). It supersedes `handoff_2026-10-10_band_shipped_hold_on_copy.md`, which now points to it.
 
 - After CHANGELOG (a), and before this note, three rulings were applied (`76f6bf4`): **"Re-pin both (Recommended)"**, **"Temperature only (Recommended)"** and **"Run FaIR on Joos's PD100 (Recommended)"**. The FaIR run is NOT started; its open protocol choices and the FaIRtoFrEDI branch question are in the note's §3.

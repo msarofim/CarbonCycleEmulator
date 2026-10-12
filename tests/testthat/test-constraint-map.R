@@ -160,3 +160,45 @@ test_that("MUTATION: the gates fail when what they guard is broken", {
   bad <- cm; bad$provenance$sd_kind <- "one posterior sd"
   expect_false(grepl("NOT a sampled posterior", bad$provenance$sd_kind, fixed = TRUE))
 })
+
+# ⛔ 7 (2026-10-11 b). THE APP REFUSES A MAP THAT IS NOT THE CANONICAL'S. Test 6 has checked the name and
+# the log-posterior here since 09-25, but the app's loader read the file with NO check, so a stale map
+# would have been drawn whenever this file was not run. Loader and test now share ccx_cmap_problems()
+# (R/paths.R). Mutation-tested on every field it reads, and on the LOADER ITSELF (global.R's own
+# expression, evaluated against a doctored copy), not only on the helper.
+CM_OTHER_MODE <- "hilda33p"   # the previous canonical: a registered mode the map was NOT built at
+
+test_that("7. the app's loader accepts the canonical's map and refuses any other (ccx_cmap_problems)", {
+  skip_if_no_cmap()
+  cm <- readRDS(.cm_file)
+  expect_identical(ccx_cmap_problems(cm), character(0))
+  # MUTATIONS: each field the check reads, broken one at a time, is refused
+  bad <- cm; bad$provenance$mode <- CM_OTHER_MODE
+  expect_match(ccx_cmap_problems(bad), sprintf("built for mode '%s'", CM_OTHER_MODE), fixed = TRUE, all = FALSE)
+  bad <- cm; bad$provenance$stored_logpost <- cm$provenance$stored_logpost + 1e-9
+  expect_match(ccx_cmap_problems(bad), "different fit", fixed = TRUE, all = FALSE)
+  bad <- cm; bad$provenance$struct <- paste0(cm$provenance$struct, "x")
+  expect_match(ccx_cmap_problems(bad), "structure", fixed = TRUE, all = FALSE)
+  bad <- cm; bad$provenance$pins <- cm$provenance$pins[-1]
+  expect_match(ccx_cmap_problems(bad), "held set", fixed = TRUE, all = FALSE)
+  bad <- cm; bad$provenance$pins[1] <- "q10"                       # same count, different set
+  expect_match(ccx_cmap_problems(bad), "held set", fixed = TRUE, all = FALSE)
+  bad <- cm; bad$provenance <- NULL
+  expect_match(ccx_cmap_problems(bad), "not a constraint-map artifact", fixed = TRUE)
+  # the SAME map, asked about another registered mode: refused on the FIT, not only the name
+  p <- ccx_cmap_problems(cm, CM_OTHER_MODE)
+  expect_match(p, "different fit", fixed = TRUE, all = FALSE)
+
+  # THE LOADER, as written in global.R: its own expression, pointed at the real file and at a doctored copy
+  ex <- Filter(function(e) is.call(e) && identical(as.character(e[[1]]), "<-") &&
+                 identical(as.character(e[[2]]), "APP_CMAP_LOAD"), parse(file.path(.root, "app", "global.R")))
+  expect_length(ex, 1L)
+  run_loader <- function(path) { env <- new.env(parent = globalenv()); env$APP_CMAP_FILE <- path
+                                 eval(ex[[1]], env); env$APP_CMAP_LOAD }
+  ok <- run_loader(.cm_file)
+  expect_false(is.null(ok$cm)); expect_null(ok$why)
+  tf <- tempfile(fileext = ".rds"); on.exit(unlink(tf))
+  bad <- cm; bad$provenance$mode <- CM_OTHER_MODE; saveRDS(bad, tf)
+  expect_message(no <- run_loader(tf), "constraint map NOT shown", fixed = TRUE)
+  expect_null(no$cm); expect_match(no$why, CM_OTHER_MODE, fixed = TRUE)
+})
