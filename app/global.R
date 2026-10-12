@@ -638,11 +638,24 @@ info_box <- function(title, ...) {
 # ⚠ NOTHING IS RE-DERIVED HERE. The shares, the ordering and the tension pairs
 # below are read or summed from the product, so the app cannot disagree with the
 # diagnostic that produced it.
-APP_CMAP <- local({
-  f <- file.path(CCX_ROOT, "data", "constraint_map.rds")
-  if (!file.exists(f)) return(NULL)
-  readRDS(f)
+# ⛔ AND IT MUST BE THE CANONICAL'S (2026-10-11 b). This read the file with no check, so a map
+# built at a retired mode would have been drawn, silently, for as long as test-constraint-map 6
+# was not run. Refused exactly as the ribbons are: no map, and the tab says why
+# (ccx_cmap_problems(), R/paths.R, shared with test-constraint-map.R).
+APP_CMAP_FILE <- file.path(CCX_ROOT, "data", "constraint_map.rds")
+APP_CMAP_LOAD <- local({
+  if (!file.exists(APP_CMAP_FILE)) return(list(cm = NULL, why = "it is not built in this checkout"))
+  cm <- readRDS(APP_CMAP_FILE)
+  bad <- if (!file.exists(ccx_mode_file(CCX_MODE_CANONICAL))) "the canonical mode file is not in this build" else
+    ccx_cmap_problems(cm, CCX_MODE_CANONICAL)
+  if (length(bad)) {
+    message("app: constraint map NOT shown: ", paste(bad, collapse = "; "))
+    return(list(cm = NULL, why = bad[1]))
+  }
+  list(cm = cm, why = NULL)
 })
+APP_CMAP     <- APP_CMAP_LOAD$cm
+APP_CMAP_WHY <- APP_CMAP_LOAD$why   # NULL when the map is shown
 
 # The sentence that keeps the map honest, printed on the chart AND asserted by
 # test-constraint-map-panel.R.

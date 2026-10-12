@@ -991,7 +991,7 @@ function(input, output, session) {
   output$cm_map_ui <- renderUI({
     if (is.null(APP_CMAP))
       return(div(class = "caveat",
-                 "The constraint map is not built in this checkout — run",
+                 sprintf("The constraint map is not shown: %s — run", APP_CMAP_WHY),
                  tags$code("Rscript calibration/diag_constraint_map.R"), "."))
     tagList(
       plotOutput("cm_map", height = "430px"),
