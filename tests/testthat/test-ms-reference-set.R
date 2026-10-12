@@ -36,6 +36,10 @@
 #       `hilda29w` (RULED 10-07 i: "Register B, seed from it (Recommended)"; seeded at the pins: a start) / the
 #       control; the launch string resolves the same; MUTATION: refused under #17's label, at seas_ml 0, with a
 #       module value moved or dropped, and the ten under #18's label (the module FREE); #17's pins under #18's label
+#   (15) THE WTC REFIT (2026-10-12; Marcus: "Carry module, then check (Recommended)"): hilda29e's pins (#18 pass 2's set)
+#       under the citation batch's label at seas_ml 1 -> hilda29e (a start, at its own model) / the control, while the
+#       canonical is not of that label; MUTATION: refused at seas_ml 0, with #18 pass 1's pins, a module value moved or
+#       dropped, and under #17's label; the canonical's own label still takes the canonical as a MODE
 # =====================================================================
 ms_cp <- CCX_MODE_CANONICAL_PINS
 ms_ctl <- CCX_MODE_CONTROL_PINS
@@ -350,4 +354,36 @@ test_that("(14) #18 PASS 2's pins (2026-10-08 d; Marcus: \"Basin 1, run the seco
   expect_error(ccx_ms_reference_set(back, "1", pump_field = "solved", struct = CCX_MODE_OBJ18_STRUCT), "no registered incumbent")
   expect_error(ccx_ms_reference_set(p2[setdiff(names(p2), "w_enso_l2")], "1", pump_field = "solved", struct = CCX_MODE_OBJ18_STRUCT),
                "no registered incumbent")
+})
+
+test_that("(15) THE WTC REFIT (2026-10-12; Marcus: \"Carry module, then check (Recommended)\"): hilda29e's pins under the citation batch's label at seas_ml 1 -> hilda29e (a start, at its own model) / the control; refused at seas_ml 0, with #18 pass 1's pins, a module value moved, a module name dropped; the canonical's own label still takes the canonical as a MODE", {
+  wp <- CCX_MODE_WTC_PINS
+  # the pins are #18 pass 2's set BY ITS PARTS (a later adoption cannot move them), = hilda29e's own
+  expect_identical(wp, CCX_MODE_OBJ18P2_PINS)
+  expect_identical(ccx_pin_label(ccx_mode_pins(ccx_mode_file(CCX_MODE_WTC_INCUMBENT))), ccx_pin_label(wp))
+  expect_identical(CCX_MODE_WTC_INCUMBENT, "hilda29e"); expect_true(CCX_MODE_WTC_INCUMBENT %in% names(CCX_MODE_FILES))
+  expect_true(CCX_MODE_WTC_STRUCT %in% CCX_STRUCT_LABELS)
+  # the label OPENS the citation batch's gate; the incumbent's own label holds it (so its file lacks the two names)
+  expect_true(ccx_gate_open(CCX_MODE_WTC_STRUCT, CCX_GATE_FLAG_WTC))
+  expect_false(ccx_gate_open(ccx_mode_struct(ccx_mode_file(CCX_MODE_WTC_INCUMBENT)), CCX_GATE_FLAG_WTC))
+  # the branch is live only while the canonical is NOT a file of the label (else the first branch, as a MODE)
+  expect_false(identical(ccx_mode_struct(ccx_mode_file(CCX_MODE_CANONICAL)), CCX_MODE_WTC_STRUCT))
+  r15 <- ccx_ms_reference_set(wp, "1", pump_field = "solved", struct = CCX_MODE_WTC_STRUCT)
+  expect_identical(r15$incumbent, CCX_MODE_WTC_INCUMBENT); expect_identical(r15$new_basin, CCX_MODE_SEASML0_CONTROL)
+  expect_match(r15$why, "WTC REFIT.*a start, not a mode")
+  # the LAUNCH STRING, through the driver's own parser
+  launch <- paste(sprintf("%s=%.17g", names(wp), wp), collapse = ",")
+  expect_identical(ccx_parse_pins(launch), wp)
+  expect_identical(ccx_ms_reference_set(ccx_parse_pins(launch), "1", pump_field = "solved", struct = CCX_MODE_WTC_STRUCT), r15)
+  # the canonical's OWN label is untouched: the canonical as a MODE
+  r14 <- ccx_ms_reference_set(wp, "1", pump_field = "solved", struct = CCX_MODE_OBJ18_STRUCT)
+  expect_identical(r14$why, "the canonical, under this array's pins")
+  # MUTATION: seas_ml 0; #18 pass 1's pins under the label; a module value moved; a module name dropped; another label
+  expect_error(ccx_ms_reference_set(wp, "0", pump_field = "solved", struct = CCX_MODE_WTC_STRUCT), "WTC refit is ruled at seas_ml 1")
+  expect_error(ccx_ms_reference_set(CCX_MODE_OBJ18_PINS, "1", pump_field = "solved", struct = CCX_MODE_WTC_STRUCT), "ruled under")
+  moved <- wp; moved[["w_enso_l2"]] <- CCX_MODE_OBJ18_PINS[["w_enso_l2"]]
+  expect_error(ccx_ms_reference_set(moved, "1", pump_field = "solved", struct = CCX_MODE_WTC_STRUCT), "no registered incumbent")
+  expect_error(ccx_ms_reference_set(wp[setdiff(names(wp), "lag_enso_land")], "1", pump_field = "solved", struct = CCX_MODE_WTC_STRUCT),
+               "no registered incumbent")
+  expect_error(ccx_ms_reference_set(wp, "1", pump_field = "solved", struct = CCX_MODE_OBJ17_STRUCT), "is not that label")
 })

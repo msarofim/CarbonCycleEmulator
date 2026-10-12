@@ -370,6 +370,26 @@ if ("npp_tsens" %in% names(MS_SPREAD_OVERRIDE) && !identical(CCX_PARAM_TABLE$npp
   stop("MS_SPREAD_OVERRIDE gives npp_tsens its prior sd as a u-space sd, which holds only under tr = \"id\".")
 MS_SPREAD_LABEL <- if (length(MS_SPREAD_OVERRIDE))
   paste0("_sdby_", paste(sprintf("%s=%s", names(MS_SPREAD_OVERRIDE), formatC(MS_SPREAD_OVERRIDE, format = "g", digits = 3)), collapse = "_")) else ""
+# ---- DRAWN FROM THE PRIOR (2026-10-12; the WTC refit, Marcus: "Carry module, then check (Recommended)" --
+# "dispersed starts draw the two from their priors"; citation rulings ledger D) ----
+# The citation batch's two fitted names carry UNIFORM priors on their logit boxes. A dispersed start draws each IN
+# PARAMETER SPACE from that prior (runif on the box) and ENCODES it through the table -- the seeded-start rule, never
+# arithmetic on `u` -- instead of dispersing it about the box midpoint at the shared sd. (Under a logit, U[lo, hi] is
+# Logistic(0, 1) in u, sd 1.81: wider than 1.0452.) ASSERTED, not assumed: each name's prior must be FLAT on the
+# table's own box (density -log(hi - lo) at interior points), so the draw IS the prior the objective scores. Applied
+# only to names this run FITS (the gate open, not pinned); printed; recorded in every start file (`prior_draw`) and
+# REQUIRED in the output directory's name, as an override is. The rnorm vector is drawn first, whole, so every other
+# coordinate of a draw is what the shared-sd draw gives at that seed.
+MS_PRIOR_DRAW <- intersect(names(CCX_PARAM_GATED_WTC), CCX_PARAM_NAMES)
+for (.n in MS_PRIOR_DRAW) {
+  .s <- CCX_PARAM_TABLE[[.n]]
+  .d <- vapply(.s$lo + (.s$hi - .s$lo) * c(0.01, 0.25, 0.5, 0.75, 0.99), function(x) .ccx_prior_eval(.s, x), 0)
+  if (!identical(.s$tr, "logit") || any(abs(.d + log(.s$hi - .s$lo)) > 1e-12))
+    stop("MS_PRIOR_DRAW draws ", .n, " uniformly on its box [", .s$lo, ", ", .s$hi, "], but its prior is not flat ",
+         "there (tr '", .s$tr, "'; log-density ", paste(signif(.d, 6), collapse = " / "), " against ",
+         signif(-log(.s$hi - .s$lo), 6), "). The draw would not be the prior.")
+}
+MS_PRIOR_LABEL <- if (length(MS_PRIOR_DRAW)) paste0("_prior_", paste(MS_PRIOR_DRAW, collapse = "_")) else ""
 MS_OUTDIR <- local({
   d <- Sys.getenv("CCX_MS_OUTDIR", NA_character_)
   # ⚠ THE DEFAULT NAMES THE PARAMETER SET, NOT JUST A DATE (2026-09-01k). It
@@ -391,7 +411,8 @@ MS_OUTDIR <- local({
                     # 2026-09-14 h: the pump field changes the objective too; the directory says it.
                     if (identical(Sys.getenv("CCX_MS_PUMP_FIELD", "solved"), "martin")) "_martin" else "",
                     ccx_pin_label(MS_PINS),
-                    MS_SPREAD_LABEL))   # 2026-09-30 p: a per-coordinate dispersion override
+                    MS_SPREAD_LABEL,    # 2026-09-30 p: a per-coordinate dispersion override
+                    MS_PRIOR_LABEL))    # 2026-10-12: the WTC names drawn from their priors
   else d
 })
 # THE DIRECTORY MUST SAY IT (the seasml1 / _martin precedent): a dispersion that differs by
@@ -399,6 +420,10 @@ MS_OUTDIR <- local({
 if (nzchar(MS_SPREAD_LABEL) && !grepl(MS_SPREAD_LABEL, basename(MS_OUTDIR), fixed = TRUE))
   stop("the dispersion OVERRIDES ", sub("^_sdby_", "", MS_SPREAD_LABEL), " (the D2/D3 gate is open) but the output ",
        "directory '", basename(MS_OUTDIR), "' does not say so. Append '", MS_SPREAD_LABEL,
+       "' to CCX_MS_OUTDIR (the driver's own default carries it).")
+if (nzchar(MS_PRIOR_LABEL) && !grepl(MS_PRIOR_LABEL, basename(MS_OUTDIR), fixed = TRUE))
+  stop("the dispersed starts draw ", paste(MS_PRIOR_DRAW, collapse = ", "), " FROM THEIR PRIORS (the WTC gate is open) ",
+       "but the output directory '", basename(MS_OUTDIR), "' does not say so. Append '", MS_PRIOR_LABEL,
        "' to CCX_MS_OUTDIR (the driver's own default carries it).")
 dir.create(MS_OUTDIR, recursive = TRUE, showWarnings = FALSE)
 MS_OUT  <- file.path(MS_OUTDIR, sprintf("start_%03d.rds", MS_ID))
@@ -492,6 +517,9 @@ cat(sprintf("  dispersion sd %.4f in u-space (measured per-coordinate RMS betwee
 if (length(MS_SPREAD_OVERRIDE))
   cat(sprintf("  dispersion OVERRIDDEN per coordinate (u-space sd): %s\n",
               paste(sprintf("%s = %.4g", names(MS_SPREAD_OVERRIDE), MS_SPREAD_OVERRIDE), collapse = ", ")))
+if (length(MS_PRIOR_DRAW))
+  cat(sprintf("  dispersed draws take %s FROM THE PRIOR (uniform on %s)\n", paste(MS_PRIOR_DRAW, collapse = ", "),
+              paste(vapply(MS_PRIOR_DRAW, function(n) sprintf("[%g, %g]", CCX_PARAM_TABLE[[n]]$lo, CCX_PARAM_TABLE[[n]]$hi), ""), collapse = " / ")))
 cat(sprintf("  out %s\n%s\n", MS_OUT, strrep("=", 70)))
 
 bp <- ccx_default_params(); bp$pump_mode <- MS_ARM
@@ -616,9 +644,11 @@ ms_draw <- function(id) {
     stopifnot(identical(names(U_COLD), names(MS_SPREAD_VEC)))
     u <- U_COLD + MS_SPREAD_VEC * stats::rnorm(length(U_COLD))
     names(u) <- CCX_PARAM_NAMES
+    for (n in MS_PRIOR_DRAW) { s <- CCX_PARAM_TABLE[[n]]; u[[n]] <- .to_unc(stats::runif(1L, s$lo, s$hi), s) }
     if (is.finite(lp_fun(u)))
       return(list(u = u, kind = sprintf("dispersed about the COLD init, sd %.4f%s", MS_SPREAD,
-                                        if (length(MS_SPREAD_OVERRIDE)) sprintf(" (%s)", paste(sprintf("%s at %.4g", names(MS_SPREAD_OVERRIDE), MS_SPREAD_OVERRIDE), collapse = ", ")) else ""),
+                                        paste0(if (length(MS_SPREAD_OVERRIDE)) sprintf(" (%s)", paste(sprintf("%s at %.4g", names(MS_SPREAD_OVERRIDE), MS_SPREAD_OVERRIDE), collapse = ", ")) else "",
+                                               if (length(MS_PRIOR_DRAW)) sprintf("; %s drawn from the prior", paste(MS_PRIOR_DRAW, collapse = ", ")) else "")),
                   draws = k, ref = NA_real_, class = "dispersed"))
   }
   # A dispersed start that cannot find a finite point is a fact about the
@@ -996,6 +1026,9 @@ if (MS_PREFLIGHT) {
   if (length(MS_SPREAD_OVERRIDE))
     cat(sprintf("             start at the overridden coordinates: %s\n",
                 paste(sprintf("%s = %+.5f", names(MS_SPREAD_OVERRIDE), unlist(ccx_unc_to_par(st$u)[names(MS_SPREAD_OVERRIDE)])), collapse = ", ")))
+  if (length(MS_PRIOR_DRAW))
+    cat(sprintf("             start at the prior-drawn coordinates: %s\n",
+                paste(sprintf("%s = %.5f", MS_PRIOR_DRAW, unlist(ccx_unc_to_par(st$u)[MS_PRIOR_DRAW])), collapse = ", ")))
   if (!isTRUE(MS_PORT$checked))
     stop("PREFLIGHT id ", MS_ID, ": the port is NOT verified, so this task would ",
          "spend its whole budget on an unchecked objective. Fix that before submitting.")
@@ -1245,6 +1278,7 @@ res <- list(id = MS_ID, kind = st$kind, u_mode = u, par_mode = pm, logpost = -be
             restart_tol = MS_TOL, cycle_tol = MS_CYCLE_TOL,
             seed = MS_SEED + MS_ID, spread = MS_SPREAD,
             spread_by_name = MS_SPREAD_OVERRIDE,   # the per-coordinate overrides (2026-09-30 p); empty = none
+            prior_draw = MS_PRIOR_DRAW,            # names a dispersed draw takes from the prior (2026-10-12); empty = none
             spread_measured = MS_SPREAD_MEASURED, draws = st$draws,
             # RECORDED **AND** READ by collect_dispersed_multistart.R: which
             # kind of start this was, and what the dispersion was pooled over.

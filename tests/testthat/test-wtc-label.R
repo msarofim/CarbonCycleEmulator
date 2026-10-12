@@ -198,3 +198,38 @@ test_that("EACH FIELD IS LIVE: removing it moves the derivative (or the row) it 
   # the column depth: the grid IS the structure's
   expect_false(isTRUE(all.equal(sum(ccx_grid_of(p)$dz), sum(ccx_ocean_grid(p$h_ml)$dz))))
 })
+
+# ---- the migration contract: what an older file RAN (2026-10-12, the WTC refit's start) -------------
+test_that("MIGRATION: under the open label an older file fills the LEGACY values (what it RAN), which encode, so the start is NOT seeded", {
+  md <- readRDS(ccx_mode_file("hilda29e"))       # the WTC refit's incumbent (R/paths.R CCX_MODE_WTC_INCUMBENT)
+  expect_false(ccx_gate_open(ccx_mode_struct(md), CCX_GATE_FLAG_WTC))      # its own label HELD the gate
+  # baseline: the file under its OWN label (its gates, its pins) -- nothing of the WTC gate in play
+  h0 <- ccx_apply_gate(ccx_mode_struct(md)); r0 <- ccx_apply_pins(ccx_mode_pins(md))
+  invisible(utils::capture.output(st0 <- ccx_mode_start(md, "test")))
+  ccx_unpin_params(r0); ccx_unapply_gate(h0)
+  expect_length(intersect(st0$absent, names(CCX_PARAM_GATED_WTC)), 0L)
+  # the open label: the two are absent from the file and in the fitted set
+  h <- ccx_apply_gate(WTC_LABEL); on.exit(ccx_unapply_gate(h), add = TRUE)
+  r <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(r), add = TRUE, after = FALSE)
+  expect_true(all(names(CCX_PARAM_GATED_WTC) %in% CCX_PARAM_NAMES))
+  expect_true(ccx_mode_carries_build(md))
+  pm <- ccx_migrate_par_set(ccx_mode_par_with_pins(md))
+  # the model's OWN absence contracts -- not 0 (all bomb 14C in the SH; no respiration lag), the generic gated fill
+  expect_identical(pm$bomb_share_NH, FORC_BOMB_NH_SHARE); expect_identical(pm$bomb_share_NH, ccx_bomb_share_nh(list()))
+  expect_identical(pm$seas_T_lag, CCX_SEAS_T_LAG);       expect_identical(pm$seas_T_lag, ccx_seas_t_lag(list()))
+  expect_true(all(names(CCX_PARAM_GATED_WTC) %in% attr(pm, "migrated")))
+  # both sit strictly inside their boxes, so they ENCODE and the start keeps them (no seed at the box midpoints)
+  for (n in names(CCX_PARAM_GATED_WTC)) {
+    s <- CCX_PARAM_TABLE[[n]]; expect_gt(pm[[n]], s$lo); expect_lt(pm[[n]], s$hi); expect_true(is.finite(.to_unc(pm[[n]], s)))
+  }
+  out <- utils::capture.output(st <- ccx_mode_start(md, "test"))
+  expect_false(any(grepl("SEEDING (bomb_share_NH|seas_T_lag)", out)))
+  expect_identical(st$p$bomb_share_NH, FORC_BOMB_NH_SHARE); expect_identical(st$p$seas_T_lag, CCX_SEAS_T_LAG)
+  expect_false(identical(st$p$bomb_share_NH, CCX_PARAM_GATED_WTC$bomb_share_NH$init))   # the old (wrong) start
+  expect_setequal(st$absent, names(CCX_PARAM_GATED_WTC))
+  for (n in md$param_names) expect_identical(st$p[[n]], md$par_mode[[n]], info = n)   # every other coordinate the file's
+  # the shift is the two names' prior + log-Jacobian AT THE LEGACY VALUES, and nothing else
+  g <- CCX_PARAM_GATED_WTC; jac <- function(v, s) .log_jac(.to_unc(v, s), s)
+  want <- sum(vapply(names(g), function(n) .ccx_prior_eval(g[[n]], st$p[[n]]) + jac(st$p[[n]], g[[n]]), 0))
+  expect_equal(st$logpost_shift - st0$logpost_shift, want, tolerance = 1e-12)
+})

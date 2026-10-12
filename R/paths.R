@@ -526,6 +526,16 @@ CCX_MODE_OBJ18P2_MODULE_FILE <- file.path("calibration", "output",
 # canonical's set, and CCX_MODE_CANONICAL_PINS / CCX_MODE_L2_ARM_PINS read it before this point).
 CCX_MODE_OBJ18P2_INCUMBENT <- "hilda29a0"    # #18's basin 1 (RULED 10-08: "Basin 1")
 CCX_MODE_OBJ18P2_NEW       <- "hilda29a6"    # #18's basin 2: the runner-up, refit beside it so the basins are re-ranked
+# THE WTC REFIT (2026-10-12; citation rulings ledger D). Marcus, verbatim: "Carry module, then check (Recommended)" -- the
+# stage-2 multistart runs directly under label hilda_csl3v0kaidgbemwtc with hilda29e's interannual-module values as pins
+# (#18 pass 2's set, named by its parts so a later adoption cannot move it); warm start = hilda29e with bomb_share_NH 0.90
+# and seas_T_lag 2.0 (its own model: ccx_migrate_par_set()'s WTC contract); dispersed starts draw the two from their
+# priors; new basin the seas_ml-0 control. Ruled only under the label at seas_ml 1, and only while the canonical is NOT a
+# file of that label: after an adoption the first branch of ccx_ms_reference_set() takes these pins with the new
+# canonical as a MODE, and this incumbent would be a stale start (remove the branch then, as #16's and #18 p2's went).
+CCX_MODE_WTC_STRUCT    <- "hilda_csl3v0kaidgbemwtc"
+CCX_MODE_WTC_PINS      <- CCX_MODE_OBJ18P2_PINS
+CCX_MODE_WTC_INCUMBENT <- "hilda29e"         # the canonical at the ruling (#18 pass 2's basin 1): a START of this refit
 #' The registered FREE mode nearest the canonical: the canonical itself when it
 #' is free, its parent when it is pinned. For a consumer that needs a vector
 #' ENCODABLE on the full table (an ancestor constructed by dropping names, a

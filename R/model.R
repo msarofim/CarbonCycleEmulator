@@ -354,6 +354,15 @@ ccx_seas_t_lag <- function(p) {
   if (length(v) != 1L || !is.finite(v)) stop("seas_T_lag must be one finite lag in months; got ", format(v))
   v
 }
+#' The NH share of bomb-14C delivery a parameter list runs (absent = FORC_BOMB_NH_SHARE, every
+#' registered mode). FITTED under label hilda_csl3v0kaidgbemwtc (citation rulings row 19). The one
+#' place absence is decided: the spinup's aux and ccx_migrate_par_set() both ask it (2026-10-12).
+ccx_bomb_share_nh <- function(p) {
+  v <- p[["bomb_share_NH"]]
+  if (is.null(v)) return(FORC_BOMB_NH_SHARE)
+  if (length(v) != 1L || !is.finite(v)) stop("bomb_share_NH must be one finite share; got ", format(v))
+  v
+}
 ccx_sst_seas_lag <- function(p) {
   nh <- p[["sst_seas_lag_NH"]]; sh <- p[["sst_seas_lag_SH"]]
   out <- c(NH = if (is.null(nh)) CCX_SST_SEAS_LAG else nh, SH = if (is.null(sh)) CCX_SST_SEAS_LAG else sh)
@@ -4667,7 +4676,7 @@ ccx_prepare <- function(p, grid = ccx_grid_of(p)) {
     # the bomb share is FITTED under label hilda_csl3v0kaidgbemwtc (2026-10-12; prior U[0.77, 0.98],
     # citation rulings row 19); absent = FORC_BOMB_NH_SHARE, every registered mode. The nuclear
     # scalar is the fallback of the forcing's per-year column (R/forcing.R, `nuc_share`).
-    bomb_share_NH = if (is.null(p[["bomb_share_NH"]])) FORC_BOMB_NH_SHARE else p[["bomb_share_NH"]],
+    bomb_share_NH = ccx_bomb_share_nh(p),
     nuc_share_NH  = FORC_NUC_NH_SHARE,
     # Ocean areas, needed by the conveyor's interhemispheric limbs: those are
     # the only fluxes in the model where the hemisphere's area does NOT cancel
