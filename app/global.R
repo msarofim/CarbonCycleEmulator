@@ -403,6 +403,7 @@ app_build_forcing <- function(scenario, years, ...) {
   # on, the canonical runs aod_mode "anomaly", and a bare build stops at ccx_run_prepared()'s check.
   if (is.null(args$enso_index))      args$enso_index      <- ccx_enso_index_of(APP_PARAMS)
   if (is.null(args$aod_mode))        args$aod_mode        <- ccx_aod_mode_of(APP_PARAMS)
+  if (is.null(args$nuc_share))       args$nuc_share       <- ccx_nuc_share_of(APP_PARAMS)   # 2026-10-12
   do.call(ccx_build_forcing, c(list(scenario, years), args))
 }
 

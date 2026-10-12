@@ -127,6 +127,9 @@ ps_year_forcing <- function(prod_c14, year0 = 1750, quiet = NULL) {
     stop("ps_year_forcing(): the quiet year carries a nonzero AOD column")
   attr(F, "aod_mode") <- "none"
   F$c14_bomb <- 0; F$c14_nuclear <- 0; F$c14_cosmo <- prod_c14
+  # no nuclear source in the quiet year, so its NH share splits nothing: valid under both
+  # share modes (2026-10-12), stamped "none" like the ENSO and AOD columns above
+  attr(F, "nuc_share") <- "none"
   F$aod_NH <- 0; F$aod_SH <- 0
   # N DEPOSITION (D2 (a), 2026-09-30): the columns are deposition ABOVE 1750, so
   # the quiet year's zeros are correct BY DEFINITION, not for want of data. Set

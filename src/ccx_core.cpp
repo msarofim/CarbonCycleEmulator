@@ -80,7 +80,7 @@ static const int C = 0, C13 = 1, C14 = 2;
 // disagreement in the column count is caught by ccx_cpp_forcing()'s name check;
 // a disagreement in the ceiling is NOT caught by anything, so if one moves the
 // other must move in the same commit.
-static const int N_FORCING = 19;   // +ndep_NH, +ndep_SH (2026-09-30, D2 (a)), LAST;
+static const int N_FORCING = 20;   // +nuc_share_NH (2026-10-12, label ...wtc), LAST; was 19:   // +ndep_NH, +ndep_SH (2026-09-30, D2 (a)), LAST;
                                    // "off" value 0 = no anthropogenic deposition.
                                    // +sst_anom_NH, +sst_anom_SH (2026-08-18),
                                    // appended LAST; NaN = column absent, and
@@ -532,9 +532,9 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
   // forcing layout: e_foss_NH, e_foss_SH, e_luc_NH, e_luc_SH, gmst, enso,
   //                 c14_bomb, c14_nuclear, c14_cosmo, d13c_foss,
   //                 cum_luc_NH, cum_luc_SH, sst_anom_NH, sst_anom_SH,
-  //                 sink_ocean, aod_NH, aod_SH, ndep_NH, ndep_SH
-  //                 (N_FORCING = 19; the last two added 2026-09-30 and missing from
-  //                 this list until 2026-10-02)
+  //                 sink_ocean, aod_NH, aod_SH, ndep_NH, ndep_SH, nuc_share_NH
+  //                 (N_FORCING = 20; ndep_* added 2026-09-30 and missing from
+  //                 this list until 2026-10-02; nuc_share_NH added 2026-10-12)
   // Must stay in step with CCX_FORCING_COLS in R/cpp.R -- indexed by position,
   // so a mismatch is silent garbage. test-parity.R is the gate.
   const double gmst = f[4], enso = f[5], d13c_foss = f[9];
@@ -1201,9 +1201,12 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
 
   // 14C sources and decay
   const double c14_to_state = 1.0 / (A.mol_per_GtC * A.R14STD);
-  dy[IX(0, C14)]   += (f[6] * A.bomb_share_NH + f[7] * A.nuc_share_NH
+  // the nuclear NH share: f[19], the forcing's per-year column under label ...wtc (2026-10-12);
+  // NaN = the aux scalar, the SAME arithmetic as before. Twin of the block in R/model.R.
+  const double nsh = std::isfinite(f[19]) ? f[19] : A.nuc_share_NH;
+  dy[IX(0, C14)]   += (f[6] * A.bomb_share_NH + f[7] * nsh
                       + f[8] * 0.5) * c14_to_state;
-  dy[IX(NPH, C14)] += (f[6] * (1.0 - A.bomb_share_NH) + f[7] * (1.0 - A.nuc_share_NH)
+  dy[IX(NPH, C14)] += (f[6] * (1.0 - A.bomb_share_NH) + f[7] * (1.0 - nsh)
                       + f[8] * 0.5) * c14_to_state;
   for (int i = 0; i < NB; ++i) dy[IX(i, C14)] -= A.lambda * y[IX(i, C14)];
 }

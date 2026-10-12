@@ -27,8 +27,10 @@
 
 #' Mixed-layer DIC that equilibrates with a given atmospheric pCO2
 #' @return DIC in mol/kg
-ccx_dic_for_pco2 <- function(pco2_target, alk, sst) {
-  f <- function(dic) pco2_from_dic(dic, alk, sst) - pco2_target
+ccx_dic_for_pco2 <- function(pco2_target, alk, sst, cc = carb_coefs()) {
+  # `cc` = the run's carbonate table (aux$carb_cc; 2026-10-12, label ...wtc). The default is the
+  # legacy table, the SAME object the pre-2026-10-12 default `k = carb_constants(T)` read.
+  f <- function(dic) pco2_from_dic(dic, alk, sst, k = carb_constants(sst, cc)) - pco2_target
   uniroot(f, interval = c(1000e-6, 2600e-6), tol = 1e-12)$root
 }
 
@@ -353,7 +355,7 @@ ccx_spinup <- function(p = ccx_default_params(),
     # starting guess and ccx_ocean_c12_steady() finishes the job -- see its
     # header for the measured consequence of skipping it (-0.915 permil of
     # spurious d13C drift).
-    dic <- ccx_dic_for_pco2(chi0, ccx_const("ALK_SURFACE"), aux$sst[[h]])
+    dic <- ccx_dic_for_pco2(chi0, ccx_aux_alk(aux), aux$sst[[h]], cc = ccx_aux_carb(aux))
     y[i$ml, "C"] <- dic * aux$ml_mass_kg[[h]] / aux$mol_per_GtC
     # GtC per metre of the INTERIOR column. With the equatorial cell on (D1,
     # 2026-09-13g) the mixed layer covers a_ml < a_ls, so "the ML's carbon per
@@ -375,8 +377,8 @@ ccx_spinup <- function(p = ccx_default_params(),
     # gate is widened to include this structure for that reason.
     if (!is.null(i$hs)) {
       dic_h <- ccx_dic_for_pco2(chi0,
-                                if (is.null(aux$alk_hs)) ccx_const("ALK_SURFACE") else aux$alk_hs,
-                                aux$sst_hs)
+                                if (is.null(aux$alk_hs)) ccx_aux_alk(aux) else aux$alk_hs,
+                                aux$sst_hs, cc = ccx_aux_carb(aux))
       y[i$hs, "C"] <- dic_h * aux$hs_mass_kg[[h]] / aux$mol_per_GtC
       y[i$hd, "C"] <- dic_h * aux$a_hs[[h]] * (if (is.null(aux$thick_hd)) aux$dz_hd else aux$thick_hd[[h]]) *   # per-hemisphere HD thickness (2026-09-21 e)
                       ccx_const("RHO_SEAWATER") / aux$mol_per_GtC
@@ -388,7 +390,7 @@ ccx_spinup <- function(p = ccx_default_params(),
     # loop sees a real gradient and ccx_c12_steady_conveyor() finishes it;
     # its gate below includes the cell for that reason (prereg 09-13g, (b)).
     if (!is.null(i$eq)) {
-      dic_e <- ccx_dic_for_pco2(chi0, aux$alk_eq, aux$sst_eq)
+      dic_e <- ccx_dic_for_pco2(chi0, aux$alk_eq, aux$sst_eq, cc = ccx_aux_carb(aux))
       y[i$eq, "C"] <- dic_e * aux$eq_mass_kg[[h]] / aux$mol_per_GtC
     }
     # THE TROPICAL SURFACE BOX (2026-09-14f), the same idiom: its own Henry
@@ -396,7 +398,7 @@ ccx_spinup <- function(p = ccx_default_params(),
     # interface with layer 1 and the loop see a real gradient, so the Newton
     # solve below finishes it (its gate includes the box).
     if (!is.null(i$tr)) {
-      dic_t <- ccx_dic_for_pco2(chi0, aux$alk_tr, aux$sst_tr)
+      dic_t <- ccx_dic_for_pco2(chi0, aux$alk_tr, aux$sst_tr, cc = ccx_aux_carb(aux))
       y[i$tr, "C"] <- dic_t * aux$tr_mass_kg[[h]] / aux$mol_per_GtC
     }
   }

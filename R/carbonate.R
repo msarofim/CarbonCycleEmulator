@@ -15,19 +15,46 @@
 # =====================================================================
 
 CARB_COEFS_FILE <- file.path("data", "carbonate_coefs.rds")
+# THE TABLES, ONE PER REFERENCE SALINITY (2026-10-12). 34.7 is the uncited legacy value every
+# registered mode ran on; 34.760 is GLODAPv2.2023's 0-100 m cos-lat-weighted surface salinity
+# (citation rulings row 30, "Compute from GLODAP, adopt (Recommended)"), read by label
+# hilda_csl3v0kaidgbemwtc through the structure field `carb_salinity`. Each file is built by
+# data-raw/build_carbonate_tables.R <salinity>; the loader checks the file's own salinity.
+CARB_SALINITY_LEGACY    <- 34.7
+CARB_COEFS_BY_SALINITY  <- c("34.7" = "carbonate_coefs.rds", "34.76" = "carbonate_coefs_s34760.rds")
 
-#' Load the fitted carbonate constants (memoised)
+#' Load the fitted carbonate constants (memoised PER FILE)
 #' @return list with coefs (K0,K1,K2,Kb), poly_degree, salinity, boron_total
+#' ⚠ Until 2026-10-12 the memo held the FIRST file read and ignored `file` thereafter -- harmless
+#' while there was one table, wrong with two. It is now keyed by path.
 .carb_env <- new.env(parent = emptyenv())
 carb_coefs <- function(file = ccx_path(CARB_COEFS_FILE)) {
-  if (is.null(.carb_env$coefs)) {
+  key <- normalizePath(file, mustWork = FALSE)
+  if (is.null(.carb_env[[key]])) {
     if (!file.exists(file)) {
       stop("Carbonate coefficients not found at '", file, "'.\n",
            "  Run: Rscript data-raw/build_carbonate_tables.R")
     }
-    .carb_env$coefs <- readRDS(file)
+    .carb_env[[key]] <- readRDS(file)
   }
-  .carb_env$coefs
+  .carb_env[[key]]
+}
+
+#' The carbonate table for a reference salinity (NULL = the legacy 34.7, the SAME object
+#' carb_coefs() returns, so every registered mode is bit-exact). An unbuilt salinity STOPS.
+ccx_carb_coefs_for <- function(salinity = NULL) {
+  if (is.null(salinity)) return(carb_coefs())
+  hit <- names(CARB_COEFS_BY_SALINITY)[abs(as.numeric(names(CARB_COEFS_BY_SALINITY)) - salinity) < 1e-9]
+  if (length(hit) != 1L)
+    stop("no carbonate table for salinity ", format(salinity), " (built: ",
+         paste(names(CARB_COEFS_BY_SALINITY), collapse = " / "), "). Build one with ",
+         "data-raw/build_carbonate_tables.R and register it in CARB_COEFS_BY_SALINITY.")
+  if (as.numeric(hit) == CARB_SALINITY_LEGACY) return(carb_coefs())
+  cc <- carb_coefs(ccx_path("data", CARB_COEFS_BY_SALINITY[[hit]]))
+  if (abs(cc$salinity - salinity) > 1e-9)
+    stop("carbonate table ", CARB_COEFS_BY_SALINITY[[hit]], " was built at S ", cc$salinity,
+         ", not the requested ", salinity)
+  cc
 }
 
 #' Evaluate a fitted ln-K polynomial
@@ -131,8 +158,8 @@ pco2_from_dic <- function(dic, alk, T, k = carb_constants(T), iter = 6L) {
 #' Reported by the app rather than prescribed: it rises as the ocean takes
 #' up carbon, which is exactly the saturation story the pulse tab tells.
 #' @param rel_step relative DIC perturbation for the centred difference
-revelle_factor <- function(dic, alk, T, rel_step = 1e-4) {
-  k  <- carb_constants(T)
+revelle_factor <- function(dic, alk, T, rel_step = 1e-4, cc = carb_coefs()) {
+  k  <- carb_constants(T, cc)
   d  <- dic * rel_step
   p1 <- pco2_from_dic(dic - d, alk, T, k = k)
   p2 <- pco2_from_dic(dic + d, alk, T, k = k)

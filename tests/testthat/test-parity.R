@@ -272,7 +272,10 @@ test_that("the single-step flat forcing vector is complete, and AOD reaches the 
       # + the N-deposition pair (2026-09-30, D2 (a)): this mirror is a LEDGER of
       # the declared layout, extended when a column is appended -- which is the
       # failure this block exists to force. The assertion below is unchanged.
-      fa$ndep_NH, fa$ndep_SH)
+      fa$ndep_NH, fa$ndep_SH,
+      # + the nuclear 14C NH share (2026-10-12, label hilda_csl3v0kaidgbemwtc): appended LAST,
+      # this ledger extended with it, the assertion below unchanged
+      fa$nuc_share_NH)
   })
   expect_identical(length(flat), length(CCX_FORCING_COLS))
 

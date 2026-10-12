@@ -242,7 +242,8 @@ ccx_run_coupled <- function(spin, scenario = "ssp245", years = c(1750, 2100),
                       bomb_total_kmol = bomb_total_kmol,
                       luc_scale = luc_scale,
                       enso_index = ccx_enso_index_of(spin$params),
-                      aod_mode = ccx_aod_mode_of(spin$params)),
+                      aod_mode = ccx_aod_mode_of(spin$params),
+                      nuc_share = ccx_nuc_share_of(spin$params)),
     warning = function(w) {
       if (grepl("held FLAT", conditionMessage(w))) invokeRestart("muffleWarning")
     })
@@ -255,7 +256,8 @@ ccx_run_coupled <- function(spin, scenario = "ssp245", years = c(1750, 2100),
                         bomb_total_kmol = bomb_total_kmol,
                         luc_scale = luc_scale,
                         enso_index = ccx_enso_index_of(spin$params),
-                        aod_mode = ccx_aod_mode_of(spin$params)),
+                        aod_mode = ccx_aod_mode_of(spin$params),
+                        nuc_share = ccx_nuc_share_of(spin$params)),
       warning = function(w) {
         if (grepl("held FLAT", conditionMessage(w))) invokeRestart("muffleWarning")
       })

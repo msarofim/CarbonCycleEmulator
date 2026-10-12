@@ -219,6 +219,14 @@ FORC_ENSO_RELSST_FILE <- file.path("data", "forcing_enso_relsst.rds")
 #                precedent: measured, not typed).
 CCX_AOD_MODE_CODES <- c(legacy = 0L, anomaly = 1L)
 FORC_AOD_BG_WIN    <- c(1850, 1852)
+# THE NUCLEAR-INDUSTRY 14C NH SHARE (2026-10-12; citation rulings row 20; label
+# hilda_csl3v0kaidgbemwtc, field `nuc_share_ts`). "constant" = FORC_NUC_NH_SHARE (0.95), every
+# registered mode: the table's `nuc_share_NH` column is NaN and both cores fall back to the aux
+# scalar. "per_year" = the share of the 22-country files' OWN rows, year by year
+# (data/forcing_nuc_nh_share.rds, data-raw/build_nuc_nh_share.R), held flat within a year and
+# HELD at the nearest year outside the files (the source is zero there; the 14C tag still needs a
+# number). Stamped as attr "nuc_share", checked at run time like the ENSO index.
+CCX_NUC_SHARE_CODES <- c(constant = 0L, per_year = 1L)
 
 # ---------------------------------------------------------------------
 #' Sourced hemispheric monthly emission seasonality, cached.
@@ -612,8 +620,10 @@ ccx_build_forcing <- function(scenario = "historical",
                               sink_mode = CCX_ARTIFICIAL_SINK_MODE,
                               emis_method = CCX_EMIS_METHOD_DEFAULT,
                               enso_index = "demean",
-                              aod_mode = "legacy") {
+                              aod_mode = "legacy",
+                              nuc_share = "constant") {
   emis_method <- match.arg(emis_method, c("spline", "constant"))
+  nuc_share   <- match.arg(nuc_share, names(CCX_NUC_SHARE_CODES))
 
   yrs <- seq(years[1], years[2])
   n   <- length(yrs) * 12
@@ -999,6 +1009,8 @@ ccx_build_forcing <- function(scenario = "historical",
     # data/forcing_ndep.rds carries this scenario; harmless at ndep_ret 0 (the
     # default) and REFUSED by ccx_run_prepared() otherwise (ccx_ndep_check()).
     ndep_NH = ndep$NH, ndep_SH = ndep$SH,
+    # the nuclear 14C NH share (2026-10-12): NaN = the aux scalar FORC_NUC_NH_SHARE in both cores
+    nuc_share_NH = if (nuc_share == "per_year") ccx_nuc_nh_share_monthly(yrs) else rep(NaN, n),
     # artificial mid-century OCEAN sink, GtC/yr, atmosphere -> mixed layer.
     # Identically zero unless CCX_SINK_RATE is set AND CCX_SINK_MODE == "ocean".
     sink_ocean = sink_ocean,
@@ -1016,6 +1028,7 @@ ccx_build_forcing <- function(scenario = "historical",
   # ccx_enso_index_check() reads it against the parameters at run time.
   attr(out, "enso_index") <- enso_index
   attr(out, "aod_mode")   <- aod_mode
+  attr(out, "nuc_share")  <- nuc_share
   # which N-deposition series the ndep columns carry ("none" = zeros)
   attr(out, "ndep_source") <- ndep$source
   # Same reason as luc_scale: a forcing built under an arm of the artificial
@@ -1205,6 +1218,39 @@ ccx_aod_mode_check <- function(p, F) {
   invisible(TRUE)
 }
 
+ccx_nuc_share_of <- function(p) {
+  v <- p[["nuc_share_ts"]]
+  if (is.null(v)) return("constant")
+  nm <- names(CCX_NUC_SHARE_CODES)[match(as.integer(v), CCX_NUC_SHARE_CODES)]
+  if (length(nm) != 1 || is.na(nm))
+    stop("ccx_nuc_share_of(): nuc_share_ts = ", paste(v, collapse = ","),
+         " is not one of ", paste(CCX_NUC_SHARE_CODES, collapse = "/"))
+  nm
+}
+#' Refuse a params/forcing nuclear-share mismatch; same contract as ccx_aod_mode_check()
+#' (an unstamped table is "constant"). A table stamped "none" carries no nuclear source.
+ccx_nuc_share_check <- function(p, F) {
+  want <- if (is.character(p)) p else ccx_nuc_share_of(p)
+  have <- attr(F, "nuc_share")
+  if (identical(have, "none")) return(invisible(TRUE))
+  if (is.null(have) && want == "constant") return(invisible(TRUE))
+  if (!identical(have, want))
+    stop("nuclear 14C share mismatch: the parameters name '", want, "' but the forcing carries '",
+         if (is.null(have)) "<unstamped>" else have,
+         "'. Build it with ccx_build_forcing(nuc_share = ccx_nuc_share_of(params)).")
+  invisible(TRUE)
+}
+#' The per-year nuclear 14C NH share on a monthly axis (12 rows per year of `yrs`). Cached.
+ccx_nuc_nh_share_monthly <- local({
+  cache <- NULL
+  function(yrs) {
+    if (is.null(cache)) cache <<- readRDS(ccx_path("data", "forcing_nuc_nh_share.rds"))
+    d <- cache
+    yy <- pmin(pmax(yrs, min(d$year)), max(d$year))     # HOLD the nearest year outside the files
+    rep(d$nh_share_filled[match(yy, d$year)], each = 12)
+  }
+})
+
 #' Extract one month's forcing in the shape ccx_deriv() expects
 ccx_forcing_at <- function(F, i) {
   list(e_foss = list(NH = F$e_foss_NH[i], SH = F$e_foss_SH[i]),
@@ -1213,6 +1259,9 @@ ccx_forcing_at <- function(F, i) {
        gmst = F$gmst[i], enso = F$enso[i], d13c_foss = F$d13c_foss[i],
        c14_bomb = F$c14_bomb[i], c14_nuclear = F$c14_nuclear[i],
        c14_cosmo = F$c14_cosmo[i],
+       # the nuclear NH share (2026-10-12): NULL on an older table, NaN under "constant";
+       # ccx_deriv() reads both as the aux scalar
+       nuc_share_NH = F$nuc_share_NH[i],
        # observed-SST columns (2026-08-18). NULL when the forcing predates them
        # -- the deriv's fallback handles that; omitting them HERE while the C++
        # matrix carried them broke R<->C++ parity at 9e-4 before this line.

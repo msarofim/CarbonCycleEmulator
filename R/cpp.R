@@ -28,7 +28,7 @@ ccx_load_cpp <- function(quiet = TRUE) {
 #' large part of why the R version is slow, and it must not be reproduced in
 #' the hot loop.
 ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
-  cc <- carb_coefs()
+  cc <- ccx_aux_carb(aux)                  # the run's carbonate table (2026-10-12)
   list(
     gtc_per_ppm_hemi = aux$gtc_per_ppm_hemi,
     chi0 = aux$chi0, mol_per_GtC = aux$mol_per_GtC,
@@ -67,9 +67,9 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
     alpha_as_kin_a = aux$alpha_as_kin_a, alpha_as_kin_b = aux$alpha_as_kin_b,
     bomb_share_NH = aux$bomb_share_NH, nuc_share_NH = aux$nuc_share_NH,
     R13 = ccx_const("R13_VPDB"), R14STD = ccx_const("R14_STD"),
-    lambda = ccx_const("LAMBDA_C14"), alk = ccx_const("ALK_SURFACE"),
-    # the cold box's own alkalinity (2026-09-08g); absent = the global constant
-    alk_hs = if (is.null(aux$alk_hs)) ccx_const("ALK_SURFACE") else aux$alk_hs,
+    lambda = ccx_const("LAMBDA_C14"), alk = ccx_aux_alk(aux),    # the run's LS alkalinity (2026-10-12)
+    # the cold box's own alkalinity (2026-09-08g); absent = the LS value
+    alk_hs = if (is.null(aux$alk_hs)) ccx_aux_alk(aux) else aux$alk_hs,
     cK0 = cc$coefs$K0, cK1 = cc$coefs$K1, cK2 = cc$coefs$K2,
     cKb = cc$coefs$Kb, cKw = cc$coefs$Kw,
     t_centre = cc$t_centre, t_scale = cc$t_scale, boron = cc$boron_total,
@@ -93,7 +93,7 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
       c(aux$pump_up$NH$org, aux$pump_up$SH$org),
     pump_up_carb = if (is.null(aux$pump_up)) numeric(2 * grid$nl) else
       c(aux$pump_up$NH$carb, aux$pump_up$SH$carb),
-    alpha_pump_org  = 1 + ccx_const("PUMP_EPS13_ORG") / 1000,
+    alpha_pump_org  = 1 + ccx_aux_pump_eps13_org(aux) / 1000,   # the run's value (2026-10-12)
     alpha_pump_carb = 1 + ccx_const("PUMP_EPS13_CARB") / 1000,
     # THE HIGH-LATITUDE BOXES (HILDA HS/HD, 2026-09-05). Sent UNCONDITIONALLY,
     # for the reason the pump arrays and the T-dependent alphas are: the core
@@ -464,7 +464,11 @@ CCX_FORCING_COLS <- c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH",
                       # same reason. "Off" is ZERO (no anthropogenic deposition);
                       # ccx_build_forcing() always emits it, and an absent column
                       # reaches C++ as NaN, which the core reads as zero.
-                      "ndep_NH", "ndep_SH")
+                      "ndep_NH", "ndep_SH",
+                      # the nuclear 14C NH share (2026-10-12; label ...wtc). Appended
+                      # LAST for the fifth time. "Off" is NaN (the aux scalar), which
+                      # ccx_build_forcing() emits under nuc_share = "constant".
+                      "nuc_share_NH")
 
 ccx_cpp_forcing <- function(F) {
   miss <- setdiff(CCX_FORCING_COLS, names(F))
@@ -523,6 +527,7 @@ ccx_run_prepare <- function(spin, substeps = "auto") {
        tr_on = ccx_tr_on(spin$params),
        enso_index = ccx_enso_index_of(spin$params),
        aod_mode = ccx_aod_mode_of(spin$params),
+       nuc_share = ccx_nuc_share_of(spin$params),       # 2026-10-12, label ...wtc
        # D2 (a): a nonzero retention must meet a forcing that CARRIES deposition
        ndep_ret = if (is.null(spin$params$ndep_ret)) CCX_NDEP_RET_DEFAULT else spin$params$ndep_ret,
        # W1 (2026-10-02): the land ENSO lag, months. The core never sees it -- the
@@ -537,7 +542,7 @@ ccx_run_prepare <- function(spin, substeps = "auto") {
 ccx_cpp_forcing_prep <- function(F) {
   structure(list(mat = ccx_cpp_forcing(F), t = F$t), class = "ccx_cpp_forcing",
             enso_index = attr(F, "enso_index"), aod_mode = attr(F, "aod_mode"),
-            ndep_source = attr(F, "ndep_source"))
+            ndep_source = attr(F, "ndep_source"), nuc_share = attr(F, "nuc_share"))
 }
 
 #' Run the core from prepared arguments. Same return shape as `ccx_run_fast()`,
@@ -548,6 +553,7 @@ ccx_run_prepared <- function(y, prep, F, retry_na = TRUE, enso_hist = NULL, tdee
   # the forcing's ENSO index must be the one the parameters name (2026-09-29)
   ccx_enso_index_check(if (is.null(prep$enso_index)) "demean" else prep$enso_index, Fm)
   ccx_aod_mode_check(if (is.null(prep$aod_mode)) "legacy" else prep$aod_mode, Fm)
+  ccx_nuc_share_check(if (is.null(prep$nuc_share)) "constant" else prep$nuc_share, Fm)   # 2026-10-12
   ccx_ndep_check(prep$ndep_ret, Fm)                 # D2 (a), 2026-09-30
   # THE LAND ENSO INPUT (W1, 2026-10-02): the SAME builder ccx_run() uses, so the two
   # cores integrate one series. Unlagged, it IS the matrix's enso column.
@@ -699,7 +705,9 @@ ccx_cpp_forcing_vec <- function(forc) {
          if (is.null(forc$aod_SH)) NA_real_ else forc$aod_SH,
          # N deposition (D2 (a), 2026-09-30): absent -> NaN -> the core reads zero.
          if (is.null(forc$ndep_NH)) NA_real_ else forc$ndep_NH,
-         if (is.null(forc$ndep_SH)) NA_real_ else forc$ndep_SH)
+         if (is.null(forc$ndep_SH)) NA_real_ else forc$ndep_SH,
+         # the nuclear NH share (2026-10-12): absent -> NaN -> the core reads the aux scalar
+         if (is.null(forc$nuc_share_NH)) NA_real_ else forc$nuc_share_NH)
   # STRUCTURAL GUARD, not a comment: the C++ indexes this vector by POSITION
   # against CCX_FORCING_COLS, so a short vector is an out-of-bounds read that
   # neither language reports.

@@ -317,7 +317,8 @@ ccx_pulse_forcings <- function(spin, years_fwd, bomb_total_kmol, luc_scale) {
   p <- spin$params
   F_hist <- ccx_build_forcing("historical", c(1750, JOOS_REF_YEAR), prod_c14 = spin$prod_c14,
                               bomb_total_kmol = bomb_total_kmol, luc_scale = luc_scale,
-                              enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p))
+                              enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p),
+                              nuc_share = ccx_nuc_share_of(p))
   # ⚠ THE FORWARD TABLE'S CLOCK RUNS ONE YEAR BEHIND REAL TIME (documented 2026-10-12, code review;
   # behaviour unchanged). F_hist ends at t = JOOS_REF_YEAR + 0.958 (Dec 2010), and the state continues
   # from the END of 2010; but years_fwd starts at JOOS_REF_YEAR, so F_fwd's first row is labelled
@@ -327,7 +328,8 @@ ccx_pulse_forcings <- function(spin, years_fwd, bomb_total_kmol, luc_scale) {
   # 2015.0). Measured negligible by the review: IRF(100) 0.37912 -> 0.37921 with the clock aligned.
   F_fwd <- suppressWarnings(ccx_build_forcing("historical", years_fwd, prod_c14 = spin$prod_c14,
                               bomb_total_kmol = 0, luc_scale = luc_scale,
-                              enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p)))
+                              enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p),
+                              nuc_share = ccx_nuc_share_of(p)))
   for (cc in c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH", "enso", "c14_bomb", "c14_nuclear"))
     F_fwd[[cc]] <- 0
   # ⛔ FIXED 2026-10-12 (Marcus: "Fix both in the builder (Recommended)"). This line was

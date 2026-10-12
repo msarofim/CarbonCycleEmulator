@@ -306,6 +306,38 @@ CCX_SST_SEAS_LAG <- 1.32                   # months past the mid-July zero-lag p
                                            # value of both lags below, resolved in R
                                            # and handed to the C++ by ccx_cpp_par().
 
+# ---- THE LS ALKALINITY AND THE CARBONATE TABLE (2026-10-12; label hilda_csl3v0kaidgbemwtc) ----
+# `alk_surface` (mol/kg) and `carb_salinity` are structure fields: GLODAPv2.2023's 2303.4 umol/kg
+# and 34.760 (data/obs_glodap_surface_alk_sal.rds; citation rulings rows 3 + 30). ABSENT = the
+# registry's ALK_SURFACE (2300) and the S 34.7 table, every registered mode.
+ccx_alk_surface <- function(p) {
+  v <- p[["alk_surface"]]
+  if (is.null(v)) return(ccx_const("ALK_SURFACE"))
+  if (length(v) != 1L || !is.finite(v) || v <= 0 || v > 0.01)
+    stop("alk_surface is the LS surface alkalinity in mol/kg (seawater ~2.3e-3); got ", format(v))
+  v
+}
+#' The pump's organic-carbon 13C fractionation (2026-10-12; citation rulings row 1): label ...wtc
+#' sets -22 permil (Claret, Sonnerup & Quay 2021, relative to SURFACE DIC); absent = the registry's
+#' PUMP_EPS13_ORG (-20), every registered mode. Carried on aux so BOTH cores read one value.
+ccx_aux_pump_eps13_org <- function(aux)
+  if (is.null(aux$pump_eps13_org)) ccx_const("PUMP_EPS13_ORG") else aux$pump_eps13_org
+#' THE COLUMN DEPTH (2026-10-12; citation rulings row 5): label ...wtc sets 3682.2 m (Charette &
+#' Smith 2010 Table 2); absent = the registry's OCEAN_DEPTH (3700), every registered mode. The grid
+#' is built from it, and the GLODAP targets are keyed by it (R/likelihood.R ccx_glodap_file()).
+ccx_ocean_depth <- function(p) {
+  v <- p[["ocean_depth"]]
+  if (is.null(v)) return(ccx_const("OCEAN_DEPTH"))
+  if (length(v) != 1L || !is.finite(v) || v < 3000 || v > 4500)
+    stop("ocean_depth must be one column depth in m (3000-4500); got ", format(v))
+  v
+}
+#' The grid a parameter list runs on: h_ml over the structure's column depth
+ccx_grid_of <- function(p) ccx_ocean_grid(p$h_ml, total_depth = ccx_ocean_depth(p))
+#' The LS alkalinity / carbonate table a prepared run uses (absent = the legacy ones)
+ccx_aux_alk  <- function(aux) if (is.null(aux$alk_ml)) ccx_const("ALK_SURFACE") else aux$alk_ml
+ccx_aux_carb <- function(aux) if (is.null(aux$carb_cc)) carb_coefs() else aux$carb_cc
+
 # ---- THE TWO LAGS AS RUN INPUTS (2026-10-12; label hilda_csl3v0kaidgbemwtc) -----
 # Until today both were compile-time twins in src/ccx_core.cpp. They are now RESOLVED HERE, by
 # the functions the R core itself calls, and ccx_cpp_par() hands the resolved values to the C++
@@ -3018,14 +3050,14 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       dic_ml <- dic_ml + p$ent_seas_amp_SH * 1e-6 *
                 sin(2 * pi * (t - (CCX_ENT_SEAS_PEAK_MO / 12 - 0.25)))
     }
-    k      <- carb_constants(sst)
+    k      <- carb_constants(sst, ccx_aux_carb(aux))
     pco2_ml <- if (isTRUE(p$revelle_frozen > 0)) {
       # Buffer factor pinned at its preindustrial value: pCO2 responds to DIC
       # linearly, with the slope the ocean HAD in 1750 and never loses. The
       # ocean therefore keeps absorbing at its preindustrial efficiency.
       aux$pco2_0[[h]] * (1 + aux$revelle0[[h]] * (dic_ml - aux$dic0[[h]]) / aux$dic0[[h]])
     } else {
-      pco2_from_dic(dic_ml, ccx_const("ALK_SURFACE"), sst, k = k)
+      pco2_from_dic(dic_ml, ccx_aux_alk(aux), sst, k = k)
     }
     if (record) { .pml[[h]] <- pco2_ml; .sstl[[h]] <- sst }
     pco2_at <- chi                                                  # ppm ~ uatm at 1 atm
@@ -3251,20 +3283,20 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
           f_ml <- aux$ml_pump_share[[h]]; f_tr <- 1 - f_ml
           sc_t <- (if (identical(p$pump_mode, "D")) y[itr, "C"] / aux$tr_C0[[h]] else 1) * s_pump
           add_flux(iml, ioc[kk], pf$org[kk] * sc * f_ml,
-                   alpha13 = 1 + ccx_const("PUMP_EPS13_ORG") / 1000, lab = "pump",
+                   alpha13 = 1 + ccx_aux_pump_eps13_org(aux) / 1000, lab = "pump",
                    alpha13_signed = TRUE)
           add_flux(iml, ioc[kk], pf$carb[kk] * sc * f_ml,
                    alpha13 = 1 + ccx_const("PUMP_EPS13_CARB") / 1000, lab = "pump",
                    alpha13_signed = TRUE)
           add_flux(itr, ioc[kk], pf$org[kk] * sc_t * f_tr,
-                   alpha13 = 1 + ccx_const("PUMP_EPS13_ORG") / 1000, lab = "pump",
+                   alpha13 = 1 + ccx_aux_pump_eps13_org(aux) / 1000, lab = "pump",
                    alpha13_signed = TRUE)
           add_flux(itr, ioc[kk], pf$carb[kk] * sc_t * f_tr,
                    alpha13 = 1 + ccx_const("PUMP_EPS13_CARB") / 1000, lab = "pump",
                    alpha13_signed = TRUE)
         } else {
           add_flux(iml, ioc[kk], pf$org[kk] * sc,
-                   alpha13 = 1 + ccx_const("PUMP_EPS13_ORG") / 1000, lab = "pump",
+                   alpha13 = 1 + ccx_aux_pump_eps13_org(aux) / 1000, lab = "pump",
                    alpha13_signed = TRUE)
           add_flux(iml, ioc[kk], pf$carb[kk] * sc,
                    alpha13 = 1 + ccx_const("PUMP_EPS13_CARB") / 1000, lab = "pump",
@@ -3427,13 +3459,13 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
         (if (isTRUE(p$sst_obs > 0) && !is.null(sa) && is.finite(sa)) sa
          else p$sst_scale * forc$gmst)
       dic_hs <- y[ihs, "C"] * aux$mol_per_GtC / hs_mass_t             # mol/kg
-      k_hs   <- carb_constants(sst_hs)
+      k_hs   <- carb_constants(sst_hs, ccx_aux_carb(aux))
       pco2_hs <- if (isTRUE(p$revelle_frozen > 0)) {
         ccx_const("CO2_PI_PPM") *
           (1 + aux$revelle0_hs * (dic_hs - aux$dic0_hs) / aux$dic0_hs)
       } else {
         pco2_from_dic(dic_hs,
-                      if (is.null(aux$alk_hs)) ccx_const("ALK_SURFACE") else aux$alk_hs,
+                      if (is.null(aux$alk_hs)) ccx_aux_alk(aux) else aux$alk_hs,
                       sst_hs, k = k_hs)
       }
       gx_hs  <- aux$asx_hs[[h]] * p$k_w * k_hs$K0
@@ -3484,7 +3516,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
         } else s_pump
         sc_hs <- (if (identical(p$pump_mode, "D")) y[ihs, "C"] / aux$hs_C0[[h]] else 1) * s_hs   # x the seasonal export factor (O5 / O5b)
         add_flux(ihs, ihd, ph$org * sc_hs,
-                 alpha13 = 1 + ccx_const("PUMP_EPS13_ORG") / 1000, lab = "pump",     # the biological-pump CHANNEL (09-08f: "pump_hs" was no channel and broke the flux trace)
+                 alpha13 = 1 + ccx_aux_pump_eps13_org(aux) / 1000, lab = "pump",     # the biological-pump CHANNEL (09-08f: "pump_hs" was no channel and broke the flux trace)
                  alpha13_signed = TRUE)
         add_flux(ihs, ihd, ph$carb * sc_hs,
                  alpha13 = 1 + ccx_const("PUMP_EPS13_CARB") / 1000, lab = "pump",
@@ -3594,7 +3626,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
          else p$sst_scale * forc$gmst) +
         aux$sst_eq_enso * forc$enso
       dic_eq <- y[ieq, "C"] * aux$mol_per_GtC / aux$eq_mass_kg[[h]]          # mol/kg
-      kc_eq  <- carb_constants(sst_eq_t)
+      kc_eq  <- carb_constants(sst_eq_t, ccx_aux_carb(aux))
       pco2_eq <- if (isTRUE(p$revelle_frozen > 0)) {
         ccx_const("CO2_PI_PPM") *
           (1 + aux$revelle0_eq * (dic_eq - aux$dic0_eq) / aux$dic0_eq)
@@ -3631,7 +3663,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
          else p$sst_scale * forc$gmst) +
         aux$sst_tr_enso * forc$enso
       dic_tr <- y[itr, "C"] * aux$mol_per_GtC / aux$tr_mass_kg[[h]]          # mol/kg
-      kc_tr  <- carb_constants(sst_tr_t)
+      kc_tr  <- carb_constants(sst_tr_t, ccx_aux_carb(aux))
       pco2_tr <- if (isTRUE(p$revelle_frozen > 0)) {
         ccx_const("CO2_PI_PPM") *
           (1 + aux$revelle0_tr * (dic_tr - aux$dic0_tr) / aux$dic0_tr)
@@ -3878,11 +3910,15 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
   # A mol of pure 14C carries R14_STD^-1 times as much "C14 signal" as a mol of
   # standard-ratio carbon, hence the division by R14_STD.
   c14_to_state <- 1 / (aux$mol_per_GtC * ccx_const("R14_STD"))
+  # the nuclear NH share: the forcing's per-year column under label ...wtc (2026-10-12), else --
+  # NULL on an older table, NaN under "constant" -- the aux scalar, the SAME arithmetic as before
+  nsh <- forc$nuc_share_NH
+  if (is.null(nsh) || !is.finite(nsh)) nsh <- aux$nuc_share_NH
   dy[aux$idx$NH$atm, "C14"] <- dy[aux$idx$NH$atm, "C14"] +
-    (forc$c14_bomb * aux$bomb_share_NH + forc$c14_nuclear * aux$nuc_share_NH +
+    (forc$c14_bomb * aux$bomb_share_NH + forc$c14_nuclear * nsh +
        forc$c14_cosmo * 0.5) * c14_to_state
   dy[aux$idx$SH$atm, "C14"] <- dy[aux$idx$SH$atm, "C14"] +
-    (forc$c14_bomb * (1 - aux$bomb_share_NH) + forc$c14_nuclear * (1 - aux$nuc_share_NH) +
+    (forc$c14_bomb * (1 - aux$bomb_share_NH) + forc$c14_nuclear * (1 - nsh) +
        forc$c14_cosmo * 0.5) * c14_to_state
 
   dy[, "C14"] <- dy[, "C14"] - ccx_const("LAMBDA_C14") * y[, "C14"]
@@ -4197,7 +4233,12 @@ ccx_point_mix_g <- function(forc, p) {
        ". Pass the runner's series (ccx_mix_g_series()).")
 }
 
-ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
+ccx_prepare <- function(p, grid = ccx_grid_of(p)) {
+  # a grid handed in must be THIS structure's column (2026-10-12): a 3700 m grid under a 3682.2 m
+  # label would integrate the wrong ocean and score it against the wrong GLODAP targets
+  if (abs(sum(grid$dz) - ccx_ocean_depth(p)) > 1e-6)
+    stop(sprintf("ccx_prepare(): the grid integrates to %.6g m but the structure's column is %.6g m -- build it with ccx_grid_of(p)",
+                 sum(grid$dz), ccx_ocean_depth(p)))
   hs_on <- ccx_hs_on(p)
   eq_on <- ccx_eq_on(p)
   tr_on <- ccx_tr_on(p)
@@ -4472,7 +4513,11 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   # unconditionally (it costs two uniroot solves once per spinup) so the two code
   # paths cannot diverge in what they consider "preindustrial".
   sst_l <- list(NH = p$sst_NH, SH = p$sst_SH)
-  alk   <- ccx_const("ALK_SURFACE")
+  # the LS mixed layer's alkalinity and the carbonate table (2026-10-12; label ...wtc reads
+  # GLODAPv2.2023's 2303.4 umol/kg and the S 34.760 table). Absent = ALK_SURFACE and the legacy
+  # table -- the same number and the same object as before, so every registered mode is bit-exact.
+  alk   <- ccx_alk_surface(p)
+  carb_cc <- ccx_carb_coefs_for(p[["carb_salinity"]])
   # Per-box alkalinity for the COLD box (T-ALK, 2026-09-08g). `alk_hs` ABSENT
   # or NULL = the one global constant for every box, BIT-EXACT (the absence
   # contract every switch in this list uses). A finite value, mol/kg, is the
@@ -4492,8 +4537,8 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
            " -- that looks like umol/kg, the unit of alk_eq / alk_tr. Divide by 1e6.")
     p$alk_hs
   }
-  dic0  <- lapply(sst_l, function(T) ccx_dic_for_pco2(ccx_const("CO2_PI_PPM"), alk, T))
-  rev0  <- lapply(HEMIS, function(h) revelle_factor(dic0[[h]], alk, sst_l[[h]]))
+  dic0  <- lapply(sst_l, function(T) ccx_dic_for_pco2(ccx_const("CO2_PI_PPM"), alk, T, cc = carb_cc))
+  rev0  <- lapply(HEMIS, function(h) revelle_factor(dic0[[h]], alk, sst_l[[h]], cc = carb_cc))
   names(rev0) <- HEMIS
 
   aux <- list(
@@ -4612,7 +4657,10 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     # the NAMED shares R/forcing.R declares (same values as the literals that
     # sat here until 2026-09-12; pointed at the constants so the two cannot
     # drift apart)
-    bomb_share_NH = FORC_BOMB_NH_SHARE,
+    # the bomb share is FITTED under label hilda_csl3v0kaidgbemwtc (2026-10-12; prior U[0.77, 0.98],
+    # citation rulings row 19); absent = FORC_BOMB_NH_SHARE, every registered mode. The nuclear
+    # scalar is the fallback of the forcing's per-year column (R/forcing.R, `nuc_share`).
+    bomb_share_NH = if (is.null(p[["bomb_share_NH"]])) FORC_BOMB_NH_SHARE else p[["bomb_share_NH"]],
     nuc_share_NH  = FORC_NUC_NH_SHARE,
     # Ocean areas, needed by the conveyor's interhemispheric limbs: those are
     # the only fluxes in the model where the hemisphere's area does NOT cancel
@@ -4749,21 +4797,27 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   # cannot end up with a different notion of "preindustrial".
   # ...at the cold box's OWN alkalinity when `alk_hs` is set (2026-09-08g).
   aux$alk_hs      <- alk_hs
-  aux$dic0_hs     <- ccx_dic_for_pco2(ccx_const("CO2_PI_PPM"), alk_hs, aux$sst_hs)
-  aux$revelle0_hs <- revelle_factor(aux$dic0_hs, alk_hs, aux$sst_hs)
+  # the LS alkalinity and carbonate table, APPENDED only when the structure sets them (label
+  # ...wtc, 2026-10-12), so a legacy aux is identical() to before; ccx_aux_alk() / ccx_aux_carb()
+  # resolve absence to ALK_SURFACE and the legacy table
+  if (!is.null(p[["alk_surface"]]))   aux$alk_ml  <- alk
+  if (!is.null(p[["carb_salinity"]])) aux$carb_cc <- carb_cc
+  if (!is.null(p[["pump_eps13_org"]])) aux$pump_eps13_org <- p[["pump_eps13_org"]]
+  aux$dic0_hs     <- ccx_dic_for_pco2(ccx_const("CO2_PI_PPM"), alk_hs, aux$sst_hs, cc = carb_cc)
+  aux$revelle0_hs <- revelle_factor(aux$dic0_hs, alk_hs, aux$sst_hs, cc = carb_cc)
   # The equatorial cell's own preindustrial chemistry references (frozen-Revelle
   # branch and the spinup's starting guess), on the same solve; 0 when off so
   # the C++ struct reads a number rather than stale memory.
   if (eq_on) {
-    aux$dic0_eq     <- ccx_dic_for_pco2(ccx_const("CO2_PI_PPM"), aux$alk_eq, aux$sst_eq)
-    aux$revelle0_eq <- revelle_factor(aux$dic0_eq, aux$alk_eq, aux$sst_eq)
+    aux$dic0_eq     <- ccx_dic_for_pco2(ccx_const("CO2_PI_PPM"), aux$alk_eq, aux$sst_eq, cc = carb_cc)
+    aux$revelle0_eq <- revelle_factor(aux$dic0_eq, aux$alk_eq, aux$sst_eq, cc = carb_cc)
   } else {
     aux$dic0_eq <- 0; aux$revelle0_eq <- 0
   }
   # ... and the tropical box's (2026-09-14f), on the same solve.
   if (tr_on) {
-    aux$dic0_tr     <- ccx_dic_for_pco2(ccx_const("CO2_PI_PPM"), aux$alk_tr, aux$sst_tr)
-    aux$revelle0_tr <- revelle_factor(aux$dic0_tr, aux$alk_tr, aux$sst_tr)
+    aux$dic0_tr     <- ccx_dic_for_pco2(ccx_const("CO2_PI_PPM"), aux$alk_tr, aux$sst_tr, cc = carb_cc)
+    aux$revelle0_tr <- revelle_factor(aux$dic0_tr, aux$alk_tr, aux$sst_tr, cc = carb_cc)
   } else {
     aux$dic0_tr <- 0; aux$revelle0_tr <- 0
   }
@@ -5045,7 +5099,7 @@ ccx_e_loop_eigbound <- function(p, grid) {
   a_ml <- a_ls - a_eq_of(p, a_oc) - (if (ccx_tr_on(p)) a_oc * c(p$tr_frac_NH, p$tr_frac_SH) else c(0, 0))
   # the weights on the ANNUAL-MEAN grid (as ccx_prepare builds them), the
   # thicknesses NOW for the rates
-  g0  <- ccx_ocean_grid(p$h_ml)
+  g0  <- ccx_grid_of(p)
   dzk <- g0$dz[seq.int(ke1, ke2) + 1L]; wk <- dzk / sum(dzk)
   # W_h / a_ls_h = w SV / sum(a_ls): equal velocity by construction
   v <- w * CCX_SV_TO_M3YR / sum(a_ls)
@@ -5056,7 +5110,7 @@ ccx_e_loop_eigbound <- function(p, grid) {
 
 #' Substeps needed to keep the explicit interior transport stable over one step
 #' @param dt master step, years (1/12 for the monthly integrator)
-ccx_substeps_for <- function(p, grid = ccx_ocean_grid(p$h_ml), dt = 1 / 12) {
+ccx_substeps_for <- function(p, grid = ccx_grid_of(p), dt = 1 / 12) {
   # ⚠⚠ SEASONAL MIXED LAYER: THE BOUND MUST BE TAKEN AT **BOTH** EXTREMES OF THE
   # CYCLE, AND TAKING ONLY ONE IS A BUG THIS FUNCTION SHIPPED WITH ON 2026-09-09i.
   #

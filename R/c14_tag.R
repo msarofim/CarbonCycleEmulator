@@ -28,8 +28,12 @@
 # month by month and hemisphere by hemisphere (the forcing DIFFERENCE, so whatever the
 # seasonalisation and interpolation do to the pulse, the tag does exactly the same).
 # It is injected through the core's two existing 14C source columns, c14_bomb and
-# c14_nuclear, whose NH shares differ (FORC_BOMB_NH_SHARE 0.90, FORC_NUC_NH_SHARE 0.95):
+# c14_nuclear, whose NH shares differ (legacy: FORC_BOMB_NH_SHARE 0.90, FORC_NUC_NH_SHARE 0.95):
 # a 2x2 solve per month puts EXACTLY the pulse's NH and SH amounts into each hemisphere.
+# ⚠ PER MONTH since 2026-10-12 (label hilda_csl3v0kaidgbemwtc): the bomb share is FITTED (prior
+# U[0.77, 0.98]) and the nuclear share is the forcing's PER-YEAR column (0.942-1.0), so the two can
+# approach; the solve reads each month's own nuclear share and refuses any TAGGED month where they
+# coincide (CCX_TAG_MIN_SHARE_GAP).
 # A negative rate in one column is exact too -- the tag is linear. No core change, so no
 # C++ parity entry is needed.
 # =====================================================================
@@ -48,14 +52,22 @@ ccx_c14_tag_rates <- function(F, F_base, aux) {
   sb <- aux$bomb_share_NH; sn <- aux$nuc_share_NH; mpg <- aux$mol_per_GtC
   if (is.null(sb) || is.null(sn) || is.null(mpg))
     stop("ccx_c14_tag_rates(): the spinup's aux lacks bomb_share_NH / nuc_share_NH / mol_per_GtC")
-  if (abs(sb - sn) < CCX_TAG_MIN_SHARE_GAP)
-    stop("ccx_c14_tag_rates(): the two 14C source columns share one NH split; the tag cannot be placed")
   d_NH <- (F$e_foss_NH + F$e_luc_NH) - (F_base$e_foss_NH + F_base$e_luc_NH)   # GtC/yr
   d_SH <- (F$e_foss_SH + F$e_luc_SH) - (F_base$e_foss_SH + F_base$e_luc_SH)
+  # the nuclear share PER MONTH: the forcing's column where finite (label ...wtc), else the aux
+  # scalar -- exactly the value each core splits c14_nuclear with that month
+  sn <- rep_len(sn, nrow(F))           # one share per month (the same number each month when scalar)
+  if (!is.null(F[["nuc_share_NH"]])) sn <- ifelse(is.finite(F[["nuc_share_NH"]]), F[["nuc_share_NH"]], sn)
+  tagged <- d_NH != 0 | d_SH != 0
+  if (any(abs(sb - sn)[tagged] < CCX_TAG_MIN_SHARE_GAP))
+    stop("ccx_c14_tag_rates(): the two 14C source columns share one NH split in a tagged month; ",
+         "the tag cannot be placed")
   k <- mpg * ccx_const("R14_STD")      # GtC/yr of standard-ratio carbon -> mol/yr of 14C
   # b sb + n sn = d_NH k ;  b (1 - sb) + n (1 - sn) = d_SH k
   bomb    <- (d_NH * (1 - sn) - sn * d_SH) / (sb - sn) * k
   nuclear <- (sb * d_SH - (1 - sb) * d_NH) / (sb - sn) * k
+  # untagged months carry nothing -- and with the two shares free to meet there, 0/0 would be NaN
+  bomb[!tagged] <- 0; nuclear[!tagged] <- 0
   # F$t is MID-MONTH (ccx_build_forcing: year + (m - 0.5)/12), so a month's injection is centred ON F$t
   dt <- diff(F$t[1:2])
   w  <- d_NH + d_SH
