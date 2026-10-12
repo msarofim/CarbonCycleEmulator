@@ -408,6 +408,9 @@ app_run_coupled <- function(spin, scenario, years, ...) {
   if (is.null(args$bomb_total_kmol)) args$bomb_total_kmol <- APP_BOMB_TOTAL
   if (is.null(args$luc_scale))       args$luc_scale       <- APP_LUC_SCALE
   args$emissions <- app_splice_history(args$emissions, scenario)
+  # the tag's reference run must be spliced IDENTICALLY, or the tag would carry the splice as well
+  # as the pulse (R/c14_tag.R tags the emissions DIFFERENCE)
+  if (!is.null(args$c14_tag_base)) args$c14_tag_base <- app_splice_history(args$c14_tag_base, scenario)
   do.call(ccx_run_coupled, c(list(spin, scenario, years), args))
 }
 

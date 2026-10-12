@@ -206,7 +206,11 @@ ccx_run_coupled <- function(spin, scenario = "ssp245", years = c(1750, 2100),
                             luc_scale = eval(formals(ccx_build_forcing)$luc_scale),
                             tol = CLIM_TOL, max_iter = CLIM_MAX_ITER,
                             substeps = "auto",
-                            interp_method = CCX_EMIS_METHOD_DEFAULT) {
+                            interp_method = CCX_EMIS_METHOD_DEFAULT,
+                            c14_tag_base = NULL) {
+  # c14_tag_base (2026-10-12, R/c14_tag.R): emissions of the run to tag AGAINST. When given, the
+  # carbon by which `emissions` exceed it is tagged with 14C, month by month and hemisphere by
+  # hemisphere, and the run returns `$tag`. The tag is passive: carbon and climate are unchanged.
   interp_method <- match.arg(interp_method, c("spline", "constant"))
   mod  <- ccx_climate_module()
   yrs  <- seq(years[1], years[2])
@@ -227,6 +231,23 @@ ccx_run_coupled <- function(spin, scenario = "ssp245", years = c(1750, 2100),
     warning = function(w) {
       if (grepl("held FLAT", conditionMessage(w))) invokeRestart("muffleWarning")
     })
+  tag <- NULL
+  if (!is.null(c14_tag_base)) {
+    F_base <- withCallingHandlers(
+      ccx_build_forcing(scenario, years, prod_c14 = spin$prod_c14,
+                        emis_method = interp_method,
+                        emissions = c14_tag_base,
+                        bomb_total_kmol = bomb_total_kmol,
+                        luc_scale = luc_scale,
+                        enso_index = ccx_enso_index_of(spin$params),
+                        aod_mode = ccx_aod_mode_of(spin$params)),
+      warning = function(w) {
+        if (grepl("held FLAT", conditionMessage(w))) invokeRestart("muffleWarning")
+      })
+    tag <- ccx_c14_tag_rates(F, F_base, spin$aux)
+    F <- ccx_c14_tag_apply(F, tag)
+    tag <- tag[c("gtc", "s_mid", "dt")]
+  }
   obs_g <- NULL
   if (isTRUE(gmst_obs)) {
     g <- as.data.frame(readRDS(ccx_path("data", "forcing_gmst.rds")))
@@ -298,5 +319,5 @@ ccx_run_coupled <- function(spin, scenario = "ssp245", years = c(1750, 2100),
   c(r, list(climate = data.frame(year = yrs, co2_ppm = co2_yr,
                                  erf_co2 = ccx_erf_co2(co2_yr, mod),
                                  erf_nonco2 = erf_nc, gmst = gmst_path),
-            iterations = iter, converged = delta < tol))
+            iterations = iter, converged = delta < tol, tag = tag))
 }

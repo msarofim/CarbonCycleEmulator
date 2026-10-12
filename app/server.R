@@ -749,6 +749,13 @@ function(input, output, session) {
       pulse = app_run_coupled(APP_SPIN, input$p_bg, yrs, input$p_bg,
                               emissions = pulse_em,
                               interp_method = APP_PULSE_EMIS_METHOD),
+      # Marcus 2026-10-12 ("Side by side in pulse lab"): the SAME pulse run with the pulse's own
+      # carbon tagged by 14C (R/c14_tag.R). Passive, so its carbon and climate are the pulse run's;
+      # only where the tagged atoms are differs. ~0.6 s.
+      tagged = app_run_coupled(APP_SPIN, input$p_bg, yrs, input$p_bg,
+                               emissions = pulse_em,
+                               interp_method = APP_PULSE_EMIS_METHOD,
+                               c14_tag_base = base_em),
       gtc = input$p_gtc, year = input$p_year)
   })
 
@@ -761,7 +768,8 @@ function(input, output, session) {
       if (identical(input$f_yvar, "gmst"))
         plot_pulse_warming(pr$base$climate, pr$pulse$climate, pr$year, pr$gtc)
       else
-        plot_pulse_decay(pr$base$climate, pr$pulse$climate, pr$year, pr$gtc)
+        plot_pulse_decay(pr$base$climate, pr$pulse$climate, pr$year, pr$gtc,
+                         tag = list(out = pr$tagged$out, tag = pr$tagged$tag), pulse_out = pr$pulse$out)
     } else if (identical(input$f_mode, "Build your own")) {
       r <- stylised_run()
       runs <- c(future_runs()[1], list(`Your scenario` = r))
@@ -888,7 +896,8 @@ function(input, output, session) {
   output$f_partition <- renderPlotFit("f_partition", {
     req(identical(input$f_mode, "Pulse lab"))
     pr <- pulse_runs()
-    plot_pulse_partition(pr$base$out, pr$pulse$out, pr$gtc, pr$year)
+    plot_pulse_partition(pr$base$out, pr$pulse$out, pr$gtc, pr$year,
+                         tag = list(out = pr$tagged$out, tag = pr$tagged$tag))
   })
 
   # ---- CUMULATIVE CARBON AND TEMPERATURE (Marcus 2026-09-25) ---------

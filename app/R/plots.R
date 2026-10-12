@@ -65,6 +65,19 @@ LAB_PULSE_WARMING  <- "Extra warming caused by the pulse (°C)"
 # must say which it drew -- see plot_growth_rate().
 KEY_GROWTH_OBS  <- "Measured (NOAA global marine reference)"
 # ⛔ The sentence that keeps plot_pulse_partition() honest. See its roxygen.
+# ⭐ THE TAGGED PULSE (Marcus 2026-10-12, "Side by side in pulse lab"; R/c14_tag.R). ⚠⚠ THE KEYS,
+# PANEL TITLES AND NOTES BELOW ARE DRAFTS FOR MARCUS'S WORDING: drafted so the slots are not empty;
+# the numbers they sit beside are the model's.
+KEY_PULSE_EXTRA  <- "The extra CO\u2082 (with the pulse, minus without)"
+KEY_PULSE_TAGGED <- "The pulse's own carbon atoms (tagged)"
+PANEL_PULSE_EXTRA  <- "The extra carbon"
+PANEL_PULSE_TAGGED <- "The pulse's own atoms"
+PULSE_TAG_DECAY_NOTE <- paste("The tagged atoms leave the air within years, because the air swaps",
+                              "carbon with land and ocean every year. The extra CO\u2082 stays far",
+                              "longer, because carbonate chemistry limits how much EXTRA carbon",
+                              "the ocean can take up.")
+PULSE_TAG_PARTITION_NOTE <- paste("Right: the same pulse, with its own carbon atoms tagged and",
+                                  "followed wherever they go.")
 PULSE_PARTITION_NOTE <- paste("This is how much extra carbon each reservoir holds because of",
                               "the pulse \u2014 the difference between running with it and",
                               "without. It is not a trace of where those particular molecules",
@@ -1228,7 +1241,7 @@ GROWTH_RESID_MIN_YEARS <- 12L
 #' shares must add to 100 %, and a panel that silently did not would be
 #' reporting a leak as physics.
 plot_pulse_partition <- function(base, pulse, pulse_gtc, pulse_year,
-                                 yr_max = NULL) {
+                                 yr_max = NULL, tag = NULL) {
   gp <- ccx_const("GtC_PER_PPM")
   t  <- base$t
   # ⛔ `co2_global` IS NOT A COLUMN OF EVERY RUN. `ccx_run_fast()` and
@@ -1268,22 +1281,42 @@ plot_pulse_partition <- function(base, pulse, pulse_gtc, pulse_year,
   kc <- k & t >= pulse_year + 1
   closure <- (d_atm + d_land + d_ocean)[kc] / pulse_gtc
   resid <- if (any(kc)) 100 * max(abs(closure - 1)) else NA_real_
-  ggplot(long, aes(t, pct, fill = where)) +
+  # ⭐ THE TAGGED PANEL (Marcus 2026-10-12, "Side by side in pulse lab"): the SAME pulse, its own
+  # atoms tagged with 14C (R/c14_tag.R), on the same axes, so the two answers sit side by side.
+  # Its closure is CONSERVATION of the tag with decay undone (~1e-9 from first principles), so it
+  # is a check and not a normalisation, exactly as the left panel's.
+  resid_tag <- NA_real_
+  if (!is.null(tag)) {
+    tp <- ccx_tag_partition(tag$out, pulse, tag$tag)
+    long$panel <- PANEL_PULSE_EXTRA
+    lt <- rbind(
+      data.frame(t = t[k], pct = 100 * tp$air[k],   where = "Still in the air"),
+      data.frame(t = t[k], pct = 100 * tp$land[k],  where = "Taken up by land"),
+      data.frame(t = t[k], pct = 100 * tp$ocean[k], where = "Taken up by the ocean"))
+    lt$where <- factor(lt$where, levels = levels(long$where)); lt$panel <- PANEL_PULSE_TAGGED
+    long <- rbind(long, lt)
+    long$panel <- factor(long$panel, levels = c(PANEL_PULSE_EXTRA, PANEL_PULSE_TAGGED))
+    resid_tag <- if (any(kc)) 100 * max(abs(tp$total[kc] - 1)) else NA_real_
+  }
+  g <- ggplot(long, aes(t, pct, fill = where)) +
     geom_area(alpha = 0.9) +
     scale_fill_manual(values = c("Still in the air" = PAL[["atm"]],
                                  "Taken up by land" = PAL[["land"]],
                                  "Taken up by the ocean" = PAL[["ocean"]])) +
     labs(x = LAB_YEAR, y = sprintf("Share of the %g GtC pulse (%%)", pulse_gtc),
          caption = app_provenance_caption(paste(
-           PULSE_PARTITION_NOTE,
+           if (!is.null(tag)) paste("Left:", PULSE_PARTITION_NOTE, PULSE_TAG_PARTITION_NOTE)
+           else PULSE_PARTITION_NOTE,
            if (is.na(resid))
              "The window is too short to check that the three shares add up."
            else sprintf(paste("The three add to 100%% of the pulse to within",
                               "%.2f%% at every step after it is released \u2014",
                               "carbon is conserved, so this is a partition and",
-                              "not an estimate."), resid)))) +
+                              "not an estimate."), max(resid, resid_tag, na.rm = TRUE))))) +
     expand_limits(y = c(0, 100)) +   # 2026-10-02: a pulse share runs 0-100 % (Marcus, card 5: "zero to 1")
     theme_ccx()
+  if (!is.null(tag)) g <- g + facet_wrap(~ panel, nrow = 1)
+  g
 }
 
 # ---------------------------------------------------------------------
@@ -1466,17 +1499,35 @@ pulse_from_release <- function(year, v, pulse_year) {
   data.frame(year = c(pulse_year, year[k] + 0.5), v = c(0, v[k]))
 }
 
-plot_pulse_decay <- function(base_cl, pulse_cl, pulse_year, pulse_gtc) {
+#' The pulse lab's CARBON view: the share of the pulse still in the air.
+#'
+#' @param tag NULL, or the TAGGED run's `$out` and `$tag` (list(out, tag), server pulse_runs()):
+#'   adds the share of the pulse's OWN carbon atoms still in the air (Marcus 2026-10-12, "Side by
+#'   side in pulse lab"). Annual means at mid-year, from zero at the release, exactly as the
+#'   extra-CO2 line, so the two lines are the same pair of years read two ways.
+plot_pulse_decay <- function(base_cl, pulse_cl, pulse_year, pulse_gtc, tag = NULL, pulse_out = NULL) {
   d <- pulse_from_release(base_cl$year,
                           (pulse_cl$co2_ppm - base_cl$co2_ppm) /
                             (pulse_gtc / ccx_const("GtC_PER_PPM")), pulse_year)
   names(d)[2] <- "frac"
-  ggplot(d, aes(year, frac)) +
+  d$who <- KEY_PULSE_EXTRA
+  if (!is.null(tag)) {
+    tp <- ccx_tag_partition(tag$out, pulse_out, tag$tag)
+    ya <- tapply(tp$air, floor(tp$t), mean)
+    dt <- pulse_from_release(as.integer(names(ya)), as.numeric(ya), pulse_year)
+    names(dt)[2] <- "frac"; dt$who <- KEY_PULSE_TAGGED
+    d <- rbind(d, dt)
+  }
+  d$who <- factor(d$who, levels = c(KEY_PULSE_EXTRA, KEY_PULSE_TAGGED))
+  ggplot(d, aes(year, frac, colour = who)) +
     geom_hline(yintercept = 0, colour = "grey75", linewidth = 0.3) +
-    geom_line(colour = PAL[["pulse"]], linewidth = 0.9) +
+    geom_line(linewidth = 0.9) +
+    scale_colour_manual(values = stats::setNames(c(PAL[["pulse"]], PAL[["obs"]]),
+                                                 c(KEY_PULSE_EXTRA, KEY_PULSE_TAGGED)),
+                        drop = TRUE) +
     scale_y_continuous(labels = function(x) paste0(round(100 * x), "%")) +
     labs(x = LAB_YEAR, y = LAB_PULSE_AIRBORNE,
-         caption = app_provenance_caption()) +
+         caption = app_provenance_caption(if (!is.null(tag)) PULSE_TAG_DECAY_NOTE)) +
     theme_ccx()
 }
 

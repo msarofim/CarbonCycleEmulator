@@ -2,6 +2,33 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (j) — **The TAGGED PULSE, side by side in the pulse lab** (Marcus, asking for "a pulse but for a tracer to show how quickly the original carbon moves into different reservoirs (as versus the pulse)"; the form ruled verbatim, "Side by side in pulse lab (Recommended)"). At `vvM`, 100 GtC in 2050: after 100 yr, **9.7 %** of the pulse's own atoms are still in the air, against **50.4 %** of the extra CO₂ (5.2×); after 20 yr it is 19.8 % against 59.9 % (3.0×).
+- **No new isotope, and no core change.** The model's ¹⁴C is already an exact passive tag:
+  - transport is linear in C14, and no ¹⁴C fractionation is applied anywhere;
+  - decay is uniform in every box;
+  - nothing reads C13 or C14 back into a carbon flux, and the climate iteration reads CO₂ only.
+  - The audit is a subagent's, with `file:line`; summary in `R/c14_tag.R`'s header. The 08-21 prototype is [[pulse_label_vs_perturb]].
+- **`R/c14_tag.R` (new).** The tag is the carbon by which a run's emissions exceed `c14_tag_base`'s, MONTH BY MONTH AND HEMISPHERE BY HEMISPHERE. Fossil emissions are seasonalised per hemisphere, so a flat label would not tag the pulse's own atoms.
+  - The tag rides on the core's two ¹⁴C source columns. Their NH shares differ (0.90 / 0.95), so a 2×2 solve places each month's tag exactly. A negative rate is exact too, because the tag is linear.
+  - Decay is undone at the tag's injection-weighted mean time.
+  - The time conventions are explicit: `F$t` is mid-month, and each `$out` row is the month's OPENING state.
+- **`ccx_run_coupled(c14_tag_base = )`** returns `$tag` (gtc, s_mid, dt). `app_run_coupled()` splices the tag base exactly as the emissions, or the tag would carry the splice.
+- **The app:**
+  - `pulse_runs()` adds a third, tagged run (0.6 s).
+  - `plot_pulse_decay()` draws the tagged line (`PAL[["obs"]]` ink) beside the extra-CO₂ line, both annual means from zero at the release.
+  - `plot_pulse_partition()` facets the tagged partition beside the perturbation one, on the same axes. Its closure sentence reports the larger of the two residuals.
+  - ⚠ **DRAFTS for Marcus's wording:** `KEY_PULSE_EXTRA`, `KEY_PULSE_TAGGED`, `PANEL_PULSE_EXTRA`, `PANEL_PULSE_TAGGED`, `PULSE_TAG_DECAY_NOTE` and `PULSE_TAG_PARTITION_NOTE` (`app/R/plots.R`); and the "Left:" prefix on his `PULSE_PARTITION_NOTE`. The section heading "Where the extra carbon ends up" now sits over both panels; it is his.
+- **Measured** (prototype, then `test-c14-tag.R`):
+  - The tagged run's carbon and climate are BIT-IDENTICAL to the pulse run's.
+  - Closure is 6.8e-10, under the undo's own second-order bound λ²Δ²/8 = 1.85e-9 (a law, not a chosen tolerance).
+  - A tag of half the pulse gives the same fractions to 1e-9.
+- **`tests/testthat/test-c14-tag.R` (new): 26 / 0.** It covers passivity, a zero tag, mass and release window, the placement identity (including months where one column's rate goes negative), conservation, linearity, and the lesson as an ORDERING.
+  - In-test mutations: swapped shares → wrong hemisphere; no decay undo → 100× the bound.
+  - Code mutations, each restored byte-identical: no undo → CONSERVATION fails; everything on the 90/10 column → PLACEMENT fails (3).
+- **Existing tests still pass:** future-yvar 35, driver-panel 49, plot-text-fits 104, review-cards 48, app-review-copy 41, pulse 28, climate 34, fair-pd100 22, pd100-runner 22, fair-overlay 29, and the four lints.
+  - review-card-numbers is 24 / 2: card 4's two failures, by design.
+- **Verified in the live app** (Futures → Pulse lab, `vvM` 100 GtC 2050): both lines, the two panels, 0 `shiny-output-error`.
+
 ## 2026-10-12 (i) — **Card 5a draws FaIR's 841-config 5–95 % band** (Marcus, verbatim: "Draw the band").
 - `rv_pulse()` carries the file's own `irf_p05` / `irf_p95` (`RV_FAIR_BAND_COLS`). `rv_plot_irf()` draws them as a ribbon (`RV_FAIR_BAND_ALPHA` 0.25) behind every line.
   - The ribbon's legend key is `RV_FAIR_BAND_FMT`, on a row of its own (`legend.box = "vertical"`). Beside the two-row line legend it clipped both.
