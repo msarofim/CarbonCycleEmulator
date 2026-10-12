@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (bb) — **The full suite at `eb9a256` (after y–aa): 7469 passed, 2 failed, 3 skipped, 18.1 min** (`outputs/diagnostics/suite_20261012_eb9a256.log`). The 2 failures are card 4's, by design, the same two as at `d36cda1`. The extra 148 passes are the new and extended tests of (y)–(aa). Run from the frozen worktree `~/ccx_frozen/suite_20261012_eb9a256` (downloads symlinked per entry), with BLAS threads pinned to 1. The review note's STATUS block is updated.
+
 ## 2026-10-12 (aa) — **The code review's §6 gap is closed: gates 1–2 and R↔C++ parity now run ON THE CANONICAL** (Marcus, verbatim: "§6 canonical-path tests"). New `tests/testthat/test-canonical-contracts.R`, 27 / 0, ~13 s. It runs whatever `ccx_mode_file()` names, so it follows the next adoption with no edit.
 
 Every bound is an existing one: DESIGN §6 gate 1's ~1e-10, `test-conservation.R`'s 1e-12 relative to the largest tendency, and `test-parity.R`'s tolerances, all unchanged. Measured at `hilda29e`:

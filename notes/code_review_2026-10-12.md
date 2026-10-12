@@ -27,9 +27,10 @@ The lanes:
 - §1 IntCal impact MEASURED, CHANGELOG (u): futures band shifts ≤ 0.066 × width; `luc_scale` / `bomb_total` / `rep_dC` move 0.5–0.7 sd. Refit-or-ship is Marcus's.
 - §2 A1–A5 FIXED, CHANGELOG (t), verified in the browser (w). A6 is copy (Marcus).
 - §3 citation list, `notes/constants_citation_needs_2026-10-12.md`.
-- §4 FIXED text-only, CHANGELOG (v), except the code items listed there.
-- §5 and §6 open.
-- Suite at `d36cda1`: 7321 / 2 (card 4, by design) / 3.
+- §4 FIXED text-only, CHANGELOG (v). Its code items FIXED in (y): `CCX_MODE_RETIRED` +5 (gated), the dead fallback path, `APP_HIST_YEARS`, the periodic spin-up's annual-mean isotopes, the fused roxygen. The `fert_k` `$` partial match FIXED in (z); the other prefix pairs stay latent.
+- §5 FIXED in (z): 12 of 13 guarded, 1 documented (#13, the LUC pulse × `luc_scale`), #2 already loud. `tests/testthat/test-dormant-guards.R`; every block fails on the pre-fix code.
+- §6 CLOSED in (aa): `tests/testthat/test-canonical-contracts.R` runs gates 1–2 and parity on the canonical.
+- Suite at `d36cda1`: 7321 / 2 (card 4, by design) / 3. At `eb9a256` (after y–aa): see CHANGELOG (bb).
 
 **Bottom line.**
 - The model's mechanics are clean at the canonical: conservation, R↔C++ parity, spin-up, stability, logpost reproduction, and pulse pairing.
