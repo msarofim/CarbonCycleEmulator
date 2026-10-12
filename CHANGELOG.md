@@ -2,6 +2,19 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (p) — **The beta copy worklist: `notes/beta_copy_worklist_2026-10-12.md`.** Marcus, verbatim: "Are any of these easy improvements? If not, I think I want to finalize this model version and work on the text so I can release the beta version."
+
+**The answer given: none of the three is easy.**
+- The 3 GtC first-year ocean excess and the fertilisation-vs-FACE check are cheap to DIAGNOSE, but any fix is a model change: a new mode, recalibration, and every downstream product re-run.
+- FaIR's ΔT in the pulse lab needs a FaIR re-run, because `fair_pulse_grid.rds` stores `d_gmst_mean` only, with no percentiles. It would also add one more label for him to write.
+
+**The worklist** lists every string still waiting on his words: A band hold 5, B pulse lab 11, C review cards 16, D other copy 5, E deploy 5, F unresolved 6. Each item gives the `file:line`, the current text, the facts it must agree with, and the test that gates it.
+- It was compiled read-only by a subagent; no copy was drafted.
+- Main-session check: all 36 locations and all 170 quoted block lines were found in the code. The header's claim that `\u` escapes are kept verbatim was wrong (about ten lines show the rendered glyph) and is corrected.
+- **One open question MEASURED.** `APP_SPLICE_YEAR` evaluates to **2024**, so the pulse-lab note's "Before 2025" is exact and `APP_FAIR_NOTE`'s "Before 2024" is a year early. Both years are typed rather than derived from the constant.
+
+**Stated, not ruled:** a model-freeze tag `v1.1-hilda29e` was proposed and NOT made.
+
 ## 2026-10-12 (o) — **The five `pulse_land_attribution_*.log` files are quarantined** (Marcus, verbatim: "Quarantine + README (Recommended)"). They print Joos 2013's split as "sec.3.2 … ±1 sd". It is §4.3, ±2 s.d. (10-12 n). Every number in them is right; only the label is wrong.
 
 - Moved to `outputs/quarantine/20261012_joos_pm_label/`, with a README. The 09-27 one ran at `hilda29l`; the four 09-28 ones are scratch modes (φ = 0 refit / basin 2; `hilda_csl3v0k` basins 1 and 2).
