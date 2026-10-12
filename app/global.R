@@ -808,25 +808,27 @@ APP_FAIR <- tryCatch(
 # three rows -- "mostly influenced by X". ⛔ TWO OF THOSE THREE WERE COIN FLIPS:
 # measured at three arms (the canonical, the like-for-like `hilda32f`, and the
 # `hilda31pe` structure contrast), the winner of δ¹³C level & gradient and of
-# Δ¹⁴C bomb CHANGES with the arm. Computing the sentence makes it MOVE; it does
+# Δ¹⁴C bomb CHANGES with the arm (09-26, at hilda29l; at hilda29e NEITHER flips -- below). Computing the sentence makes it MOVE; it does
 # not make the winner REAL. An argmax is not a finding until you print the
 # runner-up ([[ccx_cmap_second_point]]).
 #
 # ⭐ THE THRESHOLD IS MEASURED, NOT INVENTED ([[threshold_from_obs_or_law]]).
-# Across all 12 rows the two behaviours separate cleanly and with a gap:
-#     winner FLIPS between arms : margins 0.13, 0.85 pp
-#     winner is STABLE          : margins 3.02, 4.94, 6.78, 6.94, 24.4, ... pp
-# Both endpoints are carried below so the cut can be re-derived rather than
-# trusted, and the cut is their GEOMETRIC mean -- equidistant in RATIO from the
-# largest flipper and the smallest stable row (1.9x either way), which is the
-# right centring for a separation that spans two orders of magnitude.
-# ⚠ IT RESTS ON THREE ARMS AND TWELVE ROWS. A fourth arm could put a row in the
-# gap; if one ever does, re-derive from the two endpoints rather than nudging
-# the cut. Re-measure with `calibration/diag_constraint_map_arms.R`.
-APP_CMAP_TIE_FLIP_MAX   <- 0.845   # pp, the largest margin that DID flip
-APP_CMAP_TIE_STABLE_MIN <- 3.018   # pp, the smallest margin that did NOT
-APP_CMAP_TIE_PP <- sqrt(APP_CMAP_TIE_FLIP_MAX * APP_CMAP_TIE_STABLE_MIN)  # ~1.60
-APP_CMAP_TIE_SRC <- "3 arms x 12 rows, calibration/diag_constraint_map_arms.R, 2026-09-26"
+# ⚠ RE-MEASURED 2026-10-12 AT hilda29e (Marcus, verbatim: "Scale to basin spread (Recommended)").
+# The 09-26 cut (1.60 pp) was the geometric mean of two endpoints measured at hilda29l: the largest
+# margin whose winner FLIPPED between arms (0.845) and the smallest that did not (3.018). At hilda29e,
+# against its like-for-like arm (objective #18's other basin, hilda29a6: same structure, same 29
+# names), NO row's winner flips, so that rule has no lower endpoint. The arm that does flip rows,
+# the hilda31pe structure contrast, flips one at 26.6 pp: a structure difference, not a tie.
+# THE RULE NOW ([[tolerance_scaled_to_spread]]): a winner is named only if its top-two margin
+# exceeds the largest change ANY row's margin shows between two fits of the same model at nearly
+# equal posterior (logpost -1166.95 vs -1167.36). Over the 12 rows that change runs from 0.05 to 1.92 pp (median 0.51). A margin inside it
+# is not resolved by the fit, so it is reported as a tie.
+# ⚠ ONE PAIR OF BASINS. A third basin can only widen the spread; re-measure it with
+# `calibration/diag_constraint_map_arms.R` and carry its maximum here.
+APP_CMAP_TIE_ARM       <- "hilda29a6"   # the like-for-like basin the spread is measured against
+APP_CMAP_TIE_SHIFT_MAX <- 1.923         # pp, the largest |margin change| over the 12 rows (1.9229)
+APP_CMAP_TIE_PP  <- APP_CMAP_TIE_SHIFT_MAX
+APP_CMAP_TIE_SRC <- "12 rows, hilda29e vs its like-for-like basin hilda29a6, calibration/diag_constraint_map_arms.R, 2026-10-12"
 
 #' How to describe who holds one row of the constraint map
 #'

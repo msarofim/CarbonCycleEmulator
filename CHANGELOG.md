@@ -2,6 +2,23 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (h) — **The tie cut re-expressed as the BASIN SPREAD (Marcus, verbatim: "Scale to basin spread (Recommended)"). The cut is now 1.923 pp, the largest change in any row's top-two margin between `hilda29e` and its like-for-like basin `hilda29a6`. The cmap-tie deliberate RED clears. No displayed phrase changes.**
+- `app/global.R`:
+  - `APP_CMAP_TIE_FLIP_MAX` and `_STABLE_MIN` (09-26, `hilda29l`) are retired.
+  - `APP_CMAP_TIE_ARM` = `hilda29a6`, `APP_CMAP_TIE_SHIFT_MAX` = 1.923, `APP_CMAP_TIE_PP` = that value; `APP_CMAP_TIE_SRC` re-pointed.
+  - The comment block records why the 09-26 rule lost its lower endpoint.
+- **Classification unchanged.** The top three rows are δ¹³C level & gradient 0.94 (a tie under either cut), CO₂ level 12.94 and Δ¹⁴C bomb 2.28 (winners under either). Of the other rows, only CO₂ in ice cores (2.05) sits between the two cuts, and it is a winner under both.
+- **`test-cmap-tie.R`** (gate change approved by the same ruling). "THE GAP" is replaced by "THE SPREAD", which RECOMPUTES the spread from the two maps and requires:
+  - (1) the basin is like-for-like with the CURRENT canonical (mode, structure, names, rows);
+  - (2) the largest |signed margin change| equals the carried constant to 5e-4;
+  - (3) no row above the cut changes winner at the basin.
+  - The margin is SIGNED against the reference's winner, so a lost row counts in full: a 5 → −1 pp loss is −6, not −4.
+  - Test 1 now checks the derivation identity and that the source names the arm.
+  - **39 / 0.** Mutations, each restored byte-identical: the constant set to 1.600 → 2 failures, naming the 1.9229 measurement; the arm set to `hilda32f` → 4 failures + 2 errors.
+  - Neighbours: `test-constraint-map` 145 / 0, `-panel` 62 / 0.
+- `diag_constraint_map_arms.R` prints the SPREAD (median 0.514, max 1.923 pp, at δ¹³C in ice cores) next to the shipped cut. Its 10-12 log was regenerated; the script appends, so the old log was removed first.
+- ⚠ The spread rests on ONE pair of basins. A third basin can only widen it.
+
 ## 2026-10-12 (g) — Card 5a facts note (Marcus: "Write the facts note (Recommended)"): `notes/card5a_caption_facts_2026-10-12.md`. No caption prose. Also, measured for Marcus's new card-5 question: **CarboTope sits ABOVE FaIR's 841-config 95th percentile for the first 27.5 yr (0.522 vs 0.515 at 20 yr) and inside it from 28.5 to 300 yr. FaIR's own mean TH20 (11.83 yr) sits below Joos Table 4's 5 % floor (12.2); CarboTope is inside Joos's range at all three horizons (12.85 / 26.85 / 46.95).**
 - The FaIR envelope already exists: `data/fair_pd100.rds` carries `irf_p05` / `irf_p95`, and the driver ran all 841 configs. No new FaIR run is needed to draw it.
 - ⚠ The present caption's "nothing from this source" is singular, but the card now has two sources. And "decays faster here than in the multi-model mean" is the reverse of the FaIR comparison: this model decays SLOWER than FaIR at every horizon.

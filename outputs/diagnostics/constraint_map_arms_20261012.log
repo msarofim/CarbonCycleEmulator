@@ -65,7 +65,7 @@
    (each cell: the component holding the LARGEST share of that row, and that share)
 
 -- THE TIE CUT, RE-MEASURED: the reference's top-two margin per row, and whether the winner FLIPS --
-   shipped: flip max 0.845, stable min 3.018, cut 1.597 pp (3 arms x 12 rows, calibration/diag_constraint_map_arms.R, 2026-09-26)
+   shipped: arm hilda29a6, largest margin shift 1.923, cut 1.923 pp (12 rows, hilda29e vs its like-for-like basin hilda29a6, calibration/diag_constraint_map_arms.R, 2026-10-12)
    δ¹³C level & gradient       margin   0.94 pp  hilda29e: Input scalings & r hilda29a6: Input scalings & r hilda31pe: Input scalings & r
    CO₂ in ice cores             margin   2.05 pp  hilda29e: Land uptake        hilda29a6: Land uptake        hilda31pe: Seasonal cycle      flips at A3 only
    Δ¹⁴C in the air (bomb)     margin   2.28 pp  hilda29e: Input scalings & r hilda29a6: Input scalings & r hilda31pe: Input scalings & r
@@ -80,5 +80,6 @@
    Δ¹⁴C in the ocean          margin  69.20 pp  hilda29e: Mixed layer & vert hilda29a6: Mixed layer & vert hilda31pe: Mixed layer & vert
    A2 only      flippers  0, largest margin   - ; stable 12, smallest 0.940 -> NO FLIPPER: the cut has no lower endpoint
    every arm    flippers  2, largest margin 26.626; stable 10, smallest 0.940 -> *** NOT SEPARATED ***
+   SPREAD at A2 (hilda29a6): |margin shift| median 0.514, max 1.923 pp (δ¹³C in ice cores) -> cut 1.923 pp; shipped 1.923
 
 wrote outputs/diagnostics/constraint_map_arms_20261012.log

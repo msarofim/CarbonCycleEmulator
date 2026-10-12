@@ -80,7 +80,7 @@ CA_ROLE <- c(ref      = "<- REFERENCE (the shipped arm)",
              like     = "<- A2 like-for-like: same structure and names, objective #18's other basin",
              contrast = "<- A3 STRUCTURE contrast: NOT an answer to the fit question")
 # the tie cut being re-measured (app/global.R), and the matrices a stream restriction must subset
-CA_TIE_CONSTS <- c("APP_CMAP_TIE_FLIP_MAX", "APP_CMAP_TIE_STABLE_MIN", "APP_CMAP_TIE_PP", "APP_CMAP_TIE_SRC")
+CA_TIE_CONSTS <- c("APP_CMAP_TIE_ARM", "APP_CMAP_TIE_SHIFT_MAX", "APP_CMAP_TIE_PP", "APP_CMAP_TIE_SRC")
 CA_STREAM_MATS <- c("M", "DHI", "DLO", "CURV", "SLOPE", "PINS")
 CA_FAMILY_MATS <- c("MC", "RS", "CS")
 
@@ -263,8 +263,8 @@ win <- sapply(ALL, function(m) apply(CM[[m]]$MC[rownames(MC0), , drop = FALSE], 
 flip_like <- win[, CA_LIKE] != win[, CA_REF]
 flip_any  <- apply(win[, CA_ARMS, drop = FALSE] != win[, CA_REF], 1, any)
 ca_say("\n-- THE TIE CUT, RE-MEASURED: the reference's top-two margin per row, and whether the winner FLIPS --\n")
-ca_say("   shipped: flip max %.3f, stable min %.3f, cut %.3f pp (%s)\n",
-       TIE$APP_CMAP_TIE_FLIP_MAX, TIE$APP_CMAP_TIE_STABLE_MIN, TIE$APP_CMAP_TIE_PP, TIE$APP_CMAP_TIE_SRC)
+ca_say("   shipped: arm %s, largest margin shift %.3f, cut %.3f pp (%s)\n",
+       TIE$APP_CMAP_TIE_ARM, TIE$APP_CMAP_TIE_SHIFT_MAX, TIE$APP_CMAP_TIE_PP, TIE$APP_CMAP_TIE_SRC)
 o <- order(mg)
 for (i in o)
   ca_say("   %-30s margin %6.2f pp  %s%s\n", rownames(MC0)[i], mg[[i]],
@@ -283,5 +283,12 @@ ca_endpoints <- function(flip, lab) {
 }
 EP_LIKE <- ca_endpoints(flip_like, "A2 only")
 EP_ANY  <- ca_endpoints(flip_any, "every arm")
+# THE SPREAD (Marcus 2026-10-12, "Scale to basin spread"): the SIGNED change, at A2, of each reference
+# row's margin of its OWN winner over the best other component. The shipped cut is its largest |value|.
+ca_signed <- function(r, w) { s <- 100 * r / sum(r); s[[w]] - max(s[names(s) != w]) }
+w0 <- apply(MC0, 1, ca_winner)
+shift <- vapply(rownames(MC0), function(f) ca_signed(CM[[CA_LIKE]]$MC[f, ], w0[[f]]) - ca_signed(MC0[f, ], w0[[f]]), numeric(1))
+ca_say("   SPREAD at A2 (%s): |margin shift| median %.3f, max %.3f pp (%s) -> cut %.3f pp; shipped %.3f\n",
+       CA_LIKE, median(abs(shift)), max(abs(shift)), names(which.max(abs(shift))), max(abs(shift)), TIE$APP_CMAP_TIE_PP)
 
 ca_say("\nwrote %s\n", CA_LOG)
