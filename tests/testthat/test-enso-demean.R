@@ -203,12 +203,17 @@ edm_crosscheck <- function(md, r) {
   expect_true(is.finite(md$logpost))
 }
 
-test_that("PRICED at the CANONICAL mode: the demean flag is worth -0.0053 under objective #14 with constant interpolation at hilda33d (0.0364 under spline; 9.0242 under #13 at hilda29l); 17.7499 at the seas_ml 0 control hilda31pe", {
+# 2026-10-12 (a; found by the 10-11 c audit): the title said "at the CANONICAL" and quoted hilda33d's price while the body has priced hilda33p since
+# 10-08 (e). The mode is now one constant, read by the test AND printed by its title. The price history is below.
+EDM_PRICED_MODE <- "hilda33p"
+test_that(sprintf(paste("PRICED at %s (the canonical when priced, 10-06; the last on the DEMEANED index) and at the",
+                        "seas_ml 0 control %s: the demean flag's price at each is pinned (values and history in the body)"),
+                  EDM_PRICED_MODE, CCX_MODE_SEASML0_CONTROL), {
   skip_if_no_cpp()
   # 2026-10-08 (e; Marcus: "Approve all five"): NAMED -- hilda33p, the last canonical on the DEMEANED index. hilda29e runs
   # the DETRENDED index (the cut's label), under which the demean flag is not a switch at all (ccx_build_forcing refuses it)
-  md <- readRDS(ccx_mode_file("hilda33p"))
-  # the canonical is a PERIODIC-era file, and says so (stamped 09-10 after GATE 5
+  md <- readRDS(ccx_mode_file(EDM_PRICED_MODE))
+  # the priced file is a PERIODIC-era file, and says so (stamped 09-10 after GATE 5
   # had proved its streams periodic; calibration/stamp_mode_spinup.R)
   expect_identical(ccx_mode_spinup(md), "periodic")
   r <- edm_price(md)

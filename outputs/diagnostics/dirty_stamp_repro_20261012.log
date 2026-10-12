@@ -1,0 +1,58 @@
+dirty_stamp_repro_20261012 | calibration/diag_dirty_stamp_repro.R | repo HEAD 30af2b5 (+ this commit's uncommitted tidy-ups) | 2026-10-12 08:11
+QUESTION: the canonical's stage-1 module (335b886+dirty) and its module check (58ef6fc+dirty) were built on dirty trees. Does a CLEAN tree reproduce them?
+METHOD: for each commit, `git archive <commit>` into a frozen scratch copy (FROZEN_FROM_COMMIT.txt), the git-ignored data-raw/downloads APFS-cloned in, and the base mode file the run read
+  cloned to its original path (it was UNTRACKED when the run was made -- that was the dirt): obj18 base md5 b138932cf1ed99530705bfb5f19223dd, basin-1 base md5 bf4732da67ee22751d87ca9f95484b37,
+  both = the provenance's base_md5. BLAS pinned to 1 thread, 6 workers (as the originals). No RNG in the driver. Each re-run took 1.4 min.
+  335b886: Rscript calibration/fit_iav_module.R --base=calibration/output/refit_20261008_obj18_hilda_csl3v0kaidgbemwt/mode_fit_pumpN.rds --check=calibration/output/iav_module_20261007_refit_20261006_obj17_basinB_start001_DRYRUN_hilda_csl3v0kaidgbemwt.rds
+  58ef6fc: Rscript calibration/fit_iav_module.R --base=calibration/output/refit_20261008_obj18p2_hilda_csl3v0kaidgbemwt_basin1/mode_fit_pumpN.rds --check=calibration/output/iav_module_20261008_refit_20261008_obj18_hilda_csl3v0kaidgbemwt.rds
+
+=== 1. the stage-1 module (CCX_MODE_OBJ18P2_MODULE_FILE's source of the canonical's pins) ===
+stored: calibration/output/iav_module_20261008_refit_20261008_obj18_hilda_csl3v0kaidgbemwt.rds 
+  commit 335b886+dirty | repro commit 335b886+frozen? 
+  pins         identical
+  optimum      identical
+  base_values  identical
+  ratio        identical
+  loglik       identical
+  ssr_ref      identical
+  timing       identical
+  nm           identical
+  scan         identical
+  profile      identical
+  lag_1sigma   identical
+  lag_2sigma   identical
+  laplace      identical
+  check        identical
+  provenance: 30 of 30 fields identical (the 3 that must differ: commit, date, base_file)
+  VERDICT: the clean re-run reproduces the stored artifact exactly
+
+=== 2. the module check (CCX_MODE_CANONICAL_MODULE_CHECK) ===
+stored: calibration/output/iav_module_20261008_refit_20261008_obj18p2_hilda_csl3v0kaidgbemwt_basin1.rds 
+  commit 58ef6fc+dirty | repro commit 58ef6fc+frozen? 
+  pins         identical
+  optimum      identical
+  base_values  identical
+  ratio        identical
+  loglik       identical
+  ssr_ref      identical
+  timing       identical
+  nm           identical
+  scan         identical
+  profile      identical
+  lag_1sigma   identical
+  lag_2sigma   identical
+  laplace      identical
+  check        identical
+  provenance: 30 of 30 fields identical (the 3 that must differ: commit, date, base_file)
+  VERDICT: the clean re-run reproduces the stored artifact exactly
+
+=== 3. MUTATION of the comparison (planted in a copy of re-run 1) ===
+  mut_pins:
+  pins         DIFFERS: TRUE
+  VERDICT: 1 element(s) differ
+  mut_check:
+  check        DIFFERS: Component “pass”: 1 element mismatch
+  VERDICT: 1 element(s) differ
+  (mut_pins = one pin x (1 + 1e-12): all.equal() calls it TRUE, identical() does not -- the verdict reads identical())
+
+CONCLUSION: both reproduce EXACTLY. The '+dirty' was the then-untracked base mode file, whose md5 each artifact already records; the stored artifacts are left untouched.

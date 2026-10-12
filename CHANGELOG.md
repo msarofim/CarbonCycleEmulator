@@ -2,6 +2,32 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (a) — **The three tidy-ups from 10-11 (c)'s audit (Marcus: "do the tidy ups"). (1) Three test labels that called `hilda33p` fixtures "the canonical" now name their mode through a constant. (2) The two "+dirty" artifacts under the canonical's pins REPRODUCE EXACTLY from clean trees: the dirt was the then-untracked base mode file. (3) Five fixtures that carried no provenance are stamped POST HOC, with their values untouched.** Also: 10-11 (c) was merged into local `main` (`30af2b5`).
+
+- **The merge.** Local `main` carried `5287259` (card 5's FaIR PD100 import, three new files), not yet on origin.
+  - The merge commit was built and tested in this worktree, then local `main` was FAST-FORWARDED to it (`30af2b5`). Its tracked files were clean.
+  - Nothing was pushed: `5287259` is the main session's, and so is the decision to push it.
+- **(1) LABELS** (test titles and comments only; no assertion changed):
+  - `test-enso-demean`: the title said "PRICED at the CANONICAL mode" and quoted `hilda33d`'s price, while the body has priced `hilda33p` since 10-08 (e). The title now reads `EDM_PRICED_MODE` and `CCX_MODE_SEASML0_CONTROL`, and carries no typed price (the body pins it).
+  - `test-iav-cut` IC9: names its fixture `IC_MODE`.
+  - `test-gcb-enso-slope`: the fixture is `GES_MODE`; two comments that said "the canonical's stored" streams now say the fixture's.
+  - All pass: enso-demean 35, iav-cut 145, gcb-enso-slope 26.
+- **(2) THE "+dirty" STAMPS: VERIFIED HARMLESS, NOT REWRITTEN.** The two files are the stage-1 module (`335b886+dirty`, the source of `CCX_MODE_OBJ18P2_PINS`) and the module check (`58ef6fc+dirty`, `CCX_MODE_CANONICAL_MODULE_CHECK`).
+  - Each was re-run from a `git archive` of its own commit, with the base mode file it read cloned in. Neither commit's tree contained that file: it was uncommitted when the module ran, which was the dirt. Both bases match the provenance's `base_md5`.
+  - New `calibration/diag_dirty_stamp_repro.R` compares with `identical()`: every element, and all 30 provenance fields except commit / date / base_file. **Both reproduce EXACTLY.**
+  - It is mutation-tested: a 1e-12 nudge to one pin (which `all.equal()` calls TRUE) and a flipped check verdict are both caught.
+  - Receipt: `outputs/diagnostics/dirty_stamp_repro_20261012.log`. The stored artifacts are untouched: their content is identical to a clean run, so a replacement would change only the stamp and lose the original bytes.
+- **(3) FIVE FIXTURES STAMPED** by new `calibration/stamp_fixture_provenance.R`: `seas_ml_hemisphere_split_20260919`, `hilda28_basins_20260907`, `alignment_screen_d2ret_20260930`, `tau_soil_slow_profile_fixedstock_stock8053_20260929`, `kz_bracket_hilda36_20260906`.
+  - **How:** `attr(x, "provenance")`, from the companion log and git history. It records driver, run time, commit (NA with a note where the driver never recorded one), arms or mode, log, RNG (none: no RNG call in any of the five drivers, at HEAD or at the committing commit), and `md5_before`.
+  - Every stamp says it is POST HOC and not the driver's.
+  - **Safety:**
+    - before writing, every text file and 2488 `.rds` provenance blocks were searched for the five md5s: none is recorded anywhere, so no receipt breaks;
+    - after each write, the file is re-read and must be `identical()` to the original once the attribute is removed, or its bytes are restored;
+    - a second run REFUSES (it will not overwrite a stamp).
+  - **Tried and corrected:** the first stamping cited "CHANGELOG 2026-10-11 (d)"; the date had turned. The five files were restored from git and re-stamped from the committed script with this entry's label.
+  - The tests that read them pass: seas-ml-hemi 32, d14c-profile-gnorm 32, gated-params 104, likelihood 251. So do the lints that scan `calibration/`: git-stamp-lint 6, mode-struct-lint 5, overlay-idiom-lint 8, git-stamp 63.
+- Not the full suite. The tie-gap gate from 10-11 (c) is still the one deliberate red.
+
 ## 2026-10-11 (c) — **Adoption audit, the follow-up to `fa6bb86`: does any OTHER test check an app number against an artifact from a retired mode? No test repeats the pulse-linearity failure. But two things were unguarded, and both are now gated. (1) The constraint-map tie cut's premise is BROKEN at `hilda29e`: three rows sit in the gap it was derived from, and the new gate is a deliberate RED. (2) The app loaded `data/constraint_map.rds` with no mode check; it now refuses a map that is not the canonical's.** (Marcus: "Go ahead", and on the gate's scope "is there a reason not to do all 12?" — no.)
 
 **THE AUDIT** (read-only first, reported, then the two fixes on his go-ahead).

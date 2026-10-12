@@ -16,7 +16,7 @@
 #   IC7  THE ENSO PIN    (the fix found building #17) a pinned ENSO amplitude is READ: pinned at its own value
 #                        = free, bit for bit; pinned at 0 moves the likelihood
 #   IC8  THE DATA        the monthly product reproduces its estimator; its checksum is the manifest's
-#   IC9  THE ESTIMATOR   at the canonical: the preview's detrended series, SSR, r and n_eff reproduce; the
+#   IC9  THE ESTIMATOR   at the fixture (IC_MODE): the preview's detrended series, SSR, r and n_eff reproduce; the
 #                        module's slope row IS the main objective's row
 #   IC10 REFUSALS        a run that stops at the record, ssr_ref <= 0, a slope row absent
 #   IC11 A HAND-BUILT PINNED BASE (found by the 10-06 landing dry run: promote's GATE 5 gap 39.1): ccx_overlay_par()
@@ -210,7 +210,8 @@ test_that("IC8 THE DATA: the monthly product reproduces its estimator; its check
   expect_identical(ccx_cen12(1:12), rep(NA_real_, 12))
 })
 
-test_that("IC9 THE ESTIMATOR at the canonical: the preview's series, SSR, r and n_eff reproduce; the slope row is the main objective's", {
+test_that(sprintf(paste("IC9 THE ESTIMATOR at the fixture %s (where LIK_IAV_NEFF was measured and is held): the preview's",
+                        "series, SSR, r and n_eff reproduce; the slope row is the main objective's"), IC_MODE), {
   R <- ic_run(); pv <- readRDS(IC_PREVIEW_RDS)
   expect_identical(pv$provenance$mode_md5, IC_MODE_MD5)
   expect_identical(pv$provenance$window, LIK_IAV_WIN); expect_identical(pv$provenance$trend_df, LIK_IAV_TREND_DF)

@@ -8,7 +8,7 @@
 #   (2) ccx_enso_slope() recovers a KNOWN slope exactly on a synthetic series,
 #       is invariant to the index's mean (the year term), and is NA below MIN_N
 #   (3) ADDITIVE: with the switch ON the 25 pre-#13 rows are BIT-IDENTICAL to the
-#       canonical's stored streams; the row is ABSENT (not zero) with the switch
+#       fixture's (GES_MODE) stored streams; the row is ABSENT (not zero) with the switch
 #       OFF, with an obs lacking the target, and it is one finite number ON
 #   (4) DIRECTION: at the canonical's point with the limb ON (hilda_cl3,
 #       w_enso_l2 18.7, shim 0) the row is BETTER than with the limb OFF (shim
@@ -43,7 +43,8 @@ test_that("(2) the estimator recovers a known slope, ignores the index mean, and
 
 # 2026-10-08 (e; Marcus: "Approve all five"): NAMED -- hilda33p, where gcb_ocean_enso_slope is a MAIN-objective row. Under
 # the interannual cut (hilda29e) the row moved into the module (R/likelihood.R), so "the canonical" no longer carries it.
-ges_v <- dg_vector("hilda33p"); ges_r <- dg_run(ges_v)
+GES_MODE <- "hilda33p"   # the fixture (named 10-08 e); NOT the canonical, which no longer carries the row
+ges_v <- dg_vector(GES_MODE); ges_r <- dg_run(ges_v)
 ges_toggle <- function(on, f) { old <- LIK_USE_GCB_ENSO_SLOPE; assign("LIK_USE_GCB_ENSO_SLOPE", on, envir = globalenv())
   on.exit(assign("LIK_USE_GCB_ENSO_SLOPE", old, envir = globalenv()), add = TRUE); f() }
 
@@ -61,7 +62,7 @@ test_that("(3) ADDITIVE: the 25 pre-#13 rows are bit-identical; the row is absen
   # periodic spinup's tolerance-terminated iteration amplifies that to ~1e-8 RELATIVE on a row (6e-6 on
   # d13c_level_MLO at hilda30e; 6e-11 at hilda30h, whose values round-tripped exactly). The bit-identity
   # claim of this test is st_on vs st_off (above); against the stored file the bound is the round trip's.
-  expect_equal(unname(st_on[old]), unname(unlist(ges_v$md$streams[old])), tolerance = 1e-6)   # the canonical's stored 25
+  expect_equal(unname(st_on[old]), unname(unlist(ges_v$md$streams[old])), tolerance = 1e-6)   # the fixture's (GES_MODE) stored 25
   expect_equal(st_on[["gcb_ocean_enso_slope"]], ges_v$md$streams[["gcb_ocean_enso_slope"]], tolerance = 1e-6)   # and its stored row
   expect_true(is.finite(st_on[["gcb_ocean_enso_slope"]]))
   expect_identical(sum(!is.na(st_on)), length(old) + 2L)   # + the #13 row and #15's d13c_icecore (2026-10-02)
