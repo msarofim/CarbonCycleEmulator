@@ -2,6 +2,13 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (o) — **The five `pulse_land_attribution_*.log` files are quarantined** (Marcus, verbatim: "Quarantine + README (Recommended)"). They print Joos 2013's split as "sec.3.2 … ±1 sd". It is §4.3, ±2 s.d. (10-12 n). Every number in them is right; only the label is wrong.
+
+- Moved to `outputs/quarantine/20261012_joos_pm_label/`, with a README. The 09-27 one ran at `hilda29l`; the four 09-28 ones are scratch modes (φ = 0 refit / basin 2; `hilda_csl3v0k` basins 1 and 2).
+- **No canonical replacement.** The arms are retired, and the script is a held-era record (climate held), so a re-run at `hilda29e` would be a new result, not a replacement. The live partition is card 5b's (`ccx_pd100()`).
+- `outputs/quarantine/20260927_joos_release_shift/README.md` pointed at the 09-27 log; it now says where the log went. CHANGELOG 09-27 / 09-28 keep the old paths (append-only).
+- Also re-read Joos's Table 4 (p. 2802), because 10-12 (n) quoted its caption as "±two standard deviations" while card 5a's facts call its range a 5–95 %. **Both are right; the table carries two ranges.** The multi-model-mean row is ±2 s.d. (14.3 ± 1.8 / 30.2 ± 5.7 / 52.4 ± 11.3 yr). The "best estimate" row is a 5–95 % (12.2–16.3 / 24.0–36.6 / 39.5–65.2), the average of the methods' ranges centred on the fit's mean. CCX's "Joos 5 % floor 12.2" is the latter, so card 5a's facts stand. Memory `joos2013_reading_traps` is corrected (it also said §3.2).
+
 ## 2026-10-12 (n) — **Joos 2013's land/ocean ± are ±2 s.d.; `diag_pulse_land_attribution.R` labelled them ±1 s.d. and cited the wrong section.** Two files disagreed on how to read the ± on Joos et al. 2013 (ACP 13:2793) pulse-partition numbers. **`lib_design_gates.R`'s 10-02 (w) reading (±2 s.d.) is correct, and no gate, z or app number changes.** The diag script's label was wrong and is fixed as a label only. Two stale band strings in `lib_design_gates.R` are listed below for Marcus; they were NOT changed.
 
 *Made by the background session Marcus started from a task chip ("Reconcile Joos 2013 ± convention across two files"), on branch `claude/recursing-hermann-a2f965` (`3c45224`, built on `54dde08`), where it was lettered (l). Main had meanwhile used (l) and (m), so it is (n) here; the code comment that cites it was relettered with it. Nothing else differs from `3c45224`.*

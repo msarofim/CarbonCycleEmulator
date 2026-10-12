@@ -22,7 +22,8 @@ Fixed by `ccx_irf_pd()`, which holds the background to 2015 and then releases, p
 | IRF@100 | 0.284 | 0.289 | 0.409 (T5) |
 
 The integrated IRF moves 1.6–2.7 yr. The point IRF at ≥ 50 yr barely moves, and that gap is
-real. See `outputs/diagnostics/pulse_land_attribution_20260927d.log`.
+real. See `outputs/diagnostics/pulse_land_attribution_20260927d.log` (moved 2026-10-12 to
+`outputs/quarantine/20261012_joos_pm_label/`: its Joos ± are labelled "±1 sd" and are ±2 s.d.; numbers unchanged).
 
 ## Files here
 - `joos_irf_from90.log`, `joos_irf_refit0830.log` — `diag_joos_irf.R` for superseded arms, pre-fix.
