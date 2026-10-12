@@ -45,4 +45,5 @@
 - IntCal σ: use the published Δ¹⁴C σ (column 5) from the downloaded `intcal20.14c`. Add a `download_data.R` / `MANIFEST.csv` entry, rebuild `data/obs_d14c_intcal20.rds`, and stop depending on `rintcal`.
 
 ## D. Open before implementation
+- ✅ **RULED 2026-10-12 (session e): how the values reach the objective.** A NEW structure label carries every changed value and the two new fitted names; an absent field = the old value, so `hilda29e` and every registered mode stay bit-exact (the `hilda_c` / objective-#18 idiom). Versioned data files (carbonate coefficients, deep targets, IntCal) are selected by the label. Marcus, verbatim: "New label (a) (Recommended)"; the name **`hilda_csl3v0kaidgbemwtc`** ("…wtc (c = cited)").
 - Where the refit runs (Torch or the Mac), stated out loud per the standing rule.

@@ -2,6 +2,13 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (dd) — **Routing ruled: the cited values go in through a NEW structure label, `hilda_csl3v0kaidgbemwtc`** (Marcus, verbatim: "New label (a) (Recommended)"; the name "…wtc (c = cited)").
+
+- The `hilda_c` / objective-#18 idiom: a block carries every changed value and the two new fitted names, and an absent field means the old value. `hilda29e` and every registered mode stay bit-exact, and their stored logposts keep reproducing.
+- The rejected option was a global edit plus a restamp (the 09-16 e / #12 precedent). It was rejected because the old canonical would stop reproducing under its own objective.
+- The cost, accepted: one dual path per changed constant, in both cores. The registry keeps each old value, labelled as the absent-field default (the `ALPHA_PHOTO_EPS` 18-vs-15.6 shape).
+- Ledger §D updated. Nothing implemented yet.
+
 ## 2026-10-12 (cc) — **Obsolete material cleared to the Trash, and every citation item RULED; handoff written** (Marcus: "Delete any obsolete material and then walk me through the citation list rulings"; "Yes, write the handoff note" → `notes/handoff_2026-10-12d_citation_rulings_refit_plan.md`, which the 10-12c handoff now points to).
 
 - **Cleanup, nothing hard-deleted.**
