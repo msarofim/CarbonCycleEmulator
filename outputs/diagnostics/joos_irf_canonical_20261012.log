@@ -1,0 +1,81 @@
+# diag_joos_irf.R canonical -- run 2026-10-12 on 6282b57 + the spin-up and overlay fixes (uncommitted at run time; committed with this log). PD100 climate FREE (Marcus 2026-10-12)
+
+=== 0. PARAMETER VECTOR UNDER TEST ===
+  posterior mode, arm hilda29e [asked for 'canonical', resolved 2026-10-12] (refit_20261008_hilda29e_obj18p2_hilda_csl3v0kaidgbemwt, logpost -1166.95)
+  luc_scale 0.9139   bomb_total 118.87 kmol   pump_mode N
+  beta_max 2.0107  fert_k 669.0  q10 1.092  h_ml 64.63  kz 14151
+  spin-up: periodic
+    background held to 1.511 ppm of 393.62 (0.38 %); mean diagnosed emission 0.89 GtC/yr
+
+=== 1. BACKGROUND CHECK (Joos run 1: CO2 held constant); climate free ===
+  target 393.62 ppm; max deviation over 300 yr: 1.511 ppm (0.38 %)
+  Joos's PD100 background is 389 ppm; this model's is 394 ppm at 2010.
+  background GMST 0.965 K at the hold -> 1.545 K at the end (held forcing); the pulse's own warming 0.151 K at +100 yr, 4 passes
+
+=== 2. POINT IRF vs JOOS TABLE 5 (multi-model mean) ===
+      yr   this model      Joos T5       diff   climate HELD
+      20        0.522        0.596     -0.074          0.509
+      50        0.431        0.487     -0.055          0.416
+     100        0.379        0.409     -0.030          0.361
+     300        0.295        0.322     -0.027          0.272
+
+=== 3. TIME-INTEGRATED IRF vs JOOS TABLE 4 (yr) -- A COMPARISON ===
+  ⚠ RULED 2026-09-04 (Marcus): this is a POST-MODEL COMPARISON, NOT A GATE.
+    Joos is another MODEL, and no observation constrains a CO2 perturbation
+    lifetime, so the long tail is something the model should EMERGE, not
+    something it should be made to pass. 'inside/BELOW/ABOVE' below is a
+    reading, not a verdict, and nothing here is chased in a refit.
+    TH   this model    Joos best        Joos 5-95 %   vs floor     held  verdict
+    20        12.85         14.2     12.2 - 16.3        +5.34%    12.66  inside
+    50        26.85         30.3     24.0 - 36.6       +11.87%    26.22  inside
+   100        46.95         52.4     39.5 - 65.2       +18.86%    45.48  inside
+
+=== 3b. THE TAIL, IRF(300)/IRF(100) -- A COMPARISON (was gate 12b) ===
+  ⚠ Same status as section 3: reported, not gated. What IS a strict claim
+    here is the single-exponential locus -- parameter-free algebra, and the
+    reason the statistic discriminates at all.
+                                                  ratio   own null verdict
+  THIS MODEL                                     0.7776     0.1437 inside
+  Joos et al. 2013 Table 5                       0.7866     0.1676 -- the benchmark
+  Spencer 2023 (2.05 %/yr over 295 ppm)          0.0166     0.0166 ON its own null, by construction
+  Dengler & Reid 2023 (42-yr half-life)          0.0369     0.0369 ON its own null, by construction
+
+  band [0.5930, 0.9788] -- CONSTRUCTED: Joos publishes no 5-95% range at
+  TH 300, so Table 4's TH-100 relative width is borrowed. That is an
+  assumption and it is stated, not silently adopted. The DISCRIMINATION does
+  not rest on it: the one-box models sit 36x and 16x below even the
+  loosest end, and every single exponential lies ON the null by construction.
+
+  MUTATION TEST of this gate, because passing is not the same as working:
+    a single exponential tuned to THIS MODEL's own IRF(100) = 0.3791
+    would score 0.1437 and the gate must REJECT it: REJECTED. OK
+
+  and the ASYMPTOTE, which is what the ratio is really testing:
+    fraction still airborne at 300 yr: model 0.295 vs Joos T5 0.322
+    Joos T5's t -> infinity limit is a0 = 0.2173; a single exponential's is 0.
+
+=== 4. THE BACKGROUND PROTOCOL IS NOT A DETAIL (climate free; release after a 5-yr hold) ===
+case                         IRF@20  IRF@100  IRF@300 |   int IRF @100
+PD, background HELD           0.522    0.379    0.295 |           46.9
+PD, background decaying       0.508    0.354    0.268 |           45.1
+PI, background HELD           0.402    0.271    0.202 |           35.9
+PI, background decaying       0.402    0.273    0.211 |           35.9
+  Joos sec.4.4.1, integrated IRF at TH=100 across 10 models:
+    preindustrial background 34-47 yr ; present-day 45-62 yr
+  The PI-lower-than-PD ordering is Joos's own and the model must reproduce
+  the SIGN of it: a fuller ocean buffers less, so a pulse lasts longer.
+
+=== 5. PULSES ON FUTURE BACKGROUNDS (100 GtC in 2050, COUPLED climate) ===
+scenario   CO2@2050   T@2100   IRF@20   IRF@50  IRF@100 | int IRF @100
+ssp126          437     1.86    0.548    0.436    0.354 |         47.0
+ssp245          470     2.74    0.589    0.506    0.445 |         53.3
+ssp370          499     3.66    0.623    0.589    0.613 |         61.9
+ssp585          519     4.60    0.652    0.652    0.697 |         67.4
+
+  Joos (Bern3D-LPJ, Fig. 5): IRF_CO2 falls to ~70 % within two decades in
+  EVERY scenario, then keeps falling for RCP2.6 and the 389 ppm standard but
+  turns back UP for the higher pathways as CO2 and warming continue to rise;
+  for RCP8.5 the airborne fraction of the pulse is still above 80 % at year
+  1000. THE ORDERING IS THE TESTABLE CLAIM HERE, NOT THE LEVEL -- a model
+  calibrated to the historical record is out of sample in these futures, and
+  Marcus made exactly that caveat when asking for the comparison.

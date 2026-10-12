@@ -1,0 +1,27 @@
+GATE L at hilda29e: Joos 2013 1000-yr split land 16 +/- 7, ocean 59 +/- 6, air 25 +/- 4.5 % (Joos et al. 2013 ACP 13:2793, abstract (SOURCED, notes/assessment_2026-09-08_acceptable_state.md)); bound |z_land| <= 1 -> [9, 23] %
+
+  canonical      background held to 3.656 ppm; closure at 1000 yr 1.000000; 4 s
+       20 yr: land  23.6  ocean  24.1  air  52.3 %
+      100 yr: land  27.6  ocean  34.4  air  38.0 %
+      300 yr: land  27.3  ocean  43.2  air  29.5 %
+     1000 yr: land  17.4  ocean  57.6  air  25.0 %
+    COMPARISON L at 1000 yr: land 17.4 % (Joos 16 +/- 7: +0.20 sd), ocean -0.23 sd, air -0.01 sd -- REPORTED, not gated
+
+  land_off       background held to 3.080 ppm; closure at 1000 yr 1.000000; 4 s
+       20 yr: land  -0.2  ocean  27.5  air  72.7 %
+      100 yr: land  -0.5  ocean  43.4  air  57.1 %
+      300 yr: land  -1.0  ocean  56.0  air  45.0 %
+     1000 yr: land  -1.4  ocean  69.0  air  32.3 %
+    COMPARISON L at 1000 yr: land -1.4 % (Joos 16 +/- 7: -2.48 sd), ocean +1.67 sd, air +1.62 sd -- REPORTED, not gated
+
+  column_control background held to 3.205 ppm; closure at 1000 yr 1.000000; 2 s
+       20 yr: land  22.6  ocean  23.7  air  53.8 %
+      100 yr: land  39.8  ocean  30.7  air  29.6 %
+      300 yr: land  42.1  ocean  36.6  air  21.3 %
+     1000 yr: land  30.5  ocean  49.6  air  19.9 %
+    COMPARISON L at 1000 yr: land 30.5 % (Joos 16 +/- 7: +2.07 sd), ocean -1.57 sd, air -1.12 sd -- REPORTED, not gated
+
+=== READING (no verdict by ruling) ===
+  the canonical's land share at 1000 yr sits +0.20 ensemble-sd from Joos's mean; the land-off arm -2.48; the column control +2.07.
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/tl_land_share_gate_20261012.rds
+⛔ Nothing adopted; L is a comparison.

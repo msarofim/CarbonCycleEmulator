@@ -1924,6 +1924,18 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
     dioxide and climate impulse response functions…*, ACP 13:2793–2825,
     doi:10.5194/acp-13-2793-2013 — 15 models + 3 ensembles, PD100 protocol (100 GtC onto a
     background **held** at 389 ppm; compatible emissions diagnosed).
+    ⭐ **PROTOCOL, 2026-10-12 (Marcus: "free everywhere"; scope "Builder + live consumers").**
+    "Held" is the CO₂ background and the non-CO₂ forcing (Joos Table 1); **the climate is FREE**,
+    as Joos has it ("the climate is evolving freely", p. 2798). One runner, `ccx_pd100()` in
+    `R/joos_irf.R`, for card 5a, gate L / card 5b, the scorecard, tl_land_share and
+    `diag_joos_irf.R`: the background's GMST from the climate module (integrated from 1750; non-CO₂
+    ERF held at 2010), SST following it by the ratio rule, the pulse's own warming iterated, T_deep
+    carried across every seam, release at JOOS_PULSE_YR (gate L included — it pulsed the 2010
+    state). The HELD mode is kept for decompositions, with the 10-12 fixes (SST held with GMST;
+    T_deep carried). At `hilda29e`: IRF 20/100/300 **0.522 / 0.379 / 0.295** free vs 0.509 / 0.361 /
+    0.272 held; TH 20/50/100 12.85 / 26.85 / 46.95 free (`outputs/diagnostics/joos_irf_canonical_20261012.log`). ⚠ **Every number below this paragraph was
+    measured climate-HELD**, and every `diag_joos_irf.R` number before 10-12 also on the wrong
+    spin-up and (from 09-30) without `ndep_ret` — `outputs/quarantine/20261012_joos_irf_aseasonal_spinup/`.
     **Time-integrated IRF must lie inside Joos Table 4's 5–95 % range**:
     **12.2–16.3 yr (TH 20), 24.0–36.6 (50), 39.5–65.2 (100)**; multi-model best estimates
     14.2 / 30.3 / 52.4. Point IRF from the Table 5 fit

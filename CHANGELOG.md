@@ -2,6 +2,95 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (a) — **Card 5's FaIR PD100 line is built and drawn, and the PD100 runs with the climate FREE everywhere it is live. On the way: two bugs in the held builder, and two in `diag_joos_irf.R`, which had been running a different model from the one it names.** (FaIRtoFrEDI `964aa12`; here `5287259`, `6282b57`, and this entry's commit.)
+
+**RULINGS (Marcus, verbatim, 10-11/10-12):**
+- "Allow 2320 for this run (Recommended)"
+- "heat-ed-morbidity (Recommended)"
+- "Mid-release, t = year − 2015.5 (Recommended)"
+- Asked whether to free CarboTope's PD100 too: "I would lean towards free everywhere: if climate/carbon feedbacks are relevant for Card 5, they'd also be relevant for the Futures tab. Is there anywhere where it would be a problem?"
+- After the answer: "Builder + live consumers (Recommended)" and "Release at 2015, like 5a and Joos (Recommended)"
+- "Fix both in the builder (Recommended)"
+
+**1. The FaIR line** (`FaIRtoFrEDI/run_fair_pd100_for_ccx.py`, heat-ed-morbidity `964aa12`, NOT pushed: the branch carries 27 earlier unpushed commits).
+- **Protocol:** Joos Table 1 runs 1–3 on the production 1.6.0 stack (`calibration_v160_prod`, CMIP7 history).
+  - stage 0 is the stock emissions-driven history;
+  - run 1 makes every GHG concentration-driven, history then held, and holds the SLCF emissions and prescribed forcing;
+  - run 2 takes CO₂ FFI from run 1's diagnosed emissions;
+  - run 3 adds 100 GtC in 2015.
+- **Gates**, 6 of 6 mutations caught:
+  - G1 inverse recovers the CMIP7 emissions, 8e-13;
+  - G2 control, 1e-13 ppm;
+  - G3 zero pulse bit-identical;
+  - G4 first year equals FaIR's own step formula at its own α, 2.7e-15.
+- **Sanity:** sign flip 5.0 %, doubling 2.6 %, pulse year +15 0.6 %.
+- Two runs are byte-identical; the run takes 72 s.
+- **Result:** IRF 20/100/300 = **0.483 / 0.364 / 0.291**, with α 0.283 at the release. FaIR's partition fractions and lifetimes are Joos's Table 5, so it differs from Joos only through α < 1.
+- **Imported** via `data-raw/build_fair_pd100.R`. It refuses a file whose protocol is not card 5's `JOOS_*`, whose climate is not free, or whose driver was uncommitted. The result goes to `data/fair_pd100.rds`; `test-fair-pd100.R` passes 22 / 0, with 3 of 3 mutations caught.
+- **Tried and abandoned:**
+  - Run 1 first copied stage 0's WHOLE concentration array. That pre-filled the EESC slot, so the ERFari term stock FaIR leaves NaN (`2fb38d1`) was switched ON: 9.8e-3 K. G1 caught it.
+  - G4 first used `expm1`. FaIR computes 1 − exp(−r), which keeps 8 digits for the 1e9-yr box, so G4 failed at 5e-9.
+  - G4 next derived its reference ppm from `GTCO2_PER_GTC`, the constant the pulse also used, so it passed a 44/12 unit slip. It now derives it from the atmosphere's mass.
+
+**2. Free climate, and why it was asked.**
+- **The mismatch:** CarboTope's PD100 held temperature at 2010, while Joos's protocol and the ruled FaIR line let it evolve.
+  - Measured, the mismatch alone put FaIR ABOVE CarboTope at 100 and 300 yr. Like-for-like, under either protocol, CarboTope sits a few % above FaIR.
+  - Card 5 was also the only place in the app on held climate: the Futures, stylised and pulse-lab tabs all run `ccx_run_coupled()`.
+- **One runner**, `ccx_pd100()` (R/joos_irf.R):
+  - the free background takes its GMST from the climate module, integrated from 1750, with non-CO₂ ERF held at 2010, spliced to obs over 11 yr;
+  - SST follows GMST by the ratio rule seamed at 2010. It does NOT use `ccx_sst_anom_from_gmst`, which keeps observed SST to 2024;
+  - the pulse's own warming is iterated (4 passes at the canonical);
+  - T_deep is carried across every seam;
+  - a decaying background is coupled;
+  - a preindustrial background stays at GMST 0.
+- **The audit** found where it could bite (subagent, `file:line`):
+  - no objective reads a Joos quantity, and no test pins a PD100 number;
+  - a naive switch would STOP: the stratification guard refuses a varying opening without T_deep;
+  - gate L's kernel shared one table between baseline and pulse;
+  - card text could go stale;
+  - nine diagnostics hand-build their own held table.
+- **Consumers moved:**
+  - card 5a (rv_pulse);
+  - gate L / card 5b, released at 2015 after the 5-yr hold. It pulsed the 2010 state, so 5a and 5b ran two protocols;
+  - the scorecard's §4;
+  - tl_land_share (follows gate L);
+  - `diag_joos_irf.R`.
+- **Not moved:** the rep-dC ladder pins gate L to "held", since its own IRF column is held. Nine diagnostics carry a HELD-ERA RECORD header (the ruling said 8; the count is 9).
+- **Card 5 at hilda29e:**
+  - IRF 20/100/300 **0.522 / 0.379 / 0.295** free, against 0.509 / 0.361 / 0.271 held as shipped;
+  - nearly all of the difference is the pulse's own +0.15 K; the background's warming alone (1.01 → 1.55 K) is ≤ 0.2 %;
+  - 5b at 1000 yr: land **17.4** / ocean **57.6** / air **25.0 %**, z +0.20 / −0.23 / −0.01. Held with the 2015 release it is 17.1 / 60.7 / 22.3;
+  - `rv_pulse` takes 5.2 s.
+- **The card's typed claims** "decays faster here than in the multi-model mean" and "inside that study's range on every term" STILL HOLD.
+- **Card 5a draws the FaIR line,** dashed as on the Futures tab, with the legend in two rows because one row clipped the label.
+
+**3. The held builder's two bugs (fixed, ruled).**
+- (1) `ccx_pulse_forcings()` held GMST by hand and left the observed SST running: NH 0.72 → 1.29 K over 2010–2024, and the ocean reads SST (`sst_obs` = 1). Effect: IRF +0.20 % at 100 yr, +0.30 % at 300. Fix: `ccx_hold_climate()`.
+- (2) T_deep restarted at 0 at 2010 and 2015, against the history's 0.148 K. The guard was blind to it because the held GMST is constant. Effect: −0.01 %.
+
+**4. `diag_joos_irf.R` ran a different model** (found because its new log disagreed with card 5 at the same mode).
+- (a) It used the ASEASONAL spin-up `ccx_spinup(p0)` for every arm. Every mode since 09-09x uses the periodic spin-up its file names.
+- (b) Its overlay never wrote the GATED fitted parameters, so `ndep_ret` was 0 (fitted 9.08) from 09-30 on.
+- Size: the 2010 background was 403.20 → 398.43 → **393.62** ppm (= card 5); IRF@100 0.386 → 0.383 → 0.379.
+- Fixed with the mode's own spin-up and `ccx_overlay_par()`. The log now reproduces card 5 exactly.
+- **Quarantined:** the three logs made by the buggy script, in `outputs/quarantine/20261012_joos_irf_aseasonal_spinup/` with a README. They include the 09-27 log, the source of the "TH 13.04/25.80/41.80 at hilda29l" in the records. ⚠ That figure was measured on the wrong spin-up.
+
+**Tests:**
+- New: `test-pd100-runner.R` at the canonical, 22 / 0, with 5 of 5 mutations caught.
+- Existing, all passing: pulse 28, joos-irf 22, climate 34, gate-bounds 212, review-cards 48, app-review-copy 41, luc-permanence 12, joos-arm-required 12.
+- review-card-numbers: 24 / 2, card 4's two failures by design.
+- No test edited. The full suite is not yet run (see the handoff).
+
+**Not done / judgements stated:**
+- The scorecard was NOT re-run (an adoption-time tool; its next run is free).
+- Its 10-06/10-07 logs and `tl_land_share_gate_20260908.*` were NOT quarantined. Their PD100 parts carry the ≤ 0.3 % SST defect, no code reads them, and their other sections are valid. They stay as records; ask if you want them moved.
+- The nine held-era diagnostics may carry bugs 3 and 4 and were not converted, by ruling.
+
+**Pending Marcus (his copy):**
+- card 5a's caption (it gives no FaIR numbers; FaIR reads 0.483 / 0.364 / 0.291), and whether to say all three lines are now on Joos's climate-free protocol;
+- `review.R`'s card-5 comments still quote hilda33d-era numbers (18/60/22, z +0.28/+0.15/−0.63);
+- the earlier queue (handoff 10-11 §4).
+
 ## 2026-10-12 (a) — **The three tidy-ups from 10-11 (c)'s audit (Marcus: "do the tidy ups"). (1) Three test labels that called `hilda33p` fixtures "the canonical" now name their mode through a constant. (2) The two "+dirty" artifacts under the canonical's pins REPRODUCE EXACTLY from clean trees: the dirt was the then-untracked base mode file. (3) Five fixtures that carried no provenance are stamped POST HOC, with their values untouched.** Also: 10-11 (c) was merged into local `main` (`30af2b5`).
 
 - **The merge.** Local `main` carried `5287259` (card 5's FaIR PD100 import, three new files), not yet on origin.

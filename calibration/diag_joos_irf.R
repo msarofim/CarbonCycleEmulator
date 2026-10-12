@@ -196,6 +196,7 @@ JOOS_ARM_ASKED <- JOOS_ARM
 if (identical(JOOS_ARM, JOOS_ARM_CANONICAL)) JOOS_ARM <- CCX_MODE_CANONICAL
 
 p0 <- ccx_default_params()
+JOOS_SPINUP_LABEL <- "aseasonal"     # the defaults' spin-up; a mode's own label below
 JOOS_LUC_SCALE  <- 1
 JOOS_BOMB_TOTAL <- 102
 JOOS_SRC <- "uncalibrated defaults"
@@ -233,20 +234,23 @@ if (JOOS_ARM != "defaults") {
   .pm <- ccx_migrate_par_set(ccx_mode_par_with_pins(.md))
   .mig <- attr(.pm, "migrated")
   p0 <- ccx_mode_base(.md)                      # the file's own structure (2026-09-08f)
-  # ⭐ ABSENCE MUST ASSERT, rather than silently deleting. Belt and braces: the
-  # line above should make this unreachable, and a gate that cannot fire is a
-  # gate that stops protecting the moment the line above changes.
-  for (n in intersect(names(p0), CCX_PARAM_NAMES)) {
-    if (is.null(.pm[[n]]))
-      stop("diag_joos_irf.R: `", n, "` is absent from the arm's parameter set, ",
-           "so the overlay would DELETE the value ccx_mode_base() supplied. ",
-           "Arm '", JOOS_ARM, "' is not usable here.")
-    p0[[n]] <- .pm[[n]]
-  }
-  p0 <- ccx_set_enso(p0, .pm)
+  # ⛔ THE APP'S OWN OVERLAY (fixed 2026-10-12). This was a loop over intersect(names(p0),
+  # CCX_PARAM_NAMES) + ccx_set_enso(), which never wrote the GATED fitted parameters: at hilda29e it
+  # ran with ndep_ret = 0 (fitted 9.08), i.e. N-deposition retention OFF, ever since that parameter
+  # arrived (09-30). With the aseasonal spin-up fixed above, that was the remaining 4.8 ppm of 2010
+  # background between this script and card 5. ccx_overlay_par() is what dg_vector() -- card 5 and
+  # gate L -- uses, overlays the gated set too, and REFUSES an overlay that deletes a name, which is
+  # the absence check the loop carried.
+  p0 <- ccx_overlay_par(p0, .pm)
   p0$pump_mode  <- .md$pump_mode
   JOOS_LUC_SCALE  <- .pm$luc_scale
   JOOS_BOMB_TOTAL <- .pm$bomb_total
+  # ⛔ THE MODE'S OWN SPIN-UP (fixed 2026-10-12). This script ran `ccx_spinup(p0)` -- the ASEASONAL
+  # spin-up -- for every arm, while every mode since the 09-09x periodic adoption is fitted, and run by
+  # the app and gate L (dg_vector()), on the spin-up its file names. At hilda29e that held the
+  # background at 403.20 ppm against card 5's 393.62, and every TH and IRF printed here since 09-09
+  # described a slightly different model (IRF@100 0.386 vs card 5's 0.379, free).
+  JOOS_SPINUP_LABEL <- ccx_mode_spinup(.md)
   JOOS_SRC <- sprintf("posterior mode, arm %s%s (%s, logpost %.2f)%s",
                       JOOS_ARM,
                       if (identical(JOOS_ARM_ASKED, JOOS_ARM_CANONICAL))
@@ -283,7 +287,8 @@ cat(sprintf("  luc_scale %.4f   bomb_total %.2f kmol   pump_mode %s\n",
 cat(sprintf("  beta_max %.4f  fert_k %.1f  q10 %.3f  h_ml %.2f  kz %.0f\n",
             p0$beta_max, p0$fert_k, p0$q10, p0$h_ml, p0$kz))
 
-spin <- ccx_spinup(p0)
+spin <- (if (identical(JOOS_SPINUP_LABEL, "aseasonal")) ccx_spinup else ccx_spinup_from_label(JOOS_SPINUP_LABEL))(p0)
+cat(sprintf("  spin-up: %s\n", JOOS_SPINUP_LABEL))
 
 # The Joos protocol helpers -- ccx_set_emissions, ccx_hold_forcing,
 # ccx_pulse_state, ccx_irf, and the JOOS_PULSE / JOOS_PPM_PER / JOOS_HOLD_*
