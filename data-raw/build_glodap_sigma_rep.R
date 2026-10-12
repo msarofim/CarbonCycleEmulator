@@ -41,7 +41,13 @@
 # at w = 11 m), because the curve has a narrow V-bottom at the crossing that
 # averaging lifts. A smoother wider than the feature relocates it.
 #
-# Usage:  Rscript data-raw/build_glodap_sigma_rep.R     (~3 min, 19 MB CSV read)
+# Usage:  Rscript data-raw/build_glodap_sigma_rep.R [depth] [out]    (~3 min, 19 MB CSV read)
+#
+# THE COLUMN DEPTH IS AN ARGUMENT (2026-10-12; OCEAN_DEPTH 3700 -> 3682.2 m under label
+# hilda_csl3v0kaidgbemwtc). sigma_rep is measured on the model's OWN box edges, which scale with
+# the column, and against the deep product of the same column, so it is built once per depth:
+# no argument = 3700 -> data/obs_glodap_sigma_rep.rds (NOT rebuilt; the record),
+# `3682.2` -> data/obs_glodap_sigma_rep_3682.2m.rds, stamped `column_depth`.
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 
@@ -55,13 +61,23 @@ SR_FLAG_OK   <- 2                        # GLODAP: 2 = acceptable measurement
 SR_DLAT      <- 5; SR_DLON <- 10; SR_DZ <- 250
 SR_MIN_CELLS <- 20
 SR_SHIP_SURF <- c(0, 100)                # build_glodap_deep_targets.R
-SR_SHIP_DEEP <- c(2627.2, 1e5)           # ditto -- note the 1e5, and GD_MODEL_DEEP_TOP
+SR_DEPTH_LEGACY <- 3700
+sr_args      <- commandArgs(trailingOnly = TRUE)
+SR_DEPTH     <- if (length(sr_args) < 1) SR_DEPTH_LEGACY else as.numeric(sr_args[1])
+SR_SHIP_DEEP <- c(readRDS(ccx_glodap_file("obs_glodap_deep", SR_DEPTH))$model_layer[["top"]], 1e5)  # GD_MODEL_DEEP_TOP; note the 1e5
+stopifnot(SR_DEPTH != SR_DEPTH_LEGACY || SR_SHIP_DEEP[1] == 2627.2)
 SR_GATE_TOL  <- 1e-3                     # absolute, each field's own units
 SR_H_IN      <- 100                      # where the model's surface box IS [0, 100]
 # The FULL shipped support of h_ml, at 1 m. Not the old band: the whole point of
 # the adoption is that the rows are now scored everywhere h_ml can go.
-SR_H_GRID    <- seq(CCX_PARAM_TABLE$h_ml$lo, CCX_PARAM_TABLE$h_ml$hi, by = 1)
-SR_OUT       <- ccx_path("data", "obs_glodap_sigma_rep.rds")
+# ⚠ PINNED 2026-10-12 to the 08-28 support, 30-200 m: the box has since moved to [CCX_HML_FLOOR_M,
+# 200] = [42.5, 200], and deriving the grid from the live box no longer reproduced the shipped
+# record (158 points from 42.5, against its 171 from 30). The pinned grid is a SUPERSET of the
+# live box (asserted), so the interpolant never clamps inside the support, and both column-depth
+# products share one grid.
+SR_H_GRID    <- seq(30, 200, by = 1)
+stopifnot(min(SR_H_GRID) <= CCX_PARAM_TABLE$h_ml$lo, max(SR_H_GRID) >= CCX_PARAM_TABLE$h_ml$hi)
+SR_OUT       <- if (length(sr_args) >= 2) sr_args[2] else ccx_glodap_file("obs_glodap_sigma_rep", SR_DEPTH)
 
 sep <- function(s) cat(sprintf("\n\n=== %s ===\n", s))
 
@@ -93,8 +109,8 @@ iso <- utils::read.csv(SR_ISO_FILE);  tlk <- utils::read.csv(SR_TALK_FILE)
 cat(sprintf("isotope pop : %s (%d rows)\n", basename(SR_ISO_FILE), nrow(iso)))
 cat(sprintf("ALK pop     : %s (%d rows)\n", basename(SR_TALK_FILE), nrow(tlk)))
 
-tg  <- ccx_ocean_gradient_target()
-raw <- readRDS(ccx_path("data", "obs_glodap_deep.rds"))
+tg  <- ccx_ocean_gradient_target(SR_DEPTH)
+raw <- readRDS(ccx_glodap_file("obs_glodap_deep", SR_DEPTH))
 stopifnot(!is.null(tg$dic), !is.null(tg$d13c), !is.null(tg$alk))
 # The three rows and the population each is measured on. ⚠ ALK and DIC come from
 # DIFFERENT GLODAP subsets; the DIC row is the ISOTOPE population's, which is why
@@ -120,7 +136,7 @@ cat("PASS -- the recipe is the build script's, so sigma_rep below is the\n")
 cat("shipped target's OWN representation error.\n")
 
 sep("GATE G2 -- at h_ml = 100 the model's surface box IS the shipped 0-100 m layer")
-g100 <- ccx_ocean_grid(SR_H_IN); zb <- c(0, cumsum(g100$dz))
+g100 <- ccx_ocean_grid(SR_H_IN, total_depth = SR_DEPTH); zb <- c(0, cumsum(g100$dz))
 cat(sprintf("ccx_ocean_grid(%g): surface box [%.4f, %.4f]; shipped [%g, %g]\n",
             SR_H_IN, zb[1], zb[2], SR_SHIP_SURF[1], SR_SHIP_SURF[2]))
 stopifnot(abs(zb[1] - SR_SHIP_SURF[1]) < 1e-9, abs(zb[2] - SR_SHIP_SURF[2]) < 1e-9)
@@ -133,7 +149,7 @@ lfl <- list()
 for (n in names(SR_ROWS)) {
   s <- SR_ROWS[[n]]
   lfl[[n]] <- vapply(SR_H_GRID, function(h) {
-    gr <- ccx_ocean_grid(h); zb <- c(0, cumsum(gr$dz)); k <- length(gr$dz)
+    gr <- ccx_ocean_grid(h, total_depth = SR_DEPTH); zb <- c(0, cumsum(gr$dz)); k <- length(gr$dz)
     sr_grad(s$d, s$val, s$flag, c(0, zb[2]), c(zb[k], zb[k + 1]), FALSE)
   }, numeric(1))
   if (anyNA(lfl[[n]]))
@@ -175,5 +191,9 @@ out <- list(
                     note = paste("SIGNED like-for-like; sigma_eff^2 = sd_obs^2 +",
                                  "(target - like_for_like)^2. No smoothing --",
                                  "measured roughness median 0.0055, max 0.0734 logL.")))
+if (SR_DEPTH != SR_DEPTH_LEGACY) {                 # absent = 3700 (the shipped record)
+  out$column_depth <- SR_DEPTH
+  out$provenance$built <- format(Sys.Date())
+}
 saveRDS(out, SR_OUT)
 cat(sprintf("\nwrote %s\n", SR_OUT))

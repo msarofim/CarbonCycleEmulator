@@ -751,6 +751,8 @@ ccx_enso_slope_row_on <- function(err) {
 #' (2026-10-07, objective #18: `gcb_ocean_lowpass_df`, the ocean row's twin of the land switch; see
 #' "OBJECTIVE #18" below. Absent = the ocean row year by year, as before.)
 ccx_err_with_struct <- function(err, p) {
+  # the column depth the GLODAP rows are read at (label hilda_csl3v0kaidgbemwtc, 2026-10-12)
+  if (!is.null(p[["ocean_depth"]]))          err$ocean_depth          <- p[["ocean_depth"]]
   if (!is.null(p[["gcb_land_lowpass_df"]]))  err$gcb_land_lowpass_df  <- p[["gcb_land_lowpass_df"]]
   if (!is.null(p[["gcb_ocean_lowpass_df"]])) err$gcb_ocean_lowpass_df <- p[["gcb_ocean_lowpass_df"]]
   if (!is.null(p[["gcb_enso_slope_row"]]))   err$gcb_enso_slope_row   <- p[["gcb_enso_slope_row"]]
@@ -1124,8 +1126,10 @@ ccx_dgnorm_log <- function(x, mu, sd, beta = LIK_D14C_PROFILE_BETA) {
 #' The (level, A-B, B-deep) specification: targets DERIVED from the three row
 #' targets, sigmas from the deep row's convention (level) and the bootstrap
 #' product (contrasts). NULL if any input is absent (rows ABSENT, visibly).
-ccx_profile_d14c_spec <- function(block = LIK_D14C_PROFILE_BLOCK, beta = LIK_D14C_PROFILE_BETA) {
-  pc <- ccx_profile_d14c_cov(block); tgm <- ccx_mid_d14c_target(); tgd <- ccx_deep_d14c_target()
+ccx_profile_d14c_spec <- function(block = LIK_D14C_PROFILE_BLOCK, beta = LIK_D14C_PROFILE_BETA,
+                                  depth = CCX_GLODAP_DEPTH_LEGACY) {
+  pc <- ccx_profile_d14c_cov(block, depth = depth); tgm <- ccx_mid_d14c_target(depth = depth)
+  tgd <- ccx_deep_d14c_target(depth = depth)
   if (is.null(pc) || is.null(tgm) || is.null(tgd)) return(NULL)
   if (!identical(pc$streams, c(tgm$slabs$stream, "d14c_deep_ocean")) ||
       max(abs(pc$targets - c(tgm$slabs$target, tgd$target))) > 1e-6)
@@ -1141,16 +1145,17 @@ ccx_profile_d14c_spec <- function(block = LIK_D14C_PROFILE_BLOCK, beta = LIK_D14
 #' under the CURRENT switches: the three generalised-normal rows (#10), else
 #' the one MVN row (#9), else NULL (the independent rows are scored by
 #' ccx_loglik() itself). ONE source for the objective and for every fixture.
-ccx_profile_rows_at <- function(m) {
+ccx_profile_rows_at <- function(m, depth = CCX_GLODAP_DEPTH_LEGACY) {
   if (length(m) != 3L || !all(is.finite(m))) return(NULL)
   if (LIK_USE_D14C_PROFILE_GNORM) {
-    sp <- ccx_profile_d14c_spec(); if (is.null(sp)) return(NULL)
+    sp <- ccx_profile_d14c_spec(depth = depth); if (is.null(sp)) return(NULL)
     return(c(d14c_profile_level = ccx_dgnorm_log(sp$level, mean(m), sp$level_sd, sp$beta),
              d14c_profile_ab    = ccx_dgnorm_log(sp$ab, m[1] - m[2], sp$ab_sd, sp$beta),
              d14c_profile_bd    = ccx_dgnorm_log(sp$bd, m[2] - m[3], sp$bd_sd, sp$beta)))
   }
   if (LIK_USE_D14C_PROFILE_MVN) {
-    pc <- ccx_profile_d14c_cov(); tgm <- ccx_mid_d14c_target(); tgd <- ccx_deep_d14c_target()
+    pc <- ccx_profile_d14c_cov(depth = depth); tgm <- ccx_mid_d14c_target(depth = depth)
+    tgd <- ccx_deep_d14c_target(depth = depth)
     if (is.null(pc) || is.null(tgm) || is.null(tgd)) return(NULL)
     if (!identical(pc$streams, c(tgm$slabs$stream, "d14c_deep_ocean")) ||
         max(abs(pc$targets - c(tgm$slabs$target, tgd$target))) > 1e-6)
@@ -1165,10 +1170,10 @@ ccx_profile_rows_at <- function(m) {
 #' at (mid, deep). With a profile form ON that is (its rows - the deep Gaussian
 #' that replaces them); with both forms OFF it is the two mid Gaussians.
 #' Derived from the switches, never typed.
-ccx_profile_rows_delta <- function(mid, deep) {
-  tg <- ccx_mid_d14c_target(); td <- ccx_deep_d14c_target()
+ccx_profile_rows_delta <- function(mid, deep, depth = CCX_GLODAP_DEPTH_LEGACY) {
+  tg <- ccx_mid_d14c_target(depth = depth); td <- ccx_deep_d14c_target(depth = depth)
   two <- sum(stats::dnorm(tg$slabs$target, mid[tg$slabs$name], tg$slabs$sd, log = TRUE))
-  rows <- ccx_profile_rows_at(c(mid[[tg$slabs$name[1]]], mid[[tg$slabs$name[2]]], deep))
+  rows <- ccx_profile_rows_at(c(mid[[tg$slabs$name[1]]], mid[[tg$slabs$name[2]]], deep), depth = depth)
   if (is.null(rows)) return(two)
   sum(rows) - stats::dnorm(td$target, deep, td$sd, log = TRUE)
 }
@@ -1178,12 +1183,16 @@ ccx_profile_rows_delta <- function(mid, deep) {
 #' not one it stored. Cached like its siblings.
 ccx_profile_d14c_cov <- local({
   cache <- NULL
-  function(block = LIK_D14C_PROFILE_BLOCK) {
-    key <- as.character(block)
+  function(block = LIK_D14C_PROFILE_BLOCK, depth = CCX_GLODAP_DEPTH_LEGACY) {
+    depth <- ccx_glodap_depth_key(depth)
+    bkey <- as.character(block); key <- paste(bkey, depth)
     if (!is.null(cache) && identical(attr(cache, "key"), key)) return(cache)
-    g <- tryCatch(readRDS(ccx_path("data", "obs_glodap_profile_cov.rds")), error = function(e) NULL)
-    if (is.null(g) || is.null(g$cov[[key]])) return(NULL)
-    out <- list(cov = g$cov[[key]], se = g$se[[key]], means = g$means, targets = g$targets,
+    g <- tryCatch(readRDS(ccx_glodap_file("obs_glodap_profile_cov", depth)), error = function(e) NULL)
+    if (is.null(g) || is.null(g$cov[[bkey]])) return(NULL)
+    stamped <- if (is.null(g$column_depth)) CCX_GLODAP_DEPTH_LEGACY else g$column_depth
+    if (abs(stamped - depth) > CCX_GLODAP_DEPTH_TOL)
+      stop(sprintf("ccx_profile_d14c_cov(): the %g m product is stamped %g m", depth, stamped))
+    out <- list(cov = g$cov[[bkey]], se = g$se[[bkey]], means = g$means, targets = g$targets,
                 streams = g$streams, slab_names = g$slab_names, block = block,
                 contrast_obs = g$contrast_obs, built = g$built)
     attr(out, "key") <- key
@@ -1201,6 +1210,46 @@ ccx_dmvnorm_log <- function(x, mu, Sigma) {
   -0.5 * sum(z^2) - sum(log(diag(R))) - 0.5 * length(x) * log(2 * pi)
 }
 
+# ---- THE GLODAP TARGET PRODUCTS ARE KEYED BY THE COLUMN DEPTH (2026-10-12) ---------------------
+# OCEAN_DEPTH 3700 -> 3682.2 m under label hilda_csl3v0kaidgbemwtc (citation rulings row 5, Charette
+# & Smith 2010; routed by label, "New label (a) (Recommended)"). Four products carry the model's
+# layer geometry -- the deep row's window (its top is ccx_ocean_grid(75)'s bottom-layer top), slab B
+# (which ends where the deep row begins), the profile covariance (which embeds all three targets) and
+# sigma_rep (measured on the model's own box edges) -- so each is built ONCE PER COLUMN DEPTH, by its
+# data-raw script's depth argument, and read here by the depth of the column being scored:
+#   3700   -> data/<stem>.rds          (the shipped products; every registered mode)
+#   3682.2 -> data/<stem>_3682.2m.rds  (label hilda_csl3v0kaidgbemwtc)
+# A depth with no product STOPS, by name: scoring a 3682.2 m column against 3700 m targets is the
+# silent mismatch this replaces. The depth reaches ccx_loglik() through ccx_err_with_struct()
+# (`err$ocean_depth`), and the model-side reads take it from the run's own grid (ccx_grid_depth()).
+CCX_GLODAP_DEPTH_LEGACY <- 3700                    # m; the products every registered mode was scored on
+CCX_GLODAP_DEPTHS       <- c(3700, 3682.2)         # m; one built product set per entry
+CCX_GLODAP_DEPTH_TOL    <- 1e-6                    # m; an identity, not a physical tolerance
+
+#' The column depth a grid integrates to, m
+ccx_grid_depth <- function(grid) sum(grid$dz)
+
+#' Snap a column depth to the built product set it belongs to; STOP if there is none.
+ccx_glodap_depth_key <- function(depth) {
+  if (is.null(depth)) return(CCX_GLODAP_DEPTH_LEGACY)
+  if (length(depth) != 1L || !is.finite(depth))
+    stop("ccx_glodap_depth_key(): one finite column depth, m; got ", format(depth))
+  hit <- CCX_GLODAP_DEPTHS[abs(CCX_GLODAP_DEPTHS - depth) < CCX_GLODAP_DEPTH_TOL]
+  if (length(hit) != 1L)
+    stop(sprintf(paste("no GLODAP target products for a %.6g m column (built: %s m). Build them with",
+                       "data-raw/build_glodap_{deep_targets,intermediate_targets,profile_covariance,sigma_rep}.R",
+                       "<depth> and register the depth in CCX_GLODAP_DEPTHS."),
+                 depth, paste(CCX_GLODAP_DEPTHS, collapse = " / ")))
+  hit
+}
+
+#' The data/ path of one GLODAP target product for a column depth
+ccx_glodap_file <- function(stem, depth = CCX_GLODAP_DEPTH_LEGACY) {
+  key <- ccx_glodap_depth_key(depth)
+  if (key == CCX_GLODAP_DEPTH_LEGACY) ccx_path("data", paste0(stem, ".rds")) else
+    ccx_path("data", sprintf("%s_%sm.rds", stem, format(key)))
+}
+
 #' Deep-ocean D14C target, with the sigma resolved from LIK_D14C_DEEP_NEFF.
 #'
 #' Reads the GLODAPv2 build product and DERIVES the sigma rather than carrying a
@@ -1214,12 +1263,16 @@ ccx_dmvnorm_log <- function(x, mu, Sigma) {
 #'   down with it, and by_stream then shows the term ABSENT, which is visible.
 ccx_deep_d14c_target <- local({
   cache <- NULL
-  function(n_eff = LIK_D14C_DEEP_NEFF, mask_natl = LIK_D14C_DEEP_MASK_NATL) {
-    key <- paste(n_eff, mask_natl)
+  function(n_eff = LIK_D14C_DEEP_NEFF, mask_natl = LIK_D14C_DEEP_MASK_NATL,
+           depth = CCX_GLODAP_DEPTH_LEGACY) {
+    depth <- ccx_glodap_depth_key(depth)
+    key <- paste(n_eff, mask_natl, depth)
     if (!is.null(cache) && identical(attr(cache, "key"), key)) return(cache)
-    g <- tryCatch(readRDS(ccx_path("data", "obs_glodap_deep.rds")),
+    g <- tryCatch(readRDS(ccx_glodap_file("obs_glodap_deep", depth)),
                   error = function(e) NULL)
     if (is.null(g) || is.null(g$d14c)) return(NULL)
+    if (abs(g$model_layer[["bottom"]] - depth) > CCX_GLODAP_DEPTH_TOL)
+      stop(sprintf("ccx_deep_d14c_target(): the %g m product's layer ends at %g m", depth, g$model_layer[["bottom"]]))
     d <- if (mask_natl) g$d14c$deep_no_natl else g$d14c$deep
     out <- list(target = d$vw, sd = d$sd_w / sqrt(n_eff), sd_spread = d$sd_w,
                 n_eff = n_eff, layer = g$model_layer, masked = mask_natl,
@@ -1236,12 +1289,17 @@ ccx_deep_d14c_target <- local({
 #' missing. `slabs` is a data.frame with name/top/bot/target/sd/sd_spread.
 ccx_mid_d14c_target <- local({
   cache <- NULL
-  function(n_eff = LIK_D14C_MID_NEFF, mask_natl = LIK_D14C_DEEP_MASK_NATL) {
-    key <- paste(n_eff, mask_natl)
+  function(n_eff = LIK_D14C_MID_NEFF, mask_natl = LIK_D14C_DEEP_MASK_NATL,
+           depth = CCX_GLODAP_DEPTH_LEGACY) {
+    depth <- ccx_glodap_depth_key(depth)
+    key <- paste(n_eff, mask_natl, depth)
     if (!is.null(cache) && identical(attr(cache, "key"), key)) return(cache)
-    g <- tryCatch(readRDS(ccx_path("data", "obs_glodap_intermediate.rds")),
+    g <- tryCatch(readRDS(ccx_glodap_file("obs_glodap_intermediate", depth)),
                   error = function(e) NULL)
     if (is.null(g) || is.null(g$slabs)) return(NULL)
+    stamped <- if (is.null(g$column_depth)) CCX_GLODAP_DEPTH_LEGACY else g$column_depth
+    if (abs(stamped - depth) > CCX_GLODAP_DEPTH_TOL)
+      stop(sprintf("ccx_mid_d14c_target(): the %g m product is stamped %g m", depth, stamped))
     sl <- do.call(rbind, lapply(g$slabs, function(s) {
       r <- if (mask_natl) s$no_natl else s$all
       data.frame(name = s$name, top = s$top, bot = s$bot,
@@ -1268,7 +1326,7 @@ ccx_mid_d14c_target <- local({
 #' are absent, so the caller's ABSENCE is visible rather than a silent zero.
 ccx_model_d14c_slabs <- function(sp, slabs = NULL) {
   if (is.null(slabs)) {
-    tg <- ccx_mid_d14c_target()
+    tg <- ccx_mid_d14c_target(depth = ccx_grid_depth(sp$grid))   # the slabs of THIS column (2026-10-12)
     if (is.null(tg)) return(NULL)
     slabs <- tg$slabs
   }
@@ -1479,15 +1537,16 @@ LIK_ALK_NC_RATIO <- ccx_const("ALK_NC_RATIO")   # mol N per mol C, 16/117
 #'   optional file must not take the posterior down with it, and by_stream then
 #'   shows the terms ABSENT, which is visible.
 ccx_ocean_gradient_target <- local({
-  cache <- NULL
-  function() {
-    if (!is.null(cache)) return(cache)
-    g <- tryCatch(readRDS(ccx_path("data", "obs_glodap_deep.rds")),
+  cache <- list()                                  # one entry per column depth (2026-10-12)
+  function(depth = CCX_GLODAP_DEPTH_LEGACY) {
+    key <- format(ccx_glodap_depth_key(depth))
+    if (!is.null(cache[[key]])) return(cache[[key]])
+    g <- tryCatch(readRDS(ccx_glodap_file("obs_glodap_deep", depth)),
                   error = function(e) NULL)
     if (is.null(g) || is.null(g$gradient)) return(NULL)
     out <- list(dic = g$gradient$tco2, d13c = g$gradient$d13c,
                 alk = g$gradient$talk)
-    cache <<- out
+    cache[[key]] <<- out
     out
   }
 })
@@ -1509,17 +1568,21 @@ ccx_ocean_gradient_target <- local({
 #'   target loader uses; ccx_ocean_grad_scored() then STOPS rather than silently
 #'   reverting to sigma_obs, because that would be the retired objective.
 ccx_ocean_sigma_rep_table <- local({
-  cache <- NULL
-  function() {
-    if (!is.null(cache)) return(cache)
-    g <- tryCatch(readRDS(ccx_path("data", "obs_glodap_sigma_rep.rds")),
+  cache <- list()                                  # one entry per column depth (2026-10-12)
+  function(depth = CCX_GLODAP_DEPTH_LEGACY) {
+    key <- format(ccx_glodap_depth_key(depth))
+    if (!is.null(cache[[key]])) return(cache[[key]])
+    g <- tryCatch(readRDS(ccx_glodap_file("obs_glodap_sigma_rep", depth)),
                   error = function(e) NULL)
     if (is.null(g) || is.null(g$like_for_like)) return(NULL)
+    stamped <- if (is.null(g$column_depth)) CCX_GLODAP_DEPTH_LEGACY else g$column_depth
+    if (abs(stamped - as.numeric(key)) > CCX_GLODAP_DEPTH_TOL)
+      stop(sprintf("ccx_ocean_sigma_rep_table(): the %s m product is stamped %g m", key, stamped))
     # One monotone-Hermite interpolant per row, built once and closed over.
     g$fun <- lapply(names(g$like_for_like), function(n)
       stats::splinefun(g$h, g$like_for_like[[n]], method = "monoH.FC"))
     names(g$fun) <- names(g$like_for_like)
-    cache <<- g
+    cache[[key]] <<- g
     g
   }
 })
@@ -1531,11 +1594,11 @@ ccx_ocean_sigma_rep_table <- local({
 #'   leave its own prior support, so an out-of-range value is a caller bug, and
 #'   extrapolating a monotone Hermite spline past its data would be worse than
 #'   holding the endpoint.
-ccx_ocean_sigma_eff <- function(row, h_ml) {
-  sr <- ccx_ocean_sigma_rep_table()
-  tg <- ccx_ocean_gradient_target()
+ccx_ocean_sigma_eff <- function(row, h_ml, depth = CCX_GLODAP_DEPTH_LEGACY) {
+  sr <- ccx_ocean_sigma_rep_table(depth)
+  tg <- ccx_ocean_gradient_target(depth)
   if (is.null(sr) || is.null(tg) || is.null(sr$fun[[row]]))
-    stop("ccx_ocean_sigma_eff(): data/obs_glodap_sigma_rep.rds is missing or has ",
+    stop("ccx_ocean_sigma_eff(): ", ccx_glodap_file("obs_glodap_sigma_rep", depth), " is missing or has ",
          "no '", row, "' row. Rebuild with data-raw/build_glodap_sigma_rep.R. ",
          "Falling back to sigma_obs would silently restore the RETIRED objective.")
   h <- min(max(h_ml, min(sr$h)), max(sr$h))
@@ -1818,7 +1881,8 @@ ccx_model_ocean_gradient <- function(out, aux, grid, epoch) {
 #' @param pump OPTIONAL pump export fields, forwarded to
 #'   ccx_model_ocean_alk_gradient(). NULL until task 9.
 ccx_ocean_grad_scored <- function(out, spin, pump = NULL) {
-  tg <- ccx_ocean_gradient_target()
+  depth <- ccx_glodap_depth_key(ccx_grid_depth(spin$grid))   # THIS column's targets (2026-10-12)
+  tg <- ccx_ocean_gradient_target(depth)
   # objective #11 rides in this bundle but must NOT share the gradient target's
   # absence switch (two unrelated observations, one NULL): built first.
   hs_surf <- ccx_hs_surface_scored(out, spin)
@@ -1862,16 +1926,21 @@ ccx_ocean_grad_scored <- function(out, spin, pump = NULL) {
   # is not otherwise visible to ccx_loglik(), and threading it through that
   # signature would have made every one of ~30 diagnostic call sites a silent
   # opt-out. `h_ml` is carried for reporting and for the tests.
-  list(dic = gd$dic, d13c = g3$d13c,
+  res <- list(dic = gd$dic, d13c = g3$d13c,
        alk = ccx_model_ocean_alk_gradient(spin, pump = pump),
        sd_eff = vapply(c("dic", "d13c", "alk"), ccx_ocean_sigma_eff, numeric(1),
-                       h_ml = h),
+                       h_ml = h, depth = depth),
        h_ml = h,
        # objective #11 rides in the same bundle: same call sites, same epoch
        # discipline, absent (NULL) with the structure off.
        hs_surf = hs_surf,
        # the B1 reservoir row (2026-09-13g), likewise absent with the cell off
        eq_b1 = eq_b1)
+  # the column depth the bundle was built on, so ccx_loglik() can refuse a bundle scored against
+  # another column's targets. APPENDED only off the legacy 3700 m, so every registered bundle stays
+  # identical() (2026-10-12).
+  if (depth != CCX_GLODAP_DEPTH_LEGACY) res$ocean_depth <- depth
+  res
 }
 
 #' The HS-surface targets (objective #11), or NULL when the product is absent.
@@ -2750,18 +2819,31 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   # so it is off whenever either is switched off (how a fixture scores
   # "without the rows"). Any absent input falls back to the independent rows,
   # visibly, so nothing can be silently half-scored.
+  # THE COLUMN DEPTH every GLODAP row below is read at (2026-10-12): the structure's, which
+  # ccx_err_with_struct() copies onto `err`; absent = 3700 m, every registered mode, bit for bit.
+  # The ocean-gradient bundle carries the depth it was BUILT on (ccx_ocean_grad_scored()), and a
+  # bundle from another column STOPS here. `deep` / `d14c_mid` are bare numbers; their identity
+  # with this depth is gated where the spinup is in hand (ccx_make_logpost()).
+  odep <- ccx_glodap_depth_key(err[["ocean_depth"]])
+  if (!is.null(ocean_grad)) {
+    bdep <- if (is.null(ocean_grad[["ocean_depth"]])) CCX_GLODAP_DEPTH_LEGACY else ocean_grad[["ocean_depth"]]
+    if (abs(bdep - odep) > CCX_GLODAP_DEPTH_TOL)
+      stop(sprintf(paste("ccx_loglik(): the ocean-gradient bundle was built on a %g m column but `err` scores",
+                         "a %g m one -- pass err through ccx_err_with_struct() with the run's base list"), bdep, odep))
+  }
   profile_mvn <- FALSE
   if ((LIK_USE_D14C_PROFILE_GNORM || LIK_USE_D14C_PROFILE_MVN) && LIK_USE_D14C_MID && LIK_USE_D14C_DEEP &&
       !is.null(deep) && is.finite(deep) && !is.null(d14c_mid)) {
-    tgm <- ccx_mid_d14c_target()
+    tgm <- ccx_mid_d14c_target(depth = odep)
     if (!is.null(tgm)) {
-      rows <- ccx_profile_rows_at(c(d14c_mid[[tgm$slabs$name[1]]], d14c_mid[[tgm$slabs$name[2]]], deep))
+      rows <- ccx_profile_rows_at(c(d14c_mid[[tgm$slabs$name[1]]], d14c_mid[[tgm$slabs$name[2]]], deep),
+                                  depth = odep)
       if (!is.null(rows)) { for (n in names(rows)) add(n, rows[[n]]); profile_mvn <- TRUE }
     }
   }
 
   if (!profile_mvn && LIK_USE_D14C_DEEP && !is.null(deep) && is.finite(deep)) {
-    tg <- ccx_deep_d14c_target()
+    tg <- ccx_deep_d14c_target(depth = odep)
     if (!is.null(tg))
       add("d14c_deep_ocean",
           dn(tg$target, deep, tg$sd, log = TRUE))
@@ -2771,7 +2853,7 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   # One Gaussian per slab, same form as the deep row. `d14c_mid` is the named
   # vector from ccx_model_d14c_slabs(spinup); ABSENT skips the rows visibly.
   if (!profile_mvn && LIK_USE_D14C_MID && !is.null(d14c_mid)) {
-    tg <- ccx_mid_d14c_target()
+    tg <- ccx_mid_d14c_target(depth = odep)
     if (!is.null(tg)) for (i in seq_len(nrow(tg$slabs))) {
       m <- d14c_mid[[tg$slabs$name[i]]]
       if (!is.null(m) && is.finite(m))
@@ -2802,7 +2884,7 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   # pump to be scored against it. Do NOT quote it as evidence about anything
   # until ccx_model_ocean_alk_gradient() is given a pump.
   if (LIK_USE_OCEAN_GRAD && !is.null(ocean_grad)) {
-    tg <- ccx_ocean_gradient_target()
+    tg <- ccx_ocean_gradient_target(odep)
     # ⚠ LOUD, NOT SILENTLY SKIPPABLE. Since option 5 was adopted these rows are
     # scored at sigma_eff(h_ml), which ccx_ocean_grad_scored() attaches. A hand-
     # built `ocean_grad` without it would otherwise score at sigma_obs -- the

@@ -19,7 +19,13 @@
 # row targets to GP_TOL, or the file is not written -- the MVN row must score
 # the SAME three numbers the independent rows score.
 #
-# Run from the repo root:  Rscript data-raw/build_glodap_profile_covariance.R
+# Run from the repo root:  Rscript data-raw/build_glodap_profile_covariance.R [depth] [out]
+#
+# THE COLUMN DEPTH IS AN ARGUMENT (2026-10-12; OCEAN_DEPTH 3700 -> 3682.2 m under label
+# hilda_csl3v0kaidgbemwtc). The product EMBEDS the three row targets, so it is built once per
+# column depth from that depth's deep and intermediate products (R/likelihood.R's
+# ccx_glodap_file()): no argument = 3700 -> data/obs_glodap_profile_cov.rds (NOT rebuilt; the
+# record), `3682.2` -> data/obs_glodap_profile_cov_3682.2m.rds, stamped `column_depth`.
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 
@@ -27,9 +33,12 @@ GP_FILE  <- ccx_path("data-raw", "downloads", "glodap_c13c14_subset.csv")
 GP_DLAT <- 5; GP_DLON <- 10; GP_DZ <- 250; GP_FLAG_OK <- 2
 GP_BLOCKS <- c(30, 60); GP_NBOOT <- 4000; GP_SEED <- 20260906
 GP_TOL <- 1e-3                                # permil; the point means vs the stored targets
-GP_OUT <- ccx_path("data", "obs_glodap_profile_cov.rds")
+GP_DEPTH_LEGACY <- 3700
+gp_args  <- commandArgs(trailingOnly = TRUE)
+GP_DEPTH <- if (length(gp_args) < 1) GP_DEPTH_LEGACY else as.numeric(gp_args[1])
+GP_OUT   <- if (length(gp_args) >= 2) gp_args[2] else ccx_glodap_file("obs_glodap_profile_cov", GP_DEPTH)
 
-tgm <- ccx_mid_d14c_target(); tgd <- ccx_deep_d14c_target()
+tgm <- ccx_mid_d14c_target(depth = GP_DEPTH); tgd <- ccx_deep_d14c_target(depth = GP_DEPTH)
 if (is.null(tgm) || is.null(tgd)) stop("the intermediate and deep build products must exist first")
 if (tgm$masked || tgd$masked) stop("the rows are N-Atlantic-MASKED; this recipe is unmasked -- align first")
 slabs <- list(A = c(tgm$slabs$top[1], tgm$slabs$bot[1]), B = c(tgm$slabs$top[2], tgm$slabs$bot[2]),
@@ -77,4 +86,5 @@ out <- list(means = means, targets = targets, streams = streams, slab_names = tg
             source = tgm$source, built = format(Sys.Date()),
             note = paste("Objective change #9 (PENDING RULING 2026-09-06). Level variances here are the",
                          "bootstrap's, not sd_w/sqrt(n_eff); the two agree to ~20% at 60 deg."))
+if (GP_DEPTH != GP_DEPTH_LEGACY) out$column_depth <- GP_DEPTH   # absent = 3700 (the shipped record)
 saveRDS(out, GP_OUT); cat(sprintf("wrote %s\n", GP_OUT))

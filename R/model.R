@@ -3892,10 +3892,15 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
 #' length nl + 1. Depth-weighted, so a model layer spanning several observed
 #' bins gets their thickness-weighted mean rather than a point sample.
 ccx_pump_shape <- local({
-  cache <- NULL
+  # ONE ENTRY PER COLUMN DEPTH (2026-10-12): the profile is closed at the model's floor, so a
+  # 3682.2 m column (label hilda_csl3v0kaidgbemwtc) reads the 3682.2 m product, chosen by the
+  # grid it is remapped onto -- never by a caller's say-so.
+  caches <- list()
   function(grid) {
+    dkey <- format(ccx_glodap_depth_key(ccx_grid_depth(grid)))
+    cache <- caches[[dkey]]
     if (is.null(cache)) {
-      g <- tryCatch(readRDS(ccx_path("data", "obs_glodap_deep.rds")),
+      g <- tryCatch(readRDS(ccx_glodap_file("obs_glodap_deep", as.numeric(dkey))),
                     error = function(e) NULL)
       if (is.null(g) || is.null(g$dic_profile)) return(NULL)
       pr <- g$dic_profile
@@ -3931,10 +3936,11 @@ ccx_pump_shape <- local({
       # Priced in calibration/diag_hml_c1_remap_price.R; adopted by Marcus.
       edge   <- c(pr$top[1], pr$bot)
       s_edge <- c(0, cumsum((pr$bot - pr$top) * pr$shape))
-      cache <<- list(pr = pr, fS = stats::splinefun(edge, s_edge, method = "monoH.FC"),
-                     z0 = edge[1], z1 = edge[length(edge)],
-                     S0 = s_edge[1], S1 = s_edge[length(s_edge)],
-                     sh0 = pr$shape[1], sh1 = pr$shape[nrow(pr)])
+      cache <- list(pr = pr, fS = stats::splinefun(edge, s_edge, method = "monoH.FC"),
+                    z0 = edge[1], z1 = edge[length(edge)],
+                    S0 = s_edge[1], S1 = s_edge[length(s_edge)],
+                    sh0 = pr$shape[1], sh1 = pr$shape[nrow(pr)])
+      caches[[dkey]] <<- cache
     }
     cc <- cache
     # Outside the observed span the shape is held FLAT, which reproduces the old

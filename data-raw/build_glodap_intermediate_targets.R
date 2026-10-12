@@ -43,7 +43,22 @@
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 
 GI_FILE  <- ccx_path("data-raw", "downloads", "glodap_c13c14_subset.csv")
-GI_DEEP_TOP <- 2627.2            # m; = GD_MODEL_DEEP_TOP, the deep row's top
+# THE COLUMN DEPTH IS AN ARGUMENT (2026-10-12; OCEAN_DEPTH 3700 -> 3682.2 m under label
+# hilda_csl3v0kaidgbemwtc, citation rulings row 5). Slab B ENDS WHERE THE DEEP ROW BEGINS
+# (the 09-06 design: the three levels tile), so B's bottom follows the deep row's top:
+# 2627.2 at 3700 (typed, kept, so the shipped product is reproduced) and ccx_ocean_grid(75)'s
+# 2614.7 at 3682.2 -- build_glodap_deep_targets.R's rule, asserted equal to the deep product's
+# stored layer top below. ⚠ B's STREAM NAME derives from its edges (d14c_mid_2000_2615 at
+# 3682.2), so the B row is renamed under the new label.
+#   (no argument) 3700 -> data/obs_glodap_intermediate.rds (NOT rebuilt; the record)
+#   `3682.2`          -> data/obs_glodap_intermediate_3682.2m.rds
+GI_DEPTH_LEGACY <- 3700
+gi_args  <- commandArgs(trailingOnly = TRUE)
+GI_DEPTH <- if (length(gi_args) < 1) GI_DEPTH_LEGACY else as.numeric(gi_args[1])
+GI_DEEP_FILE <- ccx_glodap_file("obs_glodap_deep", GI_DEPTH)
+GI_DEEP_TOP  <- readRDS(GI_DEEP_FILE)$model_layer[["top"]]   # m; = GD_MODEL_DEEP_TOP, the deep row's top
+stopifnot(GI_DEPTH != GI_DEPTH_LEGACY || GI_DEEP_TOP == 2627.2)
+GI_OUT <- if (length(gi_args) >= 2) gi_args[2] else ccx_glodap_file("obs_glodap_intermediate", GI_DEPTH)
 GI_SLABS <- list(A = c(1500, 2000), B = c(2000, GI_DEEP_TOP))
 GI_DLAT <- 5; GI_DLON <- 10; GI_DZ <- 250
 GI_NATL <- list(lat = 40, lon = c(-80, 20))
@@ -91,7 +106,7 @@ names(slabs) <- names(GI_SLABS)
 # deep row here with the SAME function and require it to reproduce the stored
 # target; if the recipe has drifted, this file must not be written.
 deep_here <- gi_binned(ok14, "c14", GI_DEEP_TOP, 1e5)
-stored <- readRDS(ccx_path("data", "obs_glodap_deep.rds"))$d14c$deep
+stored <- readRDS(GI_DEEP_FILE)$d14c$deep
 cat(sprintf("\nrecipe check: deep row re-derived %.3f vs stored %.3f\n", deep_here$vw, stored$vw))
 # The deep script uses depth <= zmax; this one uses depth < zmax so the slabs
 # tile without double-counting a bottle exactly on a boundary. On the deep row
@@ -105,9 +120,12 @@ out <- list(
   source = paste("GLODAPv2.2023 Merged Master File, glodap.info, doi:10.25921/z7hc-v261;",
                  "Lauvset et al. 2024, ESSD 16:2047, doi:10.5194/essd-16-2047-2024"),
   accessed = "2026-08-14",          # the subset's pull date, MANIFEST.csv
-  built = "2026-09-06",
+  built = if (GI_DEPTH == GI_DEPTH_LEGACY) "2026-09-06" else format(Sys.Date()),
   binning = c(dlat = GI_DLAT, dlon = GI_DLON, dz = GI_DZ),
   neff_note = paste("n_eff NOT measured for these slabs; the likelihood reuses",
                     "LIK_D14C_DEEP_NEFF (20, measured for 2627-3700 m). Owed."))
-saveRDS(out, ccx_path("data", "obs_glodap_intermediate.rds"))
-cat(sprintf("\nwrote %s\n", ccx_path("data", "obs_glodap_intermediate.rds")))
+# the column depth, stamped on every non-legacy product (absent = 3700, the shipped file, which is
+# reproduced byte for byte -- so it cannot carry the field)
+if (GI_DEPTH != GI_DEPTH_LEGACY) out$column_depth <- GI_DEPTH
+saveRDS(out, GI_OUT)
+cat(sprintf("\nwrote %s\n", GI_OUT))

@@ -576,13 +576,15 @@ ccx_report_spinup <- function(s) {
   cat(sprintf("    by hemisphere      NH %+.1f   SH %+.1f  (equal without a conveyor;\n",
               d$d14c_deep_by_hemi[["NH"]], d$d14c_deep_by_hemi[["SH"]]))
   cat("                         under one, expect the ventilated end YOUNG)\n")
-  tg <- ccx_deep_d14c_target()
+  # the targets of THIS column (2026-10-12: 3700 m legacy, 3682.2 m under label ...wtc), and the
+  # layer printed from the product, not typed
+  tg <- ccx_deep_d14c_target(depth = ccx_grid_depth(s$grid))
   if (is.null(tg)) {
-    cat(sprintf("  bottom-box D14C      %+.1f permil  (2627-3700 m; GLODAP target ABSENT)\n",
+    cat(sprintf("  bottom-box D14C      %+.1f permil  (model bottom layer; GLODAP target ABSENT)\n",
                 d$d14c_bottom_box))
   } else {
-    cat(sprintf("  bottom-box D14C      %+.1f permil  (2627-3700 m; GLODAPv2 %+.1f +/- %.1f = %+.2f sigma)\n",
-                d$d14c_bottom_box, tg$target, tg$sd,
+    cat(sprintf("  bottom-box D14C      %+.1f permil  (%.0f-%.0f m; GLODAPv2 %+.1f +/- %.1f = %+.2f sigma)\n",
+                d$d14c_bottom_box, tg$layer[["top"]], tg$layer[["bottom"]], tg$target, tg$sd,
                 (d$d14c_bottom_box - tg$target) / tg$sd))
   }
   cat(sprintf("  ocean carbon         %.0f GtC\n", d$ocean_C_GtC))
