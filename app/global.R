@@ -175,6 +175,8 @@ APP_LUC_SMOOTH_YR <- 11   # centred years; the land-sink series is noisy enough
 # the pulse.
 APP_PULSE_EMIS_METHOD <- "constant"
 APP_PULSE_GtC_DEFAULT <- 100
+APP_PULSE_GTC_RANGE   <- c(10, 500, 10)   # the pulse-size slider: min, max, step (ui.R)
+APP_PULSE_YEAR_RANGE  <- c(2030, 2100, 10) # the release-year slider: min, max, step (ui.R); the FaIR grid covers it
 APP_PULSE_YEAR_DEFAULT <- 2050
 
 # F4 (Marcus 2026-09-22): "the temperature/CO2 radio button should be present
@@ -803,6 +805,50 @@ app_splice_history <- function(em, scenario) {
 APP_FAIR <- tryCatch(
   ccx_climate_table(),
   error = function(e) NULL)
+
+# ---------------------------------------------------------------------
+# ⭐ FaIR ON THE PULSE LAB'S OWN PULSE (Marcus 2026-10-12, "Keep card 5; FaIR on same pulse
+# (Recommended)"): precomputed by FaIRtoFrEDI/scripts/run_fair_vv_pulse_grid_for_ccx.py over the
+# seven markers x release years at one size, imported by data-raw/build_fair_pulse_grid.R, and drawn
+# ONLY when the pulse the user ran is a grid point. Off the grid there is no FaIR answer, and the note
+# says so rather than drawing the nearest one.
+# ---------------------------------------------------------------------
+APP_FAIR_PULSE_FILE <- "fair_pulse_grid.rds"
+APP_FAIR_PULSE_LOAD <- local({
+  p <- ccx_path("data", APP_FAIR_PULSE_FILE)
+  if (!file.exists(p)) list(d = NULL, why = paste(APP_FAIR_PULSE_FILE, "is not built in this checkout")) else {
+    d <- readRDS(p); pv <- attr(d, "provenance")
+    bad <- c(if (is.null(pv)) "it carries no provenance",
+             if (!all(unique(d$scenario) %in% APP_SCENARIOS)) "its scenarios are not the app's",
+             if (!is.null(pv) && !(as.numeric(pv$pulse_gtc) %in% seq(APP_PULSE_GTC_RANGE[1], APP_PULSE_GTC_RANGE[2], APP_PULSE_GTC_RANGE[3])))
+               "its pulse size is not one the slider offers")
+    if (length(bad)) list(d = NULL, why = paste(bad, collapse = "; ")) else list(d = d, why = NULL)
+  }
+})
+APP_FAIR_PULSE <- APP_FAIR_PULSE_LOAD$d
+#' Why FaIR has no answer for the pulse the user ran: NULL when it has one, else the reason
+app_fair_pulse_why <- function(bg, year, gtc) {
+  if (is.null(APP_FAIR_PULSE)) return(APP_FAIR_PULSE_LOAD$why)
+  g <- as.numeric(attr(APP_FAIR_PULSE, "provenance")$pulse_gtc); yrs <- sort(unique(APP_FAIR_PULSE$release_year))
+  if (!isTRUE(all.equal(as.numeric(gtc), g)) || !(year %in% yrs) || !(bg %in% APP_FAIR_PULSE$scenario))
+    return(sprintf(APP_FAIR_PULSE_OFFGRID_FMT, g, min(yrs), max(yrs), diff(yrs[1:2])))
+  NULL
+}
+#' FaIR's answer for the pulse the user ran (its rows, labelled), or NULL off the grid
+app_fair_pulse <- function(bg, year, gtc) {
+  if (!is.null(app_fair_pulse_why(bg, year, gtc))) return(NULL)
+  pv <- attr(APP_FAIR_PULSE, "provenance")
+  d <- APP_FAIR_PULSE[APP_FAIR_PULSE$scenario == bg & APP_FAIR_PULSE$release_year == year, ]
+  attr(d, "label") <- sprintf(APP_FAIR_PULSE_LAB_FMT, pv$model, as.integer(pv$n_configs))
+  d
+}
+# ⚠ DRAFTS for Marcus's wording (2026-10-12)
+APP_FAIR_PULSE_LAB_FMT <- "%s, %d-configuration mean (5\u201395 %% shaded)"
+APP_FAIR_PULSE_OFFGRID_FMT <- paste("FaIR was run for a %g GtC pulse released in %d-%d, every %d years;",
+                                    "set the pulse to one of those to compare.")
+APP_FAIR_PULSE_NOTE <- paste("FaIR is shown for the same pulse on the same scenario. Before 2025 this",
+                             "model follows the observed carbon budget and FaIR its own history, so the",
+                             "two release the pulse into slightly different worlds.")
 
 # ---------------------------------------------------------------------
 # ⭐ WHEN THE CONSTRAINT MAP'S TOP HOLDER IS A TIE (Marcus 2026-09-27)

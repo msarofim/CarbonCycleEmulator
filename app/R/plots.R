@@ -1505,7 +1505,8 @@ pulse_from_release <- function(year, v, pulse_year) {
 #'   adds the share of the pulse's OWN carbon atoms still in the air (Marcus 2026-10-12, "Side by
 #'   side in pulse lab"). Annual means at mid-year, from zero at the release, exactly as the
 #'   extra-CO2 line, so the two lines are the same pair of years read two ways.
-plot_pulse_decay <- function(base_cl, pulse_cl, pulse_year, pulse_gtc, tag = NULL, pulse_out = NULL) {
+plot_pulse_decay <- function(base_cl, pulse_cl, pulse_year, pulse_gtc, tag = NULL, pulse_out = NULL,
+                             fair = NULL) {
   d <- pulse_from_release(base_cl$year,
                           (pulse_cl$co2_ppm - base_cl$co2_ppm) /
                             (pulse_gtc / ccx_const("GtC_PER_PPM")), pulse_year)
@@ -1518,13 +1519,30 @@ plot_pulse_decay <- function(base_cl, pulse_cl, pulse_year, pulse_gtc, tag = NUL
     names(dt)[2] <- "frac"; dt$who <- KEY_PULSE_TAGGED
     d <- rbind(d, dt)
   }
-  d$who <- factor(d$who, levels = c(KEY_PULSE_EXTRA, KEY_PULSE_TAGGED))
-  ggplot(d, aes(year, frac, colour = who)) +
-    geom_hline(yintercept = 0, colour = "grey75", linewidth = 0.3) +
-    geom_line(linewidth = 0.9) +
-    scale_colour_manual(values = stats::setNames(c(PAL[["pulse"]], PAL[["obs"]]),
-                                                 c(KEY_PULSE_EXTRA, KEY_PULSE_TAGGED)),
-                        drop = TRUE) +
+  keys <- c(KEY_PULSE_EXTRA, KEY_PULSE_TAGGED)
+  cols <- c(PAL[["pulse"]], PAL[["obs"]]); lts <- c("solid", "solid")
+  band <- NULL
+  if (!is.null(fair) && nrow(fair)) {
+    # FaIR on the SAME pulse (Marcus 2026-10-12): its annual means, from zero at the release, as the
+    # model's -- the mean dashed as FaIR is everywhere in the app, the 5-95 % band behind it
+    fk <- attr(fair, "label")
+    fm <- pulse_from_release(fair$year, fair$af_mean, pulse_year); names(fm)[2] <- "frac"; fm$who <- fk
+    band <- data.frame(year = pulse_from_release(fair$year, fair$af_p05, pulse_year)$year,
+                       lo = pulse_from_release(fair$year, fair$af_p05, pulse_year)$v,
+                       hi = pulse_from_release(fair$year, fair$af_p95, pulse_year)$v)
+    d <- rbind(d, fm)
+    keys <- c(keys, fk); cols <- c(cols, PAL[["off"]]); lts <- c(lts, "22")
+  }
+  d$who <- factor(d$who, levels = keys)
+  g <- ggplot(d, aes(year, frac, colour = who, linetype = who)) +
+    geom_hline(yintercept = 0, colour = "grey75", linewidth = 0.3)
+  if (!is.null(band))
+    g <- g + geom_ribbon(data = band, aes(x = year, ymin = lo, ymax = hi), inherit.aes = FALSE,
+                         fill = PAL[["off"]], alpha = FUTURE_BAND_ALPHA, show.legend = FALSE)
+  g + geom_line(linewidth = 0.9) +
+    scale_colour_manual(values = stats::setNames(cols, keys), drop = TRUE) +
+    scale_linetype_manual(values = stats::setNames(lts, keys), drop = TRUE) +
+    guides(colour = guide_legend(ncol = 1), linetype = guide_legend(ncol = 1)) +
     scale_y_continuous(labels = function(x) paste0(round(100 * x), "%")) +
     labs(x = LAB_YEAR, y = LAB_PULSE_AIRBORNE,
          caption = app_provenance_caption(if (!is.null(tag)) PULSE_TAG_DECAY_NOTE)) +

@@ -424,10 +424,10 @@ navbarPage(
             "Pulse lab", br(),
             selectInput("p_bg", "Background scenario", APP_SCENARIOS,
                         selected = APP_SCENARIO_BG),
-            sliderInput("p_gtc", "Pulse size (GtC)", 10, 500,
-                        APP_PULSE_GtC_DEFAULT, step = 10),
-            sliderInput("p_year", "Release it in", 2030, 2100,
-                        APP_PULSE_YEAR_DEFAULT, step = 10, sep = ""),
+            sliderInput("p_gtc", "Pulse size (GtC)", APP_PULSE_GTC_RANGE[1], APP_PULSE_GTC_RANGE[2],
+                        APP_PULSE_GtC_DEFAULT, step = APP_PULSE_GTC_RANGE[3]),
+            sliderInput("p_year", "Release it in", APP_PULSE_YEAR_RANGE[1], APP_PULSE_YEAR_RANGE[2],
+                        APP_PULSE_YEAR_DEFAULT, step = APP_PULSE_YEAR_RANGE[3], sep = ""),
             actionButton("p_go", "Release the pulse", class = "btn-primary btn-sm"),
             helpText("Runs the model twice — with and without the pulse — and",
                      "takes the difference. That is the only honest way to ask",
@@ -454,8 +454,10 @@ navbarPage(
         # branch never read input$f_fair, and FaIR was never run on this model's pulse -- so the
         # control is withheld for the same reason as above. A FaIR pulse comparison would be a
         # new feature, not a fix.
+        # ⭐ 2026-10-12: THAT FEATURE NOW EXISTS (Marcus, "Keep card 5; FaIR on same pulse"): FaIR was
+        # run on the pulse lab's own pulse (data/fair_pulse_grid.rds), so the box is offered there again.
         conditionalPanel(
-          "input.f_mode != 'Build your own' && input.f_mode != 'Pulse lab'",
+          "input.f_mode != 'Build your own'",
           checkboxInput("f_fair", "Compare with standard FaIR", value = FALSE),
           # 2026-10-02: matched to Marcus's FaIR note -- the dashed CO2 line is NOT what this
           # model "is trying to reproduce"; only its CO2 -> temperature step is fitted to FaIR.

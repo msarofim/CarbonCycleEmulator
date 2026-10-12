@@ -2,6 +2,37 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (k) — **FaIR on the pulse lab's OWN pulse** (Marcus, verbatim: "Keep card 5; FaIR on same pulse (Recommended)"). Card 5 stays in Review. The pulse lab draws FaIR's mean and 5–95 % band for the same scenario pulse, only on a grid point; otherwise the note says why. **On the default pulse (`vvM`, 100 GtC in 2050), CarboTope is INSIDE FaIR's band at +1 / +20 / +100 / +250 yr:**
+
+| after the release | CarboTope | FaIR mean (5–95 %) |
+|---|---|---|
+| +1 yr | 0.903 | 0.884 (0.841–0.921) |
+| +20 yr | 0.598 | 0.576 (0.487–0.655) |
+| +100 yr | 0.503 | 0.514 (0.348–0.664) |
+| +250 yr | 0.410 | 0.471 (0.239–0.666) |
+
+- **The driver:** `FaIRtoFrEDI/scripts/run_fair_vv_pulse_grid_for_ccx.py` (`fa948f9`, G5 re-scoped `810acf4`), not the `run_fair_pulse_for_ccx.py` the ruling named.
+  - That driver is ssp245 on RCMIP, and the pulse lab's backgrounds are the seven van Vuuren markers. A pulse on another background is not the same pulse.
+  - This one IMPORTS the app's own exporter (`run_fair_vv_for_ccx.py`) and differs only by the pulse. Gate G2 shows each baseline arm equals the shipped FaIR line to ≤ 1e-9 ppm (5.7e-14 at `vvM`).
+- **The grid:** 7 markers × release years 2030–2100 every 10 yr (every year the slider offers) at 100 GtC (its default); 841 configs, paired; 586 s on the laptop (Torch not needed).
+  - Metric: d(airborne_emissions) / pulse, FaIR's own accounting. Annual means per config, then statistics across configs, to match the app's mid-year annual means.
+- ⚠ **G5 FAILED on its first run, and was RE-SCOPED, not loosened.**
+  - The cause, by test: on `vvH`, a few configs' pulse airborne fraction exceeds 1, late. Zeroing `iirf_airborne` removes every case (max 0.963); zeroing `iirf_temperature` (2 left) or `iirf_uptake` (4 left) does not. It is FaIR's r_A sink saturation, not a defect.
+  - "AF ≤ 1" was my assumption, not a law. G5 now requires AF > 0 always and AF ≤ 1 at the end of the release year (max 0.955).
+  - Counts on `vvH`: 5 → 34 of 841 configs (2030 → 2100 release), recorded per arm and KEPT; none on any other marker ⇒ [[fair_pulse_af_exceeds_one]].
+- **`data-raw/build_fair_pulse_grid.R` → `data/fair_pulse_grid.rds`.** It refuses a CSV whose sha256 differs from its provenance, a dirty driver, another pulse size, release or metric, and missing gate rows.
+- **The app:**
+  - `APP_FAIR_PULSE_LOAD` checks the grid against `APP_SCENARIOS` and the slider; `app_fair_pulse()` and `app_fair_pulse_why()` serve it.
+  - `plot_pulse_decay(fair = )` draws the band and a dashed mean.
+  - The "Compare with standard FaIR" box is OFFERED in the pulse lab again; it was withheld on 10-02 because it did nothing there. ⚠ Mine, not ruled: it shares the Scenarios view's box, default OFF.
+  - The two sliders' bounds are now named (`APP_PULSE_GTC_RANGE`, `APP_PULSE_YEAR_RANGE`).
+  - DRAFTS for Marcus: `APP_FAIR_PULSE_LAB_FMT`, `_OFFGRID_FMT`, `_NOTE`.
+- **`tests/testthat/test-fair-pulse-grid.R` (new): 35 / 0.** It checks the loader, provenance + gates, coverage of every background × slider year, on-grid / off-grid (three mutations), and the drawn series starting from zero at the release.
+  - Code mutation: slider step 10 → 5 → 7 failures in the coverage test; restored byte-identical.
+  - Neighbours: future-yvar 35, ui-year-bounds-lint 18, plot-text-fits 104, fair-overlay 29, git-stamp-lint 6.
+- **Verified in the live app:** on the grid, the band, the dashed mean and the note; off the grid (110 GtC), no FaIR line and the reason. 0 `shiny-output-error`.
+- Also: the early-drawdown record (`5c1a87a`); memory `ccx_tagged_pulse_built`, `fair_pulse_af_exceeds_one`, `ccx_cmap_tie_basin_spread`, `ccx_early_drawdown_diagnosis`.
+
 ## 2026-10-12 (j) — **The TAGGED PULSE, side by side in the pulse lab** (Marcus, asking for "a pulse but for a tracer to show how quickly the original carbon moves into different reservoirs (as versus the pulse)"; the form ruled verbatim, "Side by side in pulse lab (Recommended)"). At `vvM`, 100 GtC in 2050: after 100 yr, **9.7 %** of the pulse's own atoms are still in the air, against **50.4 %** of the extra CO₂ (5.2×); after 20 yr it is 19.8 % against 59.9 % (3.0×).
 - **No new isotope, and no core change.** The model's ¹⁴C is already an exact passive tag:
   - transport is linear in C14, and no ¹⁴C fractionation is applied anywhere;

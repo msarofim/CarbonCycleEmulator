@@ -756,7 +756,7 @@ function(input, output, session) {
                                emissions = pulse_em,
                                interp_method = APP_PULSE_EMIS_METHOD,
                                c14_tag_base = base_em),
-      gtc = input$p_gtc, year = input$p_year)
+      gtc = input$p_gtc, year = input$p_year, bg = input$p_bg)
   })
 
   output$f_plot <- renderPlotFit("f_plot", {
@@ -769,7 +769,9 @@ function(input, output, session) {
         plot_pulse_warming(pr$base$climate, pr$pulse$climate, pr$year, pr$gtc)
       else
         plot_pulse_decay(pr$base$climate, pr$pulse$climate, pr$year, pr$gtc,
-                         tag = list(out = pr$tagged$out, tag = pr$tagged$tag), pulse_out = pr$pulse$out)
+                         tag = list(out = pr$tagged$out, tag = pr$tagged$tag), pulse_out = pr$pulse$out,
+                         # the RUN's settings, not the live inputs, so FaIR matches the lines drawn
+                         fair = if (isTRUE(input$f_fair)) app_fair_pulse(pr$bg, pr$year, pr$gtc))
     } else if (identical(input$f_mode, "Build your own")) {
       r <- stylised_run()
       runs <- c(future_runs()[1], list(`Your scenario` = r))
@@ -806,7 +808,12 @@ function(input, output, session) {
   # budget, FaIR does not), because a reader who spots that gap unaided has
   # found a hidden defect rather than a documented one.
   output$f_fair_note <- renderUI({
-    if (!isTRUE(input$f_fair) || input$f_mode %in% c("Build your own", "Pulse lab")) return(NULL)   # 10-02: withheld in the pulse lab too
+    if (!isTRUE(input$f_fair) || identical(input$f_mode, "Build your own")) return(NULL)
+    if (identical(input$f_mode, "Pulse lab")) {
+      # 2026-10-12: offered again, now that FaIR was run on this tab's pulse -- with the reason when it was not
+      pr <- pulse_runs(); why <- app_fair_pulse_why(pr$bg, pr$year, pr$gtc)
+      return(div(class = "caveat", if (is.null(why)) APP_FAIR_PULSE_NOTE else why))
+    }
     div(class = "caveat", APP_FAIR_NOTE)
   })
 
