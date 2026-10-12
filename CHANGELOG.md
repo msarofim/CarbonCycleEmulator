@@ -2,6 +2,21 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (ee) — **The nine nuclear-industry ¹⁴C files have MANIFEST rows** (hard rule 3). Closes the "no MANIFEST row" half of the 10-02 (y) audit item. Laemmel et al. 2025, Zenodo doi:10.5281/zenodo.15034663, CC-BY-4.0.
+
+- **Nine rows appended to `data-raw/downloads/MANIFEST.csv`**, now 63 rows. Nothing was re-downloaded, and `download_data.R` was NOT re-run, because a re-run re-fetches everything and rewrites the whole manifest with one access date.
+- **Each field is what `download_data.R` [6b] would record.** The key is `"nuc_"` + the file name up to `_14C`. The file list is read from [6b]'s own `nuc_files` vector. The URL, citation and notes strings are checked verbatim against the script. Bytes and sha256 come from the files on disk in the main checkout. Worktrees do not have them, because the directory is gitignored.
+- **The access date is NOT known. `accessed` = the file mtime, 2026-08-10, and every row's notes say so.**
+  - No MANIFEST row ever carried them; `git log -S` on `nuc_` and on `15034663` finds nothing in the manifest's history.
+  - The CHANGELOG 2026-08-10 entry ("Nuclear-industry ¹⁴C source PROMOTED to v1") summed the files, which puts them on disk that day. It records no access date.
+  - Commit `c6e6c38` added [6b] at 07:36:31 EDT. The files were written at 07:33:39–07:33:44, three minutes before.
+- ⚠ **The fetch command is also unrecorded.** The files' birth times show nine non-overlapping, sequential downloads in the order NFRP, Other_countries, Germany, USA, Canada, France, South_Korea, Switzerland, China. That is not [6b]'s loop order: in [6b] Germany is fifth and China seventh. So the `source` column holds the URL [6b] uses, not a URL known to have been used.
+- **Cross-check: all nine sha256 equal the `file_sha256` stamped in `attr(readRDS("data/forcing_nuc_nh_share.rds"), "provenance")`** (built 2026-10-12 by `data-raw/build_nuc_nh_share.R`). So the files have not changed since that build.
+  - **The gate was mutation-tested.** I appended one byte to a scratch copy of the China file and restored its mtime. The builder then refused with "sha256 differs", and the manifest was left untouched.
+  - ⚠ This check cannot detect a change made before 10-12. A comparison against Zenodo's published per-file md5 (a metadata request, no download) would close that gap. **Not done**: it was outside this task.
+- The ` ⚠ Those nine files have NO MANIFEST.csv rows` comment in `build_nuc_nh_share.R` (lines 38–39) is now stale. It was left alone because it was outside this task.
+- The audit item's other half, **no processed `data/*.rds` of the emissions themselves**, is unchanged. The model still reads the raw CSVs at run time.
+
 ## 2026-10-12 (dd) — **Routing ruled: the cited values go in through a NEW structure label, `hilda_csl3v0kaidgbemwtc`** (Marcus, verbatim: "New label (a) (Recommended)"; the name "…wtc (c = cited)").
 
 - The `hilda_c` / objective-#18 idiom: a block carries every changed value and the two new fitted names, and an absent field means the old value. `hilda29e` and every registered mode stay bit-exact, and their stored logposts keep reproducing.
