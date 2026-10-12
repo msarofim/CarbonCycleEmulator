@@ -66,8 +66,33 @@
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 
 GD_FILE  <- ccx_path("data-raw", "downloads", "glodap_c13c14_subset.csv")
-GD_MODEL_DEEP_TOP <- 2627.2      # m, top of the model's bottom layer at h_ml 75
-GD_MODEL_DEPTH    <- 3700        # m, ccx_const("OCEAN_DEPTH")
+# THE COLUMN DEPTH IS AN ARGUMENT (2026-10-12, citation rulings row 5: OCEAN_DEPTH
+# 3700 -> 3682.2 m, Charette & Smith 2010 Table 2, "Adopt 3682.2 (Recommended)").
+# Two products, selected by the structure label (R/likelihood.R's
+# ccx_glodap_deep_file()), never by editing this file:
+#   (no argument) 3700, the legacy column -> data/obs_glodap_deep.rds, which every
+#        registered mode was scored against. NOT rebuilt: the shipped file is the
+#        record (a scratch `out` reproduces it; CHANGELOG 2026-10-12 ee).
+#   `3682.2`  -> data/obs_glodap_deep_3682.2m.rds, the targets of label
+#        hilda_csl3v0kaidgbemwtc.
+# The bottom layer's TOP is ccx_ocean_grid(75)'s, rounded to 0.1 m: 2627.2 at
+# 3700 (typed since 08-14 and kept typed, so the legacy product is reproduced
+# byte for byte; the derivation is asserted to agree with it), 2614.7 at 3682.2.
+# The optional second argument overrides the output path.
+GD_DEPTH_LEGACY   <- 3700        # m, the uncited working value every registered mode ran on
+GD_H_ML_GRID      <- 75          # m, the h_ml at which the target layer was defined (08-14)
+gd_args           <- commandArgs(trailingOnly = TRUE)
+GD_MODEL_DEPTH    <- if (length(gd_args) < 1) GD_DEPTH_LEGACY else as.numeric(gd_args[1])
+stopifnot(is.finite(GD_MODEL_DEPTH), GD_MODEL_DEPTH > 3000, GD_MODEL_DEPTH < 4500)
+gd_top_of <- function(D) { g <- ccx_ocean_grid(GD_H_ML_GRID, total_depth = D)
+                           round(sum(g$dz[-length(g$dz)]), 1) }
+stopifnot(gd_top_of(GD_DEPTH_LEGACY) == 2627.2)
+GD_MODEL_DEEP_TOP <- if (GD_MODEL_DEPTH == GD_DEPTH_LEGACY) 2627.2 else gd_top_of(GD_MODEL_DEPTH)  # m
+GD_OUT <- if (length(gd_args) >= 2) gd_args[2] else
+  if (GD_MODEL_DEPTH == GD_DEPTH_LEGACY) ccx_path("data", "obs_glodap_deep.rds") else
+  ccx_path("data", sprintf("obs_glodap_deep_%sm.rds", format(GD_MODEL_DEPTH)))
+cat(sprintf("column depth %g m: the model's bottom layer is %.1f-%g m at h_ml %g -> %s\n",
+            GD_MODEL_DEPTH, GD_MODEL_DEEP_TOP, GD_MODEL_DEPTH, GD_H_ML_GRID, GD_OUT))
 GD_DEPTHS <- c(1500, 2000, GD_MODEL_DEEP_TOP, 3000)
 GD_DLAT <- 5; GD_DLON <- 10; GD_DZ <- 250
 GD_NATL <- list(lat = 40, lon = c(-80, 20))
@@ -146,8 +171,8 @@ rco <- report("DEEP DIC (TCO2) -- a pump target", okco, "tco2", "umol/kg")
 
 cat(sprintf("\n\n=== WHAT THIS SETTLES ===\n"))
 cat(sprintf("[a] the kz bracket's uncited \"roughly -150 to -200 permil\" (DATA.md sec.5):\n"))
-cat(sprintf("    GLODAPv2.2023, model layer 2627-3700 m, volume-weighted: %+.1f +/- %.1f permil\n",
-            r14$deep$vw, r14$deep$sd_w))
+cat(sprintf("    GLODAPv2.2023, model layer %.0f-%.0f m, volume-weighted: %+.1f +/- %.1f permil\n",
+            GD_MODEL_DEEP_TOP, GD_MODEL_DEPTH, r14$deep$vw, r14$deep$sd_w))
 cat(sprintf("    N-Atlantic cut: %+.1f +/- %.1f. Measurement error is 2-4 permil, i.e.\n",
             r14$deep_no_natl$vw, r14$deep_no_natl$sd_w))
 cat(sprintf("    the SPATIAL SPREAD is ~%.0fx the measurement error -- but it is NOT the\n",
@@ -447,7 +472,7 @@ for (i in seq_len(nrow(prof)))
               prof$n_cells[i], prof$vw[i], prof$shape[i]))
 cat(sprintf("\nsurface-to-bottom span: %+.2f umol/kg (the gradient target is %+.2f on the\n",
             prof$vw[nrow(prof)] - prof$vw[1], grad$tco2$target))
-cat("SAME surface band but a >2627.2 m deep band, so the two differ by the deep\n")
+cat(sprintf("SAME surface band but a >%.1f m deep band, so the two differ by the deep\n", GD_MODEL_DEEP_TOP))
 cat("band's extra thickness. The profile carries SHAPE ONLY -- it is normalised --\n")
 cat("so that difference cannot leak into the pump's magnitude.\n")
 
@@ -465,5 +490,5 @@ out <- list(
   model_layer = c(top = GD_MODEL_DEEP_TOP, bottom = GD_MODEL_DEPTH),
   binning = c(dlat = GD_DLAT, dlon = GD_DLON, dz = GD_DZ),
   d14c = r14, d13c = r13, tco2 = rco)
-saveRDS(out, ccx_path("data", "obs_glodap_deep.rds"))
-cat(sprintf("\nsaved data/obs_glodap_deep.rds\n"))
+saveRDS(out, GD_OUT)
+cat(sprintf("\nsaved %s\n", GD_OUT))

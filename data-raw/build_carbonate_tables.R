@@ -16,13 +16,31 @@
 #   carbonate chemistry. R package. K1/K2 = Lueker et al. (2000),
 #   K0 = Weiss (1974), Kb = Dickson (1990), total pH scale.
 #
-# Run from repo root:  Rscript data-raw/build_carbonate_tables.R
+# Run from repo root:  Rscript data-raw/build_carbonate_tables.R [salinity] [out]
+#
+# SALINITY IS AN ARGUMENT (2026-10-12, citation rulings row 30). The model has
+# TWO tables, selected by the structure label (R/carbonate.R's
+# CARB_COEFS_BY_SALINITY), never by editing this file:
+#   (no argument) S = 34.7, the uncited legacy value -> data/carbonate_coefs.rds,
+#        which every registered mode ran on. NOT rebuilt: the shipped file is the
+#        record. Rebuild it only into a scratch `out` to check reproduction.
+#   `glodap`  S = the GLODAPv2.2023 0-100 m cos-lat-weighted salinity, RULED
+#        34.760 ("Compute from GLODAP, adopt (Recommended)"), read from
+#        data/obs_glodap_surface_alk_sal.rds -> data/carbonate_coefs_s34760.rds,
+#        the table of label hilda_csl3v0kaidgbemwtc.
+# The optional second argument overrides the output path (the reproduction
+# check writes to a scratch file and compares against the shipped table).
 # =====================================================================
 
 suppressMessages(library(seacarb))
 
 # ---- named constants -------------------------------------------------
-SALINITY_REF  <- 34.7        # global-mean surface salinity used throughout
+SALINITY_LEGACY <- 34.7      # the uncited working value every registered mode ran on
+SA_PRODUCT    <- file.path("data", "obs_glodap_surface_alk_sal.rds")
+args          <- commandArgs(trailingOnly = TRUE)
+SALINITY_REF  <- if (length(args) < 1 || identical(args[1], "34.7")) SALINITY_LEGACY else
+  if (identical(args[1], "glodap")) readRDS(SA_PRODUCT)$salinity_ruled else
+  stop("build_carbonate_tables.R: the salinity argument is `34.7` or `glodap`; got '", args[1], "'")
 # Lueker et al. (2000) is validated for T = 2-35 degC, S = 19-43. The grid stays
 # strictly inside that range: this model's boxes are HEMISPHERIC-MEAN mixed layers
 # (~15-20 degC), so no evaluation approaches the endpoints. A future version with
@@ -37,10 +55,14 @@ BORON_FORM    <- "u74"       # Uppstrom (1974) boron:salinity
 # worse than the other constants. Scaling fixes it; the scaling is stored with
 # the coefficients so evaluation stays consistent.
 POLY_DEGREE   <- 6           # in scaled T; validated below
-OUT_FILE      <- "data/carbonate_coefs.rds"
+# The output name DERIVES from the salinity (the labels-from-constants rule):
+# the legacy name for 34.7, `carbonate_coefs_s<S x 1000>.rds` for anything else.
+OUT_FILE      <- if (length(args) >= 2) args[2] else
+  if (SALINITY_REF == SALINITY_LEGACY) "data/carbonate_coefs.rds" else
+  sprintf("data/carbonate_coefs_s%05.0f.rds", SALINITY_REF * 1000)
 
 cat("\n=== build_carbonate_tables.R ===\n")
-cat(sprintf("S = %.1f, T grid %.1f..%.1f degC (n=%d), poly degree %d\n",
+cat(sprintf("S = %.3f, T grid %.1f..%.1f degC (n=%d), poly degree %d\n",
             SALINITY_REF, min(T_GRID), max(T_GRID), length(T_GRID), POLY_DEGREE))
 cat(sprintf("seacarb %s; K1K2=%s, pH scale=%s, boron=%s\n\n",
             as.character(packageVersion("seacarb")), K1K2_FORM, PH_SCALE, BORON_FORM))
@@ -117,9 +139,12 @@ out <- list(
   boron_total  = bt,
   t_range      = range(T_GRID),
   provenance   = sprintf(
-    "seacarb %s; K1K2=%s (Lueker 2000), K0=Weiss 1974 x fugacity coeff, Kb=Dickson 1990, Kw=Millero 1995, pH scale=%s, boron=%s (Uppstrom 1974); S=%.1f; built %s",
+    "seacarb %s; K1K2=%s (Lueker 2000), K0=Weiss 1974 x fugacity coeff, Kb=Dickson 1990, Kw=Millero 1995, pH scale=%s, boron=%s (Uppstrom 1974); S=%s; built %s",
     as.character(packageVersion("seacarb")), K1K2_FORM, PH_SCALE, BORON_FORM,
-    SALINITY_REF, Sys.Date())
+    # %.1f for the legacy table (its stored string, byte for byte), full ruled
+    # precision otherwise -- "S=34.8" would mislabel the 34.760 table.
+    if (SALINITY_REF == SALINITY_LEGACY) sprintf("%.1f", SALINITY_REF) else sprintf("%.3f", SALINITY_REF),
+    Sys.Date())
 )
 dir.create("data", showWarnings = FALSE)
 saveRDS(out, OUT_FILE)
