@@ -325,6 +325,7 @@ struct Par {
   // A.seas_ml survives only as a DATA-PRESENCE conjunct.
   int    seas_ml_on;
   double seas_T_amp[2], seas_lag_p[2];   // lag per hemisphere since 2026-08-31
+  double seas_T_lag, sst_seas_lag[2];    // run inputs since 2026-10-12 (were SEAS_T_LAG / SST_SEAS_LAG)
   double sst_seas_amp[2];
   // Southern-Ocean entrainment channel (2026-08-27g, version 4a). SH only --
   // a scalar, not a [2] array, because the NH control measures 0.30 months
@@ -345,9 +346,9 @@ struct Par {
   double revelle_frozen;                    // mechanism switch, 0 or 1
 };
 
-// Effective latitudes and the seasonal-T lag: MUST equal R/model.R's
-// CCX_SEAS_PHI_EFF and CCX_SEAS_T_LAG bit for bit (same discipline as
-// SV_TO_M3YR below).
+// Effective latitudes: MUST equal R/model.R's CCX_SEAS_PHI_EFF bit for bit (same
+// discipline as SV_TO_M3YR below). (The seasonal-T lag was a twin here too until
+// 2026-10-12; it is now a run input -- see below.)
 static const double SEAS_PHI_EFF[2] = { 75.0, -30.0 };
 // Twins of CCX_SEAS_T_LAG / CCX_SST_SEAS_LAG -- see the long note at those
 // constants in R/model.R before touching either. In short: the 3.5 in
@@ -356,10 +357,11 @@ static const double SEAS_PHI_EFF[2] = { 75.0, -30.0 };
 // is correct (measured: a clean interior optimum, 18,944 log-units above LAG = 0),
 // SST_SEAS_LAG is no longer unidentified: it is measured from ERSSTv5's own
 // NH seasonal peak month, because sst_seas_amp modulates SST itself.
-static const double SEAS_T_LAG = 2.0;
-static const double SST_SEAS_LAG = 1.32;   // MEASURED 2026-08-20g from ERSSTv5
-                                           // (was 2.5, a stated prior belief). MUST
-                                           // track CCX_SST_SEAS_LAG in R/model.R.
+// ⚠ NO LONGER COMPILE-TIME CONSTANTS (2026-10-12; label hilda_csl3v0kaidgbemwtc): the
+// respiration lag is FITTED (`seas_T_lag`) and the seasonal-SST lag is PER HEMISPHERE
+// (`sst_seas_lag_NH` / `_SH`). Both arrive in the parameter list, RESOLVED by ccx_cpp_par()
+// through ccx_seas_t_lag() / ccx_sst_seas_lag() -- the functions the R core calls -- so absence
+// (2.0 / 1.32 for both, every registered mode) has ONE definition. Read into Par below.
 // Twin of CCX_ENT_SEAS_PEAK_MO in R/model.R -- MUST track it. The month at
 // which the Southern-Ocean entrainment channel's surface-DIC anomaly peaks,
 // MEASURED from the ocean-area-weighted 40-90 S pCO2 first harmonic. NOT a lag
@@ -687,7 +689,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     // phase. The norm is sign-invariant by symmetry.
     if (P.seas_drivers > 0)
       q10f *= std::pow(P.q10, (hi == 0 ? 1.0 : -1.0) * P.seas_T_amp[hi]
-                * std::sin(2.0 * M_PI * (t - (3.5 + SEAS_T_LAG) / 12.0)) / 10.0)
+                * std::sin(2.0 * M_PI * (t - (3.5 + P.seas_T_lag) / 12.0)) / 10.0)
               / P.seas_r_norm[hi];
     add_flux(isf, iatm, (y[IX(isf, C)] / P.tau_soil_fast) * q10f, 1.0);
     add_flux(iss, iatm, (y[IX(iss, C)] / P.tau_soil_slow) * q10f, 1.0);
@@ -721,7 +723,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       + ((P.sst_obs > 0 && !std::isnan(sst_an)) ? sst_an : P.sst_scale * gmst)
       + (P.seas_drivers > 0
          ? (hi == 0 ? 1.0 : -1.0) * P.sst_seas_amp[hi]
-           * std::sin(2.0 * M_PI * (t - (3.5 + SST_SEAS_LAG) / 12.0))
+           * std::sin(2.0 * M_PI * (t - (3.5 + P.sst_seas_lag[hi]) / 12.0))
          : 0.0);
     // Southern-Ocean entrainment channel -- twin of the block in R/model.R,
     // which carries the rationale (SH only; zero-mean driver, the pCO2
@@ -1380,6 +1382,9 @@ static Par unpack_par(const List& p) {
   // cost 0.647 GtC/yr on 2026-08-30.
   P.seas_lag_p[0] = p["seas_lag_p_NH"];
   P.seas_lag_p[1] = p["seas_lag_p_SH"];
+  // resolved by ccx_cpp_par() through ccx_seas_t_lag() / ccx_sst_seas_lag() (2026-10-12)
+  P.seas_T_lag = p["seas_T_lag"];
+  P.sst_seas_lag[0] = p["sst_seas_lag_NH"]; P.sst_seas_lag[1] = p["sst_seas_lag_SH"];
   P.sst_seas_amp[0] = p["sst_seas_amp_NH"]; P.sst_seas_amp[1] = p["sst_seas_amp_SH"];
   P.ent_seas_amp_SH = p["ent_seas_amp_SH"];
   P.seas_npp_amp[0] = p["seas_npp_amp_NH"]; P.seas_npp_amp[1] = p["seas_npp_amp_SH"];
@@ -1392,7 +1397,7 @@ static Par unpack_par(const List& p) {
       const double mid = (m - 0.5) / 720.0;
       sn += seas_insol(SEAS_PHI_EFF[h], mid - P.seas_lag_p[h] / 12.0);
       sr += std::pow(P.q10, P.seas_T_amp[h]
-                     * std::sin(2.0 * M_PI * (mid - (3.5 + SEAS_T_LAG) / 12.0)) / 10.0);
+                     * std::sin(2.0 * M_PI * (mid - (3.5 + P.seas_T_lag) / 12.0)) / 10.0);
     }
     P.seas_n_norm[h] = sn / 720.0; P.seas_r_norm[h] = sr / 720.0;
   }

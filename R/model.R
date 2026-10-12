@@ -302,8 +302,45 @@ CCX_SEAS_T_LAG   <- 2.0                    # months past the mid-July zero-lag p
 # in the observed peak month this value is derived from.
 CCX_SST_SEAS_LAG <- 1.32                   # months past the mid-July zero-lag peak;
                                            # ERSSTv5 NH 1975-2024. MEASURED, not
-                                           # believed. Twin: SST_SEAS_LAG in
-                                           # src/ccx_core.cpp -- change both.
+                                           # believed. Since 2026-10-12 the ABSENT
+                                           # value of both lags below, resolved in R
+                                           # and handed to the C++ by ccx_cpp_par().
+
+# ---- THE TWO LAGS AS RUN INPUTS (2026-10-12; label hilda_csl3v0kaidgbemwtc) -----
+# Until today both were compile-time twins in src/ccx_core.cpp. They are now RESOLVED HERE, by
+# the functions the R core itself calls, and ccx_cpp_par() hands the resolved values to the C++
+# (the seas_lag_p / gamma_diff rule: one opinion about what absence means, in one place).
+#   * `seas_T_lag` -- the respiration lag -- is FITTED under the label (citation rulings row 16,
+#     "Fit it in the refit (Recommended)", prior U[0, 6] months on a logit box: respiration cannot
+#     lead its driver, and a lag past half a cycle aliases). ABSENT = CCX_SEAS_T_LAG (2.0).
+#   * `sst_seas_lag_NH` / `_SH` -- READ PER HEMISPHERE from data/obs_seasonal_clim.rds by the
+#     label's structure block (row 17, "Per-hemisphere, read from data (Recommended)").
+#     ABSENT = CCX_SST_SEAS_LAG (1.32) for BOTH hemispheres, every registered mode.
+ccx_seas_t_lag <- function(p) {
+  v <- p[["seas_T_lag"]]
+  if (is.null(v)) return(CCX_SEAS_T_LAG)
+  if (length(v) != 1L || !is.finite(v)) stop("seas_T_lag must be one finite lag in months; got ", format(v))
+  v
+}
+ccx_sst_seas_lag <- function(p) {
+  nh <- p[["sst_seas_lag_NH"]]; sh <- p[["sst_seas_lag_SH"]]
+  out <- c(NH = if (is.null(nh)) CCX_SST_SEAS_LAG else nh, SH = if (is.null(sh)) CCX_SST_SEAS_LAG else sh)
+  if (!all(is.finite(out))) stop("sst_seas_lag_NH / _SH must be finite lags in months")
+  out
+}
+#' The seasonal-SST lags MEASURED from ERSSTv5 (data/obs_seasonal_clim.rds, LIK_SEAS_WINDOW), in the
+#' model's convention. The term is (+1 NH / -1 SH) A sin(2 pi (t - (3.5 + LAG)/12)), so
+#'   NH peaks at month 6.5 + LAG  ->  LAG = peak_month - 6.5  (= the product's own `model_lag`)
+#'   SH peaks at month 0.5 + LAG  ->  LAG = peak_month - 0.5
+#' ⚠ NOT the product's SH `model_lag` (7.54): that field applies the NH formula and omits the SH
+#' sign flip. Verified 2026-10-12 (handoff 10-12d §2): ERSSTv5's SH peak is month 2.036 -> 1.536.
+ccx_sst_seas_lag_obs <- function(window = LIK_SEAS_WINDOW) {
+  o <- readRDS(ccx_path("data", "obs_seasonal_clim.rds"))$ocean
+  key <- function(h) sprintf("%s_%d-%d", h, window[1], window[2])
+  nh <- o[[key("NH")]]; sh <- o[[key("SH")]]
+  if (is.null(nh) || is.null(sh)) stop("obs_seasonal_clim.rds has no ocean entry for ", key("NH"), " / ", key("SH"))
+  c(NH = (nh$peak_month - 6.5) %% 12, SH = (sh$peak_month - 0.5) %% 12)
+}
 CCX_SEAS_DRIVERS_DEFAULT <- 1
 
 # ---- SOUTHERN-OCEAN ENTRAINMENT CHANNEL (2026-08-27g, version 4a) -----
@@ -803,7 +840,7 @@ ccx_seas_norms <- function(p) {
   lapply(c(NH = "NH", SH = "SH"), function(h) {
     a_t <- if (h == "NH") p$seas_T_amp_NH else p$seas_T_amp_SH
     list(n = mean(ccx_insol(CCX_SEAS_PHI_EFF[[h]], mid - lag[[h]] / 12)),
-         r = mean(p$q10^(a_t * sin(2 * pi * (mid - (3.5 + CCX_SEAS_T_LAG) / 12)) / 10)))
+         r = mean(p$q10^(a_t * sin(2 * pi * (mid - (3.5 + ccx_seas_t_lag(p)) / 12)) / 10)))
   })
 }
 
@@ -819,7 +856,7 @@ ccx_seas_norms <- function(p) {
 ccx_seas_norm_key <- function(p) {
   lag <- ccx_seas_lag_p(p)
   c(p$q10, p$seas_T_amp_NH, p$seas_T_amp_SH, lag[["NH"]], lag[["SH"]],
-    CCX_SEAS_PHI_EFF[["NH"]], CCX_SEAS_PHI_EFF[["SH"]], CCX_SEAS_T_LAG)
+    CCX_SEAS_PHI_EFF[["NH"]], CCX_SEAS_PHI_EFF[["SH"]], ccx_seas_t_lag(p))
 }
 ccx_seas_norms_keyed <- function(p) {
   v <- ccx_seas_norms(p); v$key <- ccx_seas_norm_key(p); v
@@ -2865,7 +2902,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       # mean of q10^(A sin) equals that of q10^(-A sin) by symmetry.
       sgn  <- if (h == "NH") 1 else -1
       nrm  <- .snorm[[h]]
-      q10f <- q10f * p$q10^(sgn * a_t * sin(2 * pi * (t - (3.5 + CCX_SEAS_T_LAG) / 12)) / 10) / nrm$r
+      q10f <- q10f * p$q10^(sgn * a_t * sin(2 * pi * (t - (3.5 + ccx_seas_t_lag(p)) / 12)) / 10) / nrm$r
     }
     add_flux(isf, iatm, (y[isf, "C"] / p$tau_soil_fast) * q10f)
     add_flux(iss, iatm, (y[iss, "C"] / p$tau_soil_slow) * q10f)
@@ -2946,7 +2983,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     if (isTRUE(p$seas_drivers > 0)) {
       a_s <- if (h == "NH") p$sst_seas_amp_NH else p$sst_seas_amp_SH
       sst <- sst + (if (h == "NH") 1 else -1) * a_s *
-             sin(2 * pi * (t - (3.5 + CCX_SST_SEAS_LAG) / 12))
+             sin(2 * pi * (t - (3.5 + ccx_sst_seas_lag(p)[[h]]) / 12))
     }
     dic_ml <- y[iml, "C"] * aux$mol_per_GtC / ml_mass         # mol/kg
     # SOUTHERN-OCEAN ENTRAINMENT CHANNEL (2026-08-27g, 4a). SH only; see

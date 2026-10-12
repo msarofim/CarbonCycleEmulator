@@ -350,6 +350,11 @@ ccx_cpp_par <- function(p) {
   if (is.null(p$tau_ex_seas_phase)) p$tau_ex_seas_phase <- 0
   .lagp <- ccx_seas_lag_p(p)
   p$seas_lag_p_NH <- .lagp[["NH"]]; p$seas_lag_p_SH <- .lagp[["SH"]]
+  # the respiration and seasonal-SST lags (2026-10-12): compile-time twins until today, now
+  # resolved by the SAME functions the R core calls, so absence means 2.0 / 1.32 in both cores
+  p$seas_T_lag <- ccx_seas_t_lag(p)
+  .sstl <- ccx_sst_seas_lag(p)
+  p$sst_seas_lag_NH <- .sstl[["NH"]]; p$sst_seas_lag_SH <- .sstl[["SH"]]
   if (is.null(p$sst_seas_amp_NH)) p$sst_seas_amp_NH <- 2.0
   if (is.null(p$sst_seas_amp_SH)) p$sst_seas_amp_SH <- 1.2
   # ABSENCE = 0 = the channel OFF = the pre-2026-08-27g model, bit for bit. A
@@ -417,6 +422,7 @@ ccx_cpp_par <- function(p) {
       "seas_phase_NH", "seas_phase_SH",
       "seas_drivers", "seas_ml_on", "seas_T_amp_NH", "seas_T_amp_SH",
       "seas_lag_p_NH", "seas_lag_p_SH",
+      "seas_T_lag", "sst_seas_lag_NH", "sst_seas_lag_SH",   # run inputs since 2026-10-12 (label ...wtc)
       "sst_seas_amp_NH", "sst_seas_amp_SH", "ent_seas_amp_SH",
       "sst_obs", "seas_npp_amp_NH", "seas_npp_amp_SH",
       "hs_sst_anom_frac",                       # the HS box's share of the SST anomaly (2026-10-05; §3.4a T)
