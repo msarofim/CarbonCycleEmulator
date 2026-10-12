@@ -466,8 +466,9 @@ CCX_FORCING_COLS <- c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH",
                       # reaches C++ as NaN, which the core reads as zero.
                       "ndep_NH", "ndep_SH",
                       # the nuclear 14C NH share (2026-10-12; label ...wtc). Appended
-                      # LAST for the fifth time. "Off" is NaN (the aux scalar), which
-                      # ccx_build_forcing() emits under nuc_share = "constant".
+                      # LAST for the fifth time. ccx_build_forcing() always emits it (the
+                      # constant 0.95 under nuc_share = "constant"); an absent column
+                      # reaches C++ as NaN, which the core reads as the aux scalar.
                       "nuc_share_NH")
 
 ccx_cpp_forcing <- function(F) {

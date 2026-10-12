@@ -169,10 +169,13 @@ test_that("P0.3 -- ccx_hold_climate() holds every climate FORCING COLUMN", {
   # emissions this list already holds, not a climate state; so a held-climate run
   # keeps it moving with its scenario. Same consequence as AOD: once ndep_ret != 0,
   # "climate held" does NOT mean "deposition held".
+  # nuc_share_NH: NON-CLIMATE (decided 2026-10-12, label hilda_csl3v0kaidgbemwtc; flagged to Marcus).
+  # It is the hemispheric SPLIT of the industrial 14C source (c14_nuclear, already listed here), a
+  # property of where the reactors are, not a climate state.
   non_climate <- c("t", "year", "month", "e_foss_NH", "e_foss_SH",
                    "e_luc_NH", "e_luc_SH", "cum_luc_NH", "cum_luc_SH",
                    "d13c_foss", "c14_bomb", "c14_nuclear", "c14_cosmo",
-                   "sink_ocean", "aod_NH", "aod_SH", "ndep_NH", "ndep_SH")
+                   "sink_ocean", "aod_NH", "aod_SH", "ndep_NH", "ndep_SH", "nuc_share_NH")
   expect_setequal(names(F), c(climate_cols, non_climate))
 })
 

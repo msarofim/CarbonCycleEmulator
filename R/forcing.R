@@ -221,8 +221,8 @@ CCX_AOD_MODE_CODES <- c(legacy = 0L, anomaly = 1L)
 FORC_AOD_BG_WIN    <- c(1850, 1852)
 # THE NUCLEAR-INDUSTRY 14C NH SHARE (2026-10-12; citation rulings row 20; label
 # hilda_csl3v0kaidgbemwtc, field `nuc_share_ts`). "constant" = FORC_NUC_NH_SHARE (0.95), every
-# registered mode: the table's `nuc_share_NH` column is NaN and both cores fall back to the aux
-# scalar. "per_year" = the share of the 22-country files' OWN rows, year by year
+# registered mode: the table's `nuc_share_NH` column carries that constant (the aux scalar's own
+# value; a hand-built table without the column reaches both cores as NaN = the same scalar). "per_year" = the share of the 22-country files' OWN rows, year by year
 # (data/forcing_nuc_nh_share.rds, data-raw/build_nuc_nh_share.R), held flat within a year and
 # HELD at the nearest year outside the files (the source is zero there; the 14C tag still needs a
 # number). Stamped as attr "nuc_share", checked at run time like the ENSO index.
@@ -1009,8 +1009,10 @@ ccx_build_forcing <- function(scenario = "historical",
     # data/forcing_ndep.rds carries this scenario; harmless at ndep_ret 0 (the
     # default) and REFUSED by ccx_run_prepared() otherwise (ccx_ndep_check()).
     ndep_NH = ndep$NH, ndep_SH = ndep$SH,
-    # the nuclear 14C NH share (2026-10-12): NaN = the aux scalar FORC_NUC_NH_SHARE in both cores
-    nuc_share_NH = if (nuc_share == "per_year") ccx_nuc_nh_share_monthly(yrs) else rep(NaN, n),
+    # the nuclear 14C NH share (2026-10-12): "constant" emits FORC_NUC_NH_SHARE itself -- the SAME
+    # double the aux scalar holds, so both cores' arithmetic is unchanged -- because a BUILT forcing
+    # carries no NA (test-forcing.R). NaN is only the absent value of a HAND-BUILT table.
+    nuc_share_NH = if (nuc_share == "per_year") ccx_nuc_nh_share_monthly(yrs) else rep(FORC_NUC_NH_SHARE, n),
     # artificial mid-century OCEAN sink, GtC/yr, atmosphere -> mixed layer.
     # Identically zero unless CCX_SINK_RATE is set AND CCX_SINK_MODE == "ocean".
     sink_ocean = sink_ocean,

@@ -167,7 +167,11 @@ test_that("the C++ forcing column contract is positional and complete", {
   # N_FORCING moved 17 -> 19 in the same commit. Again the DELIBERATE edit the pin
   # exists to force.
   expect_identical(CCX_FORCING_COLS[18:19], c("ndep_NH", "ndep_SH"))
-  expect_length(CCX_FORCING_COLS, 19L)
+  # nuc_share_NH APPENDED 2026-10-12 (label hilda_csl3v0kaidgbemwtc: the per-year nuclear 14C NH
+  # share), same discipline; ccx_build_forcing() emits the constant 0.95 under "constant", and an
+  # absent column is NaN = the aux scalar. N_FORCING 19 -> 20. The DELIBERATE edit this pin forces.
+  expect_identical(CCX_FORCING_COLS[20], "nuc_share_NH")
+  expect_length(CCX_FORCING_COLS, 20L)
   F <- ccx_build_forcing("historical", c(1900, 1910), prod_c14 = 0)
   expect_identical(colnames(ccx_cpp_forcing(F)), CCX_FORCING_COLS)
   expect_error(ccx_cpp_forcing(F[, setdiff(names(F), "d13c_foss")]),

@@ -246,9 +246,11 @@ test_that("under the emissions switch, the CANONICAL's carbon is blind to every 
           enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p)))
   human_carbon <- c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH",
                     "cum_luc_NH", "cum_luc_SH", "ndep_NH", "ndep_SH")
+  # nuc_share_NH (2026-10-12, label hilda_csl3v0kaidgbemwtc; flagged to Marcus): OTHER -- the
+  # hemispheric split of the nuclear 14C source, which moves no carbon (as c14_nuclear itself).
   other <- c("t", "year", "month", "gmst", "enso", "sst_anom_NH", "sst_anom_SH",
              "d13c_foss", "c14_bomb", "c14_nuclear", "c14_cosmo", "sink_ocean",
-             "aod_NH", "aod_SH")
+             "aod_NH", "aod_SH", "nuc_share_NH")
   expect_setequal(names(F0), c(human_carbon, other))
   # the deposition is live at the canonical, or this test has no power on it
   expect_gt(p$ndep_ret, 0); expect_gt(max(F0$ndep_NH), 0)
