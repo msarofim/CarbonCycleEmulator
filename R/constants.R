@@ -1138,7 +1138,84 @@ CCX_CONSTANTS <- list(
     status = "cited",
     source = paste("Wanninkhof R. (2014), Limnol. Oceanogr. Methods 12, 351-362,",
                    "doi:10.4319/lom.2014.12.351, Table 1 (CO2, seawater), as reproduced",
-                   "in pySeaFlux gas_transfer_velocity.py (accessed 2026-09-06)."))
+                   "in pySeaFlux gas_transfer_velocity.py (accessed 2026-09-06).")),
+
+  # ---- THE CITED VALUES OF LABEL hilda_csl3v0kaidgbemwtc (2026-10-12) ----------------------
+  # notes/citation_rulings_2026-10-12.md; routed by label ("New label (a) (Recommended)"), so each
+  # LEGACY entry above (ALK_SURFACE, OCEAN_DEPTH, ALPHA_PHOTO_EPS, PUMP_EPS13_ORG) stays as the
+  # ABSENT-FIELD DEFAULT every registered mode runs, and the label's structure block reads these.
+  # The data-derived ones are tied to their products by tests/testthat/test-wtc-label.R.
+  ALK_SURFACE_GLODAP = list(
+    value = 2303.4e-6, units = "mol/kg",
+    status = "data",
+    source = paste("GLODAPv2.2023 (Lauvset et al. 2024, ESSD 16:2047-2072) 0-100 m, flag 2, 5x10x250 cells,",
+                   "cos-lat weighted, all latitudes: 2303.38 umol/kg (829 cells), ruled at 2303.4",
+                   "(citation rulings row 3, 'Adopt 2303.4 (Recommended)').",
+                   "data/obs_glodap_surface_alk_sal.rds, data-raw/build_glodap_surface_alk_sal.R.")),
+  SALINITY_SURFACE_GLODAP = list(
+    value = 34.760, units = "PSS-78",
+    status = "data",
+    source = paste("GLODAPv2.2023 0-100 m, ALK's recipe and domain: 34.7602 (913 cells); the LS-only",
+                   "(|lat| < 57.14) 35.005 reported, not adopted (row 30, 'Compute from GLODAP, adopt').",
+                   "The carbonate table data/carbonate_coefs_s34760.rds is built at it. RHO_SEAWATER",
+                   "(S 35) checked: TEOS-10 density at S 34.76 is 0.18-0.19 kg/m3 lower (0.018 %).")),
+  OCEAN_DEPTH_CS2010 = list(
+    value = 3682.2, units = "m",
+    status = "cited",
+    source = paste("Charette M.A. & Smith W.H.F. (2010), The volume of Earth's ocean, Oceanography",
+                   "23(2):112-114, Table 2 p. 114: mean depth 3682.2 m (+/-1.2 %, 1 sigma), volume /",
+                   "area from SRTM30_PLUS V5. Row 5, 'Adopt 3682.2 (Recommended)'.")),
+  ALPHA_PHOTO_EPS_STILL2003 = list(
+    value = 16.2, units = "permil",
+    status = "cited",
+    source = paste("Still, Berry, Collatz & DeFries (2003) GBC 17(1):1006, doi:10.1029/2001GB001807,",
+                   "abstract: assimilation-weighted terrestrial discrimination Delta = 16.5 permil at C4",
+                   "= 23 % of GPP (verified via EarthRef ERR 74609). In CCX's alpha = 1 - eps/1000 form",
+                   "eps = Delta/(1 + Delta/1000) = 16.23 -> 16.2 (row 11-12, 'Adopt 16.2 = Still's 16.5').",
+                   "LIMITATION: the CO2-fertilised net sink is C3-dominated; one eps serves gross and net.")),
+  PUMP_EPS13_ORG_CLARET2021 = list(
+    value = -22, units = "permil",
+    status = "cited",
+    source = paste("Claret, Sonnerup & Quay (2021) GBC 35:e2020GB006757, sec. 3.2.1: deep-Pacific",
+                   "d13C-PO4 slope -1.01 +/- 0.02 permil per umol/kg; at C:P 117 remineralised OM is",
+                   "-20.07 permil vs DEEP DIC (checked against the PDF), ~-22.0 vs SURFACE DIC, the",
+                   "reference this model's export uses. Corroborated by export-weighted eps_p fits",
+                   "(-20.7 to -23.4) and isotope models (-21.5 to -23.1). Row 1, 'Adopt -22, one",
+                   "constant'. LIMITATIONS: high-latitude export is more negative (-25 to -28);",
+                   "eps_p has risen since the 1960s.")),
+  BOMB_NH_SHARE_PRIOR_LO = list(
+    value = 0.77, units = "fraction",
+    status = "cited",
+    source = paste("UNSCEAR 2000 Report Vol. I, Annex C, Table 7 pp. 210-211: measured 90Sr",
+                   "hemispheric deposition, NH 470 / SH 142 PBq -> 0.768, the closest analogue of",
+                   "stratosphere -> troposphere delivery (fission-weighted, particulate). Lower bound",
+                   "of the FITTED bomb share's uniform prior (row 19, 'Fit it, prior U[0.77, 0.98]').")),
+  BOMB_NH_SHARE_PRIOR_HI = list(
+    value = 0.98, units = "fraction",
+    status = "cited",
+    source = paste("UNSCEAR 2000 Annex C, Table 2 p. 205: fusion yield by test site, NH 0.982 with",
+                   "sites assigned by latitude (0.953 with Christmas Island split, 0.932 with",
+                   "Johnston too). Upper bound of the fitted bomb share's uniform prior (row 19).")),
+  P_CANON_KOVALTSOV2012 = list(
+    value = 1.88, units = "atoms cm-2 s-1",
+    status = "cited",
+    source = paste("Kovaltsov, Mishev & Usoskin (2012) EPSL 337-338:114-120, 1750-1900 mean global",
+                   "cosmogenic 14C production (arXiv v1 p. 5 lines 126-128). Roth & Joos (2013) Clim.",
+                   "Past 9:1879 p. 1894 give 1.75 from the carbon-cycle budget. DIAGNOSTIC ONLY",
+                   "(ccx_spinup_diagnostics()'s comparison value; never an input). Rows 21-22.")),
+  EARTH_AREA_GRS80 = list(
+    value = 5.10066e14, units = "m2",
+    status = "cited",
+    source = paste("Moritz (2000) Geodetic Reference System 1980, J. Geodesy 74:128-133, sec. 4 p. 131:",
+                   "R2 = 6 371 007.1810 m (the equal-area sphere), area 4 pi R2^2. Rows 21-22.")),
+  SEC_PER_YR = list(
+    value = .SEC_PER_YR, units = "s/yr",
+    status = "derived",
+    source = "Julian year, 365.25 x 86400 s -- derives from .SEC_PER_YR, never re-typed"),
+  AVOGADRO = list(
+    value = .AVOGADRO, units = "1/mol",
+    status = "cited",
+    source = "CODATA 2018 / SI 2019: exact by definition -- derives from .AVOGADRO, never re-typed")
 )
 
 #' Fetch a constant's value, erroring on unknown names

@@ -2376,6 +2376,13 @@ ccx_default_params <- function() {
     # NPP TEMPERATURE SENSITIVITY (D2 (b), 2026-09-30). 0 = OFF, bit-exact; see
     # CCX_NPP_TSENS_DEFAULT.
     npp_tsens = CCX_NPP_TSENS_DEFAULT,
+    # THE CITATION BATCH'S TWO GATED NAMES (2026-10-12; CCX_PARAM_GATED_WTC, opened by label
+    # hilda_csl3v0kaidgbemwtc). Slots at the LEGACY values -- the numbers every registered mode ran
+    # (FORC_BOMB_NH_SHARE 0.90; CCX_SEAS_T_LAG 2.0 months) -- so the overlay can carry a fitted
+    # value (it copies a gated name only where the base has a slot) and a holding label runs exactly
+    # what it ran before. The ndep_ret / lag_enso_land idiom.
+    bomb_share_NH = FORC_BOMB_NH_SHARE,
+    seas_T_lag = CCX_SEAS_T_LAG,
     # ---- mechanism switch, NOT a calibrated parameter -----------------
     # FROZEN REVELLE. 0 = normal carbonate chemistry. 1 = the ocean's buffer
     # factor is held at its preindustrial value instead of rising as the ocean

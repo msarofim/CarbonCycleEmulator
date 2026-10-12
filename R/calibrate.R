@@ -1132,10 +1132,38 @@ CCX_PARAM_GATED_ENSO_LAG <- list(
 )
 #' The block field that OPENS the lag gate.
 CCX_GATE_FLAG_ENSO_LAG <- "enso_lag_free"
+
+# ---- THE THIRD GATE: THE CITATION BATCH'S TWO FITTED NAMES (2026-10-12; label ...wtc) ----
+# notes/citation_rulings_2026-10-12.md rows 19 and 16. Gated for the lag's reason: both act under
+# EVERY label (the bomb split and the respiration phase), so as table entries the migration would
+# seed every registered file at init -- a different model under every old label. Held (absent =
+# FORC_BOMB_NH_SHARE 0.90 and CCX_SEAS_T_LAG 2.0) under every label but hilda_csl3v0kaidgbemwtc.
+#   bomb_share_NH  NH share of bomb-14C DELIVERY to the troposphere. Marcus: "Fit it, prior U[0.77,
+#                  0.98] (Recommended)". UNIFORM between the UNSCEAR 2000 Annex C proxies (90Sr
+#                  deposition 0.768; fusion yield by site 0.982: BOMB_NH_SHARE_PRIOR_LO/_HI), on a
+#                  LOGIT over the same interval. After the refit: an identifiability check (posterior
+#                  sd, correlation with tau_ex and bomb_total), with a fixed proxy as the fallback.
+#   seas_T_lag     the respiration lag, months past the mid-July zero-lag peak (R/model.R
+#                  ccx_seas_t_lag()). Marcus: "Fit it in the refit (Recommended)", prior "Uniform
+#                  [0, 6] months (Recommended)": respiration cannot lead its driver, and a lag past
+#                  half a cycle aliases. LOGIT on the box, like kz / h_ml. NOT centred on the old 2.0
+#                  (a profile at an ancestral mode), which would be circular.
+# INIT = each box's MIDPOINT (0.875; 3 months), the gates' rule: a start is never a value read
+# off the code under test. `lo`/`hi` are LITERALS (this file is sourced before R/constants.R and
+# R/model.R); test-wtc-label.R ties them to BOMB_NH_SHARE_PRIOR_LO/_HI.
+CCX_PARAM_GATED_WTC <- list(
+  bomb_share_NH = list(tr = "logit", lo = 0.77, hi = 0.98, init = 0.875,
+                       prior = function(x) dunif(x, ccx_const("BOMB_NH_SHARE_PRIOR_LO"),
+                                                 ccx_const("BOMB_NH_SHARE_PRIOR_HI"), log = TRUE)),
+  seas_T_lag    = list(tr = "logit", lo = 0, hi = 6, init = 3,
+                       prior = function(x) dunif(x, 0, 6, log = TRUE))
+)
+#' The block field that OPENS the citation batch's gate.
+CCX_GATE_FLAG_WTC <- "wtc_free"
 #' EVERY GATE, flag -> its set, in the order a label's names are appended. A label opens
 #' any subset; ccx_gated_names() is what a given structure fits.
-CCX_PARAM_GATES <- stats::setNames(list(CCX_PARAM_GATED, CCX_PARAM_GATED_ENSO_LAG),
-                                   c(CCX_GATE_FLAG, CCX_GATE_FLAG_ENSO_LAG))
+CCX_PARAM_GATES <- stats::setNames(list(CCX_PARAM_GATED, CCX_PARAM_GATED_ENSO_LAG, CCX_PARAM_GATED_WTC),
+                                   c(CCX_GATE_FLAG, CCX_GATE_FLAG_ENSO_LAG, CCX_GATE_FLAG_WTC))
 #' Every gated name's spec, whichever gate holds it (decode, migration, ordering).
 CCX_PARAM_GATED_ALL <- do.call(c, unname(CCX_PARAM_GATES))
 stopifnot(!anyDuplicated(names(CCX_PARAM_GATED_ALL)))
@@ -2543,7 +2571,40 @@ ccx_struct_hilda_csl3v0kaidgbemwt <- function() {
   stopifnot(!anyDuplicated(names(blk)))
   blk
 }
-CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", names(CCX_L2_RETURN_LAYERS), "hilda_cs", "hilda_csl3v0", "hilda_csl3v0k", "hilda_csl3v0ka", "hilda_csl3v0kan", "hilda_csl3v0kai", "hilda_csl3v0kaidgb", "hilda_csl3v0kaidgbe", "hilda_csl3v0kaidgbem", "hilda_csl3v0kaidgbemw", "hilda_csl3v0kaidgbemwt")
+#' THE "hilda_csl3v0kaidgbemwtc" STRUCTURE (THE CITATION BATCH, RULED 2026-10-12): hilda_csl3v0kaidgbemwt
+#' with every value the citation walkthrough CHANGED (notes/citation_rulings_2026-10-12.md). Marcus,
+#' verbatim: "New label (a) (Recommended)"; the NAME "…wtc (c = cited)". Every field is read from a
+#' data product or a cited registry entry -- none is typed here:
+#'   alk_surface      2303.4e-6 mol/kg   ALK_SURFACE_GLODAP (row 3; GLODAPv2.2023 0-100 m)
+#'   carb_salinity    34.760             SALINITY_SURFACE_GLODAP (row 30) -> data/carbonate_coefs_s34760.rds
+#'   ocean_depth      3682.2 m           OCEAN_DEPTH_CS2010 (row 5) -> the grid, and the GLODAP target
+#'                                       products keyed by it (R/likelihood.R ccx_glodap_file())
+#'   sst_seas_lag_NH/_SH  1.325 / 1.536  ccx_sst_seas_lag_obs(): ERSSTv5 per hemisphere (row 17)
+#'   nuc_share_ts     1 (per_year)       the 22-country files' own NH share, year by year (row 20)
+#'   alpha_photo_eps  16.2 permil        ALPHA_PHOTO_EPS_STILL2003 (rows 11-12), replacing #18's 15.6
+#'   pump_eps13_org   -22 permil         PUMP_EPS13_ORG_CLARET2021 (row 1)
+#'   intcal_sd_published 1               the d14c_intcal row's published D14C sigma (ledger sec. C)
+#'   wtc_free         1                  opens CCX_PARAM_GATED_WTC: bomb_share_NH, seas_T_lag FITTED
+#' Every other label leaves every one of these fields absent, so every registered file -- #18's
+#' included -- stays bit-exact.
+ccx_struct_hilda_csl3v0kaidgbemwtc <- function() {
+  blk <- ccx_struct_hilda_csl3v0kaidgbemwt()
+  lag <- ccx_sst_seas_lag_obs()
+  add <- list(alk_surface         = ccx_const("ALK_SURFACE_GLODAP"),
+              carb_salinity       = ccx_const("SALINITY_SURFACE_GLODAP"),
+              ocean_depth         = ccx_const("OCEAN_DEPTH_CS2010"),
+              sst_seas_lag_NH     = lag[["NH"]],
+              sst_seas_lag_SH     = lag[["SH"]],
+              nuc_share_ts        = CCX_NUC_SHARE_CODES[["per_year"]],
+              alpha_photo_eps     = ccx_const("ALPHA_PHOTO_EPS_STILL2003"),
+              pump_eps13_org      = ccx_const("PUMP_EPS13_ORG_CLARET2021"),
+              intcal_sd_published = 1,
+              wtc_free            = 1)
+  blk[names(add)] <- add
+  stopifnot(!anyDuplicated(names(blk)))
+  blk
+}
+CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", names(CCX_L2_RETURN_LAYERS), "hilda_cs", "hilda_csl3v0", "hilda_csl3v0k", "hilda_csl3v0ka", "hilda_csl3v0kan", "hilda_csl3v0kai", "hilda_csl3v0kaidgb", "hilda_csl3v0kaidgbe", "hilda_csl3v0kaidgbem", "hilda_csl3v0kaidgbemw", "hilda_csl3v0kaidgbemwt", "hilda_csl3v0kaidgbemwtc")
 ccx_struct_block <- function(struct) {
   if (identical(struct, "")) return(list())        # the column: nothing declared
   switch(struct,
@@ -2565,6 +2626,7 @@ ccx_struct_block <- function(struct) {
     "hilda_csl3v0kaidgbem" = ccx_struct_hilda_csl3v0kaidgbem(), # ... + the stratification feedback (2026-10-04; DESIGN §3.4a S)
     "hilda_csl3v0kaidgbemw" = ccx_struct_hilda_csl3v0kaidgbemw(), # ... + the interannual cut's main half (2026-10-06; objective #17)
     "hilda_csl3v0kaidgbemwt" = ccx_struct_hilda_csl3v0kaidgbemwt(), # ... + the detrended ENSO index + the low-pass ocean row (2026-10-07; objective #18)
+    "hilda_csl3v0kaidgbemwtc" = ccx_struct_hilda_csl3v0kaidgbemwtc(), # ... + the citation batch (2026-10-12; "New label (a)")
     stop("ccx_struct_block(): unknown structure label '", struct, "'"))
 }
 #' The pump field's construction is the THIRD structure axis (option D + E,
@@ -2833,7 +2895,8 @@ ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", ""),
          "and \"hilda_csl3v0kaidgbe\" (+ the land ENSO lag fitted, objective #15, 2026-10-02) ",
          "and \"hilda_csl3v0kaidgbem\" (+ the stratification feedback, DESIGN §3.4a S, 2026-10-04) ",
          "and \"hilda_csl3v0kaidgbemw\" (+ the interannual cut's main half, objective #17, 2026-10-06) ",
-         "and \"hilda_csl3v0kaidgbemwt\" (+ the detrended ENSO index + the low-pass ocean row, objective #18, 2026-10-07).")
+         "and \"hilda_csl3v0kaidgbemwt\" (+ the detrended ENSO index + the low-pass ocean row, objective #18, 2026-10-07) ",
+         "and \"hilda_csl3v0kaidgbemwtc\" (+ the citation batch, 2026-10-12).")
   blk <- ccx_struct_block(struct)
   for (n in names(blk)) p[[n]] <- blk[[n]]
   structure(p, struct = struct, seas_ml = seas_ml, pump_field = pump_field)

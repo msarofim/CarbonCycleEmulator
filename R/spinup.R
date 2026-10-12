@@ -10,13 +10,15 @@
 # HOW IT IS SET. Production is NOT prescribed from the literature. It is solved
 # for, as the rate that holds atmospheric Delta14C at its 1750 value in steady
 # state given the model's own carbon inventory and ventilation. That makes the
-# canonical cosmogenic estimate (2.04 atoms/cm2/s ~ 545 mol 14C/yr, the `P_canon`
-# literal in ccx_spinup_diagnostics()) an
+# canonical cosmogenic estimate (`P_canon` in ccx_spinup_diagnostics()) an
 # INDEPENDENT VALIDATION of the model's inventory and 14C bookkeeping rather
 # than an input -- see ccx_spinup()$diagnostics and test-spinup.R.
-# ⚠ (2026-10-12, code review) This header said "~2.0"; the code uses 2.04. The
-# 2.04 is UNCITED (as are the Earth area 5.1e14 m2 beside it) and is on the
-# constants citation worklist; it is a comparison value only, never an input.
+# CITED 2026-10-12 (citation rulings rows 21-22, "Use 1.88, note 1.75 (Recommended)"):
+# 1.88 atoms/cm2/s, the 1750-1900 mean of Kovaltsov et al. 2012 (Roth & Joos 2013's
+# budget gives 1.75), over the GRS80 area 5.10066e14 m2 (Moritz 2000) -> ~502 mol
+# 14C/yr. Was an uncited 2.04 over 5.1e14 (~545). A comparison value only, never an
+# input, so the change is GLOBAL (no label): it moves `prod_canonical` / `prod_ratio`
+# and nothing in the objective.
 #
 # The 12C equilibrium is analytic; the 13C and 14C equilibria are obtained by
 # exact linear solves, because both tracers enter the derivative LINEARLY once the
@@ -220,7 +222,8 @@ ccx_spinup_diagnostics <- function(y, prod, aux, grid, residuals, co2_ppm,
   bot_idx   <- unlist(lapply(HEMIS, function(h) tail(aux$idx[[h]]$oc, 1)))
 
   # canonical cosmogenic production, for comparison ONLY
-  P_canon <- 2.04 * (5.1e14 * 1e4) * 365.25 * 86400 / 6.02214076e23
+  P_canon <- ccx_const("P_CANON_KOVALTSOV2012") * (ccx_const("EARTH_AREA_GRS80") * 1e4) *
+             ccx_const("SEC_PER_YR") / ccx_const("AVOGADRO")
 
   list(
     max_abs_dCdt      = residuals$C,
