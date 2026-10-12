@@ -751,8 +751,10 @@ ccx_enso_slope_row_on <- function(err) {
 #' (2026-10-07, objective #18: `gcb_ocean_lowpass_df`, the ocean row's twin of the land switch; see
 #' "OBJECTIVE #18" below. Absent = the ocean row year by year, as before.)
 ccx_err_with_struct <- function(err, p) {
-  # the column depth the GLODAP rows are read at (label hilda_csl3v0kaidgbemwtc, 2026-10-12)
+  # label hilda_csl3v0kaidgbemwtc (2026-10-12): the column depth the GLODAP rows are read at, and
+  # the IntCal row's published D14C sigma
   if (!is.null(p[["ocean_depth"]]))          err$ocean_depth          <- p[["ocean_depth"]]
+  if (!is.null(p[["intcal_sd_published"]]))  err$intcal_sd_published  <- p[["intcal_sd_published"]]
   if (!is.null(p[["gcb_land_lowpass_df"]]))  err$gcb_land_lowpass_df  <- p[["gcb_land_lowpass_df"]]
   if (!is.null(p[["gcb_ocean_lowpass_df"]])) err$gcb_ocean_lowpass_df <- p[["gcb_ocean_lowpass_df"]]
   if (!is.null(p[["gcb_enso_slope_row"]]))   err$gcb_enso_slope_row   <- p[["gcb_enso_slope_row"]]
@@ -2177,7 +2179,11 @@ ccx_prepare_obs <- function() {
   d14  <- as.data.frame(readRDS(ccx_path("data", "obs_d14c_zonal.rds")))
   ice  <- readRDS(ccx_path("data", "obs_icecore.rds"))
   gcb  <- readRDS(ccx_path("data", "gcb_budget.rds"))$budget
-  ic20 <- tryCatch(as.data.frame(readRDS(ccx_path("data", "obs_d14c_intcal20.rds"))),
+  # the v2 table (2026-10-12, data-raw/build_intcal20_d14c.R): the shipped year / d14c / err
+  # REPRODUCED from the published intcal20.14c (gated there, exact), plus `sd_d14c` -- column 5, the
+  # D14C sigma in permil. The legacy row reads `err` exactly as before; data/obs_d14c_intcal20.rds
+  # stays as the record (test-intcal-v2.R holds the two to identical columns).
+  ic20 <- tryCatch(as.data.frame(readRDS(ccx_path("data", "obs_d14c_intcal20_v2.rds"))),
                    error = function(e) NULL)
   exc  <- tryCatch(readRDS(ccx_path("data", "obs_excess_c14.rds")),
                    error = function(e) NULL)
@@ -2432,6 +2438,19 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
                        ocean_grad = NULL, by_stream = FALSE, d14c_mid = NULL,
                        npp = NULL, residuals = FALSE) {
   parts <- c()
+  # THE COLUMN DEPTH every GLODAP row is read at (2026-10-12): the structure's, which
+  # ccx_err_with_struct() copies onto `err`; absent = 3700 m, every registered mode, bit for bit.
+  # The ocean-gradient bundle carries the depth it was BUILT on (ccx_ocean_grad_scored()), and a
+  # bundle from another column STOPS here. `deep` / `d14c_mid` are bare numbers; their identity
+  # with this depth is gated where the spinup is in hand (ccx_make_logpost()).
+  odep <- ccx_glodap_depth_key(err[["ocean_depth"]])
+  if (!is.null(ocean_grad)) {
+    bdep <- if (is.null(ocean_grad[["ocean_depth"]])) CCX_GLODAP_DEPTH_LEGACY else ocean_grad[["ocean_depth"]]
+    if (abs(bdep - odep) > CCX_GLODAP_DEPTH_TOL)
+      stop(sprintf(paste("ccx_loglik(): the ocean-gradient bundle was built on a %g m column but `err` scores",
+                         "a %g m one -- pass err through ccx_err_with_struct() with the run's base list"), bdep, odep))
+  }
+  # (checked FIRST, before any row is scored: a mismatch is a caller bug, not a row to skip)
   # GATE 11's RESIDUAL CAPTURE (W4, 2026-10-02; Marcus: "Capture in ccx_loglik"). DESIGN's gate 11
   # screens "all residual series"; the only complete source is the objective itself, so every row
   # below scores its Gaussian through `dn`, and with `residuals = TRUE` each call's (x - mean) is
@@ -2781,8 +2800,15 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
     ic_end <- if (!is.null(obs$d14_nh_ann)) min(obs$d14_nh_ann$year) else 1950
     ic <- obs$intcal[obs$intcal$year >= 1750 & obs$intcal$year < ic_end, ]
     mod <- interp("d14c_NH", ic$year + 0.5)
+    # THE SIGMA (2026-10-12; CHANGELOG 10-12 u). `err` is IntCal's 14C-AGE sigma in YEARS (9-11),
+    # scored here as permil by every registered mode -- a units bug, kept bit-exact for them. Label
+    # hilda_csl3v0kaidgbemwtc sets `intcal_sd_published` (via ccx_err_with_struct()) and scores the
+    # published D14C sigma, column 5 (1.2-1.3 permil), with the same representation term.
+    sd_ic <- if (isTRUE(err[["intcal_sd_published"]] == 1)) ic$sd_d14c else ic$err
+    if (is.null(sd_ic) || anyNA(sd_ic))
+      stop("ccx_loglik(): the IntCal rows carry no `sd_d14c` -- obs must come from obs_d14c_intcal20_v2.rds")
     add("d14c_intcal", sum(dn(ic$d14c, mod,
-                           sqrt(ic$err^2 + LIK_D14C_REP_OTHER^2), log = TRUE)))
+                           sqrt(sd_ic^2 + LIK_D14C_REP_OTHER^2), log = TRUE)))
   }
 
   # ---- ocean excess 14C inventory (design note 5) ---------------------
@@ -2819,18 +2845,6 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   # so it is off whenever either is switched off (how a fixture scores
   # "without the rows"). Any absent input falls back to the independent rows,
   # visibly, so nothing can be silently half-scored.
-  # THE COLUMN DEPTH every GLODAP row below is read at (2026-10-12): the structure's, which
-  # ccx_err_with_struct() copies onto `err`; absent = 3700 m, every registered mode, bit for bit.
-  # The ocean-gradient bundle carries the depth it was BUILT on (ccx_ocean_grad_scored()), and a
-  # bundle from another column STOPS here. `deep` / `d14c_mid` are bare numbers; their identity
-  # with this depth is gated where the spinup is in hand (ccx_make_logpost()).
-  odep <- ccx_glodap_depth_key(err[["ocean_depth"]])
-  if (!is.null(ocean_grad)) {
-    bdep <- if (is.null(ocean_grad[["ocean_depth"]])) CCX_GLODAP_DEPTH_LEGACY else ocean_grad[["ocean_depth"]]
-    if (abs(bdep - odep) > CCX_GLODAP_DEPTH_TOL)
-      stop(sprintf(paste("ccx_loglik(): the ocean-gradient bundle was built on a %g m column but `err` scores",
-                         "a %g m one -- pass err through ccx_err_with_struct() with the run's base list"), bdep, odep))
-  }
   profile_mvn <- FALSE
   if ((LIK_USE_D14C_PROFILE_GNORM || LIK_USE_D14C_PROFILE_MVN) && LIK_USE_D14C_MID && LIK_USE_D14C_DEEP &&
       !is.null(deep) && is.finite(deep) && !is.null(d14c_mid)) {

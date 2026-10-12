@@ -456,6 +456,26 @@ for (nf in nuc_files) {
 # 17 MB, 1x1 degree x 33 WOA standard depth levels, NetCDF classic. Reduced to
 # an area-weighted depth profile by build_calibration_data.R [8]; only the
 # profile is committed.
+# ---------------------------------------------------------------------
+# 4b. IntCal20 atmospheric 14C curve (ADDED 2026-10-12)
+# ---------------------------------------------------------------------
+# The pre-bomb D14C row's source. Until 2026-10-12 it came through the
+# `rintcal` package (not installed since), whose `err` column is the 14C-AGE
+# sigma in YEARS -- which the likelihood scored as permil (CHANGELOG 10-12 u).
+# The published file carries the D14C sigma in permil (column 5), and
+# data-raw/build_intcal20_d14c.R now builds the target from THIS file. First
+# fetched 2026-10-12 by hand (sha256 974a6664...168e); the MANIFEST row was
+# appended that day without re-running this whole script.
+cat("[4b] IntCal20 atmospheric 14C curve\n")
+dir.create(file.path(DL_DIR, "intcal20"), showWarnings = FALSE)
+fetch("intcal20",
+      "https://intcal.org/curves/intcal20.14c",
+      file.path("intcal20", "intcal20.14c"),
+      paste("Reimer P, et al. (2020), The IntCal20 Northern Hemisphere radiocarbon age",
+            "calibration curve (0-55 cal kBP), Radiocarbon 62:725-757, doi:10.1017/RDC.2020.41."),
+      paste("Columns: cal BP, 14C age, sigma (yr), Delta14C (permil), sigma (permil).",
+            "Pre-bomb D14C target 1750-1940 (build_intcal20_d14c.R); column 5 is its sigma."))
+
 cat("[6b] Eide et al. 2017 oceanic 13C Suess effect climatology\n")
 
 fetch("eide_c13_suess",
