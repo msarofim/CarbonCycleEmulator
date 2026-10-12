@@ -2,7 +2,20 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
-## 2026-10-12 (a) — **Card 5's FaIR PD100 line is built and drawn, and the PD100 runs with the climate FREE everywhere it is live. On the way: two bugs in the held builder, and two in `diag_joos_irf.R`, which had been running a different model from the one it names.** (FaIRtoFrEDI `964aa12`; here `5287259`, `6282b57`, and this entry's commit.)
+## 2026-10-12 (c) — **The full suite at `0e57110`: 7204 passed, 5 failed, 0 errors, 3 skipped (18.2 min).** Three failures are expected; two are a lint ratchet asking to be tightened, which is Marcus's to approve.
+- ⚠ **Lettering:** a concurrent session wrote 10-12 (a) (its tidy-ups, `c540110`) before my entry. The entry that commit `0e57110`'s message calls "(a)" is therefore (b), and this one is (c). Commit `df6a6d1` carries this run's log but, by my slip, not this entry.
+- Run: frozen detached worktree `~/ccx_frozen/suite_20261012_0e57110`, downloads APFS-cloned, BLAS pinned, `nice 10`, `set_max_fails(Inf)` (as 10-09) → `outputs/diagnostics/suite_20261012_0e57110.log`.
+- Expected:
+  - `test-cmap-tie.R:131`, the deliberate RED from 10-11 (c) (three rows in the tie gap at `hilda29e`);
+  - `test-review-card-numbers.R:75` and `:85`, card 4's two failures by design.
+- ⚠ **New, by design of the ratchet:** `test-overlay-idiom-lint.R:113` and `:124`.
+  - Converting `diag_joos_irf.R` to `ccx_overlay_par()` (10-12 b, "convert on touch") takes it off the bare-`intersect()` idiom.
+  - The lint therefore asks for it to come out of `OI_BASELINE`, and for `OI_BASELINE_N` to drop 59 → 58.
+  - That TIGHTENS the lint. It is NOT edited: the standing rule is that a failing test is reported, not changed. Marcus to approve.
+- 3 skipped, the same count as 10-09. Passes are up from 7107 because of the new test files.
+- The card-5 change was also verified in the live app: the FaIR line, the two-row legend, the free numbers in both captions, 0 `shiny-output-error` at 1024 px.
+
+## 2026-10-12 (b) — **Card 5's FaIR PD100 line is built and drawn, and the PD100 runs with the climate FREE everywhere it is live. On the way: two bugs in the held builder, and two in `diag_joos_irf.R`, which had been running a different model from the one it names.** (FaIRtoFrEDI `964aa12`; here `5287259`, `6282b57`, and this entry's commit.)
 
 **RULINGS (Marcus, verbatim, 10-11/10-12):**
 - "Allow 2320 for this run (Recommended)"
