@@ -68,6 +68,9 @@ RV_PD_CLIMATE    <- CCX_PD_CLIMATE_DEFAULT
 # built by data-raw/build_fair_pd100.R, its protocol pinned by tests/testthat/test-fair-pd100.R
 RV_FAIR_PD100_FILE <- "fair_pd100.rds"
 RV_FAIR_LAB_FMT    <- "%s, %d-configuration mean"   # legend: the file's own label and config count
+# the FaIR band (Marcus 2026-10-12, "Draw the band"): the file's own 5th-95th percentile across configs
+RV_FAIR_BAND_COLS  <- c(lo = "irf_p05", hi = "irf_p95")
+RV_FAIR_BAND_FMT   <- "%s, 5\u201395 %% of configurations"   # legend: label, then the percentiles above
 RV_SEAS_WINDOW   <- c(2000, 2024)   # the climatology window for the seasonal panels
 RV_GRAD_WINDOW   <- c(2000, 2024)   # where the MLO-SPO gradients are read
 
@@ -393,7 +396,9 @@ rv_pulse <- function() rv_memo("pulse", function() {
   list(t = o$t[k], irf = o$irf[k],
        read = vapply(RV_IRF_READ, at, numeric(1)),
        joos = vapply(RV_IRF_READ, joos_irf, numeric(1)),
-       fair = data.frame(t = fair$t, irf = fair$irf_mean),
+       fair = data.frame(t = fair$t, irf = fair$irf_mean,
+                         lo = fair[[RV_FAIR_BAND_COLS[["lo"]]]], hi = fair[[RV_FAIR_BAND_COLS[["hi"]]]]),
+       fair_band_label = sprintf(RV_FAIR_BAND_FMT, fp$label),
        fair_label = sprintf(RV_FAIR_LAB_FMT, fp$label, as.integer(fp$n_configs)),
        fair_read = vapply(RV_IRF_READ, function(y) stats::approx(fair$t, fair$irf_mean, y)$y, numeric(1)),
        horizons = RV_IRF_READ, climate = o$climate,

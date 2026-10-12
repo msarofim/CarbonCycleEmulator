@@ -534,7 +534,7 @@ navbarPage(
         review_card(2, "rv_gradient", "300px"),
         review_card(3, "rv_diseq",   "320px"),
         review_card(4, "rv_variance", "300px", "rv_enso", "320px"),
-        review_card(5, "rv_irf",     "320px", "rv_partition", "300px"),
+        review_card(5, "rv_irf",     "400px", "rv_partition", "300px"),   # 5a 320 -> 400: the FaIR band takes a third legend row (2026-10-12)
         review_card(6, NULL),
         review_card(7, NULL),
         review_card(8, "rv_oclim", "380px", "rv_oclim_stake", "280px"),

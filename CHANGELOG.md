@@ -2,6 +2,14 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (i) — **Card 5a draws FaIR's 841-config 5–95 % band** (Marcus, verbatim: "Draw the band").
+- `rv_pulse()` carries the file's own `irf_p05` / `irf_p95` (`RV_FAIR_BAND_COLS`). `rv_plot_irf()` draws them as a ribbon (`RV_FAIR_BAND_ALPHA` 0.25) behind every line.
+  - The ribbon's legend key is `RV_FAIR_BAND_FMT`, on a row of its own (`legend.box = "vertical"`). Beside the two-row line legend it clipped both.
+  - Card 5a's height goes from 320 to 400 px (`app/ui.R`) to hold the third legend row.
+- Measured on the band (CHANGELOG 10-12 g): CarboTope is above FaIR's 95th percentile to 27.5 yr and inside from 28.5 to 300 yr.
+- The caption is unchanged; it is Marcus's copy. The facts are in `notes/card5a_caption_facts_2026-10-12.md`.
+- Verified in the live app at 1024 px: the band renders and 0 `shiny-output-error`. Tests: `test-review-cards` 48 / 0, `-app-review-copy` 41 / 0, `-plot-text-fits` 104 / 0, `-fair-pd100` 22 / 0.
+
 ## 2026-10-12 (h) — **The tie cut re-expressed as the BASIN SPREAD (Marcus, verbatim: "Scale to basin spread (Recommended)"). The cut is now 1.923 pp, the largest change in any row's top-two margin between `hilda29e` and its like-for-like basin `hilda29a6`. The cmap-tie deliberate RED clears. No displayed phrase changes.**
 - `app/global.R`:
   - `APP_CMAP_TIE_FLIP_MAX` and `_STABLE_MIN` (09-26, `hilda29l`) are retired.

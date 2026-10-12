@@ -20,6 +20,7 @@
 RV_COL_MODEL <- function() PAL[["model"]]
 RV_COL_OBS   <- function() PAL[["obs"]]
 RV_COL_ALT   <- function() PAL[["off"]]
+RV_FAIR_BAND_ALPHA <- 0.25   # card 5a: the FaIR 5-95 % ribbon behind its dashed mean
 RV_COL_BAD   <- function() PAL[["pulse"]]
 
 rv_plot_unavailable <- function(msg) {
@@ -256,7 +257,12 @@ rv_plot_irf <- function() rv_guard(rv_pulse(), function(x) {
     data.frame(t = x$fair$t, f = x$fair$irf, who = lab_f))
   labs3 <- c(lab_m, lab_j, lab_f)
   d$who <- factor(d$who, levels = labs3)
+  # the FaIR band (Marcus 2026-10-12, "Draw the band"), drawn FIRST so every line sits on top of it
+  band <- data.frame(t = x$fair$t, lo = x$fair$lo, hi = x$fair$hi, who = x$fair_band_label)
   ggplot(d, aes(t, f, colour = who, linetype = who)) +
+    geom_ribbon(data = band, aes(x = t, ymin = lo, ymax = hi, fill = who), inherit.aes = FALSE,
+                alpha = RV_FAIR_BAND_ALPHA) +
+    scale_fill_manual(values = stats::setNames(RV_COL_ALT(), x$fair_band_label), name = NULL) +
     geom_line(linewidth = 0.8) +
     scale_colour_manual(values = stats::setNames(c(RV_COL_MODEL(), RV_COL_OBS(), RV_COL_ALT()), labs3)) +
     scale_linetype_manual(values = stats::setNames(c("solid", "solid", "22"), labs3)) +
@@ -269,7 +275,9 @@ rv_plot_irf <- function() rv_guard(rv_pulse(), function(x) {
                  collapse = "  "),
            "  A comparison, not a test — nothing from this source scores the model."))) +
     expand_limits(y = c(0, 1)) +   # Marcus 2026-10-02 (carbotopecomment): "the y axis should run zero to 1"
-    theme_ccx()
+    theme_ccx() +
+    # the band's key on a row of its own: beside the two-row line legend it clipped both (rendered 2026-10-12)
+    theme(legend.box = "vertical")
 })
 
 # ---------------------------------------------------------------------
