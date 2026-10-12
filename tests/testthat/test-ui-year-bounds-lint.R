@@ -4,7 +4,8 @@
 # THE DEFECT THIS GUARDS (found in the 2026-09-25 app review). All four
 # "Years shown" sliders in app/ui.R hardcoded `min = 1750, max = 2024`, and the
 # upper end of each `value =` range typed 2024 a second time -- against
-# `APP_HIST_YEARS <- c(1750, 2024)` in app/global.R, whose own section header
+# `APP_HIST_YEARS <- c(1750, 2024)` in app/global.R (its end year has been READ
+# from the GCB file since 2026-10-12, code review sec.4), whose own section header
 # says every label derives from these constants "so changing a window or a
 # scenario cannot leave a stale label behind (standing project rule)".
 #

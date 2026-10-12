@@ -2,6 +2,22 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (y) — **The code review's §4 code items are fixed** (Marcus, verbatim: "Review §4 code items", in the same answer as "Citations first, one refit (Recommended)"). No app number and no stored logpost changed: `test-mode-file.R` (the canonical's streams reproduce) is 224 / 0.
+
+- **`CCX_MODE_RETIRED` gains the five names it lacked** (`R/paths.R`): `hilda30c`, `hilda30h`, `hilda31p`, `hilda30e`, `hilda30s`.
+  - Each entry carries its cause commit (the successor's adoption: `1106933`, `0a051aa` ×2, `72089fc`, `d85ef44`, found from the commit that created each quarantine README) and its quarantine directory.
+  - Asking for one by name now says why it was retired, not "unknown mode".
+  - **New gate** (`test-mode-file.R`): every `CCX_MODE_*_QUARANTINED` constant must have an entry whose reason names the directory its file sits in, and every directory a reason names must exist. The old test walked only the names the registry already had, so it could not see a missing one. **Mutation-tested:** an entry dropped, a wrong directory and a non-existent directory each FAIL it (1, 1 and 2 failures).
+- **`app/global.R`'s dead fallback mode path is gone.** `calibration/output/mode_fit.rds` sat beside `ccx_mode_file()`, "the ONE place". It has never existed; a file that appeared there would have been loaded unlabelled.
+- **`APP_HIST_YEARS`'s end year is read from the GCB file**, the same file `APP_SPLICE_YEAR` reads, and the two are asserted equal. Before, a GCB update would have moved the splice and left the run, the sliders and the history panels a year short. Proven identical: `c(1750, 2024)`; the canonical still loads (29 fitted, "posterior mode"). `server.R`'s typed 2023 was already gone (t).
+- **The periodic spin-up now reports annual means for δ¹³C and Δ¹⁴C.** `ccx_spinup_diagnostics()` takes `d13c_atm` / `d14c_atm` as REQUIRED caller-supplied estimators, as `co2_ppm` already was. The aseasonal spin-up passes the state's instant through the new `ccx_atm_delta_instant()` (identical to before). The periodic one passes the orbit's global annual mean, mass over mass, from the same 12 rows as its CO₂.
+  - At `hilda29e`: Δ¹⁴C **2.143463 → 2.160000** (target 2.160, a global pin); δ¹³C **−6.472576 → −6.468993** (target −6.469 is the NH row's pin, met exactly; the SH sits 1.3e-5 ‰ off).
+  - Nothing reads these two fields except `ccx_report_spinup()` and one diagnostic script (`diag_periodic_spinup_adoption.R`, which prints them). The objective does not.
+  - **New test at the canonical** (`test-spinup-diagnostics.R`): Δ¹⁴C meets its pin to 1e-9; the independently recomputed NH δ¹³C meets its pin to 1e-9; the global δ¹³C lies between the NH and SH means (an ordering, not a tolerance). Putting the instant back FAILS two of these (mutation-tested). 55 / 0.
+- **`ccx_run`'s roxygen block** is moved off `ccx_fill_prod_c14()`'s and onto `ccx_run` (`R/forcing.R`), with a `flux_method` line. Parse-identical (`deparse(parse(keep.source = FALSE))`).
+- **Noticed, not changed:** `app_params`' `post_file` (`calibration/output/posterior_draws.rds`) is dead in the same way. It has never existed, and a file there would relabel the app "calibrated posterior". It feeds the banner's provenance class (`ui.R:40`), so removing it changes the UI's code path; left for Marcus.
+- Tests run: `test-mode-file` 224 / 0, `test-spinup-diagnostics` 55 / 0, `test-spinup` 18 / 0, `test-soil-inert` 107 / 0, `test-ui-year-bounds-lint` 18 / 0, `test-driver-panel` 49 / 0, `test-constants` 414 / 0. The full suite runs after the §5 / §6 batches.
+
 ## 2026-10-12 (x) — Handoff: `notes/handoff_2026-10-12c_code_review.md` (Marcus: "Yes, write the handoff note"). It supersedes `handoff_2026-10-12b_tagged_pulse_fair_grid.md`, which now points to it. New memory `ccx_flux_trace_snapshot_aliases`; the suite logs at `56b5ceb` and `d36cda1` are committed.
 
 ## 2026-10-12 (w) — **The full suite at `d36cda1`, the pushed state after the review's fixes: 7321 passed, 2 failed, 3 skipped, 19.1 min** (`outputs/diagnostics/suite_20261012_d36cda1.log`). The 2 failures are card 4's, by design. It is identical to `56b5ceb`'s, so the text-only batch (v) changed no behaviour.

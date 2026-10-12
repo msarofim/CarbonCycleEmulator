@@ -600,7 +600,42 @@ CCX_MODE_RETIRED <- c(
               "edge years). Retired by the ROUND-7 refit under that objective, promoted as",
               "`hilda31s2` (`9bc7031`; -1423.5675, +8.68, same h_ml). SUPERSEDED, not defective. Still",
               "resolvable by path as CCX_MODE_HILDA31S_QUARANTINED. Quarantined under",
-              "calibration/output/quarantine/20260913_round7_adopted/")
+              "calibration/output/quarantine/20260913_round7_adopted/"),
+  # THE LIST STOPPED GROWING ON 09-17 and these five returned "unknown mode" until 2026-10-12
+  # (pre-beta code review, notes/code_review_2026-10-12.md sec.4): each was retired to a
+  # *_QUARANTINED path above without an entry here. test-mode-file.R now ties every
+  # CCX_MODE_*_QUARANTINED constant to an entry, so the next retirement cannot skip it.
+  hilda30c = paste("the FIRST PINNED canonical (`ent_seas_amp_SH` held at 0; 30 free names) on the",
+              "`hilda` structure under objective #11, canonical 2026-09-13 (d) to 2026-09-17.",
+              "Retired by the hygiene-batch refit under objective #12 on the `hilda_c` structure,",
+              "promoted as `hilda30h` (`1106933`). SUPERSEDED, not defective; its stored streams",
+              "are objective #12's (restamped, not refit). Still resolvable by path as",
+              "CCX_MODE_HILDA30C_QUARANTINED. Quarantined under",
+              "calibration/output/quarantine/20260917_hilda30h_adopted/"),
+  hilda30h = paste("the `hilda_c` canonical fitted under objective #12, canonical 2026-09-17 to",
+              "2026-09-19. Retired by its own refit under objective #13 (the GCB ENSO ocean-slope",
+              "row), promoted as `hilda30e` (`0a051aa`). SUPERSEDED, not defective; its stored",
+              "streams are objective #13's (the 09-18 e restamp). Still resolvable by path as",
+              "CCX_MODE_HILDA30H_QUARANTINED. Quarantined under",
+              "calibration/output/quarantine/20260919_hilda30e_adopted/"),
+  hilda31p = paste("the 31-parameter `hilda` mode refitted under the PERIODIC spinup: the canonical",
+              "on 2026-09-10, then the seas_ml = 0 CONTROL until 2026-09-19, restamped through",
+              "four objectives. Retired when its objective-#13 refit on `hilda_c`, `hilda31pe`,",
+              "was registered as the control (`0a051aa`). SUPERSEDED, not defective. Still",
+              "resolvable by path as CCX_MODE_HILDA31P_QUARANTINED. Quarantined under",
+              "calibration/output/quarantine/20260919_hilda30e_adopted/"),
+  hilda30e = paste("the `hilda_c` canonical's objective-#13 refit (the seasonal mixed layer cycling",
+              "in BOTH hemispheres), canonical 2026-09-19 to 2026-09-20. Retired by the refit on",
+              "the `hilda_cs` structure (the NH cycle flat), promoted as `hilda30s` (`72089fc`).",
+              "SUPERSEDED, not defective; it is the like-for-like \"NH cycle on\" arm of hilda30s.",
+              "Still resolvable by path as CCX_MODE_HILDA30E_QUARANTINED. Quarantined under",
+              "calibration/output/quarantine/20260920_hilda30s_adopted/"),
+  hilda30s = paste("the `hilda_cs` canonical with the two-coefficient ocean ENSO shim fitted,",
+              "canonical 2026-09-20 (o) to (r). Retired by the adoption of the layer-3 Nino 3.4",
+              "return limb (`w_enso_l2` fitted, the shim pair held at 0) as `hilda29l` (`d85ef44`).",
+              "SUPERSEDED, not defective; it is the like-for-like \"shim\" arm of hilda29l. Still",
+              "resolvable by path as CCX_MODE_HILDA30S_QUARANTINED. Quarantined under",
+              "calibration/output/quarantine/20260920_hilda29l_adopted/")
 )
 
 #' Absolute path to a fitted mode file, by name

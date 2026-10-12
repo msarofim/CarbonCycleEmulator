@@ -48,7 +48,14 @@ ccx_load_cpp()
 # from APP_TITLE.
 APP_TITLE        <- "CarboTope"
 APP_SUBTITLE     <- "A calibrated carbon-cycle model you can take apart"
-APP_HIST_YEARS   <- c(1750, 2024)
+# The history's LAST year is the observed carbon budget's (GCB) last year, READ from the
+# data and not typed (2026-10-12, pre-beta code review sec.4): APP_SPLICE_YEAR below was
+# already read from this file, so a GCB update would have moved the splice and left the
+# run, the year sliders and the history panels a year short. The two are asserted equal
+# where APP_SPLICE_YEAR is defined. The FIRST year stays 1750: the run must start
+# preindustrial (see F5 below).
+APP_HIST_YEARS   <- c(1750, max(readRDS(file.path(CCX_ROOT, "data",
+                                                  "forcing_emissions_historical.rds"))$year))
 # F5 (Marcus 2026-09-22, APPROVED 09-24): Scenarios and Build-your-own show
 # 1900-2150. ⭐ THE RUN SPAN AND THE VIEW SPAN ARE DIFFERENT THINGS and the
 # distinction is load-bearing: the model must still START IN 1750, because a
@@ -214,8 +221,12 @@ app_params <- local({
   # a path that resolves to nothing fails SILENTLY in this block, a stale
   # literal here does not error -- it ships uncalibrated defaults behind a
   # banner nobody reads, which is exactly what happened until 2026-08-21.
-  mode_files <- c(ccx_mode_file(CCX_MODE_CANONICAL),
-                  file.path(CCX_ROOT, "calibration", "output", "mode_fit.rds"))
+  # ⛔ THE LITERAL FALLBACK IS GONE (2026-10-12, pre-beta code review sec.4): a
+  # second entry, `calibration/output/mode_fit.rds`, sat here beside "the ONE
+  # place". It has never existed, so it was dead -- and a file that ever
+  # appeared at that path would have been loaded with nothing saying which mode
+  # it was. The canonical is named in R/paths.R and only there.
+  mode_files <- ccx_mode_file(CCX_MODE_CANONICAL)
   post_file <- file.path(CCX_ROOT, "calibration", "output", "posterior_draws.rds")
   p <- ccx_default_params()
   # ENSO: FOUR inits since 2026-09-01, read off CCX_PARAM_TABLE rather than
@@ -775,6 +786,8 @@ APP_LUC_SPLIT_NOTE <- if (is.null(APP_LUC_SPLIT)) NULL else paste(
 # the data rather than typed, so a GCB update moves the handover and every label
 # below with it.
 APP_SPLICE_YEAR <- max(APP_EMIS_HIST$year)
+# ONE end year: the run, the sliders and the splice all read the same file (APP_HIST_YEARS above).
+stopifnot(APP_HIST_YEARS[2] == APP_SPLICE_YEAR)
 # Marcus 2026-10-11 (CarboTopecomments.10.11.26): the second sentence -- the scenarios were
 # harmonised a couple of years earlier, so the handover steps total emissions by at most
 # APP_SPLICE_STEP (0.5 GtC/yr) -- was DELETED "as extraneous detail", and the step's

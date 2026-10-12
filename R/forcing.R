@@ -1218,15 +1218,6 @@ ccx_forcing_at <- function(F, i) {
 }
 
 # ---------------------------------------------------------------------
-#' Run the model forward over an assembled forcing table
-#'
-#' @param substeps RK4 substeps per month, or "auto" to pick the smallest count
-#'   that keeps the explicit diffusion term stable (see ccx_substeps_for()).
-#'   "auto" resolves to CCX_SUBSTEPS_MIN = 4 at every ordinary parameter value.
-#'   ⚠ (code review 2026-10-12) Not under the seasonal mixed layer: 4 at the
-#'   canonical's h_ml (64.63), 5 / 6 / 9 / 13 at h_ml 68 / 70 / 72 / 73 -- see
-#'   the stability section of R/model.R. This R path has no NA-retry.
-#' @return list(state = final state, out = data.frame of monthly diagnostics)
 #' Fill an unset cosmogenic-14C production from the spinup that seeds the run
 #'
 #' `ccx_build_forcing()` defaults `prod_c14` to NA (the production is a property
@@ -1243,6 +1234,19 @@ ccx_fill_prod_c14 <- function(F, spin) {
   F
 }
 
+#' Run the model forward over an assembled forcing table
+#'
+#' (This block sat ABOVE ccx_fill_prod_c14()'s, fused onto it, until 2026-10-12 --
+#' pre-beta code review sec.4.)
+#'
+#' @param substeps RK4 substeps per month, or "auto" to pick the smallest count
+#'   that keeps the explicit diffusion term stable (see ccx_substeps_for()).
+#'   "auto" resolves to CCX_SUBSTEPS_MIN = 4 at every ordinary parameter value.
+#'   ⚠ (code review 2026-10-12) Not under the seasonal mixed layer: 4 at the
+#'   canonical's h_ml (64.63), 5 / 6 / 9 / 13 at h_ml 68 / 70 / 72 / 73 -- see
+#'   the stability section of R/model.R. This R path has no NA-retry.
+#' @param flux_method "snapshot" (default) or "rk4"; see the comment in the body.
+#' @return list(state = final state, out = data.frame of monthly diagnostics)
 ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE, edge_fn = NULL,
                     flux_method = c("snapshot", "rk4")) {
   # `flux_method` (2026-10-12): "snapshot" (the default, unchanged) evaluates the trace at each

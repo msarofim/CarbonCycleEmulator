@@ -184,7 +184,15 @@ ccx_c12_steady_conveyor <- function(p0, aux, grid, chi0, y, forc,
 #' @param residuals named list(C=, C13=, C14=) -- the CALLER's own convergence
 #'   measure, on the caller's own definition.
 #' @param co2_ppm the CALLER's own atmospheric CO2 estimator, ppm.
-ccx_spinup_diagnostics <- function(y, prod, aux, grid, residuals, co2_ppm) {
+#' @param d13c_atm,d14c_atm the CALLER's own atmospheric d13C / D14C estimators,
+#'   permil, on the SAME convention as `co2_ppm` (2026-10-12): the instant for the
+#'   aseasonal fixed point (`ccx_atm_delta_instant()`), the orbit's annual mean for
+#'   the periodic solve. Until then both were computed HERE from `y` -- for the
+#'   periodic solve the START-OF-YEAR instant, so the report printed d13C -6.473
+#'   against a target of -6.469 that the annual mean meets (pre-beta code review
+#'   sec.4). Required for the reason `co2_ppm` is.
+ccx_spinup_diagnostics <- function(y, prod, aux, grid, residuals, co2_ppm,
+                                   d13c_atm, d14c_atm) {
   if (!all(c("C", "C13", "C14") %in% names(residuals)))
     stop("ccx_spinup_diagnostics(): `residuals` needs elements C, C13 and C14 ",
          "-- the caller's own convergence measure, since the two spinups do not ",
@@ -192,11 +200,15 @@ ccx_spinup_diagnostics <- function(y, prod, aux, grid, residuals, co2_ppm) {
   if (!is.numeric(co2_ppm) || length(co2_ppm) != 1L || !is.finite(co2_ppm))
     stop("ccx_spinup_diagnostics(): `co2_ppm` must be the caller's own single ",
          "finite atmospheric estimator; there is deliberately no default.")
+  for (nm in c("d13c_atm", "d14c_atm")) {
+    v <- if (nm == "d13c_atm") d13c_atm else d14c_atm
+    if (!is.numeric(v) || length(v) != 1L || !is.finite(v))
+      stop("ccx_spinup_diagnostics(): `", nm, "` must be the caller's own single ",
+           "finite atmospheric estimator, on the same convention as `co2_ppm`; ",
+           "there is deliberately no default.")
+  }
 
   atm_idx <- c(aux$idx$NH$atm, aux$idx$SH$atm)
-  d14c_atm <- 1000 * (sum(y[atm_idx, "C14"]) / sum(y[atm_idx, "C"]) - 1)
-  d13c_atm <- 1000 * (sum(y[atm_idx, "C13"]) /
-                        (sum(y[atm_idx, "C"]) * ccx_const("R13_VPDB")) - 1)
   # HS and HD ARE ocean carbon and belong in the inventory; `$hs`/`$hd` are NULL
   # when the structure is off, and c() drops them, so this is the same vector.
   ocean_idx <- unlist(lapply(HEMIS, function(h)
@@ -473,6 +485,7 @@ ccx_spinup <- function(p = ccx_default_params(),
   # definitions: an instantaneous derivative, and the instantaneous atmospheric
   # burden (which on an aseasonal fixed point is trivially also its annual mean).
   resid <- ccx_deriv_fast(y, 1750, p0, zero_forc(prod), grid, aux, prep = prep)
+  dl <- ccx_atm_delta_instant(y, aux)   # the isotope rows, on the same (instant) convention
 
   list(
     y = y, prod_c14 = prod, aux = aux, grid = grid, params = p,
@@ -482,8 +495,22 @@ ccx_spinup <- function(p = ccx_default_params(),
                        C13 = max(abs(resid[, "C13"])),
                        C14 = max(abs(resid[, "C14"]))),
       co2_ppm   = sum(y[c(aux$idx$NH$atm, aux$idx$SH$atm), "C"]) /
-                    ccx_const("GtC_PER_PPM"))
+                    ccx_const("GtC_PER_PPM"),
+      d13c_atm  = dl[["d13c"]], d14c_atm = dl[["d14c"]])
   )
+}
+
+#' The atmospheric d13C and D14C of a STATE, permil: the INSTANT
+#'
+#' The aseasonal spinup's estimator for `ccx_spinup_diagnostics()`'s two isotope rows
+#' (on its fixed point the instant IS the annual mean). Moved out of the producer
+#' 2026-10-12, when the periodic solve began passing its orbit's annual means.
+#' @return c(d13c = , d14c = )
+ccx_atm_delta_instant <- function(y, aux) {
+  atm_idx <- c(aux$idx$NH$atm, aux$idx$SH$atm)
+  c(d13c = 1000 * (sum(y[atm_idx, "C13"]) /
+                     (sum(y[atm_idx, "C"]) * ccx_const("R13_VPDB")) - 1),
+    d14c = 1000 * (sum(y[atm_idx, "C14"]) / sum(y[atm_idx, "C"]) - 1))
 }
 
 #' EVERY carbon stock in a state, GtC, from the model's own index map (2026-09-30)
@@ -527,11 +554,12 @@ ccx_stock_readout <- function(y, aux) {
 
 #' Pretty-print the spinup diagnostics
 ccx_report_spinup <- function(s) {
-  # ⚠ TWO LABEL CAVEATS (code review 2026-10-12; labels left unchanged). (1) For a
-  # PERIODIC spinup the d13C / D14C rows are the START-OF-YEAR instant on the orbit,
-  # not annual means (only CO2 is; see R/periodic_spinup.R step 3). (2) The depth
+  # ⚠ LABEL CAVEAT (code review 2026-10-12; label left unchanged). The depth
   # ranges "1314-3700" / "2627-3700" are the layer edges at h_ml = 75 m; the real
   # edges move with h_ml (the canonical's is 64.63), so read them as nominal.
+  # (The review's other caveat -- a PERIODIC spinup's d13C / D14C rows were the
+  # START-OF-YEAR instant -- is FIXED: since 2026-10-12 they are the orbit's annual
+  # means, the convention its CO2 row and its pins are stated on.)
   d <- s$diagnostics
   cat("=== preindustrial spinup ===\n")
   cat(sprintf("  residual |dC/dt|     %.3e GtC/yr  (must be ~0)\n", d$max_abs_dCdt))

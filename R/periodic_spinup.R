@@ -317,12 +317,19 @@ ccx_periodic_spinup <- function(p = ccx_default_params(),
                      C14 = max(abs(rfin$state[, "C14"] - y[, "C14"]))),
     # the ANNUAL MEAN over the orbit -- the quantity the 12C pin is stated on.
     # The start-of-year instant differs from it by the seasonal amplitude.
-    # ⚠ (noted 2026-10-12, code review) ONLY co2_ppm is an annual mean. Every
-    # other atmospheric row -- `d13c_atm`, `d14c_atm` -- is computed from the
-    # state `y`, i.e. the START-OF-YEAR instant on the orbit, so
-    # ccx_report_spinup() prints e.g. d13C -6.473 against a target of -6.469 that
-    # the ANNUAL MEAN meets exactly. Its labels do not say so (left unchanged).
-    co2_ppm   = mean(rfin$out$co2_NH + rfin$out$co2_SH) / 2)
+    co2_ppm   = mean(rfin$out$co2_NH + rfin$out$co2_SH) / 2,
+    # ⭐ THE ISOTOPE ROWS ON THE SAME CONVENTION (2026-10-12, pre-beta code review
+    # sec.4). They were computed from the state `y` -- the START-OF-YEAR instant --
+    # so ccx_report_spinup() printed d13C -6.4726 / D14C 2.1435 against targets of
+    # -6.469 / 2.160 that the annual means meet. Now: the GLOBAL atmosphere's
+    # annual mean, mass over mass, from the same 12 rows as co2_ppm. At hilda29e
+    # D14C is 2.160000 (the pin is global) and d13C -6.468993 (the pin is the NH
+    # row's -6.469000; the SH sits 1.3e-5 permil off it).
+    d13c_atm  = 1000 * (mean((1 + rfin$out$d13c_NH / 1000) * rfin$out$co2_NH +
+                             (1 + rfin$out$d13c_SH / 1000) * rfin$out$co2_SH) /
+                          mean(rfin$out$co2_NH + rfin$out$co2_SH) - 1),
+    d14c_atm  = 1000 * (mean(rfin$out$atm_C14) /
+                          (mean(rfin$out$co2_NH + rfin$out$co2_SH) * gpph) - 1))
 
   list(y = y, prod_c14 = prod, aux = aux, grid = grid, params = p,
        diagnostics = d,

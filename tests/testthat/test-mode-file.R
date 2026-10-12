@@ -151,6 +151,34 @@ test_that("ccx_mode_file refuses the quarantined arm names WITH THE REASON", {
   expect_error(ccx_mode_file(rep(CCX_MODE_CANONICAL, 2L)), "ONE mode name")
 })
 
+test_that("every CCX_MODE_*_QUARANTINED path is a RETIRED name whose reason names ITS directory", {
+  # The registry stopped growing on 2026-09-17: hilda30c, 30h, 31p, 30e and 30s were each moved
+  # to a *_QUARANTINED path with no CCX_MODE_RETIRED entry, so asking for one by name said
+  # "unknown mode" instead of why (code review 2026-10-12 sec.4). The test above walks only the
+  # names the registry already HAS, so it could not see a missing one. This walks the paths.
+  env <- environment(ccx_mode_file)    # wherever setup.R sourced R/ into
+  q <- ls(envir = env, pattern = "^CCX_MODE_.*_QUARANTINED$")
+  expect_gte(length(q), 7L)   # the seven on 2026-10-12; a rename that empties the pattern fails here
+  for (n in q) {
+    nm <- tolower(sub("^CCX_MODE_(.*)_QUARANTINED$", "\\1", n))
+    expect_true(nm %in% names(CCX_MODE_RETIRED),
+                info = paste0(n, " names a quarantined mode, ", nm, ", with no CCX_MODE_RETIRED entry"))
+    if (!nm %in% names(CCX_MODE_RETIRED)) next
+    parts <- strsplit(get(n, envir = env), "/", fixed = TRUE)[[1]]
+    dir <- parts[which(parts == "quarantine") + 1L]
+    expect_match(CCX_MODE_RETIRED[[nm]], paste0("quarantine/", dir, "/"), fixed = TRUE,
+                 info = paste(nm, "reason does not name the directory its file is in:", dir))
+  }
+  # and every directory a reason names is on disk
+  for (a in names(CCX_MODE_RETIRED)) {
+    d <- regmatches(CCX_MODE_RETIRED[[a]],
+                    regexpr("quarantine/[^/]+/", CCX_MODE_RETIRED[[a]]))
+    expect_length(d, 1L)
+    expect_true(dir.exists(ccx_path("calibration", "output", d)),
+                info = paste(a, "names a quarantine directory that is not on disk:", d))
+  }
+})
+
 test_that("every named mode is on disk and carries THIS BUILD's parameter set", {
   for (a in names(CCX_MODE_FILES)) {
     f <- ccx_mode_file(a)

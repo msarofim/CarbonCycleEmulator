@@ -31,16 +31,25 @@ test_that("ccx_spinup_diagnostics() REFUSES the estimator-dependent rows it cann
   sp <- sd_sp()
   ok <- list(C = 0, C13 = 0, C14 = 0)
   # the happy path first, so a refusal below cannot be the state's fault
-  expect_type(ccx_spinup_diagnostics(sp$y, sp$prod_c14, sp$aux, sp$grid, ok, 277), "list")
+  expect_type(ccx_spinup_diagnostics(sp$y, sp$prod_c14, sp$aux, sp$grid, ok, 277, -6.5, 0),
+              "list")
   # residuals: a MISSING element must stop, not silently become NULL. The two
   # spinups do not share a definition of a residual, so there is no default.
   expect_error(ccx_spinup_diagnostics(sp$y, sp$prod_c14, sp$aux, sp$grid,
-                                      list(C = 0, C13 = 0), 277), "residuals")
+                                      list(C = 0, C13 = 0), 277, -6.5, 0), "residuals")
   # co2_ppm: no default, and not a vector or a non-finite
-  expect_error(ccx_spinup_diagnostics(sp$y, sp$prod_c14, sp$aux, sp$grid, ok, c(1, 2)),
+  expect_error(ccx_spinup_diagnostics(sp$y, sp$prod_c14, sp$aux, sp$grid, ok, c(1, 2), -6.5, 0),
                "co2_ppm")
-  expect_error(ccx_spinup_diagnostics(sp$y, sp$prod_c14, sp$aux, sp$grid, ok, NA_real_),
+  expect_error(ccx_spinup_diagnostics(sp$y, sp$prod_c14, sp$aux, sp$grid, ok, NA_real_, -6.5, 0),
                "co2_ppm")
+  # d13c_atm / d14c_atm (caller-supplied since 2026-10-12, for the reason co2_ppm is):
+  # no default, and not a vector or a non-finite
+  expect_error(ccx_spinup_diagnostics(sp$y, sp$prod_c14, sp$aux, sp$grid, ok, 277),
+               "d13c_atm")
+  expect_error(ccx_spinup_diagnostics(sp$y, sp$prod_c14, sp$aux, sp$grid, ok, 277, c(1, 2), 0),
+               "d13c_atm")
+  expect_error(ccx_spinup_diagnostics(sp$y, sp$prod_c14, sp$aux, sp$grid, ok, 277, -6.5, NA_real_),
+               "d14c_atm")
 })
 
 test_that("ccx_spinup() itself goes through the producer, and has not diverged from it", {
@@ -52,7 +61,11 @@ test_that("ccx_spinup() itself goes through the producer, and has not diverged f
   d2 <- ccx_spinup_diagnostics(
     sp$y, sp$prod_c14, sp$aux, sp$grid,
     residuals = list(C = d$max_abs_dCdt, C13 = d$max_abs_dC13dt, C14 = d$max_abs_dC14dt),
-    co2_ppm   = d$co2_ppm)
+    co2_ppm   = d$co2_ppm, d13c_atm = d$d13c_atm, d14c_atm = d$d14c_atm)
+  # the aseasonal solve's isotope rows ARE the state's instant (its estimator), exactly
+  dl <- ccx_atm_delta_instant(sp$y, sp$aux)
+  expect_identical(d$d13c_atm, dl[["d13c"]])
+  expect_identical(d$d14c_atm, dl[["d14c"]])
   expect_setequal(names(d), names(d2))
   for (n in names(d)) expect_identical(d[[n]], d2[[n]], info = n)
   # MUTATION: a producer row that drifts must be caught, so the loop has power.
@@ -107,6 +120,38 @@ test_that("the PERIODIC spinup's diagnostics are its OWN, not the seed's", {
   # 1000x mutation still passed and the first cut of this line was itself a
   # no-power assertion ⇒ [[no_power_null]]. Sized off the measured headroom.
   expect_gt(1e6 * sp_per$diagnostics$max_abs_dCdt / inv_C, rel_floor)
+})
+
+test_that("AT THE CANONICAL the periodic spinup's isotope rows are the orbit's ANNUAL MEANS and meet the pins", {
+  # THE DEFECT (pre-beta code review 2026-10-12 sec.4): the periodic solve's d13c_atm /
+  # d14c_atm were the START-OF-YEAR instant, so ccx_report_spinup() printed d13C -6.4726 /
+  # D14C 2.1435 against targets of -6.469 / 2.160 that the annual means meet; only co2_ppm
+  # was the mean. Asserted at the CANONICAL (its seasonal mixed layer is what separates
+  # the instant from the mean), against the PINS -- which are the ruled targets, not this
+  # code's output ⇒ [[threshold_from_obs_or_law]].
+  lm <- ccx_load_mode(); p <- lm$p
+  sp <- ccx_periodic_spinup(p, verbose = FALSE)
+  d  <- sp$diagnostics
+  # D14C: production is scaled so the GLOBAL annual-mean atmospheric D14C IS the target.
+  # A linear rescaling, so an identity to roundoff (measured 2.160000 vs 2.160).
+  expect_equal(d$d14c_atm, ccx_const("D14C_PI"), tolerance = 1e-9, scale = 1)
+  # d13C: the pin is the NH row's annual mean. Recompute THAT independently (the NH
+  # 13C mass, the pin's own form in ps_monodromy) -- it must be the target...
+  aux <- sp$aux; gpph <- aux$gtc_per_ppm_hemi; R13 <- ccx_const("R13_VPDB")
+  o <- ps_phi(sp$y, p, aux, sp$grid, ps_year_forcing(sp$prod_c14))$out
+  nh <- 1000 * (mean((1 + o$d13c_NH / 1000) * R13 * o$co2_NH * gpph) /
+                  (mean(o$co2_NH) * gpph * R13) - 1)
+  sh <- 1000 * (mean((1 + o$d13c_SH / 1000) * R13 * o$co2_SH * gpph) /
+                  (mean(o$co2_SH) * gpph * R13) - 1)
+  expect_equal(nh, ccx_const("D13C_PI"), tolerance = 1e-9, scale = 1)
+  # ...and the GLOBAL row, a mass-weighted mean of the two hemispheres, must lie BETWEEN
+  # them: an ORDERING of two measured quantities, not an invented tolerance.
+  expect_gte(d$d13c_atm, min(nh, sh) - 1e-12)
+  expect_lte(d$d13c_atm, max(nh, sh) + 1e-12)
+  # POWER: the instant this replaced fails both, by far more than the bars above.
+  inst <- ccx_atm_delta_instant(sp$y, aux)
+  expect_gt(abs(inst[["d14c"]] - ccx_const("D14C_PI")), 1e-3)
+  expect_gt(abs(inst[["d13c"]] - ccx_const("D13C_PI")), 100 * abs(sh - nh))
 })
 
 test_that("`spinup_fn` DEFAULTS to the PERIODIC spinup since adoption (09-09x)", {
