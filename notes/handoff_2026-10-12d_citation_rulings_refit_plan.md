@@ -1,5 +1,8 @@
 # HANDOFF 2026-10-12 (d) — review §4–§6 done; every citation item RULED; the one refit is PLANNED, not started; `~/ccx_frozen` cleared to the Trash
 
+> ⛔ **SUPERSEDED by `notes/handoff_2026-10-12e_wtc_label_built.md`** (2026-10-12): the routing was ruled, the label
+> `hilda_csl3v0kaidgbemwtc` built, tested and priced, and the refit procedure ruled. Read that one first.
+
 **Supersedes** `notes/handoff_2026-10-12c_code_review.md`. Everything still open from its §4 is restated in §4 below.
 
 Written on Marcus's request ("Yes, write the handoff note"), 2026-10-12.
