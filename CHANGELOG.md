@@ -2,6 +2,10 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (m) — Handoff: `notes/handoff_2026-10-12b_tagged_pulse_fair_grid.md` (Marcus: "Yes, write the handoff note"). It supersedes `handoff_2026-10-12_pd100_free_climate.md`, which now points to it.
+- Also preserved: the two FaIR G5 diagnosis scripts (`outputs/diagnostics/fair_pulse_g5_20261012/`). They are the tests behind 10-12 (k)'s r_A attribution; until now they lived only in the session scratchpad.
+- A background session (Marcus started the chip) is reconciling the Joos 2013 ± convention between `diag_pulse_land_attribution.R` and `lib_design_gates.R`. It is told to change no number without his approval.
+
 ## 2026-10-12 (l) — **The full suite at `54dde08`: 7279 passed, 2 failed, 3 skipped.** Both failures are card 4's by design (`test-review-card-numbers.R:75`, `:85`). The cmap-tie deliberate RED is GONE (10-12 h).
 - Run: frozen detached worktree `~/ccx_frozen/suite_20261012_54dde08`, downloads APFS-cloned, BLAS pinned, `nice 10`, `set_max_fails(Inf)` → `outputs/diagnostics/suite_20261012_54dde08.log`.
 - Passes are up 75 from `0e57110`'s 7204: the three new files (`test-c14-tag` 26, `test-fair-pulse-grid` 35) and the re-expressed `test-cmap-tie`.
