@@ -2,6 +2,59 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (ee) — **Label `hilda_csl3v0kaidgbemwtc` BUILT, TESTED AND PRICED; nothing refit.** The handoff's §4 steps 1–2 (data products; both cores), with the routing ruled in (dd). Every registered mode stays bit-exact: `test-mode-file` reproduces the canonical's −1108.1126 (24 rows), and `hilda29e`'s stored logpost recomputes exactly.
+
+**Data products** (each from a `data-raw/` script, each with a reproduction gate, mutation-tested where it is a gate on a ruled value):
+
+| product | value | gate |
+|---|---|---|
+| `obs_glodap_surface_alk_sal.rds` (new script) | ALK 2303.3763 µmol/kg (829 cells), S 34.76018 (913) | reproduces the ruled 2303.38 / 34.760; `depth < 101` stops it |
+| `carbonate_coefs_s34760.rds` | K0 −0.03 %, K1 +0.05 %, K2 +0.14 %, Kb +0.07 %, boron +0.17 % | the S 34.7 rebuild is `identical()` to the shipped table |
+| `obs_glodap_{deep,intermediate,profile_cov,sigma_rep}_3682.2m.rds` | deep layer 2614.7–3682.2 m; targets move ≤ 0.01 σ | each 3700 rebuild reproduces its shipped file |
+| `obs_d14c_intcal20_v2.rds` (new script) | `sd_d14c` = column 5, 1.20–1.30 ‰ | the legacy columns reproduce the rintcal table exactly; 8267→8268 stops it |
+| `forcing_nuc_nh_share.rds` (new script) | NH share 0.9424 (1984) – 1.0; pooled 0.9930 | the total equals the model's own sum; pooled = the ledger's 0.993 |
+
+- seacarb 3.4.1 installed from CRAN (Marcus: "Install 3.4.1 (Recommended)"); `test-carbonate`'s two seacarb tests now RUN instead of skipping.
+- `RHO_SEAWATER` checked, not changed: TEOS-10 at S 34.76 is 0.018 % below S 35, inside the 0.1 % its citation claims.
+- `sigma_rep`'s h grid is PINNED to the 08-28 support (30–200 m): the live box moved to [42.5, 200], and a derived grid no longer reproduced the record.
+- ⚠ **FINDING (raised with Marcus): the nuclear files' SH gap is 15 years, not 2.** SH rows exist only 1983–2006 (Argentina) and 2020–2021 (Argentina + Brazil), so the share is 1.0 in 2007–2019 and 2022–2023. The ledger said "SH 0 in 2010 and 2023". The same rows are missing from the model's global total.
+- `forcing_nuc_nh_share.rds` stamps the nine files' sha256: they have no `MANIFEST.csv` rows (pre-existing; spun off as a task).
+
+**Code** (absent field = the old value, in both cores; R↔C++ parity unchanged at the canonical):
+- GLODAP target products keyed by COLUMN DEPTH (`ccx_glodap_file()`; an unbuilt depth stops by name). `ccx_loglik()` reads the label's depth from `err` (via `ccx_err_with_struct()`) and refuses an ocean-gradient bundle built on another column; model-side reads take the run's own grid.
+- The respiration lag and the seasonal-SST lag are RUN INPUTS in both cores (the compile-time twins are gone), resolved once in R (`ccx_seas_t_lag()`, `ccx_sst_seas_lag()`).
+- Forcing column `nuc_share_NH` APPENDED (N_FORCING 20); `ccx_build_forcing(nuc_share =)` with the `_of`/`_check`/stamp idiom; the ¹⁴C tag's 2×2 solve is per month.
+- ALK, the carbonate table (`carb_coefs()` is now memoised PER FILE — it held the first file read), the column depth (`ccx_grid_of()`; `ccx_prepare()` refuses a grid of another column) and the pump's organic ε, each through one resolver both cores read.
+- The IntCal row scores `err` (the units bug, kept bit-exact for registered modes) unless the label sets `intcal_sd_published`.
+- The third gate, `wtc_free`: `bomb_share_NH` logit U[0.77, 0.98], `seas_T_lag` logit U[0, 6]; inits at the box midpoints; default-param slots at the legacy 0.90 / 2.0.
+- Registry: `ALK_SURFACE_GLODAP`, `SALINITY_SURFACE_GLODAP` (data); `OCEAN_DEPTH_CS2010`, `ALPHA_PHOTO_EPS_STILL2003`, `PUMP_EPS13_ORG_CLARET2021`, `BOMB_NH_SHARE_PRIOR_LO/_HI`, `P_CANON_KOVALTSOV2012`, `EARTH_AREA_GRS80`, `AVOGADRO` (cited); `SEC_PER_YR` (derived). The legacy entries stay as the absent-field defaults. The photo-ε registry text corrected (21 % C4, not 25 %; no "15–18" in Still or Suits).
+- `P_canon`: 1.88 over the GRS80 area, registry-read (545.2 → 502.5 mol/yr). Diagnostic only, so global.
+
+**Tests.** New `test-wtc-label.R` (140): block provenance, the run carries every field, **R↔C++ parity UNDER THE LABEL** over 1983–2003 with both fitted names off-default (test-parity tolerances; power: the per-year share moves SH Δ¹⁴C > 1e-6), and each field LIVE in the derivative. Label ledgers extended deliberately in nine files. Classification decisions made where the tests say they are made (flagged): `nuc_share_NH` is NON-CLIMATE (hold-climate) and OTHER (emissions switch).
+
+**Priced at `hilda29e`, before any refit** (`calibration/diag_wtc_batch_price.R`, `outputs/diagnostics/wtc_batch_price_20261012/`; on LIKELIHOOD; G1 and G2 both exactly 0):
+
+| item | Δ log-likelihood |
+|---|---|
+| IntCal σ (column 5) | +96.79 (`d14c_intcal`: mostly the σ normalisation; the rows now weigh ~6×) |
+| photo ε 16.2 | +7.32 (δ¹³C level and seasonal rows) |
+| pump organic ε −22 | +3.06 (`ocean_grad_d13c`) |
+| depth 3682.2 | +0.09 |
+| ALK / salinity / nuclear share | −0.05 / −0.01 / −0.01 |
+| SST lags per hemisphere | −0.27 (`co2_icecore` −0.64) |
+| **all** | **+106.95** (interaction +0.03) |
+
+**Rulings after the pricing** (verbatim, ledger §D): refit "Carry module, then check (Recommended)" (warm start = `hilda29e` with the two new names at 0.90 / 2.0; then the one-pass module check); "Mac overnight, #18's recipe (Recommended)" (Torch verdict said out loud: the Mac is ~2× faster per evaluation, Torch wins only 24-wide, which Marcus would submit); nuclear gaps "Keep the gaps (Recommended)"; the two red tests "Re-express both (Recommended)".
+
+**Suite.** At `9967a63` (the label commit): 8 failures in 20.4 min — card 4's two (by design, as at `eb9a256`) and six this change caused. Each was then FIXED or handled as its test directs:
+- `test-forcing.R:37`, a built forcing must carry no NA: a CODE fix (the "constant" share emits 0.95, not NaN);
+- the column-count pin (`test-forcing.R:170`) and the two column INVENTORIES (`test-mechanisms`, `test-so-entrainment`): extended where each test says the decision is made;
+- `test-enso-lag.R:267` and `test-ndep.R:42`: reported, then RE-EXPRESSED on Marcus's ruling.
+
+**Full suite at `f2af594` (the final commit): 7909 passed, 2 failed, 1 skipped, 19.7 min** (`outputs/diagnostics/suite_20261012_f2af594.log`; frozen worktree `~/ccx_frozen/suite_20261012_f2af594`, downloads symlinked, BLAS threads pinned to 1). The 2 failures are card 4's two, by design, the same as at `eb9a256`. The skips fell from 3 to 1: the two seacarb tests now run. The `9967a63` run's log is kept beside it (`suite_20261012_9967a63.log`).
+
+**Not done:** the refit driver's ruled extension (`ccx_ms_reference_set()` refuses the canonical's pins under another label by design; `ccx_mode_start()` refuses a file lacking the two gated names), then the launch, landing, module check and adoption; the PHI_EFF NH product; the cite-as-is registry sweep and its "judgement" entries. Spun off as a task: MANIFEST rows for the nine nuclear files.
+
 ## 2026-10-12 (dd) — **Routing ruled: the cited values go in through a NEW structure label, `hilda_csl3v0kaidgbemwtc`** (Marcus, verbatim: "New label (a) (Recommended)"; the name "…wtc (c = cited)").
 
 - The `hilda_c` / objective-#18 idiom: a block carries every changed value and the two new fitted names, and an absent field means the old value. `hilda29e` and every registered mode stay bit-exact, and their stored logposts keep reproducing.

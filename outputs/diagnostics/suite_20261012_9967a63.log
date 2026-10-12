@@ -1,0 +1,859 @@
+Test passed with 10 successes 😸.
+run-time inputs present: 14/14. OK
+alk-hs: .............
+alpha-as: .................................
+aod-mode: ..........................................
+app-params-table: .......................................................
+app-review-copy: .........................................
+app-version: ..........
+artificial-sink: ..............................
+bomb-source-provenance: .....
+c14-tag: ..........................
+canonical-contracts: ...........................
+carbonate: ..........
+climate: ...................................
+cmap-tie: .......................................
+conservation: ..........
+constants-batch: ...............................W..
+constants: .....................................................................................................................................................................................................................................................................................................................................................................................................................................................................................
+constraint-map-panel: ..............................................................
+constraint-map: .................................................................................................................................................
+conveyor: ............................W...W...W...
+d14c-mid: ............W..........
+d14c-profile-gnorm: ......................W.........
+d14c-profile-mvn: ..............W..........
+dormant-guards: ........................
+driver-panel: .................................................
+emission-seasonality: .........................................
+enso-demean: .......W................SEEDING w_eq for the edm_price: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the edm_price: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the edm_price: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the edm_price: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the edm_price: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_thc for the edm_price: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_enso_l2 for the edm_price: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 18.7.
+     The ancestor held no opinion about this coordinate.
+...........
+enso-index: .............................................
+enso-lag: ...............................................................................................................................................1....................................................
+enso-split: ............................................SEEDING w_vent for the fixture: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The file held it OFF; this arm fits it.
+SEEDING gamma_vent for the fixture: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The file held it OFF; this arm fits it.
+SEEDING w_thc for the fixture: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The file held it OFF; this arm fits it.
+..............
+ent-seas-fitted: ....................................................................
+eq-cell: ..........................................................................................W........................WW.W......................................WW....................W.........
+fair-overlay: .............................
+fair-pd100: ......................
+fair-pulse-grid: ...................................
+fertilisation: ............................
+figure-palette: .......
+flux-trace-exact: ................
+fluxes: ...................................W..............................
+forcing: ........................2....W..................W.W.W............3W.....
+future-span: .....................
+future-yvar: ...................................
+futures-ribbons: .................................................................
+gate-bounds: ....................................................................................................................................................................................................................
+gate-p7: .........................
+gated-params: ........................................................................................................
+gates-w4: ...............................................................................................................................................................................
+gcb-enso-slope: .....W...W................
+git-stamp-lint: ......
+git-stamp: .................fatal: :(exclude)/var/folders/v2/ms445cpj20171v9g678ngbw80000gn/T//RtmphjdK4n/elsewhere.rds: '/var/folders/v2/ms445cpj20171v9g678ngbw80000gn/T//RtmphjdK4n/elsewhere.rds' is outside repository at '/private/var/folders/v2/ms445cpj20171v9g678ngbw80000gn/T/RtmphjdK4n/git stamp (scratch) 112f72e883993'
+.error: bad signature 0x5a5a5a5a
+fatal: index file corrupt
+.fatal: Needed a single revision
+............................................
+gradient: ..............................
+growth-residuals: ...........................
+hilda-boxes: ..........................WWW......................
+hml-floor: ...........................SEEDING w_eq for the hml-floor hilda31s2: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the hml-floor hilda31s2: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the hml-floor hilda31s2: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the hml-floor hilda31s2: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the hml-floor hilda31s2: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_thc for the hml-floor hilda31s2: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_enso_l2 for the hml-floor hilda31s2: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 18.7.
+     The ancestor held no opinion about this coordinate.
+...........
+hs-asx-frac: .........WW..WWW...........
+hs-sst-frac: ........................
+hs-surface-rows: .................WW...........
+iav-cut: ..................................................................................................................................................
+iav-redesign: ..............................................................................................
+imb-alloc: ............................................................................
+imbalance-panel: ......................................
+importance: .............................
+joos-arm-required: ............
+joos-irf: ......................
+kz-profile: ......W........WWW............
+l2-enso-limb: .........................................SEEDING w_enso_l2 for the test: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 18.7.
+     The ancestor held no opinion about this coordinate.
+SEEDING ent_seas_amp_SH for the test: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "log" cannot encode. Starting at the table init 6.55246.
+     The file held it OFF; this arm fits it.
+SEEDING w_vent for the test: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The file held it OFF; this arm fits it.
+SEEDING gamma_vent for the test: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The file held it OFF; this arm fits it.
+SEEDING w_thc for the test: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The file held it OFF; this arm fits it.
+.............W....................W..............W..............W..............................................................................................S
+likelihood: ............W........................................W.W.....WWW..WWW....................................................................................W........................................................................................................
+luc-gross-split: ............................
+luc-nh-share: ......................
+luc-permanence: ............
+luc-regrowth-panel: ....................................
+luc-scale: ...........WW..................................................
+mcmc-diag: ......................
+mechanisms: ..........................................4..............................................................
+mixing-strat: ................................................W.................................
+mode-decode: ..............
+mode-file: ....................................................................................................................................................................................................................SEEDING w_eq for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_thc for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_enso_l2 for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 18.7.
+     The ancestor held no opinion about this coordinate.
+....
+  [test-mode-file] PINNED canonical hilda29e: likelihood -1108.1126 on 24 common rows; parent hilda32f -1124.3448 (price +16.2322, RECORDED not gated); control hilda31pe -1123.1607 (+15.0481)
+.............
+mode-struct-lint: .....
+ms-clock: ...............................................
+ms-deadline: ..................................................
+ms-kept-pair: .....................................................................
+ms-reference-set: ......................................................................................................................................................................................
+ms-seed: ..................................................................
+ndep: .5.............................................
+npp-record: W........
+npp-tsens: .......................
+obj15: ...........................................
+ocean-advection: ...W...WW.........W...WW...........W.................................
+ocean-climate-card: .........................
+ocean-grad-area: .....
+option-e: ..............................W...............................WW.W.....WW.W.................
+  N-E1: export matching the canonical's PI bottom-minus-ML gradient (366.8 umol/kg): 9.99 GtC/yr (the solved field: 59.0);
+        ocean_grad_dic +0.38, ocean_grad_d13c -2.94 log-units vs the canonical
+        DIC minus ML, solved | martin, umol/kg by layer:
+         55|11  116|20  165|31  208|49  249|77  299|131  347|229  366|326  367|345  367|367 
+
+overlay-idiom-lint: ........
+param-absent-ok: ........................................................................................................................W..
+parity: .....W.......................W..........W.W...................W...............W..W.......
+pd100-runner: ......................
+pin-family: ..............................................
+pinned-arm: ..............SEEDING w_vent for the pinned-arm: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The file held it OFF; this arm fits it.
+SEEDING gamma_vent for the pinned-arm: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The file held it OFF; this arm fits it.
+SEEDING w_thc for the pinned-arm: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The file held it OFF; this arm fits it.
+.........SEEDING w_vent for the score: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The file held it OFF; this arm fits it.
+SEEDING gamma_vent for the score: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The file held it OFF; this arm fits it.
+SEEDING w_thc for the score: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The file held it OFF; this arm fits it.
+SEEDING w_vent for the score: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The file held it OFF; this arm fits it.
+SEEDING gamma_vent for the score: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The file held it OFF; this arm fits it.
+SEEDING w_thc for the score: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The file held it OFF; this arm fits it.
+......
+plot-text-fits: ........................................................................................................
+prior-z: ........................................W.............
+promote-id: ...................................................................
+pulse-linearity: .....................
+pulse: ............................
+pump-conveyor: .......................
+pump-hs-seas: ......................W.........................WW.W....WW.W....WW.W....WW.W....WW.W....WW.W....WW.W....WW.W.................
+pump-hs: .................................
+pump-seas: ...........W...............WW.W....WW.W....WW.W....WW.W....WW.W....WW.W....WW.W....WW.W....WW.W....WW.W....WW.W....WW.W....WW.W....WW.W....WW.W....WW.W............
+pump: .......W.......................
+q-attachment: ...................
+review-0916-fixes: W..........W............
+review-card-numbers: ....6...7.................
+review-cards: ................................................
+seas-isotope: .....
+seas-lag-split: ..................................SEEDING w_vent for the fixture: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The file held it OFF; this arm fits it.
+SEEDING gamma_vent for the fixture: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The file held it OFF; this arm fits it.
+SEEDING w_thc for the fixture: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The file held it OFF; this arm fits it.
+...........WWW.SEEDING ent_seas_amp_SH for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 6.55246.
+     The ancestor held no opinion about this coordinate.
+SEEDING kz_deep_frac for the test-seas-lag-split: the migration filled 1 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.05.
+     The ancestor held no opinion about this coordinate.
+WSEEDING pump_hs_gcm2 for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 22.9.
+     The ancestor held no opinion about this coordinate.
+WSEEDING w_eq for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_thc for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_enso_l2 for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 18.7.
+     The ancestor held no opinion about this coordinate.
+  [from90] unencodable after seeding: h_ml
+W.......WW.SEEDING ent_seas_amp_SH for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 6.55246.
+     The ancestor held no opinion about this coordinate.
+SEEDING kz_deep_frac for the test-seas-lag-split: the migration filled 1 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.05.
+     The ancestor held no opinion about this coordinate.
+WSEEDING pump_hs_gcm2 for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 22.9.
+     The ancestor held no opinion about this coordinate.
+WSEEDING w_eq for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_thc for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_enso_l2 for the test-seas-lag-split: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 18.7.
+     The ancestor held no opinion about this coordinate.
+  [pin90] unencodable after seeding: none
+.
+seas-ml-hemi: ................................
+seas-ml-label: ........................................................................
+seas-ml: ..................................................................................................
+seasonal-box-observable: .................
+sigma-inflation: ..........................
+so-entrainment: W......W.....W....W..W..W........8..W.
+soil-inert: ..................................W........................W..................................................
+spinup-diagnostics: .............................................SEEDING w_vent for the spinup-diagnostics: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The file held it OFF; this arm fits it.
+SEEDING gamma_vent for the spinup-diagnostics: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The file held it OFF; this arm fits it.
+SEEDING w_thc for the spinup-diagnostics: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The file held it OFF; this arm fits it.
+..........
+spinup: ..................
+spo-constants-tie: .............................................................
+stability: ..........W.W.W.W.W...W...W...W...W...WWW.WW..WW...........
+struct-v0: ..........................................
+stylised-takeaway: ...............................................................
+takeaway-arithmetic: ..........................
+thc-limb: ..........................W.................................WW.W.....WW.W.....WW.W.....WW.W.....WW.W.....WW.W...............
+tr-box: ...........................................................................................W...........................WW.W............................................WW.W............................................WW................................W..............
+u-hs-fitted: ........................................................................WWW.WWW.WWWWWW.
+ui-year-bounds-lint: ..................
+volcanic-diffuse: ............
+wtc-label: ............................................................................................................................................
+
+══ Skipped ═════════════════════════════════════════════════════════════════════
+1. a file-HELD name this arm FITS is seeded, not fatal (2026-09-20 o): the canonical holds w_enso_l2 = 0 on the logit floor; the limb's arm fits it ('test-l2-enso-limb.R:222:3') - Reason: the canonical does not hold w_enso_l2 at 0
+
+══ Warnings ════════════════════════════════════════════════════════════════════
+1. the C++ core runs hilda_c and agrees with R; the canonical's streams still reproduce under hilda ('test-constants-batch.R:81:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+2. R and C++ agree with the conveyor on, in every config ('test-conveyor.R:209:5') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+3. R and C++ agree with the conveyor on, in every config ('test-conveyor.R:209:5') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+4. R and C++ agree with the conveyor on, in every config ('test-conveyor.R:209:5') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+5. the rows are absent without `d14c_mid`, Gaussian with it, and decompose ('test-d14c-mid.R:65:3') - window starts at 1955 with 168.6 GtC of land-use carbon already emitted, so the land's equilibrium is 7.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+6. the rows replace the three level rows, decompose, and fall back when an input is absent ('test-d14c-profile-gnorm.R:64:3') - window starts at 1955 with 168.6 GtC of land-use carbon already emitted, so the land's equilibrium is 7.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+7. switched ON the row replaces the three and moves the total by exactly their difference ('test-d14c-profile-mvn.R:74:3') - window starts at 1955 with 168.6 GtC of land-use carbon already emitted, so the land's equilibrium is 7.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+8. SPAN-INVARIANCE: the offset does not depend on the years requested ('test-enso-demean.R:74:3') - window starts at 1980 with 215.6 GtC of land-use carbon already emitted, so the land's equilibrium is 10.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+9. P0a NO-OP: eq_frac = 0 is BIT-EXACT with every cell parameter set, both cores ('test-eq-cell.R:184:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+10. P0c PARITY: R and C++ agree with the cell on -- derivative, transient, and the pCO2 columns ('test-eq-cell.R:277:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+11. P0c PARITY: R and C++ agree with the cell on -- derivative, transient, and the pCO2 columns ('test-eq-cell.R:280:5') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+12. P0c PARITY: R and C++ agree with the cell on -- derivative, transient, and the pCO2 columns ('test-eq-cell.R:280:5') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+13. P0e READER-DERIV PARITY: the exported pCO2 columns are the derivative's own values ('test-eq-cell.R:300:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+14. P0e READER-DERIV PARITY: the exported pCO2 columns are the derivative's own values ('test-eq-cell.R:304:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+15. EVERY limb is mutation-tested: break it and the model must move ('test-eq-cell.R:411:3') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+16. gross fluxes dwarf the net, which is the point of the trace ('test-fluxes.R:246:3') - window starts at 2015 with 275.6 GtC of land-use carbon already emitted, so the land's equilibrium is 12.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+17. emission hemispheric splits sum to the global total ('test-forcing.R:42:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+18. bomb 14C total is set by the prior, not by the provisional shape ('test-forcing.R:102:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+19. bomb 14C total is set by the prior, not by the provisional shape ('test-forcing.R:102:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+20. bomb 14C total is set by the prior, not by the provisional shape ('test-forcing.R:102:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+21. the C++ forcing column contract is positional and complete ('test-forcing.R:171:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+22. (2) the estimator recovers a known slope, ignores the index mean, and is NA below MIN_N ('test-gcb-enso-slope.R:36:3') - essentially perfect fit: summary may be unreliable
+
+23. (2) the estimator recovers a known slope, ignores the index mean, and is NA below MIN_N ('test-gcb-enso-slope.R:39:3') - essentially perfect fit: summary may be unreliable
+
+24. R and C++ agree with the boxes on ('test-hilda-boxes.R:96:3') - window starts at 1850 with 41.8 GtC of land-use carbon already emitted, so the land's equilibrium is 2.0 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+25. R and C++ agree with the boxes on ('test-hilda-boxes.R:98:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+26. R and C++ agree with the boxes on ('test-hilda-boxes.R:98:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+27. the atmosphere's bomb curve sees it, through the C++ transient ('test-hs-asx-frac.R:51:5') - window starts at 1955 with 168.6 GtC of land-use carbon already emitted, so the land's equilibrium is 7.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+28. the atmosphere's bomb curve sees it, through the C++ transient ('test-hs-asx-frac.R:51:5') - window starts at 1955 with 168.6 GtC of land-use carbon already emitted, so the land's equilibrium is 7.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+29. R and C++ agree at 0.5 ('test-hs-asx-frac.R:62:3') - window starts at 1850 with 41.8 GtC of land-use carbon already emitted, so the land's equilibrium is 2.0 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+30. R and C++ agree at 0.5 ('test-hs-asx-frac.R:64:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+31. R and C++ agree at 0.5 ('test-hs-asx-frac.R:64:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+32. rows are absent with the structure off, present with it on, and equal the box state at the epoch ('test-hs-surface-rows.R:65:3') - ccx_model_ocean_gradient(): the run ends at 1760.95833333333, before the gradient epochs (surf 1999.8359144806 / deep 2002.36939862517); the ocean_grad rows are ABSENT for this run.
+
+33. rows are absent with the structure off, present with it on, and equal the box state at the epoch ('test-hs-surface-rows.R:65:3') - ccx_model_ocean_gradient(): the run ends at 1760.95833333333, before the gradient epochs (surf 1999.78376064822 / deep 2002.15572943936); the ocean_grad rows are ABSENT for this run.
+
+34. f = 1 and ABSENCE reproduce the model bit for bit -- spinup and transient ('test-kz-profile.R:60:3') - window starts at 1955 with 168.6 GtC of land-use carbon already emitted, so the land's equilibrium is 7.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+35. R and C++ agree at f = 0.5 with the HS boxes on ('test-kz-profile.R:91:3') - window starts at 1850 with 41.8 GtC of land-use carbon already emitted, so the land's equilibrium is 2.0 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+36. R and C++ agree at f = 0.5 with the HS boxes on ('test-kz-profile.R:93:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+37. R and C++ agree at f = 0.5 with the HS boxes on ('test-kz-profile.R:93:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+38. P0a ABSENT: the name absent, at 0, or at 25 under k_l2 = 0 is BIT-EXACT with the canonical's model, both cores ('test-l2-enso-limb.R:97:3') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+39. P0b SPINUP, P0c CONSERVATION, P0d PARITY with the limb ON at both seasonal states and BOTH return layers; the limb MOVES the transient ('test-l2-enso-limb.R:137:5') - window starts at 1996 with 242.4 GtC of land-use carbon already emitted, so the land's equilibrium is 11.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+40. P0b SPINUP, P0c CONSERVATION, P0d PARITY with the limb ON at both seasonal states and BOTH return layers; the limb MOVES the transient ('test-l2-enso-limb.R:137:5') - window starts at 1996 with 242.4 GtC of land-use carbon already emitted, so the land's equilibrium is 11.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+41. P0b SPINUP, P0c CONSERVATION, P0d PARITY with the limb ON at both seasonal states and BOTH return layers; the limb MOVES the transient ('test-l2-enso-limb.R:137:5') - window starts at 1996 with 242.4 GtC of land-use carbon already emitted, so the land's equilibrium is 11.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+42. the fast model-side reduction equals the general estimator ('test-likelihood.R:76:3') - window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+43. the d13C seasonal cycle is scored, and through the NEP harmonic ('test-likelihood.R:344:5') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+44. the d13C seasonal cycle is scored, and through the NEP harmonic ('test-likelihood.R:344:5') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+45. the seasonal statistic constrains amplitude and phase ('test-likelihood.R:415:5') - window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+46. the seasonal statistic constrains amplitude and phase ('test-likelihood.R:415:5') - window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+47. the seasonal statistic constrains amplitude and phase ('test-likelihood.R:415:5') - window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+48. the seasonal statistic constrains amplitude and phase ('test-likelihood.R:415:5') - window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+49. the seasonal statistic constrains amplitude and phase ('test-likelihood.R:415:5') - window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+50. the seasonal statistic constrains amplitude and phase ('test-likelihood.R:415:5') - window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+51. the excess-14C term refuses to score off a wrong baseline ('test-likelihood.R:722:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+52. the PRE-WINDOW cumulative scales too ('test-luc-scale.R:47:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+53. the PRE-WINDOW cumulative scales too ('test-luc-scale.R:48:3') - window starts at 1900 with 44.0 GtC of land-use carbon already emitted, so the land's equilibrium is 2.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+54. S4 SPINUP, S5 PARITY and CONSERVATION with the mechanism ON at g < 1; ON MOVES the transient ('test-mixing-strat.R:105:3') - window starts at 1996 with 242.4 GtC of land-use carbon already emitted, so the land's equilibrium is 11.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+55. (code run outside of `test_that()`) ('test-npp-record.R:16:1') - window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+56. w_up = 0 is the pure-diffusion model, exactly ('test-ocean-advection.R:86:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+57. MUTATION: w_up > 0 does change the answer ('test-ocean-advection.R:101:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+58. MUTATION: w_up > 0 does change the answer ('test-ocean-advection.R:102:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+59. R and C++ agree with overturning on ('test-ocean-advection.R:140:3') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+60. with NO interior source, reversing the circulation ties EVERY column ('test-ocean-advection.R:178:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+61. with NO interior source, reversing the circulation ties EVERY column ('test-ocean-advection.R:179:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+62. with the pump ON, TOTAL CARBON is still invariant and the ISOTOPES are not ('test-ocean-advection.R:242:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+63. P0a NO-OP: names absent vs present at defaults is BIT-EXACT, and the loop is INERT under the solved field, both cores ('test-option-e.R:78:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+64. P0b CONSERVATION and P0d PARITY with E on, at both seasonal states; the loop MOVES the state (not a silent no-op) ('test-option-e.R:151:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+65. P0b CONSERVATION and P0d PARITY with E on, at both seasonal states; the loop MOVES the state (not a silent no-op) ('test-option-e.R:153:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+66. P0b CONSERVATION and P0d PARITY with E on, at both seasonal states; the loop MOVES the state (not a silent no-op) ('test-option-e.R:153:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+67. P0b CONSERVATION and P0d PARITY with E on, at both seasonal states; the loop MOVES the state (not a silent no-op) ('test-option-e.R:151:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+68. P0b CONSERVATION and P0d PARITY with E on, at both seasonal states; the loop MOVES the state (not a silent no-op) ('test-option-e.R:153:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+69. P0b CONSERVATION and P0d PARITY with E on, at both seasonal states; the loop MOVES the state (not a silent no-op) ('test-option-e.R:153:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+70. f_luc_perm ABSENT resolves to CCX_F_LUC_PERM_DEFAULT in the R core, as in the C++ (09-16 c review, finding 2) ('test-param-absent-ok.R:92:3') - window starts at 1990 with 232.5 GtC of land-use carbon already emitted, so the land's equilibrium is 10.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+71. multi-decade trajectories agree to roundoff ('test-parity.R:103:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+72. parity holds with the frozen-Revelle switch engaged ('test-parity.R:162:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+73. frozen Revelle does what it claims, and only that ('test-parity.R:209:3') - window starts at 1800 with 15.6 GtC of land-use carbon already emitted, so the land's equilibrium is 0.7 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+74. the C++ core conserves carbon exactly, independently of R ('test-parity.R:221:3') - window starts at 1800 with 15.6 GtC of land-use carbon already emitted, so the land's equilibrium is 0.7 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+75. the seasonal mixed layer agrees between the cores at seas_ml = 1 ('test-parity.R:384:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+76. seas_ml = 1 is a DIFFERENT trajectory from seas_ml = 0 in BOTH cores ('test-parity.R:414:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+77. the two hemispheres are in ANTIPHASE in the C++ core, not swapped ('test-parity.R:431:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+78. ccx_prior_z matches the analytic z for the two OBSERVATION lognormals under a logit box (09-08d) ('test-prior-z.R:92:3') - NaNs produced
+
+79. P0a NO-OP: absent vs present-at-0 is BIT-EXACT in both cores; inert under seas_drivers 0 ('test-pump-hs-seas.R:73:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+80. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x pump_seas_amp {0, 0.5}; the factor MOVES the transient ('test-pump-hs-seas.R:132:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+81. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x pump_seas_amp {0, 0.5}; the factor MOVES the transient ('test-pump-hs-seas.R:134:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+82. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x pump_seas_amp {0, 0.5}; the factor MOVES the transient ('test-pump-hs-seas.R:134:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+83. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x pump_seas_amp {0, 0.5}; the factor MOVES the transient ('test-pump-hs-seas.R:132:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+84. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x pump_seas_amp {0, 0.5}; the factor MOVES the transient ('test-pump-hs-seas.R:134:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+85. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x pump_seas_amp {0, 0.5}; the factor MOVES the transient ('test-pump-hs-seas.R:134:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+86. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x pump_seas_amp {0, 0.5}; the factor MOVES the transient ('test-pump-hs-seas.R:132:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+87. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x pump_seas_amp {0, 0.5}; the factor MOVES the transient ('test-pump-hs-seas.R:134:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+88. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x pump_seas_amp {0, 0.5}; the factor MOVES the transient ('test-pump-hs-seas.R:134:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+89. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x pump_seas_amp {0, 0.5}; the factor MOVES the transient ('test-pump-hs-seas.R:132:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+90. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x pump_seas_amp {0, 0.5}; the factor MOVES the transient ('test-pump-hs-seas.R:134:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+91. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x pump_seas_amp {0, 0.5}; the factor MOVES the transient ('test-pump-hs-seas.R:134:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+92. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x pump_seas_amp {0, 0.5}; the factor MOVES the transient ('test-pump-hs-seas.R:132:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+93. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x pump_seas_amp {0, 0.5}; the factor MOVES the transient ('test-pump-hs-seas.R:134:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+94. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x pump_seas_amp {0, 0.5}; the factor MOVES the transient ('test-pump-hs-seas.R:134:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+95. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x pump_seas_amp {0, 0.5}; the factor MOVES the transient ('test-pump-hs-seas.R:132:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+96. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x pump_seas_amp {0, 0.5}; the factor MOVES the transient ('test-pump-hs-seas.R:134:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+97. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x pump_seas_amp {0, 0.5}; the factor MOVES the transient ('test-pump-hs-seas.R:134:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+98. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x pump_seas_amp {0, 0.5}; the factor MOVES the transient ('test-pump-hs-seas.R:132:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+99. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x pump_seas_amp {0, 0.5}; the factor MOVES the transient ('test-pump-hs-seas.R:134:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+100. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x pump_seas_amp {0, 0.5}; the factor MOVES the transient ('test-pump-hs-seas.R:134:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+101. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x pump_seas_amp {0, 0.5}; the factor MOVES the transient ('test-pump-hs-seas.R:132:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+102. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x pump_seas_amp {0, 0.5}; the factor MOVES the transient ('test-pump-hs-seas.R:134:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+103. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x pump_seas_amp {0, 0.5}; the factor MOVES the transient ('test-pump-hs-seas.R:134:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+104. P0a NO-OP: absent vs present-at-0 is BIT-EXACT in both cores; inert under seas_drivers 0 ('test-pump-seas.R:53:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+105. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:98:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+106. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+107. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+108. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:98:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+109. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+110. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+111. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:98:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+112. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+113. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+114. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:98:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+115. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+116. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+117. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:98:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+118. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+119. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+120. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:98:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+121. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+122. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+123. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:98:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+124. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+125. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+126. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:98:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+127. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+128. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+129. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:98:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+130. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+131. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+132. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:98:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+133. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+134. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+135. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:98:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+136. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+137. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+138. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:98:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+139. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+140. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+141. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:98:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+142. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+143. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+144. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:98:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+145. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+146. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+147. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:98:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+148. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+149. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+150. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:98:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+151. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+152. P0c PARITY and P0d CONSERVATION at amp {0.5, 1} x lag {0, 2} x seas_ml {0, 1}, both fields; the factor MOVES the transient ('test-pump-seas.R:100:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+153. pump_grad = 0 emits NOTHING -- the no-pump model is bit-reproduced ('test-pump.R:52:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+154. F3: a consistent evaluation is not retried; a forced escalation is FLAGGED, and the objective refuses it ('test-review-0916-fixes.R:18:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+155. F6: a bare ccx_build_forcing() no longer yields an all-NA Delta14C ('test-review-0916-fixes.R:58:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+156. the REAL 08-30 arm files MIGRATE, and REFUSE to encode ('test-seas-lag-split.R:251:5') - NaNs produced
+
+157. the REAL 08-30 arm files MIGRATE, and REFUSE to encode ('test-seas-lag-split.R:251:5') - NaNs produced
+
+158. the REAL 08-30 arm files MIGRATE, and REFUSE to encode ('test-seas-lag-split.R:251:5') - NaNs produced
+
+159. the REAL 08-30 arm files MIGRATE, and REFUSE to encode ('test-seas-lag-split.R:263:5') - NaNs produced
+
+160. the REAL 08-30 arm files MIGRATE, and REFUSE to encode ('test-seas-lag-split.R:263:5') - NaNs produced
+
+161. the REAL 08-30 arm files MIGRATE, and REFUSE to encode ('test-seas-lag-split.R:280:7') - NaNs produced
+
+162. the REAL 08-30 arm files MIGRATE, and REFUSE to encode ('test-seas-lag-split.R:251:5') - NaNs produced
+
+163. the REAL 08-30 arm files MIGRATE, and REFUSE to encode ('test-seas-lag-split.R:251:5') - NaNs produced
+
+164. the REAL 08-30 arm files MIGRATE, and REFUSE to encode ('test-seas-lag-split.R:263:5') - NaNs produced
+
+165. the REAL 08-30 arm files MIGRATE, and REFUSE to encode ('test-seas-lag-split.R:263:5') - NaNs produced
+
+166. P0.1 -- at zero amplitude the channel is absent, bit for bit ('test-so-entrainment.R:74:3') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+167. P0.1 -- and bit for bit in the C++ core too ('test-so-entrainment.R:91:3') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+168. P0.2 -- R and C++ are the same model with the channel ON ('test-so-entrainment.R:101:3') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+169. P0.2 -- and the channel is not a no-op in EITHER core ('test-so-entrainment.R:116:3') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+170. P0.3 -- seas_drivers = 0 kills the channel, hold_climate does NOT ('test-so-entrainment.R:130:5') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+171. P0.3 -- ccx_hold_climate() holds every climate FORCING COLUMN ('test-so-entrainment.R:150:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+172. the entrainment channel is CONSERVATIVE, and rectifies no more than
+           the seasonal SST term the model already accepts ('test-so-entrainment.R:211:3') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+173. PARITY: derivative, pro-rata LUC debit and trajectories agree with f ON ('test-soil-inert.R:112:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+174. BOX: both cores count it as LAND, never ocean, and carry it unchanged ('test-soil-inert.R:179:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+175. the criterion predicts where the OLD fixed-substep scheme broke ('test-stability.R:62:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+176. the criterion predicts where the OLD fixed-substep scheme broke ('test-stability.R:64:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+177. the criterion predicts where the OLD fixed-substep scheme broke ('test-stability.R:62:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+178. the criterion predicts where the OLD fixed-substep scheme broke ('test-stability.R:64:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+179. no NAs anywhere in or far beyond the prior's support ('test-stability.R:73:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+180. no NAs anywhere in or far beyond the prior's support ('test-stability.R:73:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+181. no NAs anywhere in or far beyond the prior's support ('test-stability.R:73:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+182. no NAs anywhere in or far beyond the prior's support ('test-stability.R:73:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+183. no NAs anywhere in or far beyond the prior's support ('test-stability.R:73:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+184. MUTATION: with the controller disabled, the same cases DO fail ('test-stability.R:86:19') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+185. MUTATION: with the controller disabled, the same cases DO fail ('test-stability.R:86:19') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+186. MUTATION: with the controller disabled, the same cases DO fail ('test-stability.R:86:19') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+187. the auto substep count is accurate, not merely stable ('test-stability.R:99:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+188. the auto substep count is accurate, not merely stable ('test-stability.R:100:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+189. the auto substep count is accurate, not merely stable ('test-stability.R:99:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+190. the auto substep count is accurate, not merely stable ('test-stability.R:100:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+191. P0a NO-OP: absent vs present-at-0 is BIT-EXACT; INERT under the solved field; the eigbound is exactly 0 off ('test-thc-limb.R:88:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+192. P0b CONSERVATION and P0d PARITY with the limb on at k in {1, 5, 10}, both seasonal states; the limb MOVES the equilibrium ('test-thc-limb.R:142:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+193. P0b CONSERVATION and P0d PARITY with the limb on at k in {1, 5, 10}, both seasonal states; the limb MOVES the equilibrium ('test-thc-limb.R:144:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+194. P0b CONSERVATION and P0d PARITY with the limb on at k in {1, 5, 10}, both seasonal states; the limb MOVES the equilibrium ('test-thc-limb.R:144:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+195. P0b CONSERVATION and P0d PARITY with the limb on at k in {1, 5, 10}, both seasonal states; the limb MOVES the equilibrium ('test-thc-limb.R:142:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+196. P0b CONSERVATION and P0d PARITY with the limb on at k in {1, 5, 10}, both seasonal states; the limb MOVES the equilibrium ('test-thc-limb.R:144:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+197. P0b CONSERVATION and P0d PARITY with the limb on at k in {1, 5, 10}, both seasonal states; the limb MOVES the equilibrium ('test-thc-limb.R:144:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+198. P0b CONSERVATION and P0d PARITY with the limb on at k in {1, 5, 10}, both seasonal states; the limb MOVES the equilibrium ('test-thc-limb.R:142:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+199. P0b CONSERVATION and P0d PARITY with the limb on at k in {1, 5, 10}, both seasonal states; the limb MOVES the equilibrium ('test-thc-limb.R:144:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+200. P0b CONSERVATION and P0d PARITY with the limb on at k in {1, 5, 10}, both seasonal states; the limb MOVES the equilibrium ('test-thc-limb.R:144:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+201. P0b CONSERVATION and P0d PARITY with the limb on at k in {1, 5, 10}, both seasonal states; the limb MOVES the equilibrium ('test-thc-limb.R:142:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+202. P0b CONSERVATION and P0d PARITY with the limb on at k in {1, 5, 10}, both seasonal states; the limb MOVES the equilibrium ('test-thc-limb.R:144:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+203. P0b CONSERVATION and P0d PARITY with the limb on at k in {1, 5, 10}, both seasonal states; the limb MOVES the equilibrium ('test-thc-limb.R:144:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+204. P0b CONSERVATION and P0d PARITY with the limb on at k in {1, 5, 10}, both seasonal states; the limb MOVES the equilibrium ('test-thc-limb.R:142:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+205. P0b CONSERVATION and P0d PARITY with the limb on at k in {1, 5, 10}, both seasonal states; the limb MOVES the equilibrium ('test-thc-limb.R:144:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+206. P0b CONSERVATION and P0d PARITY with the limb on at k in {1, 5, 10}, both seasonal states; the limb MOVES the equilibrium ('test-thc-limb.R:144:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+207. P0b CONSERVATION and P0d PARITY with the limb on at k in {1, 5, 10}, both seasonal states; the limb MOVES the equilibrium ('test-thc-limb.R:142:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+208. P0b CONSERVATION and P0d PARITY with the limb on at k in {1, 5, 10}, both seasonal states; the limb MOVES the equilibrium ('test-thc-limb.R:144:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+209. P0b CONSERVATION and P0d PARITY with the limb on at k in {1, 5, 10}, both seasonal states; the limb MOVES the equilibrium ('test-thc-limb.R:144:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+210. P0a NO-OP: tr_frac = 0 is BIT-EXACT with hilda_eq with every tr parameter set, both cores ('test-tr-box.R:160:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+211. P0c PARITY: R and C++ agree with all three structures on -- derivative, transient, the pCO2 columns, and the DIC-limited pump ('test-tr-box.R:243:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+212. P0c PARITY: R and C++ agree with all three structures on -- derivative, transient, the pCO2 columns, and the DIC-limited pump ('test-tr-box.R:246:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+213. P0c PARITY: R and C++ agree with all three structures on -- derivative, transient, the pCO2 columns, and the DIC-limited pump ('test-tr-box.R:246:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+214. P0c PARITY: R and C++ agree with all three structures on -- derivative, transient, the pCO2 columns, and the DIC-limited pump ('test-tr-box.R:243:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+215. P0c PARITY: R and C++ agree with all three structures on -- derivative, transient, the pCO2 columns, and the DIC-limited pump ('test-tr-box.R:246:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+216. P0c PARITY: R and C++ agree with all three structures on -- derivative, transient, the pCO2 columns, and the DIC-limited pump ('test-tr-box.R:246:7') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+217. P0e READER-DERIV PARITY: tr_pco2 is the derivative's own value; B1 is the four-box area contrast ('test-tr-box.R:266:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+218. P0e READER-DERIV PARITY: tr_pco2 is the derivative's own value; B1 is the four-box area contrast ('test-tr-box.R:268:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+219. EVERY limb is mutation-tested: break it and the model must move ('test-tr-box.R:430:3') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+220. the objective reads u_hs from the vector, not from the structure ('test-u-hs-fitted.R:86:3') - ccx_model_hs_surface(): the run ends at 1800.95833333333, before the HS-surface epochs (2008 / 2011); the #11 rows are ABSENT for this run.
+
+221. the objective reads u_hs from the vector, not from the structure ('test-u-hs-fitted.R:86:3') - ccx_model_ocean_gradient(): the run ends at 1800.95833333333, before the gradient epochs (surf 1999.8359144806 / deep 2002.36939862517); the ocean_grad rows are ABSENT for this run.
+
+222. the objective reads u_hs from the vector, not from the structure ('test-u-hs-fitted.R:86:3') - ccx_model_ocean_gradient(): the run ends at 1800.95833333333, before the gradient epochs (surf 1999.78376064822 / deep 2002.15572943936); the ocean_grad rows are ABSENT for this run.
+
+223. the objective reads u_hs from the vector, not from the structure ('test-u-hs-fitted.R:86:35') - ccx_model_hs_surface(): the run ends at 1800.95833333333, before the HS-surface epochs (2008 / 2011); the #11 rows are ABSENT for this run.
+
+224. the objective reads u_hs from the vector, not from the structure ('test-u-hs-fitted.R:86:35') - ccx_model_ocean_gradient(): the run ends at 1800.95833333333, before the gradient epochs (surf 1999.8359144806 / deep 2002.36939862517); the ocean_grad rows are ABSENT for this run.
+
+225. the objective reads u_hs from the vector, not from the structure ('test-u-hs-fitted.R:86:35') - ccx_model_ocean_gradient(): the run ends at 1800.95833333333, before the gradient epochs (surf 1999.78376064822 / deep 2002.15572943936); the ocean_grad rows are ABSENT for this run.
+
+226. the objective reads u_hs from the vector, not from the structure ('test-u-hs-fitted.R:87:3') - ccx_model_hs_surface(): the run ends at 1800.95833333333, before the HS-surface epochs (2008 / 2011); the #11 rows are ABSENT for this run.
+
+227. the objective reads u_hs from the vector, not from the structure ('test-u-hs-fitted.R:87:3') - ccx_model_ocean_gradient(): the run ends at 1800.95833333333, before the gradient epochs (surf 1999.8359144806 / deep 2002.36939862517); the ocean_grad rows are ABSENT for this run.
+
+228. the objective reads u_hs from the vector, not from the structure ('test-u-hs-fitted.R:87:3') - ccx_model_ocean_gradient(): the run ends at 1800.95833333333, before the gradient epochs (surf 1999.78376064822 / deep 2002.15572943936); the ocean_grad rows are ABSENT for this run.
+
+229. the objective reads u_hs from the vector, not from the structure ('test-u-hs-fitted.R:87:3') - ccx_model_hs_surface(): the run ends at 1800.95833333333, before the HS-surface epochs (2008 / 2011); the #11 rows are ABSENT for this run.
+
+230. the objective reads u_hs from the vector, not from the structure ('test-u-hs-fitted.R:87:3') - ccx_model_ocean_gradient(): the run ends at 1800.95833333333, before the gradient epochs (surf 1999.8359144806 / deep 2002.36939862517); the ocean_grad rows are ABSENT for this run.
+
+231. the objective reads u_hs from the vector, not from the structure ('test-u-hs-fitted.R:87:3') - ccx_model_ocean_gradient(): the run ends at 1800.95833333333, before the gradient epochs (surf 1999.78376064822 / deep 2002.15572943936); the ocean_grad rows are ABSENT for this run.
+
+══ Failed ══════════════════════════════════════════════════════════════════════
+── 1. Failure ('test-enso-lag.R:267:3'): GATE: the ledger, the spec tied to its 
+Expected `utils::tail(.CCX_PARAM_ORDER, 1)` to be identical to "lag_enso_land".
+Differences:
+1/1 mismatches
+x[1]: "seas_T_lag"
+y[1]: "lag_enso_land"
+
+── 2. Failure ('test-forcing.R:37:3'): historical forcing assembles with the exp
+Expected `anyNA(F[[cl]])` to be FALSE.
+Differences:
+`actual`:   TRUE 
+`expected`: FALSE
+
+nuc_share_NH
+
+── 3. Failure ('test-forcing.R:170:3'): the C++ forcing column contract is posit
+Expected `CCX_FORCING_COLS` to have length 19.
+Actual length: 20.
+
+── 4. Failure ('test-mechanisms.R:252:3'): under the emissions switch, the CANON
+Expected `names(F0)` to have the same values as `c(human_carbon, other)`.
+Actual: "t", "year", "month", "e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH", "cum_luc_NH", "cum_luc_SH", ...
+Expected: "e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH", "cum_luc_NH", "cum_luc_SH", "ndep_NH", "ndep_SH", "t", ...
+Needs: "nuc_share_NH"
+
+── 5. Failure ('test-ndep.R:42:3'): OFF: ndep_ret 0 ignores even a loud depositi
+Expected `length(CCX_FORCING_COLS)` to be identical to 19L.
+Differences:
+1/1 mismatches
+[1] 20 - 19 == 1
+
+── 6. Failure ('test-review-card-numbers.R:75:3'): card 4's lag is within ONE sd
+Expected `abs(L$value - RCN_CARD4_LAG)` < `L$sd`.
+Actual comparison: 3.4 >= 1.2
+Difference: 2.2 >= 0
+
+── 7. Failure ('test-review-card-numbers.R:85:3'): card 4's 'a little <word> the
+Expected `.rcn_rv$rv_enso_l2_relation(run$w_enso_l2, br)` to be identical to `.rcn_rv$RV_ENSO_L2_VS_OBS`.
+Differences:
+1/1 mismatches
+x[1]: "inside"
+y[1]: "below"
+
+── 8. Failure ('test-so-entrainment.R:176:3'): P0.3 -- ccx_hold_climate() holds 
+Expected `names(F)` to have the same values as `c(climate_cols, non_climate)`.
+Actual: "t", "year", "month", "e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH", "cum_luc_NH", "cum_luc_SH", ...
+Expected: "gmst", "enso", "sst_anom_NH", "sst_anom_SH", "t", "year", "month", "e_foss_NH", "e_foss_SH", ...
+Needs: "nuc_share_NH"
+
+══ DONE ════════════════════════════════════════════════════════════════════════
+rc=0 elapsed_s=1222
