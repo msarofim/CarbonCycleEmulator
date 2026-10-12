@@ -53,7 +53,7 @@ OI_BASELINE <- c(
   "diag_hml_band_discontinuity.R", "diag_hml_seasonal_limbs.R",
   "diag_hml_sst_elasticity.R", "diag_hml_unbound_profile.R",
   "diag_ice_hemisphere.R", "diag_joint_land_ocean_refit.R",
-  "diag_joos_irf.R", "diag_kz_railed.R", "diag_land_eagerness.R",
+  "diag_kz_railed.R", "diag_land_eagerness.R",
   "diag_landed_gap_streams.R", "diag_luc_arm_ridge_confound.R",
   "diag_p3_sigma_d14c_contamination.R", "diag_price_gamma_diff.R",
   "diag_price_the_lag.R", "diag_q10_controlled_recovery.R",
@@ -68,8 +68,10 @@ OI_BASELINE <- c(
   "profile_kz_ventilation.R", "run_modefind_pump_arms.R",
   "run_modefind.R", "run_post_refit_adoption.R",
   "test-gate-bounds.R", "test-luc-scale.R")
-OI_BASELINE_N <- 59L    # live occurrences across OI_BASELINE: 61 on 2026-09-02; 59 on 2026-09-30
-                        # (dg_vector and ccx_load_mode converted on touch -- the D2/D3 gate)
+OI_BASELINE_N <- 58L    # live occurrences across OI_BASELINE: 61 on 2026-09-02; 59 on 2026-09-30
+                        # (dg_vector and ccx_load_mode converted on touch -- the D2/D3 gate);
+                        # 58 on 2026-10-12 (diag_joos_irf.R converted on touch -- it had dropped
+                        # the gated ndep_ret; Marcus approved the tightening, "Approve the lint update")
 
 # The copy loop, matched on the LITERAL wherever it is written -- a helper
 # nobody is forced to use would not stop this coming back. Same construction,
