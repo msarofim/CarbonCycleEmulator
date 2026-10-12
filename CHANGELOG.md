@@ -2,6 +2,22 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (w) — **The full suite at `d36cda1`, the pushed state after the review's fixes: 7321 passed, 2 failed, 3 skipped, 19.1 min** (`outputs/diagnostics/suite_20261012_d36cda1.log`). The 2 failures are card 4's, by design. It is identical to `56b5ceb`'s, so the text-only batch (v) changed no behaviour.
+
+**The live app was verified in the browser at 1024 px** after a restart on this code, with 0 `shiny-output-error`. The fixed numbers read as follows:
+- **Keeling:** "315 ppm in 1958, rising to 423 ppm today; the measured value is about 424 ppm".
+- **Where does it go:** "… a net sink around 1989 (GCB) or in 1969 (our model …)".
+- **Isotopes:** "δ¹³C has fallen 2.35‰ since 1850".
+- **Under the hood:** the warm arrow reads "(59 down as the biological pump, 58 back up by mixing)".
+- **Scenarios, all seven ticked:** "By 2150 these scenarios span 305 to 825 ppm and 1.3 to 4.6 °C".
+
+**Still Marcus's, from this review:**
+1. IntCal: refit or ship-and-document (impact measured in (u)).
+2. The citation list (`notes/constants_citation_needs_2026-10-12.md`). Six in-objective values would change on adoption.
+3. Whether the flux trace's default (and the NPP record with it) moves from the snapshot to the RK4 month-mean (t).
+4. The `v1.1-hilda29e` tag, not made.
+5. Two copy items found by the review (worklist A2's card-6 title; the pulse box's "about 1.4 °C per 1000 GtC", measured only on vvM / 2050).
+
 ## 2026-10-12 (v) — **The stale comments and docs from the code review are corrected** (Marcus, verbatim: "Fix all text-only (Recommended)"; the `CLAUDE.md` line was approved in the same answer). **The full suite at `56b5ceb` (the app-number fixes, 10-12 t): 7321 passed, 2 failed, 3 skipped, 18.8 min** (`outputs/diagnostics/suite_20261012_56b5ceb.log`). The 2 failures are card 4's, by design. The extra 42 passes over `54dde08` are exactly the two new files (16 + 26).
 
 - **The comment pass was a subagent's, under a mechanical gate.** For each of the 14 `.R` files it touched, `deparse(parse(f, keep.source = FALSE))` is IDENTICAL before and after, so no code or string changed. A deliberate value change and a deliberate string change each tripped the gate.

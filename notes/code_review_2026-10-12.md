@@ -23,6 +23,14 @@ The lanes:
 | L6 | Objective, MCMC |
 | L7 | How the app drives the model |
 
+**STATUS (updated 2026-10-12, end of session):**
+- §1 IntCal impact MEASURED, CHANGELOG (u): futures band shifts ≤ 0.066 × width; `luc_scale` / `bomb_total` / `rep_dC` move 0.5–0.7 sd. Refit-or-ship is Marcus's.
+- §2 A1–A5 FIXED, CHANGELOG (t), verified in the browser (w). A6 is copy (Marcus).
+- §3 citation list, `notes/constants_citation_needs_2026-10-12.md`.
+- §4 FIXED text-only, CHANGELOG (v), except the code items listed there.
+- §5 and §6 open.
+- Suite at `d36cda1`: 7321 / 2 (card 4, by design) / 3.
+
 **Bottom line.**
 - The model's mechanics are clean at the canonical: conservation, R↔C++ parity, spin-up, stability, logpost reproduction, and pulse pairing.
 - **One live bug is in the OBJECTIVE (§1).** It touches the fitted mode, so it is Marcus's decision.
