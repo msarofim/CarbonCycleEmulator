@@ -37,7 +37,22 @@ NF_HML_NUDGES <- 1:3                           # section 3: h_ml x (1 + k NF_REL
 NF_GATE_TOL   <- 1e-5                          # = fit_iav_module.R IAV_REPRO_TOL (ruled 2026-10-07)
 NF_POW_NAMES  <- c("kz", "h_ml", "beta_max", "pump_grad", "q10")
 NF_POW_REL    <- c(1e-8, 1e-7, 1e-6)
-NF_OUT <- file.path("outputs", "diagnostics", sprintf("objective_noise_floor_%s", format(Sys.Date(), "%Y%m%d")))
+# ENV OVERRIDES (2026-10-13, the WTC landing's GATE 0 stop; CHANGELOG 2026-10-13 b): the same four sections at another wave.
+# Unset, every constant above is #17's, so the 2026-10-07 log reproduces. CCX_NF_IDS = "A=<id>,B=<id>" (the start files,
+# sections 1-2); CCX_NF_MODE_A / _B = the promoted files of those starts (section 3; A also section 4); CCX_NF_TAG names
+# the outputs.
+local({
+  w <- Sys.getenv("CCX_NF_WAVE", ""); if (nzchar(w)) NF_WAVE <<- w
+  ids <- Sys.getenv("CCX_NF_IDS", "")
+  if (nzchar(ids)) { kv <- strsplit(strsplit(ids, ",")[[1]], "=")
+    if (!all(lengths(kv) == 2L) || !setequal(vapply(kv, `[`, "", 1L), c("A", "B")))
+      stop("CCX_NF_IDS must be \"A=<id>,B=<id>\", not '", ids, "'")
+    NF_IDS <<- stats::setNames(as.integer(vapply(kv, `[`, "", 2L)), vapply(kv, `[`, "", 1L))[c("A", "B")] }
+  for (k in c("A", "B")) { m <- Sys.getenv(paste0("CCX_NF_MODE_", k), ""); if (nzchar(m)) NF_MODES[[k]] <<- m }
+  if (nzchar(paste0(w, ids)) && !nzchar(Sys.getenv("CCX_NF_MODE_A", ""))) stop("an overridden wave or ids needs CCX_NF_MODE_A / _B too")
+})
+NF_TAG <- Sys.getenv("CCX_NF_TAG", "")
+NF_OUT <- file.path("outputs", "diagnostics", sprintf("objective_noise_floor_%s%s", format(Sys.Date(), "%Y%m%d"), NF_TAG))
 COMMIT <- ccx_git_stamp()
 sink(paste0(NF_OUT, ".log"), split = TRUE)
 cat(sprintf("%s @%s, %s | RNG: set.seed(%d) immediately before section 2's offsets (the only draws)\n", NF_DRIVER, COMMIT,
