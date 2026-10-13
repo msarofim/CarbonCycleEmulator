@@ -53,7 +53,7 @@ WR_NAMED        <- c(WR_NEW_NAMES, "tau_ex", "bomb_total", "luc_scale", "beta_ma
 WR_WAVE_GLOB    <- "multistart_20261012ff_hilda_csl3v0kaidgbemwtc_seasml1_pin_wtc_sd1.0452_prior_bomb_share_NH_seas_T_lag"
 WR_MODE_GLOB    <- "refit_*_wtc_hilda_csl3v0kaidgbemwtc"
 WR_BASIN_GAP    <- 0.05                                     # logpost; #18's read's O18_BASIN_GAP
-WR_REPRO_TOL    <- 1e-5                                     # the objective's noise floor (objective_noise_floor_optimum_on_spike)
+WR_REPRO_TOL    <- CCX_REPRO_TOL                            # the objective's noise floor. RULED (Marcus 2026-10-13: "Use CCX_REPRO_TOL (Recommended)"; CHANGELOG 2026-10-13 o); was 1e-5, measured 0 / 2.2e-11
 WR_TOP          <- 12L
 WR_NET_WIN      <- c(2015L, 2024L); WR_NET_CLIM <- c(1901L, 1920L)   # GCB 2025 s. 3.7.2; TRENDY's held climate
 WR_GCB_NET      <- c(mean = -0.8, sd = 0.7)                 # GtC/yr, GCB 2025 ESSD 18:3211 s. 3.7.2 (lit note G3)

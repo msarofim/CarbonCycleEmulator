@@ -2,6 +2,14 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-13 (o) — **The last three reproduce tolerances RULED: all read `CCX_REPRO_TOL` (5e-5).** Marcus, verbatim, for each: "Use CCX_REPRO_TOL (Recommended)". This closes the 10-13 (c) list (promote's GATE 5 was already ruled in (e)).
+
+- **`MC_LP_TOL`** (`run_mcmc_check.R`, the mode must reproduce its stored logpost before sampling): 1e-5 → `CCX_REPRO_TOL`. Measured diff 0 at hilda31w. ⚠ **The running chains** (frozen tree at `e83e228`) **used 1e-5** and are unaffected; the change applies to future runs.
+- **`WR_REPRO_TOL`** (`diag_wtc_refit_read.R`): 1e-5 → `CCX_REPRO_TOL`. Measured 0 and 2.2e-11.
+- **`IAV_REPRO_TOL`** in `diag_iav_redesign_price.R` (the 10-07 closed-arc diagnostic, its own copy): 1e-5 → `CCX_REPRO_TOL`. Measured 1e-10 to 2.7e-10, so the 10-07 record's verdicts stand.
+- Why one constant: every such gate asks whether a STORED point reproduces. All diffs measured are ≤ 2.7e-10, and the real defects found in 10-13 (c) move things by 2.35 to 1.0e3, so power is unchanged. 5e-5 also stays clear of the label's ~1.2e-5 noise floor on any future re-run.
+- **Test:** `test-repro-tol-hess-fallback.R` gains a block that requires all three, and requires that no literal 1e-5 remains. Now 35 expectations. **Mutation-tested, 3 of 3 caught:** each driver put back to 1e-5 fails it.
+
 ## 2026-10-13 (n) — **Easy fixes from the hilda31w app run** (Marcus: "Fix anything that can be addressed easily"; `0e273e1`). After a restart, the :7790 app's server log is CLEAN through Keeling, carbon, What if, isotopes and Known issues, with all nine card plots drawn.
 
 - **Card 1's label border** (`app/R/plots_review.R:94`): `label.size = 0` → `linewidth = 0`. ggplot2 4.0 dropped `label.size`, so 4.0.2 ignored it and drew a coloured border round the "measured offset" box. Rendered both ways: the old form has the border, the new one has none and no warning.

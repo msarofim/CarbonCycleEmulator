@@ -93,6 +93,7 @@
 - **Flagged, not changed:**
   - Card 7's sentence after the number ("The data slightly prefer the literature value…") was measured at hilda33p (10-05 a). It is not re-measured at hilda31w.
   - `MC_LP_TOL` (1e-5) is not under `CCX_REPRO_TOL`. It passed with diff 0, since the gate evaluates at the stored u. Also still unruled at 1e-5: `WR_REPRO_TOL` and `IAV_REPRO_TOL`.
+    ⭐ **RULED 10-13 (o): all three now read `CCX_REPRO_TOL`** (the running chains used 1e-5).
   - GATE S's blind phase moved 4.10 → 4.38. The per-hemisphere ERSSTv5 SST lag is a candidate cause, inferred and not tested.
 - **The new objective's logposts are NOT comparable to #18's.** Compare on likelihood.
 - **Still Marcus's** (unchanged):

@@ -30,6 +30,19 @@ test_that("CCX_REPRO_TOL is the ruled 5e-5, and the four ruled gates read it (pr
   expect_false(grepl("IAV_REPRO_TOL\\s*<-\\s*1e-5", fi))
 })
 
+# The three gates left at 1e-5 by 10-13 (c), RULED 2026-10-13 (o) (Marcus: "Use CCX_REPRO_TOL (Recommended)", all three).
+test_that("the MCMC start gate, the WTC read and the IAV redesign price read CCX_REPRO_TOL too", {
+  mc <- code_of("calibration/run_mcmc_check.R")
+  expect_match(mc, "MC_LP_TOL\\s*<-\\s*CCX_REPRO_TOL")
+  expect_match(mc, "abs\\(lp0 - md\\$logpost\\) < MC_LP_TOL")
+  wr <- code_of("calibration/diag_wtc_refit_read.R")
+  expect_match(wr, "WR_REPRO_TOL\\s*<-\\s*CCX_REPRO_TOL")
+  ip <- code_of("calibration/diag_iav_redesign_price.R")
+  expect_match(ip, "IAV_REPRO_TOL\\s*<-\\s*CCX_REPRO_TOL")
+  expect_match(ip, "dmax > IAV_REPRO_TOL")
+  for (x in list(mc, wr, ip)) expect_false(grepl("(MC_LP_TOL|WR_REPRO_TOL|IAV_REPRO_TOL)\\s*<-\\s*1e-5", x))
+})
+
 # A synthetic, SEPARABLE log-posterior whose diagonal curvature at every grid step is a DESIGNED value:
 # f_k(x) = c_k(|x|) x^2 / 2, with c_k interpolated in log10 |x| through the table, so the central difference at a grid
 # step returns the table entry exactly (up to roundoff). NA in a table = the step leaves the feasible region (-Inf).

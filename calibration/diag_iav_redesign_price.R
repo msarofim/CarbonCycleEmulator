@@ -89,7 +89,8 @@ IAV_RATIO_MODE <- "hilda33p"; IAV_RATIO_MD5 <- "525404989a20ece51ec8bd088c7d4638
 IAV_LAG_MAX  <- CCX_ENSO_LAG_MAX; IAV_W_MAX <- CCX_PARAM_TABLE[[IAV_OCEAN]]$hi   # read BEFORE any pin removes the name
 IAV_LAGS_SUP <- seq(0.5, 10, by = 0.25); IAV_NM_MAXIT <- 400L; IAV_NM_RELTOL <- 1e-8
 IAV_PROF_LAGS <- c(2, 3, 4, 4.5, 5, 5.5, 6.5, 7, 7.5, 8, 9, 10); IAV_PROF_MAXIT <- 150L
-IAV_SIG <- c(one = 0.5, two = 2); IAV_H_STEP <- c(L = 0.05, s = 0.01, w = 0.25); IAV_REPRO_TOL <- 1e-5; IAV_XLAGS <- -6:18
+# IAV_REPRO_TOL RULED (Marcus 2026-10-13: "Use CCX_REPRO_TOL (Recommended)"; CHANGELOG 2026-10-13 o): was a literal 1e-5 (10-07 measured 1e-10 to 2.7e-10, so that record's verdicts stand)
+IAV_SIG <- c(one = 0.5, two = 2); IAV_H_STEP <- c(L = 0.05, s = 0.01, w = 0.25); IAV_REPRO_TOL <- CCX_REPRO_TOL; IAV_XLAGS <- -6:18
 if (RP_SMOKE) { IAV_LAGS_SUP <- c(1, 3, 6, 9); IAV_NM_MAXIT <- 8L; IAV_PROF_LAGS <- c(4, 7); IAV_PROF_MAXIT <- 4L }
 RP_TAG  <- paste0(format(Sys.Date(), "%Y%m%d"), if (RP_SMOKE) "_SMOKE" else "")
 RP_OUT  <- file.path(RP_OUTDIR, sprintf("iav_redesign_price_%s", RP_TAG))
