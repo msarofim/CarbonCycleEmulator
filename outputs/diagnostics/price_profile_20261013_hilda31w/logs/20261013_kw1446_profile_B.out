@@ -1,0 +1,21 @@
+=== calibration/run_price_profile.R @142767b, 2026-10-13 16:23: hold k_w = 1446, start calibration/output/refit_20261005_kw1446_hilda_csl3v0kaidgbe/mode_fit_pumpN.rds, tag B ===
+[ccx_adopt_mode_band] h_ml -> [42.5, 200] (mode 69.5414); kz -> [1161.6, 27808] (mode 13790.0802)
+GATE: the canonical's logpost -1054.495920 vs stored -1054.495920 (diff 0.00e+00, tol 5e-05) -> PASS; its likelihood -1015.703414
+held: k_w = 1446 (15 pins); 30 free names
+start: 28 names from refit_20261005_kw1446_hilda_csl3v0kaidgbe, 2 from hilda31w; logpost -1360.0711
+  cycle 1 NM 1: logpost -1077.4438 (gain 282.6273, 6001 evals, 31.6 CPU-min)
+  cycle 1 NM 2: logpost -1076.4743 (gain 0.9695, 6001 evals, 66.0 CPU-min)
+  cycle 1 NM 3: logpost -1076.3387 (gain 0.1356, 6001 evals, 100.6 CPU-min)
+  cycle 1 BFGS: logpost -1073.7018 (gain 2.6369, convergence 0, 155.6 CPU-min)
+  cycle 2 NM 1: logpost -1073.7018 (gain 0.0000, 3087 evals, 182.8 CPU-min)
+  cycle 2 BFGS: logpost -1073.7018 (gain 0.0000, convergence 0, 183.5 CPU-min)
+cycle 2 gained 0.0000 < 0.5: CONVERGED
+Warning message:
+In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0),  :
+  conveyor 12C spinup did not converge: |resid| = 4.439e+07
+
+RESULT (B): logpost -1073.7018, likelihood -1009.4888, log-prior -64.2130
+vs the canonical (hilda31w, k_w free): likelihood +6.2146, logpost -19.2059 (NOT comparable as a posterior: different held sets; compare on LIKELIHOOD)
+largest moves from the canonical (in its Laplace u-sd): hs_asx_frac +11.6, h_hs +4.1, bomb_total -2.5, u_hs -2.1, kz +1.9, pump_hs_gcm2 -1.4, rep_dC +0.8, sst_seas_amp_NH +0.6
+provenance: calibration/run_price_profile.R @142767b; hilda31w; hold k_w = 1446; start calibration/output/refit_20261005_kw1446_hilda_csl3v0kaidgbe/mode_fit_pumpN.rds; no RNG
+wrote outputs/diagnostics/price_profile_20261013_hilda31w/profile_k_w_B.rds
