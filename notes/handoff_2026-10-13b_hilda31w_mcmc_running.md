@@ -82,7 +82,8 @@
   - Exactly resumable: re-run `~/ccx_frozen/20261013_mcmc_hilda31w_launch.sh`. Do NOT add `--commit`.
   - Starts: chains 1–2 after 2 redraws, 3–4 after 0 (recorded as `start_redraws`).
 - **Also running, not mine:** a Shiny preview on :7788 from `app/`, started 10-12 14:02. It holds hilda29e in memory.
-- **Worktrees in `~/ccx_frozen/`:**
+- **Worktrees in `~/ccx_frozen/`:** ⭐ **UPDATE 10-13 ~13:05: the nine removable trees below are REMOVED** (Marcus asked;
+  CHANGELOG 10-13 (l) lists what was checked). Only `20261013_mcmc_hilda31w` remains.
   - In use: `20261013_mcmc_hilda31w`.
   - Removable, made this session: `suite_20261013_2b1c603`; `ledger_20261013_2b1c603` (the scratch tree, with the harness patch applied).
   - Older, from the previous handoff: `20261012ff_wtc`, `_chaindry`, `_dryrun`, `suite_20261012_{9967a63,f2af594,1e66077}`, `suite_20261013_9200485`.

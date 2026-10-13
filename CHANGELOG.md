@@ -2,6 +2,19 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-13 (l) — **Nine removable worktrees in `~/ccx_frozen/` REMOVED** (Marcus: "Remove the removable worktrees in ~/ccx_frozen"). `20261013_mcmc_hilda31w` (the running chains) is untouched.
+
+- **Removed:** `20261012ff_wtc` (5.7 GB), `20261012ff_wtc_chaindry`, `20261012ff_wtc_dryrun`, `ledger_20261013_2b1c603`, `suite_20261012_{9967a63,f2af594,1e66077}`, `suite_20261013_{9200485,2b1c603}`. Both handoffs (10-13, 10-13b) listed them as removable.
+- **Checked file by file first, against the repo:**
+  - the 78 ignored `data-raw/downloads` copies in each tree are byte-identical to main's;
+  - `20261012ff_wtc`: its 48 multistart files and all 152 wave log files have byte-identical copies in main, and its modified `port_targets.csv` equals the multistart dir's `port_targets_hilda_csl3v0kaidgbemwtc.csv`;
+  - `ledger_…`: its uncommitted test patch is byte-identical to `ledger_20261013_hilda31w/harness_patch_NOT_APPLIED.diff`;
+  - the suite trees held only the downloads and a stray `Rplots.pdf`.
+- **Not in any record, and removed as the records allow:**
+  - `_chaindry`: 5 files — the scratch `start_001`, the dry-run mode file + Hessian (its README: "can be removed … once the landing is committed"), and two port-target copies;
+  - `_dryrun`: 8 small files (~100 KB) — the synthetic plumbing test's `.rds` outputs, its ocean-driver log and its scratch mode file. Its record keeps the logs, and nothing in the CHANGELOG cites these by name.
+- No process had its working directory in any removed tree. The loose scripts, PIDs and `.out` logs in `~/ccx_frozen/` were left alone. The app's own `.claude/worktrees/compassionate-chatelet-52df58` is not in `~/ccx_frozen/` and was not touched.
+
 ## 2026-10-13 (k) — **The three product rebuilds at hilda31w are DONE: the constraint map, `pulse_vs_tcre` and card 8.** Every driver gate passes, and every typed claim on the app's map tab and card 8 still holds. One gate (the futures stake's G3) failed and was diagnosed, ruled and split. Two tests are red with reasons: `test-cmap-tie` (deferred to the MCMC, ruled) and card 4's two (by design).
 
 - **Rulings (Marcus, verbatim):** the map's two new names, "Existing groups (Recommended)"; G3, "Both exact checks (Recommended)"; the tie cut, "Defer to the MCMC (Recommended)"; panel #7, "Self-contained mutation (Recommended)".
