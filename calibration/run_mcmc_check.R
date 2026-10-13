@@ -65,6 +65,11 @@ MC_OUT_DIR    <- mc_arg("out", file.path("outputs", "mcmc_check"))
 MC_SEED_BASE  <- 20261001L
 MC_RNG_KIND   <- c("Mersenne-Twister", "Inversion", "Rejection")
 MC_OVERDISP   <- 2                                      # start = u0 + MC_OVERDISP x a Laplace draw
+# REDRAW UNTIL FINITE (2026-10-13; Marcus: "Redraw until finite (Recommended)"). At hilda31w the h_ml mode (69.5 m) sits
+# ~6 m under the P8 wall (75.48 m), where the model refuses, and chains 1-2's 2x draws landed past it (78.6, 82.9 m). The
+# posterior has no mass there, so a start past the wall is redrawn from the SAME stream, up to MC_START_MAX_DRAWS, and the
+# count is recorded. A chain whose first draw is finite starts exactly as before (hilda29e's chains are unchanged).
+MC_START_MAX_DRAWS <- 50L
 MC_EPS        <- 1e-8                                   # Haario's regulariser, u-space units^2
 MC_LP_TOL     <- 1e-5                                   # the mode reproduces its stored logpost
 # A copy that is not a checkout cannot stamp itself, so its commit is SUPPLIED, and labelled as
@@ -125,8 +130,15 @@ if (file.exists(MC_FILE)) {
   RNGkind(MC_RNG_KIND[1], MC_RNG_KIND[2], MC_RNG_KIND[3])
   set.seed(MC_SEED_BASE + MC_CHAIN)       # immediately before the first draw this chain makes
   L0 <- chol(Sig)
-  u_start <- u0 + MC_OVERDISP * as.vector(stats::rnorm(d) %*% L0); names(u_start) <- names(u0)
-  S <- list(iter = 0L, u = u_start, lp = lp_eval(u_start), n_acc = 0L, n_acc_post = 0L,
+  draw_start <- function() { u <- u0 + MC_OVERDISP * as.vector(stats::rnorm(d) %*% L0); names(u) <- names(u0); u }
+  u_start <- draw_start(); lp_start <- lp_eval(u_start); n_redraw <- 0L
+  while (!is.finite(lp_start) && n_redraw < MC_START_MAX_DRAWS - 1L) {
+    n_redraw <- n_redraw + 1L
+    cat(sprintf("chain %d: start draw %d has a non-finite log-posterior (h_ml %.2f); redrawing from the same stream\n",
+                MC_CHAIN, n_redraw, ccx_unc_to_par(u_start)$h_ml))
+    u_start <- draw_start(); lp_start <- lp_eval(u_start)
+  }
+  S <- list(iter = 0L, u = u_start, lp = lp_start, n_acc = 0L, n_acc_post = 0L,
             sum_u = numeric(d), sum_uu = matrix(0, d, d), n_sum = 0L, C = Sig,
             samples = matrix(NA_real_, 0, d, dimnames = list(NULL, names(u0))), samples_lp = numeric(0),
             samples_iter = integer(0), lp_trace = numeric(0),
@@ -138,9 +150,12 @@ if (file.exists(MC_FILE)) {
               proposal = sprintf("adaptive Metropolis (Haario et al. 2001): N(u, %.4f x C), C = the Laplace covariance until iteration %d, then the chain's running covariance + eps I, FROZEN from iteration %d", sd_scale, MC_T0, MC_ADAPT),
               seed = MC_SEED_BASE + MC_CHAIN, rng_kind = MC_RNG_KIND,
               seed_applied = "set.seed() immediately before the start draw; the RNG state is carried through every checkpoint, so a resumed chain is the uninterrupted chain",
+              start_redraws = n_redraw,
+              start_rule = sprintf("u0 + %g x a Laplace draw, redrawn from the same stream while its log-posterior is non-finite (at most %d draws)",
+                                   MC_OVERDISP, MC_START_MAX_DRAWS),
               emis_method = CCX_EMIS_METHOD_DEFAULT, spinup = ccx_mode_spinup(md)))
-  if (!is.finite(S$lp)) stop("the overdispersed start has a non-finite log-posterior")
-  cat(sprintf("chain %d starts at logpost %.3f (mode %.3f)\n", MC_CHAIN, S$lp, lp0))
+  if (!is.finite(S$lp)) stop(sprintf("the overdispersed start has a non-finite log-posterior after %d draws", MC_START_MAX_DRAWS))
+  cat(sprintf("chain %d starts at logpost %.3f (mode %.3f) after %d redraw(s)\n", MC_CHAIN, S$lp, lp0, n_redraw))
 }
 
 save_state <- function() {
