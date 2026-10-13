@@ -66,7 +66,7 @@ ccx_load_cpp()
 
 # ---- NAMED CONSTANTS: every label, filename and threshold derives from here ----
 CM_TAG        <- "constraint_map"
-CM_DATE       <- "20261008e"  # the SHIPPED canonical artifact's tag: hilda29e at its adoption (10-08 e; built 10-08 h after Marcus's "Main fit only" ruling; was 20261006a = hilda33p, 20261003h = hilda34g, 20261001k = hilda33d after the 10-01 (k) flip, 20261001 for that adoption build, 20260925 at hilda29l); see CM4. ⚠ MOVE IT AT EVERY ADOPTION: the canonical's log is named by it, so a stale tag overwrites the previous canonical's record (it did, 10-03, and was restored from git)
+CM_DATE       <- "20261013f"  # the SHIPPED canonical artifact's tag: hilda31w at its adoption (10-13 f; built 10-13 after Marcus's "Existing groups (Recommended)" for its two new names; was 20261008e = hilda29e, built 10-08 h after Marcus's "Main fit only" ruling; 20261006a = hilda33p, 20261003h = hilda34g, 20261001k = hilda33d after the 10-01 (k) flip, 20261001 for that adoption build, 20260925 at hilda29l); see CM4. ⚠ MOVE IT AT EVERY ADOPTION: the canonical's log is named by it, so a stale tag overwrites the previous canonical's record (it did, 10-03, and was restored from git)
 # ⛔⛔ CM4  THE ARM (2026-09-26). The map used to be canonical-only. A SECOND
 #       evaluation point answers a question one point cannot: is the pins/pulls
 #       picture a property of the MODEL, or only of THIS FIT?
@@ -156,15 +156,19 @@ CM_COMPONENT_ALL <- list(
   "Mixed layer & vertical mixing" = c("h_ml", "kz", "kz_deep_frac", "tau_ex"),
   "High-latitude structure"= c("hs_asx_frac", "h_hs", "u_hs"),
   "Biological pump"        = c("pump_hs_gcm2", "pump_grad"),
+  # + seas_T_lag (the WTC label, fitted from hilda31w, 2026-10-13; Marcus: "Existing groups (Recommended)"),
+  #   beside seas_lag_p_NH, its r +0.955 partner at the Laplace
   "Seasonal cycle"         = c("npp_frac_NH", "seas_T_amp_NH", "seas_T_amp_SH",
-                               "seas_lag_p_NH", "seas_lag_p_SH",
+                               "seas_lag_p_NH", "seas_lag_p_SH", "seas_T_lag",
                                "sst_seas_amp_NH", "sst_seas_amp_SH",
                                "ent_seas_amp_SH"),
   # + the land ENSO lag (DESIGN's L_MEI; the lag label, fitted from hilda34g, 2026-10-03)
   "ENSO response"          = c("w_enso_l2", "gamma_enso_land_NH", "gamma_enso_land_SH",
                                "gamma_enso_ocn_NH", "gamma_enso_ocn_SH", "lag_enso_land"),
   # + the GCB-imbalance shares (D3, objective #14; from hilda33d, 2026-10-01): a target choice
-  "Input scalings & reporting" = c("bomb_total", "luc_scale", "sigma_d14c",
+  # + bomb_share_NH (the WTC label, fitted from hilda31w, 2026-10-13; same ruling), beside bomb_total: both
+  #   describe the bomb-14C input
+  "Input scalings & reporting" = c("bomb_total", "bomb_share_NH", "luc_scale", "sigma_d14c",
                                    "rep_dC", "grad_off_co2", "grad_off_d13c",
                                    "imb_share_land", "imb_share_ocean_rest")
 )
@@ -187,7 +191,7 @@ CM_ARM_ONLY_NAMES <- c("w_enso_l2",                                  # canonical
 # The observation families. ⚠ Same rule: every stream exactly once, gated.
 # ⚠ 2026-10-08 (h): like the components, this is now the UNION over registered arms (CM_FAMILY_ALL), restricted
 # below to the streams THIS arm's objective has (CM_FAMILY). The cut (iav_cut 1) moved `gcb_ocean_enso_slope` out
-# of the main objective into the stage-1 module, so at hilda29e its family is empty. COVER stays per-arm and
+# of the main objective into the stage-1 module, so at hilda29e (and hilda31w, which carries its pins) its family is empty. COVER stays per-arm and
 # strict; GATE UNION now also requires every union stream absent from this arm to be in CM_ARM_ONLY_STREAMS.
 # ⚠ THESE STRINGS ARE READER-FACING: they are the app's own axis labels and
 # the subject of its computed prose, so they are typeset here rather than
@@ -212,7 +216,7 @@ CM_FAMILY_ALL <- list(
   "ENSO–sink covariance"       = c("gcb_ocean_enso_slope")
 )
 # Streams a REGISTERED arm other than this one scores in its MAIN objective. Listed by hand, like the names.
-CM_ARM_ONLY_STREAMS <- c("gcb_ocean_enso_slope")   # hilda33p and earlier; the cut's stage-1 module at hilda29e
+CM_ARM_ONLY_STREAMS <- c("gcb_ocean_enso_slope")   # hilda33p and earlier; the cut's stage-1 module at hilda29e / hilda31w
 
 dir.create(dirname(CM_LOG), showWarnings = FALSE, recursive = TRUE)
 cm_say <- function(...) { txt <- sprintf(...); cat(txt); cat(txt, file = CM_LOG, append = TRUE) }
