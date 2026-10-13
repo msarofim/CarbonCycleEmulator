@@ -2,6 +2,31 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-13 (j) — **The hilda31w MCMC band is RUNNING: 4 chains to 200k on the Mac, launched 11:42 EDT.** Also: `ALPHA_AS_FCO3` is KEPT at 0.082 with the re-measurement recorded (`f6088ac`), and the three cheap products are ruled for rebuild. Record: `outputs/diagnostics/mcmc_launch_20261013_hilda31w/` (README).
+
+- **Rulings (Marcus, verbatim):** "Launch on the Mac (Recommended)"; "Keep 0.082, record it (Recommended)"; "Rebuild all three (Recommended)"; then, for the starts, "Redraw until finite (Recommended)".
+- **Torch verdict, said out loud: Mac.**
+  - CCX is ~2× faster per evaluation on the M4 (0.141 vs 0.294 s, probe job 16075825), four cores are free, and there is no licence or substrate blocker.
+  - Load was 4.1 at launch, with nothing else heavy running (the idle preview app on :7788 only).
+- **The first smoke FAILED to start chains 1–2**, and was diagnosed rather than retried.
+  - The driver starts at the mode + 2 × a Laplace draw. hilda31w's `h_ml` mode (69.5 m) sits ~6 m under the P8 wall (75.48 m), where the model refuses.
+  - Chains 1–2 drew 78.6 / 82.9 m (`diag_mcmc_starts.R`). At hilda29e the mode was 64.6 m and the same seeds started.
+  - The posterior has no mass past the wall, so this is about where to start, not the target.
+- **The ruled fix** (`e83e228`, `run_mcmc_check.R`): a non-finite start is redrawn from the SAME stream, at most 50 draws, and `start_redraws` / `start_rule` are recorded in provenance. A chain whose first draw is finite starts exactly as before, so hilda29e's chains are unchanged.
+- **Smoke at `e83e228`, 4 × 300 iterations:**
+  - chains 1–2 redraw twice; every rejected draw was past the wall (78–88 m);
+  - chains 3–4 need none, and their starts equal the pre-change draws exactly (−1378.092, −1521.914);
+  - every chain reproduces the stored logpost (diff 0, against `MC_LP_TOL` 1e-5);
+  - 0.26–0.42 s/iteration with four in parallel, so **~15–23 h to 200k**.
+- **Production:** frozen worktree `~/ccx_frozen/20261013_mcmc_hilda31w` at `e83e228`.
+  - Settings are hilda29e's band settings: n 2e5, adapt 3e4, t0 1000, thin 20, ckpt 500, seeds 20261001 + chain. Chains run under `caffeinate`.
+  - It is exactly resumable by re-running the launch script; do NOT add `--commit`.
+  - The production starts equal the smoke's.
+- **Next with it:**
+  - read convergence at a common window (`read_mcmc_check.R`), as at hilda29e;
+  - the identifiability check: posterior sd and correlations for `bomb_share_NH` (partners `tau_ex`, `bomb_total`) and `seas_T_lag` (partner `seas_lag_p_NH`, r +0.955 at the Laplace);
+  - then the band (`build_futures_ribbons.R --draws=`) and the per-chain test.
+
 ## 2026-10-13 (i) — **`ALPHA_AS_FCO3` re-measured at hilda31w: 0.0926 in 2024 (NH 0.0981, SH 0.0871) and 0.1190 in 1750, against the shipped 0.082.** This is the post-adoption list's first item (citation rulings: "re-measure it at the new mode"). Nothing changed; the constant is Marcus's call.
 
 - **Driver** `calibration/diag_fco3_at_mode.R` (`8e53a05`; log and rds `outputs/diagnostics/fco3_at_mode_20261013.*`, stamp clean).

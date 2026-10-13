@@ -1,0 +1,7 @@
+[ccx_adopt_mode_band] h_ml -> [42.5, 200] (mode 69.5414); kz -> [1161.6, 27808] (mode 13790.0802)
+[calibration/run_mcmc_check.R chain 3 @e83e228] mode hilda31w logpost: recomputed -1054.495920, stored -1054.495920 (diff 0.00e+00)
+chain 3 starts at logpost -1378.092 (mode -1054.496) after 0 redraw(s)
+chain 3 iter 100/300  logpost -1085.684  acceptance 0.230  (0.6 min)
+chain 3 iter 200/300  logpost -1082.589  acceptance 0.210  (1.4 min)
+chain 3 iter 300/300  logpost -1086.876  acceptance 0.233, post-adapt 0.280  (2.1 min)
+chain 3 COMPLETE: 300 iterations, 5 kept samples, acceptance 0.233 (post-adapt 0.280)
