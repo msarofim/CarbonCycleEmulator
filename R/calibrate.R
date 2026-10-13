@@ -2158,7 +2158,21 @@ ccx_scaled_forcing <- function(sp = NULL, years = c(1750, 2024), luc_scale = 1,
 CCX_HESS_EPS_GRID   <- c(1e-5, 3e-5, 1e-4, 3e-4, 1e-3, 3e-3, 1e-2, 3e-2, 1e-1, 3e-1)
 CCX_HESS_STABLE_TOL <- 0.02    # max relative disagreement with EITHER neighbour
 CCX_HESS_EPS_FRAC   <- 0.10    # step as a fraction of the direction's posterior sd
-CCX_HESS_FALLBACK   <- 3e-4    # only for directions with no stable plateau
+# NO PLATEAU (RULED 2026-10-13, Marcus: "Most-stable step (Recommended)"; CHANGELOG 2026-10-13 c). A direction with no
+# 2 % plateau takes the INTERIOR GRID STEP whose curvature disagrees least with its neighbours (the plateau test's own
+# metric), and stays flagged. It used to take the fixed CCX_HESS_FALLBACK, 3e-4 in u, which under the WTC label reads
+# curvature noise of ~1e-5 / (3e-4)^2 ~ 110: more than kz_deep_frac's own curvature (~ -2.4), so id 17's Hessian lost
+# negative-definiteness on that step alone (objective_noise_floor_20261013_wtc.log). The fixed value is now used only
+# when NO interior triple is finite (every step leaves the feasible region).
+CCX_HESS_FALLBACK   <- 3e-4
+# THE REPRODUCE GATES (RULED 2026-10-13, Marcus: "5e-5, all three (Recommended)"; CHANGELOG 2026-10-13 c): does a STORED
+# point reproduce through another evaluation path? promote_multistart_mode.R GATE 4 (logpost), recompute_hessian.R
+# GATE 1 (logpost) and fit_iav_module.R GATE 0 (each row, the dg path) read this ONE value. History: a literal 1e-6
+# until 2026-10-07, then 1e-5 (~6x #17's measured per-row floor). Under label hilda_csl3v0kaidgbemwtc the floor is
+# ~4-5x larger in the same delta13C rows (per-row moves to 7.9e-6 under 1e-12 nudges; logpost spikes to 1.2e-5), so
+# 1e-5 stopped the WTC landing at 1.18e-5 on noise. 5e-5 is ~6x that floor again. Power: four real defects move the
+# rows by 2.35-1.0e3 (outputs/diagnostics/wtc_landing_20261013/gate0_diagnosis/).
+CCX_REPRO_TOL       <- 5e-5
 
 ccx_hessian_per_direction <- function(lp, u, verbose = TRUE) {
   nm <- names(u); n <- length(u); lp0 <- lp(u)
@@ -2175,21 +2189,28 @@ ccx_hessian_per_direction <- function(lp, u, verbose = TRUE) {
   D <- sapply(CCX_HESS_EPS_GRID, function(e) diag_at(rep(e, n)))
   dimnames(D) <- list(nm, format(CCX_HESS_EPS_GRID, scientific = TRUE))
   plateau <- function(k) {
-    d <- D[k, ]
+    d <- D[k, ]; best_s <- Inf; best_i <- NA_real_
     for (i in seq_along(d)) {
       if (i == 1L || i == length(d)) next
       tri <- d[c(i - 1L, i, i + 1L)]
       if (anyNA(tri) || !all(is.finite(tri)) || tri[2] == 0) next
-      if (max(abs(tri - tri[2])) / abs(tri[2]) < CCX_HESS_STABLE_TOL)
-        return(c(d = tri[[2]], idx = i))
+      s <- max(abs(tri - tri[2])) / abs(tri[2])
+      if (s < CCX_HESS_STABLE_TOL) return(c(d = tri[[2]], idx = i, best = NA_real_))
+      if (s < best_s) { best_s <- s; best_i <- i }      # the most-stable interior step, for the no-plateau case
     }
-    c(d = NA_real_, idx = NA_real_)
+    c(d = NA_real_, idx = NA_real_, best = best_i)
   }
-  PL <- t(vapply(seq_len(n), plateau, numeric(2))); rownames(PL) <- nm
+  PL <- t(vapply(seq_len(n), plateau, numeric(3))); rownames(PL) <- nm
   SDV <- ifelse(PL[, "d"] < 0, 1 / sqrt(-PL[, "d"]), NA_real_)
   eps <- CCX_HESS_EPS_FRAC * SDV
   no_plateau <- nm[is.na(eps)]
-  eps[is.na(eps)] <- CCX_HESS_FALLBACK
+  # no plateau: the most-stable interior grid step (ruled 2026-10-13); the fixed fallback only when none is finite.
+  # ⚠ A STABLE but NON-NEGATIVE plateau (a direction that is not a maximum) also has no sd, so it lands here too; the
+  # ruling does not cover it, and it keeps the fixed step it always had, labelled as what it is.
+  eps_fb <- ifelse(is.na(PL[, "best"]), CCX_HESS_FALLBACK, CCX_HESS_EPS_GRID[PL[, "best"]])
+  fallback_how <- stats::setNames(ifelse(!is.na(PL[, "idx"]), "fixed_nonneg_plateau",
+                                         ifelse(is.na(PL[, "best"]), "fixed_none_finite", "most_stable")), nm)[no_plateau]
+  eps[is.na(eps)] <- eps_fb[is.na(eps)]
   names(eps) <- nm
 
   # 2. verify the chosen step at eps/3 and 3 eps
@@ -2217,11 +2238,12 @@ ccx_hessian_per_direction <- function(lp, u, verbose = TRUE) {
       cat(sprintf("  %-16s %10.5f %11.3e %11.5g%s\n", nm[k], SDV[k], eps[k], V[k, "mid"],
                   if (nm[k] %in% unstable) "  ** no stable step" else ""))
     if (length(no_plateau))
-      cat(sprintf("  ** no plateau, fell back to %.0e: %s\n",
-                  CCX_HESS_FALLBACK, paste(no_plateau, collapse = ", ")))
+      cat(sprintf("  ** no plateau (%.0f %% test), so the most-stable grid step (the fixed %.0e only where none is finite): %s\n",
+                  100 * CCX_HESS_STABLE_TOL, CCX_HESS_FALLBACK,
+                  paste(sprintf("%s %.0e (%s)", no_plateau, eps[no_plateau], fallback_how), collapse = ", ")))
   }
   list(H = H, eps = eps, sd_diag = SDV, curvature_by_step = D, verify = V,
-       no_plateau = no_plateau, unstable = unstable, eps_frac = CCX_HESS_EPS_FRAC)
+       no_plateau = no_plateau, fallback_how = fallback_how, unstable = unstable, eps_frac = CCX_HESS_EPS_FRAC)
 }
 
 # ---- THE DECLARED STRUCTURE (2026-09-06d, Marcus's ruling) -----------

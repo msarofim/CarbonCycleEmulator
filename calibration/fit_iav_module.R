@@ -82,7 +82,10 @@ IAV_CHECK_TOL <- 0.1                                            # + CHECK: RULED
 # by 0.4-1.6e-6 at BOTH basins, and basin B passed at 1e-10 only because its path crossed no step (CHANGELOG 2026-10-07 a).
 # 1e-5 is the tolerance promote_multistart_mode.R GATE 4 and recompute_hessian.R GATE 1 use for the same question, ~6x the
 # measured per-row floor. Mutation-tested 2026-10-07: a dropped land ENSO pin still fails it.
-IAV_REPRO_TOL <- 1e-5
+# ⭐ RULED AGAIN 2026-10-13 (Marcus: "5e-5, all three (Recommended)"; CHANGELOG 2026-10-13 c): under label
+# hilda_csl3v0kaidgbemwtc the floor is ~4-5x #17's in the same rows, and 1e-5 stopped the WTC landing at 1.18e-5 on
+# noise. Now R/calibrate.R CCX_REPRO_TOL, shared with promote GATE 4 and recompute_hessian GATE 1.
+IAV_REPRO_TOL <- CCX_REPRO_TOL
 IAV_XLAGS    <- -6:18                                           # the timing read (br_timing's BR_XLAGS)
 IAV_PREVIEW  <- file.path("outputs", "diagnostics", "iav_cut_smoothed_land_20261006_hilda33p.rds")  # its land_ocean scope
 if (IAV_SMOKE) { IAV_LAGS_SUP <- c(1, 3, 6, 9); IAV_NM_MAXIT <- 8L; IAV_PROF_LAGS <- c(4, 7); IAV_PROF_MAXIT <- 4L }

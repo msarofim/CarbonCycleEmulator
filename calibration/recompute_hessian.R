@@ -98,8 +98,8 @@ HESS_OUT_FILE  <- sub("\\.rds$", "_hess.rds", HESS_MODE_FILE)
 HESS_EPS_GRID  <- c(1e-5, 3e-5, 1e-4, 3e-4, 1e-3, 3e-3, 1e-2, 3e-2, 1e-1, 3e-1)
 HESS_STABLE_TOL <- 0.02   # max relative disagreement with EITHER neighbour
 HESS_EPS_FRAC   <- 0.10   # step as a fraction of each direction's posterior sd
-HESS_FALLBACK   <- 3e-4   # used only for parameters with no stable step, and
-                          # flagged loudly when it is
+HESS_FALLBACK   <- CCX_HESS_FALLBACK   # since 2026-10-13 ONLY where no interior step is finite; a no-plateau
+                          # direction otherwise takes its MOST-STABLE grid step (R/calibrate.R; ruled), flagged loudly
 
 sep <- function(s) cat(sprintf("\n%s\n%s\n", s, strrep("-", nchar(s))))
 
@@ -149,7 +149,7 @@ if (!is.null(md$u_mode))
   cat(sprintf("(md$u_mode would have decoded h_ml to %.3f m; par_mode says %.3f m)\n",
               .from_unc(md$u_mode[[match("h_ml", nm)]], CCX_PARAM_TABLE$h_ml),
               md$par_mode$h_ml))
-if (abs(lp0 - md$logpost) > 1e-5)
+if (abs(lp0 - md$logpost) > CCX_REPRO_TOL)   # GATE 1: R/calibrate.R, RULED 2026-10-13 (5e-5; was a literal 1e-5)
   stop("the mode does not reproduce -- a Hessian here would be at the wrong point")
 
 # ---- how far each unconstrained step reaches in NATURAL units ----------
@@ -216,8 +216,9 @@ if (length(failed))
   cat(sprintf("\n*** %d parameter(s) UNSTABLE at the derived step: %s\n",
               length(failed), paste(failed, collapse = ", ")))
 if (length(unstable))
-  cat(sprintf("*** %d parameter(s) had no plateau at all, using the fallback: %s\n",
-              length(unstable), paste(unstable, collapse = ", ")))
+  cat(sprintf("*** %d parameter(s) had no plateau at all (%.0f %% test); the step each took: %s\n",
+              length(unstable), 100 * HESS_STABLE_TOL,
+              paste(sprintf("%s %.0e (%s)", unstable, EPSV[unstable], HD$fallback_how[unstable]), collapse = ", ")))
 if (HESS_HAS_REF) {
   cat(sprintf("\nthe refit's single %.0e, as a multiple of the right step: soft directions\n",
               HESS_REF_EPS))
@@ -298,7 +299,7 @@ out <- list(mode_file = HESS_MODE_FILE, logpost = lp0,
             hessian = H, cov = Sigma, cor = Cor, sd_unc = sdv, pd = pd,
             logdet_negH = if (pd) sum(log(-ev$values)) else NA_real_,
             eigen = ev, hess_eps = EPSV, hess_eps_unstable = failed,
-            hess_eps_no_plateau = unstable, hess_eps_frac = HESS_EPS_FRAC,
+            hess_eps_no_plateau = unstable, hess_eps_fallback_how = HD$fallback_how, hess_eps_frac = HESS_EPS_FRAC,
             sd_diag = SDV, hess_eps_verify = V,
             hess_eps_grid = HESS_EPS_GRID, hess_diag_by_step = D,
             unc_reach = reach, stable_tol = HESS_STABLE_TOL)

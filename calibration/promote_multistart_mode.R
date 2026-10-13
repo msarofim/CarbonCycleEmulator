@@ -61,9 +61,11 @@ PMM_ID         <- if (is.na(PMM_ID_ARG)) NA_integer_ else as.integer(PMM_ID_ARG)
 if (!is.na(PMM_ID) && (is.na(PMM_WHY) || !nzchar(trimws(PMM_WHY))))
   stop("--id needs --why=\"<reason>\": the mode file must record why it is not the best stored logpost")
 if (is.na(PMM_ID) && !is.na(PMM_WHY)) stop("--why is for --id only: the computed best needs no reason")
-PMM_LP_TOL     <- 1e-5      # matches recompute_hessian.R's GATE 1 -- the same
-                            # question ("does this point reproduce?") answered
-                            # to the same precision, deliberately not tighter.
+PMM_LP_TOL     <- CCX_REPRO_TOL   # GATE 4 = recompute_hessian.R GATE 1 = fit_iav_module.R GATE 0: the same question
+                                 # ("does this point reproduce?"), ONE value (R/calibrate.R; RULED 2026-10-13, 5e-5)
+# ⚠ GATE 5 (the decomposition) is NOT in that ruling and keeps 1e-5. It meets the same noise: at the WTC landing its gap
+# was -9.608e-6, EXACTLY GATE 4's diff (CHANGELOG 2026-10-13 c), so it is one noise draw from failing a correct point.
+PMM_DECOMP_TOL <- 1e-5
 PMM_N_PAR      <- length(CCX_PARAM_NAMES)
 
 sep <- function(s) cat(sprintf("\n%s\n%s\n", s, strrep("-", nchar(s))))
@@ -281,9 +283,9 @@ p_pr <- bp; for (n in names(pm)) p_pr[[n]] <- pm[[n]]
 pj <- sum(vapply(CCX_PARAM_NAMES, function(n) { s <- CCX_PARAM_TABLE[[n]]
   .ccx_prior_eval(s, pm[[n]], p_pr) + .log_jac(u[[match(n, CCX_PARAM_NAMES)]], s) }, numeric(1)))
 cat(sprintf("sum(streams) %.6f ; logpost %.6f ; implied prior+jacobian %.6f ; recomputed prior+jacobian %.6f ; gap %.3e (tol %g)\n",
-            sum(st), lp0, pri, pj, pri - pj, PMM_LP_TOL))
+            sum(st), lp0, pri, pj, pri - pj, PMM_DECOMP_TOL))
 if (!is.finite(pri)) stop("non-finite prior residual -- the decomposition is wrong")
-if (abs(pri - pj) > PMM_LP_TOL)
+if (abs(pri - pj) > PMM_DECOMP_TOL)
   stop("GATE 5: the streams do not sum to the likelihood half of the logpost (gap ",
        format(pri - pj, digits = 3), "): a stream is missing from the decomposition ",
        "or the prior is not the one the objective used.")

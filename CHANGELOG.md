@@ -2,6 +2,24 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-13 (c) — **Two rulings on the noise floor, BUILT: one reproduce tolerance, 5e-5, for all three gates; the most-stable step for a no-plateau Hessian direction.** Tested, and 6 of 6 mutations caught.
+
+- **Marcus, verbatim: "5e-5, all three (Recommended)".** New `R/calibrate.R` `CCX_REPRO_TOL <- 5e-5` (with its history and derivation), read by:
+  - `promote_multistart_mode.R` GATE 4 (`PMM_LP_TOL <- CCX_REPRO_TOL`);
+  - `recompute_hessian.R` GATE 1 (was a literal 1e-5);
+  - `fit_iav_module.R` GATE 0 (`IAV_REPRO_TOL <- CCX_REPRO_TOL`).
+
+  5e-5 is ~6× the per-row floor measured under the label (10-13 b), the same reasoning as 10-07's 1e-5. Four real defects move GATE 0's rows by 2.35 to 1.0e3.
+- ⚠ **Promote's GATE 5 is NOT in the ruling and keeps 1e-5**, now under its own name `PMM_DECOMP_TOL`. It shared `PMM_LP_TOL` before. It meets the same noise: at the landing its gap was −9.608e-6, exactly GATE 4's diff. **Flagged for Marcus.** Also left at 1e-5 and unruled: `diag_wtc_refit_read.R` `WR_REPRO_TOL` (its gate evaluates at the stored u, diff 0 at id 17) and `diag_iav_redesign_price.R`'s own `IAV_REPRO_TOL`.
+- **Marcus, verbatim: "Most-stable step (Recommended)".** In `ccx_hessian_per_direction()` (`R/calibrate.R`, shared by `recompute_hessian.R`, the refit driver and two diagnostics), a direction with no 2 % plateau now takes the **interior grid step whose curvature disagrees least with its neighbours**, using the plateau test's own metric. Before, it took the fixed `CCX_HESS_FALLBACK` 3e-4. It stays in `no_plateau` and flagged. The new field `fallback_how` (stored as `hess_eps_fallback_how`) says which rule applied.
+  - The fixed 3e-4 remains for two cases outside the ruling: a direction with **no finite interior step** (`fixed_none_finite`), and a **stable but non-negative plateau** (`fixed_nonneg_plateau`), which is not a maximum and had no sd before either. Both are labelled.
+  - On id 17's own rows this gives **`kz_deep_frac` 1e-1** (2.5 %; 3e-2 scores 3.2 %, so the question's "≈3e-2" was slightly off) and **`h_ml` 3e-3** (2.28 %).
+- **Tests:** new `tests/testthat/test-repro-tol-hess-fallback.R`, 27 expectations.
+  - Text gates on the code (comments stripped): the constant, the three gates, and GATE 5's separate 1e-5.
+  - A synthetic separable log-posterior whose curvature-by-step reproduces id 17's `kz_deep_frac` and `h_ml` rows exactly, plus a plateau row, a positive-plateau row and an infeasible row.
+  - A power check: the 3e-4 step reads the wrong sign.
+  - **Mutation-tested, 6 of 6 caught:** the tolerance back to 1e-5; the fixed fallback; "first finite step" instead of most stable; GATE 5 widened silently; each of the two literals restored.
+
 ## 2026-10-13 (b) — **The WTC refit LANDED, and its chain STOPPED at the module check's GATE 0 (1.18e-5 > the ruled 1e-5).** Diagnosed as the objective's NUMERICAL NOISE FLOOR, which under the label is ~4–5× #17's. The Hessian's two UNSTABLE names have the same cause. Two rulings are owed. Nothing adopted.
 
 - **The wave:** 24/24 exit 0, finished 07:36 (launched 19:46). The armed land chain at `065697f` ran land (byte-identical copy, RUN_PROVENANCE) → collect → basins → promote → Hessian → WTC read, all rc 0. It then stopped at `fit_iav_module.R --check` GATE 0. `checkz`, the ocean driver and the scorecard did not run. Committed as landed (`a9b6601`); the stopped log is `wtc_landing_20261013/check_id017_STOPPED_gate0.log`.
