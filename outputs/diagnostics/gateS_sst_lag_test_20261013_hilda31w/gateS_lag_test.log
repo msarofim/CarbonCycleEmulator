@@ -1,0 +1,8 @@
+canonical hilda31w @94378a2; run lags NH 1.324875 SH 1.535666 (absent = legacy 1.32)
+                                 whole_amp whole_mo blind_amp blind_mo
+A as fitted (NH 1.325, SH 1.536)     0.388    8.908     0.854    4.377
+B SH -> legacy 1.32                  0.332    9.346     0.854    4.155
+C both -> legacy 1.32                0.332    9.346     0.854    4.155
+
+blind phase: A 4.377; B 4.155 (moved -0.222 mo for a -0.216 mo SH lag change); C 4.155
+hilda29e's recorded blind read: 4.10 (test-gate-bounds.R); the share of the +0.28 move the SH lag accounts for: 80 %

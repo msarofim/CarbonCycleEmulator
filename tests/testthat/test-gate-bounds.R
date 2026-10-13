@@ -502,6 +502,9 @@ test_that("GATE S has POWER against its own blind spot: at a seas_ml = 1 canonic
   # wtc_landing_20261013/resume/scorecard.log); the blind read 4.10 -> 4.38 (4.377), outside the old 0.05. The blind phase IS
   # the thermal phase, and the label reads the SST lag per hemisphere from ERSSTv5 (SH 1.536 vs the legacy 1.32 months) --
   # a candidate cause, inferred, not tested. MEASURED (Marcus 2026-10-13: "Approve all (Recommended)").
+  # ⭐ TESTED 2026-10-13 (p): with the SH lag restored to 1.32 the blind read is 4.155 (-0.222 for -0.216), i.e. 80 % of
+  # the move; the rest is the refit. The whole limb moves 8.91 -> 9.35, still PASS
+  # (outputs/diagnostics/gateS_sst_lag_test_20261013_hilda31w/).
   expect_true(full$pass)
   expect_equal(full$mo,  8.91, tolerance = 0.05, scale = 1)
   expect_equal(blind$mo, 4.38, tolerance = 0.05, scale = 1)
