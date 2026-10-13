@@ -8,6 +8,10 @@
 - **Start here:** CHANGELOG **2026-10-13 (f) → (j)**; memory [[ccx_hilda31w_adopted]] (current state, last paragraph);
   `outputs/diagnostics/ledger_20261013_hilda31w/` and `outputs/diagnostics/mcmc_launch_20261013_hilda31w/` (READMEs).
 - **First thing to do:** confirm the 4 MCMC chains are alive (§5), then the product rebuilds (§4 step 1).
+- ⭐ **UPDATE 10-13 ~12:50: §4 step 1 is DONE** — CHANGELOG **2026-10-13 (k)** (`327de2d`..`526a2a6`, pushed). Three rulings
+  were taken on the way (map grouping, the stake's G3 split, panel #7). `test-cmap-tie` is RED **by ruling**: the tie cut's
+  re-measurement is deferred to the MCMC read (no near basin in the WTC wave). Chains at ~12k/200k after 65 min, so
+  ~18–19 h in all (≈ 05:30–06:30 EDT 10-14). **Next is §4 step 2**, and it now carries the tie-cut method question.
 
 ## 1. What was done (2026-10-13 ~10:00 → 12:00)
 
