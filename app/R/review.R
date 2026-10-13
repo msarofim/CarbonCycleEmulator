@@ -760,7 +760,12 @@ RV_CARDS <- list(
                       # "1,446" to KW_PRIOR_CENTRE and "about 1,850" to the canonical's fitted k_w.
                       # 2026-10-13 (g): "about 1,900" -> "about 1,850" (Marcus: "about 1,850"): hilda31w's k_w is
                       # 1835.4 (sd 52.5); 1,900 was 1.23 sd off. The next sentence's claim (the data prefer 1,446)
-                      # was MEASURED at hilda33p (10-05 a) and is not re-measured at hilda31w.
+                      # was MEASURED at hilda34g (10-05 a; earlier notes said hilda33p, wrongly: the read's own record
+                      # names hilda34g). RE-MEASURED at hilda31w 2026-10-13 (q), a two-start profile with k_w held at 1446
+                      # (outputs/diagnostics/price_profile_20261013_hilda31w/read_k_w_20261013.log): the data prefer 1,446
+                      # by +6.21 log-likelihood (+2.75 at hilda34g; atmospheric d14C +7.09), and hs_asx_frac's prior is
+                      # -19.92 of the -22.56 prior cost (88 %); posterior price -15.40 (was -20.01). Both claims hold;
+                      # whether "slightly" still fits +6.2 is Marcus's wording call.
                       "One fitted value is a compromise between two sources rather",
                       "than a measurement: the air-sea gas transfer speed comes out at",
                       "about 1,850 m per year, against the literature's 1,446 (Naegler",

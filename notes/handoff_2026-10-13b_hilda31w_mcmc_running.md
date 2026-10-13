@@ -15,7 +15,7 @@
 - ⭐⭐ **UPDATE 10-13 ~16:40 — TONIGHT'S PREP, CHANGELOG (p). Tomorrow starts here:**
   1. The chains (~05:30–07:00 EDT 10-14). Snapshot them into the repo, then run `read_mcmc_check.R --dir=<snapshot>` (now fixed for `start_redraws`). Then run `diag_mcmc_identifiability.R --draws=<pooled_u.rds>` (new, dry-run tested). ⚠ The `h_ml` wall at the mode is 75.02 m (the substep cap); P8 is at 75.14.
   2. The band: `build_futures_ribbons.R --draws=<repo-relative pooled_u> --out=<not data/>` (`RB_COV_EMIS` now has hilda31w; smoke-tested). A Gaussian band is NOT buildable at this mode (P8 censors the Laplace draws).
-  3. The `k_w` = 1446 profile: two starts RUNNING (PIDs `~/ccx_frozen/20261013_kw1446_profile.pids`; `kill -0`, never `pgrep -f`). Results land in `~/ccx_frozen/20261013_kw1446_profile/outputs/diagnostics/price_profile_20261013_hilda31w/profile_k_w_{A,B}.rds`. Copy them into the repo, then read: likelihood vs the canonical's −1015.7034, the prior ledger, A vs B. Card 7's sentence rides on it.
+  3. ✅ **DONE 10-13 ~19:45, CHANGELOG (q):** the `k_w` = 1446 profile CONVERGED and was read. Likelihood +6.21 (1446 preferred); `hs_asx_frac`'s prior is 88 % of the cost; posterior price −15.40. Card 7's claims hold; "slightly" is Marcus's call. (The 10-05 measurement was at hilda34g, not hilda33p as written below.) Was: two starts RUNNING (PIDs `~/ccx_frozen/20261013_kw1446_profile.pids`; `kill -0`, never `pgrep -f`). Results land in `~/ccx_frozen/20261013_kw1446_profile/outputs/diagnostics/price_profile_20261013_hilda31w/profile_k_w_{A,B}.rds`. Copy them into the repo, then read: likelihood vs the canonical's −1015.7034, the prior ledger, A vs B. Card 7's sentence rides on it.
   4. The tie-cut method (deferred to the MCMC); the release.
   - Removable when Marcus says: the new suite worktree `~/ccx_frozen/suite_20261013_5f158b3`.
 - ⭐ **UPDATE 10-13 ~13:40: §4 step 4's "start the app on hilda31w" is DONE** — CHANGELOG (m): 12 / 12 headless, every tab
@@ -96,6 +96,7 @@
   - Removable, made this session: `suite_20261013_2b1c603`; `ledger_20261013_2b1c603` (the scratch tree, with the harness patch applied).
   - Older, from the previous handoff: `20261012ff_wtc`, `_chaindry`, `_dryrun`, `suite_20261012_{9967a63,f2af594,1e66077}`, `suite_20261013_9200485`.
   - **Marcus has not said to remove any.**
+- ⚠ **10-13 ~19:35: chain 4 is STICKY** at `h_ml` ~45.7 m, near the 42.5 m floor. The share of iterations that move fell 7.7 % → ~1 % after 60k; chains 1–3 sit at ~59–65 m. It will show in `h_ml`'s R-hat. Whether to keep, drop or extend it is Marcus's call at the read.
 - **Flagged, not changed:**
   - Card 7's sentence after the number ("The data slightly prefer the literature value…") was measured at hilda33p (10-05 a). It is not re-measured at hilda31w.
   - `MC_LP_TOL` (1e-5) is not under `CCX_REPRO_TOL`. It passed with diff 0, since the gate evaluates at the stored u. Also still unruled at 1e-5: `WR_REPRO_TOL` and `IAV_REPRO_TOL`.

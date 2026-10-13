@@ -2,6 +2,22 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-13 (q) — **Card 7's `k_w` claim RE-MEASURED at hilda31w: the data prefer Naegler's 1,446 by +6.21 log-likelihood (+2.75 at hilda34g), and `hs_asx_frac`'s prior is 88 % of what holds `k_w` higher.** Both of the card's claims hold. The two profile starts agree to 1.3e-6 in logpost. Marcus: "Yes, copy the results and compute the prior ledger". Card text unchanged.
+
+- **The profile** (`calibration/run_price_profile.R` @`142767b`, run overnight as ruled): both starts CONVERGED in 2 cycles (133 / 184 CPU-min) to one point. Results are copied byte-identical into `outputs/diagnostics/price_profile_20261013_hilda31w/` with their logs and launch script.
+- **The read** (new `calibration/diag_price_profile_read.R` @`eee2fc4` → `read_k_w_20261013.{log,rds}`). It keeps `diag_kw1446_price_read.R`'s arithmetic; that driver stays as written for its 10-05 record.
+  - Each point reproduces its stored logpost exactly (diff 0).
+  - **Likelihood +6.2149** (A; B +6.2146) against the canonical's −1015.7034. By family: atmospheric Δ¹⁴C +7.09, CO₂ +1.88, δ¹³C −2.68, ocean ¹⁴C +0.28, GCB −0.32.
+  - **The prior ledger:** `hs_asx_frac` 0.730 → 1.661 (z 0.74 → 6.22) **−19.92**; `h_hs` −2.45; `u_hs` −1.88; partly offset by `pump_hs_gcm2` +1.19. The other names' priors total −22.56, and `hs_asx_frac` is 88 % of it. `k_w`'s own prior favours 1446 by +0.95.
+  - The split CLOSES: −19.2059 = +6.2149 − 22.5630 − 2.8780 − (−0.0203), check −1.4e-13.
+  - **Posterior price on the natural scale: −15.40** (10-05: −20.01).
+  - What absorbs `k_w` (−8.34 sd) is the 10-05 pattern: `hs_asx_frac` +11.6 sd, `h_hs` +4.1, `bomb_total` −2.5, `u_hs` −2.1, `kz` +1.9.
+- **Card 7:**
+  - "The data slightly prefer the literature value" HOLDS. The preference grew, +2.75 → +6.21; whether "slightly" still fits is Marcus's wording call.
+  - "What holds it higher is the stated prior on how much gas exchange the cold high-latitude box gets" HOLDS (88 %).
+  - Only the code comment changed.
+- **Correction:** the 10-05 read's canonical was **hilda34g**, not hilda33p. Its own provenance and CHANGELOG 10-05 (a) agree; card 7's comment, the handoff and the 10-13 status message said hilda33p. Fixed in the comment and the handoff.
+
 ## 2026-10-13 (p) — **Prep while the MCMC runs: tomorrow's read, band and identifiability check now run end to end at hilda31w (two blockers found and fixed); GATE S's move explained (80 % the SST lag); suite 8027 / 8 expected reds; the `k_w` = 1446 profile RUNNING overnight.** Marcus: "Do 1, 2, 4 and 3; run 5 overnight"; "Two-start profile, Mac (Recommended)".
 
 - **(1) The read, dry-run on the partial chains** (snapshot at ~54–59k, window (30000, 54000], scratch only, no conclusions):
