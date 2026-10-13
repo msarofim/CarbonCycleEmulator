@@ -1,6 +1,53 @@
-calibration/fit_iav_module.R @065697f+dirty, 2026-10-13 07:48 | base refit_20261013_wtc_hilda_csl3v0kaidgbemwtc (hilda_csl3v0kaidgbemwtc) | 6 workers
+calibration/fit_iav_module.R @df4ebb6, 2026-10-13 09:20 | base refit_20261013_wtc_hilda_csl3v0kaidgbemwtc (hilda_csl3v0kaidgbemwtc) | 6 workers
 ratio hilda33p (md5 525404989a20ece51ec8bd088c7d4638): gamma_enso_land_NH / gamma_enso_land_SH = 0.5077686 / 0.4866420, NH : SH = 1.0434; base's own: L 5.9293, s 1.30609 (SH's 1.30609), w 16.7877, gamma_diff 0.25
 growth product mbl_global_growth_monthly.rds (sha256 ab0bae11a89f...); window 1980-2024, trend df 5, n_eff 22.5388
 
 === 0. GATES ===
-  the base's 26 stored rows through the dg path: max |diff| 1.2e-05 (tol 1e-05)
+  the base's 26 stored rows through the dg path: max |diff| 1.2e-05 (tol 5e-05)
+  the module at the base: SSR 88.8516 (the reference), slope row +2.7693, growth r 0.6841
+
+=== 1. BASIN: superposition over the lag (s in closed form, w at the base) ===
+  superposition vs a direct run at the scan's best (L 6.00, s 1.292): rms 3.47e-06 ppm/yr against a signal of 0.359
+  the scan's best: L 6.00, s 1.292 (growth-only, w at the base) -- the START of step 2
+
+=== 2. OPTIMUM: Nelder-Mead on real runs of the full module objective ===
+  80 evaluations, convergence 0, 0.4 min
+  L 5.9797 months, s 1.28626 (gamma_enso_land_NH / gamma_enso_land_SH = 0.65312 / 0.62595), w_enso_l2 16.6282
+  module loglik +0.0126 vs the base (growth -0.0042, slope row +2.7693 -> +2.7861); SSR 88.8516 -> 88.8847; growth r 0.6841 -> 0.6843
+  growth peak after Nino 3.4: base +6, optimum +6 months (the record +5)
+  the preview's answer (iav_cut_smoothed_land_20261006_hilda33p.rds, land_ocean, at hilda33p): L 5.8430, s 1.30119, w 14.7263 -> this run's differences +0.1367, -0.01493, +1.9019
+
+=== 3. PROFILE of the lag on real runs (s and w re-optimised at each lag) ===
+       L      s       w      ll conv  n     dll
+  2.0000 0.9914 15.5214 -0.3615    0 65 -3.1435
+  3.0000 1.1091 15.6921  0.7682    0 71 -2.0138
+  4.0000 1.2010 15.9564  1.7942    0 57 -0.9878
+  4.5000 1.2355 16.1123  2.2063    0 61 -0.5756
+  5.0000 1.2612 16.2795  2.5174    0 59 -0.2645
+  5.5000 1.2782 16.4556  2.7101    0 59 -0.0718
+  5.9797 1.2863 16.6282  2.7819    0  0  0.0000
+  6.5000 1.2867 16.8164  2.7282    0 59 -0.0537
+  7.0000 1.2786 16.9880  2.5595    0 57 -0.2225
+  7.5000 1.2622 17.1558  2.2773    0 65 -0.5047
+  8.0000 1.2388 17.3078  1.9181    0 57 -0.8638
+  9.0000 1.1716 17.5709  1.0252    0 57 -1.7567
+ 10.0000 1.0844 17.7708  0.0565    0 65 -2.7254
+  the lag: 1-sigma 4.61-7.49, 2-sigma 3.02-9.25 months (drops 0.5 / 2.0); the base's 5.93 sits at -0.00
+
+=== 4. LAPLACE: the module's Hessian in (L, s, w), central differences on real runs ===
+  Hessian eigenvalues -0.4139, -0.8217, -11.65 (all must be < 0)
+  Laplace 1-sigma: L 1.266 months, s 0.2946, w 1.425; correlations L-s +0.08, L-w +0.31, s-w -0.03
+
+=== THE STAGE-1 RESULT: the module's four names, to be PINNED in stage 2 (fitted under hilda_csl3v0kaidgbemwtc) ===
+  lag_enso_land = 5.9797238930622125
+  gamma_enso_land_NH = 0.65312314921948789
+  gamma_enso_land_SH = 0.62594887182147718
+  w_enso_l2 = 16.628152188158307
+
+=== + CHECK against an earlier stage 1 (RULED: stop below 0.1 of each name's own 1 sigma) ===
+  L moved +0.0504 = +0.042 sigma
+  s moved -0.0198 = -0.067 sigma
+  w moved -0.1596 = -0.110 sigma
+  VERDICT: a name moved MORE than the ruled tolerance: this goes to Marcus before any second refit
+
+saved calibration/output/iav_module_20261013_refit_20261013_wtc_hilda_csl3v0kaidgbemwtc.rds and outputs/diagnostics/iav_module_20261013_refit_20261013_wtc_hilda_csl3v0kaidgbemwtc.log | 1.4 min
