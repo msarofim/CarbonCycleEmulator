@@ -2,6 +2,17 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-13 (a) — **The nine nuclear-industry ¹⁴C files are byte-for-byte Zenodo record 15034663: md5 and size 9/9.** This closes the gap that 10-12 (gg)'s sha256 cross-check could not reach (any change before 10-12). Marcus: "Fix the comment, run the Zenodo md5 check, then cherry-pick to main".
+
+- **Method:** one metadata request, `https://zenodo.org/api/records/15034663` (JSON, 11 349 bytes, sha256 `f83b5811…bf77`). No data file was downloaded. Each local file's `tools::md5sum()` and size were compared with the record's `checksum` (`md5:…`) and `size`. All nine annual files match on both.
+- **The record is current.** `versions/latest` resolves to 15034663 itself (`index` 0, `is_last` TRUE): published 2025-03-16, metadata updated 2025-03-18. There is no newer vintage to miss.
+- **The record holds 18 files; [6b] fetches 9.** The other nine are not in the repo: `Data description.pdf` and eight sub-annual or plant-level series (France NPP quarterly and La Hague monthly; Germany NPP quarterly; Hungary Paks weekly; Sweden NPP monthly; Switzerland Gösgen/Leibstadt monthly; UK Sellafield monthly; UK NPP monthly). The model reads annual totals only.
+- **Mutation-tested:** a one-byte change to a scratch copy of the USA file reads 8/9.
+- **MANIFEST:** the nine `nuc_*` rows' notes now record the result. Every other field is byte-identical, which the edit script asserts.
+- **What this does NOT settle:** the access date. The match shows the bytes are the record's, so the files are the dataset whatever command fetched them. It does not say when they were fetched. `accessed` stays the file mtime, as (gg) records.
+- **The comment fix asked for here was already done:** main's merge `67d343f` had corrected `build_nuc_nh_share.R:38-41`. This session's own edit to the same lines was dropped before syncing, so main keeps that wording.
+- **Timing:** this touches only `data-raw/downloads/MANIFEST.csv` and this file. The armed land chain refuses only uncommitted changes under `R/`, `calibration/` or `tests/`, and requires only that the landing kit is an ancestor of HEAD. It was still waiting on the wave launcher (78825) when this landed.
+
 ## 2026-10-12 (ii) — **The armed DRY RUN of the WTC landing chain: every step rc 0** (22:33–22:57; one finished start, id 001; tree at `bad9f9d`). Record: `outputs/diagnostics/wtc_chaindry_20261012/` (README, logs, products, and the chain + armed scripts as they ran).
 
 - **Collect, basins and promote ran under the label for the first time, and so did the Hessian, the WTC read, the module check, `checkz`, the ocean driver and the scorecard.** The read's gates pass: the stored logposts reproduce, REF hits the port target to 2.2e-11, REF's rows equal the pricing's, and the label alone is +106.9490.
@@ -32,7 +43,7 @@ Project log: what was done, what was tried and abandoned, and why.
 - ⚠ **The fetch command is also unrecorded.** The files' birth times show nine non-overlapping, sequential downloads in the order NFRP, Other_countries, Germany, USA, Canada, France, South_Korea, Switzerland, China. That is not [6b]'s loop order: in [6b] Germany is fifth and China seventh. So the `source` column holds the URL [6b] uses, not a URL known to have been used.
 - **Cross-check: all nine sha256 equal the `file_sha256` stamped in `attr(readRDS("data/forcing_nuc_nh_share.rds"), "provenance")`** (built 2026-10-12 by `data-raw/build_nuc_nh_share.R`). So the files have not changed since that build.
   - **The gate was mutation-tested.** I appended one byte to a scratch copy of the China file and restored its mtime. The builder then refused with "sha256 differs", and the manifest was left untouched.
-  - ⚠ This check cannot detect a change made before 10-12. A comparison against Zenodo's published per-file md5 (a metadata request, no download) would close that gap. **Not done**: it was outside this task.
+  - ⚠ This check cannot detect a change made before 10-12. A comparison against Zenodo's published per-file md5 (a metadata request, no download) would close that gap. **Not done**: it was outside this task. → **Done 10-13 (a): 9/9 match.**
 - The ` ⚠ Those nine files have NO MANIFEST.csv rows` comment in `build_nuc_nh_share.R` (lines 38–39) is now stale. It was left alone because it was outside this task.
 - The audit item's other half, **no processed `data/*.rds` of the emissions themselves**, is unchanged. The model still reads the raw CSVs at run time.
 - **Merged into main 2026-10-12 ~21:20** (merge of `claude/compassionate-chatelet-52df58`, commit `d1a09fe`). The branch wrote this entry as **(ee)**, but main's (ee) is the label build, so it is relabelled **(gg)** here. The commit message of `d1a09fe` still says "(ee)"; this entry is the one it means.
