@@ -102,5 +102,5 @@
   - the copy worklist and deploy items;
   - card 4's two by-design failures;
   - the CarboTope `.docx` files.
-  - New: `app/DEPLOY.md:36` still names hilda33p as the release's cut mode (stale since 10-08).
+  - ~~New: `app/DEPLOY.md:36` still names hilda33p as the release's cut mode~~ FIXED 10-13 (n), `0e273e1`.
 - **Memory:** the root `MEMORY.md` routes the canonical to [[ccx_hilda31w_adopted]], and its content is ~12.1 KB (soft 12 KB). `INDEX_ccx.md` is 14.8 KB (soft 14), net −116 B this session.

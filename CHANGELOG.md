@@ -2,6 +2,22 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-13 (n) — **Easy fixes from the hilda31w app run** (Marcus: "Fix anything that can be addressed easily"; `0e273e1`). After a restart, the :7790 app's server log is CLEAN through Keeling, carbon, What if, isotopes and Known issues, with all nine card plots drawn.
+
+- **Card 1's label border** (`app/R/plots_review.R:94`): `label.size = 0` → `linewidth = 0`. ggplot2 4.0 dropped `label.size`, so 4.0.2 ignored it and drew a coloured border round the "measured offset" box. Rendered both ways: the old form has the border, the new one has none and no warning.
+- **The land-sink panel's log noise** (`plot_land_sink_imbalance()`): `na.rm = TRUE` on the three SMOOTHED layers only. Their edge NAs are the gated design (11-yr centred mean), and every render logged "Removed 10 rows" ×3, on the hilda29e instance too. Rendered before and after at the canonical: the PNG is **byte-identical** and the warnings go 3 → 0.
+- **`app/DEPLOY.md:36`**: the release-mode history gains hilda29e (since 10-08) and the 10-13 hold, so test-app-version is a known red.
+- DEPLOY.md and README.md said "the seventh tab"; both now name the "Known issues" tab. It is the SIXTH top-level tab today and was seventh at `v1.0-hilda29l`, so the name is true of both.
+- Tests: test-plot-text-fits, test-app-review-copy and test-imbalance-panel pass.
+- **Checked and NOT fixed** (not easy, or not mine to rule):
+  - The pure-R core runs NONE of the four forcing guards (ENSO index, AOD, `nuc_share`, N deposition); all four sit on the C++ path (`ccx_run_prepared()`). Adding them is a design change with a wide test blast radius.
+  - Card 7's "the data slightly prefer the literature value" needs a new `k_w` = 1446 price-arm refit at hilda31w (hours).
+  - `MC_LP_TOL` / `WR_REPRO_TOL` / `IAV_REPRO_TOL` need rulings.
+  - GATE S's blind-phase move needs a test, not a fix.
+  - The first-load "figure margins too large" was transient (into a hidden pane) and did not recur.
+- **Audit:** no other gate compares two coupled runs with `identical()` over a span past the GMST record, the G3 pattern. The one candidate (`test-dormant-guards.R`, the SST seam) tests the builder's arithmetic, not two runs.
+- Already done before this pass: `build_nuc_nh_share.R`'s stale "no MANIFEST rows" comment had been corrected.
+
 ## 2026-10-13 (m) — **The app RUNS on hilda31w: the run-time proof of 10-12 (hh)'s static `nuc_share` argument.** The headless proof passes 12 / 12, including two refused mutations. A fresh app on :7790 renders every tab with no output error. Marcus: "Yes, start the app on hilda31w". Record: `outputs/diagnostics/app_runtime_proof_20261013_hilda31w/` (README, script, log).
 
 - **Headless** (`app_nuc_proof.R`, @`5c57add`), on the app's own objects:
