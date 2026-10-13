@@ -91,7 +91,9 @@ rv_plot_repdc <- function() rv_guard(rv_rep_dc(), function(x) {
                              x$rep_dC, x$prior_sd)) +
     annotate("label", x = max(x$year), y = RV_REP_OBS_MEAN, hjust = 1, vjust = 0.5,
              size = 3.1, colour = RV_COL_OBS(), fill = "white", alpha = 0.85,
-             label.size = 0, label.padding = unit(0.12, "lines"),
+             # linewidth, not label.size (2026-10-13): ggplot2 4.0 dropped label.size, so 4.0.2 IGNORED it
+             # ("Ignoring unknown parameters") and drew a border round the box. linewidth = 0 is the 4.0 form.
+             linewidth = 0, label.padding = unit(0.12, "lines"),
              label = sprintf("measured offset %.2f ppm", RV_REP_OBS_MEAN)) +
     scale_colour_manual(values = stats::setNames(
       c(RV_COL_ALT(), RV_COL_MODEL()),

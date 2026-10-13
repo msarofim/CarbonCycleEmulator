@@ -707,13 +707,15 @@ plot_land_sink_imbalance <- function(out, gcb, F, smooth_yr = APP_LUC_SMOOTH_YR)
          "the subtitle would misdescribe the line")
   cols <- stats::setNames(c(PAL[["model"]], PAL[["obs"]]), c(KEY_IMB_MODEL, KEY_IMB_GCB))
   ggplot(d, aes(x = year)) +
+    # na.rm on the three SMOOTHED layers only (2026-10-13): their edge NAs are the gated design above, and
+    # without it every render logged "Removed 10 rows" three times. The picture is unchanged (checked).
     geom_ribbon(aes(ymin = s_obs, ymax = s_obs + s_imbal, fill = KEY_IMB_BAND),
-                alpha = 0.16, colour = NA) +
+                alpha = 0.16, colour = NA, na.rm = TRUE) +
     scale_fill_manual(values = stats::setNames(PAL[["obs"]], KEY_IMB_BAND)) +
     geom_line(aes(y = obs,   colour = KEY_IMB_GCB),   linewidth = 0.3, alpha = 0.32) +
     geom_line(aes(y = model, colour = KEY_IMB_MODEL), linewidth = 0.3, alpha = 0.32) +
-    geom_line(aes(y = s_obs,   colour = KEY_IMB_GCB),   linewidth = 1.1) +
-    geom_line(aes(y = s_model, colour = KEY_IMB_MODEL), linewidth = 1.1) +
+    geom_line(aes(y = s_obs,   colour = KEY_IMB_GCB),   linewidth = 1.1, na.rm = TRUE) +
+    geom_line(aes(y = s_model, colour = KEY_IMB_MODEL), linewidth = 1.1, na.rm = TRUE) +
     scale_colour_manual(values = cols) +
     guides(colour = guide_legend(order = 1), fill = guide_legend(order = 2, nrow = 2)) +
     labs(x = LAB_YEAR, y = LAB_IMB_Y,
