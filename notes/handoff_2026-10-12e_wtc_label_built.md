@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-12 (e) — label `hilda_csl3v0kaidgbemwtc` BUILT, TESTED, PRICED; the refit is RULED, not yet launched
 
+> ⚠ **SUPERSEDED 2026-10-12 by `notes/handoff_2026-10-12f_wtc_refit_armed.md`** (the refit launched; landing armed). Two claims here were wrong: `ccx_mode_start()` does NOT refuse hilda29e (the real failure was the migration's silent 0 fill), and the module check's stopping rule is 0.1 σ (ruled), not 0.01.
+
 **Supersedes** `notes/handoff_2026-10-12d_citation_rulings_refit_plan.md` (which now points here). Written on Marcus's
 request ("Yes, write the handoff note"), 2026-10-12.
 
