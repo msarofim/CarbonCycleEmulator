@@ -2,6 +2,27 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-13 (b) — **The WTC refit LANDED, and its chain STOPPED at the module check's GATE 0 (1.18e-5 > the ruled 1e-5).** Diagnosed as the objective's NUMERICAL NOISE FLOOR, which under the label is ~4–5× #17's. The Hessian's two UNSTABLE names have the same cause. Two rulings are owed. Nothing adopted.
+
+- **The wave:** 24/24 exit 0, finished 07:36 (launched 19:46). The armed land chain at `065697f` ran land (byte-identical copy, RUN_PROVENANCE) → collect → basins → promote → Hessian → WTC read, all rc 0. It then stopped at `fit_iav_module.R --check` GATE 0. `checkz`, the ocean driver and the scorecard did not run. Committed as landed (`a9b6601`); the stopped log is `wtc_landing_20261013/check_id017_STOPPED_gate0.log`.
+- **The landing's read** (`outputs/diagnostics/wtc_refit_read_20261013_id017.log`):
+  - **Basins.** 19 of 24 starts converged. LP = NAT = **id 17, at −1054.4959**. 13 starts land within 0.026 of it, among them all three reference starts and nine dispersed draws with the new names drawn from their priors. The other basins sit at −3.49 (ids 14, 23), −5.03 (ids 10, 11), −36.8 and −184.
+  - **Likelihood +10.83 over REF**; stored logpost +8.45.
+  - **`bomb_share_NH` 0.8417** (legacy 0.90). **`seas_T_lag` 0.276 months** (legacy 2.0), at 0.046 of its box.
+  - The −3.5 / −5.0 basins carry `seas_T_lag` ≈ 4.7–4.8 with `seas_lag_p_NH` ≈ 0.7 (basin 1: 1.26). That is the dry run's +0.95 correlation showing up as a second solution.
+  - Largest moves (in hilda29e's sd): `seas_lag_p_NH` −5.89 sd, `seas_lag_p_SH` −3.98 sd.
+  - CO₂ in 2300, WTC − REF: SSP5-8.5 +12.26 ppm, vvH +5.68 ppm (no ridge width yet).
+- **GATE 0's miss is the noise floor, not a defect.** Measured with `calibration/diag_objective_noise_floor.R` at the landing (env overrides added, `8a3fc26`; log `outputs/diagnostics/objective_noise_floor_20261013_wtc.log`; A = id 17, B = id 1). Five observations:
+  - **Same rows as #17's miss:** δ¹³C level SPO/MLO and the ice core (1.18e-5 now; 1.73e-6 then).
+  - **The dg rows move 1.5–7.9e-6 under 1e-12 `h_ml` nudges**, at id 1 as well. Id 1 itself reproduces at 1.06e-10, so the floor belongs to the basin, not to id 17. At #17 the same moves were 0.4–1.6e-6.
+  - **Id 17 sits on a spike.** All 8 single-name nudges move its logpost DOWN, by 6–12e-6. Nearby points scatter on both sides.
+  - **Re-encoding `par_mode`** (≤ 8.9e-16 in u) alone moves the objective −9.6e-6.
+  - **Promote's GATE 4 refused id 2** (scratch promote, nothing written) at 1.018e-5. Id 17 passed it at 9.6e-6 by luck of path.
+- **Power is not the issue.** Four real defects at the base move GATE 0's rows by **2.35 to 1.0e3**: dropped land ENSO pins 4.81, land ENSO lag +1 month 4.07, `bomb_share_NH` at the legacy 0.90 2.35, `seas_T_lag` at the legacy 2.0 1.0e3 (`wtc_landing_20261013/gate0_diagnosis/`). A 5e-5 gate keeps more than 4.6 orders of margin. The cost is the "precision-loss" class: a 1e-7 relative move of `beta_max` moves the rows 3.4e-5.
+- **The Hessian is NOT negative-definite** at id 17: one eigenvalue +9.6, on `kz_deep_frac` (−0.72) and `h_ml` (−0.49). Both are flagged "no plateau" at `HESS_STABLE_TOL` 0.02, so they take `HESS_FALLBACK` 3e-4 in u. At a ~1e-5 floor that step reads curvature noise of order 1e-5 / (3e-4)² ≈ 110. That swamps `kz_deep_frac`'s own curvature (≈ −2.4, flat to within 2.5–7 % from 3e-3 to 3e-1) and matches `h_ml`'s (≈ −150). Id 001's dry-run Hessian flagged the same two names on the same fallback and came out negative by luck. So the read has no Laplace sd for the two new names. That is a PREVIEW only: the ruled identifiability check is the MCMC after adoption.
+- ⚠ **The source of the floor is still not identified** (as at 10-07), nor why the label made it 4–5× larger. The noisy rows are the δ¹³C ones.
+- **Owed to Marcus:** (1) the reproduce-gate tolerance. The 10-07 ruling's 1e-5 was ~6× #17's floor; here it is ~1–2×. (2) The Hessian's fallback for no-plateau directions. Then: resume the chain by hand from `check` (check, checkz, ocean, scorecard; the land step refuses an existing outdir), as #18 pass 2's `chain_resume.sh`.
+
 ## 2026-10-13 (a) — **The nine nuclear-industry ¹⁴C files are byte-for-byte Zenodo record 15034663: md5 and size 9/9.** This closes the gap that 10-12 (gg)'s sha256 cross-check could not reach (any change before 10-12). Marcus: "Fix the comment, run the Zenodo md5 check, then cherry-pick to main".
 
 - **Method:** one metadata request, `https://zenodo.org/api/records/15034663` (JSON, 11 349 bytes, sha256 `f83b5811…bf77`). No data file was downloaded. Each local file's `tools::md5sum()` and size were compared with the record's `checksum` (`md5:…`) and `size`. All nine annual files match on both.

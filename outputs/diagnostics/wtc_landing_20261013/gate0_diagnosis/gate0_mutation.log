@@ -1,0 +1,6 @@
+gate0_mutation.R (a scratch probe, copied beside this log) run at 8a3fc26 on the committed landing 2026-10-13 07:57; no RNG. GATE 0's rows (dg_vector / dg_run / dg_streams) at the promoted base under four real defects.
+base as stored: 1.18e-05 (d13c_level_SPO) 
+land ENSO pins dropped (gamma 0): 4.81e+00 (co2_level_SPO) 
+land ENSO lag +1 month: 4.07e+00 (co2_seasonal_SPO) 
+bomb_share_NH at the legacy 0.90: 2.35e+00 (d14c_NH) 
+seas_T_lag at the legacy 2.0: 1.01e+03 (co2_seasonal_MLO) 

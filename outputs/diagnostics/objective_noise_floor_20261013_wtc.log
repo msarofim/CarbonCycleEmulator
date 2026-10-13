@@ -1,0 +1,28 @@
+calibration/diag_objective_noise_floor.R @8a3fc26, 2026-10-13 07:55 | RNG: set.seed(20261007) immediately before section 2's offsets (the only draws)
+  basin A: calibration/output/multistart_20261012ff_hilda_csl3v0kaidgbemwtc_seasml1_pin_wtc_sd1.0452_prior_bomb_share_NH_seas_T_lag/start_017.rds (md5 d1fc9d51330fbf4a2eb0d97f7df36413), logpost -1054.495910426
+  basin B: calibration/output/multistart_20261012ff_hilda_csl3v0kaidgbemwtc_seasml1_pin_wtc_sd1.0452_prior_bomb_share_NH_seas_T_lag/start_001.rds (md5 dc26846ee4aa737fe73669176788e009), logpost -1054.521819205
+
+=== 1. THE ROUND TRIP: the objective at the optimiser's u_mode vs at ccx_par_to_unc(par_mode) ===
+  basin A: 14 of 31 names re-encode differently (max |du| 8.9e-16); objective - stored at u_mode +0.000e+00, at the re-encoded point -9.608e-06; u_mode twice +0.0e+00
+  basin B: 12 of 31 names re-encode differently (max |du| 7.8e-16); objective - stored at u_mode +0.000e+00, at the re-encoded point +0.000e+00; u_mode twice +0.0e+00
+
+=== 2. THE FLOOR: 1e-12 single-name nudges of u (tau_ex, hs_asx_frac, h_hs, kz, u_hs, h_ml, beta_max, q10) ===
+  basin A at u_mode            base -1054.495910426 | d: -1.1e-05 -1.2e-05 -7.0e-06 -6.1e-06 -8.2e-06 -9.2e-06 -1.2e-05 -1.1e-05 | 0+ / 8- / 0 zero
+  basin B at u_mode            base -1054.521819205 | d: -5.4e-06 -2.3e-06 -1.6e-06 -3.7e-06 -1.7e-06 -2.9e-06 -3.1e-06 -5.6e-06 | 0+ / 8- / 0 zero
+  basin A + offset 1           base -1054.495921936 | d: -6.4e-07 +6.3e-07 +1.0e-07 +2.8e-06 +7.5e-07 +1.5e-06 +6.1e-06 +4.0e-06 | 7+ / 1- / 0 zero
+  basin A + offset 2           base -1054.495920952 | d: -3.1e-06 +3.5e-06 +1.0e-07 +9.8e-07 +3.7e-06 -3.6e-06 -2.9e-06 +1.0e-06 | 5+ / 3- / 0 zero
+  basin A + offset 3           base -1054.495923824 | d: +4.1e-06 +4.3e-06 +3.9e-06 +8.6e-06 +2.9e-06 -1.7e-06 -6.5e-09 -2.7e-07 | 5+ / 3- / 0 zero
+
+=== 3. THE dg PATH: the base's stored rows (fit_iav_module.R's GATE 0), and under h_ml nudges ===
+  basin A: max |row - stored| 1.18e-05 (d13c_level_SPO +1.18e-05, d13c_level_MLO -9.58e-06, d13c_icecore +6.23e-06); h_ml x (1 + k 1e-12), k = 1/2/3: max 1.5e-06 / 5.1e-06 / 6.0e-06
+  basin B: max |row - stored| 1.06e-10 (d13c_level_SPO -1.06e-10, d13c_icecore +4.76e-11, d13c_level_MLO -3.31e-11); h_ml x (1 + k 1e-12), k = 1/2/3: max 4.5e-06 / 7.9e-06 / 4.1e-06
+
+=== 4. THE GATE's POWER at basin A: max |row - stored| under a relative move of one name (gate 1e-05) ===
+  kz         1e-08: 7.6e-07 | 1e-07: 9.7e-06 | 1e-06: 7.7e-05 FAILS
+  h_ml       1e-08: 5.8e-06 | 1e-07: 3.3e-06 | 1e-06: 2.5e-05 FAILS
+  beta_max   1e-08: 3.4e-06 | 1e-07: 3.4e-05 FAILS | 1e-06: 3.4e-04 FAILS
+  pump_grad  1e-08: 3.9e-06 | 1e-07: 3.0e-06 | 1e-06: 2.8e-05 FAILS
+  q10        1e-08: 2.9e-06 | 1e-07: 2.9e-05 FAILS | 1e-06: 2.9e-04 FAILS
+
+saved outputs/diagnostics/objective_noise_floor_20261013_wtc.{log,rds}
+⛔ ADOPTS NOTHING.
