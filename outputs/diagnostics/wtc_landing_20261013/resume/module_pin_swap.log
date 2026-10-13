@@ -1,0 +1,7 @@
+module_pin_swap.R @1f2f4e2, 2026-10-13 09:28
+  carried pins: lag_enso_land 5.92934, gamma_enso_land_NH 0.66319, gamma_enso_land_SH 0.635596, w_enso_l2 16.7877
+  check's pins: lag_enso_land 5.97972, gamma_enso_land_NH 0.653123, gamma_enso_land_SH 0.625949, w_enso_l2 16.6282
+  logpost  carried -1054.495910 (stored -1054.495910) -> swapped -1054.843520 : -0.3476
+  likelihood -1015.703404 -> -1016.051013 : -0.3476 (prior + Jacobian +1.14e-13)
+  rows that moved by > 0.005: co2_seasonal_SPO -0.1474, co2_seasonal_MLO -0.0915, gcb_land_sink -0.0344, d13c_icecore -0.0305, d13c_seasonal_MLO -0.0200, d13c_seasonal_SPO -0.0112, d13c_level_SPO -0.0091, d14c_NH -0.0057
+  for scale: the objective's noise floor here ~1e-5 (objective_noise_floor_20261013_wtc.log); the basin's 13 starts span 0.026

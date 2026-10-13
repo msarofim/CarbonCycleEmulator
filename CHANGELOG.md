@@ -2,6 +2,29 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-13 (d) — **The WTC landing is COMPLETE (resumed by hand at the rulings): id 17 is the basin best; the module check says `w` moved −0.110 σ (over the ruled 0.1 σ); GATE V passes; suite 8012/2 by design/1.** Nothing adopted. Owed to Marcus: a second module pass or not, adoption, and the mode's name.
+
+- **The resume** (`~/ccx_frozen/20261013_wtc_resume.sh`, copied with its logs to `outputs/diagnostics/wtc_landing_20261013/resume/`) ran in three stages, each committed before the next, so every stamp is clean: (A) Hessian `df4ebb6`, (B) read + check + `checkz` `292783d`, (C) ocean + scorecard `1f2f4e2`.
+- **Survey:** 24/24 exit 0; 19 converged, 5 out of time, 0 dead.
+  - **Basin 1, −1054.4959: 13 starts** (ids 17, 2, 5, 20, 3, 15, 0, 7, 12, 9, 21, 22, 1). That is all three references and nine dispersed draws with the new names drawn from their priors. Within the basin the order is noise: the top four lie within 1e-5.
+  - Then −1057.98 (ids 14, 23), −1059.52 (ids 10, 11), −1091.26 (id 18), −1238.75 (id 6).
+  - **LP = NAT = id 17. No NEAR**: the runner-up basin is 3.49 below, outside 0.5.
+- **The read** (`outputs/diagnostics/wtc_refit_read_20261013_id017.log`; its pre-fix version is quarantined, and only §2 differs):
+  - **Likelihood +10.83 over REF.** By group: seasonal +3.54, bomb ¹⁴C +3.29, ice cores +2.60, IntCal +0.92, CO₂ levels +0.45, δ¹³C levels −0.41, ocean −0.22, GCB rows −1.07.
+  - **`bomb_share_NH` 0.8417 ± 0.032**, 2.2 sd from the nearer bound. Correlations: `tau_ex` −0.31, `bomb_total` −0.06.
+  - **`seas_T_lag` 0.276 ± 0.287 months**: within 1 sd of its floor, and **r = +0.955 with `seas_lag_p_NH`**. The −3.5 / −5.0 basins sit at `seas_T_lag` ≈ 4.7–4.8 with `seas_lag_p_NH` ≈ 0.7: the two lags trade.
+  - Moves (in hilda29e's sd): `seas_lag_p_NH` −5.89, `seas_lag_p_SH` −3.98, `q10` +1.98, `npp_frac_NH` +1.92, `h_ml` +1.54, `tau_ex` +1.17.
+  - CO₂ in 2300, WTC − REF: SSP5-8.5 +12.26 ppm, vvH +5.68 ppm (no ridge width yet).
+  - Net land climate effect: −0.095 GtC/yr (REF −0.057), z +1.01.
+- **Hessian (at the ruled most-stable step):** −H positive-definite, condition 3.79e5. `h_ml` (3e-3) and `kz_deep_frac` (1e-1) are still flagged; their verification spreads are 2.29 % and 2.52 %.
+- **Module check (GATE 0 passes at 5e-5; the miss is still 1.2e-5):** L +0.042 σ, s −0.067 σ, **`w` −0.110 σ ⇒ "to Marcus before any second pass"**. The module's own optimum is only **+0.013 log-lik** above the carried pins.
+  - **Scored on the MAIN objective at id 17, free names held, the check's four values cost −0.348** (`resume/module_pin_swap.{R,log}`). Mostly the seasonal CO₂ rows (SPO −0.147, MLO −0.092), then `gcb_land_sink` −0.034 and `d13c_icecore` −0.031: rows the module's objective does not see.
+  - A second pass would re-fit the free names under the new pins, starting from that step.
+  - (For contrast, the dry run's id 001 moved `w` by −0.47 σ: the module optimum follows the main point, which differs mainly in `h_ml`, 65.3 vs 69.5.)
+- **Scorecard:** GATE V **PASS** for wtc (sd 0.817, z −1.38; hilda29e −1.62). G, Q, 7, S and 6 pass; H, GL, 5 and D fail, the same verdicts as hilda29e. P7's move is 0.23× its bound.
+- **Ocean-climate driver:** the held-climate gate passes, and both mutations fail it as they must.
+- **Suite at `9200485`: 8012 passed, 2 failed (card 4's two, by design), 1 skipped, 20.3 min** (`outputs/diagnostics/suite_20261013_9200485.log`, frozen worktree `~/ccx_frozen/suite_20261013_9200485`).
+
 ## 2026-10-13 (c) — **Two rulings on the noise floor, BUILT: one reproduce tolerance, 5e-5, for all three gates; the most-stable step for a no-plateau Hessian direction.** Tested, and 6 of 6 mutations caught.
 
 - **Marcus, verbatim: "5e-5, all three (Recommended)".** New `R/calibrate.R` `CCX_REPRO_TOL <- 5e-5` (with its history and derivation), read by:
