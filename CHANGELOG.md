@@ -2,6 +2,26 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-13 (m) — **The app RUNS on hilda31w: the run-time proof of 10-12 (hh)'s static `nuc_share` argument.** The headless proof passes 12 / 12, including two refused mutations. A fresh app on :7790 renders every tab with no output error. Marcus: "Yes, start the app on hilda31w". Record: `outputs/diagnostics/app_runtime_proof_20261013_hilda31w/` (README, script, log).
+
+- **Headless** (`app_nuc_proof.R`, @`5c57add`), on the app's own objects:
+  - the label asks for `per_year`, so the guard has power;
+  - the two new names in the app's spin-up equal the fit;
+  - `APP_HIST`, the flux trace's row subset and a futures build are all stamped, and carry the per-year column;
+  - `app_run_coupled("vvM")` gives 576.63 ppm in 2300, equal to the stake driver's f = 1 (576.630) by an independent path;
+  - unstamped and "constant"-stamped tables are REFUSED.
+  - ⚠ The pure-R core (used only by the flux trace) has no `nuc_share` guard of its own. It reads the column and would fall back to the constant if the column were missing. The app feeds it a stamped build, which is checked.
+- **Live:**
+  - 8 tabs + 3 Futures sub-tabs, no `.shiny-output-error`;
+  - the Pulse lab prints 1.35 °C per 1000 GtC, a 2.1 % spread, "about 1.4";
+  - the parameter table labels both new names;
+  - the band is held by design.
+- **Server-log noise, none new to hilda31w:**
+  - a one-off "figure margins too large" at the first load into a hidden pane (a reload is clean);
+  - three ggplot "Removed 10 rows", also on the hilda29e instance;
+  - ⚠ `label.size` ignored by ggplot2 4.0.2 (`app/R/plots_review.R:94`, since 09-22), so card 1's label likely gets a default border. **Flagged, not changed.**
+- `diag_pulse_vs_tcre.R`'s screen-read anchor re-read: 1.36 (10-01, hilda33d) → **1.35**, dated 2026-10-13. The new launch config `ccx-app-7790` leaves the :7788 hilda29e preview alone.
+
 ## 2026-10-13 (l) — **Nine removable worktrees in `~/ccx_frozen/` REMOVED** (Marcus: "Remove the removable worktrees in ~/ccx_frozen"). `20261013_mcmc_hilda31w` (the running chains) is untouched.
 
 - **Removed:** `20261012ff_wtc` (5.7 GB), `20261012ff_wtc_chaindry`, `20261012ff_wtc_dryrun`, `ledger_20261013_2b1c603`, `suite_20261012_{9967a63,f2af594,1e66077}`, `suite_20261013_{9200485,2b1c603}`. Both handoffs (10-13, 10-13b) listed them as removable.

@@ -1,0 +1,20 @@
+canonical hilda31w | mode md5 53ee816ac48cea0f1c1fad244651c5fd | commit 5c57add
+label's nuc_share (from APP_PARAMS): per_year 
+  [PASS] the app loaded hilda31w
+  [PASS] the label asks for a NON-constant share (otherwise an unstamped table would pass and the guard has no power)
+  [PASS] bomb_share_NH in the app's spin-up = the mode's fit (0.8417 vs 0.8417)
+  [PASS] seas_T_lag in the app's spin-up = the mode's fit (0.2760 vs 0.2760)
+1. the historical run (Keeling tab)
+  [PASS] APP_HIST forcing stamped 'per_year'
+  [PASS] its nuc_share_NH column is per-year (27 distinct values, 0.942-1.000)
+2. the flux trace's row subset (APP_FLUX, pure-R core)
+  [PASS] a row subset keeps the stamp and the column
+  [PASS] APP_FLUX built, its last row finite
+3. a futures build and a coupled run (futures / stylised / pulse tabs' choke point)
+Warning message:
+GMST observations end 2024; years 2025-2300 are held FLAT at the last observed value. Use ccx_run_coupled() for an interactive climate. 
+  [PASS] app_build_forcing('vvM') stamped
+  [PASS] app_run_coupled('vvM') ran: CO2 2300 = 576.63 ppm
+4. MUTATIONS: the guard must refuse a table that dropped or changed the stamp
+  [PASS] unstamped table refused: nuclear 14C share mismatch: the parameters name 'per_year' but the forcing carries '<unsta
+  [PASS] 'constant'-stamped table refused: nuclear 14C share mismatch: the parameters name 'per_year' but the forcing carries 'consta

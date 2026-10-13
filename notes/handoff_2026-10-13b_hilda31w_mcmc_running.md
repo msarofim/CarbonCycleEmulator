@@ -12,6 +12,8 @@
   were taken on the way (map grouping, the stake's G3 split, panel #7). `test-cmap-tie` is RED **by ruling**: the tie cut's
   re-measurement is deferred to the MCMC read (no near basin in the WTC wave). Chains at ~12k/200k after 65 min, so
   ~18–19 h in all (≈ 05:30–06:30 EDT 10-14). **Next is §4 step 2**, and it now carries the tie-cut method question.
+- ⭐ **UPDATE 10-13 ~13:40: §4 step 4's "start the app on hilda31w" is DONE** — CHANGELOG (m): 12 / 12 headless, every tab
+  live, no output error. A fresh app is on **:7790** (`ccx-app-7790`); :7788 still holds hilda29e.
 
 ## 1. What was done (2026-10-13 ~10:00 → 12:00)
 
