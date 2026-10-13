@@ -22,10 +22,12 @@ for (f in list.files("R", pattern = "[.]R$", full.names = TRUE)) source(f)
 
 OCC_DRIVER <- "calibration/build_ocean_climate_card.R"
 # the three products AT THE CANONICAL -- move these at every adoption (the md5 gate refuses a stale one)
+# (hilda31w, 2026-10-13; was hilda29e's ocean_climate_gobm_20261008_obj18p2b1 / h2_time_shape_ and h2_futures_stake_20261008_hilda29e.
+#  The OC product was made as `wtcid017` by the WTC wave's stage C, before the rename; its md5 is the canonical's.)
 OCC_IN <- list(
-  OC = file.path("outputs", "diagnostics", "ocean_climate_gobm_20261008_obj18p2b1.rds"),
-  TS = file.path("outputs", "diagnostics", "h2_time_shape_20261008_hilda29e.rds"),
-  FS = file.path("outputs", "diagnostics", "h2_futures_stake_20261008_hilda29e.rds"))
+  OC = file.path("outputs", "diagnostics", "ocean_climate_gobm_20261013_wtcid017.rds"),
+  TS = file.path("outputs", "diagnostics", "h2_time_shape_20261013_hilda31w.rds"),
+  FS = file.path("outputs", "diagnostics", "h2_futures_stake_20261013_hilda31w.rds"))
 OCC_GCB      <- c(mean = -0.20, sd = 0.05)            # GCB 2025 p. 3242 (VERIFIED, diag_ocean_climate_gobm.R header)
 OCC_GCB_PCT  <- c(mean = -7.1, lo = -10.7, hi = -4.2)  # the same source: % of the CO2 effect, its model range
 OCC_WINDOW   <- c(2015L, 2024L)
