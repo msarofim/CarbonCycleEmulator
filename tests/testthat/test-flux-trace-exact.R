@@ -31,7 +31,7 @@ FTX_ENSO_MO <- c(1997, 12)    # an El Nino month (the reviewer's 1.565 GtC/yr ta
 .F  <- withCallingHandlers(
   ccx_build_forcing("historical", FTX_YEARS, prod_c14 = .sp$prod_c14,
                     bomb_total_kmol = .v$bomb_total, luc_scale = .v$luc_scale,
-                    enso_index = ccx_enso_index_of(.v$p), aod_mode = ccx_aod_mode_of(.v$p)),
+                    enso_index = ccx_enso_index_of(.v$p), aod_mode = ccx_aod_mode_of(.v$p), nuc_share = ccx_nuc_share_of(.v$p)),
   warning = function(w) if (grepl("held FLAT", conditionMessage(w))) invokeRestart("muffleWarning"))
 .k  <- which(floor(.F$t + 1e-9) == FTX_SPLIT)[1] - 1L
 .F1 <- .F[seq_len(.k), ]; .F2 <- .F[(.k + 1L):nrow(.F), ]
@@ -62,7 +62,8 @@ if (ccx_mix_on(.sp$params)) .s2$tdeep0 <- ccx_mix_tdeep_after(.F1$gmst, .F1$t, .
 .tol <- function(s) FTX_ULPS * .Machine$double.eps * max(abs(s))
 
 test_that("the canonical runs the structures the trace broke on (else this file has no power)", {
-  expect_identical(CCX_MODE_CANONICAL, "hilda29e")
+  # 2026-10-13 (g): re-expressed to hilda31w (Marcus: "Approve all (Recommended)"); the structure checks below are the power
+  expect_identical(CCX_MODE_CANONICAL, "hilda31w")
   expect_true(isTRUE(.aux$hs_on == 1L))
   expect_true(isTRUE(.aux$l2_on == 1L))
   expect_true(ccx_seas_ml_on(.sp$params))

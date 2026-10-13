@@ -130,7 +130,7 @@ seasml_at <- function(hm) { p <- ccx_load_mode()$p; p$h_ml <- hm; p }
 # extremes, where it peaks (diag_seasml_substep_controller.R section 2 checks the
 # extremes against a 1200-point year).
 true_stiffness <- function(p) {
-  grid <- ccx_ocean_grid(p$h_ml); aux <- ccx_prepare(p, grid); K <- aux$kz_int
+  grid <- ccx_grid_of(p); aux <- ccx_prepare(p, grid); K <- aux$kz_int
   rho <- function(h, f) {
     sh <- aux$a_ml[[h]] / aux$a_ls[[h]]; ht <- grid$h_ml * f; dzl <- grid$dz
     dzl[2] <- dzl[2] + (dzl[1] - ht) * sh; dzl[1] <- ht
@@ -148,7 +148,7 @@ true_stiffness <- function(p) {
 
 # THE MUTATION: the bound as it stood before 2026-10-04 -- sampled extremes, K
 # re-evaluated on the moved grid, a silent clamp at the cap
-ss_pre_20261004 <- function(p, grid = ccx_ocean_grid(p$h_ml), dt = 1 / 12) {
+ss_pre_20261004 <- function(p, grid = ccx_grid_of(p), dt = 1 / 12) {
   .sh <- ccx_mld_shape("ls")
   .fs <- c(min(vapply(HEMIS, function(h) min(.sh[[h]]$f_month), 0)),
            max(vapply(HEMIS, function(h) max(.sh[[h]]$f_month), 0)))
@@ -164,7 +164,8 @@ ss_pre_20261004 <- function(p, grid = ccx_ocean_grid(p$h_ml), dt = 1 / 12) {
 # the canonical column's P8 wall: where the continuous winter maximum reaches layer 1's base
 p8_wall <- function() {
   fmax <- max(vapply(HEMIS, function(h) ccx_mld_shape("ls")[[h]]$f_max, 0))
-  stats::uniroot(function(h) cumsum(ccx_ocean_grid(h)$dz)[2] - h * fmax, c(60, 100), tol = 1e-10)$root
+  .dep <- ccx_ocean_depth(seasml_at(75))   # the canonical's own column
+  stats::uniroot(function(h) cumsum(ccx_ocean_grid(h, total_depth = .dep)$dz)[2] - h * fmax, c(60, 100), tol = 1e-10)$root
 }
 
 test_that("seas_ml = 1: the count keeps the integrator's own stiffness inside RK4's limit up to the P8 wall (MUTATION: the pre-10-04 bound breaks it)", {
@@ -200,7 +201,7 @@ test_that("seas_ml = 1: near the P8 wall the auto count is ACCURATE, and the pre
   skip_if_not(ccx_seas_ml_ls_on(p), "the canonical does not run the LS seasonal mixed layer")
   sp <- ccx_spinup(p)                             # a state to integrate from; the orbit is not under test
   F  <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = sp$prod_c14,
-                          enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p))
+                          enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p), nuc_share = ccx_nuc_share_of(p))
   run <- function(ss) ccx_run_fast(sp, F, substeps = ss, retry_na = FALSE)$out
   moved <- function(ss) { a <- run(ss); b <- run(2L * ss)
     c(co2 = max(abs(a$co2_SH - b$co2_SH)) / max(a$co2_SH), d14c = max(abs(a$d14c_SH - b$d14c_SH))) }

@@ -24,7 +24,7 @@ cc_fix <- local({ f <- NULL; function() {
     sp <- ccx_spinup_from_label(ccx_mode_spinup(md))(p)
     F  <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = sp$prod_c14,
                             bomb_total_kmol = rp$bomb_total, luc_scale = rp$luc_scale,
-                            enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p))
+                            enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p), nuc_share = ccx_nuc_share_of(p))
     f <<- list(md = md, p = p, sp = sp, F = F)
   }
   f } })

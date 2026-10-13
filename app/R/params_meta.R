@@ -127,6 +127,13 @@ APP_PARAM_META <- list(
   # the label that opens the lag gate. Wording DRAFTED 2026-10-02 for Marcus's review.
   lag_enso_land        = list(desc = "Delay between El Niño and the land's carbon response",
                               unit = "months"),
+  # the citation batch's two fitted names (2026-10-12; R/calibrate.R CCX_PARAM_GATED_WTC): fitted only under the
+  # label that opens the WTC gate (hilda31w). Wording DRAFTED 2026-10-13 for Marcus's review; he ruled "Use the
+  # drafts (Recommended)".
+  bomb_share_NH        = list(desc = "Share of bomb-test ¹⁴C released in the Northern Hemisphere",
+                              unit = "—"),
+  seas_T_lag           = list(desc = "Delay between the seasonal temperature swing and soil respiration",
+                              unit = "months"),
 
   # ---- RETIRED, label kept ------------------------------------------------
   # These left CCX_PARAM_NAMES but their labels stay so that a run against a

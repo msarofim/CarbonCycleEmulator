@@ -1,0 +1,107 @@
+=== mechanism sweep at hilda31w (hilda_csl3v0kaidgbemwtc), 127 combinations, 50867d7 ===
+
+1. OLD construction (switch inside the spin-up), 64 combinations with ocean_sink: error 8, ok 16, warning 40
+                                                                       off
+                                                                ocean_sink
+                                               warming_feedback+ocean_sink
+                                                           enso+ocean_sink
+                                                       volcanic+ocean_sink
+                                                      ocean_sink+emissions
+                                 fertilisation+warming_feedback+ocean_sink
+                                          fertilisation+ocean_sink+revelle
+                                          warming_feedback+enso+ocean_sink
+                                      warming_feedback+volcanic+ocean_sink
+                                     warming_feedback+ocean_sink+emissions
+                                       warming_feedback+ocean_sink+revelle
+                                                  enso+volcanic+ocean_sink
+                                                 enso+ocean_sink+emissions
+                                             volcanic+ocean_sink+emissions
+                            fertilisation+warming_feedback+enso+ocean_sink
+                        fertilisation+warming_feedback+volcanic+ocean_sink
+                       fertilisation+warming_feedback+ocean_sink+emissions
+                         fertilisation+warming_feedback+ocean_sink+revelle
+                                     fertilisation+enso+ocean_sink+revelle
+                                 fertilisation+volcanic+ocean_sink+revelle
+                                fertilisation+ocean_sink+emissions+revelle
+                                 warming_feedback+enso+volcanic+ocean_sink
+                                warming_feedback+enso+ocean_sink+emissions
+                                  warming_feedback+enso+ocean_sink+revelle
+                            warming_feedback+volcanic+ocean_sink+emissions
+                              warming_feedback+volcanic+ocean_sink+revelle
+                             warming_feedback+ocean_sink+emissions+revelle
+                                        enso+volcanic+ocean_sink+emissions
+                   fertilisation+warming_feedback+enso+volcanic+ocean_sink
+                  fertilisation+warming_feedback+enso+ocean_sink+emissions
+                    fertilisation+warming_feedback+enso+ocean_sink+revelle
+              fertilisation+warming_feedback+volcanic+ocean_sink+emissions
+                fertilisation+warming_feedback+volcanic+ocean_sink+revelle
+               fertilisation+warming_feedback+ocean_sink+emissions+revelle
+                            fertilisation+enso+volcanic+ocean_sink+revelle
+                           fertilisation+enso+ocean_sink+emissions+revelle
+                       fertilisation+volcanic+ocean_sink+emissions+revelle
+                       warming_feedback+enso+volcanic+ocean_sink+emissions
+                         warming_feedback+enso+volcanic+ocean_sink+revelle
+                        warming_feedback+enso+ocean_sink+emissions+revelle
+                    warming_feedback+volcanic+ocean_sink+emissions+revelle
+         fertilisation+warming_feedback+enso+volcanic+ocean_sink+emissions
+           fertilisation+warming_feedback+enso+volcanic+ocean_sink+revelle
+          fertilisation+warming_feedback+enso+ocean_sink+emissions+revelle
+      fertilisation+warming_feedback+volcanic+ocean_sink+emissions+revelle
+                  fertilisation+enso+volcanic+ocean_sink+emissions+revelle
+               warming_feedback+enso+volcanic+ocean_sink+emissions+revelle
+ fertilisation+warming_feedback+enso+volcanic+ocean_sink+emissions+revelle
+  status                                                            msg
+ warning  periodic spinup: carbon did not converge, |resid| = 2.873e-08
+ warning  periodic spinup: carbon did not converge, |resid| = 5.011e-07
+ warning  periodic spinup: carbon did not converge, |resid| = 2.873e-08
+ warning  periodic spinup: carbon did not converge, |resid| = 2.873e-08
+ warning  periodic spinup: carbon did not converge, |resid| = 2.873e-08
+ warning  periodic spinup: carbon did not converge, |resid| = 1.361e-04
+ warning  periodic spinup: carbon did not converge, |resid| = 1.743e-03
+ warning  periodic spinup: carbon did not converge, |resid| = 5.011e-07
+ warning  periodic spinup: carbon did not converge, |resid| = 5.011e-07
+ warning  periodic spinup: carbon did not converge, |resid| = 5.011e-07
+   error Lapack routine dgesv: system is exactly singular: U[36,36] = 0
+ warning  periodic spinup: carbon did not converge, |resid| = 2.873e-08
+ warning  periodic spinup: carbon did not converge, |resid| = 2.873e-08
+ warning  periodic spinup: carbon did not converge, |resid| = 2.873e-08
+ warning  periodic spinup: carbon did not converge, |resid| = 1.361e-04
+ warning  periodic spinup: carbon did not converge, |resid| = 1.361e-04
+ warning  periodic spinup: carbon did not converge, |resid| = 1.361e-04
+ warning  periodic spinup: carbon did not converge, |resid| = 5.720e-08
+ warning  periodic spinup: carbon did not converge, |resid| = 1.743e-03
+ warning  periodic spinup: carbon did not converge, |resid| = 1.743e-03
+ warning  periodic spinup: carbon did not converge, |resid| = 1.743e-03
+ warning  periodic spinup: carbon did not converge, |resid| = 5.011e-07
+ warning  periodic spinup: carbon did not converge, |resid| = 5.011e-07
+   error Lapack routine dgesv: system is exactly singular: U[36,36] = 0
+ warning  periodic spinup: carbon did not converge, |resid| = 5.011e-07
+   error Lapack routine dgesv: system is exactly singular: U[36,36] = 0
+   error Lapack routine dgesv: system is exactly singular: U[36,36] = 0
+ warning  periodic spinup: carbon did not converge, |resid| = 2.873e-08
+ warning  periodic spinup: carbon did not converge, |resid| = 1.361e-04
+ warning  periodic spinup: carbon did not converge, |resid| = 1.361e-04
+ warning  periodic spinup: carbon did not converge, |resid| = 5.720e-08
+ warning  periodic spinup: carbon did not converge, |resid| = 1.361e-04
+ warning  periodic spinup: carbon did not converge, |resid| = 5.720e-08
+ warning  periodic spinup: carbon did not converge, |resid| = 5.720e-08
+ warning  periodic spinup: carbon did not converge, |resid| = 1.743e-03
+ warning  periodic spinup: carbon did not converge, |resid| = 1.743e-03
+ warning  periodic spinup: carbon did not converge, |resid| = 1.743e-03
+ warning  periodic spinup: carbon did not converge, |resid| = 5.011e-07
+   error Lapack routine dgesv: system is exactly singular: U[36,36] = 0
+   error Lapack routine dgesv: system is exactly singular: U[36,36] = 0
+   error Lapack routine dgesv: system is exactly singular: U[36,36] = 0
+ warning  periodic spinup: carbon did not converge, |resid| = 1.361e-04
+ warning  periodic spinup: carbon did not converge, |resid| = 5.720e-08
+ warning  periodic spinup: carbon did not converge, |resid| = 5.720e-08
+ warning  periodic spinup: carbon did not converge, |resid| = 5.720e-08
+ warning  periodic spinup: carbon did not converge, |resid| = 1.743e-03
+   error Lapack routine dgesv: system is exactly singular: U[36,36] = 0
+ warning  periodic spinup: carbon did not converge, |resid| = 5.720e-08
+
+2. NEW construction (the app's), all 127: ok 127
+[1] off    status msg   
+<0 rows> (or 0-length row.names)
+
+wrote outputs/diagnostics/mechanism_sweep_20261013_hilda31w.rds 

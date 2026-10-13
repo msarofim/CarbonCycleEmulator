@@ -498,9 +498,13 @@ test_that("GATE S has POWER against its own blind spot: at a seas_ml = 1 canonic
   # At hilda29e (2026-10-08 e, #18 pass 2: the interannual cut, h_ml 64.6): whole limb 0.269 @ 9.06 PASS (the scorecard's
   # number; whole_model_scorecard_20261008_hilda33p_obj18p2); +0.56 mo, the deeper mixed layer's later SPO limb as at
   # hilda30s (h_ml 58: 8.98) -- inferred, not tested. Re-pin approved by Marcus ("Approve all five").
+  # At hilda31w (2026-10-13 g, the WTC label): whole limb 0.388 @ 8.91 PASS (8.908; the scorecard's number,
+  # wtc_landing_20261013/resume/scorecard.log); the blind read 4.10 -> 4.38 (4.377), outside the old 0.05. The blind phase IS
+  # the thermal phase, and the label reads the SST lag per hemisphere from ERSSTv5 (SH 1.536 vs the legacy 1.32 months) --
+  # a candidate cause, inferred, not tested. MEASURED (Marcus 2026-10-13: "Approve all (Recommended)").
   expect_true(full$pass)
-  expect_equal(full$mo,  9.06, tolerance = 0.05, scale = 1)
-  expect_equal(blind$mo, 4.10, tolerance = 0.05, scale = 1)
+  expect_equal(full$mo,  8.91, tolerance = 0.05, scale = 1)
+  expect_equal(blind$mo, 4.38, tolerance = 0.05, scale = 1)
   expect_false(dg_gateS_verdict(list(mo = blind$mo, amp = blind$amp))$pass)
 })
 

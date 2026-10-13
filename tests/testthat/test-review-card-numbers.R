@@ -8,6 +8,7 @@
 #     months after the index" -- the canonical FITS it (hilda33p 2.606 +/- 0.407 months);
 #   card 7 ("Add a line about k_w to the known issues tab"): the gas transfer speed "comes out at about
 #     1,900 m per year, against the literature's 1,446" -- hilda33p 1894.7 +/- 53.7; the prior centre.
+#     2026-10-13 (g): "about 1,850" (Marcus) -- hilda31w 1835.4 +/- 52.5.
 # THE TOLERANCE IS EACH FIT'S OWN POSTERIOR SD (the Laplace marginal on the natural scale, by the delta
 # method through the parameter's transform), never a hand-picked band: a refit that moves the value more
 # than one sd from the typed number makes the card false, and this is what says so. The literature
@@ -87,7 +88,7 @@ test_that("card 4's 'a little <word> the range' is where the limb strength the c
   expect_true(grepl(sprintf("sits a little %s the range", .rcn_rv$RV_ENSO_L2_VS_OBS), rcn_card4_detail(), fixed = TRUE))
 })
 
-test_that("card 7's k_w line: '1,446' IS the prior's centre, and 'about 1,900' is within one sd of the fit", {
+test_that("card 7's k_w line: '1,446' IS the prior's centre, and 'about 1,850' is within one sd of the fit", {
   rv <- rcn_review_text()
   expect_identical(ccx_const("KW_PRIOR_CENTRE"), 1446)
   expect_true(grepl(sprintf("against the literature's %s", format(ccx_const("KW_PRIOR_CENTRE"), big.mark = ",")),
@@ -96,8 +97,8 @@ test_that("card 7's k_w line: '1,446' IS the prior's centre, and 'about 1,900' i
   run <- ccx_overlay_par(ccx_mode_base(md), md$par_mode)
   sd_nat <- rcn_sd_nat(md, "k_w", CCX_PARAM_TABLE$k_w)
   expect_gt(sd_nat, 0)
-  expect_lt(abs(run$k_w - 1900), sd_nat)
-  expect_true(grepl("about 1,900 m per year", rv, fixed = TRUE))
+  expect_lt(abs(run$k_w - 1850), sd_nat)
+  expect_true(grepl("about 1,850 m per year", rv, fixed = TRUE))
 })
 
 test_that("MUTATION: the one-sd rule FAILS a typed number the fit has left behind", {

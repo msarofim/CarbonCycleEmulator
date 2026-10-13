@@ -2,6 +2,30 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-13 (h) — **Ledger (g) APPLIED as ruled.** Every edited file passes; the two remaining failures are card 4's, by design.
+
+Marcus, verbatim: "Approve all (Recommended)" (the ledger); "Use the drafts (Recommended)" (the parameter labels); "Hold until rebuilt (Recommended)" (the app release); "about 1,850" (card 7).
+
+- **(A) The harness patch**, as measured in (g): 11 lines in 5 files. Test-built forcings pass `nuc_share = ccx_nuc_share_of(p)`. `test-stability.R` builds the canonical's own column (`ccx_grid_of(p)`; the P8 wall on `ccx_ocean_depth()`).
+- **(B) Re-expressed to hilda31w:**
+  - `flux-trace-exact:65`, the canonical's name; the structure checks under it are the power.
+  - `ms-reference-set` (11): the canonical runs the WTC label.
+  - `ms-reference-set` (14): pass 2's pins, which the canonical CARRIES, are taken under the canonical's label with the canonical as a MODE. Under #18's own label they are now REFUSED ("is not that label", a new mutation), and also under #17's label and at seas_ml 0. A module value moved back, or a module name dropped, still has no incumbent.
+- **(C) Re-pinned, measured:**
+  - GATE S: whole limb 8.91 (scorecard 0.388 ppm @ 8.91); blind read 4.38.
+  - imbalance-panel: last-decade miss 1.05 (1.0487); `d_land` +0.564; `d_luc` −0.099; `−d_ocn` −0.017.
+- **(G) `spinup-diagnostics:154`:** the instant must now fail the two bars the test applies, the NH identity's 1e-9 and the ordering between the hemispheres, replacing the hand-picked 100×. **Mutation-tested:** with the instant replaced by the annual mean it must not be, the test fails twice (the ¹⁴C bar and the ordering); the scratch copy was removed.
+- **`mechanisms:328`, RE-MEASURED** with a new driver, `calibration/diag_mechanism_sweep.R` (`50867d7`; the 10-11 a sweep, previously ad hoc). Results: `outputs/diagnostics/mechanism_sweep_20261013_hilda31w.{log,rds}`.
+  - Old construction (the switch inside the spin-up), 64 combinations with the ocean switch: **8 crash ("singular"), 40 warn of non-convergence, 16 clean.** The pair warming + ocean now only warns (|resid| 5.0e-7).
+  - **The app's construction: 127 / 127 clean**, with no warnings.
+  - The power check moves to the SMALLEST combination that still crashes, `warming_feedback + ocean_sink + revelle`, and that triple joins the test's loop of combinations the app's construction must run. `test-mechanisms` passes 108 / 0.
+- **The parameter labels** (`app/R/params_meta.R`): `bomb_share_NH` "Share of bomb-test ¹⁴C released in the Northern Hemisphere" (—); `seas_T_lag` "Delay between the seasonal temperature swing and soil respiration" (months). `app-params-table` passes 55 / 0.
+- **Card 7:** "about 1,900" → "about 1,850 m per year" (`k_w` 1835.4 ± 52.5). ⚠ The card's NEXT sentence ("The data slightly prefer the literature value…") was measured at hilda33p (10-05 a) and is **not re-measured at hilda31w**. Flagged, not changed.
+- **Per file:** app-params-table 55/0; app-review-copy 41/0; review-card-numbers 24/2 (card 4, by design); ms-reference-set 184/0; flux-trace-exact 16/0; gate-bounds 212/0; imbalance-panel 38/0; spinup-diagnostics 56/0; canonical-contracts 27/0; stability 59/0; mechanisms 108/0.
+- **Still red, by ruling:**
+  - app-version (`APP_RELEASE_MODE` stays "hilda29e" until the products are rebuilt);
+  - the four products of (g) D: the futures band, the constraint map, the ocean-climate card, `pulse_vs_tcre`.
+
 ## 2026-10-13 (g) — **The adoption's test ledger: the full suite at `2b1c603` has 7865 passed, 32 failed, 12 errored, 4 skipped (19.3 min).** That is 44 entries in 25 tests across 15 files, every one classified. **No repo test is edited.** One is a real app gap: the parameter table has no labels for the two new fitted names. Evidence: `outputs/diagnostics/ledger_20261013_hilda31w/` (README).
 
 - **A. The test's own inputs are not label-aware: all 12 errors.** The guards refuse correctly. Each test builds its own forcing without `nuc_share`, or its own grid on the legacy 3700 m column; the label runs 3682.2 m. The files are canonical-contracts ×2, flux-trace-exact (file level), imbalance-panel, mechanisms ×4, and stability ×3 errors + 1 failure (`:190`: the P8 wall found on the wrong column).

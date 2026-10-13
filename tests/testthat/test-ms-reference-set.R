@@ -193,7 +193,9 @@ test_that("(11) OBJECTIVE #16's pins ARE the canonical's since 2026-10-06 (hilda
   expect_identical(p16[["npp_tsens"]], 0)
   expect_identical(p16[["npp_tsens"]], CCX_NPP_TSENS_DEFAULT, info = "the pin IS the term's absent default")
   expect_true(CCX_MODE_OBJ16_STRUCT %in% CCX_STRUCT_LABELS)
-  expect_identical(ccx_mode_struct(readRDS(ccx_mode_file())), CCX_MODE_OBJ18_STRUCT, info = "the canonical runs #18's label (hilda29e)")
+  # 2026-10-13 (g): the canonical runs the WTC label since hilda31w (Marcus: "Approve all (Recommended)"); its pins are still
+  # #16's ten + the module's four (#18 pass 2's, carried: no second pass)
+  expect_identical(ccx_mode_struct(readRDS(ccx_mode_file())), CCX_MODE_WTC_STRUCT, info = "the canonical runs the WTC label (hilda31w)")
   # since hilda29e NO ruled reference set takes #16's ten: a #16 re-run rules its own, as #15's nine since 10-06
   expect_error(ccx_ms_reference_set(p16, "1"), "no registered incumbent")
   # the LAUNCH STRING, through the driver's own parser, resolves the same
@@ -336,23 +338,28 @@ test_that("(14) #18 PASS 2's pins (2026-10-08 d; Marcus: \"Basin 1, run the seco
   }
   expect_identical(readRDS(ccx_mode_file(CCX_MODE_OBJ18P2_INCUMBENT))$promoted_from$id, 0L)
   expect_identical(readRDS(ccx_mode_file(CCX_MODE_OBJ18P2_NEW))$promoted_from$id, 6L)
-  # 2026-10-08 (e): pass 2 PASSED and its basin-1 refit is the canonical, hilda29e -- pass 2's pins ARE the canonical's, so
-  # the first branch takes them, the canonical as a MODE; pass 2's own branch is removed (the hilda33p precedent)
-  expect_identical(p2, CCX_MODE_CANONICAL_PINS); expect_identical(CCX_MODE_CANONICAL, "hilda29e")
-  r14 <- ccx_ms_reference_set(p2, "1", pump_field = "solved", struct = CCX_MODE_OBJ18_STRUCT)
+  # 2026-10-08 (e): pass 2 PASSED and its basin-1 refit was the canonical, hilda29e -- pass 2's pins became the canonical's;
+  # pass 2's own branch was removed (the hilda33p precedent).
+  # 2026-10-13 (g) (Marcus: "Approve all (Recommended)"): the canonical is hilda31w, which CARRIES pass 2's pins (no second
+  # pass) under the WTC label. The first branch takes them under the CANONICAL's label, the canonical as a MODE; under #18's
+  # own label (hilda29e's) the cut canonical's guard now refuses them, as it refuses any other label: a #18 re-run rules its own.
+  expect_identical(p2, CCX_MODE_CANONICAL_PINS); expect_identical(CCX_MODE_CANONICAL, "hilda31w")
+  expect_identical(ccx_mode_struct(ccx_mode_file()), CCX_MODE_WTC_STRUCT)
+  r14 <- ccx_ms_reference_set(p2, "1", pump_field = "solved", struct = CCX_MODE_WTC_STRUCT)
   expect_identical(r14$incumbent, CCX_MODE_CANONICAL); expect_identical(r14$new_basin, CCX_MODE_SEASML0_CONTROL)
   expect_identical(r14$why, "the canonical, under this array's pins")
   # the LAUNCH STRING, through the driver's own parser
   launch <- paste(sprintf("%s=%.17g", names(p2), p2), collapse = ",")
   expect_identical(ccx_parse_pins(launch), p2)
-  expect_identical(ccx_ms_reference_set(ccx_parse_pins(launch), "1", pump_field = "solved", struct = CCX_MODE_OBJ18_STRUCT), r14)
-  # MUTATION: under #17's label, at seas_ml 0, a module value moved back to pass 1's, a module name dropped
-  # MUTATION (the cut canonical's guard, 10-08 e; the same two refusals pass 2's branch made)
+  expect_identical(ccx_ms_reference_set(ccx_parse_pins(launch), "1", pump_field = "solved", struct = CCX_MODE_WTC_STRUCT), r14)
+  # MUTATION (the cut canonical's guard): under #18's label (the previous canonical's) and #17's, at seas_ml 0; then a
+  # module value moved back to pass 1's, and a module name dropped
+  expect_error(ccx_ms_reference_set(p2, "1", pump_field = "solved", struct = CCX_MODE_OBJ18_STRUCT), "is not that label")
   expect_error(ccx_ms_reference_set(p2, "1", pump_field = "solved", struct = CCX_MODE_OBJ17_STRUCT), "is not that label")
-  expect_error(ccx_ms_reference_set(p2, "0", pump_field = "solved", struct = CCX_MODE_OBJ18_STRUCT), "fitted at seas_ml 1")
+  expect_error(ccx_ms_reference_set(p2, "0", pump_field = "solved", struct = CCX_MODE_WTC_STRUCT), "fitted at seas_ml 1")
   back <- p2; back[["w_enso_l2"]] <- CCX_MODE_OBJ18_PINS[["w_enso_l2"]]
-  expect_error(ccx_ms_reference_set(back, "1", pump_field = "solved", struct = CCX_MODE_OBJ18_STRUCT), "no registered incumbent")
-  expect_error(ccx_ms_reference_set(p2[setdiff(names(p2), "w_enso_l2")], "1", pump_field = "solved", struct = CCX_MODE_OBJ18_STRUCT),
+  expect_error(ccx_ms_reference_set(back, "1", pump_field = "solved", struct = CCX_MODE_WTC_STRUCT), "no registered incumbent")
+  expect_error(ccx_ms_reference_set(p2[setdiff(names(p2), "w_enso_l2")], "1", pump_field = "solved", struct = CCX_MODE_WTC_STRUCT),
                "no registered incumbent")
 })
 

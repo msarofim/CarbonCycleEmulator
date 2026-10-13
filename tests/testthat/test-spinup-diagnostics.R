@@ -148,10 +148,15 @@ test_that("AT THE CANONICAL the periodic spinup's isotope rows are the orbit's A
   # them: an ORDERING of two measured quantities, not an invented tolerance.
   expect_gte(d$d13c_atm, min(nh, sh) - 1e-12)
   expect_lte(d$d13c_atm, max(nh, sh) + 1e-12)
-  # POWER: the instant this replaced fails both, by far more than the bars above.
+  # POWER: the instant this replaced fails both bars above -- the NH identity's 1e-9 and the ordering's interval
+  # between the two hemispheres. 2026-10-13 (g) (Marcus: "Approve all (Recommended)"): until today the d13C margin was
+  # "100 x |SH - NH|", a hand-picked factor. The orbit starts in January, near the zero crossing of the seasonal d13C
+  # cycle, so that margin is a phase coincidence: 266x at hilda29e, 22x at hilda31w, against a seasonal range of 0.15
+  # permil at both (outputs/diagnostics/ledger_20261013_hilda31w/power_spinup_diag154_2b1c603.log).
   inst <- ccx_atm_delta_instant(sp$y, aux)
   expect_gt(abs(inst[["d14c"]] - ccx_const("D14C_PI")), 1e-3)
-  expect_gt(abs(inst[["d13c"]] - ccx_const("D13C_PI")), 100 * abs(sh - nh))
+  expect_gt(abs(inst[["d13c"]] - ccx_const("D13C_PI")), 1e-9)                  # fails the NH identity's bar
+  expect_true(inst[["d13c"]] < min(nh, sh) - 1e-12 || inst[["d13c"]] > max(nh, sh) + 1e-12)   # and the ordering
 })
 
 test_that("`spinup_fn` DEFAULTS to the PERIODIC spinup since adoption (09-09x)", {

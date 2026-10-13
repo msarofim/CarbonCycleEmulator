@@ -757,10 +757,13 @@ RV_CARDS <- list(
                       # DRAFTED for his review. The record: the k_w = 1446 price arm (CHANGELOG 10-05 a)
                       # fits 2.75 BETTER on likelihood; its -20 posterior price is ONE prior,
                       # hs_asx_frac's judgement width (kept, 10-05 e). test-review-card-numbers.R ties
-                      # "1,446" to KW_PRIOR_CENTRE and "about 1,900" to the canonical's fitted k_w.
+                      # "1,446" to KW_PRIOR_CENTRE and "about 1,850" to the canonical's fitted k_w.
+                      # 2026-10-13 (g): "about 1,900" -> "about 1,850" (Marcus: "about 1,850"): hilda31w's k_w is
+                      # 1835.4 (sd 52.5); 1,900 was 1.23 sd off. The next sentence's claim (the data prefer 1,446)
+                      # was MEASURED at hilda33p (10-05 a) and is not re-measured at hilda31w.
                       "One fitted value is a compromise between two sources rather",
                       "than a measurement: the air-sea gas transfer speed comes out at",
-                      "about 1,900 m per year, against the literature's 1,446 (Naegler",
+                      "about 1,850 m per year, against the literature's 1,446 (Naegler",
                       "2009). The data slightly prefer the literature value; what holds",
                       "it higher is the stated prior on how much gas exchange the cold",
                       "high-latitude box gets, and the two cannot both hold."),

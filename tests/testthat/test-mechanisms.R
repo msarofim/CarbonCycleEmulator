@@ -175,7 +175,7 @@ test_that("under the warming switch, the CANONICAL's run is blind to the tempera
   sp_fn <- ccx_spinup_from_label(ccx_mode_spinup(md))
   F0 <- suppressWarnings(ccx_build_forcing("historical", c(1750, 2024), prod_c14 = 0,
           bomb_total_kmol = md$par_mode$bomb_total, luc_scale = md$par_mode$luc_scale,
-          enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p)))
+          enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p), nuc_share = ccx_nuc_share_of(p)))
   clim <- grep("^gmst$|^sst_anom_", names(F0), value = TRUE)
   expect_true("gmst" %in% clim)
   run <- function(F) {
@@ -210,7 +210,7 @@ test_that("the warming caveat's 'third, smaller effect' (the mixing slowdown) ho
   sp_fn <- ccx_spinup_from_label(ccx_mode_spinup(md))
   F0 <- suppressWarnings(ccx_build_forcing("historical", c(1750, 2024), prod_c14 = 0,
           bomb_total_kmol = md$par_mode$bomb_total, luc_scale = md$par_mode$luc_scale,
-          enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p)))
+          enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p), nuc_share = ccx_nuc_share_of(p)))
   today <- function(set) {
     pp <- p; for (n in names(set)) pp[[n]] <- set[[n]]
     sp <- sp_fn(pp); FF <- F0; FF$c14_cosmo <- sp$prod_c14
@@ -243,7 +243,7 @@ test_that("under the emissions switch, the CANONICAL's carbon is blind to every 
   sp_fn <- ccx_spinup_from_label(ccx_mode_spinup(md))
   F0 <- suppressWarnings(ccx_build_forcing("historical", c(1750, 2024), prod_c14 = 0,
           bomb_total_kmol = md$par_mode$bomb_total, luc_scale = md$par_mode$luc_scale,
-          enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p)))
+          enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p), nuc_share = ccx_nuc_share_of(p)))
   human_carbon <- c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH",
                     "cum_luc_NH", "cum_luc_SH", "ndep_NH", "ndep_SH")
   # nuc_share_NH (2026-10-12, label hilda_csl3v0kaidgbemwtc; flagged to Marcus): OTHER -- the
@@ -305,11 +305,13 @@ test_that("the ocean switch is RUN-ONLY: the combinations that crashed spin up a
   sp_fn <- ccx_spinup_from_label(ccx_mode_spinup(md))
   F0 <- suppressWarnings(ccx_build_forcing("historical", c(1750, 2024), prod_c14 = 0,
           bomb_total_kmol = md$par_mode$bomb_total, luc_scale = md$par_mode$luc_scale,
-          enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p)))
+          enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p), nuc_share = ccx_nuc_share_of(p)))
   expect_identical(CCX_MECH_RUN_ONLY, "ocean_sink")
   # the reported combination, and the two minimal pairs the 127-combination sweep found
+  # + the smallest combination whose OLD construction still crashes at hilda31w (2026-10-13 g; the power check below)
   for (off in list(c("warming_feedback", "enso", "volcanic", "ocean_sink"),
-                   c("warming_feedback", "ocean_sink"), c("ocean_sink", "revelle"))) {
+                   c("warming_feedback", "ocean_sink"), c("ocean_sink", "revelle"),
+                   c("warming_feedback", "ocean_sink", "revelle"))) {
     ms <- ccx_mechanism_spinup(p, F0, off, sp_fn)
     expect_identical(ms$spin$params, ms$m$p)              # the RUN carries every switch ...
     expect_identical(ms$spin$params$k_w, OCEAN_OFF_K_W)   # ... the ocean's included
@@ -325,6 +327,10 @@ test_that("the ocean switch is RUN-ONLY: the combinations that crashed spin up a
   # POWER: the old construction (the switch inside the spin-up) still fails on the minimal pair, so
   # the assertions above are not passing vacuously. If a model change ever makes this converge, the
   # test has lost its power, not the app its fix -- re-measure before deleting it.
-  expect_error(suppressWarnings(sp_fn(ccx_apply_mechanisms(p, F0, c("warming_feedback", "ocean_sink"))$p)),
+  # 2026-10-13 (g) RE-MEASURED (Marcus: "Approve all (Recommended)"; calibration/diag_mechanism_sweep.R,
+  # outputs/diagnostics/mechanism_sweep_20261013_hilda31w.log): at hilda31w the old construction crashes on 8 of the 64
+  # ocean combinations and warns non-convergence on 40; the pair warming_feedback + ocean_sink now only warns (|resid|
+  # 5.0e-7), so the check moves to the SMALLEST combination that still crashes. The app's construction: 127 / 127 clean.
+  expect_error(suppressWarnings(sp_fn(ccx_apply_mechanisms(p, F0, c("warming_feedback", "ocean_sink", "revelle"))$p)),
                "singular")
 })

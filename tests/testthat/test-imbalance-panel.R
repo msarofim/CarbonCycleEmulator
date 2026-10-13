@@ -68,7 +68,7 @@ test_that("1. the app's land sink IS the gate's, not a second implementation", {
   F <- suppressWarnings(ccx_build_forcing("historical", DG_YEARS, prod_c14 = spin$prod_c14,
                                           luc_scale = pm$luc_scale,
                                           bomb_total_kmol = pm$bomb_total,
-                                          enso_index = ccx_enso_index_of(bp), aod_mode = ccx_aod_mode_of(bp)))
+                                          enso_index = ccx_enso_index_of(bp), aod_mode = ccx_aod_mode_of(bp), nuc_share = ccx_nuc_share_of(bp)))
   r <- ccx_run_fast(spin, F); r$F <- F
 
   ann <- .imb_env$app_sinks_annual(r$out, r$F)
@@ -98,8 +98,10 @@ test_that("1. the app's land sink IS the gate's, not a second implementation", {
   # 0.92 (0.9235). MEASURED (Marcus 2026-10-03: "Approve all (Recommended)").
   # 2026-10-08 (e): at the canonical hilda29e (#18 pass 2, the interannual cut), still 5 decades in the band; the last
   # decade's miss 0.92 -> 1.00 (1.0029). MEASURED (Marcus 2026-10-08: "Approve all five").
+  # 2026-10-13 (g): at the canonical hilda31w (the WTC label), still 5 decades in the band; the last decade's miss
+  # 1.00 -> 1.05 (1.0487). MEASURED (Marcus 2026-10-13: "Approve all (Recommended)").
   expect_equal(sum(s$in_band), 5L)
-  expect_equal(s$miss[nrow(s)], 1.00, tolerance = 0.02)
+  expect_equal(s$miss[nrow(s)], 1.05, tolerance = 0.02)
 
   # ---- the +0.32 decomposition, recomputed (added 2026-09-25) --------------
   # \u26d4 The info box used to TYPE "about 0.3 GtC" and name THREE terms. There
@@ -122,12 +124,15 @@ test_that("1. the app's land sink IS the gate's, not a second implementation", {
   # MEASURED (Marcus 2026-10-06: "Approve all (Recommended)").
   # 2026-10-08 (e): the canonical is hilda29e. d_land +0.482 -> +0.507 (0.5074), d_luc -0.169 -> -0.146 (-0.1458); the
   # other four unchanged within tolerance. MEASURED (Marcus 2026-10-08: "Approve all five").
-  expect_equal(z$d_land, +0.507, tolerance = 0.005)
+  # 2026-10-13 (g): the canonical is hilda31w. d_land +0.507 -> +0.564 (0.5642), d_luc -0.146 -> -0.099 (-0.0988), -d_ocn
+  # -0.029 -> -0.017 (-0.0165); imbal, cement and -d_grow unchanged within tolerance. MEASURED (Marcus 2026-10-13: "Approve
+  # all (Recommended)").
+  expect_equal(z$d_land, +0.564, tolerance = 0.005)
   expect_equal(z$imbal,  +0.54, tolerance = 0.005)
   expect_equal(z$cement, +0.09, tolerance = 0.005)
-  expect_equal(z$d_luc,  -0.146, tolerance = 0.005)
+  expect_equal(z$d_luc,  -0.099, tolerance = 0.005)
   expect_equal(-z$d_grow, +0.058, tolerance = 0.005)
-  expect_equal(-z$d_ocn,  -0.029, tolerance = 0.005)
+  expect_equal(-z$d_ocn,  -0.017, tolerance = 0.005)
   # \u26a0 THE CLOSURE IS ASSERTED AT ITS MEASURED SIZE, NOT AT ZERO. It is
   # -0.006 GtC/yr (the table's `num` column), ~2 % of the d_land it explains.
   # Asserting 3e-14 here would fail; asserting nothing would let the identity
