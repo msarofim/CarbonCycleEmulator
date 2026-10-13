@@ -1,0 +1,12 @@
+WTC landing RESUME stage B at df4ebb6, 2026-10-13T09:20:01-0400
+== read_id017  09:20:01
+   rc 0
+== check_id017  09:20:12
+   rc 0
+== checkz_id017  09:21:36
+   rc 0
+     L moved +0.04172 sigma
+     s moved -0.06734 sigma
+     w moved -0.11032 sigma
+     RULED 0.1 sigma (Marcus 2026-10-12): a name moved MORE: to Marcus before any second pass
+== STAGE B DONE 09:21:36. Logs: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/wtc_landing_20261013/resume
