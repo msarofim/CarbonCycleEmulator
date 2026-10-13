@@ -35,8 +35,10 @@
 # SOURCE. Laemmel T, Knaack T, Heckel A, Wenger A, Szidat S (2025), Compilation of
 # nuclear industry's gaseous radiocarbon emissions from 1950 to 2023, Zenodo,
 # doi:10.5281/zenodo.15034663 (CC-BY-4.0); fetched by data-raw/download_data.R [6b].
-# ⚠ Those nine files have NO MANIFEST.csv rows (the fetch is in download_data.R but
-# the manifest was last written without it), so each file's sha256 is stamped here.
+# Their MANIFEST.csv rows (keys nuc_*) were appended by hand on 2026-10-12, without
+# re-running download_data.R; the access date there is the file mtime (2026-08-10),
+# since the original was never recorded (CHANGELOG 2026-10-12 gg). Each file's sha256
+# is ALSO stamped here, and the two agree.
 # =====================================================================
 
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)

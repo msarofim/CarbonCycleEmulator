@@ -2,6 +2,25 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (gg) — **The nine nuclear-industry ¹⁴C files have MANIFEST rows** (hard rule 3). Closes the "no MANIFEST row" half of the 10-02 (y) audit item. Laemmel et al. 2025, Zenodo doi:10.5281/zenodo.15034663, CC-BY-4.0.
+
+- **Nine rows appended to `data-raw/downloads/MANIFEST.csv`**, now 63 rows. Nothing was re-downloaded, and `download_data.R` was NOT re-run, because a re-run re-fetches everything and rewrites the whole manifest with one access date.
+- **Each field is what `download_data.R` [6b] would record.** The key is `"nuc_"` + the file name up to `_14C`. The file list is read from [6b]'s own `nuc_files` vector. The URL, citation and notes strings are checked verbatim against the script. Bytes and sha256 come from the files on disk in the main checkout. Worktrees do not have them, because the directory is gitignored.
+- **The access date is NOT known. `accessed` = the file mtime, 2026-08-10, and every row's notes say so.**
+  - No MANIFEST row ever carried them; `git log -S` on `nuc_` and on `15034663` finds nothing in the manifest's history.
+  - The CHANGELOG 2026-08-10 entry ("Nuclear-industry ¹⁴C source PROMOTED to v1") summed the files, which puts them on disk that day. It records no access date.
+  - Commit `c6e6c38` added [6b] at 07:36:31 EDT. The files were written at 07:33:39–07:33:44, three minutes before.
+- ⚠ **The fetch command is also unrecorded.** The files' birth times show nine non-overlapping, sequential downloads in the order NFRP, Other_countries, Germany, USA, Canada, France, South_Korea, Switzerland, China. That is not [6b]'s loop order: in [6b] Germany is fifth and China seventh. So the `source` column holds the URL [6b] uses, not a URL known to have been used.
+- **Cross-check: all nine sha256 equal the `file_sha256` stamped in `attr(readRDS("data/forcing_nuc_nh_share.rds"), "provenance")`** (built 2026-10-12 by `data-raw/build_nuc_nh_share.R`). So the files have not changed since that build.
+  - **The gate was mutation-tested.** I appended one byte to a scratch copy of the China file and restored its mtime. The builder then refused with "sha256 differs", and the manifest was left untouched.
+  - ⚠ This check cannot detect a change made before 10-12. A comparison against Zenodo's published per-file md5 (a metadata request, no download) would close that gap. **Not done**: it was outside this task.
+- The ` ⚠ Those nine files have NO MANIFEST.csv rows` comment in `build_nuc_nh_share.R` (lines 38–39) is now stale. It was left alone because it was outside this task.
+- The audit item's other half, **no processed `data/*.rds` of the emissions themselves**, is unchanged. The model still reads the raw CSVs at run time.
+- **Merged into main 2026-10-12 ~21:20** (merge of `claude/compassionate-chatelet-52df58`, commit `d1a09fe`). The branch wrote this entry as **(ee)**, but main's (ee) is the label build, so it is relabelled **(gg)** here. The commit message of `d1a09fe` still says "(ee)"; this entry is the one it means.
+  - **Re-checked at the merge, before committing:** all nine rows' sha256 equal `attr(readRDS("data/forcing_nuc_nh_share.rds"), "provenance")$file_sha256` (the same set of nine names) AND the files on disk now, and every `bytes` field equals `file.size()`. This was the 10-12f handoff's condition for merging.
+  - **The stale comment is fixed** at `data-raw/build_nuc_nh_share.R` lines 38–39. It now says the rows exist and that the access date is the file mtime. The builder was not re-run, and `data/` is untouched.
+  - **Timing:** the merge touches only `data-raw/` and this file. Neither is a path that `ccx_git_stamp()` reads (`R src calibration app data`). It landed before the armed WTC dry run (~01:00) and the land chain (mid-morning), so neither run sees a changed tree.
+
 ## 2026-10-12 (ff) — **The WTC refit LAUNCHED** (Mac, 24 starts, 8 at once, #18's recipe; wave `20261012ff`, 19:46:02). The handoff's §4 steps 1–2. Marcus's rulings applied as written: "Carry module, then check (Recommended)"; "Mac overnight, #18's recipe (Recommended)". Torch verdict, said out loud: Mac, as ruled (the Mac is ~2× faster per evaluation; Torch wins only 24-wide).
 
 **The driver extension (`1e66077`).** Three things, one of which the handoff had wrong:
