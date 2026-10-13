@@ -1125,8 +1125,9 @@ app_stylised_emissions <- function(kind, years, to_zero_year = 2060,
 # Measured by `calibration/diag_pulse_vs_tcre.R` at the app's own defaults
 # (background APP_SCENARIO_BG = vvM since 2026-09-29, release 2050, the p_gtc
 # slider's full range), reading the SAME app_run_coupled() the tab uses. dGMST
-# per 1000 GtC at +100 yr, at hilda29e (2026-10-11, pulse_vs_tcre_20261011.csv @4e819ad):
-#     10 GtC 1.359 | 50 1.356 | 100 1.353 | 200 1.347 | 500 1.327
+# per 1000 GtC at +100 yr, at hilda31w (2026-10-13, pulse_vs_tcre_20261013.csv @6ddf4b2):
+#     10 GtC 1.355 | 50 1.353 | 100 1.350 | 200 1.345 | 500 1.327
+# (hilda29e, 2026-10-11, pulse_vs_tcre_20261011.csv @4e819ad: 1.359 | 1.356 | 1.353 | 1.347 | 1.327.)
 # ⛔ THESE SAT AT hilda33p FOR FIVE DAYS AFTER hilda29e WAS ADOPTED (10-08): the gate read the
 # newest CSV and never asked which mode had made it (found 2026-10-11; test-pulse-linearity.R
 # now requires the CSV's mode to be CCX_MODE_CANONICAL).
@@ -1139,9 +1140,9 @@ app_stylised_emissions <- function(kind, years, to_zero_year = 2060,
 # by construction. `test-pulse-linearity.R` re-reads the driver's own CSV and
 # fails if these drift from it, so the constant cannot rot silently.
 APP_PULSE_LIN_SIZES   <- c(10, 500)   # GtC, the range the claim covers
-APP_PULSE_LIN_SPREAD  <- 2.3          # per cent of the mean, across that range (hilda33p 2.5; hilda34g 2.7; hilda33d 2.5; hilda29l 4.2)
+APP_PULSE_LIN_SPREAD  <- 2.1          # per cent of the mean, across that range (hilda29e 2.3; hilda33p 2.5; hilda34g 2.7; hilda33d 2.5; hilda29l 4.2)
 APP_PULSE_LIN_HORIZON <- 100L         # years after release
-APP_PULSE_LIN_SRC     <- "calibration/diag_pulse_vs_tcre.R, 2026-10-11 (vvM background, hilda29e)"
+APP_PULSE_LIN_SRC     <- "calibration/diag_pulse_vs_tcre.R, 2026-10-13 (vvM background, hilda31w)"
 # THE HORIZON DEPENDENCE (100 GtC). At hilda29l the per-1000 figure FELL with
 # horizon -- 1.43 at +20 yr, 1.20 at +50, 1.03 at +100, 0.97 at +200 -- and the
 # box said "flat in pulse size but NOT in when you look". At hilda33d it is
@@ -1157,7 +1158,10 @@ APP_PULSE_LIN_SRC     <- "calibration/diag_pulse_vs_tcre.R, 2026-10-11 (vvM back
 # 1.402 -- every horizon within the ruled 0.1 of "about 1.4", and the headline (1.358) rounds to it.
 # hilda29e (2026-10-11, pulse_vs_tcre_20261011.log): 1.438 / 1.370 / 1.353 / 1.401 -- every horizon
 # within the ruled 0.1, and the headline (1.353) rounds to 1.4.
-APP_PULSE_PER1000_BY_HORIZON <- c(`20` = 1.44, `50` = 1.37, `100` = 1.35, `200` = 1.40)
+# hilda31w (2026-10-13, pulse_vs_tcre_20261013.log): 1.429 / 1.363 / 1.350 / 1.402 -- every horizon
+# within the ruled 0.1. ⚠ The headline is 1.35026: it rounds to 1.4 by 0.0003, so a refit that moves
+# it down by that much flips the box's one-decimal rule (the test's last assertion).
+APP_PULSE_PER1000_BY_HORIZON <- c(`20` = 1.43, `50` = 1.36, `100` = 1.35, `200` = 1.40)
 # ⭐ THE BOX'S SENTENCE (Marcus 2026-10-01, review 10-01c A2: "Say about 1.4 dC
 # per 1000 GtC"). One figure for every horizon above, to one decimal.
 # test-pulse-linearity.R requires every horizon's measurement, and the 100 GtC
