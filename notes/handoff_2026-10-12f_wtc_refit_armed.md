@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-12 (f) — the WTC refit is RUNNING (wave `20261012ff`); its dry run and landing are ARMED
 
+> ⚠ **SUPERSEDED 2026-10-13 by `notes/handoff_2026-10-13_hilda31w_adoption.md`.** The wave landed. The land chain stopped at the module check's GATE 0 on the objective's noise floor, it was resumed after two rulings, and id 17 was ruled ADOPTED as `hilda31w`. Two things here turned out differently. (1) The first start finished at 22:33, not ~01:00: id 001 converged in 161 CPU-min. (2) §5's "don't merge the MANIFEST branch while the land chain runs" was more caution than needed: that merge touches only `data-raw/` and CHANGELOG, and neither is a `ccx_git_stamp()` path. It merged before both runs (10-12 gg).
+
 **Supersedes** `notes/handoff_2026-10-12e_wtc_label_built.md` (which now points here). Written on Marcus's request
 ("Yes, write the handoff note"), 2026-10-12 ~21:00.
 
