@@ -21,7 +21,16 @@
 #   G1 f = 1 through the wrapper IS the unwrapped run (identical()), and SSP5-8.5 2300 reproduces 10-05 (p)'s
 #      1461.53 ppm (obj16_refit_read_20261005.log, the same estimator, br_futures());
 #   G2 f = 0 equals the model's OWN route to no SST warming (p$sst_obs = 0, p$sst_scale = 0, unwrapped), identical();
-#   G3 a futures-only arm reproduces the f = 1 run up to the seam year, identical().
+#   G3 a futures-only arm reproduces the f = 1 run over the history, identical(), as TWO exact checks (Marcus 2026-10-13:
+#      "Both exact checks (Recommended)"):
+#      G3a at the arms' OWN settings, over 1750 to the last year BOTH observed records cover (GMST and SST);
+#      G3b with both runs forced to the coupled loop's cap (tol 0, CLIM_MAX_ITER iterations), over 1750 to the SST
+#          record's last year, so the year the SST seam sits in is still tested exactly.
+#      WHY TWO. The GMST record ends a year before the SST record (2024 vs 2025), so the SST-observed year runs on
+#      MODELLED GMST, which carries the loop's convergence residual. Two arms whose futures differ can stop after
+#      different iteration counts, and that year then differs at the residual (hilda31w: 6 vs 5 iterations, 8e-13 ppm
+#      in 2025; outputs/diagnostics/h2_futures_stake_20261013_hilda31w_G3_FAILED.log). That is not a leak: forced to
+#      one count the two are bit-identical through 2025. G3a alone would never see a leak INTO that year; G3b does.
 # Outputs: CO2 and GMST at 2100 / 2150 / 2300 for the seven van Vuuren markers (spliced onto the historical
 # emissions, as the app runs them) and SSP5-8.5 (unspliced, the record's anchor). No RNG.
 # Usage: Rscript calibration/diag_h2_futures_stake.R   (CCX_HF_WORKERS=<n>, default 4)
@@ -112,20 +121,20 @@ reset_sst <- function() ccx_sst_anom_from_gmst <<- ORIG_SST
 # ⚠ THE RUN TAKES ITS PARAMETERS FROM THE SPINUP (`spin$params`), not from `v`: v supplies only bomb_total and
 # luc_scale. A changed vector needs its OWN spinup -- the first G2 passed v0 with the canonical's spinup and so
 # ran the canonical (it reproduced f = 1 to the digit, which is how the gate caught it).
-run_scen <- function(v, s, spliced, sp = SP) {
+run_scen <- function(v, s, spliced, sp = SP, ...) {
   em <- if (!spliced) NULL else { e <- ccx_scenario_emissions(s)
     rbind(HE, e[e$year > max(HE$year), c("year", "fossil_GtC", "luc_GtC")]) }
   rr <- suppressWarnings(ccx_run_coupled(sp, s, c(1750L, HF_END), emissions = em,
-                                         bomb_total_kmol = v$bomb_total, luc_scale = v$luc_scale))
+                                         bomb_total_kmol = v$bomb_total, luc_scale = v$luc_scale, ...))
   yr <- floor(rr$out$t)
   co2 <- tapply((rr$out$co2_NH + rr$out$co2_SH) / 2, yr, mean)
   gm  <- if (!is.null(rr$climate$gmst)) stats::setNames(rr$climate$gmst, rr$climate$year) else rep(NA_real_, length(co2))
   list(co2 = co2, gmst = gm)
 }
-arm_run <- function(f, mode, s, spliced, v = V, sp = SP) {
+arm_run <- function(f, mode, s, spliced, v = V, sp = SP, ...) {
   if (is.na(f)) reset_sst() else use_sst_scale(f, mode)
   on.exit(reset_sst(), add = TRUE)
-  run_scen(v, s, spliced, sp)
+  run_scen(v, s, spliced, sp, ...)
 }
 at <- function(x, y) unname(x[as.character(y)])
 
@@ -144,9 +153,18 @@ g2 <- identical(g_own0$co2, g_f0$co2)
 cat(sprintf("G2 f = 0 vs the model's own route (sst_obs = 0, sst_scale = 0): identical() %s (ssp585 %d %.3f vs %.3f) -> %s\n", g2, HF_END,
             at(g_f0$co2, HF_END), at(g_own0$co2, HF_END), if (g2) "PASS" else "FAIL"))
 g_fut <- arm_run(0.613, "future", "ssp585", FALSE)
-hist_y <- as.character(1750:LAST_OBS)
-g3 <- identical(g_fut$co2[hist_y], g_ref$co2[hist_y])
-cat(sprintf("G3 a futures-only arm vs f = 1 over 1750-%d: identical() %s -> %s\n", LAST_OBS, g3, if (g3) "PASS" else "FAIL"))
+LAST_BOTH <- min(LAST_OBS, max(as.data.frame(readRDS(ccx_path("data", "forcing_gmst.rds")))$year))  # both records observed
+hist_a <- as.character(1750:LAST_BOTH)
+g3a <- identical(g_fut$co2[hist_a], g_ref$co2[hist_a])
+cat(sprintf("G3a a futures-only arm vs f = 1 over 1750-%d (both records observed), the arms' own settings: identical() %s -> %s\n",
+            LAST_BOTH, g3a, if (g3a) "PASS" else "FAIL"))
+g_ref_c <- arm_run(NA, "all", "ssp585", FALSE, tol = 0, max_iter = CLIM_MAX_ITER)
+g_fut_c <- arm_run(0.613, "future", "ssp585", FALSE, tol = 0, max_iter = CLIM_MAX_ITER)
+hist_b <- as.character(1750:LAST_OBS)
+g3b <- identical(g_fut_c$co2[hist_b], g_ref_c$co2[hist_b])
+cat(sprintf("G3b the same pair, both forced to %d coupled iterations (tol 0), over 1750-%d (the SST record): identical() %s -> %s\n",
+            CLIM_MAX_ITER, LAST_OBS, g3b, if (g3b) "PASS" else "FAIL"))
+g3 <- g3a && g3b
 if (!(g1a && g1b && g2 && g3)) stop("a gate failed; nothing is read")
 
 # ---- the arms ---------------------------------------------------------------------------------------------
@@ -180,7 +198,7 @@ for (a in c(names(HF_ALL)[-1], names(HF_FUT))) {
 }
 sink()
 saveRDS(list(table = tab, arms_all = HF_ALL, arms_future = HF_FUT, scenarios = HF_SCEN, seam = SEAM, last_obs = LAST_OBS, today = HF_TODAY,
-             gates = c(G1 = g1a && g1b, G2 = g2, G3 = g3),
+             gates = c(G1 = g1a && g1b, G2 = g2, G3 = g3, G3a = g3a, G3b = g3b),
              provenance = list(driver = HF_DRIVER, commit = COMMIT, mode = HF_MODE, mode_file = MODE_FILE,
                                mode_md5 = unname(tools::md5sum(MODE_FILE)), rng = "none",
                                knob = "ccx_sst_anom_from_gmst() wrapped: the SST anomaly x f (all-time) or its post-record increment x f",

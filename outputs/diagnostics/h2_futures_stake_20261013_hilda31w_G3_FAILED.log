@@ -1,0 +1,8 @@
+calibration/diag_h2_futures_stake.R @327de2d | 2026-10-13 12:02 | canonical hilda31w | 4 workers
+f values (DERIVED from outputs/diagnostics/ocean_climate_gobm_20261013_wtcid017.rds): f1 1.0000, f_T_hi 0.5995, f_T 0.4905, f_T_lo 0.3815, f_W 0.2935, f0 0.0000
+mode file /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261013_hilda31w_wtc_hilda_csl3v0kaidgbemwtc/mode_fit_pumpN.rds (md5 53ee816ac48cea0f1c1fad244651c5fd); SST record ends 2025, seam (last 10 yr) NH 1.080 SH 0.927 K
+
+=== GATES ===
+G1 f = 1 through the wrapper vs unwrapped: identical() TRUE; ssp585 2300 1486.848 vs the recorded reference 1486.85 -> PASS
+G2 f = 0 vs the model's own route (sst_obs = 0, sst_scale = 0): identical() TRUE (ssp585 2300 1425.175 vs 1425.175) -> PASS
+G3 a futures-only arm vs f = 1 over 1750-2025: identical() FALSE -> FAIL
