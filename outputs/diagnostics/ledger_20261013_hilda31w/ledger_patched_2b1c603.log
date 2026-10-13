@@ -1,0 +1,50 @@
+Test passed with 10 successes 🎉.
+run-time inputs present: 14/14. OK
+Test passed with 10 successes 🥇.
+run-time inputs present: 14/14. OK
+
+### flux-trace-exact | expectation_failure | the canonical runs the structures the trace broke on (else this file has no power)
+  at line 65 
+   Expected `CCX_MODE_CANONICAL` to be identical to "hilda29e".
+   Differences:
+   1/1 mismatches
+   x[1]: "hilda31w"
+   y[1]: "hilda29e" 
+Test passed with 10 successes 🥳.
+run-time inputs present: 14/14. OK
+
+### imbalance-panel | expectation_failure | 1. the app's land sink IS the gate's, not a second implementation
+  at line 102 
+   Expected `s$miss[nrow(s)]` to equal 1.
+   Differences:
+   1/1 mismatches
+   [1] 1.05 - 1 == 0.0487 
+
+### imbalance-panel | expectation_failure | 1. the app's land sink IS the gate's, not a second implementation
+  at line 125 
+   Expected `z$d_land` to equal `+0.507`.
+   Differences:
+   1/1 mismatches
+   [1] 0.564 - 0.507 == 0.0572 
+
+### imbalance-panel | expectation_failure | 1. the app's land sink IS the gate's, not a second implementation
+  at line 128 
+   Expected `z$d_luc` to equal `-0.146`.
+   Differences:
+   1/1 mismatches
+   [1] -0.0988 - -0.146 == 0.0472 
+
+### imbalance-panel | expectation_failure | 1. the app's land sink IS the gate's, not a second implementation
+  at line 130 
+   Expected `-z$d_ocn` to equal `-0.029`.
+   Differences:
+   1/1 mismatches
+   [1] -0.0165 - -0.029 == 0.0125 
+Test passed with 10 successes 😀.
+run-time inputs present: 14/14. OK
+
+### mechanisms | expectation_failure | the ocean switch is RUN-ONLY: the combinations that crashed spin up and run at the CANONICAL
+  at line 328 
+   Expected `suppressWarnings(...)` to throw a error. 
+Test passed with 10 successes 🌈.
+run-time inputs present: 14/14. OK

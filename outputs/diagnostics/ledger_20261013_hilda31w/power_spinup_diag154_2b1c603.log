@@ -1,0 +1,4 @@
+hilda29e: |inst-pin| 0.00358  |sh-nh| 0.000013  ratio 266.1 (test wants > 100)  global d13C seasonal range 0.1582  month1-mean -0.00376  inst d14c-pin -0.0165
+  monthly global d13C - annual mean: -0.0038 -0.0273 -0.0472 -0.0661 -0.0736 -0.0575 -0.0147 +0.0379 +0.0769 +0.0846 +0.0631 +0.0276 
+hilda31w: |inst-pin| 0.00021  |sh-nh| 0.000009  ratio 22.1 (test wants > 100)  global d13C seasonal range 0.1515  month1-mean -0.00035  inst d14c-pin -0.0150
+  monthly global d13C - annual mean: -0.0004 -0.0207 -0.0424 -0.0656 -0.0744 -0.0564 -0.0111 +0.0403 +0.0747 +0.0771 +0.0549 +0.0240 

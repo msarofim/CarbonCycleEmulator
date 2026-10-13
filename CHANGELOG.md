@@ -2,6 +2,32 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-13 (g) — **The adoption's test ledger: the full suite at `2b1c603` has 7865 passed, 32 failed, 12 errored, 4 skipped (19.3 min).** That is 44 entries in 25 tests across 15 files, every one classified. **No repo test is edited.** One is a real app gap: the parameter table has no labels for the two new fitted names. Evidence: `outputs/diagnostics/ledger_20261013_hilda31w/` (README).
+
+- **A. The test's own inputs are not label-aware: all 12 errors.** The guards refuse correctly. Each test builds its own forcing without `nuc_share`, or its own grid on the legacy 3700 m column; the label runs 3682.2 m. The files are canonical-contracts ×2, flux-trace-exact (file level), imbalance-panel, mechanisms ×4, and stability ×3 errors + 1 failure (`:190`: the P8 wall found on the wrong column).
+  - Every `R/` forcing builder already passes `nuc_share` (`climate.R`, `joos_irf.R`, `calibrate.R`), as do the app's two choke points (10-12 hh). Checked.
+  - **Measured with the proposed patch** (11 lines in 5 files, applied only in a scratch worktree; `harness_patch_NOT_APPLIED.diff`): **gates 1–2 (conservation) and R↔C++ parity PASS at hilda31w, and so does every stability test.**
+  - Underneath, four more surface:
+    - `flux-trace-exact:65` asserts the canonical is "hilda29e" (its power premise).
+    - `imbalance-panel` has four measured literals: the last decade's miss 1.00 → 1.05; `d_land` 0.507 → 0.564; `d_luc` −0.146 → −0.099; `−d_ocn` −0.029 → −0.017.
+    - `mechanisms:328`: the power check's crash no longer reproduces. The old construction (the ocean switch inside the spin-up) now converges at hilda31w. The test's own comment: "re-measure before deleting it". The app's construction passes.
+- **B. The previous canonical by name or label:** `ms-reference-set` (11) at line 196 and (14) at lines 341–342.
+- **C. Measured literals to re-pin:** GATE S's phases. The whole limb moves 9.06 → 8.91 months; the blind read moves 4.10 → 4.38, outside its 0.05 tolerance. The blind phase is the thermal phase, and the label reads the SST lags per hemisphere from ERSSTv5 (SH 1.536 vs the legacy 1.32). That is a candidate cause, inferred and not tested.
+- **D. Precomputed products keyed to hilda29e**, each refused by its app loader:
+  - the futures ribbons (the MCMC band);
+  - the constraint map ×4, plus the cmap-tie skip;
+  - the ocean-climate card;
+  - `pulse_vs_tcre` ×1, plus 2 skips.
+- **E. A REAL APP GAP:** `app-params-table` ×15. `APP_PARAM_META` has no rows for `bomb_share_NH` or `seas_T_lag`. At hilda31w the "Under the hood" table is replaced by "This is a bug — please report it."
+- **F. Copy:**
+  - `APP_RELEASE_MODE` (app-version).
+  - Card 4's two by-design failures, unchanged.
+  - **Card 7's "about 1,900 m per year":** `k_w` is 1835.4 at hilda31w (1869.8 at hilda29e), |Δ| 64.6 against an sd of 52.5.
+- **G. Power lost at this mode:** `spinup-diagnostics:154` (and `mechanisms:328`, under A).
+  - The orbit starts in January, near the zero crossing of the seasonal δ¹³C cycle. January minus the annual mean is −0.0038 ‰ at hilda29e and −0.00035 ‰ at hilda31w; the seasonal range is 0.15 ‰ at both.
+  - So the hand-picked "100 × |SH − NH|" margin was 266× and is 22×. The identity (1e-9) and ordering checks above it pass.
+- **The four skips:** cmap-tie and pulse-linearity ×2 (from D), and `test-l2-enso-limb.R:222`, standing.
+
 ## 2026-10-13 (f) — **ADOPTED: `hilda31w` (the WTC refit's id 17) is the canonical** (Marcus, verbatim: "Adopt id 17"; the name "hilda31w"; "No second pass (Recommended)"). The handoff's §4 step 1 (`notes/handoff_2026-10-13_hilda31w_adoption.md`), following `938c9cb` (hilda29e's).
 
 - **Refit dir renamed** `refit_20261013_wtc_hilda_csl3v0kaidgbemwtc` → `refit_20261013_hilda31w_wtc_hilda_csl3v0kaidgbemwtc` (`git mv`; md5 `53ee816a…` unchanged). `diag_wtc_refit_read.R`'s glob `refit_*_wtc_hilda_csl3v0kaidgbemwtc` still matches it.

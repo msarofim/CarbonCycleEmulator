@@ -1,0 +1,313 @@
+Test passed with 10 successes 🥳.
+run-time inputs present: 14/14. OK
+
+### app-params-table | expectation_failure | at the SHIPPED canonical, the held rows are exactly the pins, at the values the model RUNS
+  at line 162 
+   Expected `pt_set_problems(tab, rows, md$param_names, held)` to equal `character(0)`.
+   Differences:
+   Lengths differ: 1 is not 0 
+
+### app-params-table | expectation_failure | at the SHIPPED canonical, the held rows are exactly the pins, at the values the model RUNS
+  at line 166 
+   Expected `tab$Value[match(n, rows)]` to be identical to `formatC(pins[[n]], digits = 3, format = "g")`.
+   Differences:
+   target is NULL, current is character
+   ent_seas_amp_SH 
+
+### app-params-table | expectation_failure | at the SHIPPED canonical, the held rows are exactly the pins, at the values the model RUNS
+  at line 166 
+   Expected `tab$Value[match(n, rows)]` to be identical to `formatC(pins[[n]], digits = 3, format = "g")`.
+   Differences:
+   target is NULL, current is character
+   w_eq 
+
+### app-params-table | expectation_failure | at the SHIPPED canonical, the held rows are exactly the pins, at the values the model RUNS
+  at line 166 
+   Expected `tab$Value[match(n, rows)]` to be identical to `formatC(pins[[n]], digits = 3, format = "g")`.
+   Differences:
+   target is NULL, current is character
+   gamma_eq 
+
+### app-params-table | expectation_failure | at the SHIPPED canonical, the held rows are exactly the pins, at the values the model RUNS
+  at line 166 
+   Expected `tab$Value[match(n, rows)]` to be identical to `formatC(pins[[n]], digits = 3, format = "g")`.
+   Differences:
+   target is NULL, current is character
+   pump_export 
+
+### app-params-table | expectation_failure | at the SHIPPED canonical, the held rows are exactly the pins, at the values the model RUNS
+  at line 166 
+   Expected `tab$Value[match(n, rows)]` to be identical to `formatC(pins[[n]], digits = 3, format = "g")`.
+   Differences:
+   target is NULL, current is character
+   w_vent 
+
+### app-params-table | expectation_failure | at the SHIPPED canonical, the held rows are exactly the pins, at the values the model RUNS
+  at line 166 
+   Expected `tab$Value[match(n, rows)]` to be identical to `formatC(pins[[n]], digits = 3, format = "g")`.
+   Differences:
+   target is NULL, current is character
+   gamma_vent 
+
+### app-params-table | expectation_failure | at the SHIPPED canonical, the held rows are exactly the pins, at the values the model RUNS
+  at line 166 
+   Expected `tab$Value[match(n, rows)]` to be identical to `formatC(pins[[n]], digits = 3, format = "g")`.
+   Differences:
+   target is NULL, current is character
+   w_thc 
+
+### app-params-table | expectation_failure | at the SHIPPED canonical, the held rows are exactly the pins, at the values the model RUNS
+  at line 166 
+   Expected `tab$Value[match(n, rows)]` to be identical to `formatC(pins[[n]], digits = 3, format = "g")`.
+   Differences:
+   target is NULL, current is character
+   gamma_enso_ocn_NH 
+
+### app-params-table | expectation_failure | at the SHIPPED canonical, the held rows are exactly the pins, at the values the model RUNS
+  at line 166 
+   Expected `tab$Value[match(n, rows)]` to be identical to `formatC(pins[[n]], digits = 3, format = "g")`.
+   Differences:
+   target is NULL, current is character
+   gamma_enso_ocn_SH 
+
+### app-params-table | expectation_failure | at the SHIPPED canonical, the held rows are exactly the pins, at the values the model RUNS
+  at line 166 
+   Expected `tab$Value[match(n, rows)]` to be identical to `formatC(pins[[n]], digits = 3, format = "g")`.
+   Differences:
+   target is NULL, current is character
+   npp_tsens 
+
+### app-params-table | expectation_failure | at the SHIPPED canonical, the held rows are exactly the pins, at the values the model RUNS
+  at line 166 
+   Expected `tab$Value[match(n, rows)]` to be identical to `formatC(pins[[n]], digits = 3, format = "g")`.
+   Differences:
+   target is NULL, current is character
+   lag_enso_land 
+
+### app-params-table | expectation_failure | at the SHIPPED canonical, the held rows are exactly the pins, at the values the model RUNS
+  at line 166 
+   Expected `tab$Value[match(n, rows)]` to be identical to `formatC(pins[[n]], digits = 3, format = "g")`.
+   Differences:
+   target is NULL, current is character
+   gamma_enso_land_NH 
+
+### app-params-table | expectation_failure | at the SHIPPED canonical, the held rows are exactly the pins, at the values the model RUNS
+  at line 166 
+   Expected `tab$Value[match(n, rows)]` to be identical to `formatC(pins[[n]], digits = 3, format = "g")`.
+   Differences:
+   target is NULL, current is character
+   gamma_enso_land_SH 
+
+### app-params-table | expectation_failure | at the SHIPPED canonical, the held rows are exactly the pins, at the values the model RUNS
+  at line 166 
+   Expected `tab$Value[match(n, rows)]` to be identical to `formatC(pins[[n]], digits = 3, format = "g")`.
+   Differences:
+   target is NULL, current is character
+   w_enso_l2 
+Test passed with 10 successes 😀.
+run-time inputs present: 14/14. OK
+
+### app-version | expectation_failure | the release was cut on the mode the app actually loads
+  at line 55 
+   Expected `p` to equal `character(0)`.
+   Differences:
+   Lengths differ: 1 is not 0
+   APP_RELEASE_MODE is 'hilda29e' but the app loads 'hilda31w' 
+Test passed with 10 successes 🎊.
+run-time inputs present: 14/14. OK
+
+### canonical-contracts | expectation_error | GATE 1 AT THE CANONICAL: every tracer closes in ccx_deriv() with the sources off
+  at line 51 
+   Error in `ccx_nuc_share_check(if (is.null(prep$nuc_share)) "constant" else prep$nuc_share, Fm)`: nuclear 14C share mismatch: the parameters name 'per_year' but the forcing carries 'constant'. Build it with ccx_build_forcing(nuc_share = ccx_nuc_share_of(params)). 
+
+### canonical-contracts | expectation_error | R <-> C++ PARITY AT THE CANONICAL: 1955-1975 from one transient state
+  at line 100 
+   Error in `ccx_nuc_share_check(if (is.null(prep$nuc_share)) "constant" else prep$nuc_share, Fm)`: nuclear 14C share mismatch: the parameters name 'per_year' but the forcing carries 'constant'. Build it with ccx_build_forcing(nuc_share = ccx_nuc_share_of(params)). 
+Test passed with 10 successes 🥳.
+run-time inputs present: 14/14. OK
+
+### constraint-map | expectation_failure | 6. the artifact stamps its own provenance
+  at line 121 
+   Expected `pv$mode` to be identical to `CCX_MODE_CANONICAL`.
+   Differences:
+   1/1 mismatches
+   x[1]: "hilda29e"
+   y[1]: "hilda31w" 
+
+### constraint-map | expectation_failure | 7. the app's loader accepts the canonical's map and refuses any other (ccx_cmap_problems)
+  at line 174 
+   Expected `ccx_cmap_problems(cm)` to be identical to `character(0)`.
+   Differences:
+   Lengths differ: 3 is not 0 
+
+### constraint-map | expectation_failure | 7. the app's loader accepts the canonical's map and refuses any other (ccx_cmap_problems)
+  at line 199 
+   Expected `is.null(ok$cm)` to be FALSE.
+   Differences:
+   `actual`:   TRUE 
+   `expected`: FALSE
+    
+
+### constraint-map | expectation_failure | 7. the app's loader accepts the canonical's map and refuses any other (ccx_cmap_problems)
+  at line 199 
+   Expected `ok$why` to be NULL.
+   Differences:
+   `actual` is a character vector ('built for mode \'hilda29e\', the canonical is \'hilda31w\'')
+   `expected` is NULL
+    
+Test passed with 10 successes 🌈.
+run-time inputs present: 14/14. OK
+
+### flux-trace-exact | expectation_error | NA
+  at line 41 
+   Error in `ccx_nuc_share_check(if (is.null(prep$nuc_share)) "constant" else prep$nuc_share, Fm)`: nuclear 14C share mismatch: the parameters name 'per_year' but the forcing carries 'constant'. Build it with ccx_build_forcing(nuc_share = ccx_nuc_share_of(params)). 
+Test passed with 10 successes 😸.
+run-time inputs present: 14/14. OK
+
+### futures-ribbons | expectation_failure | the shipped band passes the app's own check at the canonical, built for the mode it was ruled for
+  at line 151 
+   Expected `p` to equal `character(0)`.
+   Differences:
+   Lengths differ: 2 is not 0
+   built for mode 'hilda29e', the canonical is 'hilda31w' | built at a different parameter vector from the checked mode's par_mode 
+Test passed with 10 successes 🥳.
+run-time inputs present: 14/14. OK
+
+### gate-bounds | expectation_failure | GATE S has POWER against its own blind spot: at a seas_ml = 1 canonical the switch moves the limb by months
+  at line 502 
+   Expected `full$mo` to equal 9.06.
+   Differences:
+   1/1 mismatches
+   [1] 8.91 - 9.06 == -0.152 
+
+### gate-bounds | expectation_failure | GATE S has POWER against its own blind spot: at a seas_ml = 1 canonical the switch moves the limb by months
+  at line 503 
+   Expected `blind$mo` to equal 4.1.
+   Differences:
+   1/1 mismatches
+   [1] 4.38 - 4.1 == 0.277 
+Test passed with 10 successes 😀.
+run-time inputs present: 14/14. OK
+
+### imbalance-panel | expectation_error | 1. the app's land sink IS the gate's, not a second implementation
+  at line 72 
+   Error in `ccx_nuc_share_check(if (is.null(prep$nuc_share)) "constant" else prep$nuc_share, Fm)`: nuclear 14C share mismatch: the parameters name 'per_year' but the forcing carries 'constant'. Build it with ccx_build_forcing(nuc_share = ccx_nuc_share_of(params)). 
+Test passed with 10 successes 🥳.
+run-time inputs present: 14/14. OK
+
+### mechanisms | expectation_error | under the warming switch, the CANONICAL's run is blind to the temperature record
+  at line 184 
+   Error in `ccx_nuc_share_check(if (is.null(prep$nuc_share)) "constant" else prep$nuc_share, Fm)`: nuclear 14C share mismatch: the parameters name 'per_year' but the forcing carries 'constant'. Build it with ccx_build_forcing(nuc_share = ccx_nuc_share_of(params)). 
+
+### mechanisms | expectation_error | the warming caveat's 'third, smaller effect' (the mixing slowdown) holds at the CANONICAL
+  at line 217 
+   Error in `ccx_nuc_share_check(if (is.null(prep$nuc_share)) "constant" else prep$nuc_share, Fm)`: nuclear 14C share mismatch: the parameters name 'per_year' but the forcing carries 'constant'. Build it with ccx_build_forcing(nuc_share = ccx_nuc_share_of(params)). 
+
+### mechanisms | expectation_error | under the emissions switch, the CANONICAL's carbon is blind to every human carbon input
+  at line 261 
+   Error in `ccx_nuc_share_check(if (is.null(prep$nuc_share)) "constant" else prep$nuc_share, Fm)`: nuclear 14C share mismatch: the parameters name 'per_year' but the forcing carries 'constant'. Build it with ccx_build_forcing(nuc_share = ccx_nuc_share_of(params)). 
+
+### mechanisms | expectation_error | the ocean switch is RUN-ONLY: the combinations that crashed spin up and run at the CANONICAL
+  at line 317 
+   Error in `ccx_nuc_share_check(if (is.null(prep$nuc_share)) "constant" else prep$nuc_share, Fm)`: nuclear 14C share mismatch: the parameters name 'per_year' but the forcing carries 'constant'. Build it with ccx_build_forcing(nuc_share = ccx_nuc_share_of(params)). 
+Test passed with 10 successes 🥇.
+run-time inputs present: 14/14. OK
+
+### ms-reference-set | expectation_failure | (11) OBJECTIVE #16's pins ARE the canonical's since 2026-10-06 (hilda33p; Marcus: "Remove, re-express its test"): the FIRST branch takes them, the canonical as a MODE; npp_tsens off 0, a pin moved or dropped, and #15's nine are refused
+  at line 196 
+   Expected `ccx_mode_struct(readRDS(ccx_mode_file()))` to be identical to `CCX_MODE_OBJ18_STRUCT`.
+   Differences:
+   1/1 mismatches
+   x[1]: "hilda_csl3v0kaidgbemwtc"
+   y[1]: "hilda_csl3v0kaidgbemwt"
+   the canonical runs #18's label (hilda29e) 
+
+### ms-reference-set | expectation_failure | (14) #18 PASS 2's pins (2026-10-08 d; Marcus: "Basin 1, run the second pass, adopt if it passes"): #16's ten + the module at the one-pass check's values at basin 1, tied bit for bit to the check file, under #18's label at seas_ml 1 -> hilda29a0 (basin 1) / hilda29a6 (basin 2), both seeded; refused under #17's label, at seas_ml 0, a module value moved back to pass 1's, a module name dropped
+  at line 341 
+   Expected `CCX_MODE_CANONICAL` to be identical to "hilda29e".
+   Differences:
+   1/1 mismatches
+   x[1]: "hilda31w"
+   y[1]: "hilda29e" 
+
+### ms-reference-set | expectation_error | (14) #18 PASS 2's pins (2026-10-08 d; Marcus: "Basin 1, run the second pass, adopt if it passes"): #16's ten + the module at the one-pass check's values at basin 1, tied bit for bit to the check file, under #18's label at seas_ml 1 -> hilda29a0 (basin 1) / hilda29a6 (basin 2), both seeded; refused under #17's label, at seas_ml 0, a module value moved back to pass 1's, a module name dropped
+  at line 342 
+   Error in `ccx_ms_reference_set(p2, "1", pump_field = "solved", struct = CCX_MODE_OBJ18_STRUCT)`: ccx_ms_reference_set(): the canonical's pins carry the interannual module's values, fitted under hilda_csl3v0kaidgbemwtc; struct 'hilda_csl3v0kaidgbemwt' is not that label (a cut canonical's pins are ruled under its own). 
+Test passed with 10 successes 🌈.
+run-time inputs present: 14/14. OK
+
+### ocean-climate-card | expectation_failure | 1. the product is the CANONICAL's, built from the committed inputs it names
+  at line 27 
+   Expected `.oc_rv$rv_oclim_problems(x, ccx_mode_file())` to be identical to `character(0)`.
+   Differences:
+   Lengths differ: 2 is not 0 
+Test passed with 10 successes 🌈.
+run-time inputs present: 14/14. OK
+
+### pulse-linearity | expectation_failure | the measurement is OF THE CANONICAL (and the check can fail)
+  at line 49 
+   Expected `.csv_mode_ok(R)` to be TRUE.
+   Differences:
+   `actual`:   FALSE
+   `expected`: TRUE 
+   
+   pulse_vs_tcre_20261011.csv was made at hilda29e; the app loads hilda31w -- re-run calibration/diag_pulse_vs_tcre.R 
+Test passed with 10 successes 🎊.
+run-time inputs present: 14/14. OK
+
+### review-card-numbers | expectation_failure | card 4's lag is within ONE sd of the land ENSO lag the canonical RUNS, fitted OR pinned
+  at line 75 
+   Expected `abs(L$value - RCN_CARD4_LAG)` < `L$sd`.
+   Actual comparison: 3.4 >= 1.3
+   Difference: 2.2 >= 0 
+
+### review-card-numbers | expectation_failure | card 4's 'a little <word> the range' is where the limb strength the canonical RUNS sits against the observed bracket
+  at line 85 
+   Expected `.rcn_rv$rv_enso_l2_relation(run$w_enso_l2, br)` to be identical to `.rcn_rv$RV_ENSO_L2_VS_OBS`.
+   Differences:
+   1/1 mismatches
+   x[1]: "inside"
+   y[1]: "below" 
+
+### review-card-numbers | expectation_failure | card 7's k_w line: '1,446' IS the prior's centre, and 'about 1,900' is within one sd of the fit
+  at line 99 
+   Expected `abs(run$k_w - 1900)` < `sd_nat`.
+   Actual comparison: 64.6 >= 52.5
+   Difference: 12.1 >= 0 
+Test passed with 10 successes 🥇.
+run-time inputs present: 14/14. OK
+SEEDING w_vent for the spinup-diagnostics: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The file held it OFF; this arm fits it.
+SEEDING gamma_vent for the spinup-diagnostics: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The file held it OFF; this arm fits it.
+SEEDING w_thc for the spinup-diagnostics: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The file held it OFF; this arm fits it.
+
+### spinup-diagnostics | expectation_failure | AT THE CANONICAL the periodic spinup's isotope rows are the orbit's ANNUAL MEANS and meet the pins
+  at line 154 
+   Expected `abs(inst[["d13c"]] - ccx_const("D13C_PI"))` > `100 * abs(sh - nh)`.
+   Actual comparison: 0.00021 <= 0.00095
+   Difference: -0.00074 <= 0 
+Test passed with 10 successes 🌈.
+run-time inputs present: 14/14. OK
+
+### stability | expectation_error | seas_ml = 1: the count keeps the integrator's own stiffness inside RK4's limit up to the P8 wall (MUTATION: the pre-10-04 bound breaks it)
+  at line 177 
+   Error in `ccx_prepare(p, grid)`: ccx_prepare(): the grid integrates to 3700 m but the structure's column is 3682.2 m -- build it with ccx_grid_of(p) 
+
+### stability | expectation_failure | seas_ml = 1: near the P8 wall the count STOPS rather than clamp, and past it there is no bound
+  at line 190 
+   `ccx_substeps_for(p)` threw an error with unexpected message.
+   Expected match: "CCX_SUBSTEPS_MAX"
+   Actual message: "ccx_substeps_for: at h_ml = 75.484 the winter mixed layer reaches layer 1's base (prereg P8; see ccx_seas_ml_guard()) -- there is no stability bound to take." 
+
+### stability | expectation_error | seas_ml = 1: near the P8 wall the count STOPS rather than clamp, and past it there is no bound
+  at line 193 
+   Error in `ccx_prepare(p, grid)`: ccx_prepare(): the grid integrates to 3700 m but the structure's column is 3682.2 m -- build it with ccx_grid_of(p) 
+
+### stability | expectation_error | seas_ml = 1: near the P8 wall the auto count is ACCURATE, and the pre-10-04 count was not (MUTATION)
+  at line 204 
+   Error in `ccx_nuc_share_check(if (is.null(prep$nuc_share)) "constant" else prep$nuc_share, Fm)`: nuclear 14C share mismatch: the parameters name 'per_year' but the forcing carries 'constant'. Build it with ccx_build_forcing(nuc_share = ccx_nuc_share_of(params)). 
