@@ -63,9 +63,10 @@ if (!is.na(PMM_ID) && (is.na(PMM_WHY) || !nzchar(trimws(PMM_WHY))))
 if (is.na(PMM_ID) && !is.na(PMM_WHY)) stop("--why is for --id only: the computed best needs no reason")
 PMM_LP_TOL     <- CCX_REPRO_TOL   # GATE 4 = recompute_hessian.R GATE 1 = fit_iav_module.R GATE 0: the same question
                                  # ("does this point reproduce?"), ONE value (R/calibrate.R; RULED 2026-10-13, 5e-5)
-# ⚠ GATE 5 (the decomposition) is NOT in that ruling and keeps 1e-5. It meets the same noise: at the WTC landing its gap
-# was -9.608e-6, EXACTLY GATE 4's diff (CHANGELOG 2026-10-13 c), so it is one noise draw from failing a correct point.
-PMM_DECOMP_TOL <- 1e-5
+# GATE 5 (the decomposition) meets the same noise through the same two paths: at the WTC landing its gap was -9.608e-6,
+# EXACTLY GATE 4's diff (CHANGELOG 2026-10-13 c). RULED 2026-10-13 (Marcus: "Raise to CCX_REPRO_TOL (Recommended)";
+# CHANGELOG 2026-10-13 e): it was 1e-5 until then. A missing stream moves it by >> 1, so its power is unaffected.
+PMM_DECOMP_TOL <- CCX_REPRO_TOL
 PMM_N_PAR      <- length(CCX_PARAM_NAMES)
 
 sep <- function(s) cat(sprintf("\n%s\n%s\n", s, strrep("-", nchar(s))))

@@ -4,7 +4,8 @@
 # negative-definiteness. Both were the objective's numerical noise floor, ~4-5x #17's under label hilda_csl3v0kaidgbemwtc
 # (outputs/diagnostics/objective_noise_floor_20261013_wtc.log):
 #   * "5e-5, all three (Recommended)": promote GATE 4, recompute_hessian GATE 1 and fit_iav_module GATE 0 read ONE
-#     value, CCX_REPRO_TOL. Promote's GATE 5 (the decomposition) is NOT in the ruling and keeps 1e-5.
+#     value, CCX_REPRO_TOL. Promote's GATE 5 (the decomposition) joined it by a second ruling the same day
+#     ("Raise to CCX_REPRO_TOL (Recommended)"; CHANGELOG 2026-10-13 e).
 #   * "Most-stable step (Recommended)": a direction with no 2 % plateau takes the interior grid step whose curvature
 #     disagrees least with its neighbours, instead of the fixed 3e-4 in u.
 # =====================================================================
@@ -12,14 +13,14 @@
 .root_rt <- normalizePath(file.path(testthat::test_path(), "..", ".."))
 code_of <- function(rel) paste(ccx_code_lines(readLines(file.path(.root_rt, rel), warn = FALSE)), collapse = "\n")
 
-test_that("CCX_REPRO_TOL is the ruled 5e-5, and the three ruled gates read it (GATE 5 keeps its own 1e-5)", {
+test_that("CCX_REPRO_TOL is the ruled 5e-5, and the four ruled gates read it (promote GATE 4 + 5, Hessian GATE 1, module GATE 0)", {
   expect_identical(CCX_REPRO_TOL, 5e-5)
   pr <- code_of("calibration/promote_multistart_mode.R")
   expect_match(pr, "PMM_LP_TOL\\s*<-\\s*CCX_REPRO_TOL")
   expect_match(pr, "abs\\(lp0 - best\\$logpost\\) > PMM_LP_TOL")              # GATE 4
-  expect_match(pr, "PMM_DECOMP_TOL\\s*<-\\s*1e-5")
-  expect_match(pr, "abs\\(pri - pj\\) > PMM_DECOMP_TOL")                      # GATE 5, unruled, unchanged
-  expect_false(grepl("abs\\(pri - pj\\) > PMM_LP_TOL", pr))
+  expect_match(pr, "PMM_DECOMP_TOL\\s*<-\\s*CCX_REPRO_TOL")                   # GATE 5 (ruled 10-13 e)
+  expect_match(pr, "abs\\(pri - pj\\) > PMM_DECOMP_TOL")
+  expect_false(grepl("PMM_DECOMP_TOL\\s*<-\\s*1e-5", pr))
   expect_match(code_of("calibration/recompute_hessian.R"), "abs\\(lp0 - md\\$logpost\\) > CCX_REPRO_TOL")   # GATE 1
   fi <- code_of("calibration/fit_iav_module.R")
   expect_match(fi, "IAV_REPRO_TOL\\s*<-\\s*CCX_REPRO_TOL")

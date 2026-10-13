@@ -2,6 +2,24 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-13 (e) — **RULED: no second module pass; ADOPT id 17 as `hilda31w`; promote's GATE 5 reads `CCX_REPRO_TOL`.** GATE 5 is built and tested. The adoption itself is NOT yet executed.
+
+- **Marcus, verbatim (three answers, one question set):**
+  - "No second pass (Recommended)": the module check's `w` −0.110 σ is recorded and stands at one pass.
+  - "Adopt id 17".
+  - "Raise to CCX_REPRO_TOL (Recommended)".
+- **The name, Marcus: "hilda31w"**: 31 fitted names, 'w' for the WTC (cited) label. Offered beside "hilda31e" (the exact hilda29e pattern, from this entry's letter), which is one letter from `hilda31pe`, the seas_ml-0 control that was this refit's own new-basin start.
+- **GATE 5 built:** `PMM_DECOMP_TOL <- CCX_REPRO_TOL` (`calibration/promote_multistart_mode.R`). Its test (`test-repro-tol-hess-fallback.R`) moves to the new spec: 27/27 pass, and the 1e-5 mutation is caught (2 failures). This is a ruled change of spec, not a failing test edited to pass.
+- **The adoption is scoped, not done.** Following `938c9cb` (hilda29e's):
+  - rename the refit dir to carry the name;
+  - register `hilda31w` (`CCX_MODE_CANONICAL`, `CCX_MODE_FILES`, `CCX_MODE_PINNED`; `CCX_MODE_CANONICAL_PINS` stays `CCX_MODE_OBJ18P2_PINS`, since no second pass means the pins are #18 pass 2's);
+  - update the README's canonical statement and `make_bundle.sh`.
+
+  Beyond that precedent:
+  - **the WTC reference-set branch** (`R/calibrate.R:2799`) goes DEAD at adoption, and `test-ms-reference-set.R:360–386` asserts it is live (line 370: the canonical is not of the label). The branch and those tests leave in the same commit.
+  - **`CCX_MODE_CANONICAL_MODULE_CHECK`** moves to `calibration/output/iav_module_20261013_refit_20261013_wtc_hilda_csl3v0kaidgbemwtc.rds` (renamed with the dir).
+  - **16 test files** read the canonical. Several of them rest on precomputed canonical products (futures ribbons, app version, gate bounds, mode file), so the post-adoption list follows directly: ALPHA_AS_FCO3, MCMC 4 × 200k (+ the identifiability check for `bomb_share_NH` and now `seas_T_lag`), futures bands, app and card numbers (`APP_RELEASE_MODE` is "hilda29e"; the app release was a separate question at hilda29e), suite, `v1.1` tag.
+
 ## 2026-10-13 (d) — **The WTC landing is COMPLETE (resumed by hand at the rulings): id 17 is the basin best; the module check says `w` moved −0.110 σ (over the ruled 0.1 σ); GATE V passes; suite 8012/2 by design/1.** Nothing adopted. Owed to Marcus: a second module pass or not, adoption, and the mode's name.
 
 - **The resume** (`~/ccx_frozen/20261013_wtc_resume.sh`, copied with its logs to `outputs/diagnostics/wtc_landing_20261013/resume/`) ran in three stages, each committed before the next, so every stamp is clean: (A) Hessian `df4ebb6`, (B) read + check + `checkz` `292783d`, (C) ocean + scorecard `1f2f4e2`.
