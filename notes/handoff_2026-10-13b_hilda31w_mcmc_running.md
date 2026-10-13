@@ -12,6 +12,12 @@
   were taken on the way (map grouping, the stake's G3 split, panel #7). `test-cmap-tie` is RED **by ruling**: the tie cut's
   re-measurement is deferred to the MCMC read (no near basin in the WTC wave). Chains at ~12k/200k after 65 min, so
   ~18–19 h in all (≈ 05:30–06:30 EDT 10-14). **Next is §4 step 2**, and it now carries the tie-cut method question.
+- ⭐⭐ **UPDATE 10-13 ~16:40 — TONIGHT'S PREP, CHANGELOG (p). Tomorrow starts here:**
+  1. The chains (~05:30–07:00 EDT 10-14). Snapshot them into the repo, then run `read_mcmc_check.R --dir=<snapshot>` (now fixed for `start_redraws`). Then run `diag_mcmc_identifiability.R --draws=<pooled_u.rds>` (new, dry-run tested). ⚠ The `h_ml` wall at the mode is 75.02 m (the substep cap); P8 is at 75.14.
+  2. The band: `build_futures_ribbons.R --draws=<repo-relative pooled_u> --out=<not data/>` (`RB_COV_EMIS` now has hilda31w; smoke-tested). A Gaussian band is NOT buildable at this mode (P8 censors the Laplace draws).
+  3. The `k_w` = 1446 profile: two starts RUNNING (PIDs `~/ccx_frozen/20261013_kw1446_profile.pids`; `kill -0`, never `pgrep -f`). Results land in `~/ccx_frozen/20261013_kw1446_profile/outputs/diagnostics/price_profile_20261013_hilda31w/profile_k_w_{A,B}.rds`. Copy them into the repo, then read: likelihood vs the canonical's −1015.7034, the prior ledger, A vs B. Card 7's sentence rides on it.
+  4. The tie-cut method (deferred to the MCMC); the release.
+  - Removable when Marcus says: the new suite worktree `~/ccx_frozen/suite_20261013_5f158b3`.
 - ⭐ **UPDATE 10-13 ~13:40: §4 step 4's "start the app on hilda31w" is DONE** — CHANGELOG (m): 12 / 12 headless, every tab
   live, no output error. A fresh app is on **:7790** (`ccx-app-7790`); :7788 still holds hilda29e.
 

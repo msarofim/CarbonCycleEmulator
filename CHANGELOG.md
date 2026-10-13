@@ -2,6 +2,31 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-13 (p) — **Prep while the MCMC runs: tomorrow's read, band and identifiability check now run end to end at hilda31w (two blockers found and fixed); GATE S's move explained (80 % the SST lag); suite 8027 / 8 expected reds; the `k_w` = 1446 profile RUNNING overnight.** Marcus: "Do 1, 2, 4 and 3; run 5 overnight"; "Two-start profile, Mac (Recommended)".
+
+- **(1) The read, dry-run on the partial chains** (snapshot at ~54–59k, window (30000, 54000], scratch only, no conclusions):
+  - ⛔ **Blocker found and fixed** (`f6d8242`): `read_mcmc_check.R` stopped at "chain_3.rds was not run like chain_1.rds: start_redraws". The 10-13 (j) start rule records each chain's redraw count (2, 2, 0, 0), so that field now differs by chain by design, like chain, seed and host.
+  - Post-adaptation acceptance is 5.4–7.7 %; hilda29e's chains showed 6.0–7.5 % at the same stage, so this is not new. Max R-hat is 1.24 this early.
+  - **New `calibration/diag_mcmc_identifiability.R`** (`0ad47a0`), the read's two owed checks. It is descriptive only. Smoke-tested on Laplace draws, then on the dry run's 4800 pooled draws.
+  - ⭐ **MEASURED on the way: the objective's `h_ml` wall at the mode is 75.02 m, and it is the SUBSTEP CAP, not P8.** At `kz` 13790 the spin-up needs 249 substeps at 75.02 m and 265–270 at 75.03 m, past `CCX_SUBSTEPS_MAX` 256. **P8 alone is at 75.14 m** on the label's 3682.2 m grid. The recorded 75.48 is ~0.4 m high, and the mode's margin is 5.5 m, not ~6.
+- **(2) The band builder, smoke-tested at hilda31w** (scratch only):
+  - ⛔ **Blocker found and fixed** (`94378a2`): `RB_COV_EMIS` had no hilda31w entry, so the build stopped before any draw. Its Hessian is `recompute_hessian.R` 2026-10-13 (stage A, `df4ebb6`), after the 10-01 flip, with no override, so the entry is "constant".
+  - `--draws` and `--out` resolve relative to the repo root.
+  - ⚠ **Laplace (Gaussian) draws at hilda31w are CENSORED by P8:** 4 of 20 failed, and the builder correctly refuses at more than 1 %. So **a Gaussian band cannot be built at this mode**. MCMC draws cannot cross the wall.
+  - End to end on 20 draws below the wall: decoded mode vs the app 5e-8 (tolerance 1e-6); the central line lies inside [5 %, 95 %] in 100 % of 5614 cells; 4.1 min on 2 cores.
+- **(4) GATE S's blind-phase move TESTED** (`55b810f`, `outputs/diagnostics/gateS_sst_lag_test_20261013_hilda31w/`).
+  - With the SH SST lag restored to the legacy 1.32, the blind read is 4.155 (−0.222 for −0.216, one for one). That is **80 %** of the 4.10 → 4.38 move; the rest is the refit.
+  - The whole limb moves 8.91 → 9.35 and still PASSES.
+- **(3) Suite at `5f158b3`** (frozen worktree `~/ccx_frozen/suite_20261013_5f158b3`): **8027 passed, 8 failed, 1 skipped, 0 errored, 26.7 min.**
+  - The reds are exactly the expected ones: app-version (release hold); cmap-tie ×4 (deferred, ruled); futures-ribbons (the band is hilda29e's until rebuilt); card 4 ×2 (by design).
+  - The 10-13 (g) ledger read 32 failed and 12 errored.
+  - Commits after `5f158b3` are not covered: new drivers, the two fixes above and a test comment.
+- **(5) The `k_w` = 1446 PRICE PROFILE, RUNNING overnight** (`calibration/run_price_profile.R`, `142767b`).
+  - Setup: frozen worktree `~/ccx_frozen/20261013_kw1446_profile`; PIDs in `~/ccx_frozen/20261013_kw1446_profile.pids`; logs `~/ccx_frozen/20261013_kw1446_profile_{A,B}.out`. Re-running the launch script resumes it.
+  - The objective is the sampler's harness with `k_w` added to the pins; the canonical reproduces at diff 0, and its likelihood (−1015.7034) is the reference. The optimiser restates the wave's recipe.
+  - Start A is hilda31w's mode (−2446.11 at the pin). Start B takes 28 names warm from the 10-05 kw1446 refit and the two WTC names from hilda31w (−1360.07).
+  - 300 CPU-min each, so done by ~22:00–23:00. **The read is tomorrow's:** likelihood vs −1015.70, the prior ledger, and the two starts' agreement.
+
 ## 2026-10-13 (o) — **The last three reproduce tolerances RULED: all read `CCX_REPRO_TOL` (5e-5).** Marcus, verbatim, for each: "Use CCX_REPRO_TOL (Recommended)". This closes the 10-13 (c) list (promote's GATE 5 was already ruled in (e)).
 
 - **`MC_LP_TOL`** (`run_mcmc_check.R`, the mode must reproduce its stored logpost before sampling): 1e-5 → `CCX_REPRO_TOL`. Measured diff 0 at hilda31w. ⚠ **The running chains** (frozen tree at `e83e228`) **used 1e-5** and are unaffected; the change applies to future runs.
