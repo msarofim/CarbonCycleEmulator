@@ -2,6 +2,24 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-13 (f) — **ADOPTED: `hilda31w` (the WTC refit's id 17) is the canonical** (Marcus, verbatim: "Adopt id 17"; the name "hilda31w"; "No second pass (Recommended)"). The handoff's §4 step 1 (`notes/handoff_2026-10-13_hilda31w_adoption.md`), following `938c9cb` (hilda29e's).
+
+- **Refit dir renamed** `refit_20261013_wtc_hilda_csl3v0kaidgbemwtc` → `refit_20261013_hilda31w_wtc_hilda_csl3v0kaidgbemwtc` (`git mv`; md5 `53ee816a…` unchanged). `diag_wtc_refit_read.R`'s glob `refit_*_wtc_hilda_csl3v0kaidgbemwtc` still matches it.
+- **`R/paths.R`:**
+  - `CCX_MODE_CANONICAL <- "hilda31w"`, with the rulings quoted.
+  - `hilda31w` added to `CCX_MODE_FILES` and to `CCX_MODE_PINNED` (TRUE).
+  - `CCX_MODE_CANONICAL_PINS` stays `CCX_MODE_OBJ18P2_PINS`; a comment says why (no second pass).
+  - `CCX_MODE_CANONICAL_MODULE_CHECK` → `iav_module_20261013_refit_20261013_wtc_hilda_csl3v0kaidgbemwtc.rds`. The file keeps its pre-rename name, as the 10-08 file did. Its `base_md5` equals the renamed mode file's.
+  - `hilda29e` stays registered as the previous canonical.
+- **The WTC reference-set branch is REMOVED** from `ccx_ms_reference_set()` (`R/calibrate.R`). Its test (15) in `test-ms-reference-set.R` is removed with it, as scoped in (e). Both changes are the spec of deleted code; no failing test was edited to pass.
+  - After adoption, the branch's own predicate (canonical not of the label) is FALSE, so the code was dead.
+  - The three `CCX_MODE_WTC_*` constants stay as RECORDS: `diag_wtc_refit_read.R` and `diag_obj18_basins.R` read them.
+  - Checked by hand: the WTC pins under the label at seas_ml 1 now return `hilda31w` / `hilda31pe`, "the canonical, under this array's pins". seas_ml 0 and #18's label are both refused by the cut canonical's guard.
+- **Smoke at the new registry:** `ccx_mode_file()` resolves; struct `hilda_csl3v0kaidgbemwtc`, seas_ml 1, 31 free names, 14 pins; the file's pins equal `CCX_MODE_CANONICAL_PINS`.
+- **README:** the canonical statement; `hilda29e` is the previous canonical. CO₂ in 2300 is stated against hilda29e itself: SSP5-8.5 1486.85 vs 1475.29 ppm, +11.56. The read's +12.26 is against REF (hilda29e under the label); the label alone is −0.70.
+- **`make_bundle.sh`** ships hilda31w's dir. hilda29e's is kept.
+- **NOT done here:** the app release (`APP_RELEASE_MODE` stays "hilda29e"; Marcus's question first), and the test ledger, which follows from the full suite. Precomputed canonical products are keyed to hilda29e (futures ribbons, the H2 stake's per-mode tables, card numbers, gate bounds), so failures are expected and will be reported, not edited.
+
 ## 2026-10-13 (e) — **RULED: no second module pass; ADOPT id 17 as `hilda31w`; promote's GATE 5 reads `CCX_REPRO_TOL`.** GATE 5 is built and tested. The adoption itself is NOT yet executed.
 
 - **Marcus, verbatim (three answers, one question set):**

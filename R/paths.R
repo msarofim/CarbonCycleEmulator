@@ -217,7 +217,14 @@
 # at basin 1 -- the interannual cut with the DETRENDED ENSO index (hilda_csl3v0kaidgbemwt); #16's ten pins + the module's
 # four at the one-pass check's values (CCX_MODE_OBJ18P2_PINS); the check at it STOPS (every module name < 0.01 sigma).
 # hilda33p (objective #16) stays registered as the previous canonical.
-CCX_MODE_CANONICAL <- "hilda29e"
+# 2026-10-13 (f): hilda31w ADOPTED (Marcus, verbatim: "Adopt id 17"; the name "hilda31w": 31 fitted names, 'w' for the WTC
+# (cited) label; "hilda31e" was offered beside it and declined, one letter from hilda31pe). The WTC refit's basin best
+# (wave 20261012ff id 17 = LP = NAT, a basin of 13 starts) under hilda_csl3v0kaidgbemwtc: hilda29e's structure with the
+# citation batch's values and two new fitted names (bomb_share_NH, seas_T_lag). The pins are #18 pass 2's, carried: "No
+# second pass (Recommended)" -- the module check at it moved w_enso_l2 -0.110 sigma (over the ruled 0.1), recorded, not
+# iterated. Likelihood +10.83 over hilda29e rescored under the label (CHANGELOG 10-13 b-f). hilda29e stays registered as
+# the previous canonical.
+CCX_MODE_CANONICAL <- "hilda31w"
 # 2026-09-22 (k): `hilda32f` -- THE FREE PARENT OF THE LIMB CANONICAL (Marcus: "Repoint").
 # hilda29l's OWN structure (hilda_csl3, seas_ml 1) with only the six inert names held: the
 # seasonal shim ent_seas_amp_SH (8.24), the ocean ENSO pair (NH 0.240, SH 0.001) and the
@@ -233,7 +240,10 @@ CCX_MODE_CANONICAL <- "hilda29e"
 # named red #1 ("the parent is the best free arm") discharges here; red #2 (the AIC gate)
 # is untouched.
 CCX_MODE_FILES <- c(
-  # 2026-10-08 (e): THE CANONICAL (see CCX_MODE_CANONICAL): #18 pass 2's basin-1 refit (wave 20261008d id 1), the
+  # 2026-10-13 (f): THE CANONICAL (see CCX_MODE_CANONICAL): the WTC refit's id 17 (wave 20261012ff), the directory renamed
+  # from refit_20261013_wtc_hilda_csl3v0kaidgbemwtc at adoption (the hilda33p / hilda29e precedent).
+  hilda31w = file.path("calibration", "output", "refit_20261013_hilda31w_wtc_hilda_csl3v0kaidgbemwtc", "mode_fit_pumpN.rds"),
+  # 2026-10-08 (e): the canonical until 2026-10-13 (f): #18 pass 2's basin-1 refit (wave 20261008d id 1), the
   # directory renamed from refit_20261008_obj18p2_hilda_csl3v0kaidgbemwt_basin1 at adoption (the hilda33p precedent).
   hilda29e = file.path("calibration", "output", "refit_20261008_hilda29e_obj18p2_hilda_csl3v0kaidgbemwt", "mode_fit_pumpN.rds"),
   hilda33p = file.path("calibration", "output", "refit_20261005_hilda33p_obj16_hilda_csl3v0kaidgbem",
@@ -361,7 +371,7 @@ CCX_MODE_HILDA30S_QUARANTINED <- file.path("calibration", "output", "quarantine"
 # 2026-09-04 -> 2026-09-11 (8) this registry held one arm, then two free arms;
 # the free-vs-pinned comparison it exists to express had no power
 # ([[no_power_null]]). It has power from 09-13 (d): the canonical is PINNED.
-CCX_MODE_PINNED <- c(hilda29e = TRUE, hilda33p = TRUE, hilda34g = TRUE, hilda33d = TRUE, hilda29l = TRUE, hilda32f = FALSE, hilda31s2 = FALSE, hilda31pe = FALSE,
+CCX_MODE_PINNED <- c(hilda31w = TRUE, hilda29e = TRUE, hilda33p = TRUE, hilda34g = TRUE, hilda33d = TRUE, hilda29l = TRUE, hilda32f = FALSE, hilda31s2 = FALSE, hilda31pe = FALSE,
                      hilda29w = TRUE,   # 2026-10-07 (i): #17's basin B, the module's four pinned (READ names)
                      hilda29a0 = TRUE, hilda29a6 = TRUE)   # 2026-10-08 (d): #18's two basins, the module's four pinned
 # A PINNED CANONICAL (2026-09-13). When the canonical is a pinned arm, the
@@ -399,12 +409,17 @@ CCX_MODE_OBJ18P2_PINS    <- c(CCX_MODE_OBJ16_PINS,
                               gamma_enso_land_SH = 0.6355964031675142,
                               w_enso_l2          = 16.787744029103425)
 CCX_MODE_CANONICAL_PINS  <- CCX_MODE_OBJ18P2_PINS   # 2026-10-08 (e): hilda29e's: #16's ten + the module at pass 2's values
+# 2026-10-13 (f): UNCHANGED at hilda31w's adoption -- "No second pass (Recommended)": the WTC refit carried #18 pass 2's set,
+# and its own module check (CCX_MODE_CANONICAL_MODULE_CHECK, w_enso_l2 -0.110 sigma) is a record, not a source of new pins.
 # The canonical's OWN stage-1 module check (fit_iav_module.R --check, run AT the adopted mode file): where a PINNED
 # module name's uncertainty lives (its `laplace`). NOT CCX_MODE_OBJ18P2_MODULE_FILE, which was taken at #18 pass 1's
 # basin and is the source of the pins. test-review-card-numbers gates its base_md5 against ccx_mode_file(), so an
 # adoption that does not move this FAILS there. MOVE IT AT EVERY ADOPTION of a cut canonical (2026-10-08 g).
+# 2026-10-13 (f): hilda31w's check (fit_iav_module.R --check at id 17, resume stage B `292783d`). The file keeps the name it
+# was written under, before the directory's rename (the 10-08 file's precedent); its base_md5 is the mode file's, unchanged
+# by the rename. hilda29e's was iav_module_20261008_refit_20261008_obj18p2_hilda_csl3v0kaidgbemwt_basin1.rds.
 CCX_MODE_CANONICAL_MODULE_CHECK <- file.path("calibration", "output",
-                                             "iav_module_20261008_refit_20261008_obj18p2_hilda_csl3v0kaidgbemwt_basin1.rds")
+                                             "iav_module_20261013_refit_20261013_wtc_hilda_csl3v0kaidgbemwtc.rds")
 # ⚠ RE-DOCUMENTED 2026-10-01 (Marcus, review 10-01c B3b: option (i), "follow recommendations").
 # `hilda32f` is the free parent of the v1.0 canonical, hilda29l (structure hilda_csl3,
 # objective #13). It is NOT a parent of the current canonical: hilda33d (objective #14, the
@@ -533,6 +548,9 @@ CCX_MODE_OBJ18P2_NEW       <- "hilda29a6"    # #18's basin 2: the runner-up, ref
 # priors; new basin the seas_ml-0 control. Ruled only under the label at seas_ml 1, and only while the canonical is NOT a
 # file of that label: after an adoption the first branch of ccx_ms_reference_set() takes these pins with the new
 # canonical as a MODE, and this incumbent would be a stale start (remove the branch then, as #16's and #18 p2's went).
+# 2026-10-13 (f): DONE -- hilda31w (a file of this label) is the canonical, so the branch is removed from
+# ccx_ms_reference_set() and these pins take its first branch, the canonical as a MODE. The three constants stay as RECORDS
+# of the refit (diag_wtc_refit_read.R and diag_obj18_basins.R read them); no live code path routes through them.
 CCX_MODE_WTC_STRUCT    <- "hilda_csl3v0kaidgbemwtc"
 CCX_MODE_WTC_PINS      <- CCX_MODE_OBJ18P2_PINS
 CCX_MODE_WTC_INCUMBENT <- "hilda29e"         # the canonical at the ruling (#18 pass 2's basin 1): a START of this refit

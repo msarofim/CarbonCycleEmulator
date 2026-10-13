@@ -25,7 +25,21 @@ is a **deal-breaker, fixable, or acceptable** for a pedagogical model. Comments 
 the Substack post the app links to; anyone whose comment changes the model or the
 write-up is credited in the acknowledgements.
 
-**Main branch, 2026-10-08: the canonical is `hilda29e`** (objective #18, second pass; 29 fitted names, fourteen held).
+**Main branch, 2026-10-13: the canonical is `hilda31w`** (the WTC refit; 31 fitted names, fourteen held).
+It is `hilda29e`'s model with the citation batch: working values replaced by cited ones (surface alkalinity and salinity
+from GLODAP, the carbonate constants at that salinity, the ocean column depth, the seasonal sea-surface temperature lag
+per hemisphere, the photosynthetic and pump ¹³C fractionations, IntCal20's published ¹⁴C errors, and the nuclear
+industry's ¹⁴C split by hemisphere), and two former working values now fitted: the Northern Hemisphere's share of the
+bomb ¹⁴C (`bomb_share_NH`, 0.84 ± 0.03) and the lag of soil respiration behind temperature (`seas_T_lag`, 0.3 ± 0.3
+months). The interannual module's four values are carried from `hilda29e` without a second pass (its check moved one
+of them by 0.11 of its standard deviation, just over the 0.1 stopping rule). What it buys: +10.8 log-likelihood over
+`hilda29e` scored under the same cited values, mostly in the seasonal cycle, the bomb ¹⁴C record and the ice cores;
+GATE V still passes. What it costs: the GCB rows (−1.1), and `seas_T_lag` is not separately identified (it sits near
+its floor, correlated +0.96 with the Northern Hemisphere's phenology lag, `seas_lag_p_NH`, how far plant growth trails sunlight). CO₂ in 2300 under
+SSP5-8.5 is 1487 ppm, 12 ppm above `hilda29e`'s. CHANGELOG 2026-10-12 (dd)–(ii), 2026-10-13 (b)–(f).
+The app's release mode is decided separately.
+
+**Previous canonical, 2026-10-08 to 2026-10-13: `hilda29e`** (objective #18, second pass; 29 fitted names, fourteen held).
 It is `hilda33p`'s model with the interannual "cut": the ENSO terms that shape only the year-to-year variability (the
 land response's lag and amplitude, and the ocean's ENSO limb `w_enso_l2`) are fitted in a separate module to the
 detrended CO₂ growth rate and GCB's ocean ENSO slope, then held while everything else is refit; the ENSO forcing index

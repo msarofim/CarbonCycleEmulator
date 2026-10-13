@@ -2781,32 +2781,23 @@ ccx_l2_on <- function(p) {
 #'   Marcus: "Register B, seed from it (Recommended)"), under #18's label at seas_ml 1
 #'                          -> incumbent #17's basin B, registered `hilda29w` (seeded at the pins: a start);
 #'                             new basin the control
-#'   THE WTC REFIT's pins (= hilda29e's, #18 pass 2's set; 2026-10-12, Marcus: "Carry module, then check
-#'   (Recommended)"), under the citation batch's label at seas_ml 1, while the canonical is not of that label
-#'                          -> incumbent hilda29e (at its own model, bomb_share_NH 0.90 / seas_T_lag 2.0: a
-#'                             start); new basin the control. Checked FIRST: it is the one ruled exception to
-#'                             the cut canonical's own-label guard.
+#'   (THE WTC REFIT's pins had a branch of their own, 2026-10-12 -- hilda29e at its own model, a START, the one
+#'   ruled exception to the cut canonical's own-label guard. Since 2026-10-13 (f) the canonical is hilda31w, a
+#'   file of that label, so the first rule takes them with the canonical as a MODE; the branch is removed, as
+#'   #16's and #18 pass 2's were.)
 #'   anything else          -> stop: a new objective with no incumbent on disk.
 ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_PUMP_FIELD", "solved"),
                                  struct = Sys.getenv("CCX_MS_STRUCT", "")) {
   seas_ml <- ccx_parse_seas_ml(seas_ml)
   same <- function(a, b) identical(ccx_pin_label(a), ccx_pin_label(b))
-  # THE WTC REFIT (2026-10-12; Marcus: "Carry module, then check (Recommended)"): hilda29e's pins under the citation
-  # batch's label are RULED -- the one exception to the guard below, which otherwise refuses a cut canonical's pins under
-  # any other label. The incumbent is a START (its file lacks the two gated names; the migration fills what it ran).
-  # Only while the canonical is not itself a file of that label (R/paths.R CCX_MODE_WTC_*); then the guard and the
-  # first branch apply as for any canonical.
-  wtc <- identical(struct, CCX_MODE_WTC_STRUCT) && same(pins, CCX_MODE_WTC_PINS) &&
-    !identical(ccx_mode_struct(readRDS(ccx_mode_file(CCX_MODE_CANONICAL))), CCX_MODE_WTC_STRUCT)
-  if (wtc && seas_ml != 1L)
-    stop("ccx_ms_reference_set(): the WTC refit is ruled at seas_ml 1 (the canonical's seasonal mixed layer); ",
-         "seas_ml ", seas_ml, " is not a ruled arm.")
+  # (2026-10-13 f) THE WTC REFIT's exception is REMOVED: its pins are the canonical's and its label is the canonical's since
+  # hilda31w, so the guard below and the first branch take them, the canonical as a MODE (R/paths.R CCX_MODE_WTC_*: records).
   # ⛔ A CUT CANONICAL'S PINS BELONG TO ITS OWN LABEL AND MIXED LAYER (2026-10-08 e; Marcus: "Approve all five"). Since
   # hilda29e the canonical's pins carry the interannual module's four at stage 1's values, fitted UNDER its label at its
   # seas_ml; under another label (#17's: a different ENSO index) or seas_ml 0 they are values of a different objective.
   # #18 pass 2's own branch refused both; the first branch below never checked either (deliberately, for a canonical
   # without the cut: a structure arm on its pins was legal). So: only when the canonical's pins carry the module.
-  if (!wtc && all(CCX_IAV_MODULE_NAMES %in% names(CCX_MODE_CANONICAL_PINS)) &&
+  if (all(CCX_IAV_MODULE_NAMES %in% names(CCX_MODE_CANONICAL_PINS)) &&
       (same(pins, CCX_MODE_CANONICAL_PINS) || ccx_pins_extend_canonical(pins, pump_field, struct))) {
     .mdc <- readRDS(ccx_mode_file(CCX_MODE_CANONICAL))
     if (!identical(struct, ccx_mode_struct(.mdc)))
@@ -2816,13 +2807,7 @@ ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_
       stop("ccx_ms_reference_set(): the canonical's pins carry the interannual module's values, fitted at seas_ml ",
            ccx_mode_seas_ml(.mdc), "; seas_ml ", seas_ml, " is not a ruled arm for them.")
   }
-  res <- if (wtc) {
-    list(incumbent = CCX_MODE_WTC_INCUMBENT, new_basin = CCX_MODE_SEASML0_CONTROL,
-         why = paste0("the WTC REFIT (label ", CCX_MODE_WTC_STRUCT, ", Marcus 2026-10-12): ", CCX_MODE_WTC_INCUMBENT,
-                      "'s pins with its interannual module carried; the incumbent at its own model (bomb_share_NH ",
-                      format(FORC_BOMB_NH_SHARE), ", seas_T_lag ", format(CCX_SEAS_T_LAG),
-                      "): a start, not a mode of this objective"))
-  } else if (same(pins, CCX_MODE_CANONICAL_PINS) || ccx_pins_extend_canonical(pins, pump_field, struct)) {
+  res <- if (same(pins, CCX_MODE_CANONICAL_PINS) || ccx_pins_extend_canonical(pins, pump_field, struct)) {
     list(incumbent = CCX_MODE_CANONICAL, new_basin = CCX_MODE_SEASML0_CONTROL,
          why = "the canonical, under this array's pins")
   } else if (ccx_pins_price_canonical(pins, pump_field, struct)) {
