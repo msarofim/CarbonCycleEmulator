@@ -2,6 +2,13 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (hh) — **The app's forcing builds already carry the WTC label's `nuc_share`: a STATIC check, done while the wave runs** (the 10-12f handoff's §4 step 5, "check `app/` before the live run", brought forward because it is read-only). Nothing edited.
+
+- **Every app forcing goes through two choke points, and both pass it.** `app_build_forcing()` (`app/global.R:398`) defaults `nuc_share = ccx_nuc_share_of(APP_PARAMS)`; this was added on 2026-10-12, beside `enso_index` / `aod_mode`. `app_run_coupled()` calls `ccx_run_coupled()`, whose two builds pass it (`R/climate.R:246,260`). A parse-tree scan of `app/` (including `app/R/`) finds NO direct `ccx_build_forcing()` call.
+- **The two library builds that pass no `nuc_share` are correct as they stand.** `R/calibrate.R:2090` is the LUC arm's arm-off base: it is differenced on the LUC columns only and never run. `R/periodic_spinup.R:115` is the quiet year, which has no nuclear source and is stamped `"none"`.
+- **The stamp survives the app's own handling.** A row subset (`F[seq_len(k), ]`, used by `APP_FLUX`) keeps `attr(F, "nuc_share")`, measured. The only by-name re-stamp, `R/cpp.R:545-546`, carries `nuc_share` beside `aod_mode`. `ccx_nuc_share_check()` has the same refuse-if-unstamped contract as `ccx_aod_mode_check()`, and the canonical already runs `aod_mode = "anomaly"`. So any app path that dropped the attributes would already be failing today.
+- ⚠ **This is a static argument, not a run.** The proof is starting the app against the adopted WTC mode, which stays in step 5 (after adoption).
+
 ## 2026-10-12 (gg) — **The nine nuclear-industry ¹⁴C files have MANIFEST rows** (hard rule 3). Closes the "no MANIFEST row" half of the 10-02 (y) audit item. Laemmel et al. 2025, Zenodo doi:10.5281/zenodo.15034663, CC-BY-4.0.
 
 - **Nine rows appended to `data-raw/downloads/MANIFEST.csv`**, now 63 rows. Nothing was re-downloaded, and `download_data.R` was NOT re-run, because a re-run re-fetches everything and rewrites the whole manifest with one access date.
