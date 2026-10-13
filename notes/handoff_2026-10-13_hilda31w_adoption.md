@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-13: the WTC refit LANDED and RULED; adopt it as `hilda31w` (the adoption commit is NOT yet done)
 
+> **SUPERSEDED 2026-10-13 ~12:00 by `notes/handoff_2026-10-13b_hilda31w_mcmc_running.md`** (the adoption, its suite ledger and the ledger's application are done; fCO3 kept; the MCMC band is running). One claim here turned out differently: the README's 2300 figure is +11.56 ppm against hilda29e ITSELF, not the read's +12.26, which is against REF (hilda29e under the new label).
+
 **Supersedes** `notes/handoff_2026-10-12f_wtc_refit_armed.md` (which now points here). Written on Marcus's request
 ("Yes, write the handoff note"), 2026-10-13 ~09:45.
 
