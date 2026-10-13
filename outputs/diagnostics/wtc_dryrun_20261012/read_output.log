@@ -1,0 +1,91 @@
+calibration/diag_wtc_refit_read.R @c3514fb+dirty, 2026-10-12 20:22
+  incumbent hilda29e (/Users/MarcusMarcus/ccx_frozen/20261012ff_wtc_dryrun/calibration/output/refit_20261008_hilda29e_obj18p2_hilda_csl3v0kaidgbemwt/mode_fit_pumpN.rds, md5 bf4732da67ee22751d87ca9f95484b37)
+  WTC mode  /Users/MarcusMarcus/ccx_frozen/20261012ff_wtc_dryrun/calibration/output/DRYRUN_refit_wtc_synthetic/mode_fit_pumpN.rds (md5 663fd6083f6d71e3f85f4e916c3109ea)
+  wave      /Users/MarcusMarcus/ccx_frozen/20261012ff_wtc_dryrun/calibration/output/DRYRUN_wave
+  port      /Users/MarcusMarcus/ccx_frozen/20261012ff_wtc_dryrun/calibration/output/DRYRUN_wave/port_targets_hilda_csl3v0kaidgbemwtc.csv
+  pricing   outputs/diagnostics/wtc_batch_price_20261012/price.rds
+  ⚠ TAGGED '_DRYRUN': read the provenance before quoting anything below
+
+=== 0. EACH VECTOR REPRODUCES ITS STORED LOGPOST IN ITS OWN SPACE (tol 1e-05); THE WAVE ===
+  survey: 0 start files; 0 CONVERGED in time and live, 0 out of time, 0 dead; best none
+  DUPLICATES (optimum bit-identical to a lower id): none
+  promoted: id 1 at -1062.949441, chosen by id -- 0.000000 below the best (id 1); why: basin 1, RULED (Marcus 2026-10-08: 'Basin 1, run the second pass, adopt if it passes'): the warm refit from hilda29a0 at the pass-2 pins
+  incumbent hilda29e (#18)   logpost -1166.949732 (stored -1166.949732, diff +0.0e+00)  likelihood -1133.4803 on 26 rows
+  WTC mode                   logpost -1062.949441 (stored -1062.949441, diff +2.2e-11)  likelihood -1026.5313 on 26 rows
+  hilda29e's rows vs the pricing's streams_18: max |diff| 0.0e+00 (tol 1e-05)
+
+=== 1. ON THE WTC ROWS: the new mode vs REF (hilda29e under hilda_csl3v0kaidgbemwtc at bomb_share_NH 0.9, seas_T_lag 2: the incumbent START) ===
+  REF vs the wave's port target (incumbent -1062.9494406082): +2.2e-11; REF's rows vs the pricing's streams_all: max |diff| 0.0e+00 (tol 1e-05)
+  the label alone at the incumbent (REF - hilda29e's own rows): +106.9490 (the pricing's ALL row: +106.9490)
+  co2_level_MLO          REF    -71.619 | WTC   +0.000
+  co2_level_SPO          REF    -62.585 | WTC   +0.000
+  co2_seasonal_MLO       REF     -2.089 | WTC   +0.000
+  co2_seasonal_SPO       REF     67.245 | WTC   +0.000
+  d13c_seasonal_MLO      REF    209.918 | WTC   +0.000
+  d13c_seasonal_SPO      REF    247.971 | WTC   +0.000
+  co2_icecore            REF   -512.998 | WTC   +0.000
+  d13c_icecore           REF     65.002 | WTC   +0.000
+  d13c_level_MLO         REF     67.469 | WTC   +0.000
+  d13c_level_SPO         REF     59.026 | WTC   +0.000
+  co2_gradient           REF    -14.563 | WTC   +0.000
+  d13c_gradient          REF    105.715 | WTC   +0.000
+  d14c_NH                REF   -288.546 | WTC   +0.000
+  d14c_SH                REF   -287.204 | WTC   +0.000
+  d14c_intcal            REF   -543.890 | WTC   +0.000
+  excess_c14_ocean       REF     -9.671 | WTC   +0.000
+  d14c_profile_level     REF     -3.260 | WTC   +0.000
+  d14c_profile_ab        REF     -3.156 | WTC   +0.000
+  d14c_profile_bd        REF     -2.193 | WTC   +0.000
+  ocean_grad_dic         REF     -7.704 | WTC   +0.000
+  ocean_grad_d13c        REF     -1.796 | WTC   +0.000
+  ocean_grad_alk         REF     -5.337 | WTC   +0.000
+  hs_surf_dic            REF     -4.208 | WTC   +0.000
+  hs_surf_d13c           REF     -2.810 | WTC   +0.000
+  gcb_ocean_sink         REF     -2.694 | WTC   +0.000
+  gcb_land_sink          REF    -22.555 | WTC   +0.000
+  TOTAL likelihood +0.0000 (REF -1026.5313; WTC -1026.5313); stored logpost +0.0000 (same objective and pins: comparable)
+  by group: intcal +0.000, bomb_c14 +0.000, ice_cores +0.000, co2_levels +0.000, d13c_levels +0.000, seasonal +0.000, ocean +0.000, gcb_rows +0.000
+
+=== 2. THE TWO NEW NAMES: values, box position, spread across the wave, identifiability PREVIEW ===
+  bomb_share_NH  0.90000 (legacy 0.9)  box [0.77, 0.98] at 0.619 of its width; no Hessian in the file yet
+  seas_T_lag     2.00000 (legacy 2)  box [0, 6] at 0.333 of its width; no Hessian in the file yet
+
+=== 3. THE PRIOR LEDGER (the same 31 free names, both under hilda_csl3v0kaidgbemwtc) and THE MOVES in hilda29e's marginal Laplace sd ===
+  priors +0.0000, Jacobians +0.0000 (WTC - REF); the two new names' share: priors +0.0000, Jacobians +0.0000
+  beta_max                   2.0107 ->       2.0107   +0.00 sd
+  fert_k                     669.03 ->       669.03   +0.00 sd
+  q10                        1.0919 ->       1.0919   +0.00 sd
+  k_w                        1869.8 ->       1869.8   +0.00 sd
+  h_ml                       64.631 ->       64.631   +0.00 sd
+  kz                          14151 ->        14151   +0.00 sd
+  kz_deep_frac              0.00747 ->      0.00747   +0.00 sd
+  hs_asx_frac               0.71059 ->      0.71059   +0.00 sd
+  h_hs                       292.02 ->       292.02   +0.00 sd
+  u_hs                       23.132 ->       23.132   +0.00 sd
+  pump_hs_gcm2               85.301 ->       85.301   +0.00 sd
+  pump_grad                  314.74 ->       314.74   +0.00 sd
+  bomb_share_NH                 0.9 ->          0.9  (no sd at the incumbent: a new name)
+  seas_T_lag                      2 ->            2  (no sd at the incumbent: a new name)
+  tau_ex                    0.89298 ->      0.89298   +0.00 sd
+  bomb_total                 118.87 ->       118.87   +0.00 sd
+  luc_scale                 0.91394 ->      0.91394   +0.00 sd
+
+=== 4. THE FUTURES: CO2 (ppm) in 2300 (br_futures()) ===
+  inc  ssp585  1475.29 | vvH  1014.51
+  ref  ssp585  1474.59 | vvH  1014.04
+  wtc  ssp585  1474.59 | vvH  1014.04
+  the label alone (REF - inc): ssp585   -0.70 | vvH   -0.47
+  the refit (WTC - REF):       ssp585   +0.00 | vvH   +0.00
+  ⚠ No ridge width is measured for this objective: a move here is not a finding until it is compared with one.
+
+=== 5. THE LAND's NET CLIMATE EFFECT, 2015-2024 (TRENDY S2 - S1), GtC/yr ===
+  inc  net climate effect -0.0572, z +1.06 against GCB 2025's -0.8 +/- 0.7
+  ref  net climate effect -0.0572, z +1.06 against GCB 2025's -0.8 +/- 0.7
+  wtc  net climate effect -0.0572, z +1.06 against GCB 2025's -0.8 +/- 0.7
+
+=== THE SEPARATE DRIVERS (each writes its own log) ===
+  THE ONE-PASS CHECK: Rscript calibration/fit_iav_module.R --base=/Users/MarcusMarcus/ccx_frozen/20261012ff_wtc_dryrun/calibration/output/DRYRUN_refit_wtc_synthetic/mode_fit_pumpN.rds --check=calibration/output/iav_module_20261008_refit_20261008_obj18_hilda_csl3v0kaidgbemwt.rds
+    ⚠ The 10-12 ruling's option text says a second pass "only if a module name moves > 0.01 sigma"; fit_iav_module.R's
+      IAV_CHECK_TOL is the 0.1 sigma ruled for #17 / #18. Read the z values against both; the choice is Marcus's.
+  CCX_SC_EXTRA_MODE="wtc=/Users/MarcusMarcus/ccx_frozen/20261012ff_wtc_dryrun/calibration/output/DRYRUN_refit_wtc_synthetic/mode_fit_pumpN.rds" CCX_SC_TAG_SUFFIX=_wtc Rscript calibration/diag_whole_model_scorecard.R
+  CCX_OC_MODE="wtc=/Users/MarcusMarcus/ccx_frozen/20261012ff_wtc_dryrun/calibration/output/DRYRUN_refit_wtc_synthetic/mode_fit_pumpN.rds" Rscript calibration/diag_ocean_climate_gobm.R

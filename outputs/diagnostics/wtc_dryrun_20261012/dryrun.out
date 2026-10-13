@@ -1,0 +1,20 @@
+WTC landing dry run at c3514fb, 2026-10-12T20:05:02-0400
+== hessian  20:05:02
+   rc 0
+== read  20:22:55
+   rc 0
+== check  20:23:09
+   FAILED (rc 1)
+calibration/fit_iav_module.R @c3514fb+dirty, 2026-10-12 20:23 | base DRYRUN_refit_wtc_synthetic (hilda_csl3v0kaidgbemwtc) | 2 workers
+ratio hilda33p (md5 525404989a20ece51ec8bd088c7d4638): gamma_enso_land_NH / gamma_enso_land_SH = 0.5077686 / 0.4866420, NH : SH = 1.0434; base's own: L 5.9293, s 1.30609 (SH's 1.30609), w 16.7877, gamma_diff 0.25
+growth product mbl_global_growth_monthly.rds (sha256 ab0bae11a89f...); window 1980-2024, trend df 5, n_eff 22.5388
+
+=== 0. GATES ===
+  the base's 26 stored rows through the dg path: max |diff| 9.7e+01 (tol 1e-05)
+Error: the base does not reproduce its stored rows
+Execution halted
+== ocean  20:23:14
+   rc 0
+== scorecard  20:26:36
+   rc 0
+== DRY RUN DONE 20:27:20. Logs: /Users/MarcusMarcus/ccx_frozen/20261012ff_wtc_dryrun/DRYRUN_logs

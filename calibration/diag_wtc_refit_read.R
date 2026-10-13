@@ -194,15 +194,19 @@ if (length(S1)) cat(sprintf("  the incumbent's own refit (id 1, from REF): store
 # ---- 2. the two new names ----------------------------------------------------------------------------------
 cat("\n=== 2. THE TWO NEW NAMES: values, box position, spread across the wave, identifiability PREVIEW ===\n")
 LN <- ledger(OWN_N$u, OWN_N$bp)
-FSN <- ccx_mode_fit_stats(MD_N)
+FSN <- suppressWarnings(ccx_mode_fit_stats(MD_N))   # sqrt(diag(-H)) warns where the Hessian is not negative-definite
 has_h <- !is.null(FSN$cov) && identical(length(FSN$param_names), nrow(FSN$cov)) && all(WR_NEW_NAMES %in% FSN$param_names)
+# WHY no sd, said by name: no Hessian at all (run recompute_hessian.R --update first) vs a Hessian that is NOT negative-
+# definite (not a maximum: no covariance, so no Laplace sd) -- the dry run's synthetic file was the second (pd FALSE)
+no_h <- if (has_h) "" else if (is.null(MD_N$hessian)) "; no Hessian in the file (recompute_hessian.R --update)" else
+  sprintf("; the file's Hessian is NOT negative-definite (pd %s): no covariance, so no Laplace sd", format(MD_N$pd))
 for (n in WR_NEW_NAMES) {
   s <- CCX_PARAM_GATED_WTC[[n]]; x <- LN[n, "value"]; frac <- (x - s$lo) / (s$hi - s$lo)
   sd_nat <- if (has_h) { i <- match(n, FSN$param_names); sqrt(FSN$cov[i, i]) * (x - s$lo) * (s$hi - x) / (s$hi - s$lo) } else NA_real_
   edge <- if (is.finite(sd_nat)) min(x - s$lo, s$hi - x) / sd_nat else NA_real_
   cat(sprintf("  %-14s %.5f (legacy %g)  box [%g, %g] at %.3f of its width%s\n", n, x, WR_LEGACY[[n]], s$lo, s$hi, frac,
               if (is.finite(sd_nat)) sprintf("; Laplace sd %.4g (natural, delta method); nearer bound %.2f sd away%s", sd_nat, edge,
-                                             if (edge < 1) " -- WITHIN 1 sd OF A BOUND" else "") else "; no Hessian in the file yet"))
+                                             if (edge < 1) " -- WITHIN 1 sd OF A BOUND" else "") else no_h))
 }
 if (length(conv)) {
   VAL <- t(vapply(conv, function(s) c(id = as.integer(s$id), logpost = s$logpost, unlist(s$par_mode[WR_NEW_NAMES])), numeric(2 + length(WR_NEW_NAMES))))
