@@ -58,8 +58,11 @@ fs <- sort(list.files(RD_DIR, pattern = "^chain_[0-9]+\\.rds$", full.names = TRU
 if (length(fs) < 2L) stop("R-hat needs at least two chains; found ", length(fs), " in ", RD_DIR)
 S <- lapply(fs, readRDS); M <- length(S)
 P <- lapply(S, `[[`, "provenance"); p1 <- P[[1]]
-for (k in seq_len(M)[-1]) {         # chain, seed and host differ by design; nothing else may
-  same <- vapply(setdiff(names(p1), c("chain", "seed", "host")),
+# chain, seed and host differ by design; so does start_redraws (2026-10-13 j: the redraw-until-finite start rule records
+# how many draws EACH chain's start took -- 2, 2, 0, 0 at hilda31w), found by the 10-13 dry run. Nothing else may.
+RD_PER_CHAIN <- c("chain", "seed", "host", "start_redraws")
+for (k in seq_len(M)[-1]) {
+  same <- vapply(setdiff(names(p1), RD_PER_CHAIN),
                  function(n) identical(P[[k]][[n]], p1[[n]]), logical(1))
   if (!all(same)) stop(basename(fs[k]), " was not run like ", basename(fs[1]), ": ",
                        paste(names(same)[!same], collapse = ", "))
