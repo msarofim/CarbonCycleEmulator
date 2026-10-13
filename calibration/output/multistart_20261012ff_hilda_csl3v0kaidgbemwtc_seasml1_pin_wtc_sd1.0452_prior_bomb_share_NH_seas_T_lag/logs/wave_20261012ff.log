@@ -1,0 +1,36 @@
+CCX_PROJ_DIR  /Users/MarcusMarcus/ccx_frozen/20261012ff_wtc
+CCX_MS_OUTDIR /Users/MarcusMarcus/ccx_frozen/20261012ff_wtc/calibration/output/multistart_20261012ff_hilda_csl3v0kaidgbemwtc_seasml1_pin_wtc_sd1.0452_prior_bomb_share_NH_seas_T_lag
+CCX_MS_STRUCT hilda_csl3v0kaidgbemwtc   CCX_MS_SEAS_ML 1   CCX_MS_PUMP_FIELD solved   CCX_MS_SPREAD 1.0452   CCX_MS_PIN 'ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.0800000000000001,w_vent=0,gamma_vent=0,w_thc=0,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0,npp_tsens=0,lag_enso_land=5.9293432319444337,gamma_enso_land_NH=0.66318950821232669,gamma_enso_land_SH=0.6355964031675142,w_enso_l2=16.787744029103425'
+BUDGET 300 min on the cpu clock  RESTARTS 3  CYCLES 6  MAXIT 6000   mode wave   ids [0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 ]   8 at once
+host MacBook-Pro-2.local  started 2026-10-12T19:46:02-0400  uptime: 19:46  up 11 days, 10:11, 4 users, load averages: 4.48 4.07 2.91
+already running at launch (>20% CPU), so a slow eval rate is read as CONTENTION first:
+    47.7 11-10:04:48 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer -daemon
+    23.6 02-23:19:42 /Applications/Claude.app/Contents/Frameworks/Claude Helper (Renderer).app/Contents/MacOS/Claude Helper (Renderer) --type=renderer --user-data-
+    21.7 02-23:19:43 /Applications/Claude.app/Contents/Frameworks/Claude Helper.app/Contents/MacOS/Claude Helper --type=gpu-process --user-data-dir=/Users/MarcusMa
+all tasks finished 2026-10-13T07:36:01-0400
+exit codes (id rc):
+0 0
+1 0
+2 0
+3 0
+4 0
+5 0
+6 0
+7 0
+8 0
+9 0
+10 0
+11 0
+12 0
+13 0
+14 0
+15 0
+16 0
+17 0
+18 0
+19 0
+20 0
+21 0
+22 0
+23 0
+non-zero exits: 0

@@ -1,0 +1,59 @@
+task 7  2026-10-12T19:44:09-0400
+GATE OPEN (structure 'hilda_csl3v0kaidgbemwtc'): ndep_ret, npp_tsens, imb_share_land, imb_share_ocean_rest, lag_enso_land, bomb_share_NH, seas_T_lag enter the fitted set
+PINNED (removed from the fitted set, held in the base): ent_seas_amp_SH = 0, w_eq = 27, gamma_eq = 1, pump_export = 9.08, w_vent = 0, gamma_vent = 0, w_thc = 0, gamma_enso_ocn_NH = 0, gamma_enso_ocn_SH = 0, npp_tsens = 0, lag_enso_land = 5.92934323194443, gamma_enso_land_NH = 0.663189508212327, gamma_enso_land_SH = 0.635596403167514, w_enso_l2 = 16.7877440291034 -> 31 free parameters
+run-time inputs present: 14/14. OK
+OVERRIDE CCX_MS_RESTARTS = 3 (default 3)
+OVERRIDE CCX_MS_CYCLES = 6 (default 6)
+OVERRIDE CCX_MS_MAXIT = 6000 (default 6000)
+OVERRIDE CCX_MS_BUDGET_MIN = 300 (default 180)
+OVERRIDE CCX_MS_CLOCK = cpu (default wall)
+SEEDING ndep_ret for the new basin feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 3.9.
+     The ancestor held no opinion about this coordinate.
+SEEDING imb_share_land for the new basin feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.333333.
+     The ancestor held no opinion about this coordinate.
+SEEDING imb_share_ocean_rest for the new basin feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING ndep_ret for the new basin start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 3.9.
+     The ancestor held no opinion about this coordinate.
+SEEDING imb_share_land for the new basin start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.333333.
+     The ancestor held no opinion about this coordinate.
+SEEDING imb_share_ocean_rest for the new basin start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+OVERRIDE CCX_MS_SPREAD = 1.0452 (default 0.4618697)
+
+======================================================================
+DISPERSED MULTI-START, id 7, arm N, 31 parameters
+  host MacBook-Pro-2.local   R 4.5.3   seed 2026 + id
+  budget: 3 restarts x 6000 maxit x 6 cycles, CPU 300 min
+  ... on the CPU clock (CCX_MS_CLOCK; RECORDED in the start file): a sleep or a suspension does not spend
+      it. WALL time past 2 x the budget is FLAGGED, never stopped (D4, CHANGELOG 2026-10-05 o).
+  dispersion sd 1.0452 in u-space (measured per-coordinate RMS between
+    the two known basins = 0.4619, pooled over the 29 coordinates at least one of
+    them FITTED; over all 31 it would be 0.4467, diluted by the 2 migrated in BOTH:
+    bomb_share_NH, seas_T_lag)
+  dispersed draws take bomb_share_NH, seas_T_lag FROM THE PRIOR (uniform on [0.77, 0.98] / [0, 6])
+  out /Users/MarcusMarcus/ccx_frozen/20261012ff_wtc/calibration/output/multistart_20261012ff_hilda_csl3v0kaidgbemwtc_seasml1_pin_wtc_sd1.0452_prior_bomb_share_NH_seas_T_lag/start_007.rds
+======================================================================
+  structure: 'hilda_csl3v0kaidgbemwtc' (hs_frac=0.12841, tau_q=538, sst_hs=2, q_attach_from=1, kz_zscale=253, sst_NH=22.321, sst_SH=18.724, alpha_photo_eps=16.2, ml_nh_cycle=0, k_l2=3, w0_l2=27, npp_veg_frac=0, fert_k_prior=1, aod_mode=1, soil_inert_frac=0.19468, d2d3_free=1, imb_treatment=2, imb_with_cement=1, enso_lag_free=1, mix_strat_s=0.052198, mix_strat_q=1, mix_strat_tau=194.94, iav_cut=1, gcb_land_lowpass_df=6, gcb_enso_slope_row=0, enso_index=1, gcb_ocean_lowpass_df=6, alk_surface=0.0023034, carb_salinity=34.76, ocean_depth=3682.2, sst_seas_lag_NH=1.3249, sst_seas_lag_SH=1.5357, nuc_share_ts=1, pump_eps13_org=-22, intcal_sd_published=1, wtc_free=1)
+  seasonal mixed layer: seas_ml = 1 (ON -- round 6; from CCX_MS_SEAS_ML, RECORDED in every start file and GATED against the port targets)
+  pump field: 'solved' (the SOLVED GLODAP-shape field -- every registered file; from CCX_MS_PUMP_FIELD, RECORDED in every start file and GATED against the port targets)
+infeasible-step penalty: log-post -1.672e+07 (= max(1e+06, 10 x |start|)); the start beats it by construction
+start point: dispersed about the COLD init, sd 1.0452; bomb_share_NH, seas_T_lag drawn from the prior (2 draws), log-post there = -1672106.9557
+PORT GATE (a) at the new_basin reference point: here -11548.7050036340 vs MacBook-Pro-2.local@1e66077 -11548.7050036340,
+              |diff| 1.637e-11 (rel 1.42e-15)  [this task's own start is elsewhere]
+              roundoff floor here: max |delta lp| 4.976e-06 over 12 perturbations of u by 1e-12 (median 9.922e-07; 0 non-finite)
+              bound = max(1e-08 x |target| = 1.155e-04, 3 x floor = 1.493e-05) = 1.155e-04; ceiling 1e-06 x |target| = 1.155e-02
+PORT GATE (a) PASSED.
+measured 0.3690 CPU-s/eval (median of 5; range 0.3530-0.4150) => one 6000-eval restart
+  projects to 36.9 CPU-min; CPU budget 300 CPU-min, of which 45.0 CPU-min is RESERVED for the
+  BFGS polish (100 iterations)
+PREFLIGHT id 007 on MacBook-Pro-2.local: start dispersed, log-post -1672106.9557, 2 draws, port VERIFIED rel 1.4e-15 (floor 5.0e-06, bound 1.2e-04),
+             0.3690 CPU-s/eval => a 6000-eval restart takes 36.9 CPU-min of a 300 CPU-min budget. LAUNCHABLE.
+             start at the prior-drawn coordinates: bomb_share_NH = 0.85770, seas_T_lag = 4.58131
+done 2026-10-12T19:44:22-0400 exit 0

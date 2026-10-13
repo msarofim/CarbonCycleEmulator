@@ -1,0 +1,100 @@
+calibration/diag_wtc_refit_read.R @065697f+dirty, 2026-10-13 07:48
+  incumbent hilda29e (/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261008_hilda29e_obj18p2_hilda_csl3v0kaidgbemwt/mode_fit_pumpN.rds, md5 bf4732da67ee22751d87ca9f95484b37)
+  WTC mode  /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261013_wtc_hilda_csl3v0kaidgbemwtc/mode_fit_pumpN.rds (md5 af9676595d38becaa19a7d375a4e4213)
+  wave      /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261012ff_hilda_csl3v0kaidgbemwtc_seasml1_pin_wtc_sd1.0452_prior_bomb_share_NH_seas_T_lag
+  port      /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261012ff_hilda_csl3v0kaidgbemwtc_seasml1_pin_wtc_sd1.0452_prior_bomb_share_NH_seas_T_lag/port_targets_hilda_csl3v0kaidgbemwtc.csv
+  pricing   outputs/diagnostics/wtc_batch_price_20261012/price.rds
+  ⚠ TAGGED '_id017': read the provenance before quoting anything below
+
+=== 0. EACH VECTOR REPRODUCES ITS STORED LOGPOST IN ITS OWN SPACE (tol 1e-05); THE WAVE ===
+  survey: 24 start files; 19 CONVERGED in time and live, 5 out of time, 0 dead; best -1054.495910 (id 017)
+  DUPLICATES (optimum bit-identical to a lower id): none
+  converged logposts in clusters split at gaps > 0.05: -1054.4959 x13 (ids 17,2,5,20,3,15,0,7,12,9,21,22,1) | -1057.9824 x2 (ids 14,23) | -1059.5247 x2 (ids 10,11) | -1091.2616 x1 (ids 18) | -1238.7472 x1 (ids 6)
+  promoted: id 17 at -1054.495920, chosen by best_logpost
+  incumbent hilda29e (#18)   logpost -1166.949732 (stored -1166.949732, diff +0.0e+00)  likelihood -1133.4803 on 26 rows
+  WTC mode                   logpost -1054.495920 (stored -1054.495920, diff +0.0e+00)  likelihood -1015.7034 on 26 rows
+  hilda29e's rows vs the pricing's streams_18: max |diff| 0.0e+00 (tol 1e-05)
+
+=== 1. ON THE WTC ROWS: the new mode vs REF (hilda29e under hilda_csl3v0kaidgbemwtc at bomb_share_NH 0.9, seas_T_lag 2: the incumbent START) ===
+  REF vs the wave's port target (incumbent -1062.9494406082): +2.2e-11; REF's rows vs the pricing's streams_all: max |diff| 0.0e+00 (tol 1e-05)
+  the label alone at the incumbent (REF - hilda29e's own rows): +106.9490 (the pricing's ALL row: +106.9490)
+  d13c_seasonal_SPO      REF    247.971 | WTC   +2.462
+  d14c_NH                REF   -288.546 | WTC   +2.302
+  co2_gradient           REF    -14.563 | WTC   +1.626
+  d13c_icecore           REF     65.002 | WTC   +1.389
+  co2_icecore            REF   -512.998 | WTC   +1.215
+  d13c_seasonal_MLO      REF    209.918 | WTC   +1.127
+  d14c_SH                REF   -287.204 | WTC   +0.985
+  ocean_grad_d13c        REF     -1.796 | WTC   -0.947
+  d14c_intcal            REF   -543.890 | WTC   +0.920
+  ocean_grad_dic         REF     -7.704 | WTC   +0.913
+  co2_level_MLO          REF    -71.619 | WTC   +0.781
+  gcb_land_sink          REF    -22.555 | WTC   -0.695
+  d13c_level_MLO         REF     67.469 | WTC   -0.692
+  co2_seasonal_MLO       REF     -2.089 | WTC   -0.624
+  co2_seasonal_SPO       REF     67.245 | WTC   +0.579
+  ocean_grad_alk         REF     -5.337 | WTC   -0.545
+  gcb_ocean_sink         REF     -2.694 | WTC   -0.378
+  co2_level_SPO          REF    -62.585 | WTC   -0.332
+  d13c_level_SPO         REF     59.026 | WTC   +0.280
+  hs_surf_d13c           REF     -2.810 | WTC   +0.280
+  excess_c14_ocean       REF     -9.671 | WTC   +0.147
+  d13c_gradient          REF    105.715 | WTC   +0.101
+  d14c_profile_ab        REF     -3.156 | WTC   -0.080
+  hs_surf_dic            REF     -4.208 | WTC   +0.033
+  d14c_profile_level     REF     -3.260 | WTC   -0.016
+  d14c_profile_bd        REF     -2.193 | WTC   -0.002
+  TOTAL likelihood +10.8279 (REF -1026.5313; WTC -1015.7034); stored logpost +8.4535 (same objective and pins: comparable)
+  by group: intcal +0.920, bomb_c14 +3.287, ice_cores +2.604, co2_levels +0.448, d13c_levels -0.412, seasonal +3.544, ocean -0.217, gcb_rows -1.073
+  the incumbent's own refit (id 1, from REF): stored logpost -1054.521819 (converged); the WTC mode +0.0259 against it
+
+=== 2. THE TWO NEW NAMES: values, box position, spread across the wave, identifiability PREVIEW ===
+  bomb_share_NH  0.84170 (legacy 0.9)  box [0.77, 0.98] at 0.341 of its width; the file's Hessian is NOT negative-definite (pd FALSE): no covariance, so no Laplace sd
+  seas_T_lag     0.27597 (legacy 2)  box [0, 6] at 0.046 of its width; the file's Hessian is NOT negative-definite (pd FALSE): no covariance, so no Laplace sd
+  cluster 1 (-1054.4959, 13 starts): bomb_share_NH 0.8417-0.8418; seas_T_lag 0.2758-0.2802
+  cluster 2 (-1057.9824, 2 starts): bomb_share_NH 0.8460-0.8460; seas_T_lag 4.8322-4.8444
+  cluster 3 (-1059.5247, 2 starts): bomb_share_NH 0.8467-0.8467; seas_T_lag 4.7185-4.7186
+  cluster 4 (-1091.2616, 1 starts): bomb_share_NH 0.8692-0.8692; seas_T_lag 0.0613-0.0613
+  cluster 5 (-1238.7472, 1 starts): bomb_share_NH 0.8566-0.8566; seas_T_lag 5.5378-5.5378
+
+=== 3. THE PRIOR LEDGER (the same 31 free names, both under hilda_csl3v0kaidgbemwtc) and THE MOVES in hilda29e's marginal Laplace sd ===
+  priors -0.4486, Jacobians -1.9258 (WTC - REF); the two new names' share: priors +0.0000, Jacobians -1.6699
+  seas_lag_p_NH              1.5846 ->       1.2585   -5.89 sd
+  seas_lag_p_SH              2.6474 ->       2.3379   -3.98 sd
+  q10                        1.0919 ->       1.1532   +1.98 sd
+  npp_frac_NH               0.59415 ->      0.63849   +1.92 sd
+  h_ml                       64.631 ->       69.541   +1.54 sd
+  tau_ex                    0.89298 ->      0.94335   +1.17 sd
+  sst_seas_amp_NH            1.6323 ->       1.4134   -0.93 sd
+  luc_scale                 0.91394 ->      0.94169   +0.71 sd
+  k_w                        1869.8 ->       1835.4   -0.64 sd
+  imb_share_land            0.66213 ->      0.73053   +0.61 sd
+  pump_hs_gcm2               85.301 ->       75.927   -0.58 sd
+  ndep_ret                   9.0779 ->       6.7301   -0.55 sd
+  bomb_share_NH                 0.9 ->       0.8417  (no sd at the incumbent: a new name)
+  seas_T_lag                      2 ->      0.27597  (no sd at the incumbent: a new name)
+  bomb_total                 118.87 ->        118.4   -0.53 sd
+  beta_max                   2.0107 ->       2.0054   -0.02 sd
+  fert_k                     669.03 ->       601.44   -0.45 sd
+  pump_grad                  314.74 ->       330.68   +0.44 sd
+  kz                          14151 ->        13790   -0.34 sd
+
+=== 4. THE FUTURES: CO2 (ppm) in 2300 (br_futures()) ===
+  inc  ssp585  1475.29 | vvH  1014.51
+  ref  ssp585  1474.59 | vvH  1014.04
+  wtc  ssp585  1486.85 | vvH  1019.71
+  the label alone (REF - inc): ssp585   -0.70 | vvH   -0.47
+  the refit (WTC - REF):       ssp585  +12.26 | vvH   +5.68
+  ⚠ No ridge width is measured for this objective: a move here is not a finding until it is compared with one.
+
+=== 5. THE LAND's NET CLIMATE EFFECT, 2015-2024 (TRENDY S2 - S1), GtC/yr ===
+  inc  net climate effect -0.0572, z +1.06 against GCB 2025's -0.8 +/- 0.7
+  ref  net climate effect -0.0572, z +1.06 against GCB 2025's -0.8 +/- 0.7
+  wtc  net climate effect -0.0945, z +1.01 against GCB 2025's -0.8 +/- 0.7
+
+=== THE SEPARATE DRIVERS (each writes its own log) ===
+  THE ONE-PASS CHECK (RULED 0.1 sigma, Marcus 2026-10-12: "I'm okay with 0.1 sigma unless that's a problem"):
+    Rscript calibration/fit_iav_module.R --base=/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261013_wtc_hilda_csl3v0kaidgbemwtc/mode_fit_pumpN.rds --check=calibration/output/iav_module_20261008_refit_20261008_obj18_hilda_csl3v0kaidgbemwt.rds
+  CCX_SC_EXTRA_MODE="wtc=/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261013_wtc_hilda_csl3v0kaidgbemwtc/mode_fit_pumpN.rds" CCX_SC_TAG_SUFFIX=_wtc Rscript calibration/diag_whole_model_scorecard.R
+  CCX_OC_MODE="wtc=/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261013_wtc_hilda_csl3v0kaidgbemwtc/mode_fit_pumpN.rds" Rscript calibration/diag_ocean_climate_gobm.R
+saved outputs/diagnostics/wtc_refit_read_20261013_id017.{log,rds}. ⛔ ADOPTS NOTHING.

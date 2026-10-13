@@ -1,0 +1,137 @@
+calibration/diag_obj18_basins.R @065697f+dirty, 2026-10-13 07:36
+  wave /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261012ff_hilda_csl3v0kaidgbemwtc_seasml1_pin_wtc_sd1.0452_prior_bomb_share_NH_seas_T_lag
+  ⚠ TAGGED '_wtc': read the provenance before quoting anything below
+  objective: WTC refit (structure hilda_csl3v0kaidgbemwtc; pins CCX_MODE_WTC_PINS)
+  24 start files; structure hilda_csl3v0kaidgbemwtc, seas_ml 1, pump field solved, pump mode N, h_ml band [42.5, 200]; pins _pin_ent_seas_amp_SH=0.0000000_w_eq=27.0000000_gamma_eq=1.0000000_pump_export=9.0800000_w_vent=0.0000000_gamma_vent=0.0000000_w_thc=0.0000000_gamma_enso_ocn_NH=0.0000000_gamma_enso_ocn_SH=0.0000000_npp_tsens=0.0000000_lag_enso_land=5.9293432_gamma_enso_land_NH=0.6631895_gamma_enso_land_SH=0.6355964_w_enso_l2=16.7877440
+  DUPLICATES (optimum bit-identical to a lower id): none
+
+=== 0. GATES ===
+  basin 1 (id 017): logpost -1054.495920, stored -1054.495910, diff -9.6e-06 (tol 1e-05)
+  basin 2 (id 014): logpost -1057.982451, stored -1057.982446, diff -4.8e-06 (tol 1e-05)
+  basin 3 (id 010): logpost -1059.524743, stored -1059.524741, diff -1.5e-06 (tol 1e-05)
+  basin 4 (id 018): logpost -1091.261588, stored -1091.261584, diff -4.2e-06 (tol 1e-05)
+  basin 5 (id 006): logpost -1238.747203, stored -1238.747197, diff -6.3e-06 (tol 1e-05)
+  likelihood + prior + Jacobian close every logpost to <= 1e-08
+
+=== 1. THE BASINS (collect's clustering; each by its best stored-logpost member) ===
+  basin 1  id 017  x13 (13 distinct)  logpost -1054.4959  likelihood -1015.7034  prior -77.6843  Jacobian +38.8918  lik+prior -1093.3877
+            h_ml 69.541, pump_grad 330.68, kz 13790, beta_max 2.0054, fert_k 601.44, q10 1.1532, bomb_share_NH 0.8417, seas_T_lag 0.27597
+            members: 0 1 2 3 5 7 9 12 15 17 20 21 22
+  basin 2  id 014  x2 (2 distinct)  logpost -1057.9825  likelihood -1015.6334  prior -82.9358  Jacobian +40.5867  lik+prior -1098.5691
+            h_ml 64.957, pump_grad 316.28, kz 14079, beta_max 1.8244, fert_k 614.41, q10 0.84564, bomb_share_NH 0.84604, seas_T_lag 4.8322
+            members: 14 23
+  basin 3  id 010  x2 (2 distinct)  logpost -1059.5247  likelihood -1016.3239  prior -82.8549  Jacobian +39.6540  lik+prior -1099.1788
+            h_ml 50.141, pump_grad 323.96, kz 14372, beta_max 1.8389, fert_k 616.63, q10 0.84606, bomb_share_NH 0.84671, seas_T_lag 4.7185
+            members: 10 11
+  basin 4  id 018  x1 (1 distinct)  logpost -1091.2616  likelihood -1029.5850  prior -100.2204  Jacobian +38.5439  lik+prior -1129.8055
+            h_ml 64.632, pump_grad 312.85, kz 13794, beta_max 1.8749, fert_k 704.84, q10 0.88719, bomb_share_NH 0.86925, seas_T_lag 0.061255
+            members: 18
+  basin 5  id 006  x1 (1 distinct)  logpost -1238.7472  likelihood -1049.3434  prior -229.8105  Jacobian +40.4066  lik+prior -1279.1538
+            h_ml 68.638, pump_grad 402.02, kz 14845, beta_max 1.1538, fert_k 596.66, q10 0.58443, bomb_share_NH 0.85664, seas_T_lag 5.5378
+            members: 6
+
+  BEST by stored logpost: id 017 (basin 1) | by LIKELIHOOD: id 014 (basin 2) | by likelihood + prior: id 017 (basin 1)
+  ⇒ the stored logpost and likelihood + prior AGREE on the best basin
+  the runner-up on likelihood + prior: basin 2 (id 014), 5.1815 below the best: OUTSIDE the near-tie bound 0.5 (the starts' cycle_tol)
+  ⚠ the likelihood ALONE picks basin 2 (id 014): likelihood +0.070 but priors -5.252 against basin 1's. NOT promoted (RULED 10-07 k: likelihood + prior)
+
+=== 2. EACH BASIN AGAINST THE LOGPOST-BEST (other - best) ===
+  basin 2 (id 014) - basin 1 (id 017): logpost -3.4865 = likelihood +0.0701 + priors -5.2515 + Jacobians +1.6949; lik+prior -5.1815
+    q10                       0.84564 vs       1.1532   prior  -3.1924  Jacobian  -0.3102
+    seas_T_lag                 4.8322 vs      0.27597   prior  +0.0000  Jacobian  +1.2732
+    seas_lag_p_NH             0.70708 vs       1.2585   prior  -1.2423  Jacobian  +0.0000
+    seas_T_amp_NH              19.209 vs       14.536   prior  -1.1339  Jacobian  +0.2787
+    seas_T_amp_SH              4.8106 vs       3.4371   prior  +0.2909  Jacobian  +0.3362
+    sst_seas_amp_NH            1.5215 vs       1.4134   prior  +0.4244  Jacobian  +0.0737
+    imb_share_land            0.64195 vs      0.73053   prior  +0.2842  Jacobian  +0.1550
+    npp_frac_NH               0.64962 vs      0.63849   prior  -0.3159  Jacobian  -0.0258
+    pump_grad                  316.28 vs       330.68   prior  +0.2778  Jacobian  -0.0445
+    ndep_ret                   7.7299 vs       6.7301   prior  -0.3290  Jacobian  +0.1385
+    row co2_seasonal_MLO        +2.5738
+    row d13c_seasonal_MLO       +2.1080
+    row co2_gradient            -1.3439
+    row gcb_land_sink           -1.2714
+    row d13c_seasonal_SPO       -1.0162
+    row co2_level_MLO           -0.6399
+    row co2_level_SPO           -0.6240
+    row ocean_grad_alk          +0.4960
+    row co2_seasonal_SPO        +0.3468
+    row d14c_SH                 -0.3038
+    row d14c_intcal             -0.2460
+    row d13c_gradient           -0.2031
+    rows favouring the other basin +6.0836; rows favouring the best -6.0135 (26 rows)
+  basin 3 (id 010) - basin 1 (id 017): logpost -5.0288 = likelihood -0.6204 + priors -5.1706 + Jacobians +0.7623; lik+prior -5.7911
+    q10                       0.84606 vs       1.1532   prior  -3.1860  Jacobian  -0.3097
+    seas_T_lag                 4.7185 vs      0.27597   prior  +0.0000  Jacobian  +1.3423
+    seas_lag_p_NH             0.67476 vs       1.2585   prior  -1.3319  Jacobian  +0.0000
+    seas_T_amp_NH              19.401 vs       14.536   prior  -1.2032  Jacobian  +0.2887
+    h_ml                       50.141 vs       69.541   prior  +0.2967  Jacobian  -1.1252
+    sst_seas_amp_NH            1.5674 vs       1.4134   prior  +0.5712  Jacobian  +0.1034
+    seas_T_amp_SH              4.7161 vs       3.4371   prior  +0.3008  Jacobian  +0.3164
+    sst_seas_amp_SH            1.3393 vs       1.6238   prior  -0.3287  Jacobian  -0.1927
+    imb_share_land            0.65195 vs      0.73053   prior  +0.2559  Jacobian  +0.1421
+    ndep_ret                   7.6784 vs       6.7301   prior  -0.3122  Jacobian  +0.1318
+    row d13c_seasonal_MLO       +2.5941
+    row co2_seasonal_MLO        +2.2886
+    row d13c_seasonal_SPO       -1.7262
+    row gcb_land_sink           -1.5388
+    row co2_gradient            -1.3700
+    row co2_level_MLO           -0.6656
+    row co2_level_SPO           -0.6266
+    row ocean_grad_dic          +0.4972
+    row ocean_grad_d13c         +0.3312
+    row ocean_grad_alk          +0.2806
+    row d13c_level_SPO          -0.2654
+    row d14c_intcal             -0.2275
+    rows favouring the other basin +6.4463; rows favouring the best -7.0668 (26 rows)
+  basin 4 (id 018) - basin 1 (id 017): logpost -36.7657 = likelihood -13.8816 + priors -22.5361 + Jacobians -0.3479; lik+prior -36.4178
+    seas_lag_p_SH              5.1793 vs       2.3379   prior  -7.6206  Jacobian  +0.0000
+    seas_T_amp_SH              16.703 vs       3.4371   prior  -7.1020  Jacobian  +1.5810
+    npp_frac_NH                0.4752 vs      0.63849   prior  -4.2625  Jacobian  -0.4555
+    q10                       0.88719 vs       1.1532   prior  -2.5980  Jacobian  -0.2622
+    seas_T_lag               0.061255 vs      0.27597   prior  +0.0000  Jacobian  -1.4684
+    seas_T_amp_NH              9.9497 vs       14.536   prior  -0.9382  Jacobian  -0.3791
+    ndep_ret                   11.702 vs       6.7301   prior  -1.5709  Jacobian  +0.5532
+    sst_seas_amp_NH            1.6608 vs       1.4134   prior  +0.8161  Jacobian  +0.1613
+    imb_share_land            0.61065 vs      0.73053   prior  +0.3680  Jacobian  +0.1888
+    seas_lag_p_NH              1.5045 vs       1.2585   prior  +0.3798  Jacobian  +0.0000
+    row co2_gradient            -7.1952
+    row co2_seasonal_MLO        +2.7907
+    row d13c_seasonal_SPO       -2.3262
+    row co2_level_SPO           -1.5080
+    row d14c_SH                 -1.4688
+    row co2_level_MLO           -1.2268
+    row co2_seasonal_SPO        -1.0547
+    row d13c_icecore            -0.9518
+    row co2_icecore             +0.9457
+    row d14c_intcal             -0.7973
+    row d14c_NH                 -0.7649
+    row ocean_grad_alk          +0.6030
+    rows favouring the other basin +5.2829; rows favouring the best -19.1645 (26 rows)
+  basin 5 (id 006) - basin 1 (id 017): logpost -184.2513 = likelihood -33.6399 + priors -152.1262 + Jacobians +1.5149; lik+prior -185.7661
+    seas_T_amp_SH              854.44 vs       3.4371   prior -118.1918  Jacobian  +5.5158
+    npp_frac_NH               0.79695 vs      0.63849   prior -11.7959  Jacobian  -3.4596
+    q10                       0.58443 vs       1.1532   prior  -9.0032  Jacobian  -0.6796
+    seas_T_amp_NH              6.7488 vs       14.536   prior  -4.8612  Jacobian  -0.7673
+    seas_lag_p_SH           -0.095676 vs       2.3379   prior  -4.8840  Jacobian  +0.0000
+    ndep_ret                   16.931 vs       6.7301   prior  -3.0010  Jacobian  +0.9226
+    rep_dC                     3.7564 vs       4.2386   prior  +1.9278  Jacobian  +0.0000
+    pump_grad                  402.02 vs       330.68   prior  -1.5935  Jacobian  +0.1954
+    seas_lag_p_NH             0.70048 vs       1.2585   prior  -1.2604  Jacobian  +0.0000
+    imb_share_land            0.37346 vs      0.73053   prior  +0.8438  Jacobian  +0.1728
+    row gcb_land_sink          -30.7922
+    row co2_seasonal_MLO        +9.7617
+    row d13c_icecore            +6.0967
+    row co2_gradient            -4.7408
+    row co2_level_SPO           -3.9094
+    row d14c_SH                 -3.7875
+    row co2_seasonal_SPO        -3.7855
+    row ocean_grad_alk          -3.4669
+    row co2_level_MLO           -3.1295
+    row d14c_intcal             -3.0925
+    row d13c_level_SPO          +2.1052
+    row co2_icecore             +1.8574
+    rows favouring the other basin +27.4622; rows favouring the best -61.1021 (26 rows)
+
+saved outputs/diagnostics/obj18_basins_20261013_wtc.{log,rds,ids}: LP 17, NAT 17
+⛔ ADOPTS NOTHING.

@@ -1,0 +1,24 @@
+run-time inputs present: 14/14. OK
+reference set: incumbent hilda29e, new basin hilda31pe (the WTC REFIT (label hilda_csl3v0kaidgbemwtc, Marcus 2026-10-12): hilda29e's pins with its interannual module carried; the incumbent at its own model (bomb_share_NH 0.9, seas_T_lag 2): a start, not a mode of this objective)
+objective label: struct 'hilda_csl3v0kaidgbemwtc', seas_ml 1, pump_field 'solved', pins '_pin_ent_seas_amp_SH=0.0000000_w_eq=27.0000000_gamma_eq=1.0000000_pump_export=9.0800000_w_vent=0.0000000_gamma_vent=0.0000000_w_thc=0.0000000_gamma_enso_ocn_NH=0.0000000_gamma_enso_ocn_SH=0.0000000_npp_tsens=0.0000000_lag_enso_land=5.9293432_gamma_enso_land_NH=0.6631895_gamma_enso_land_SH=0.6355964_w_enso_l2=16.7877440' (31 free parameters)
+SEEDING ndep_ret for the new_basin port target: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 3.9.
+     The ancestor held no opinion about this coordinate.
+SEEDING imb_share_land for the new_basin port target: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.333333.
+     The ancestor held no opinion about this coordinate.
+SEEDING imb_share_ocean_rest for the new_basin port target: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+
+PORT TARGETS written to /Users/MarcusMarcus/ccx_frozen/20261012ff_wtc/calibration/torch/port_targets.csv
+
+      name           logpost           stored            offset
+      cold -62123.1166463439             <NA>              <NA>
+ incumbent  -1062.9494406082 -1166.9497319330   +104.0002913248
+ new_basin -11548.7050036340 -1231.0747417395 -10317.6302618945
+
+  arm N, 31 parameters, struct 'hilda_csl3v0kaidgbemwtc', seas_ml 1, commit 1e66077, host MacBook-Pro-2.local, R 4.5.3
+  ⚠ `stored` is each mode FILE's own logpost and is NOT the target: each
+    offset (incumbent +104.00, new_basin -10317.63) is objective drift since that file was fitted, not a port defect.
+    (This line was a typed '-0.85' until 2026-09-07f; it is now GENERATED.)

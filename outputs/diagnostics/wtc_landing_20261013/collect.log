@@ -1,0 +1,60 @@
+
+==========================================================================
+DISPERSED MULTI-START SURVEY -- 24 starts under
+  /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261012ff_hilda_csl3v0kaidgbemwtc_seasml1_pin_wtc_sd1.0452_prior_bomb_share_NH_seas_T_lag
+==========================================================================
+  reference cold       id 0  logpost   -1054.4959  port VERIFIED (rel 4.7e-16)
+  reference incumbent  id 1  logpost   -1054.5218  port VERIFIED (rel 2.1e-14)
+  reference new_basin  id 2  logpost   -1054.4959  port VERIFIED (rel 1.4e-15)
+
+  19 of 24 starts CONVERGED, 5 ran out of CPU time (excluded from the
+  basin count, kept in the table), 0 spent their restart budget.
+  cluster radius 0.6429 = 0.25 x the measured inter-basin separation
+
+  ⇒ 5 DISTINCT BASINS among the 19 finished starts.
+
+   rank     id        logpost        vs best    basin  status    min clock  kind
+      1     17     -1054.4959         0.0000        1    conv    194   cpu  dispersed about the COLD init, sd 1.0452; bomb_share_NH, seas_T_lag drawn from the prior
+      2      2     -1054.4959        -0.0000        1    conv    210   cpu  reference: NEW BASIN = hilda31pe (seas_ml 0 control, periodic spinup; registered, evaluated at seas_ml 1)
+      3      5     -1054.4959        -0.0000        1    conv    204   cpu  UNSEEDABLE seeded slot 'new_obs' (the NEW BASIN + the OBSERVATION-implied partition): the ENSO seed: gamma_enso_ocn_NH, gamma_enso_ocn_SH, w_enso_l2 not fitted by this arm; the land seed: gamma_enso_land_NH, gamma_enso_land_SH not fitted by this arm -- so this id runs a DISPERSED DRAW instead: dispersed about the COLD init, sd 1.0452; bomb_share_NH, seas_T_lag drawn from the prior
+      4     20     -1054.4959        -0.0000        1    conv    216   cpu  dispersed about the COLD init, sd 1.0452; bomb_share_NH, seas_T_lag drawn from the prior
+      5      3     -1054.4959        -0.0000        1    conv    212   cpu  UNSEEDABLE seeded slot 'inc_enso' (the INCUMBENT + the ENSO seed): the ENSO seed: gamma_enso_ocn_NH, gamma_enso_ocn_SH, w_enso_l2 not fitted by this arm -- so this id runs a DISPERSED DRAW instead: dispersed about the COLD init, sd 1.0452; bomb_share_NH, seas_T_lag drawn from the prior
+      6     15     -1054.4959        -0.0000        1    conv    193   cpu  dispersed about the COLD init, sd 1.0452; bomb_share_NH, seas_T_lag drawn from the prior
+      7      0     -1054.4959        -0.0000        1    conv    260   cpu  reference: COLD hand-set init
+      8      7     -1054.4959        -0.0000        1    conv    211   cpu  dispersed about the COLD init, sd 1.0452; bomb_share_NH, seas_T_lag drawn from the prior
+      9     12     -1054.4959        -0.0000        1    conv    204   cpu  dispersed about the COLD init, sd 1.0452; bomb_share_NH, seas_T_lag drawn from the prior
+     10      9     -1054.4963        -0.0004        1    conv    184   cpu  dispersed about the COLD init, sd 1.0452; bomb_share_NH, seas_T_lag drawn from the prior
+     11     21     -1054.4970        -0.0011        1    conv    181   cpu  dispersed about the COLD init, sd 1.0452; bomb_share_NH, seas_T_lag drawn from the prior
+     12     22     -1054.5217        -0.0258        1    conv    171   cpu  dispersed about the COLD init, sd 1.0452; bomb_share_NH, seas_T_lag drawn from the prior
+     13      1     -1054.5218        -0.0259        1    conv    161   cpu  reference: INCUMBENT = hilda29e (the WTC REFIT (label hilda_csl3v0kaidgbemwtc, Marcus 2026-10-12): hilda29e's pins with its interannual module carried; the incumbent at its own model (bomb_share_NH 0.9, seas_T_lag 2): a start, not a mode of this objective; scored under this build's objective, periodic spinup, evaluated at seas_ml 1)
+     14     14     -1057.9824        -3.4865        2    conv    201   cpu  dispersed about the COLD init, sd 1.0452; bomb_share_NH, seas_T_lag drawn from the prior
+     15     23     -1057.9831        -3.4872        2    conv    207   cpu  dispersed about the COLD init, sd 1.0452; bomb_share_NH, seas_T_lag drawn from the prior
+     16     10     -1059.5247        -5.0288        3    conv    182   cpu  dispersed about the COLD init, sd 1.0452; bomb_share_NH, seas_T_lag drawn from the prior
+     17     11     -1059.5248        -5.0289        3    conv    225   cpu  dispersed about the COLD init, sd 1.0452; bomb_share_NH, seas_T_lag drawn from the prior
+     18      8     -1077.0171       -22.5212       --    TIME    281   cpu  dispersed about the COLD init, sd 1.0452; bomb_share_NH, seas_T_lag drawn from the prior
+     19     18     -1091.2616       -36.7657        4    conv    175   cpu  dispersed about the COLD init, sd 1.0452; bomb_share_NH, seas_T_lag drawn from the prior
+     20     16     -1100.4070       -45.9111       --    TIME    252   cpu  dispersed about the COLD init, sd 1.0452; bomb_share_NH, seas_T_lag drawn from the prior
+     21     19     -1103.1534       -48.6575       --    TIME    255   cpu  dispersed about the COLD init, sd 1.0452; bomb_share_NH, seas_T_lag drawn from the prior
+     22      4     -1199.3999      -144.9040       --    TIME    285   cpu  UNSEEDABLE seeded slot 'new_enso' (the NEW BASIN + the ENSO seed): the ENSO seed: gamma_enso_ocn_NH, gamma_enso_ocn_SH, w_enso_l2 not fitted by this arm -- so this id runs a DISPERSED DRAW instead: dispersed about the COLD init, sd 1.0452; bomb_share_NH, seas_T_lag drawn from the prior
+     23      6     -1238.7472      -184.2513        5    conv    229   cpu  dispersed about the COLD init, sd 1.0452; bomb_share_NH, seas_T_lag drawn from the prior
+     24     13     -1249.8513      -195.3554       --    TIME    264   cpu  dispersed about the COLD init, sd 1.0452; bomb_share_NH, seas_T_lag drawn from the prior
+
+  ⚠ seeded slots 3, 4, 5 were UNSEEDABLE under this arm (its seed moves no fitted name) and ran dispersed draws:
+    counted with the survey's draws, not in the benchmark.
+
+--------------------------------------------------------------------------
+  BEST FOUND      id 17 at -1054.4959
+  TO BEAT         id 2 (reference: NEW BASIN = hilda31pe (seas_ml 0 control, periodic spinup; registered, evaluated at seas_ml 1)) at -1054.4959
+  difference      +0.0000 log-units
+  BEST DISPERSED  id 17 at -1054.4959 (+0.0000 vs the benchmark), of 21 finished
+  VERDICT: 21 dispersed starts REPRODUCED, and did not beat, the best re-converged known
+           basin, at the optimiser's own convergence bound of 0.5 log-units.
+  ENSO seeding at the incumbent: UNSEEDABLE under this arm (id 3 ran a dispersed draw)
+  ENSO seeding at the new_basin: UNSEEDABLE under this arm (id 4 ran a dispersed draw)
+  ⚠ A survey bounds what N starts at ONE dispersion found. It is not a
+    proof that no better basin exists ([[no_power_null]]: measure the
+    test's power before believing its null).
+
+  summary written to /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261012ff_hilda_csl3v0kaidgbemwtc_seasml1_pin_wtc_sd1.0452_prior_bomb_share_NH_seas_T_lag/summary.csv
+⛔ NOTHING IS ADOPTED.
+==========================================================================
