@@ -19,6 +19,15 @@ Project log: what was done, what was tried and abandoned, and why.
 
 **The handoff's Trash warning is moot:** #18's launch and land scripts were committed all along, in each wave's `calibration/output/multistart_*/logs/`, and its chains in `outputs/diagnostics/obj18*_landing*/`. The only loss was the duplicates in `~/ccx_frozen`.
 
+**RULED after the launch: the module check stops at 0.1 σ** (Marcus, verbatim: "I'm okay with 0.1 sigma unless that's a problem"). The 10-12 option he picked had said "> 0.01 sigma". That was a slip in the question's text: #17 and #18 ran at 0.1 σ, which is also `fit_iav_module.R`'s `IAV_CHECK_TOL`. No code moves. The ledger (§D), the WTC read and the landing chain's check step now say 0.1, and the chain refuses a check run at any other tolerance.
+
+**Landing kit (`c3514fb`).** The subagent's screen of the eight landing tools, with its main claim verified by hand:
+- Five hand-built forcings lacked the label's per-year nuclear share and would have STOPPED under the label: promote's GATE 5, `dg_run` / `dg_gateG`, `br_net_climate` and the ocean driver. Fixed; a regression test was added and mutation-tested.
+- The basin script now takes the WTC objective as a (label, pins) pair.
+- New `calibration/diag_wtc_refit_read.R`.
+- The chain is `~/ccx_frozen/20261012ff_wtc_chain.sh` (dry-run and land modes).
+- The tools that need only a mode file are dry-running on a SYNTHETIC file: `hilda29e` relabelled at 0.90 / 2.0. The Hessian step reproduces its logpost to 2.2e-11.
+
 **Not done:** the landing chain and the WTC read script (being built while the wave runs); the land itself; the module check at the new mode; adoption (Marcus names the mode).
 
 ## 2026-10-12 (ee) — **Label `hilda_csl3v0kaidgbemwtc` BUILT, TESTED AND PRICED; nothing refit.** The handoff's §4 steps 1–2 (data products; both cores), with the routing ruled in (dd). Every registered mode stays bit-exact: `test-mode-file` reproduces the canonical's −1108.1126 (24 rows), and `hilda29e`'s stored logpost recomputes exactly.

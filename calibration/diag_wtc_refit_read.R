@@ -258,9 +258,7 @@ for (a in rownames(NET)) cat(sprintf("  %-4s net climate effect %+.4f, z %+.2f a
 
 # ---- the separate drivers ---------------------------------------------------------------------------------
 cat("\n=== THE SEPARATE DRIVERS (each writes its own log) ===\n")
-cat(sprintf("  THE ONE-PASS CHECK: Rscript calibration/fit_iav_module.R --base=%s --check=%s\n", WR_MODE, WR_MODULE_REF))
-cat("    ⚠ The 10-12 ruling's option text says a second pass \"only if a module name moves > 0.01 sigma\"; fit_iav_module.R's\n")
-cat("      IAV_CHECK_TOL is the 0.1 sigma ruled for #17 / #18. Read the z values against both; the choice is Marcus's.\n")
+cat(sprintf("  THE ONE-PASS CHECK (RULED 0.1 sigma, Marcus 2026-10-12: \"I'm okay with 0.1 sigma unless that's a problem\"):\n    Rscript calibration/fit_iav_module.R --base=%s --check=%s\n", WR_MODE, WR_MODULE_REF))
 cat(sprintf("  CCX_SC_EXTRA_MODE=\"wtc=%s\" CCX_SC_TAG_SUFFIX=_wtc Rscript calibration/diag_whole_model_scorecard.R\n", WR_MODE))
 cat(sprintf("  CCX_OC_MODE=\"wtc=%s\" Rscript calibration/diag_ocean_climate_gobm.R\n", WR_MODE))
 
