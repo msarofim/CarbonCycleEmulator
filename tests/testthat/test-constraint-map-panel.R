@@ -205,8 +205,14 @@ test_that("7. a row total never prints as a bare 0, and the prose uses the SAME 
     expect_true(all(abs(as.numeric(lab) - tot) <= tol))
   }
   # MUTATION: the retired %.0f label must FAIL this, or the gate is decorative.
-  retired <- sprintf("%.0f", rowSums(cm$MC))
+  # ⚠ SELF-CONTAINED since 2026-10-13 (Marcus: "Self-contained mutation (Recommended)"). It relied on the
+  # canonical HAVING a row under 0.5 -- hilda29e's pre-bomb Δ¹⁴C, 0.177 -- and at hilda31w the smallest row is
+  # 1.113, so it lost its power. It now injects that measured 0.177 into a copy of the totals: the retired label
+  # must print "0" there and the live one must not, whatever the canonical's own rows are.
+  tot_mut <- rowSums(cm$MC); tot_mut[[which.min(tot_mut)]] <- 0.177
+  retired <- sprintf("%.0f", tot_mut)
   expect_true(any(retired == "0"))
+  expect_false(any(env$fmt_cmap_total(tot_mut) == "0"))
 })
 
 # 2026-10-08 (h) (Marcus: "Main fit only"). At an interannual-CUT canonical the El Nino settings are fitted in a

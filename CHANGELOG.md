@@ -2,6 +2,39 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-13 (k) — **The three product rebuilds at hilda31w are DONE: the constraint map, `pulse_vs_tcre` and card 8.** Every driver gate passes, and every typed claim on the app's map tab and card 8 still holds. One gate (the futures stake's G3) failed and was diagnosed, ruled and split. Two tests are red with reasons: `test-cmap-tie` (deferred to the MCMC, ruled) and card 4's two (by design).
+
+- **Rulings (Marcus, verbatim):** the map's two new names, "Existing groups (Recommended)"; G3, "Both exact checks (Recommended)"; the tie cut, "Defer to the MCMC (Recommended)"; panel #7, "Self-contained mutation (Recommended)".
+- **Torch verdict, said out loud: Mac.** Each product is single-core and takes seconds to a minute, and 6 cores were free beside the 4 MCMC chains.
+- **`pulse_vs_tcre`** (`pulse_vs_tcre_20261013`, @`6ddf4b2`, 21 s, all gates pass):
+  - 1.350 °C per 1000 GtC at the app defaults (hilda29e 1.353); spread over sizes 2.1 % (2.3); horizons 1.429 / 1.363 / 1.350 / 1.402.
+  - App constants synced (`327de2d`): `APP_PULSE_LIN_SPREAD` 2.3 → 2.1; `APP_PULSE_PER1000_BY_HORIZON` 1.44 / 1.37 → 1.43 / 1.36; the source string. test-pulse-linearity passes in full, no skips.
+  - ⚠ **"About 1.4" holds, narrowly.** The headline is 1.35026, so it rounds to 1.4 by 0.0003, and a refit that lowers it by that much flips the box's one-decimal rule. Flagged in the comment.
+- **Constraint map** (`data/constraint_map.rds`, log `20261013f`, @`4c672a7`, 62 evaluations in 21.7 s):
+  - `bomb_share_NH` → "Input scalings & reporting" (beside `bomb_total`); `seas_T_lag` → "Seasonal cycle" (beside `seas_lag_p_NH`). Still 7 components. `CM_DATE` → `20261013f`.
+  - All gates pass: harness −1054.4959 reproduced, cover 31 / 7 and 26 / 12, module held, Hessian pd, 0 of 31 nonlinear.
+  - Against hilda29e: pin share 6.8 → 8.0 %; ocean Δ¹⁴C → mixing 80 → 81 %; interior chemistry → pump 73 → 74 %; CO₂ level → pump 5.5 → 4.5 %; land 34 / 23 → 34 / 24 %; `beta_max`/`fert_k` "about 62×" → "about 51×".
+  - The computed three quietest names swap `sigma_d14c` for `imb_share_ocean_rest`. `bomb_share_NH` is 8th least identified (its strongest stream is `d14c_NH`). `co2_seasonal_MLO × seas_T_lag` is the map's 3rd-largest cell.
+  - The bomb-Δ¹⁴C row's top-two margin widened from 2.3 to 10.4 pp. At the carried 1.923 pp cut the one tied row is the same as at hilda29e (δ¹³C level & gradient, 1.17 pp; was 0.94).
+- **Card 8, the chain:**
+  - Time shape (`h2_time_shape_20261013_hilda31w`, from the wtcid017 OC product, md5 = canonical): 2015–24 −0.434 (−0.433); per-K ratio 1.80 ± 0.41 (1.81 ± 0.40); emergence 27 yr before GCB (same).
+  - The independent G1 reference (`app_ssp585_ref_20261013_hilda31w`): **1486.8484 ppm**, as expected.
+  - Futures stake (`h2_futures_stake_20261013_hilda31w`, @`e459921`): f_T 0.4905 (0.4937). GCB-sized response in 2300: SSP5-8.5 −31.7 ppm (−31.3), vvH −24.8 (−24.5), vvM −14.4 (−14.4).
+  - Card (`data/ocean_climate_card.rds`, @`03b4f28`): **2.17×** GCB (2.16×). "About twice" and "decades earlier" hold. test-ocean-climate-card passes in full. The card text is still Claude's draft awaiting Marcus's wording.
+- **G3 FAILED in the first stake run, and it was NOT a leak.** The log is kept as `h2_futures_stake_20261013_hilda31w_G3_FAILED.log`.
+  - The futures-only arm differed from f = 1 in 2025 only, by 8e-13 ppm. Three tests:
+    - iterations, f = 1 vs futures-only: hilda29e 5 / 5, hilda31w **6 / 5**;
+    - 1750–2024 is bit-identical at both modes;
+    - forced to one iteration count, 1750–2025 is bit-identical at both.
+  - Cause: the GMST record ends 2024 and the SST record 2025. The gate's span came from the SST record, so its last year ran on MODELLED GMST, which carries the coupled loop's convergence residual.
+  - Split as ruled (`e459921`). G3a: identical over 1750–min(GMST end, SST end), at the arms' own settings (the header's own claim). G3b: identical over 1750–SST end, both runs forced to `CLIM_MAX_ITER` (tol 0).
+  - **Mutation-tested:** a wrapper leaking from 2025 passes G3a and fails G3b; one leaking from 2024 fails both.
+  - Tried first and dropped: the per-hemisphere SST seasonal lag (`sst_seas_lag_*`, new run inputs at this label) as the cause. It is a phase inside a sinusoid of t and cannot read future SST.
+- **Two tests the map rebuild exposed** (both had SKIPPED while the map was hilda29e's):
+  - `test-cmap-tie` **RED, deferred (ruled).** Its basin `hilda29a6` is hilda29e's structure with 29 names. The WTC wave has no near basin: the runner-up, id 14, is 3.49 log-units below and on the other side of the lag trade. So the 10-12 recipe would measure something else. `APP_CMAP_TIE_*` stay at 1.923; decide at the MCMC read whether the cut becomes each row's margin spread over posterior draws (~22 s per map).
+  - `test-constraint-map-panel` #7: its mutation LOST POWER. It needed a row under 0.5 (hilda29e's pre-bomb Δ¹⁴C, 0.177); hilda31w's smallest is 1.113. Made self-contained as ruled: it injects 0.177 into a copy, and the live formatter must not print "0" there. 63 / 63, and an injected 0.977 makes it fail as it must.
+- Other tests that read these products pass: `test-constraint-map`, `test-git-stamp-lint`, `test-review-cards`. `test-review-card-numbers` shows only card 4's two, by design.
+
 ## 2026-10-13 (j) — **The hilda31w MCMC band is RUNNING: 4 chains to 200k on the Mac, launched 11:42 EDT.** Also: `ALPHA_AS_FCO3` is KEPT at 0.082 with the re-measurement recorded (`f6088ac`), and the three cheap products are ruled for rebuild. Record: `outputs/diagnostics/mcmc_launch_20261013_hilda31w/` (README).
 
 - **Rulings (Marcus, verbatim):** "Launch on the Mac (Recommended)"; "Keep 0.082, record it (Recommended)"; "Rebuild all three (Recommended)"; then, for the starts, "Redraw until finite (Recommended)".
