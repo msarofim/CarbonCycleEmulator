@@ -28,7 +28,19 @@ Project log: what was done, what was tried and abandoned, and why.
 - The chain is `~/ccx_frozen/20261012ff_wtc_chain.sh` (dry-run and land modes).
 - The tools that need only a mode file are dry-running on a SYNTHETIC file: `hilda29e` relabelled at 0.90 / 2.0. The Hessian step reproduces its logpost to 2.2e-11.
 
-**Not done:** the landing chain and the WTC read script (being built while the wave runs); the land itself; the module check at the new mode; adoption (Marcus names the mode).
+**Dry run on the synthetic file (`44643e8`, `outputs/diagnostics/wtc_dryrun_20261012/`).** Hessian, read, module check, ocean driver and scorecard all run under the label:
+- the read's gates pass (port target 2.2e-11; the pricing's rows exactly; the label alone +106.9490);
+- the module check passes GATE 0 once the synthetic file carries the new objective's rows, and at that point it says STOP at 0.1σ (w +0.029σ);
+- the Hessian at hilda29e under the new objective is NOT negative-definite (3 positive eigenvalues: kz_deep_frac, beta_max/fert_k, npp_frac_NH). That is expected of a start, and the read now says why it shows no sd.
+
+The full suite at `1e66077`: **7978 passed, 2 failed (card 4's two, by design), 1 skipped** (33.3 min, beside the wave).
+
+**ARMED** (`~/ccx_frozen/20261012ff_wtc_armed.sh`, pid in `.pid`, log `.out`), #18's pattern plus a dry-run stage:
+- (1) once the first start file is ≥ 2 min old (a file condition, never a pgrep loop), the chain's DRY RUN on the finished starts, in its own worktree at HEAD. This exercises collect / basins / promote, the three steps a synthetic file cannot.
+- (2) once the launcher's PID is gone, the chain in LAND mode in the repo, under `caffeinate`.
+- It adopts and commits nothing. A failure stops the chain at its step, harmlessly, for a resume by hand.
+
+**Not done:** the land (armed); the module check's verdict; adoption (Marcus names the mode).
 
 ## 2026-10-12 (ee) — **Label `hilda_csl3v0kaidgbemwtc` BUILT, TESTED AND PRICED; nothing refit.** The handoff's §4 steps 1–2 (data products; both cores), with the routing ruled in (dd). Every registered mode stays bit-exact: `test-mode-file` reproduces the canonical's −1108.1126 (24 rows), and `hilda29e`'s stored logpost recomputes exactly.
 
