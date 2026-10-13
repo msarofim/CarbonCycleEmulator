@@ -150,7 +150,8 @@ br_net_climate <- function(v, win = c(2015L, 2024L), clim = c(1901L, 1920L)) {
   sp <- dg_spinup(v)
   F <- withCallingHandlers(
     ccx_build_forcing("historical", DG_YEARS, prod_c14 = sp$prod_c14, bomb_total_kmol = v$bomb_total, luc_scale = v$luc_scale,
-                      enso_index = ccx_enso_index_of(v$p), aod_mode = ccx_aod_mode_of(v$p)),
+                      enso_index = ccx_enso_index_of(v$p), aod_mode = ccx_aod_mode_of(v$p),
+                      nuc_share = ccx_nuc_share_of(v$p)),   # 2026-10-12: label ...wtc's per-year share
     warning = function(w) if (grepl("held FLAT", conditionMessage(w))) invokeRestart("muffleWarning"))
   F0 <- F; sel <- F0$year >= clim[1]
   F0$gmst[sel] <- mean(F$gmst[F$year >= clim[1] & F$year <= clim[2]])

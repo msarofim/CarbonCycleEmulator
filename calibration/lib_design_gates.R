@@ -834,7 +834,8 @@ dg_run <- function(v) {
   F  <- withCallingHandlers(
     ccx_build_forcing("historical", DG_YEARS, prod_c14 = sp$prod_c14,
                       bomb_total_kmol = v$bomb_total, luc_scale = v$luc_scale,
-                      enso_index = ccx_enso_index_of(v$p), aod_mode = ccx_aod_mode_of(v$p)),
+                      enso_index = ccx_enso_index_of(v$p), aod_mode = ccx_aod_mode_of(v$p),
+                      nuc_share = ccx_nuc_share_of(v$p)),   # 2026-10-12: label ...wtc's per-year share
     warning = function(w) if (grepl("held FLAT", conditionMessage(w))) invokeRestart("muffleWarning"))
   list(sp = sp, F = F, out = ccx_run_fast(sp, F)$out)
 }
@@ -1656,7 +1657,8 @@ dg_gateG <- function(v, obs, r = NULL) {
   # the structure's enso/aod modes (2026-10-01), as dg_run(): the canonical hilda33d runs aod "anomaly"
   F  <- ccx_build_forcing("historical", c(DG_YEARS[1], yr), prod_c14 = sp$prod_c14,
                           bomb_total_kmol = v$bomb_total, luc_scale = v$luc_scale,
-                          enso_index = ccx_enso_index_of(v$p), aod_mode = ccx_aod_mode_of(v$p))
+                          enso_index = ccx_enso_index_of(v$p), aod_mode = ccx_aod_mode_of(v$p),
+                          nuc_share = ccx_nuc_share_of(v$p))   # 2026-10-12: label ...wtc's per-year share
   rs <- ccx_run_fast(sp, F); st <- rs$state
   out <- if (is.null(r)) rs$out else r$out     # the epoch year's rows are the same rows
   rho <- ccx_const("RHO_SEAWATER")

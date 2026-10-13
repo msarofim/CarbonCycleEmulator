@@ -228,7 +228,8 @@ streams <- local({
   # are what every older label resolves to, so the older labels' forcing is unchanged.
   F <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = 0,
                          bomb_total_kmol = 102,
-                         enso_index = ccx_enso_index_of(p_mode), aod_mode = ccx_aod_mode_of(p_mode))
+                         enso_index = ccx_enso_index_of(p_mode), aod_mode = ccx_aod_mode_of(p_mode),
+                         nuc_share = ccx_nuc_share_of(p_mode))   # 2026-10-12: label ...wtc's per-year share
   F$c14_cosmo <- sp$prod_c14
   F$c14_bomb  <- F$c14_bomb * (pm$bomb_total / 102)
   for (cc in c("e_luc_NH", "e_luc_SH", "cum_luc_NH", "cum_luc_SH"))

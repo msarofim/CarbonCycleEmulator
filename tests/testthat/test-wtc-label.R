@@ -233,3 +233,26 @@ test_that("MIGRATION: under the open label an older file fills the LEGACY values
   want <- sum(vapply(names(g), function(n) .ccx_prior_eval(g[[n]], st$p[[n]]) + jac(st$p[[n]], g[[n]]), 0))
   expect_equal(st$logpost_shift - st0$logpost_shift, want, tolerance = 1e-12)
 })
+
+# ---- the landing tools' hand-built forcing (2026-10-12 ff) ---------------------------------------
+# promote's GATE 5, dg_run / dg_gateG (fit_iav_module --check, the scorecard), br_net_climate and the ocean
+# driver each build their own forcing; without nuc_share every one STOPS under the label at ccx_run_prepared()'s
+# share check ("the parameters name 'per_year' but the forcing carries 'constant'"). Found by reading the
+# landing chain before the WTC refit landed; dg_run is the shared path, so it is the one exercised here.
+test_that("THE LANDING TOOLS: dg_run builds the label's per-year nuclear share (and a registered label's default)", {
+  skip_if_no_cpp()
+  e <- environment(); source(ccx_path("calibration", "lib_design_gates.R"), local = e)
+  md <- readRDS(ccx_mode_file("hilda29e")); md2 <- md; md2$struct <- WTC_LABEL
+  md2$par_mode[["bomb_share_NH"]] <- FORC_BOMB_NH_SHARE; md2$par_mode[["seas_T_lag"]] <- CCX_SEAS_T_LAG
+  md2$param_names <- c(md$param_names, names(CCX_PARAM_GATED_WTC))
+  f <- tempfile(fileext = ".rds"); saveRDS(md2, f); on.exit(unlink(f), add = TRUE)
+  v <- dg_vector(f)
+  expect_identical(attr(v$p, "struct"), WTC_LABEL)
+  expect_identical(ccx_nuc_share_of(v$p), "per_year")
+  expect_identical(v$p$bomb_share_NH, FORC_BOMB_NH_SHARE); expect_identical(ccx_seas_t_lag(v$p), CCX_SEAS_T_LAG)
+  r <- dg_run(v)                                                    # stopped here before the fix
+  expect_identical(attr(r$F, "nuc_share"), "per_year")
+  expect_gt(nrow(r$out), 0L)
+  # a registered label resolves to the builder's own default: its forcing is unchanged
+  expect_identical(ccx_nuc_share_of(dg_vector("hilda29e")$p), "constant")
+})

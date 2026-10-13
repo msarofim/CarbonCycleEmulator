@@ -29,6 +29,8 @@
 # GATES: one structure / pin set / seas_ml / pump field / h_ml band across the wave; each representative reproduces
 # its stored logpost (1e-5, the objective's noise floor: memory objective_noise_floor_optimum_on_spike); the three
 # parts close each logpost exactly (1e-8); `LP` is the best converged, in-time, live start; collect's basin 1 holds it.
+# ⭐ 2026-10-12 (ff): ALSO THE WTC REFIT's wave (label hilda_csl3v0kaidgbemwtc, hilda29e's pins): OB_OBJECTIVES pairs each
+# label with its pin set, and the two new fitted names join the per-basin print when the wave fits them.
 # Usage: Rscript calibration/diag_obj18_basins.R  (CCX_O18_WAVE=<dir> overrides the wave; CCX_O18_TAG=<suffix> tags
 #        the outputs). OUTPUTS: outputs/diagnostics/obj18_basins_<date><tag>.{log,rds,ids}. ⛔ ADOPTS NOTHING. No RNG.
 # =====================================================================
@@ -37,10 +39,13 @@ ccx_load_cpp()
 
 # ---- named constants (every label below derives from these) -------------------------
 OB_DRIVER    <- "calibration/diag_obj18_basins.R"
-OB_LABEL     <- CCX_MODE_OBJ18_STRUCT                       # "hilda_csl3v0kaidgbemwt"
-# THE PIN SETS THIS SCRIPT READS (2026-10-08 d: + #18 PASS 2, the module at the one-pass check's values at basin 1). A wave
-# must match ONE of them exactly; which one is printed. Any other pin set is refused.
-OB_PIN_SETS  <- list(`#18` = CCX_MODE_OBJ18_PINS, `#18 pass 2` = CCX_MODE_OBJ18P2_PINS)
+# THE OBJECTIVES THIS SCRIPT READS, each a (LABEL, PIN SET) PAIR (2026-10-08 d: + #18 PASS 2, the module at the one-pass
+# check's values at basin 1; 2026-10-12 ff: + THE WTC REFIT, label hilda_csl3v0kaidgbemwtc on hilda29e's pins). A wave must
+# match ONE pair exactly; which one is printed. ⚠ The WTC refit's pins ARE #18 pass 2's (R/paths.R CCX_MODE_WTC_PINS), so
+# the pin set alone cannot tell them apart -- the label does. Any other pair is refused.
+OB_OBJECTIVES <- list(`#18`        = list(label = CCX_MODE_OBJ18_STRUCT, pins = CCX_MODE_OBJ18_PINS,   pins_name = "CCX_MODE_OBJ18_PINS"),
+                      `#18 pass 2` = list(label = CCX_MODE_OBJ18_STRUCT, pins = CCX_MODE_OBJ18P2_PINS, pins_name = "CCX_MODE_OBJ18P2_PINS"),
+                      `WTC refit`  = list(label = CCX_MODE_WTC_STRUCT,   pins = CCX_MODE_WTC_PINS,     pins_name = "CCX_MODE_WTC_PINS"))
 OB_WAVE_GLOB <- "multistart_20261007i_hilda_csl3v0kaidgbemwt_seasml1_pin_obj18_sd1.0452"
 OB_REPRO_TOL <- 1e-5          # recompute_hessian.R's GATE 1, promote's GATE 4
 OB_CLOSE_TOL <- 1e-8          # the three parts sum to the logpost (diag_obj17_basins.R)
@@ -72,14 +77,14 @@ PF <- one(function(s) s$pump_field, "the pump field"); PM <- one(function(s) s$p
 HB <- one(function(s) s$hml_bound, "the h_ml band"); PN <- one(function(s) ccx_pin_label(s$pins), "the pins")
 OB_NEAR_GAP <- one(function(s) s$cycle_tol, "the optimiser's convergence bound (cycle_tol)")   # the near-tie window, READ
 PINS <- S[[1]]$pins
-if (!identical(ST, OB_LABEL)) stop("the wave's structure is '", ST, "', not #18's '", OB_LABEL, "'")
-OB_PIN_MATCH <- names(Filter(function(P0) setequal(names(PINS), names(P0)) &&
-                                isTRUE(all.equal(unname(unclass(PINS)[names(P0)]), unname(P0))), OB_PIN_SETS))
+OB_PIN_MATCH <- names(Filter(function(o) identical(ST, o$label) && setequal(names(PINS), names(o$pins)) &&
+                                isTRUE(all.equal(unname(unclass(PINS)[names(o$pins)]), unname(o$pins))), OB_OBJECTIVES))
 if (length(OB_PIN_MATCH) != 1L)
-  stop("the wave's pins match ", length(OB_PIN_MATCH), " of the registered #18 pin sets (", paste(names(OB_PIN_SETS), collapse = ", "),
+  stop("the wave's (structure '", ST, "', pins) match ", length(OB_PIN_MATCH), " of the registered objectives (",
+       paste(sprintf("%s: %s", names(OB_OBJECTIVES), vapply(OB_OBJECTIVES, `[[`, "", "label")), collapse = "; "),
        "); exactly one is required")
-OB_PINS <- OB_PIN_SETS[[OB_PIN_MATCH]]
-cat(sprintf("  pins: %s's (%s)\n", OB_PIN_MATCH, if (OB_PIN_MATCH == "#18") "CCX_MODE_OBJ18_PINS" else "CCX_MODE_OBJ18P2_PINS"))
+OB_PINS <- OB_OBJECTIVES[[OB_PIN_MATCH]]$pins
+cat(sprintf("  objective: %s (structure %s; pins %s)\n", OB_PIN_MATCH, ST, OB_OBJECTIVES[[OB_PIN_MATCH]]$pins_name))
 if (!isTRUE(all.equal(HB, c(CCX_PARAM_TABLE$h_ml$lo, CCX_PARAM_TABLE$h_ml$hi))))
   stop("the wave's h_ml band [", paste(HB, collapse = ", "), "] is not the table's: this script does not re-impose bands")
 cat(sprintf("  %d start files; structure %s, seas_ml %s, pump field %s, pump mode %s, h_ml band [%g, %g]; pins %s\n",
@@ -96,6 +101,7 @@ cat(sprintf("  DUPLICATES (optimum bit-identical to a lower id): %s\n", if (nrow
 # ---- the objective ONCE, in the wave's own space (promote's GATE 4 construction; the gate and pins stay applied for
 # the rest of this script, as in promote) ---------------------------------------------------------------------------
 invisible(ccx_apply_gate(ST)); invisible(ccx_apply_pins(PINS))
+OB_SHOW <- c(OB_SHOW, intersect(names(CCX_PARAM_GATED_WTC), CCX_PARAM_NAMES))   # the WTC refit's two new names, when fitted
 bp <- ccx_apply_structure(ccx_default_params(), ST, seas_ml = ccx_parse_seas_ml(SMl), pump_field = ccx_parse_pump_field(PF))
 for (n in names(PINS)) bp[[n]] <- PINS[[n]]
 attr(bp, "pins") <- PINS; bp$pump_mode <- PM

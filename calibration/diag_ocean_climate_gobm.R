@@ -183,7 +183,8 @@ if (OC_MIX) {
 }
 SP <- dg_spinup(V)
 F  <- withCallingHandlers(ccx_build_forcing("historical", DG_YEARS, prod_c14 = SP$prod_c14, bomb_total_kmol = V$bomb_total,
-                                            luc_scale = V$luc_scale, enso_index = ccx_enso_index_of(V$p), aod_mode = ccx_aod_mode_of(V$p)),
+                                            luc_scale = V$luc_scale, enso_index = ccx_enso_index_of(V$p), aod_mode = ccx_aod_mode_of(V$p),
+                                            nuc_share = ccx_nuc_share_of(V$p)),   # 2026-10-12: label ...wtc
                           warning = function(w) if (grepl("held FLAT", conditionMessage(w))) invokeRestart("muffleWarning"))
 cat(sprintf("forcing %d-%d, %d monthly rows; spinup %s; the ocean's climate columns: %s (w_enso_l2 %.3f Sv per index unit)\n",
             DG_YEARS[1], DG_YEARS[2], nrow(F), V$spinup_label, paste(OC_OCEAN_COLS, collapse = " + "), V$p$w_enso_l2))
