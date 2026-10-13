@@ -777,7 +777,13 @@ CCX_CONSTANTS <- list(
                    "Measured at the 25-parameter mode's own surface state",
                    "(NH 0.0856, SH 0.0786; mean 0.082) -- INSIDE Zhang's stated",
                    "0.05-0.20. Contributes 0.020 permil of an ~8.7 permil",
-                   "eps_DIC-g and 1 % of its temperature slope.")),
+                   "eps_DIC-g and 1 % of its temperature slope.",
+                   "RE-MEASURED 2026-10-13 at hilda31w from the model's own",
+                   "surface state (calibration/diag_fco3_at_mode.R): 0.0926 in",
+                   "2024 (NH 0.0981, SH 0.0871), 0.1190 in 1750; hilda29e",
+                   "0.0922 / 0.1186. The 0.0106 shift is worth ~0.0025 permil,",
+                   "a twentieth of Zhang's +- 0.05. KEPT at 0.082 (Marcus:",
+                   "\"Keep 0.082, record it (Recommended)\").")),
   # THE KINETIC LIMB, linear through the paper's two measured temperatures.
   # ⚠ TWO POINTS ONLY -- this line is an interpolation the paper does not
   # itself draw. ⚠ CORRECTED 2026-10-12 (code review, CHANGELOG 2026-10-12 (s)):
