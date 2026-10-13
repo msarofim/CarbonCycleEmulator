@@ -2,6 +2,21 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-13 (i) — **`ALPHA_AS_FCO3` re-measured at hilda31w: 0.0926 in 2024 (NH 0.0981, SH 0.0871) and 0.1190 in 1750, against the shipped 0.082.** This is the post-adoption list's first item (citation rulings: "re-measure it at the new mode"). Nothing changed; the constant is Marcus's call.
+
+- **Driver** `calibration/diag_fco3_at_mode.R` (`8e53a05`; log and rds `outputs/diagnostics/fco3_at_mode_20261013.*`, stamp clean).
+  - It reads the model's OWN surface state: the air-sea pCO₂ and SST that `ccx_deriv(record = TRUE)` hands to `ccx_run()`'s edge hook, at each month's opening state.
+  - DIC comes from inverting `pco2_from_dic()` at the label's ALK and carbonate table, and fCO₃ = K1K2/(h² + K1h + K1K2). It never divides by a box mass.
+- **hilda29e, same driver:** 0.0922 (2024) and 0.1186 (1750). **The label's ALK and table move fCO₃ by only +0.0004.** The shift from 0.082 is the ancestral 25-parameter mode's state.
+- **Worth:** a × T × ΔfCO₃ = 0.014 × 17 × 0.0106 ≈ **0.0025 ‰**, of an ~8.7 ‰ ε_DIC-g, against Zhang's stated ±0.05. Every value lies inside Zhang's 0.05–0.20.
+- **Plausibility, from first principles:** today's surface CO₃²⁻ is ~180–200 µmol/kg over DIC ~2000, so ~0.09–0.10; it was higher before industrialisation.
+- **⛔ TRIED AND DROPPED:** the legacy recipe (`diag_alpha_as_up_precheck.R` §1: the last month's ML carbon over the STATIC mixed-layer mass).
+  - At hilda31w it read **SH 0.616**, physically impossible: December's austral-summer layer is thin, so its carbon over the annual-mean mass reads DIC far too low ([[seasonal_box_observable_artefact]]).
+  - It was valid when the 0.082 was measured (seas_ml 0).
+- **Open, Marcus's:**
+  - whether to change the constant, given that it moves every mode's objective;
+  - which epoch the constant should represent: the 0.082 was taken at present day, so 2024 is its like-for-like.
+
 ## 2026-10-13 (h) — **Ledger (g) APPLIED as ruled.** Every edited file passes; the two remaining failures are card 4's, by design.
 
 Marcus, verbatim: "Approve all (Recommended)" (the ledger); "Use the drafts (Recommended)" (the parameter labels); "Hold until rebuilt (Recommended)" (the app release); "about 1,850" (card 7).

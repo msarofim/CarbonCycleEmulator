@@ -1,0 +1,12 @@
+=== ALPHA_AS_FCO3 re-measured (shipped 0.082) -- 8e53a05, 20261013 ===
+
+hilda29e (hilda_csl3v0kaidgbemwt; ALK 2300.0 umol/kg, legacy carb_coefs())
+  (M) model's own state, 1750:         NH 0.1250 [0.1240, 0.1261]  SH 0.1122 [0.1053, 0.1191]  mean 0.1186  (12 months)
+  (M) model's own state, 2024:         NH 0.0977 [0.0967, 0.0987]  SH 0.0867 [0.0807, 0.0929]  mean 0.0922  (12 months)
+
+hilda31w (hilda_csl3v0kaidgbemwtc; ALK 2303.4 umol/kg, the label's table)
+  (M) model's own state, 1750:         NH 0.1255 [0.1247, 0.1264]  SH 0.1126 [0.1051, 0.1202]  mean 0.1190  (12 months)
+  (M) model's own state, 2024:         NH 0.0981 [0.0973, 0.0989]  SH 0.0871 [0.0805, 0.0938]  mean 0.0926  (12 months)
+
+Worth: a x T x dfCO3 with a = 0.0140 permil/K: per 0.01 of fCO3 at 17 degC, 0.0024 permil (of an ~8.7 permil eps_DIC-g).
+wrote outputs/diagnostics/fco3_at_mode_20261013.rds 
