@@ -2,6 +2,18 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-12 (ii) — **The armed DRY RUN of the WTC landing chain: every step rc 0** (22:33–22:57; one finished start, id 001; tree at `bad9f9d`). Record: `outputs/diagnostics/wtc_chaindry_20261012/` (README, logs, products, and the chain + armed scripts as they ran).
+
+- **Collect, basins and promote ran under the label for the first time, and so did the Hessian, the WTC read, the module check, `checkz`, the ocean driver and the scorecard.** The read's gates pass: the stored logposts reproduce, REF hits the port target to 2.2e-11, REF's rows equal the pricing's, and the label alone is +106.9490.
+- ⛔ **ONE start of 24: the incumbent start, id 001, which finished in 161 CPU-min.** No dispersed draw, cold start or new-basin start had finished, so there is no survey yet. These are previews, not the landing's read:
+  - likelihood **+10.74** over REF;
+  - `bomb_share_NH` **0.842** (sd 0.032);
+  - `seas_T_lag` **0.28 months**, within 1 sd of its floor and **correlated +0.95 with `seas_lag_p_NH`** in u;
+  - the module check: **`w` −0.47 σ, over the ruled 0.1 σ**, against a module log-lik gain of only **+0.15**;
+  - GATE V passes (z −1.44).
+- **The `+dirty` stamps are the chain's own scratch writes**: in dryrun mode it overwrites the tracked port-targets file and leaves untracked `DRYRUN_*` products in `calibration/output/`. #18 pass 2's landing shows the same pattern. Land mode reads port targets only from the wave's copy, which `land.sh` makes. Checked by reading every reader of the file.
+- **Not changed:** the chain, `land.sh` and the armed script (stage 2 now waits on launcher 78825); anything under `R/`, `calibration/` or `tests/`.
+
 ## 2026-10-12 (hh) — **The app's forcing builds already carry the WTC label's `nuc_share`: a STATIC check, done while the wave runs** (the 10-12f handoff's §4 step 5, "check `app/` before the live run", brought forward because it is read-only). Nothing edited.
 
 - **Every app forcing goes through two choke points, and both pass it.** `app_build_forcing()` (`app/global.R:398`) defaults `nuc_share = ccx_nuc_share_of(APP_PARAMS)`; this was added on 2026-10-12, beside `enso_index` / `aod_mode`. `app_run_coupled()` calls `ccx_run_coupled()`, whose two builds pass it (`R/climate.R:246,260`). A parse-tree scan of `app/` (including `app/R/`) finds NO direct `ccx_build_forcing()` call.

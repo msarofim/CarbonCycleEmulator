@@ -1,0 +1,2 @@
+"id","logpost","basin","converged","out_of_time","minutes","clock","minutes_wall","n_eval","draws","kind","start_class","host"
+1,-1054.52181920498,1,TRUE,FALSE,160.6148,"cpu",164.61385106643,28371,0,"reference: INCUMBENT = hilda29e (the WTC REFIT (label hilda_csl3v0kaidgbemwtc, Marcus 2026-10-12): hilda29e's pins with its interannual module carried; the incumbent at its own model (bomb_share_NH 0.9, seas_T_lag 2): a start, not a mode of this objective; scored under this build's objective, periodic spinup, evaluated at seas_ml 1)","reference","MacBook-Pro-2.local"

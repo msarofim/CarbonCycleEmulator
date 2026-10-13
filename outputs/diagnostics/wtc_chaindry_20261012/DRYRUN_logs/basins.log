@@ -1,0 +1,24 @@
+calibration/diag_obj18_basins.R @bad9f9d+dirty, 2026-10-12 22:33
+  wave /Users/MarcusMarcus/ccx_frozen/20261012ff_wtc_chaindry/calibration/output/DRYRUN_multistart_20261012ff_hilda_csl3v0kaidgbemwtc_seasml1_pin_wtc_sd1.0452_prior_bomb_share_NH_seas_T_lag
+  ⚠ TAGGED '_wtc_DRYRUN': read the provenance before quoting anything below
+  objective: WTC refit (structure hilda_csl3v0kaidgbemwtc; pins CCX_MODE_WTC_PINS)
+  1 start files; structure hilda_csl3v0kaidgbemwtc, seas_ml 1, pump field solved, pump mode N, h_ml band [42.5, 200]; pins _pin_ent_seas_amp_SH=0.0000000_w_eq=27.0000000_gamma_eq=1.0000000_pump_export=9.0800000_w_vent=0.0000000_gamma_vent=0.0000000_w_thc=0.0000000_gamma_enso_ocn_NH=0.0000000_gamma_enso_ocn_SH=0.0000000_npp_tsens=0.0000000_lag_enso_land=5.9293432_gamma_enso_land_NH=0.6631895_gamma_enso_land_SH=0.6355964_w_enso_l2=16.7877440
+  DUPLICATES (optimum bit-identical to a lower id): none
+
+=== 0. GATES ===
+  basin 1 (id 001): logpost -1054.521819, stored -1054.521819, diff +0.0e+00 (tol 1e-05)
+  likelihood + prior + Jacobian close every logpost to <= 1e-08
+
+=== 1. THE BASINS (collect's clustering; each by its best stored-logpost member) ===
+  basin 1  id 001  x1 (1 distinct)  logpost -1054.5218  likelihood -1015.7881  prior -77.4840  Jacobian +38.7502  lik+prior -1093.2721
+            h_ml 65.307, pump_grad 332.03, kz 13880, beta_max 2.0065, fert_k 600.69, q10 1.15, bomb_share_NH 0.84181, seas_T_lag 0.28018
+            members: 1
+
+  BEST by stored logpost: id 001 (basin 1) | by LIKELIHOOD: id 001 (basin 1) | by likelihood + prior: id 001 (basin 1)
+  ⇒ the stored logpost and likelihood + prior AGREE on the best basin
+
+=== 2. EACH BASIN AGAINST THE LOGPOST-BEST (other - best) ===
+  one basin: nothing to compare
+
+saved outputs/diagnostics/obj18_basins_20261012_wtc_DRYRUN.{log,rds,ids}: LP 1, NAT 1
+⛔ ADOPTS NOTHING.
