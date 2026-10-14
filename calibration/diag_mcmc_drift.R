@@ -17,7 +17,7 @@
 #
 # Usage (repo root):
 #   Rscript calibration/diag_mcmc_drift.R --dir=<snapshot with chain_*.rds> --ribbons=<the band built from the
-#       pooled draws> [--pooled=<dir>/pooled_u.rds] [--tag=hilda29e_final]
+#       pooled draws> [--pooled=<dir>/pooled_u.rds] [--tag=hilda29e_final] [--names=h_ml,beta_max,...]
 # The pooled draws may be thinned within each chain (read_mcmc_check.R --pool-thin): the join applies the
 # reader's own rule, read from their provenance. The drift sections (1)-(2) read every kept sample.
 # =====================================================================
@@ -37,7 +37,12 @@ DR_TAG     <- dr_arg("tag", "hilda29e_final")
 DR_DATE    <- format(Sys.Date(), "%Y%m%d")
 DR_LOG     <- file.path("outputs", "diagnostics", sprintf("mcmc_drift_%s_%s.log", DR_TAG, DR_DATE))
 DR_RDS     <- sub("\\.log$", ".rds", DR_LOG)
-DRIFT_NAMES <- c("h_ml", "beta_max", "ndep_ret", "fert_k", "luc_scale")   # the five worst R-hats at 100k
+# --names=a,b,...: the names to follow. Default: hilda29e's five worst R-hats at 100k (its record reproduces).
+# hilda31w's five worst (2026-10-14 a) include the seasonal-lag triplet, which is collinear (r +0.96 between
+# seas_T_lag and seas_lag_p_NH): the leverage regression's per-name coefficients then trade off between them, and
+# only their combined predicted shift is well determined. h_ml is required (the floor share reads it).
+DRIFT_NAMES <- strsplit(dr_arg("names", "h_ml,beta_max,ndep_ret,fert_k,luc_scale"), ",", fixed = TRUE)[[1]]
+stopifnot("h_ml" %in% DRIFT_NAMES, !anyDuplicated(DRIFT_NAMES))
 DRIFT_BLOCK <- 10000L                      # iterations per block
 DRIFT_FLOOR_NEAR <- 5                      # m: "near the floor" (as the 50k read, CHANGELOG 10-08 k)
 DR_PROBS   <- c(0.05, 0.50, 0.95)
