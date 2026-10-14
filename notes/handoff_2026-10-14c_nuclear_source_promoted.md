@@ -3,6 +3,10 @@
 **Supersedes** `notes/handoff_2026-10-14b_band_shipped.md` (which now points here). Written on Marcus's
 request ("Yes, write the handoff and remove the two suite worktrees"), 2026-10-14 ~12:20.
 
+- ⭐ **UPDATE, later 10-14 (same day):** §3.3 IC8 is DONE (CHANGELOG (m), `f451f0f`). §3.4's pure-R guards are
+  MEASURED, not landed (CHANGELOG (n), `818b9cc`; `outputs/diagnostics/guards_measure_20261014/`): landing them, and fixing
+  the seven scripts they would stop, are Marcus's. The smoke chains are KEPT (ruled). Two scratch worktrees
+  `~/ccx_frozen/suite_20261014_guards_{base,on}` remain.
 - **Start here:** CHANGELOG **2026-10-14 (g) → (k)**; memory [[ccx_worktree_needs_downloads_linked]]
   (now "FIXED AT THE SOURCE") and [[ccx_app_beta_blockers]] (deploy blocker CLOSED).
 - main = `61421c6` + this note's commit, **pushed**.
