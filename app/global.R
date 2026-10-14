@@ -516,9 +516,11 @@ APP_RIBBONS_FILE <- file.path(CCX_ROOT, "data", "futures_ribbons.rds")
 # The evidence is outputs/diagnostics/futures_ribbons_laplace_held_20261001.rds and
 # futures_ribbons_mcmc_stage1_20261002.rds. While this is set the loader draws NOTHING and
 # says nothing, even if a ribbons file appears in data/; test-futures-ribbons.R asserts it.
-# ⭐ SHIP RULED (Marcus 2026-10-09: "Ship the 200k band (Recommended)"; CHANGELOG 10-09 e-f): the
-# hilda29e MCMC band (4 chains to 200k, 17 000 draws; chains agree to <= 3.5 ppm, 21 % of the
-# width) is in data/futures_ribbons.rds (calibration/promote_futures_ribbons.R). The hold now
+# ⭐ SHIP RULED (Marcus 2026-10-09: "Ship the 200k band (Recommended)"; CHANGELOG 10-09 e-f), and
+# RE-SHIPPED at the canonical hilda31w (Marcus 2026-10-14: "Ship the hilda31w band (Recommended)";
+# CHANGELOG 10-14 e-f): the hilda31w MCMC band (4 chains to 200k, 17 000 draws; chains agree to
+# <= 4.76 ppm, 21 % of the width, median 11 %) is in data/futures_ribbons.rds
+# (calibration/promote_futures_ribbons.R). The hold now
 # waits ONLY on the copy, which is Marcus's: the band's label (provenance$label, rendered by
 # APP_RIBBON_NOTE), card 6's title and text (app/R/review.R), the parameter panel's "not yet
 # a posterior" clause above, and (2026-10-10, "Omit it on temperature") the temperature view's

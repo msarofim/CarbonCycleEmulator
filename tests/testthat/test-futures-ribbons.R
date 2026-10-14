@@ -9,6 +9,9 @@
 #   200 000 iterations, window (30000, 200000], thin 20, pooled thinned x2 within chain = 17 000 draws,
 #   each run through the full model by calibration/build_futures_ribbons.R and PROMOTED into data/ by
 #   calibration/promote_futures_ribbons.R (bands untouched, chain seeds recorded, key_draws dropped).
+# - 2026-10-14 (Marcus): "Ship the hilda31w band (Recommended)". The SAME recipe at the new canonical hilda31w
+#   (4 chains to 200 000, window (30000, 200000], thin 20, x2 within chain = 17 000 draws; CHANGELOG
+#   2026-10-14 e, f). The ship record below moved with it: the shipped mode and the landing it was promoted from.
 #
 # - 2026-10-10 (Marcus): "Omit it on temperature". The band is drawn on the CO2 view only
 #   (APP_RIBBON_YVARS); the temperature view says in words that its spread comes only through CO2 and is
@@ -30,7 +33,7 @@
 # =====================================================================
 
 .fr_ship_file <- file.path(.root, "data", "futures_ribbons.rds")
-.fr_src_file  <- file.path(.root, "outputs", "diagnostics", "futures_ribbons_mcmc_20261009_hilda29e_200k.rds")
+.fr_src_file  <- file.path(.root, "outputs", "diagnostics", "futures_ribbons_mcmc_20261014_hilda31w_200k.rds")
 .fr_lap_file  <- file.path(.root, "outputs", "diagnostics", "futures_ribbons_laplace_held_20261001.rds")
 .fr_global    <- file.path(.root, "app", "global.R")
 .fr_review    <- file.path(.root, "app", "R", "review.R")
@@ -49,7 +52,7 @@ if (file.exists(.fr_global))
 .fr_lap <- if (.fr_lap_have) readRDS(.fr_lap_file) else NULL
 # THE MODES, by NAME, never read back from the artifacts (a check of an artifact against its own label
 # would pass whatever it said). ccx_ribbons_problems() reads each mode file itself.
-.fr_ship_md <- "hilda29e"   # the canonical the band was ruled for (10-09); a new canonical must REFUSE it
+.fr_ship_md <- "hilda31w"   # the canonical the band was ruled for (10-14; hilda29e 10-09); a new canonical must REFUSE it
 .fr_lap_md  <- "hilda33d"   # the held Laplace evidence (re-expressed 2026-10-03 h, "Approve all")
 
 FR_PROBS_RULED    <- c(0.05, 0.50, 0.95)   # the ruled band (+ the median), both builds
