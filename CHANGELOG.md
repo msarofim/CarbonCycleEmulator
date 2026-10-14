@@ -2,6 +2,34 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-14 (b) — **RULED (Marcus, verbatim): "Pool all 4, build, test by chain (Recommended)"; `--drop` "0 (Recommended)"; "Thin ×2 within chain (Recommended)"; the tie cut "Posterior spread, 100 draws (Recommended)". The band build and the tie-cut run are RUNNING from frozen worktrees. A first launch ran without `data-raw/downloads/`, so the nuclear-¹⁴C source was ZERO; the tie-cut driver's own gate caught it.**
+
+- **The read at the rulings** (`aac38b6`): `read_mcmc_check.R --drop=0 --pool-thin=2` → `pooled_u_thin2.rds`, 17 000 × 31 (md5 77e84906…).
+  - It is exactly rows 2, 4, … of each chain of `pooled_u.rds`, checked with `identical()`.
+  - The diagnostics csv is byte-identical to the drop-0 read's.
+- **`diag_mcmc_drift.R --names=`** (`aac38b6`): the five followed names were hard-coded to hilda29e's worst R-hats. The default is unchanged (`identical()` to the old vector). The driver's own gate refuses the hilda29e chains at the hilda31w canonical, so that record cannot be re-run here.
+- **New `calibration/diag_cmap_posterior_spread.R`** (`1c26e8e`): the constraint map at N evenly spaced pooled draws.
+  - It uses the shipped map's step (the conditional Hessian sd at the mode) and the shipped map's component and family tables.
+  - **Four gates:**
+    - STEP: the shipped sd is 1/√diag(−H), exactly.
+    - MAP: at the mode it reproduces `data/constraint_map.rds`'s MC to 1e-9; measured diff 0.
+    - JOIN: each pooled row is its chain sample.
+    - LP: the harness's logpost equals the chain's stored one at every draw, to `CCX_REPRO_TOL`; measured diff 0.
+  - **The ruled statistic:** the largest 5–95 % range of any row's signed margin of the canonical's winner. The margin definition is `test-cmap-tie.R`'s.
+  - ⚠ **Method choice, flagged:** a half-step the objective refuses (the `h_ml` substep wall; the step is ~2 m at the mode) falls back to the finite half. Refusals are recorded per draw, and the cut is also reported without those draws.
+  - **Diagnostic split:** the same statistic on the cell's curvature part |Δ⁺+Δ⁻|/2 and slope part |Δ⁺−Δ⁻|/2.
+  - ⚠ **The 2- and 3-draw smokes already move the CO₂ N–S gradient row's margin from +25 to −66 pp.** At the mode the total gradient is zero; at a draw it is not, so the max-of-halves cell picks up each stream's first-order slope. Whether the "posterior spread" is the right object for a mode-defined map is a question for Marcus once the 100 draws are in.
+- **The worktree incident (07:02).** Both jobs first launched from bare `git worktree`s, which have no `data-raw/downloads/` (gitignored), so `ccx_nuclear_c14_annual()` warned and ran with the nuclear source at zero.
+  - The tie-cut run's GATE MAP failed by **0.962 log-units** and stopped; the band build was killed after ~10 min.
+  - Both worktrees now symlink all 78 missing files (81 entries, the same as main and the 10-13 MCMC worktree). The failed log is kept as an unplanned mutation test of GATE MAP.
+  - The 10-13 MCMC worktree WAS linked, so the chains are sound (GATE LP from the main checkout: diff 0). `excursion_read/` ran in the main checkout.
+  - ⚠ The band's own central-line check compares two runs in ONE process, so it cannot see this; it passed at 4.99e-08 in the unlinked tree. Memory: [[ccx_worktree_needs_downloads_linked]]; this was the third time the trap was hit.
+- **Running (relaunched 07:03):**
+  - **Band:** `~/ccx_frozen/20261014_band_hilda31w` @`aac38b6`, PID in `20261014_band_hilda31w.pid`. Build (17 000 draws, 8 cores, ~4.7 h), then `diag_mcmc_band_by_chain.R --laplace=none`, then `diag_mcmc_drift.R --names=seas_T_lag,seas_lag_p_NH,seas_lag_p_SH,beta_max,h_ml`.
+  - **Tie cut:** `~/ccx_frozen/20261014_cmap_spread` @`1c26e8e`, 100 draws on 1 core (~40 min). GATE MAP passed (diff 0), as did GATE JOIN.
+  - Torch verdict, said out loud: Mac.
+  - ⚠ Spotlight (`mds_stores`) was using ~2 cores, indexing the new worktrees.
+
 ## 2026-10-14 (a) — **The hilda31w 200k chains: SNAPSHOTTED and READ. NOT converged by Vehtari et al.'s reference. The failure is the SEASONAL-LAG RIDGE, not `h_ml`: R-hat 1.241 (`seas_T_lag`), 1.199 (`seas_lag_p_NH`), 1.150 (`seas_lag_p_SH`), bulk ESS 13–19. It comes from one 65k-iteration excursion of chain 4. Draws from that excursion move the futures' key-cell medians by ≤ 0.28 of the band's width (median 0.10 / 0.13).** Nothing shipped; the calls are Marcus's. (Handoff 10-14 §4 steps 1–2.)
 
 - **Snapshot:** `outputs/mcmc_check_20261014_hilda31w_200k/`. The four chains are `cmp`-identical to the frozen worktree's, with the chain logs and launch script in `logs/`. Chain md5s: a33cdaed… / 4b4ae5d3… / 898cd3b2… / 9fb9ff92….

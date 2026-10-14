@@ -1,0 +1,4 @@
+=== calibration/diag_cmap_posterior_spread.R @1c26e8e, 2026-10-14 07:02 ===
+[ccx_adopt_mode_band] h_ml -> [42.5, 200] (mode 69.5414); kz -> [1161.6, 27808] (mode 13790.0802)
+GATE STEP: shipped conditional sd vs 1/sqrt(diag(-H)) of hilda31w: max |diff| 0.00e+00 -> PASS (exact)
+GATE MAP: this harness's map at hilda31w vs data/constraint_map.rds (commit 4c672a7): max |diff| 9.62e-01 log-units (tol 1e-09) -> *** FAIL ***; 29.8 s per map
