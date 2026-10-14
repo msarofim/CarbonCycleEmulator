@@ -36,7 +36,8 @@ skip_if_no_climate <- function() {
 
 # THE RUN-TIME INPUTS, asserted ONCE before any file runs (2026-09-16 b). The
 # suite's bit-identity tests ("the canonical's stored streams reproduce") read
-# `data-raw/downloads/nuclear14c/*.csv` at run time through a default argument;
+# `data-raw/downloads/nuclear14c/*.csv` at run time through a default argument
+# (until 2026-10-14; the source is now data/forcing_nuclear_c14.rds and its loader STOPS);
 # absent, the industrial 14C source silently becomes zero and TWENTY tests fail
 # on the three 14C rows by 0.4-1.2 log-units -- which reads like a build
 # regression, not a missing file. Found on a frozen copy that excluded

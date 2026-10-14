@@ -89,6 +89,10 @@ The app reads from the repository root, so deploy the whole tree, not just `app/
 | `calibration/lib_design_gates.R` (+ `lib_seas_limbs.R`, `lib_glodap_obs.R`) | **the gate kernels the "Known issues" tab measures itself with.** Sourced lazily on first view of that tab, never at start-up. Omit them and the cards that need them render their reason in place of their number — a visible degradation, not a silent one, but the review tab is then half-useless |
 
 `data-raw/` is **not** needed at runtime and is large. Exclude it.
+⚠ **True only since 2026-10-14.** Until then the app summed `data-raw/downloads/nuclear14c/` at run time, so a
+bundle built from this line ran with the industrial ¹⁴C source silently at ZERO (Δ¹⁴C NH −3.9 ‰ by 2024;
+`outputs/diagnostics/deploy_nuclear_absent_20261014/`). The source is now `data/forcing_nuclear_c14.rds`
+(covered by `data/*.rds` above), and the loader STOPS without it, so an incomplete bundle fails at start-up.
 
 ## The parameter banner
 

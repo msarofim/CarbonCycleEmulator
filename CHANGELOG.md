@@ -2,6 +2,28 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-14 (j) — **RULED (Marcus, verbatim): "Promote to data/ .rds + stop() (Recommended)". The nuclear-industry ¹⁴C source is now the tracked `data/forcing_nuclear_c14.rds` (`data-raw/build_nuclear_c14_source.R`), and `ccx_nuclear_c14_annual()` STOPS without it. Before, it summed `data-raw/downloads/nuclear14c/` at run time, and its absence only warned and zeroed the source. Bit-identical: the source and three forcings are `identical()` to the pre-change build. Nothing in `R/` reads `data-raw/` at run time now.** Also ruled: the release waits ("We can wait until the current set of work is done, and then set the new version."). The six frozen worktrees are removed ("Remove all six (Recommended)").
+
+- **The change:**
+  - `R/forcing.R`: `FORC_NUC_C14_FILE`. The loader reads the `.rds` (cached per file; `stop()` names the builder). `ccx_nuclear_c14_sum_files(dir)` is the old reader's body, build-time only, with no default `dir`.
+  - The `.rds` stores per-year GBq (74 years, 1950–2023), each file's sha256 checked against MANIFEST.csv, and provenance. The loader converts with `MOL_C14_PER_GBq` as before.
+- **The identity gate:**
+  - Before/after snapshots (pre-change code at `5d74e9a`): the source, `historical` 1750–2024 (constant and per-year `nuc_share`) and `ssp245` 1750–2150. All four are `identical()`.
+  - `data-raw/build_nuc_nh_share.R`'s gate now reads the model's `.rds`. Re-run to a scratch path: data and provenance identical to the committed `data/forcing_nuc_nh_share.rds` (bar the build date). The committed file is untouched.
+- **New `test-nuclear-c14-source.R`, 10 / 0, mutation-tested 4 ways.** Each mutation fails exactly its own check:
+  - N1: a provenance sha256 changed.
+  - N2: one GBq moved by 1 ulp.
+  - N3: the loader reverted to warn-and-zero.
+  - N4: a `ccx_path("data-raw", …)` default added to `R/`.
+- **Updated:**
+  - `lib_run_inputs.R`: the entry now names the `.rds`, and the stop message no longer says the inputs are gitignored. All 14 are tracked.
+  - `make_bundle.sh` no longer ships `data-raw/downloads/nuclear14c` (`data` carries it).
+  - `setup.R` comment, `DATA.md` row, `app/DEPLOY.md` (the "exclude `data-raw/`" line is now true; the 10-14 (h) gap is closed).
+- **Worktree cleanup:** six removed after each output was `cmp`'d against its landed copy.
+  - One exception: the 10-13 MCMC SMOKE chains were never landed. They are kept in `~/ccx_frozen/20261013_mcmc_hilda31w_smoke_chains/` (README).
+  - Main's `data-raw/downloads/` is intact (81 entries).
+- **Suite:** pending, run twice, from a LINKED and an UNLINKED frozen worktree at this commit.
+
 ## 2026-10-14 (i) — **Suite @ `4acb215`: 8040 passed, 3 failed, 1 skipped, 0 errored, 19.9 min. All three reds are the expected ones:** `app-version` (the release is still cut on hilda29e; v1.0 vs v1.1 is Marcus's call) and card 4 ×2 (by design). Log: `outputs/diagnostics/suite_20261014_4acb215.log`.
 
 - Against 8027 / 8 at `5f158b3`: `test-cmap-tie` (4 reds) and `test-futures-ribbons` (1) are now green, as 10-14 (d) and (f) predicted. Nothing new is red.

@@ -107,7 +107,7 @@ a **methodological choice awaiting Marcus' call**.
 | Future emissions | 1750–2500, 5 SSP markers | GtC/yr | RCMIP v5.1.0 (`Mt CO2/yr` ÷ 1000 ÷ 3.664) |
 | GMST anomaly | 1850–2024 | °C | IGCC (standing obs convention) |
 | ENSO (Niño 3.4) | 1948–2026 | SST anomaly, 1991–2020 base | NOAA PSL |
-| Nuclear-industry ¹⁴C | 1950–2023, 22 countries | GBq/yr → mol ¹⁴C/yr | Laemmel et al. 2025, doi:10.5281/zenodo.15034663 |
+| Nuclear-industry ¹⁴C | 1950–2023, 22 countries | GBq/yr → mol ¹⁴C/yr | Laemmel et al. 2025, doi:10.5281/zenodo.15034663; **summed per year into `data/forcing_nuclear_c14.rds` by `data-raw/build_nuclear_c14_source.R` (2026-10-14)**, sha256 per file checked against MANIFEST.csv. Before that it was summed from `data-raw/downloads/nuclear14c/` at run time, and its absence silently zeroed the source. A LOWER BOUND: coverage is incomplete by construction (e.g. USA 2010–2023 only) |
 | Bomb ¹⁴C | 1952–1980, monthly | mol ¹⁴C/yr **delivered to the troposphere** | Tans 1981 SCOPE 16 Tables 1–2 (Table 2 after Telegadas 1971), via `data-raw/build_bomb_c14_source.R`; total still from Naegler & Levin 2006 |
 | Cosmogenic ¹⁴C | all | mol ¹⁴C/yr | **solved by the spinup**, not prescribed (§7) |
 

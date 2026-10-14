@@ -19,11 +19,12 @@ Rscript --vanilla -e 'for (f in list.files("R", pattern = "R$", full.names = TRU
   fs <- c(unname(CCX_MODE_FILES), CCX_MODE_COLUMN_CONTROL, CCX_MODE_HILDA31_QUARANTINED, CCX_MODE_HILDA31S_QUARANTINED, CCX_MODE_HILDA30C_QUARANTINED, CCX_MODE_HILDA30H_QUARANTINED, CCX_MODE_HILDA31P_QUARANTINED, CCX_MODE_HILDA30E_QUARANTINED, CCX_MODE_HILDA30S_QUARANTINED)
   miss <- fs[!file.exists(fs)]; if (length(miss)) stop("registry names missing files: ", paste(miss, collapse = ", "))
   cat("registry files present:", length(fs), "\n")' 
-# ⚠ `data-raw/downloads/nuclear14c` IS NOT OPTIONAL, and it is 428 KB of the
-# 3.4 GB tree. `ccx_nuclear_c14_annual()` reads it AT RUN TIME through a default
-# argument and, when it is absent, WARNS and sets the industrial 14C source to
-# zero -- a different objective, ~1e-3 relative, with no error. Omitting it is
-# how the 2026-09-01 port gate came to fail on a machine that was fine.
+# ⭐ `data-raw/downloads/nuclear14c` IS NO LONGER SHIPPED (2026-10-14). Until then
+# `ccx_nuclear_c14_annual()` read it AT RUN TIME and, when it was absent, WARNED and set
+# the industrial 14C source to zero: a different objective, ~1e-3 relative, with no error.
+# Omitting it is how the 2026-09-01 port gate came to fail on a machine that was fine. The
+# source is now data/forcing_nuclear_c14.rds, shipped with `data` below, and the loader
+# STOPS without it (CHANGELOG 2026-10-14 j).
 # Everything in calibration/lib_run_inputs.R's manifest must be listed here.
 # ⛔ AND EVERY MODE FILE R/paths.R NAMES (CCX_MODE_FILES + the *_QUARANTINED paths): a missing
 # one makes tar exit non-zero under set -e BEFORE the 'bundle:' line, and a stale tarball at
@@ -38,7 +39,6 @@ Rscript --vanilla -e 'for (f in list.files("R", pattern = "R$", full.names = TRU
 COPYFILE_DISABLE=1 tar --no-xattrs -czf "$OUT" \
   DESIGN.md CLAUDE.md README.md DATA.md \
   R src data tests \
-  data-raw/downloads/nuclear14c \
   calibration/*.R calibration/torch calibration/mac \
   calibration/output/refit_20261013_hilda31w_wtc_hilda_csl3v0kaidgbemwtc \
   calibration/output/refit_20261008_hilda29e_obj18p2_hilda_csl3v0kaidgbemwt \

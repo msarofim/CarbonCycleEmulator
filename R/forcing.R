@@ -227,6 +227,9 @@ FORC_AOD_BG_WIN    <- c(1850, 1852)
 # HELD at the nearest year outside the files (the source is zero there; the 14C tag still needs a
 # number). Stamped as attr "nuc_share", checked at run time like the ENSO index.
 CCX_NUC_SHARE_CODES <- c(constant = 0L, per_year = 1L)
+# The nuclear-industry 14C SOURCE itself (2026-10-14): a tracked data/ input, so the
+# loader can STOP without it rather than warn and run on zero (ccx_nuclear_c14_annual()).
+FORC_NUC_C14_FILE <- file.path("data", "forcing_nuclear_c14.rds")
 
 # ---------------------------------------------------------------------
 #' Sourced hemispheric monthly emission seasonality, cached.
@@ -356,38 +359,57 @@ ccx_annual_to_monthly <- function(years, values, out_years, method = c("spline",
 # ---------------------------------------------------------------------
 #' Nuclear-industry 14C emissions, GBq/yr -> mol 14C/yr, annual
 #'
-#' Sums every annual file in data-raw/downloads/nuclear14c. Coverage is
+#' Reads data/forcing_nuclear_c14.rds (data-raw/build_nuclear_c14_source.R): the
+#' per-year sum of every annual file in data-raw/downloads/nuclear14c. Coverage is
 #' incomplete by construction (e.g. USA reports only 2010-2023), so this is a
 #' LOWER BOUND on the true industrial source -- stated in DATA.md, not hidden.
 #'
-#' CACHED per directory (2026-09-12, review B1): every `ccx_build_forcing()`
-#' re-read the whole CSV directory, and the periodic spinup built three
-#' forcings per objective evaluation -- `read.table`/`scan` were 12 % of an
-#' evaluation. Same `local({cache})` idiom as ccx_emission_seasonality(). The
-#' empty-directory warning path is NOT cached, so it still warns every call.
+#' ⛔ IT STOPS WITHOUT THE FILE (Marcus 2026-10-14: "Promote to data/ .rds +
+#' stop() (Recommended)"; CHANGELOG 2026-10-14 h, j). Until then this summed the
+#' CSVs AT RUN TIME and, when data-raw/downloads/nuclear14c was absent, WARNED
+#' and set the source to ZERO: a different objective with no error. That hit
+#' the Torch bundle (09-01), three frozen worktrees, and would have hit the
+#' public app, whose DEPLOY.md excluded data-raw/ (Δ14C NH -3.9 permil by 2024).
+#' The .rds lives in tracked data/, so every copy of the tree carries it.
+#' Bit-identical to the old reader (tests/testthat/test-nuclear-c14-source.R).
+#'
+#' CACHED per file (2026-09-12, review B1): the periodic spinup builds three
+#' forcings per objective evaluation, and re-reading the source was 12 % of an
+#' evaluation. Same `local({cache})` idiom as ccx_emission_seasonality().
 ccx_nuclear_c14_annual <- local({
   cache <- list()
-  function(dir = ccx_path("data-raw", "downloads", "nuclear14c")) {
-    key <- as.character(dir)
+  function(file = ccx_path(FORC_NUC_C14_FILE)) {
+    key <- as.character(file)
     if (!is.null(cache[[key]])) return(cache[[key]])
-    fs <- list.files(dir, pattern = "csv$", full.names = TRUE)
-    if (length(fs) == 0) {
-      warning("No nuclear 14C files found; industrial source set to zero.")
-      return(data.frame(year = integer(0), mol_per_yr = numeric(0)))
-    }
-    d <- do.call(rbind, lapply(fs, function(f) {
-      x <- utils::read.csv2(f, stringsAsFactors = FALSE)
-      data.frame(year = suppressWarnings(as.integer(x$Year)),
-                 GBq  = suppressWarnings(as.numeric(x$C14_tot_GBq)))
-    }))
-    d <- d[!is.na(d$year) & !is.na(d$GBq), ]
-    agg <- aggregate(GBq ~ year, data = d, FUN = sum)
-    v <- data.frame(year = agg$year,
-                    mol_per_yr = agg$GBq * ccx_const("MOL_C14_PER_GBq"))
+    if (!file.exists(file))
+      stop("the nuclear-industry 14C source ", file, " is missing. Build it with ",
+           "data-raw/build_nuclear_c14_source.R; it is NOT optional (until 2026-10-14 its ",
+           "absence silently set the industrial 14C source to zero).")
+    r <- readRDS(file)
+    v <- data.frame(year = r$year,
+                    mol_per_yr = r$GBq * ccx_const("MOL_C14_PER_GBq"))
     cache[[key]] <<- v
     v
   }
 })
+
+#' The per-year GBq sum of the nuclear-14C CSVs in `dir` -- the BUILD-TIME reader
+#'
+#' Used by data-raw/build_nuclear_c14_source.R and its test only; nothing at run
+#' time reads data-raw/. No default `dir` on purpose, so `grep 'ccx_path("data-raw"' R/`
+#' still finds no run-time read (calibration/lib_run_inputs.R's header).
+#' The rows kept and the sum are exactly the pre-2026-10-14 run-time reader's.
+ccx_nuclear_c14_sum_files <- function(dir) {
+  fs <- list.files(dir, pattern = "csv$", full.names = TRUE)
+  if (length(fs) == 0) stop("no nuclear 14C files in ", dir)
+  d <- do.call(rbind, lapply(fs, function(f) {
+    x <- utils::read.csv2(f, stringsAsFactors = FALSE)
+    data.frame(year = suppressWarnings(as.integer(x$Year)),
+               GBq  = suppressWarnings(as.numeric(x$C14_tot_GBq)))
+  }))
+  d <- d[!is.na(d$year) & !is.na(d$GBq), ]
+  aggregate(GBq ~ year, data = d, FUN = sum)
+}
 
 # ---------------------------------------------------------------------
 #' Bomb 14C DELIVERY to the troposphere, monthly, mol 14C/yr

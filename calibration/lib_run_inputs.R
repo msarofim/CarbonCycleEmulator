@@ -18,10 +18,16 @@
 # and names the wrong one still costs a diagnosis. So: assert the inputs first,
 # by name, and let the port gate go back to guarding the port.
 #
+# ⭐ FIXED AT THE SOURCE 2026-10-14 (Marcus: "Promote to data/ .rds + stop() (Recommended)";
+# CHANGELOG 2026-10-14 h, j). The source is now data/forcing_nuclear_c14.rds (tracked;
+# data-raw/build_nuclear_c14_source.R), and ccx_nuclear_c14_annual() STOPS without it. The
+# same gap had also reached three frozen worktrees and, through DEPLOY.md's "exclude
+# data-raw/", the public app. The entry below now names the .rds.
+#
 # ⚠ THE LIST IS THE POINT ([[recorded_but_never_restored]], [[default_off_hides_the_bug]]).
-# `nuclear14c` is TODAY the only run-time read from `data-raw/` in `R/` -- checked,
-# not assumed (`grep -rn 'ccx_path("data-raw"' R/`). Add an entry here THE SAME
-# DAY a second one appears, and `make_bundle.sh` ships everything named here.
+# Since 2026-10-14 NOTHING in `R/` reads `data-raw/` at run time -- checked, not assumed
+# (`grep -rn 'ccx_path("data-raw"' R/` finds nothing). Add an entry here THE SAME DAY one
+# appears, and `make_bundle.sh` ships everything named here.
 #
 # ⛔ SOURCE THIS, DO NOT RUN IT.
 # =====================================================================
@@ -29,13 +35,11 @@
 # Each entry: the path, WHY the objective needs it, and the SYMPTOM of absence --
 # because the symptom is what a reader will actually have in front of them.
 CCX_RUN_INPUTS <- list(
-  list(path    = file.path("data-raw", "downloads", "nuclear14c"),
-       kind    = "dir",
-       pattern = "csv$",
-       why     = "the industrial (reactor) 14C source, summed over 7 country files",
-       symptom = paste("ccx_nuclear_c14_annual() warns 'No nuclear 14C files found;",
-                       "industrial source set to zero' and the objective shifts by",
-                       "~1e-3 relative -- silently, and only in the 14C streams")),
+  list(path    = file.path("data", "forcing_nuclear_c14.rds"),
+       kind    = "file", pattern = NULL,
+       why     = "the industrial (reactor + reprocessing) 14C source, the per-year sum of the nine Laemmel et al. 2025 files (data-raw/build_nuclear_c14_source.R)",
+       symptom = paste("ccx_nuclear_c14_annual() STOPS (since 2026-10-14; before that it warned",
+                       "and set the source to zero, shifting the objective ~1e-3 relative)")),
   # 2026-09-07f: the two products round 3's objective and prior read. The
   # surface product is tryCatch'ed to NULL by ccx_hs_surface_target(), so its
   # absence would DROP two rows silently -- a different objective, no error.
@@ -128,10 +132,10 @@ ccx_require_run_inputs <- function(inputs = CCX_RUN_INPUTS) {
   if (length(missing))
     stop("RUN-TIME INPUT MISSING -- the objective would be silently DIFFERENT ",
          "here:\n", paste(missing, collapse = "\n"),
-         "\n\n  These are excluded from git (`.gitignore: data-raw/downloads/*`) but ",
-         "ARE shipped by\n  calibration/torch/make_bundle.sh. If you are on a remote ",
-         "machine, re-build and\n  re-send the bundle; do not proceed, and do not ",
-         "read a port-gate failure as a\n  port problem until this passes.")
+         "\n\n  Since 2026-10-14 every entry is a TRACKED file in data/, shipped by\n  ",
+         "calibration/torch/make_bundle.sh (`data`), so a missing one means an incomplete ",
+         "checkout,\n  copy or bundle. Re-check out / re-build and re-send; do not proceed, ",
+         "and do not\n  read a port-gate failure as a port problem until this passes.")
   cat(sprintf("run-time inputs present: %d/%d. OK\n", length(inputs), length(inputs)))
   invisible(TRUE)
 }

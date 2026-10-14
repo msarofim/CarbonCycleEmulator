@@ -74,8 +74,9 @@ out <- data.frame(year = yr,
 out$gbq_total[is.na(out$gbq_total)] <- 0
 out$gbq_sh[is.na(out$gbq_sh)]       <- 0
 out$nh_share <- ifelse(out$gbq_total > 0, 1 - out$gbq_sh / out$gbq_total, NA_real_)
-# GATE: the total equals the model's own (ccx_nuclear_c14_annual sums the same rows)
-mod <- ccx_nuclear_c14_annual(NS_DIR)
+# GATE: the total equals the model's own (ccx_nuclear_c14_annual sums the same rows; since
+# 2026-10-14 it reads them from data/forcing_nuclear_c14.rds, so build that first)
+mod <- ccx_nuclear_c14_annual()
 k <- match(mod$year, out$year)
 stopifnot(!anyNA(k), max(abs(out$gbq_total[k] * ccx_const("MOL_C14_PER_GBq") - mod$mol_per_yr)) == 0)
 # filled: hold the nearest year with a defined share (ties -> the earlier year)
