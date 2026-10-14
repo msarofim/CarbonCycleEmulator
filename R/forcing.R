@@ -1352,6 +1352,13 @@ ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE, edge_fn = NULL,
   # wants (a pathway sum, a state slice); the core stores nothing new by
   # default. Diagnostic only; `out` and `state` are untouched by it.
   y <- spin$y; aux <- spin$aux; grid <- spin$grid; p <- spin$params
+  # THE FOUR FORCING GUARDS (2026-10-14 o, Marcus: "Land them, with a test"): the forcing's
+  # ENSO index, AOD mode, nuclear 14C share and N deposition must be the ones the parameters
+  # name, derived exactly as ccx_cpp_prepare() derives them for ccx_run_prepared(). Until then
+  # this core checked none, so a default-built forcing under the canonical's params ran on the
+  # DEFAULT variants with no error (CHANGELOG 2026-10-14 n). Gate: test-run-r-guards.R.
+  ccx_enso_index_check(p, F); ccx_aod_mode_check(p, F); ccx_nuc_share_check(p, F)
+  ccx_ndep_check(if (is.null(p$ndep_ret)) CCX_NDEP_RET_DEFAULT else p$ndep_ret, F)
   substeps <- ccx_resolve_substeps(substeps, p, grid)
   n <- nrow(F)
   # THE LAND ENSO INPUT (W1, 2026-10-02): the index read lag_enso_land months late,

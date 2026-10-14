@@ -2,6 +2,20 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-14 (o) — **RULED (Marcus, verbatim): "Land them, with a test (Recommended)". The pure-R `ccx_run()` now runs the same four forcing guards as `ccx_run_prepared()`: ENSO index, AOD mode, nuclear ¹⁴C share, N deposition. Gate: `test-run-r-guards.R`, 6 tests and 9 expectations, mutation-tested 5 ways.** Also ruled: the seven scripts are "Fix on touch (Recommended)", and the two scratch worktrees "Remove both (Recommended)".
+
+- **The code** is the four lines measured in (n), with a permanent comment (`R/forcing.R`, top of `ccx_run()`). Each value is derived from `spin$params` exactly as `ccx_cpp_prepare()` derives it.
+- **The test:**
+  - R1–R4: each mismatch is refused with its own guard's message.
+  - R5: the scripts' actual failure, a DEFAULT-built `ccx_build_forcing()` under params naming `detrend`, is refused.
+  - R6: a forcing stamped from the params passes all four guards and fails only on the fake spin.
+- **Mutations** (run in the scratch tree; main untouched):
+  - deleting the ENSO guard turns R1 and R5 red;
+  - deleting the AOD, nuclear-share or deposition guard turns R2, R3 or R4 red, respectively;
+  - M5, the ENSO guard reading `"demean"` instead of the params, turns R1, R5 and R6 red.
+  - Restored, all pass.
+- **The seven scripts (fix on touch):** `d13c_isoflux_budget`, `f2_periodic_spinup`, `p12_compensator_redundant`, `seas_ml_convergence`, `seas_ml_probe`, `kz_pump_pathways`, `ta0_enso_upwelling_sign`. Each now STOPS at the canonical instead of running silently. The fix is to pass `enso_index` / `aod_mode` / `nuc_share = ccx_*_of(sp$params)`, as `dg_run()` does. ⚠ f2 also needs a ruling on deposition past 2025, when it is next touched.
+
 ## 2026-10-14 (n) — **The four forcing guards on the pure-R `ccx_run()`, MEASURED (Marcus: "Measure first (Recommended)"): they stop NOTHING in the suite (8050 / 3 / 1 with and without them, the same three expected reds) or in the app. They WOULD stop 9 of the 21 `ccx_run()` call sites under `calibration/`, in 7 scripts. Five of those run today on the canonical's params against the DEFAULT ENSO / AOD / nuclear variants, with no error.** Nothing landed; the patch ran only in a scratch worktree. Record: `outputs/diagnostics/guards_measure_20261014/` (README, patch, power check, launch scripts).
 
 - **Power first:** each of the four mismatches stops in the patched tree, and the matched case passes the guards. `test-flux-trace-exact.R` drives `ccx_run()` through all four at the canonical's non-default values, so the suite's null is not guaranteed by construction.
