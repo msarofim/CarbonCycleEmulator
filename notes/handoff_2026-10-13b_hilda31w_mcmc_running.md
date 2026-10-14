@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-13b: hilda31w ADOPTED, its test ledger APPLIED; the MCMC band is RUNNING; the product rebuilds are next
 
+⛔ **SUPERSEDED by `notes/handoff_2026-10-14_hilda31w_mcmc_complete.md`** (2026-10-14 ~06:10: the chains are complete; the read is next). Kept as written below for the record.
+
 **Supersedes** `notes/handoff_2026-10-13_hilda31w_adoption.md` (which now points here). Written on Marcus's request
 ("Yes, write the handoff note"), 2026-10-13 ~12:00.
 
