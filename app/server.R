@@ -1049,14 +1049,16 @@ function(input, output, session) {
   # holds them -- COMPUTED from the row totals and row shares, so a refit moves
   # the sentence rather than leaving it asserting the old winner.
   output$cm_takeaway <- renderText({
-    if (is.null(APP_CMAP)) return("")
+    # no stability file computed against THIS map -> no takeaway (APP_CMAP_STAB logs why)
+    if (is.null(APP_CMAP) || is.null(APP_CMAP_STAB)) return("")
     tot <- sort(rowSums(APP_CMAP$MC), decreasing = TRUE)
     top <- names(tot)[1:3]
     # ⛔ 2026-09-27: this used to say "mostly influenced by <argmax>" for all
     # three rows, and two of the three are TIES whose winner changes with the
     # arm (0.13 pp and 0.85 pp). The phrase is now a pure function in global.R
-    # so it can be gated, and it reports a tie as a tie.
-    who <- vapply(top, function(r) app_cmap_holder_phrase(APP_CMAP$MC[r, ]),
+    # so it can be gated, and it reports a tie as a tie. Since 2026-10-14 a tie is a winner that
+    # loses the row in more than APP_CMAP_TIE_LOST_MAX of the posterior draws.
+    who <- vapply(top, function(r) app_cmap_holder_phrase(APP_CMAP$MC[r, ], APP_CMAP_STAB$lost_share[[r]]),
                   character(1))
     paste0("The metrics most sensitive to changes in this model are ",
            paste(sprintf("%s — %s", top, who), collapse = "; "),

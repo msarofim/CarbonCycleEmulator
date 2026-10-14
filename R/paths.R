@@ -999,6 +999,27 @@ ccx_cmap_problems <- function(cm, mode = CCX_MODE_CANONICAL) {
   bad
 }
 
+#' Why a constraint-map STABILITY artifact may not be read beside a map (character(0) when it may)
+#'
+#' The takeaway's tie rule (Marcus 2026-10-14, "Posterior winner stability") reads, per row, the share
+#' of posterior draws in which the map's winner loses the row (calibration/promote_cmap_stability.R).
+#' Those shares belong to ONE map: the artifact carries the map it was computed against, and it is
+#' refused unless that map is identical() to the one shown. Shared by app/global.R and test-cmap-tie.R.
+#' @param st the stability artifact; @param cm the constraint map it is to be read beside
+ccx_cmap_stab_problems <- function(st, cm) {
+  pv <- st[["provenance"]]
+  if (is.null(pv) || is.null(st[["lost_share"]]) || is.null(st[["MC_map"]]))
+    return("not a constraint-map stability artifact (no provenance, lost_share or MC_map)")
+  bad <- character(0)
+  if (!identical(pv[["mode"]], cm[["provenance"]][["mode"]]))
+    bad <- c(bad, sprintf("computed at mode '%s', the map is '%s'", format(pv[["mode"]]), format(cm[["provenance"]][["mode"]])))
+  if (!identical(st[["MC_map"]], cm[["MC"]]))
+    bad <- c(bad, "computed against a different constraint map (its MC_map is not the shown map's MC)")
+  if (!setequal(names(st[["lost_share"]]), rownames(cm[["MC"]])) || anyNA(st[["lost_share"]]))
+    bad <- c(bad, "its rows are not the map's rows")
+  bad
+}
+
 #' Parameters at a fitted mode, decoded under the band that FOUND it
 #'
 #' Use this instead of `ccx_unc_to_par(md$u_mode)` whenever the parameters are

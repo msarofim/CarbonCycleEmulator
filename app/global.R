@@ -890,38 +890,50 @@ APP_FAIR_PULSE_NOTE <- paste("FaIR is shown for the same pulse on the same scena
 # three rows -- "mostly influenced by X". ⛔ TWO OF THOSE THREE WERE COIN FLIPS:
 # measured at three arms (the canonical, the like-for-like `hilda32f`, and the
 # `hilda31pe` structure contrast), the winner of δ¹³C level & gradient and of
-# Δ¹⁴C bomb CHANGES with the arm (09-26, at hilda29l; at hilda29e NEITHER flips -- below). Computing the sentence makes it MOVE; it does
+# Δ¹⁴C bomb CHANGES with the arm (09-26, at hilda29l; at hilda29e neither flipped between its two basins). Computing the sentence makes it MOVE; it does
 # not make the winner REAL. An argmax is not a finding until you print the
 # runner-up ([[ccx_cmap_second_point]]).
 #
-# ⭐ THE THRESHOLD IS MEASURED, NOT INVENTED ([[threshold_from_obs_or_law]]).
-# ⚠ RE-MEASURED 2026-10-12 AT hilda29e (Marcus, verbatim: "Scale to basin spread (Recommended)").
-# The 09-26 cut (1.60 pp) was the geometric mean of two endpoints measured at hilda29l: the largest
-# margin whose winner FLIPPED between arms (0.845) and the smallest that did not (3.018). At hilda29e,
-# against its like-for-like arm (objective #18's other basin, hilda29a6: same structure, same 29
-# names), NO row's winner flips, so that rule has no lower endpoint. The arm that does flip rows,
-# the hilda31pe structure contrast, flips one at 26.6 pp: a structure difference, not a tie.
-# THE RULE NOW ([[tolerance_scaled_to_spread]]): a winner is named only if its top-two margin
-# exceeds the largest change ANY row's margin shows between two fits of the same model at nearly
-# equal posterior (logpost -1166.95 vs -1167.36). Over the 12 rows that change runs from 0.05 to 1.92 pp (median 0.51). A margin inside it
-# is not resolved by the fit, so it is reported as a tie.
-# ⚠ ONE PAIR OF BASINS. A third basin can only widen the spread; re-measure it with
-# `calibration/diag_constraint_map_arms.R` and carry its maximum here.
-APP_CMAP_TIE_ARM       <- "hilda29a6"   # the like-for-like basin the spread is measured against
-APP_CMAP_TIE_SHIFT_MAX <- 1.923         # pp, the largest |margin change| over the 12 rows (1.9229)
-APP_CMAP_TIE_PP  <- APP_CMAP_TIE_SHIFT_MAX
-APP_CMAP_TIE_SRC <- "12 rows, hilda29e vs its like-for-like basin hilda29a6, calibration/diag_constraint_map_arms.R, 2026-10-12"
+# ⭐⭐ THE RULE SINCE 2026-10-14: POSTERIOR WINNER STABILITY (Marcus, verbatim: "Posterior winner stability
+# (Recommended)"; CHANGELOG 2026-10-14 c, d). A row's winner is NAMED only if it holds the row in at least
+# 1 - APP_CMAP_TIE_LOST_MAX of the MCMC posterior draws; otherwise the row is reported as a tie.
+# ⛔ WHY NOT A MARGIN CUT ANY MORE. Every earlier rule cut on the top-two MARGIN at the mode: 09-26's
+# geometric mean of flip/stable endpoints between arms (1.60 pp), then 10-12's basin spread
+# (hilda29e vs hilda29a6, 1.923 pp). At hilda31w there is no near basin, so the map was re-run at 100
+# posterior draws (calibration/diag_cmap_posterior_spread.R). The margin turned out NOT to predict
+# whether the winner holds:
+#   - Δ¹⁴C in the ocean has a 70.7 pp margin and loses in 6 % of draws;
+#   - Δ¹⁴C bomb has a 10.4 pp margin and holds in 98 %.
+# The stable and unstable rows' margins overlap, so no cut divides them. The posterior asks the
+# question directly. The map's cells are first-order slopes (a step-scaling test, 10-14 c), and they
+# move across the posterior.
+# ⚠ 5 % is the band's own convention (the 5-95 % range everywhere in the app), not a fitted threshold.
+# The shares are DATA (data/constraint_map_stability.rds, calibration/promote_cmap_stability.R), refused
+# unless computed against THIS map (ccx_cmap_stab_problems, R/paths.R). A rebuilt map drops the tie
+# rule until the stability is re-run: the takeaway is then not shown, and the log says why.
+APP_CMAP_TIE_LOST_MAX <- 0.05
+APP_CMAP_TIE_SRC <- "share of 100 MCMC posterior draws (hilda31w, 4 chains x 200k) in which the map's winner loses the row; calibration/diag_cmap_posterior_spread.R, 2026-10-14"
+APP_CMAP_STAB_FILE <- file.path(CCX_ROOT, "data", "constraint_map_stability.rds")
+APP_CMAP_STAB <- local({
+  if (is.null(APP_CMAP)) return(NULL)
+  if (!file.exists(APP_CMAP_STAB_FILE)) { message("app: constraint-map takeaway NOT shown: no stability file"); return(NULL) }
+  st <- readRDS(APP_CMAP_STAB_FILE)
+  bad <- ccx_cmap_stab_problems(st, APP_CMAP)
+  if (length(bad)) { message("app: constraint-map takeaway NOT shown: ", paste(bad, collapse = "; ")); return(NULL) }
+  st
+})
 
 #' How to describe who holds one row of the constraint map
 #'
 #' @param row one row of `MC` (named leverage per component)
-#' @param tie_pp margin, in percentage points, at or below which the top two are
-#'   reported as a tie rather than a winner
+#' @param lost_share the share of posterior draws in which this row's winner at the mode loses the row
+#' @param lost_max the share above which the top two are reported as a tie rather than a winner
 #' @return a phrase; Marcus's wording (2026-09-27) for the tie case
-app_cmap_holder_phrase <- function(row, tie_pp = APP_CMAP_TIE_PP) {
+app_cmap_holder_phrase <- function(row, lost_share, lost_max = APP_CMAP_TIE_LOST_MAX) {
+  stopifnot(length(lost_share) == 1L, is.finite(lost_share), lost_share >= 0, lost_share <= 1)
   sh <- 100 * row / sum(row)
   o  <- sort(sh, decreasing = TRUE)
-  if (length(o) >= 2 && (o[[1]] - o[[2]]) <= tie_pp)
+  if (length(o) >= 2 && lost_share > lost_max)
     return(sprintf("influenced about equally by %s (%.0f%%) and %s (%.0f%%)",
                    names(o)[1], o[[1]], names(o)[2], o[[2]]))
   sprintf("mostly influenced by %s (%.0f%%)", names(o)[1], o[[1]])

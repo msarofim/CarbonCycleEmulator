@@ -79,8 +79,9 @@ CA_ARM_ONLY_STREAMS <- c("gcb_ocean_enso_slope")
 CA_ROLE <- c(ref      = "<- REFERENCE (the shipped arm)",
              like     = "<- A2 like-for-like: same structure and names, objective #18's other basin",
              contrast = "<- A3 STRUCTURE contrast: NOT an answer to the fit question")
-# the tie cut being re-measured (app/global.R), and the matrices a stream restriction must subset
-CA_TIE_CONSTS <- c("APP_CMAP_TIE_ARM", "APP_CMAP_TIE_SHIFT_MAX", "APP_CMAP_TIE_PP", "APP_CMAP_TIE_SRC")
+# the shipped tie rule (app/global.R; since 2026-10-14 posterior winner stability, not a margin cut), and the
+# matrices a stream restriction must subset
+CA_TIE_CONSTS <- c("APP_CMAP_TIE_LOST_MAX", "APP_CMAP_TIE_SRC")
 CA_STREAM_MATS <- c("M", "DHI", "DLO", "CURV", "SLOPE", "PINS")
 CA_FAMILY_MATS <- c("MC", "RS", "CS")
 
@@ -245,11 +246,11 @@ for (f in fams) {
 ca_say("   (each cell: the component holding the LARGEST share of that row, and that share)\n")
 
 # ---------------------------------------------------------------------
-# THE TIE CUT, RE-MEASURED (2026-10-12; test-cmap-tie.R "THE GAP", app/global.R).
-# The margin is the REFERENCE row's top-two share gap, computed exactly as
-# app_cmap_holder_phrase() does: the cut is applied to the reference's rows, and
-# the gap gate reads them. A row FLIPS if its winner differs at an arm.
-# Two definitions: A2 only (the like-for-like answer) and every arm (09-26's).
+# THE ARMS' VIEW OF THE TIES (2026-10-12; the shipped rule moved 2026-10-14). The margin is the REFERENCE
+# row's top-two share gap; a row FLIPS if its winner differs at an arm. Two definitions: A2 only (the
+# like-for-like answer) and every arm (09-26's). ⚠ REPORT ONLY since 10-14: the app's tie rule is now the
+# posterior winner-loss share (calibration/diag_cmap_posterior_spread.R, promote_cmap_stability.R), because
+# at hilda31w the mode's margin did not predict whether a winner holds across the posterior.
 # ---------------------------------------------------------------------
 TIE <- new.env()
 for (e in parse(ccx_path("app", "global.R")))
@@ -263,8 +264,8 @@ win <- sapply(ALL, function(m) apply(CM[[m]]$MC[rownames(MC0), , drop = FALSE], 
 flip_like <- win[, CA_LIKE] != win[, CA_REF]
 flip_any  <- apply(win[, CA_ARMS, drop = FALSE] != win[, CA_REF], 1, any)
 ca_say("\n-- THE TIE CUT, RE-MEASURED: the reference's top-two margin per row, and whether the winner FLIPS --\n")
-ca_say("   shipped: arm %s, largest margin shift %.3f, cut %.3f pp (%s)\n",
-       TIE$APP_CMAP_TIE_ARM, TIE$APP_CMAP_TIE_SHIFT_MAX, TIE$APP_CMAP_TIE_PP, TIE$APP_CMAP_TIE_SRC)
+ca_say("   shipped rule: a tie when the winner loses in > %.0f %% of posterior draws (%s)\n",
+       100 * TIE$APP_CMAP_TIE_LOST_MAX, TIE$APP_CMAP_TIE_SRC)
 o <- order(mg)
 for (i in o)
   ca_say("   %-30s margin %6.2f pp  %s%s\n", rownames(MC0)[i], mg[[i]],
@@ -288,7 +289,7 @@ EP_ANY  <- ca_endpoints(flip_any, "every arm")
 ca_signed <- function(r, w) { s <- 100 * r / sum(r); s[[w]] - max(s[names(s) != w]) }
 w0 <- apply(MC0, 1, ca_winner)
 shift <- vapply(rownames(MC0), function(f) ca_signed(CM[[CA_LIKE]]$MC[f, ], w0[[f]]) - ca_signed(MC0[f, ], w0[[f]]), numeric(1))
-ca_say("   SPREAD at A2 (%s): |margin shift| median %.3f, max %.3f pp (%s) -> cut %.3f pp; shipped %.3f\n",
-       CA_LIKE, median(abs(shift)), max(abs(shift)), names(which.max(abs(shift))), max(abs(shift)), TIE$APP_CMAP_TIE_PP)
+ca_say("   SPREAD at A2 (%s): |margin shift| median %.3f, max %.3f pp (%s) -- the retired 10-12 rule's cut, reported only\n",
+       CA_LIKE, median(abs(shift)), max(abs(shift)), names(which.max(abs(shift))))
 
 ca_say("\nwrote %s\n", CA_LOG)
