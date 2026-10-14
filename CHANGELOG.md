@@ -2,6 +2,13 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-14 (k) — **Suite @ `ea29022`, run twice. LINKED: 8050 passed, 3 failed, 1 skipped (the 8040 + the 10 new; the same three expected reds), so the promotion is bit-identical end to end. UNLINKED (no `data-raw/downloads/`, which `setup.R` used to refuse): 8035 / 4 / 5, and no objective or stream-reproduce test fails. The worktree trap is closed for the objective.**
+
+- Logs: `outputs/diagnostics/suite_20261014_ea29022_{linked,unlinked}.log`. Each ran from its own frozen worktree (`~/ccx_frozen/suite_20261014_ea29022_*`), concurrently, 20.3 min each.
+- **Unlinked, the one extra red is `test-iav-cut.R` IC8.** It sha256s the RAW `data-raw/downloads/mbl_zonal_co2_GL.txt` and does not skip when the file is absent; four sibling provenance tests do skip. It is a build-provenance check, not the objective, and it passes linked. **Not edited; reported.** A `skip_if_not(file.exists(...))` like its siblings would be the fix, and that is Marcus's call.
+- Unlinked skips (5): `fair-pd100`, `luc-nh-share`, `sigma-inflation` and the new `nuclear-c14-source` N2, each needing its raw download, plus the standing `l2-enso-limb` skip.
+- The app sources cleanly on the new loader: no nuclear warning, and the forcing sum is 13978.29 mol, equal to the 10-14 (h) pre-change log.
+
 ## 2026-10-14 (j) — **RULED (Marcus, verbatim): "Promote to data/ .rds + stop() (Recommended)". The nuclear-industry ¹⁴C source is now the tracked `data/forcing_nuclear_c14.rds` (`data-raw/build_nuclear_c14_source.R`), and `ccx_nuclear_c14_annual()` STOPS without it. Before, it summed `data-raw/downloads/nuclear14c/` at run time, and its absence only warned and zeroed the source. Bit-identical: the source and three forcings are `identical()` to the pre-change build. Nothing in `R/` reads `data-raw/` at run time now.** Also ruled: the release waits ("We can wait until the current set of work is done, and then set the new version."). The six frozen worktrees are removed ("Remove all six (Recommended)").
 
 - **The change:**
