@@ -2,6 +2,28 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-14 (a) — **The hilda31w 200k chains: SNAPSHOTTED and READ. NOT converged by Vehtari et al.'s reference. The failure is the SEASONAL-LAG RIDGE, not `h_ml`: R-hat 1.241 (`seas_T_lag`), 1.199 (`seas_lag_p_NH`), 1.150 (`seas_lag_p_SH`), bulk ESS 13–19. It comes from one 65k-iteration excursion of chain 4. Draws from that excursion move the futures' key-cell medians by ≤ 0.28 of the band's width (median 0.10 / 0.13).** Nothing shipped; the calls are Marcus's. (Handoff 10-14 §4 steps 1–2.)
+
+- **Snapshot:** `outputs/mcmc_check_20261014_hilda31w_200k/`. The four chains are `cmp`-identical to the frozen worktree's, with the chain logs and launch script in `logs/`. Chain md5s: a33cdaed… / 4b4ae5d3… / 898cd3b2… / 9fb9ff92….
+- **The read** (`read_mcmc_check.R --drop=0` → `read_20261014_drop0.log`, `diag_20261014_drop0.csv`, `pooled_u.rds`; 34 000 × 31, md5 322ff754…).
+  - Every chain's provenance agrees, and the mode, structure and pins equal the canonical's.
+  - **Log-posterior blocks:** no post-adaptation trend in any chain. Chains 1–3 block means sit at −1065.5 to −1075.1, inside the Laplace expectation's 95 % [−1078.6, −1063.3]. Chain 4 drops to −1073 to −1081 at 75–110k (the excursion), then recovers.
+  - R-hat above 1.01 for 14 of 32 quantities; bulk / tail ESS below 400 for 13. After the lag triplet: `beta_max` 1.057 (ESS 69 / 23), `h_ml` 1.054 (72 / 34), `npp_frac_NH` 1.050, `q10` 1.049, `fert_k` 1.032, logpost 1.032.
+  - Against Laplace (u-space sd ratio): `h_ml` ×2.94 (shift −2.36 sd); `bomb_share_NH` ×1.54; `seas_lag_p_NH` ×1.54; `beta_max` ×1.38.
+- **Where the failure is** (`excursion_read/`, README there):
+  - Chains 1–3 hold `seas_T_lag` at ~0.1–0.4 months (mode 0.276).
+  - From ~50k chain 4 walked a joint ridge: `seas_T_lag` to 1.7–2.65, `seas_lag_p_NH` 1.25 → 1.68, `seas_lag_p_SH` 2.33 → 2.76, and `h_ml` down to ~45 m at 80–110k. It returned by ~115k.
+  - Share of kept samples at `seas_T_lag` > 1: 39.5 % (chain 4) vs 5.3 / 2.5 / 1.6 % (chains 1–3).
+  - So the handoff's "chain 4's `h_ml` excursion" was the `h_ml` shadow of a LAG excursion. `h_ml`'s own R-hat is the sixth-worst.
+- **The identifiability check** (`diag_mcmc_identifiability.R` → `mcmc_identifiability_20261014_hilda31w.{log,rds}`; GATE: logpost reproduced, diff 0):
+  - **`bomb_share_NH` is identified.** 95 % [0.776, 0.909] in the band [0.77, 0.98]. Correlation with `tau_ex`: posterior −0.29, Laplace −0.31. With `bomb_total`: −0.03 vs −0.06. 4.2 % of draws in the band's lowest 5 %.
+  - **`seas_T_lag` sits on its 0 floor.** 2.5 / 50 / 97.5 % = 0.015 / 0.230 / 2.585 months. 60 % of draws in the band's lowest 5 %, 11.5 % in the lowest 1 %. Correlation with `seas_lag_p_NH` +0.964 (parameter scale; Laplace +0.955).
+  - **`h_ml`: the wall at the mode is the substep cap again, 75.02 m** (P8 alone 75.14). No draw past it. 2.7 / 5.3 / 15.1 % within 1 / 2 / 5 m below it; 0.1 / 2.1 / 9.2 % within 1 / 2 / 5 m of the 42.5 m floor. 95 % [44.8, 74.1] m. ⚠ So the posterior's upper tail is truncated by a NUMERICAL limit (`CCX_SUBSTEPS_MAX`), not by data or physics. The 2.7 % within 1 m is the mass that is piling against it.
+- **Does the band care?** One `build_futures_ribbons.R` run, 400 supplied draws, 6.6 min on 8 cores. Rows 1–200 are evenly spaced from chain 4's excursion window (50–115k), rows 201–400 from chains 1–3.
+  - Excursion minus main median, over main's 5–95 % width: **median 0.10 (CO₂) / 0.13 (GMST); max 0.28** (vvLN CO₂ 2150: −2.76 ppm on 10.07 ppm; vvLN GMST 2100: −0.007 °C on 0.027 °C).
+  - The low scenarios run slightly LOWER in CO₂ at 2150 in the excursion. Widths agree within ×0.77–1.17.
+  - ⚠ Not ESS-adjusted: the excursion's 200 draws are one autocorrelated stretch of one chain. The test BOUNDS the effect; it cannot fix the region's weight, which chains 1–3 put at 1.6–5 % and chain 4 at 40 %.
+- **Timing measured for the full build:** 400 draws took 6.6 min on 8 cores, about 60 draws per minute, slower than hilda29e's ~93. So thin ×2 (17 000 draws) is about 4.7 h, thin ×4 (8 500) about 2.4 h, and unthinned (34 000) about 9.4 h.
 ## 2026-10-13 (q) — **Card 7's `k_w` claim RE-MEASURED at hilda31w: the data prefer Naegler's 1,446 by +6.21 log-likelihood (+2.75 at hilda34g), and `hs_asx_frac`'s prior is 88 % of what holds `k_w` higher.** Both of the card's claims hold. The two profile starts agree to 1.3e-6 in logpost. Marcus: "Yes, copy the results and compute the prior ledger". Card text unchanged.
 
 - **The profile** (`calibration/run_price_profile.R` @`142767b`, run overnight as ruled): both starts CONVERGED in 2 cycles (133 / 184 CPU-min) to one point. Results are copied byte-identical into `outputs/diagnostics/price_profile_20261013_hilda31w/` with their logs and launch script.

@@ -1,0 +1,61 @@
+
+seas_T_lag (mode 0.276)  median by quarter of kept samples [q05,q95 overall]
+  chain 1:   0.405   0.250   0.150   0.239   [0.073, 1.035]
+  chain 2:   0.180   0.172   0.258   0.237   [0.052, 0.767]
+  chain 3:   0.221   0.170   0.143   0.140   [0.009, 0.729]
+  chain 4:   1.419   2.500   0.113   0.206   [0.032, 2.705]
+
+seas_lag_p_NH (mode 1.259)  median by quarter of kept samples [q05,q95 overall]
+  chain 1:   1.305   1.259   1.235   1.256   [1.178, 1.433]
+  chain 2:   1.244   1.241   1.264   1.259   [1.173, 1.387]
+  chain 3:   1.251   1.237   1.238   1.237   [1.159, 1.373]
+  chain 4:   1.543   1.675   1.221   1.253   [1.173, 1.735]
+
+seas_lag_p_SH (mode 2.338)  median by quarter of kept samples [q05,q95 overall]
+  chain 1:   2.400   2.348   2.293   2.346   [2.137, 2.590]
+  chain 2:   2.324   2.328   2.360   2.352   [2.139, 2.542]
+  chain 3:   2.330   2.337   2.336   2.315   [2.125, 2.542]
+  chain 4:   2.568   2.757   2.311   2.355   [2.169, 2.834]
+
+h_ml (mode 69.541)  median by quarter of kept samples [q05,q95 overall]
+  chain 1:  62.782  63.064  63.023  63.377   [47.791, 73.255]
+  chain 2:  63.078  61.575  60.711  62.926   [46.000, 72.987]
+  chain 3:  62.694  64.090  65.377  62.698   [51.206, 73.490]
+  chain 4:  62.484  45.709  63.720  61.586   [44.326, 72.619]
+
+beta_max (mode 2.005)  median by quarter of kept samples [q05,q95 overall]
+  chain 1:   1.993   2.075   2.111   2.085   [1.647, 2.451]
+  chain 2:   2.241   2.042   2.022   2.127   [1.696, 2.528]
+  chain 3:   2.275   2.029   2.103   2.036   [1.683, 2.527]
+  chain 4:   2.015   1.971   2.130   2.560   [1.668, 2.773]
+
+npp_frac_NH (mode 0.638)  median by quarter of kept samples [q05,q95 overall]
+  chain 1:   0.622   0.635   0.631   0.629   [0.583, 0.669]
+  chain 2:   0.628   0.632   0.627   0.633   [0.578, 0.676]
+  chain 3:   0.633   0.631   0.636   0.632   [0.592, 0.672]
+  chain 4:   0.621   0.589   0.642   0.627   [0.573, 0.666]
+
+q10 (mode 1.153)  median by quarter of kept samples [q05,q95 overall]
+  chain 1:   1.138   1.150   1.147   1.144   [1.083, 1.225]
+  chain 2:   1.145   1.153   1.145   1.145   [1.089, 1.234]
+  chain 3:   1.156   1.150   1.146   1.152   [1.097, 1.246]
+  chain 4:   1.126   1.101   1.158   1.140   [1.082, 1.225]
+
+fert_k (mode 601.441)  median by quarter of kept samples [q05,q95 overall]
+  chain 1: 603.158 601.770 612.273 630.719   [453.916, 827.484]
+  chain 2: 674.845 599.109 596.052 648.102   [451.154, 831.545]
+  chain 3: 681.392 594.334 684.617 584.520   [467.002, 847.723]
+  chain 4: 579.967 633.121 684.305 763.751   [479.740, 955.291]
+
+pooled correlation (natural units):
+              seas_T_lag seas_lag_p_NH seas_lag_p_SH
+seas_T_lag         1.000         0.964         0.792
+seas_lag_p_NH      0.964         1.000         0.809
+seas_lag_p_SH      0.792         0.809         1.000
+
+fraction of pooled seas_T_lag below 0.25 / 0.5 months: 0.5338824 0.7621176 
+differences NH-T, SH-T pooled quantiles:
+    5%    50%    95% 
+-0.572  1.017  1.173 
+   5%   50%   95% 
+0.522 2.067 2.328 
