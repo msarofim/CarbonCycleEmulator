@@ -199,8 +199,7 @@ test_that("IC8 THE DATA: the monthly product reproduces its estimator; its check
   man <- utils::read.csv(ccx_path("data-raw", "downloads", "MANIFEST.csv"), stringsAsFactors = FALSE)
   expect_identical(pr$provenance$manifest, "mbl_zonal_gl")
   expect_identical(pr$provenance$sha256, man$sha256[man$key == "mbl_zonal_gl"])
-  expect_identical(unname(tools::sha256sum(ccx_path("data-raw", "downloads", "mbl_zonal_co2_GL.txt"))),
-                   pr$provenance$sha256)
+  # the RAW file's own sha256 is IC8b, which skips when the download is absent (Marcus 2026-10-14)
   # the window is covered, with g defined over every month of it
   w <- m[m$year >= LIK_IAV_WIN[1] & m$year <= LIK_IAV_WIN[2], ]
   expect_identical(nrow(w), 12L * (LIK_IAV_WIN[2] - LIK_IAV_WIN[1] + 1L)); expect_true(all(is.finite(w$g)))
@@ -209,6 +208,14 @@ test_that("IC8 THE DATA: the monthly product reproduces its estimator; its check
   expect_identical(g[7], x[13] - x[1]); expect_identical(g[24], x[30] - x[18])
   expect_true(all(is.na(g[c(1:6, 25:30)]))); expect_true(all(is.finite(g[7:24])))
   expect_identical(ccx_cen12(1:12), rep(NA_real_, 12))
+})
+
+test_that("IC8b THE RAW FILE: the download's sha256 is the one the product records", {
+  # Split out of IC8 so ONLY this expectation skips in a tree without data-raw/downloads
+  # (a frozen worktree, a bundle); the four sibling provenance tests skip the same way.
+  raw <- ccx_path("data-raw", "downloads", "mbl_zonal_co2_GL.txt")
+  skip_if_not(file.exists(raw), "NOAA MBL zonal CO2 download not present")
+  expect_identical(unname(tools::sha256sum(raw)), ccx_iav_growth_obs()$provenance$sha256)
 })
 
 test_that(sprintf(paste("IC9 THE ESTIMATOR at the fixture %s (where LIK_IAV_NEFF was measured and is held): the preview's",

@@ -2,6 +2,16 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-14 (m) — **RULED (Marcus, verbatim): "Skip that one expectation (Recommended)". IC8's raw-file sha256 is now its own block, `IC8b`, which skips when `data-raw/downloads/mbl_zonal_co2_GL.txt` is absent; IC8's other 12 expectations run everywhere.** Also ruled: the pure-R guards are "Measure first (Recommended)" (running, (n)); the 10-13 smoke chains in `~/ccx_frozen/` are "Keep it".
+
+- **Why a split rather than a `skip_if_not` in place:** a skip ends the whole `test_that` block, so in place it would also have skipped the window and `ccx_cen12` checks that follow. The four sibling provenance tests skip a whole block too.
+- **Checked three ways on `test-iav-cut.R`** (scratch worktree `~/ccx_frozen/suite_20261014_guards_base`):
+  - unlinked: 145 / 0 / 1 (IC8 12 / 0, IC8b skipped);
+  - linked: 146 / 0 / 0;
+  - MUTATION (the raw file replaced by a copy with one byte appended): 145 / 1 / 0, the failure is IC8b. Restored: 146 / 0 / 0.
+  - Main's raw file is untouched (sha256 `ab0bae11…`, the one `pr$provenance` records).
+- Also: the :7790 preview was restarted on the `ea29022` loader. The isotope tab draws both plots with no output error, and the server log has no nuclear warning.
+
 ## 2026-10-14 (l) — **Handoff `notes/handoff_2026-10-14c_nuclear_source_promoted.md`** (Marcus: "Yes, write the handoff and remove the two suite worktrees"). It supersedes 10-14b, which now points to it. The two `ea29022` suite worktrees are removed (logs committed in (k)), so no frozen worktrees remain.
 
 ## 2026-10-14 (k) — **Suite @ `ea29022`, run twice. LINKED: 8050 passed, 3 failed, 1 skipped (the 8040 + the 10 new; the same three expected reds), so the promotion is bit-identical end to end. UNLINKED (no `data-raw/downloads/`, which `setup.R` used to refuse): 8035 / 4 / 5, and no objective or stream-reproduce test fails. The worktree trap is closed for the objective.**
