@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-14 (l) — **Handoff `notes/handoff_2026-10-14c_nuclear_source_promoted.md`** (Marcus: "Yes, write the handoff and remove the two suite worktrees"). It supersedes 10-14b, which now points to it. The two `ea29022` suite worktrees are removed (logs committed in (k)), so no frozen worktrees remain.
+
 ## 2026-10-14 (k) — **Suite @ `ea29022`, run twice. LINKED: 8050 passed, 3 failed, 1 skipped (the 8040 + the 10 new; the same three expected reds), so the promotion is bit-identical end to end. UNLINKED (no `data-raw/downloads/`, which `setup.R` used to refuse): 8035 / 4 / 5, and no objective or stream-reproduce test fails. The worktree trap is closed for the objective.**
 
 - Logs: `outputs/diagnostics/suite_20261014_ea29022_{linked,unlinked}.log`. Each ran from its own frozen worktree (`~/ccx_frozen/suite_20261014_ea29022_*`), concurrently, 20.3 min each.

@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-14b: the hilda31w MCMC is read, the band SHIPPED, and the tie rule is now posterior stability
 
+> ⚠ **SUPERSEDED 2026-10-14 by `notes/handoff_2026-10-14c_nuclear_source_promoted.md`.** Its §3 items 1, 4 (the nuclear warn) and the `~/ccx_frozen` list are done or changed there.
+
 **Supersedes** `notes/handoff_2026-10-14_hilda31w_mcmc_complete.md` (which now points here). Written on Marcus's request
 ("Yes, write the handoff (Recommended)"), 2026-10-14 ~11:00.
 
