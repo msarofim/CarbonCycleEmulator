@@ -2,6 +2,11 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-14 (i) — **Suite @ `4acb215`: 8040 passed, 3 failed, 1 skipped, 0 errored, 19.9 min. All three reds are the expected ones:** `app-version` (the release is still cut on hilda29e; v1.0 vs v1.1 is Marcus's call) and card 4 ×2 (by design). Log: `outputs/diagnostics/suite_20261014_4acb215.log`.
+
+- Against 8027 / 8 at `5f158b3`: `test-cmap-tie` (4 reds) and `test-futures-ribbons` (1) are now green, as 10-14 (d) and (f) predicted. Nothing new is red.
+- It ran from the linked frozen worktree `~/ccx_frozen/suite_20261014_4acb215` (run-time inputs 14 / 14).
+
 ## 2026-10-14 (h) — **A DEPLOY GAP, measured: DEPLOY.md says to exclude `data-raw/`, but the app reads `data-raw/downloads/nuclear14c/` at run time. Deployed as written, the public app would silently run with the industrial ¹⁴C source set to zero: Δ¹⁴C NH −3.9 ‰ by 2024 (~0.7–0.8 of the fitted `sigma_d14c`, 5.37 ‰), and CO₂ / δ¹³C unchanged.** Nothing changed; the fix is Marcus's.
 
 - Record: `outputs/diagnostics/deploy_nuclear_absent_20261014/` (README, script, log). It reruns the app's own `app_hist` path with the loader returning its empty-directory frame.
