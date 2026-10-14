@@ -1,5 +1,7 @@
 # Beta copy worklist, 2026-10-12
 
+> ⚠ **2026-10-14:** the band re-shipped at `hilda31w` (`4acb215`). Group A's locations still hold, but every hilda29e NUMBER it cites from `ship_copy_facts_2026-10-09.md` is superseded by `notes/ship_copy_facts_2026-10-14_hilda31w.md` (the `.rds` md5 is now `66c81912…`).
+
 - Date: 2026-10-12. Commit: `f0def17`.
 - Compiled read-only; no copy drafted.
 

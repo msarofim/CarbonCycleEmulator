@@ -2,6 +2,17 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-14 (g) — **The copy facts at hilda31w: `notes/ship_copy_facts_2026-10-14_hilda31w.md`.** Facts only, no copy. The 10-09 facts note and the 10-12 worklist were hilda29e; both now carry a pointer.
+
+- Read from the shipped `data/futures_ribbons.rds` (md5 66c81912…) and the 10-14 MCMC read. The script was a scratch script, not committed.
+- What moved since hilda29e:
+  - 31 parameters varied, not 29 (`seas_T_lag` and `bomb_share_NH` added). The 14 held values are identical, so the label's "fourteen" still holds.
+  - F3 is materially worse by the strict reference: R-hat max 1.241 (`seas_T_lag`), 14 of 32 above 1.01, min bulk ESS 13. In band units it is on the same footing: ≤ 4.76 ppm, 21 %.
+  - F2: `h_ml` 2.94× its Laplace sd, now against the substep cap (75.02 m), not the 42.5 m floor.
+  - F1: a Gaussian band cannot be built at hilda31w at all.
+  - The widest GMST band in 2150 is vvH (0.0847 °C), not vvLN.
+- Pixel sizes are scaled from the 10-09 browser measurement and were NOT re-measured.
+
 ## 2026-10-14 (f) — **SHIPPED (Marcus, verbatim): "Ship the hilda31w band (Recommended)". The hilda31w MCMC band is in `data/futures_ribbons.rds`; `APP_RIBBONS_HOLD` stays set until Marcus's copy, as on 10-09. `test-futures-ribbons` is GREEN (65 / 0).** (`4acb215`)
 
 - `promote_futures_ribbons.R` at the clean `753abc9` (log `outputs/diagnostics/promote_futures_ribbons_20261014.log`):

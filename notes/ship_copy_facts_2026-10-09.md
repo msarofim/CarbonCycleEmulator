@@ -1,5 +1,7 @@
 # The band ship: FACTS for Marcus's copy, 2026-10-09
 
+> ⚠ **SUPERSEDED FOR ITS NUMBERS (2026-10-14):** these are `hilda29e`'s. The band re-shipped at `hilda31w` (`4acb215`); the numbers for the copy are in `notes/ship_copy_facts_2026-10-14_hilda31w.md`.
+
 **FACTS, NOT COPY.** The wording is Marcus's. Every number below comes from a committed artifact:
 - the shipped band `data/futures_ribbons.rds` (`e1711dc`);
 - the 200k read `outputs/mcmc_check_20261009_hilda29e_200k/` (`diag_20261009_drop0.csv`, `read_20261009_drop0_pool2.log`);
