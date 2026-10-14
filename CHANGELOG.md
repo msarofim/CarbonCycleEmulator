@@ -2,6 +2,34 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-14 (d) — **RULED (Marcus, verbatim): "Posterior winner stability (Recommended)"; refused half-steps "Finite half only (Recommended)". The takeaway's tie rule is now: a row's winner is named only if it holds the row in ≥ 95 % of the MCMC posterior draws. At hilda31w that makes CO₂ level a tie (12 %) beside δ¹³C level & gradient (8 %); CO₂ seasonal cycle keeps its winner (0 %). `test-cmap-tie` is GREEN (47 / 0), mutation-tested.** (`988465e`, `a69d606`)
+
+- **`calibration/promote_cmap_stability.R` (new)** writes `data/constraint_map_stability.rds` from the landed 100-draw run.
+  - Each row's winner-loss share is RECOMPUTED from the run's per-draw winners and must equal the run's table.
+  - The shipped map's MC is carried, and the run's map at the mode must be `identical()` to it.
+  - It records the source, draws and chains, with their md5s and seeds.
+  - Two runs at `988465e` are BYTE-IDENTICAL (md5 7387a81b…). The second-path run must come first, or the rewritten tracked file stamps the other run `+dirty`.
+- **`R/paths.R` `ccx_cmap_stab_problems()`:** the app and the test refuse a stability file not computed against the map shown. ⚠ So **a map rebuild removes the takeaway** (logged) until the 100-draw run and the promote are re-done.
+- **`app/global.R`:**
+  - `APP_CMAP_TIE_LOST_MAX` = 0.05 (the app's own 5–95 % convention, not a fitted number). `APP_CMAP_TIE_SRC` re-pointed.
+  - `APP_CMAP_TIE_ARM` / `_SHIFT_MAX` / `_PP` retired.
+  - `app_cmap_holder_phrase(row, lost_share)` refuses a share outside [0, 1].
+  - `app/server.R` passes the row's share, and renders no takeaway without a matching stability.
+- **`test-cmap-tie.R` re-expressed** (the gate change is covered by the ruling). Six blocks:
+  - the rule and the retired constants' absence;
+  - the phrase, by stability not margin, including the boundary at exactly 5 %;
+  - the server call;
+  - the real product (two ties among the top three, as measured);
+  - the shares recomputed from the cited run;
+  - in-test mutations.
+  - **Code mutations, each restored byte-identically (`cmp`):** `>=` for `>` → the phrase test fails; the server without the share → the server test fails; one shipped share 0.12 → 0.04 → three tests fail.
+- **`diag_constraint_map_arms.R`** reports the arms' flips against the new rule; its basin spread is report-only.
+- **Tests:** `test-cmap-tie` 47 / 0, and the 21 other files that read `global.R`, `server.R`, `paths.R` or the lints. The only reds are the four expected ones: app-version (release), futures-ribbons (until the band ships) and card 4 ×2 (by design). `constraint-map` 145 / 0, `-panel` 63 / 0.
+- **Live app** (:7790, What pins down what?): the takeaway reads "δ¹³C level & gradient — influenced about equally by Input scalings & reporting (22%) and High-latitude structure (21%); CO₂ level — influenced about equally by Land uptake (34%) and Mixed layer & vertical mixing (22%); CO₂ seasonal cycle — mostly influenced by Seasonal cycle (71%)", with 0 output errors.
+  - ⚠ **COPY, MARCUS'S:** "about equally" was worded (09-27) for close margins. It now also covers ties with unequal mode shares (34 % vs 22 %). The phrase needs his rewording; the rule does not depend on it.
+  - The server log's two "figure margins too large" (`k_plot`, `k_seasonal`) were a first-load sizing transient: both render at full width on revisit.
+- Memory: [[ccx_cmap_tie_posterior_stability]] (new; supersedes [[ccx_cmap_tie_basin_spread]], marked).
+
 ## 2026-10-14 (c) — **THE TIE CUT FROM THE POSTERIOR, READ: the ruled statistic is 93.3 pp, which would make all 12 rows ties. It is not usable as a cut. NO MARGIN CUT separates the rows whose winner holds across the posterior from those whose winner does not: Δ¹⁴C in the ocean has a 70.7 pp margin and loses in 6 % of draws, while Δ¹⁴C bomb has 10.4 pp and holds in 98 %. A step-scaling test rules out an integrator artefact: the map's cells are first-order SLOPES, and those move across the posterior.** `APP_CMAP_TIE_*` untouched; the method is back with Marcus.
 
 - **The run** (`diag_cmap_posterior_spread.R` @`1c26e8e`, frozen worktree, 100 draws, 25 per chain, 45.3 min on 1 core): every gate PASSES with diff 0 (STEP, MAP, JOIN 100 / 100, LP). Landed byte-identical: `outputs/diagnostics/cmap_posterior_spread_20261014_hilda31w_n100.{log,rds,out}` and the launch script.
