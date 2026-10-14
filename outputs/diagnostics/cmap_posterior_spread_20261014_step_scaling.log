@@ -1,0 +1,56 @@
+
+== mode: h_ml 69.54 m, kz 13790 ==
+  h_ml          step x1.00  d14C-ocean |d+| 0.1153 |d-| 0.1050   CO2-grad |d+| 0.0081 |d-| 0.0074
+  h_ml          step x0.50  d14C-ocean |d+| 0.0563 |d-| 0.0538   CO2-grad |d+| 0.0040 |d-| 0.0040
+  h_ml          step x0.25  d14C-ocean |d+| 0.0278 |d-| 0.0272   CO2-grad |d+| 0.0019 |d-| 0.0018
+  kz            step x1.00  d14C-ocean |d+| 0.2910 |d-| 0.2708   CO2-grad |d+| 0.0098 |d-| 0.0100
+  kz            step x0.50  d14C-ocean |d+| 0.1429 |d-| 0.1378   CO2-grad |d+| 0.0049 |d-| 0.0050
+  kz            step x0.25  d14C-ocean |d+| 0.0708 |d-| 0.0695   CO2-grad |d+| 0.0025 |d-| 0.0025
+  kz_deep_frac  step x1.00  d14C-ocean |d+| 1.9005 |d-| 0.7709   CO2-grad |d+| 0.0075 |d-| 0.0040
+  kz_deep_frac  step x0.50  d14C-ocean |d+| 0.7337 |d-| 0.4673   CO2-grad |d+| 0.0032 |d-| 0.0023
+  kz_deep_frac  step x0.25  d14C-ocean |d+| 0.3250 |d-| 0.2594   CO2-grad |d+| 0.0015 |d-| 0.0012
+  tau_ex        step x1.00  d14C-ocean |d+| 0.0006 |d-| 0.0005   CO2-grad |d+| 0.6176 |d-| 1.0081
+  tau_ex        step x0.50  d14C-ocean |d+| 0.0003 |d-| 0.0003   CO2-grad |d+| 0.3585 |d-| 0.4562
+  tau_ex        step x0.25  d14C-ocean |d+| 0.0001 |d-| 0.0001   CO2-grad |d+| 0.1916 |d-| 0.2160
+
+== draw86: h_ml 44.16 m, kz 12669 ==
+  h_ml          step x1.00  d14C-ocean |d+| 0.0010 |d-| 0.0010   CO2-grad |d+| 0.0006 |d-| 0.0006
+  h_ml          step x0.50  d14C-ocean |d+| 0.0005 |d-| 0.0005   CO2-grad |d+| 0.0003 |d-| 0.0003
+  h_ml          step x0.25  d14C-ocean |d+| 0.0003 |d-| 0.0002   CO2-grad |d+| 0.0002 |d-| 0.0001
+  kz            step x1.00  d14C-ocean |d+| 0.0340 |d-| 0.0346   CO2-grad |d+| 0.0137 |d-| 0.0139
+  kz            step x0.50  d14C-ocean |d+| 0.0170 |d-| 0.0172   CO2-grad |d+| 0.0069 |d-| 0.0069
+  kz            step x0.25  d14C-ocean |d+| 0.0085 |d-| 0.0086   CO2-grad |d+| 0.0034 |d-| 0.0035
+  kz_deep_frac  step x1.00  d14C-ocean |d+| 0.0142 |d-| 0.0071   CO2-grad |d+| 0.0012 |d-| 0.0006
+  kz_deep_frac  step x0.50  d14C-ocean |d+| 0.0058 |d-| 0.0041   CO2-grad |d+| 0.0005 |d-| 0.0004
+  kz_deep_frac  step x0.25  d14C-ocean |d+| 0.0027 |d-| 0.0022   CO2-grad |d+| 0.0002 |d-| 0.0002
+  tau_ex        step x1.00  d14C-ocean |d+| 0.0005 |d-| 0.0005   CO2-grad |d+| 0.9012 |d-| 1.3314
+  tau_ex        step x0.50  d14C-ocean |d+| 0.0002 |d-| 0.0002   CO2-grad |d+| 0.5054 |d-| 0.6129
+  tau_ex        step x0.25  d14C-ocean |d+| 0.0001 |d-| 0.0001   CO2-grad |d+| 0.2663 |d-| 0.2931
+
+== draw41: h_ml 67.26 m, kz 13878 ==
+  h_ml          step x1.00  d14C-ocean |d+| 0.0698 |d-| 0.0638   CO2-grad |d+| 0.0171 |d-| 0.0115
+  h_ml          step x0.50  d14C-ocean |d+| 0.0342 |d-| 0.0326   CO2-grad |d+| 0.0102 |d-| 0.0059
+  h_ml          step x0.25  d14C-ocean |d+| 0.0169 |d-| 0.0165   CO2-grad |d+| 0.0069 |d-| 0.0030
+  kz            step x1.00  d14C-ocean |d+| 0.2114 |d-| 0.2030   CO2-grad |d+| 0.0191 |d-| 0.0193
+  kz            step x0.50  d14C-ocean |d+| 0.1045 |d-| 0.1024   CO2-grad |d+| 0.0096 |d-| 0.0096
+  kz            step x0.25  d14C-ocean |d+| 0.0520 |d-| 0.0515   CO2-grad |d+| 0.0048 |d-| 0.0048
+  kz_deep_frac  step x1.00  d14C-ocean |d+| 0.0234 |d-| 0.0122   CO2-grad |d+| 0.0003 |d-| 0.0001
+  kz_deep_frac  step x0.50  d14C-ocean |d+| 0.0098 |d-| 0.0071   CO2-grad |d+| 0.0001 |d-| 0.0001
+  kz_deep_frac  step x0.25  d14C-ocean |d+| 0.0045 |d-| 0.0038   CO2-grad |d+| 0.0000 |d-| 0.0000
+  tau_ex        step x1.00  d14C-ocean |d+| 0.0008 |d-| 0.0008   CO2-grad |d+| 1.2280 |d-| 1.5759
+  tau_ex        step x0.50  d14C-ocean |d+| 0.0004 |d-| 0.0004   CO2-grad |d+| 0.6583 |d-| 0.7453
+  tau_ex        step x0.25  d14C-ocean |d+| 0.0002 |d-| 0.0002   CO2-grad |d+| 0.3401 |d-| 0.3619
+
+== draw46: h_ml 62.81 m, kz 16229 ==
+  h_ml          step x1.00  d14C-ocean |d+| 0.1444 |d-| 0.1317   CO2-grad |d+| 0.0016 |d-| 0.0017
+  h_ml          step x0.50  d14C-ocean |d+| 0.0705 |d-| 0.0673   CO2-grad |d+| 0.0008 |d-| 0.0008
+  h_ml          step x0.25  d14C-ocean |d+| 0.0349 |d-| 0.0341   CO2-grad |d+| 0.0004 |d-| 0.0004
+  kz            step x1.00  d14C-ocean |d+| 0.3561 |d-| 0.3346   CO2-grad |d+| 0.0010 |d-| 0.0010
+  kz            step x0.50  d14C-ocean |d+| 0.1753 |d-| 0.1699   CO2-grad |d+| 0.0005 |d-| 0.0005
+  kz            step x0.25  d14C-ocean |d+| 0.0870 |d-| 0.0856   CO2-grad |d+| 0.0003 |d-| 0.0002
+  kz_deep_frac  step x1.00  d14C-ocean |d+| 0.9116 |d-| 0.4399   CO2-grad |d+| 0.0005 |d-| 0.0002
+  kz_deep_frac  step x0.50  d14C-ocean |d+| 0.3718 |d-| 0.2585   CO2-grad |d+| 0.0002 |d-| 0.0001
+  kz_deep_frac  step x0.25  d14C-ocean |d+| 0.1689 |d-| 0.1408   CO2-grad |d+| 0.0001 |d-| 0.0001
+  tau_ex        step x1.00  d14C-ocean |d+| 0.0005 |d-| 0.0005   CO2-grad |d+| 0.2302 |d-| 0.1642
+  tau_ex        step x0.50  d14C-ocean |d+| 0.0003 |d-| 0.0003   CO2-grad |d+| 0.0649 |d-| 0.0337
+  tau_ex        step x0.25  d14C-ocean |d+| 0.0001 |d-| 0.0001   CO2-grad |d+| 0.0200 |d-| 0.0047

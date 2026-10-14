@@ -2,6 +2,22 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-14 (c) — **THE TIE CUT FROM THE POSTERIOR, READ: the ruled statistic is 93.3 pp, which would make all 12 rows ties. It is not usable as a cut. NO MARGIN CUT separates the rows whose winner holds across the posterior from those whose winner does not: Δ¹⁴C in the ocean has a 70.7 pp margin and loses in 6 % of draws, while Δ¹⁴C bomb has 10.4 pp and holds in 98 %. A step-scaling test rules out an integrator artefact: the map's cells are first-order SLOPES, and those move across the posterior.** `APP_CMAP_TIE_*` untouched; the method is back with Marcus.
+
+- **The run** (`diag_cmap_posterior_spread.R` @`1c26e8e`, frozen worktree, 100 draws, 25 per chain, 45.3 min on 1 core): every gate PASSES with diff 0 (STEP, MAP, JOIN 100 / 100, LP). Landed byte-identical: `outputs/diagnostics/cmap_posterior_spread_20261014_hilda31w_n100.{log,rds,out}` and the launch script.
+  - **The ruled statistic** (largest 5–95 % range of any row's signed margin): **93.35 pp** (Δ¹⁴C in the ocean); 95.42 pp without the 6 draws whose `h_ml`+ half-step the wall refused.
+  - Next widest: CO₂ N–S gradient 89.7 (winner lost in 45 % of draws) and sinks 70.2. One-sided excursion (not ruled): 92.6.
+  - **By total leverage, the app's top three:** δ¹³C level & gradient (margin 1.17, range 9.3, winner lost in 8 % of draws); CO₂ level (11.9, 30.5, 12 %); CO₂ seasonal cycle (59.2, 25.2, 0 %). The statistic over those three alone would be 30.5.
+  - **Winner lost in > 5 % of draws: 8 of 12 rows.** Their mode margins are 1.17 / 3.21 / 5.82 / 11.91 / 13.09 / 23.6 / 25.09 / 70.73. The stable rows' margins are 10.36 / 57.25 / 58.52 / 59.17. The two sets overlap, so no margin threshold divides them.
+- **Is it a bug?** The two widest rows are both won by "Mixed layer & vertical mixing" (`h_ml`, `kz`, `kz_deep_frac`, `tau_ex`), and the objective is known to be non-smooth near the substep wall. So that was tested first.
+  - The test (`cmap_posterior_spread_20261014_step_scaling.{R,log}`): those names' cells on the two rows, at steps ×1, ×0.5 and ×0.25, at the mode and at draws 86, 41 and 46.
+  - **Every cell scales smoothly:** halving the step halves the response (`h_ml` at the mode 0.1153 → 0.0563 → 0.0278; `kz` 0.2910 → 0.1429 → 0.0708). An integrator jump would not shrink with the step. **No artefact.**
+  - The halving also shows the cells are **first-order**: a stream's own slope, not its curvature. That holds at the mode as well as at the draws.
+  - What moves: `kz_deep_frac`'s pull on ocean Δ¹⁴C is 1.90 at the mode and 0.014 at draw 86, a chain-4 excursion draw at `h_ml` 44 m. That row's total falls from ~2.9 to ~0.3 log-units there. Shares of so small a total flip easily.
+  - ⚠ **Correction to (b):** the "curvature / slope split" does not isolate the effect. Its curvature part swings MORE (105 pp; median row range 50 vs 28), because |Δ⁺+Δ⁻| is a near-cancelling difference. The step-scaling test is the clean evidence; the split is not. I had floated the slope explanation before the run on two draws; the split did not support it, and the step test does.
+- **What it means for the product:** the map's "who holds this row" is a property of the MODE. Across the posterior it is robust for some rows and not others, and the mode's margin does not tell which. Options are with Marcus.
+- ⚠ **Not done:** `APP_CMAP_TIE_*` and `test-cmap-tie.R` are unchanged, and the test stays RED by the 10-13 ruling.
+
 ## 2026-10-14 (b) — **RULED (Marcus, verbatim): "Pool all 4, build, test by chain (Recommended)"; `--drop` "0 (Recommended)"; "Thin ×2 within chain (Recommended)"; the tie cut "Posterior spread, 100 draws (Recommended)". The band build and the tie-cut run are RUNNING from frozen worktrees. A first launch ran without `data-raw/downloads/`, so the nuclear-¹⁴C source was ZERO; the tie-cut driver's own gate caught it.**
 
 - **The read at the rulings** (`aac38b6`): `read_mcmc_check.R --drop=0 --pool-thin=2` → `pooled_u_thin2.rds`, 17 000 × 31 (md5 77e84906…).
