@@ -2,6 +2,20 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-14 (f) — **SHIPPED (Marcus, verbatim): "Ship the hilda31w band (Recommended)". The hilda31w MCMC band is in `data/futures_ribbons.rds`; `APP_RIBBONS_HOLD` stays set until Marcus's copy, as on 10-09. `test-futures-ribbons` is GREEN (65 / 0).** (`4acb215`)
+
+- `promote_futures_ribbons.R` at the clean `753abc9` (log `outputs/diagnostics/promote_futures_ribbons_20261014.log`):
+  - bands untouched; the draws md5 checked against the landing's `method`; chain seeds 20261002–05 recorded; `key_draws` dropped (22.1 → 0.3 MB);
+  - `ccx_ribbons_problems()` at the canonical: none;
+  - the label is carried UNRULED (`label_ruled` FALSE);
+  - md5 **66c81912…**, and two runs are byte-identical (second path first).
+- **`test-futures-ribbons.R`:** the ship record moves with the ruling. `.fr_ship_md` hilda29e → hilda31w, and the source landing 10-09 → 10-14; the header records the ruling.
+  - This test was the expected red "until the band ships". It was not a passing test edited to pass.
+  - Mutation: the hilda29e band put back in `data/` fails 4.
+- `app/global.R`: the hold's comment records the re-ship. The hold string and the four copy items are unchanged and are Marcus's: card 6, the parameter panel's "not yet a posterior" clause, the band's label, and the temperature sentence.
+- The hilda29e band stays in git history and in its committed landing (`outputs/diagnostics/futures_ribbons_mcmc_20261009_hilda29e_200k.rds`). It was superseded by a new canonical, not by a bug, so it was not quarantined.
+- **Suite:** running at `4acb215` in a linked worktree (`~/ccx_frozen/suite_20261014_4acb215`).
+
 ## 2026-10-14 (e) — **The hilda31w MCMC BAND, LANDED: 17 000 of 17 000 draws ran, 0 failed (216 min, 8 cores). Chains agree to ≤ 4.76 ppm at the worst cell (vvH CO₂ 2150's 5 % edge, chain 4 low; 21 % of the width), with a median of 11 %. Cell R-hat ≤ 1.036, not still widening. This is the same footing as hilda29e's 200k band, which Marcus ruled to ship on 10-09.** Not promoted; the call is Marcus's.
 
 - **Landed byte-identical** from `~/ccx_frozen/20261014_band_hilda31w` @`aac38b6` (`cmp` each):

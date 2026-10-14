@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-14: the hilda31w MCMC chains are COMPLETE; the read is next
 
+> ⛔ **SUPERSEDED** by `notes/handoff_2026-10-14b_band_shipped.md` (2026-10-14 ~11:00): the read is done, the band shipped, the tie rule changed.
+
 **Supersedes** `notes/handoff_2026-10-13b_hilda31w_mcmc_running.md` (which now points here). Written on Marcus's request
 ("check status and then write handoff"), 2026-10-14 ~06:10.
 
