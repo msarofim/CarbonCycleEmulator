@@ -2,6 +2,12 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-14 (h) — **A DEPLOY GAP, measured: DEPLOY.md says to exclude `data-raw/`, but the app reads `data-raw/downloads/nuclear14c/` at run time. Deployed as written, the public app would silently run with the industrial ¹⁴C source set to zero: Δ¹⁴C NH −3.9 ‰ by 2024 (~0.7–0.8 of the fitted `sigma_d14c`, 5.37 ‰), and CO₂ / δ¹³C unchanged.** Nothing changed; the fix is Marcus's.
+
+- Record: `outputs/diagnostics/deploy_nuclear_absent_20261014/` (README, script, log). It reruns the app's own `app_hist` path with the loader returning its empty-directory frame.
+- This is the worktree trap ([[ccx_worktree_needs_downloads_linked]]) in a third setting, after Torch on 09-01 and the worktrees. `calibration/lib_run_inputs.R` asserts the directory only in the multistart, the port gates and the tests' `setup.R`. The app, the band builder, the MCMC and the posterior-spread driver do not call it.
+- `nuclear14c` is still the ONLY run-time read from `data-raw/` in `R/` or `app/` (grep). It is 428 KB of a 5.6 GB `data-raw/`.
+
 ## 2026-10-14 (g) — **The copy facts at hilda31w: `notes/ship_copy_facts_2026-10-14_hilda31w.md`.** Facts only, no copy. The 10-09 facts note and the 10-12 worklist were hilda29e; both now carry a pointer.
 
 - Read from the shipped `data/futures_ribbons.rds` (md5 66c81912…) and the 10-14 MCMC read. The script was a scratch script, not committed.

@@ -1,0 +1,12 @@
+=== /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/deploy_nuclear_absent_20261014/nuc_zero_effect.R @175c8e7, 2026-10-14 10:52 ===
+global.R sourced in 5 s; mode hilda31w
+Warning message:
+In ccx_nuclear_c14_annual() :
+  No nuclear 14C files found; industrial source set to zero.
+nuclear source sum (mol): base 13978.29  zero 0 
+There were 13 warnings (use warnings() to see them)
+max |zero - base| by output column (nonzero only):
+  d14c_NH   d14c_SH ocean_C14  land_C14   atm_C14 
+     4.19      3.77      6.46      2.13      3.58 
+d14c_NH                annual-mean diff: 1980 -0.38  2000 -1.79  2010 -2.53  2024 -3.89  (max |.| 4.17 in 2023)
+d14c_SH                annual-mean diff: 1980 -0.33  2000 -1.49  2010 -2.19  2024 -3.70  (max |.| 3.74 in 2023)
