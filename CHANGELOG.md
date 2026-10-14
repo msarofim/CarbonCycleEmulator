@@ -2,6 +2,16 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-14 (n) — **The four forcing guards on the pure-R `ccx_run()`, MEASURED (Marcus: "Measure first (Recommended)"): they stop NOTHING in the suite (8050 / 3 / 1 with and without them, the same three expected reds) or in the app. They WOULD stop 9 of the 21 `ccx_run()` call sites under `calibration/`, in 7 scripts. Five of those run today on the canonical's params against the DEFAULT ENSO / AOD / nuclear variants, with no error.** Nothing landed; the patch ran only in a scratch worktree. Record: `outputs/diagnostics/guards_measure_20261014/` (README, patch, power check, launch scripts).
+
+- **Power first:** each of the four mismatches stops in the patched tree, and the matched case passes the guards. `test-flux-trace-exact.R` drives `ccx_run()` through all four at the canonical's non-default values, so the suite's null is not guaranteed by construction.
+- **The app's one pure-R call** (`app/global.R:473`, the box diagram's flux trace) passes: `app_build_forcing()` stamps from `APP_PARAMS`, and `F[i, ]` keeps the stamps.
+- **The seven scripts** (a static read by a subagent; three spot-checked by hand, each mode's variants run):
+  - SILENT today: `d13c_isoflux_budget`, `f2_periodic_spinup` (deposition zero too: its forcing runs past the 2025 table), `p12_compensator_redundant`, `seas_ml_convergence` (2 sites), `seas_ml_probe`;
+  - already STOPPED today by a C++ call on the same forcing: `kz_pump_pathways` (2 sites), `ta0_enso_upwelling_sign`.
+- **No existing output is affected.** Every output of the five silent scripts is from 09-09 to 09-21, at `hilda29l` or the 09-08 `hilda31`. The variant switches arrived 09-29 to 10-12. Nothing quarantined.
+- Both scratch worktrees are kept (`~/ccx_frozen/suite_20261014_guards_{base,on}`); their outputs are all in the record.
+
 ## 2026-10-14 (m) — **RULED (Marcus, verbatim): "Skip that one expectation (Recommended)". IC8's raw-file sha256 is now its own block, `IC8b`, which skips when `data-raw/downloads/mbl_zonal_co2_GL.txt` is absent; IC8's other 12 expectations run everywhere.** Also ruled: the pure-R guards are "Measure first (Recommended)" (running, (n)); the 10-13 smoke chains in `~/ccx_frozen/` are "Keep it".
 
 - **Why a split rather than a `skip_if_not` in place:** a skip ends the whole `test_that` block, so in place it would also have skipped the window and `ccx_cen12` checks that follow. The four sibling provenance tests skip a whole block too.

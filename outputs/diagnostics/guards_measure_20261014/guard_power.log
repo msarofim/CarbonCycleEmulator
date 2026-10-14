@@ -1,0 +1,12 @@
+== suite_20261014_guards_base
+enso  argument must be coercible to non-negative integer
+aod   argument must be coercible to non-negative integer
+nuc   argument must be coercible to non-negative integer
+ndep  argument must be coercible to non-negative integer
+none  argument must be coercible to non-negative integer
+== suite_20261014_guards_on
+enso  ENSO index mismatch: the parameters name 'detrend' but the forcing carries '<unstamped>'. 
+aod   AOD mode mismatch: the parameters name 'anomaly' but the forcing carries '<unstamped>'. Bu
+nuc   nuclear 14C share mismatch: the parameters name 'per_year' but the forcing carries '<unsta
+ndep  ndep_ret = 0.5 but the forcing carries NO N-deposition series (ndep_source absent). Build 
+none  argument must be coercible to non-negative integer

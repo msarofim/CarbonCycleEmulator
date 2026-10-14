@@ -1,0 +1,15 @@
+diff --git a/R/forcing.R b/R/forcing.R
+index 9d2db97..97ab90a 100644
+--- a/R/forcing.R
++++ b/R/forcing.R
+@@ -1352,6 +1352,10 @@ ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE, edge_fn = NULL,
+   # wants (a pathway sum, a state slice); the core stores nothing new by
+   # default. Diagnostic only; `out` and `state` are untouched by it.
+   y <- spin$y; aux <- spin$aux; grid <- spin$grid; p <- spin$params
++  # MEASUREMENT PATCH (2026-10-14 n, scratch worktree only): the four forcing guards
++  # ccx_run_prepared() runs, derived from the parameters exactly as ccx_cpp_prepare() does.
++  ccx_enso_index_check(p, F); ccx_aod_mode_check(p, F); ccx_nuc_share_check(p, F)
++  ccx_ndep_check(if (is.null(p$ndep_ret)) CCX_NDEP_RET_DEFAULT else p$ndep_ret, F)
+   substeps <- ccx_resolve_substeps(substeps, p, grid)
+   n <- nrow(F)
+   # THE LAND ENSO INPUT (W1, 2026-10-02): the index read lag_enso_land months late,
