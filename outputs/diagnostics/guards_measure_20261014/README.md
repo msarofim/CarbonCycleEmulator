@@ -6,6 +6,9 @@ N deposition against the parameters, and `ccx_run()` (`R/forcing.R` ~1342) check
 
 **Nothing in main changed.** The patch ran only in a scratch worktree.
 
+⭐ **OUTCOME, the same day:** LANDED as CHANGELOG 2026-10-14 (o), `bcaa1f9` (Marcus: "Land them, with a test
+(Recommended)"), with `tests/testthat/test-run-r-guards.R`. The seven scripts in §4 are fix-on-touch.
+
 ## What was run
 
 - **Two scratch worktrees at `f451f0f`**, both with `data-raw/downloads` linked (81 / 81):
