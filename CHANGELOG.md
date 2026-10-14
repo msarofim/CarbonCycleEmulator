@@ -2,6 +2,27 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-14 (e) — **The hilda31w MCMC BAND, LANDED: 17 000 of 17 000 draws ran, 0 failed (216 min, 8 cores). Chains agree to ≤ 4.76 ppm at the worst cell (vvH CO₂ 2150's 5 % edge, chain 4 low; 21 % of the width), with a median of 11 %. Cell R-hat ≤ 1.036, not still widening. This is the same footing as hilda29e's 200k band, which Marcus ruled to ship on 10-09.** Not promoted; the call is Marcus's.
+
+- **Landed byte-identical** from `~/ccx_frozen/20261014_band_hilda31w` @`aac38b6` (`cmp` each):
+  - `outputs/diagnostics/futures_ribbons_mcmc_20261014_hilda31w_200k.{rds,_20261014.log}`;
+  - `mcmc_band_by_chain_hilda31w_200k_20261014.{log,csv}`;
+  - `mcmc_drift_hilda31w_200k_20261014.{log,rds}`;
+  - the launch script and the pipeline's `.out` in `band_20261014_hilda31w_logs/`.
+- **The band** (5 / 50 / 95 %, central = the app's line, inside the band in 100 % of 5 614 cells):
+  - vvH CO₂ 2150: **814.9 / 825.8 / 837.9 ppm** (width 22.95; central 827.9). hilda29e's was 812.2 / 822.0 / 834.7.
+  - vvVL CO₂ 2150: 363.9 / 365.9 / 367.8. vvM GMST 2100: 2.935 / 2.949 / 2.964 °C.
+  - The delta-method pre-check agrees with the sampled sd to ×1.04–1.05.
+- **By chain** (`--laplace=none`): the between-chain range of an edge or median is max 4.76 ppm / 0.018 °C (21 % of the width) and median 11 %. Cell R-hat max 1.036 (median 1.017); ESS bulk min 130, tail min 38. Late/early width median 1.03, z +0.4: **not widening**.
+  - hilda29e 200k, for comparison: 3.46 ppm / 0.018 °C, 19 %; ESS bulk min 143.
+  - The worst cell's spread is chain 4's 5 % edge (812.1 vs 816.0–816.8): the excursion's footprint.
+- **Drift** (`--names=` the five worst R-hats):
+  - Logpost halves pooled −1071.25 → −1070.82; chain 4 −1073.44 → −1071.64 as it recovers from the excursion.
+  - **Leverage at vvH CO₂ 2150 per posterior sd:** `beta_max` −6.6 ppm; `seas_T_lag` +1.4 and `seas_lag_p_NH` −1.82, collinear (r +0.96) and opposite, so a few tenths net when they move together; `h_ml` +0.4; `seas_lag_p_SH` −0.27. R² 0.87.
+  - At vvLN CO₂ 2150, R² is only 0.11: the excursion's −2.8 ppm there (10-14 a) is not linear in these names.
+- **The 10-14 (a) excursion test predicted this:** it bounded the lag ridge's effect at ≤ 0.28 of the width. The landed band's chain spread is 0.21 at the worst cell.
+- Ship = `promote_futures_ribbons.R --from=<the landed rds> --draws=outputs/mcmc_check_20261014_hilda31w_200k/pooled_u_thin2.rds`. `APP_RIBBONS_HOLD` stays until Marcus's copy (10-09 f: card 6, the parameter panel's clause, the label, and the temperature sentence).
+
 ## 2026-10-14 (d) — **RULED (Marcus, verbatim): "Posterior winner stability (Recommended)"; refused half-steps "Finite half only (Recommended)". The takeaway's tie rule is now: a row's winner is named only if it holds the row in ≥ 95 % of the MCMC posterior draws. At hilda31w that makes CO₂ level a tie (12 %) beside δ¹³C level & gradient (8 %); CO₂ seasonal cycle keeps its winner (0 %). `test-cmap-tie` is GREEN (47 / 0), mutation-tested.** (`988465e`, `a69d606`)
 
 - **`calibration/promote_cmap_stability.R` (new)** writes `data/constraint_map_stability.rds` from the landed 100-draw run.
