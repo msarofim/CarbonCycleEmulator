@@ -18,7 +18,7 @@
 #   pulse remaining   annual mean of d(global CO2) over year ZP_PULSE_YEAR + h, divided by the pulse in ppm
 #                     (centred h years after the release-year midpoint, as FaIR's annual mean)
 # GATES: G1 a zeroing that starts after the run reproduces base bit-identically; G3 every arm equals base before
-# T0; G4 the emissions tables differ from base exactly where intended. No RNG. Run from the repo root:
+# T0 to ZP_CAUSAL_TOL_PPM (see its note); G4 the emissions tables differ from base exactly where intended. No RNG. Run from the repo root:
 #   Rscript calibration/diag_zec_vs_pulse.R
 t_start <- Sys.time()
 ROOT <- normalizePath(getwd())
@@ -37,12 +37,14 @@ ZP_PULSE_GTC  <- 100                      # the pulse lab's default and FaIR's g
 stopifnot(isTRUE(all.equal(ZP_PULSE_GTC, APP_PULSE_GtC_DEFAULT)))
 ZP_NOOP_YEAR  <- APP_PULSE_YEARS[2] + 50L
 GTC_PER_PPM   <- ccx_const("GtC_PER_PPM")
-# The coupled carbon-climate loop stops when its max |change| < CLIM_TOL (1e-4 K), and arms can stop after different
-# numbers of passes. On vvHL that left 2.1e-8 ppm before 2030 (base 5 passes, zero arms 4) and failed G3. At
-# CLIM_TOL / 100 every arm takes 6 passes and the difference is exactly 0 -- convergence noise, not an acausal path
-# (the test R/climate.R's own comment prescribes) -- and the answers move < 1e-4. So the arms run at the tighter
-# tolerance and G3 stays EXACT.
-ZP_TOL        <- CLIM_TOL / 100
+# G3's TOLERANCE, from two MEASUREMENTS. The coupled carbon-climate loop stops when its max |change| < CLIM_TOL
+# (1e-4 K), and arms can stop after different numbers of passes, so their pre-T0 states differ by unconverged
+# amounts: 2.1e-8 ppm on vvHL (base 5 passes, zero arms 4) and 5.7e-11 on vvVL at 1e-6 K. Tightening the loop makes
+# them exactly 0 once the pass counts match (the test R/climate.R's own comment prescribes), so it is convergence
+# noise. The one REAL acausal path this loop has had (the spline ringing, CHANGELOG 2026-09-24) left 3.48e-3 ppm.
+# 1e-6 ppm sits 50x above the measured noise and 3500x below that signal; the arms run at the app's own CLIM_TOL.
+ZP_TOL        <- CLIM_TOL
+ZP_CAUSAL_TOL_PPM <- 1e-6
 ZP_OUT_DIR    <- file.path("outputs", "diagnostics", sprintf("zec_vs_pulse_%s", format(Sys.Date(), "%Y%m%d")))
 ZP_STEM       <- sprintf("ccx_%s_zec%d_vs_pulse%d_h%d", CCX_MODE_CANONICAL, ZP_ZERO_YEAR, ZP_PULSE_GTC, ZP_HORIZON)
 dir.create(ZP_OUT_DIR, showWarnings = FALSE, recursive = TRUE)
@@ -85,7 +87,8 @@ for (bg in unname(APP_SCENARIOS)) {
   stopifnot(identical(run(bg, emis_for(bg, ZP_NOOP_YEAR))$co2_NH, b$co2_NH))
   # G3: causality -- every arm equals base before T0 (the pulse and the zeroing both start on 1 Jan T0)
   pre <- b$t < ZP_ZERO_YEAR
-  for (a in list(z, zp, bp)) stopifnot(identical(a$co2_NH[pre], b$co2_NH[pre]), identical(a$co2_SH[pre], b$co2_SH[pre]))
+  g3 <- max(vapply(list(z, zp, bp), function(a) max(abs(c(a$co2_NH[pre] - b$co2_NH[pre], a$co2_SH[pre] - b$co2_SH[pre]))), 0))
+  if (!(g3 <= ZP_CAUSAL_TOL_PPM)) stop(sprintf("G3 FAIL: %s arms differ from base before %d by %.2e ppm (> %.0e)", bg, ZP_ZERO_YEAR, g3, ZP_CAUSAL_TOL_PPM))
   c_pi <- annual(b, yrs[1])
   x0 <- centred(z, ZP_ZERO_YEAR) - c_pi
   for (h in c(ZP_HORIZON, ZP_EXTRA)) {
@@ -93,7 +96,7 @@ for (bg in unname(APP_SCENARIOS)) {
     x1 <- centred(z, ZP_ZERO_YEAR + h) - c_pi
     pz <- (annual(zp, ZP_PULSE_YEAR + h) - annual(z, ZP_PULSE_YEAR + h)) * GTC_PER_PPM / ZP_PULSE_GTC
     pb <- (annual(bp, ZP_PULSE_YEAR + h) - annual(b, ZP_PULSE_YEAR + h)) * GTC_PER_PPM / ZP_PULSE_GTC
-    rows[[length(rows) + 1]] <- data.frame(scenario = bg, horizon_yr = h, c_pi_ppm = c_pi,
+    rows[[length(rows) + 1]] <- data.frame(scenario = bg, horizon_yr = h, c_pi_ppm = c_pi, g3_pre_t0_max_dco2_ppm = g3,
       excess_t0_ppm = x0, excess_t1_ppm = x1, excess_remaining = x1 / x0,
       pulse_remaining_zero_bg = pz, pulse_remaining_scenario_bg = pb, ratio_excess_to_pulse_zero_bg = (x1 / x0) / pz)
   }
