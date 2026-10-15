@@ -50,13 +50,15 @@ function(input, output, session) {
   # `output$y` would silently wrap to another panel's width, which is the
   # caption-sync bug class with a new face. test-plot-text-fits.R asserts every id
   # matches its output.
-  renderPlotFit <- function(id, expr, env = parent.frame(), quoted = FALSE) {
+  # `height` (2026-10-15): the box diagram's height FOLLOWS its width, so the diagram keeps one shape and its
+  # text scales with it (plot_box_diagram's `scale`); every other plot keeps renderPlot's default ("auto").
+  renderPlotFit <- function(id, expr, env = parent.frame(), quoted = FALSE, height = "auto") {
     fn <- shiny::exprToFunction(expr, env, quoted)
     shiny::renderPlot({
       app_set_panel_px(session$clientData[[paste0("output_", id, "_width")]])
       on.exit(app_clear_panel_px(), add = TRUE)
       fn()
-    })
+    }, height = height)
   }
 
   # ---- 1. Keeling ----------------------------------------------------
@@ -1181,8 +1183,13 @@ function(input, output, session) {
   # are ~70 and ~95 GtC/yr while emissions are ~11 and the net imbalance ~5, and
   # an arrow without a number cannot say that. Numbers come from APP_FLUX_NOW
   # (R/fluxes.R), i.e. from the model's own tap, not from a table typed here.
-  output$h_diagram <- renderPlotFit("h_diagram", 
-    plot_box_diagram(APP_FLUX_NOW, APP_HIST$out[nrow(APP_HIST$out), ], app_params$p))
+  # 2026-10-15 (Marcus: legibility): one SHAPE at every width -- the height is the width times DIAGRAM_ASPECT and
+  # every text size is multiplied by the same width ratio, so the layout tuned at DIAGRAM_REF_PX is what any
+  # reader sees, larger or smaller.
+  output$h_diagram <- renderPlotFit("h_diagram",
+    plot_box_diagram(APP_FLUX_NOW, APP_HIST$out[nrow(APP_HIST$out), ], app_params$p, n_layers = APP_SPIN$grid$nl,
+                     scale = diagram_scale(session$clientData$output_h_diagram_width)),
+    height = function() diagram_height_px(session$clientData$output_h_diagram_width))
 
   # THE LABEL TABLE IS GATED, NOT TYPED HERE (2026-09-22, Marcus review U1).
   # It used to be a `desc`/`unit` pair written inline in this block, last

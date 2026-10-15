@@ -1637,12 +1637,43 @@ fmt_gtc <- function(x) sprintf("%s GtC", format(round(x), big.mark = ","))
 # given character count it renders WIDER. That is why these are SIZES and not
 # widths -- the wrap is computed from the size, and the size is what annotate()
 # is handed, so the measured thing and the drawn thing cannot disagree.
-DIAGRAM_NOTE_SIZE      <- 3.1   # ggplot `size` (mm) of the grey footnote
-DIAGRAM_NOTE_SIZE_BOLD <- 3.2   # ...and of the bold one beneath it
+# 2026-10-15 (Marcus: "Make the text a little bigger"): every diagram size up ~12 %, and the panel 330 -> 440 px.
+DIAGRAM_NOTE_SIZE      <- 3.45  # ggplot `size` (mm) of the grey footnote
+DIAGRAM_NOTE_SIZE_BOLD <- 3.6   # ...and of the bold one beneath it
+DIAGRAM_ARROW_SIZE     <- 3.25  # the flux labels on the arrows (was 2.9)
+DIAGRAM_BOX_SIZE       <- 3.8   # the box names (was 3.4)
+# ONE SHAPE AT EVERY WIDTH (2026-10-15). The layout and the sizes above are tuned for a DIAGRAM_REF_PX-wide panel
+# drawn DIAGRAM_ASPECT as tall. The app draws the diagram at its live width w, w * DIAGRAM_ASPECT tall, with every
+# size multiplied by diagram_scale(w) -- so text keeps its proportion to the boxes instead of shrinking on a wide
+# screen (at 1280 px the panel is ~714 px, and fixed sizes read ~20 % smaller than tuned).
+DIAGRAM_REF_PX <- 565
+DIAGRAM_ASPECT <- 440 / 565
+DIAGRAM_SCALE_RANGE <- c(0.9, 1.6)   # never much below the tuned size: a narrower panel crowds a little instead
+diagram_scale <- function(px) {
+  if (is.null(px) || length(px) != 1L || !is.finite(px) || px <= 0) return(1)
+  min(max(px / DIAGRAM_REF_PX, DIAGRAM_SCALE_RANGE[1]), DIAGRAM_SCALE_RANGE[2])
+}
+diagram_height_px <- function(px) {
+  if (is.null(px) || length(px) != 1L || !is.finite(px) || px <= 0) px <- DIAGRAM_REF_PX
+  round(px * DIAGRAM_ASPECT)
+}
 # ggplot's `size` is mm; grid measures in points. `.pt` is ggplot's own factor.
 diagram_note_pt <- function(size) size * ggplot2::.pt
 
-plot_box_diagram <- function(fx, stock, p) {
+# ⭐ TWO ARROWS BETWEEN THE MIXED LAYER AND THE DEEP (2026-10-15, Marcus: "Why not use two arrows for ocean
+# mixed layer to and from the deep ocean like for other boxes?"). It was ONE net arrow ("to the deep, net"). The
+# two channels are R/fluxes.R's: the biological pump's export (`pump`, down) and the mixing exchange (`ml_int`,
+# net, NEGATIVE = upward -- deep water is richer in dissolved carbon, so mixing carries it up). Each is drawn in
+# the direction its sign says, so a mixing term that turned downward could not be drawn pointing up.
+diagram_mix_pair <- function(x_dn, x_up, y_top, y_bot, export, mixing) {
+  up <- mixing < 0
+  data.frame(x = c(x_dn, x_up), xend = c(x_dn, x_up),
+             y = c(y_top, if (up) y_bot else y_top), yend = c(y_bot, if (up) y_top else y_bot),
+             val = c(export, abs(mixing)), hj = c(1.12, -0.12), vj = c(0.5, 0.5), pos = 0.5,
+             nm = c("biological\npump", if (up) "returned up\nby mixing" else "mixed down"))
+}
+
+plot_box_diagram <- function(fx, stock, p, n_layers = 10L, scale = 1) {
   hs_on <- isTRUE(p$hs_frac > 0)
   boxes <- data.frame(
     x = c(2, 1, 3, 5, 5), y = c(4, 2.4, 2.4, 3.0, 1.2),
@@ -1650,7 +1681,7 @@ plot_box_diagram <- function(fx, stock, p) {
             # + the inert pool when the structure carries it (2026-09-30); the
             # shipped app's mode has none, so its label is unchanged
             if (ccx_inert_on(p)) "Soil\n(fast + slow + inert)" else "Soil\n(fast + slow)",
-            "Ocean\nmixed layer", "Deep ocean\n(10 layers)"),
+            "Ocean\nmixed layer", sprintf("Deep ocean\n(%d layers)", as.integer(n_layers))),
     col = c(PAL[["atm"]], PAL[["land"]], PAL[["land"]], PAL[["ocean"]], PAL[["ocean"]]))
   as_down <- fx$as_down - if (hs_on) fx$hs_as_down else 0
   as_up   <- fx$as_up   - if (hs_on) fx$hs_as_up   else 0
@@ -1662,37 +1693,23 @@ plot_box_diagram <- function(fx, stock, p) {
   wr <- ccx_flux_warm_route(fx)
   # x/xend/yend and the flux each segment carries, kept in ONE table so a
   # moved arrow cannot end up with another arrow's number.
-  # ⛔ LAND CLEARING IS ITS OWN ARROW SINCE 2026-09-22 (Marcus). It used to be
-  # ADDED INTO the soil-to-atmosphere arrow -- `fx$rh + fx$luc` under a label
-  # that said "respiration" -- so the one flux the whole land-use convention
-  # argument is about (R1, 09-22: land use is an INTERNAL TRANSFER out of the
-  # land pool into the air) had no arrow anywhere on the diagram that explains
-  # the model. It is small, 1.0 against 69.6 GtC/yr, which is exactly why it
-  # could hide: the printed number rounds to 71 either way. R/fluxes.R's own
-  # header already says these two "must not be merged".
-  #
-  # ⚠ IT LEAVES BOTH LAND POOLS, NOT ONE. At `f_luc_wood` = 0 the debit is split
-  # pro rata by ccx_luc_pool_shares(): ~24 % from the vegetation boxes and ~76 %
-  # from the soils (70 % of the whole from the SLOW soil) at the 09-22 mode; at
-  # hilda33p 28 / 72 % and 66 % (2026-10-06). Drawing one arrow per
-  # pool would put "0" and "1" on two arrows for a 1 GtC/yr flux, so it is ONE
-  # arrow rising from between the two land boxes -- the land as a whole -- and
-  # the footnote says which pools it comes out of. Placed in the empty wedge
-  # between photosynthesis and respiration, whose attachment points on the
-  # atmosphere are moved apart by 0.25 to open it.
-  arrows_df <- data.frame(
-    x    = c(1.75, 1,   3,   2.6, 5,   5,   2.0, 2.0),
-    xend = c(1,    3,   2.25, 4.6, 2.6, 5,   2.0, 2.0),
-    y    = c(3.68, 2.4, 2.7, 3.75, 3.15, 2.6, 4.7, 2.55),
-    yend = c(2.8,  2.4, 3.68, 3.05, 4.05, 1.7, 4.3, 3.62),
-    # "to the deep" is the NET surface-to-interior transfer: the diffusive return
-    # (`ml_int`, negative = upward) PLUS the biological pump's export (`pump`, a
-    # channel of its own). Shown as one net number with the export named, so the
-    # arrow cannot read "-40 to the deep" (which it did until 2026-09-08g).
-    val  = c(fx$gpp, fx$litter, fx$rh, as_down, as_up, wr[["ml_int"]] + wr[["pump"]],
-             fx$foss, fx$luc),
-    hj   = c(1.15, 0.5, -0.1, 0.5, 0.5, -0.15, -0.2, -0.12),
-    vj   = c(0.5,  -0.6, 0.5, 1.5, -1.0, 0.5, 0.5, 0.5),
+  # ⛔ LAND CLEARING IS ITS OWN ARROW (2026-09-22, Marcus): it was once ADDED INTO "respiration" (`fx$rh +
+  # fx$luc`), hiding the flux the land-use convention is about (R1: an INTERNAL TRANSFER out of the land into the
+  # air). It leaves BOTH land pools (pro rata, ccx_luc_pool_shares()), so it is ONE arrow rising from between the
+  # two land boxes, and the footnote says which pools it comes out of.
+  # 2026-10-15 LAYOUT (Marcus: legibility). Every label is anchored at `pos` along its own arrow (0 = tail,
+  # 1 = head) and pushed off it by hj / vj, so a label can be slid away from a neighbour without moving the arrow.
+  arrows_df <- rbind(data.frame(
+    x    = c(1.75, 1,   3,   2.62, 4.95, 2.0, 2.0),
+    xend = c(1,    3,   2.25, 4.55, 2.62, 2.0, 2.0),
+    y    = c(3.68, 2.4, 2.7, 3.76, 3.22, 4.7, 2.55),
+    yend = c(2.8,  2.4, 3.68, 3.12, 3.92, 4.3, 3.62),
+    val  = c(fx$gpp, fx$litter, fx$rh, as_down, as_up, fx$foss, fx$luc),
+    hj   = c(1.15, 0.5, -0.1, 0.45, 0.5, -0.2, -0.12),
+    # litterfall's label sits UNDER its arrow (vj > 1), Marcus 2026-10-15; "respiration" is slid toward the air and
+    # "air to warm sea" set below its arrow between it and the mixed-layer box; "warm sea to air" sits above its own
+    vj   = c(0.5,  1.6, 0.5, 1.3, -0.35, 0.5, 0.5),
+    pos  = c(0.5,  0.5, 0.65, 0.62, 0.45, 0.5, 0.5),
     # ⚠ THE NEW ARROW'S NAME IS READ FROM R/fluxes.R's CHANNEL TABLE, which
     # states that nothing downstream may name a channel in prose without reading
     # it from there. The older arrows predate that rule and keep their teaching
@@ -1700,9 +1717,9 @@ plot_box_diagram <- function(fx, stock, p) {
     nm   = c("photosynthesis", "litterfall", "respiration",
              if (hs_on) "air to warm sea" else "air to sea",
              if (hs_on) "warm sea to air" else "sea to air",
-             sprintf("to the deep, net\n(%.0f down as the biological\npump, %.0f back up by mixing)", wr[["pump"]], -wr[["ml_int"]]),
              "fossil fuels",
-             tolower(CCX_FLUX_CHANNELS[["luc"]])))
+             tolower(CCX_FLUX_CHANNELS[["luc"]]))),
+    diagram_mix_pair(4.82, 5.18, 2.6, 1.7, wr[["pump"]], wr[["ml_int"]]))
   xmax <- 6.1
   if (hs_on) {
     xmax <- 7.9
@@ -1710,19 +1727,22 @@ plot_box_diagram <- function(fx, stock, p) {
     # ABOVE the warm pair (y 4.12 / 3.92 against 3.75) so the two pairs never
     # cross, and their labels are pushed to the right-hand end of the arrows.
     boxes <- rbind(boxes, data.frame(
-      x = c(6.9, 6.9), y = c(3.5, 1.2),
+      x = c(6.9, 6.9), y = c(3.75, 1.2),
       lab = c(sprintf("Cold surface\n(high latitude, %.0f%%)", 100 * p$hs_frac), "Cold deep\nocean"),
       col = c(PAL[["ocean"]], PAL[["ocean"]])))
+    # The cold column gets the same two-arrow pair (2026-10-15): export `hs_pump` down, and the rest of the
+    # cold surface -> cold deep net (`hs_hd_net` INCLUDES the export) as mixing, in the direction of its sign.
     arrows_df <- rbind(arrows_df, data.frame(
-      x    = c(2.6, 6.45, 6.9, 6.3),
-      xend = c(6.45, 2.6, 6.9, 5.6),
-      y    = c(4.12, 3.42, 3.1, 1.35),
-      yend = c(3.62, 3.92, 1.7, 1.35),
-      val  = c(fx$hs_as_down, fx$hs_as_up, fx$hs_hd_net, fx$hd_int_net),
-      hj   = c(-0.55, -0.55, -0.15, 0.5),
-      vj   = c(-0.5, 1.5, 0.5, -0.6),
-      nm   = c("air to cold sea", "cold sea to air",
-               sprintf("sinks, net (of which\n%.1f biological export)", fx$hs_pump), "cold deep to interior")))
+      x    = c(2.62, 6.35, 6.3),
+      xend = c(6.35, 2.62, 5.6),
+      y    = c(4.17, 3.66, 1.35),
+      yend = c(3.92, 4.04, 1.35),
+      val  = c(fx$hs_as_down, fx$hs_as_up, fx$hd_int_net),
+      hj   = c(0.5, 0.5, 0.5),
+      vj   = c(-0.35, 1.35, -0.6),
+      pos  = c(0.72, 0.28, 0.5),
+      nm   = c("air to cold sea", "cold sea to air", "cold deep to interior")),
+      diagram_mix_pair(6.72, 7.08, 3.35, 1.7, fx$hs_pump, fx$hs_hd_net - fx$hs_pump))
   }
   # ⚠ THE POOL SPLIT IS COMPUTED FROM THE SAME EXPRESSION THE MODEL USES
   # (R/model.R's land-use block), not typed: `f_luc_wood` is a parameter and the
@@ -1738,46 +1758,50 @@ plot_box_diagram <- function(fx, stock, p) {
     sprintf(" Land-use change takes carbon out of the land pools themselves (%.0f%% soil, %.0f%% plants), not out of thin air.",
             100 * soil, 100 * veg)
   })
-  arrows_df$lab <- sprintf("%.0f\n%s", arrows_df$val, arrows_df$nm)
+  # one decimal below 10 GtC/yr, so the small cold-box flows do not round to 2 and 4
+  arrows_df$lab <- sprintf(ifelse(arrows_df$val < 9.5, "%.1f\n%s", "%.0f\n%s"), arrows_df$val, arrows_df$nm)
   ggplot() +
     geom_segment(data = arrows_df, aes(x, y, xend = xend, yend = yend),
-                 arrow = arrow(length = unit(0.16, "cm"), type = "closed"),
-                 colour = "grey45", linewidth = 0.5) +
+                 arrow = arrow(length = unit(0.16 * scale, "cm"), type = "closed"),
+                 colour = "grey45", linewidth = 0.5 * scale) +
     geom_text(data = arrows_df,
-              aes((x + xend) / 2, (y + yend) / 2, label = lab, hjust = hj, vjust = vj),
-              size = 2.9, colour = "grey20", lineheight = 0.9) +
+              aes(x + pos * (xend - x), y + pos * (yend - y), label = lab, hjust = hj, vjust = vj),
+              size = DIAGRAM_ARROW_SIZE * scale, colour = "grey20", lineheight = 0.9) +
     geom_label(data = boxes, aes(x, y, label = lab, fill = I(col)),
-               colour = "white", fontface = "bold", size = 3.4,
+               colour = "white", fontface = "bold", size = DIAGRAM_BOX_SIZE * scale,
                label.padding = unit(0.4, "lines"), label.r = unit(0.15, "lines")) +
     # ⚠ WRAPPED, NOT HAND-BROKEN. This footnote used to carry a literal "\n" at a
     # point that happened to fit; adding the land-use clause (2026-09-22) pushed
     # the second line past BOTH panel edges, because an annotate() label clips
     # exactly as a caption does. strwrap() at a named measure means the next
     # clause someone adds cannot do that again.
-    annotate("text", x = xmax / 2, y = 0.70, size = DIAGRAM_NOTE_SIZE,
+    # the two footnotes are TOP-anchored in their own band below the deep boxes (they ran into them at 0.70 / 0.18)
+    annotate("text", x = xmax / 2, y = 0.72, size = DIAGRAM_NOTE_SIZE * scale, vjust = 1,
              colour = "grey35", lineheight = 1.05,
              label = app_wrap_px(sprintf(paste0(
                "Arrows are flows in GtC per year (%d). Stocks today: ",
                "atmosphere %s, land %s, ocean %s. ",
-               "Each box exists twice — once per hemisphere.%s"),
+               # Marcus 2026-10-15: say that the flows are two-hemisphere sums, and that the air is the only link
+               "Each box exists twice — once per hemisphere — and every flow shown is the sum of the two; ",
+               "the hemispheres exchange carbon only through the atmosphere.%s"),
                fx$year,
                fmt_gtc(stock$co2_global * ccx_const("GtC_PER_PPM")),
                fmt_gtc(stock$land_C), fmt_gtc(stock$ocean_C),
                paste0(
                  if (hs_on) " The cold boxes are the high-latitude ocean; the warm arrows exclude them." else "",
                  luc_note)),
-               app_text_px("diagram"), diagram_note_pt(DIAGRAM_NOTE_SIZE))) +
+               app_text_px("diagram"), diagram_note_pt(DIAGRAM_NOTE_SIZE * scale))) +
     # ⚠ WRAPPED, NOT HAND-BROKEN -- the SIBLING of the footnote above, and it
     # kept its literal newline escape after that one lost its own, three lines
     # under the comment recording the incident. Fixing one of a pair and not
     # the other is its own failure mode; the pair is now ONE mechanism.
-    annotate("text", x = xmax / 2, y = 0.18, size = DIAGRAM_NOTE_SIZE_BOLD,
+    annotate("text", x = xmax / 2, y = -0.72, size = DIAGRAM_NOTE_SIZE_BOLD * scale, vjust = 1,
              colour = "grey20", fontface = "bold", lineheight = 1.05,
              label = app_wrap_px(
                sprintf(paste0("Photosynthesis and the sea move %.0f GtC a year in and out of the air, ",
                               "so an average CO₂ molecule stays only ~%.1f years. ",
-                              "The added carbon still takes centuries to go."),
+                              "The increase in atmospheric carbon concentrations persists for centuries."),   # Marcus 2026-10-15
                        fx$atm_out, fx$tau_turn),
-               app_text_px("diagram"), diagram_note_pt(DIAGRAM_NOTE_SIZE_BOLD))) +
-    xlim(0.1, xmax) + ylim(0, 4.9) + theme_void()
+               app_text_px("diagram"), diagram_note_pt(DIAGRAM_NOTE_SIZE_BOLD * scale))) +
+    xlim(0.1, xmax) + ylim(-1.45, 4.9) + theme_void()
 }

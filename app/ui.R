@@ -609,8 +609,10 @@ navbarPage(
   tabPanel(
     "Under the hood",
     fluidRow(
+      # 2026-10-15: FULL width below 992 px (col-sm-12), side by side above it (col-lg-7 / col-lg-5; BS5 "lg"). As col-sm-7
+      # the left column was 422 px at a 780 px window, too narrow for the box diagram to be legible.
       column(
-        7,
+        12, class = "col-lg-7",
         h4("What this model is"),
         # U6 (Marcus 2026-09-22): the GOAL before the structure, his wording.
         p("A carbon-cycle model able to duplicate observed hemispheric, seasonal",
@@ -627,7 +629,7 @@ navbarPage(
           "a cold high-latitude surface box and a deep box alongside it.",
           "Monthly steps from 1750. All exchanges include all three carbon",
           "isotopes — ¹²C, ¹³C and ¹⁴C."),
-        plotOutput("h_diagram", height = "330px"),
+        plotOutput("h_diagram", height = "auto"),   # the height follows the width (server.R, 2026-10-15)
         h4("Parameters"),
         # 2026-10-06 (Marcus: "Mark held rows (Recommended)"): "and the few it holds at a stated
         # value" added; the table's "Set" column says which (app/R/params_meta.R)
@@ -638,7 +640,7 @@ navbarPage(
         tableOutput("h_params")
       ),
       column(
-        5,
+        12, class = "col-lg-5",
         # U2 (Marcus 2026-09-22): IGCC temperature used to sit in the table
         # below, which says what the model is FITTED to. It is a driver. Two
         # boxes now, and the driver list is what the Keeling tab's takeaway
