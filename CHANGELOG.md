@@ -2,6 +2,13 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-15 (q) — **Full suite @ `e1c9d10` (frozen, LINKED, launch guard on): 8166 passed, 0 failed, 1 skipped (the standing `l2-enso-limb` skip), 20.1 min.** Log: `outputs/diagnostics/suite_20261015_e1c9d10.log`, committed in `0cbc67d`. No "No nuclear" line.
+
+- **Covered:** the merged dormant-bug fixes (j–k), Marcus's 10.15.26b edits (l), the full app-text review (n) and the README (o). The +1 over the branch's 8165 is the extended spelling lint (m).
+- **Since then:** (p) changed one legend string, covered by `plot-text-fits` 114 / 0, and added outputs and a PDF.
+- **README:** the test line cites this run. ⚠ `0cbc67d`'s message says the README was updated, but it was not: the script matched the pre-merge line (8,125 @ `02d4297`), while the merge had brought in the branch's (8,165 @ `47cf497`), so it stopped before writing. Fixed in the next commit.
+- **Cleanup:** the suite worktree is removed (links deleted first).
+
 ## 2026-10-15 (p) — **Substack figures and the hero image, made from the app** (Marcus: "Can you provide nicely formatted figures as replacements for the screenshots I made, and also select a good hero figure?"). `outputs/substack_20261015/`: `make_figures.R`, four PNGs and `provenance.txt` (driver @ `cd7a68b`, mode `hilda31w`).
 
 - **Figures 1–3** are the app's own plots, drawn by the app's functions on the same runs the app makes, at 1456 px wide (2× the ~728 px Substack column):
