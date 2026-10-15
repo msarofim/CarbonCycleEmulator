@@ -91,7 +91,8 @@ APP_AUTHOR       <- "Marcus C. Sarofim"
 APP_VERSION      <- "v1.0"
 APP_STAGE        <- "beta"
 APP_RELEASE_NAME <- paste(toupper(APP_STAGE), APP_VERSION, APP_TITLE)   # "BETA v1.0 CarboTope"
-APP_RELEASE_MODE <- "hilda29e"   # Marcus 2026-10-08: "Approve all five" (the app already loads the canonical; hilda33p 10-06, hilda34g 10-03, hilda33d 10-01)
+APP_RELEASE_MODE <- "hilda31w"   # Marcus 2026-10-15: "Beta v1.0 is fine, because this is the first public version"
+                                 # (was hilda29e 10-08, hilda33p 10-06, hilda34g 10-03, hilda33d 10-01)
 # "frozen at this version" was dropped 2026-10-01: stale since the 09-30
 # unfreeze, and a freeze verdict is Marcus's (the B8 assessment record).
 APP_STAGE_NOTE   <- paste("Beta. What is under review is how much the model's",
@@ -121,7 +122,9 @@ APP_WARMUP_NOTE  <- paste("First load compiles the model and runs a 1750 spin-up
 # APP_FEEDBACK_URL is the Substack post the review comments live under
 # (Marcus 2026-09-22: the feedback channel is the Substack post on the model).
 APP_FEEDBACK_URL <- "SET-BEFORE-DEPLOY"
-APP_REPO_URL     <- "SET-BEFORE-DEPLOY"
+# Marcus 2026-10-15: the repository goes PUBLIC before the app is deployed (his posting plan, step 1),
+# so this is its GitHub address. It 404s for anyone else until that switch is made.
+APP_REPO_URL     <- "https://github.com/msarofim/CarbonCycleEmulator"
 APP_FEEDBACK_HOW <- paste("Comments are public on the post and I read all of",
                           "them. Please lead your comment with the card number",
                           "so the threads stay separable. Anyone whose comment",
