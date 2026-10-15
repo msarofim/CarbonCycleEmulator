@@ -294,15 +294,28 @@ ccx_cpp_par <- function(p) {
   if (is.null(p$npp_veg_frac)) p$npp_veg_frac <- 0
   if (is.null(p$ra_ratio)) p$ra_ratio <- 0
   # Fertilization form, added 2026-08-14. Defaults to the SAME named constant
-  # ccx_default_params() uses -- and that constant is the LOG form, so a
-  # parameter list built before today reaches the core as the model it was
-  # written for. beta_max / fert_k are inert under FERT_LOG but must still be
-  # present and finite: unpack_par reads them unconditionally, and a missing
-  # name would throw (see the 2026-10-02 correction above).
-  if (is.null(p$fert_form)) p$fert_form <- CCX_FERT_FORM_DEFAULT
-  p$fert_form <- as.integer(p$fert_form)
-  if (is.null(p$beta_max)) p$beta_max <- 0
-  if (is.null(p$fert_k)) p$fert_k <- 1
+  # ccx_default_params() uses, CCX_FERT_FORM_DEFAULT, which has been the
+  # SATURATING (MM) form since 2026-08-14 (Marcus); this comment called it the
+  # LOG form until 2026-10-15. ccx_fert_factor() resolves an absent form the same
+  # way, so the two cores agree about what absence means.
+  # ⛔ UNDER MM, beta_max AND fert_k ARE REQUIRED (2026-10-15, dormant bug 2).
+  # They were filled with 0 and 1 here, so a list lacking them reached the C++
+  # core as the saturating form with NO fertilization, while the R core stopped.
+  # Under FERT_LOG they are inert but must still be present and finite: unpack_par
+  # reads them unconditionally, and a missing name would throw (see the
+  # 2026-10-02 correction above), so the LOG form keeps its fillers.
+  # `[[` and not `$`: `fert_k` prefixes `fert_k_prior`, which `$` would read.
+  if (is.null(p[["fert_form"]])) p$fert_form <- CCX_FERT_FORM_DEFAULT
+  p$fert_form <- as.integer(p[["fert_form"]])
+  if (p$fert_form == CCX_FERT_MM) {
+    miss <- c("beta_max", "fert_k")[c(is.null(p[["beta_max"]]), is.null(p[["fert_k"]]))]
+    if (length(miss))
+      stop("ccx_cpp_par(): the saturating (MM) form needs ", paste0("`", miss, "`", collapse = " and "),
+           if (length(miss) == 1L) ", which is" else ", which are", " absent from the parameter list. ",
+           "The R core (ccx_fert_factor) stops on the same list.")
+  }
+  if (is.null(p[["beta_max"]])) p$beta_max <- 0
+  if (is.null(p[["fert_k"]])) p$fert_k <- 1
   # Ocean overturning added 2026-08-13, default OFF. Same reasoning as above: a
   # parameter list built before that date must reach the core as the
   # pure-diffusion model it was written for, not as garbage.

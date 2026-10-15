@@ -1067,10 +1067,13 @@ ccx_fert_factor <- function(chi, p, chi0 = ccx_const("CO2_PI_PPM")) {
   # `[[` AND A PRESENCE CHECK, not `$` (code review 2026-10-12 sec.4): `fert_k` PREFIXES
   # `fert_k_prior`, so with `fert_k` absent `p$fert_k` partial-matched the prior SWITCH and ran
   # K = 1 with nothing said (demonstrated; latent, as every live list carries `fert_k`).
+  # `beta_max` is checked the same way since 2026-10-15 (dormant bug 2): absent, the product below was
+  # numeric(0) and NPP had no value, where the C++ core now stops on the same list.
   kk <- p[["fert_k"]]
-  if (is.null(kk))
-    stop("ccx_fert_factor(): the saturating (MM) form needs `fert_k`, which is absent from the ",
-         "parameter list.")
+  miss <- c("beta_max", "fert_k")[c(is.null(p[["beta_max"]]), is.null(kk))]
+  if (length(miss))
+    stop("ccx_fert_factor(): the saturating (MM) form needs ", paste0("`", miss, "`", collapse = " and "),
+         if (length(miss) == 1L) ", which is" else ", which are", " absent from the parameter list.")
   kk <- max(kk, 1e-6)
   pmax(1 + p[["beta_max"]] * d / pmax(kk + d, 1e-6), 0)
 }

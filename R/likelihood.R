@@ -2810,9 +2810,14 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   # coverage, but the window ran to 1950 and scored 1941-1949 TWICE (IntCal20
   # tree rings and Hua's NH pre-bomb compilation, which draws on the same
   # tree-ring records). The end year is READ from the Hua rows, never typed.
+  # ⛔ ONLY YEARS INSIDE THE RUN (2026-10-15, dormant bug 5), the ice-core rows' rule (review A11
+  # above). The window started at a typed 1750, so a run starting later scored IntCal's earlier
+  # rows against its own first row through `interp()`'s rule = 2 (an 1850 start: 191 rows, 91 in the
+  # run). The start is the run's own first calendar year; at the canonical's 1750 start the rows are
+  # the same. IntCal's record reaches 1700, so a run starting before 1750 would score those years.
   if (!is.null(obs$intcal)) {
     ic_end <- if (!is.null(obs$d14_nh_ann)) min(obs$d14_nh_ann$year) else 1950
-    ic <- obs$intcal[obs$intcal$year >= 1750 & obs$intcal$year < ic_end, ]
+    ic <- obs$intcal[obs$intcal$year >= floor(min(out$t) + 1e-9) & obs$intcal$year < ic_end, ]
     mod <- interp("d14c_NH", ic$year + 0.5)
     # THE SIGMA (2026-10-12; CHANGELOG 10-12 u). `err` is IntCal's 14C-AGE sigma in YEARS (9-11),
     # scored here as permil by every registered mode -- a units bug, kept bit-exact for them. Label
@@ -3008,7 +3013,9 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
       # D3 (see LIK_IMB_*): the targets move by the FITTED share of GCB's
       # imbalance. No shares = the targets are GCB's own columns, untouched.
       tgt_o <- g$ocean_sink; tgt_l <- g$land_sink
-      sh <- ccx_imb_shares_check(err$imb_share_land, err$imb_share_ocean)
+      # `[[` and not `$` (2026-10-15, dormant bug 3): `imb_share_ocean` prefixes the stick-breaking
+      # coordinate `imb_share_ocean_rest`, so `$` read the coordinate as the share when the share was absent.
+      sh <- ccx_imb_shares_check(err[["imb_share_land"]], err[["imb_share_ocean"]])
       if (!is.null(sh)) {
         im <- ccx_imb_series(obs$gcb)
         I  <- im$I[match(g$year, im$year)]

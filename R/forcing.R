@@ -555,8 +555,10 @@ ccx_enso_efold_yr <- function(x) {
   r <- stats::acf(x, lag.max = 60, plot = FALSE)$acf[-1]
   k <- which(r < exp(-1))[1]
   if (is.na(k)) stop("ccx_enso_efold_yr(): the ACF never falls below 1/e within 60 months.")
-  # lag k-1 is the last one >= 1/e, lag k the first below; interpolate between
-  lag <- if (k == 1L) k * (r[1] - exp(-1)) / (r[1] - exp(-1)) else
+  # lag k-1 is the last one >= 1/e, lag k the first below; interpolate between.
+  # At k == 1 the bracket is lag 0, where the ACF is 1 (2026-10-15, dormant bug 6: the branch read
+  # k (r1 - 1/e) / (r1 - 1/e), which is 1 month whatever r1 is). The shipped record has k = 8.
+  lag <- if (k == 1L) (1 - exp(-1)) / (1 - r[1]) else
     (k - 1) + (r[k - 1] - exp(-1)) / (r[k - 1] - r[k])
   lag / 12
 }
