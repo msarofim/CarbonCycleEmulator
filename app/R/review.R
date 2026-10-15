@@ -538,7 +538,7 @@ RV_CARDS <- list(
                                     # 2026-10-15 review: the measured line is DOTTED (and is the two
                                     # stations' mean; its label now says so), so "the lower" -> "the lower dotted line"
                                     "the fitted offset is the upper dashed line, the",
-                                    "measured one the lower dotted line. Re-centring the prior on the",
+                                    "measured one the lower dotted line. Re-centering the prior on the",
                                     "measured value would relabel most of that gap rather",
                                     "than remove it."),
                               RV_REP_OBS_NH, RV_REP_OBS_SH),

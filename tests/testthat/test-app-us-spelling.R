@@ -22,7 +22,7 @@ US_SPELL_BRITISH <- paste0("(?i)\\b(",
   "regulari|vapori|(re)?minerali|oxidi|acidi|ioni|mobili|centrali|seasonali|deseasonali)s(e|es|ed|ing)|",
   "(analy|cataly|paraly)s(e|ed|ing)|",
   "colour\\w*|behaviour\\w*|favour\\w*|neighbour\\w*|labour\\w*|honour\\w*|vapour\\w*|",
-  "centre[sd]?|metres?|litres?|fibres?|grey(ish)?|",
+  "centre[sd]?|centring|metres?|litres?|fibres?|grey(ish)?|",   # centring: missed until 2026-10-15 (issue 1)
   "modell(ed|ing|er|ers)|labell(ed|ing)|travell\\w*|cancell(ed|ing)|signall(ed|ing)|",
   "artefact\\w*|ageing|judgement|whilst|amongst|programmes?|sulph\\w*|palaeo\\w*|aluminium|",
   "licence|defence|offence|catalogue|analogue|per cent",
@@ -56,7 +56,7 @@ test_that("the app's reader-facing strings use U.S. spelling", {
 })
 
 test_that("MUTATION: British forms in a string are caught; comments, identifiers and the allowlist are not", {
-  src <- c('x <- paste("CO₂ fertilisation, the grey band, the colours and cubic metres")',
+  src <- c('x <- paste("CO₂ fertilisation, the grey band, the colours and cubic metres, re-centring")',
            '# a comment about fertilisation and colour',
            'fertilisation <- list(label = "CO₂ fertilization")',
            'scale_colour_hue(aesthetics = c("colour", "fill"))',
@@ -65,5 +65,5 @@ test_that("MUTATION: British forms in a string are caught; comments, identifiers
   h <- us_spell_hits(us_spell_strings(src, "mut.R"))
   expect_length(h, 1L)
   expect_match(h, "^mut.R:1 ")
-  for (w in c("fertilisation", "grey", "colours", "metres")) expect_match(h, w, fixed = TRUE)
+  for (w in c("fertilisation", "grey", "colours", "metres", "centring")) expect_match(h, w, fixed = TRUE)
 })

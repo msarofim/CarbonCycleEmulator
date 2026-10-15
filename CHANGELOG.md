@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-15 (m) — **One British form missed by (f): issue 1's "Re-centring" → "Re-centering".** The lint matched `centre[sd]?` and not "centring". The full re-read of the app text for Marcus's review found it. A broader scan of every app string literal found no other one. The lint now carries `centring`, and its mutation test includes it. It fails on the real file with the British form restored (checked), and passes with the fix: 9 / 0.
+
 ## 2026-10-15 (l) — **Marcus's `Carbotopecomments10.15.26b.docx` APPLIED (13 items).** Read as plain text: a list of edits, no Word comments.
 
 - **Text:**
