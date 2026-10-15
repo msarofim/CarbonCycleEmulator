@@ -94,3 +94,12 @@ test_that("the D3 ocean share is read EXACTLY: the stick-breaking coordinate doe
                                   imb_share_ocean_rest = 0.5), luc = eluc, by_stream = TRUE)
   expect_identical(both, alone)
 })
+
+test_that("ccx_unc_to_par() decodes an UNNAMED vector as the live fitted set, and refuses a wrong length", {
+  # With names(u) NULL it took the build's names and then indexed `u` by them, which an unnamed
+  # vector cannot answer: "subscript out of bounds".
+  u <- ccx_init_unc()
+  expect_identical(ccx_unc_to_par(unname(u)), ccx_unc_to_par(u))
+  expect_error(ccx_unc_to_par(unname(u)[-1]), "UNNAMED")
+  expect_error(ccx_unc_to_par(c(unname(u), 0)), "UNNAMED")
+})

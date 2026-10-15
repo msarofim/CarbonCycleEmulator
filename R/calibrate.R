@@ -1821,7 +1821,16 @@ ccx_require_param_set <- function(md, what) {
 # honour it, and say so loudly when a name the caller needs is simply absent.
 ccx_unc_to_par <- function(u) {
   nm <- names(u)
-  if (is.null(nm)) nm <- CCX_PARAM_NAMES
+  # An UNNAMED `u` is the live fitted set in table order, and is NAMED here (2026-10-15, dormant bug 4):
+  # it used to take the names without naming `u`, so `u[[n]]` below was "subscript out of bounds".
+  # The length must match, or position would assign the values to the wrong names.
+  if (is.null(nm)) {
+    if (length(u) != length(CCX_PARAM_NAMES))
+      stop("ccx_unc_to_par(): an UNNAMED u has length ", length(u), " but this build fits ",
+           length(CCX_PARAM_NAMES), " names. Name it, or pass one value per fitted name in table order.")
+    nm <- CCX_PARAM_NAMES
+    names(u) <- nm
+  }
   # a GATED name decodes by its own transform whether or not the gate is open in this process
   # (2026-10-01): decoding a named vector needs each name's transform, not the live fitted set
   spec <- function(n) if (!is.null(CCX_PARAM_TABLE[[n]])) CCX_PARAM_TABLE[[n]] else CCX_PARAM_GATED_ALL[[n]]
