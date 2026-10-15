@@ -41,3 +41,34 @@ test_that("a PINNED name with no model slot (bomb_total, luc_scale, the four lik
   expect_error(score("rep_dC", in_base = FALSE), "rep_dC")
   expect_true(all(CCX_NUISANCE_NAMES %in% CCX_PARAM_NAMES))   # the fitted set is restored
 })
+
+test_that("a list without the saturating form's names STOPS in both cores, not only in R", {
+  # ccx_cpp_par() filled fert_form = MM, beta_max = 0 and fert_k = 1, so a list lacking them reached
+  # the C++ core as the saturating form with NO fertilisation, while the R core stopped on fert_k and
+  # returned numeric(0) on beta_max.
+  p <- ccx_default_params()
+  expect_identical(p$fert_form, CCX_FERT_MM)                    # the default form IS the saturating one
+  expect_identical(CCX_FERT_FORM_DEFAULT, CCX_FERT_MM)
+  drop <- function(p, nm) { for (n in nm) p[[n]] <- NULL; p }
+  for (nm in list(c("fert_form", "beta_max", "fert_k"), c("fert_form", "beta_max"), "beta_max", "fert_k")) {
+    q <- drop(p, nm)
+    miss <- intersect(c("beta_max", "fert_k"), nm)
+    expect_error(ccx_fert_factor(400, q), miss[length(miss)])
+    expect_error(ccx_cpp_par(q), miss[1])
+  }
+  # ...and `fert_k_prior` does not stand in for an absent `fert_k` (`$` would partial-match it)
+  q <- drop(p, "fert_k"); q$fert_k_prior <- 1
+  expect_error(ccx_cpp_par(q), "needs `fert_k`")
+  # an absent FORM alone is the default form with the list's own pair, in both cores
+  q <- drop(p, "fert_form")
+  expect_identical(ccx_fert_factor(400, q), ccx_fert_factor(400, p))
+  x <- ccx_cpp_par(q)
+  expect_identical(x[["fert_form"]], CCX_FERT_MM)
+  expect_identical(c(x[["beta_max"]], x[["fert_k"]]), c(p$beta_max, p$fert_k))
+  # the LOG form needs neither name: both cores run it, the C++ with the inert fillers its unpack reads
+  q <- drop(p, c("beta_max", "fert_k")); q$fert_form <- CCX_FERT_LOG
+  expect_equal(ccx_fert_factor(400, q), 1 + q$beta * log(400 / ccx_const("CO2_PI_PPM")))
+  x <- ccx_cpp_par(q)
+  expect_identical(x[["fert_form"]], CCX_FERT_LOG)
+  expect_true(is.finite(x[["beta_max"]]) && is.finite(x[["fert_k"]]))
+})
