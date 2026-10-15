@@ -125,12 +125,13 @@ APP_FEEDBACK_URL <- "SET-BEFORE-DEPLOY"
 # Marcus 2026-10-15: the repository goes PUBLIC before the app is deployed (his posting plan, step 1),
 # so this is its GitHub address. It 404s for anyone else until that switch is made.
 APP_REPO_URL     <- "https://github.com/msarofim/CarbonCycleEmulator"
-APP_FEEDBACK_HOW <- paste("Comments are public on the post and I read all of",
-                          "them. Please lead your comment with the card number",
-                          "so the threads stay separable. Anyone whose comment",
-                          "changes the model or the write-up will be credited",
-                          "in the acknowledgements for the tool and any potential",
-                          "future publication.")
+# Marcus 2026-10-15: his wording ("Substack" capitalised).
+APP_FEEDBACK_HOW <- paste("Comments are public on Substack. Be specific about what",
+                          "issue your comment addresses (use the issue number if",
+                          "appropriate). If your comment leads to a change in the",
+                          "model, and you would like to be included in the",
+                          "acknowledgments to the model or any future publication,",
+                          "please include your full name in the comments.")
 app_link_ok <- function(u) is.character(u) && length(u) == 1L &&
   nzchar(u) && !identical(u, "SET-BEFORE-DEPLOY")
 
@@ -868,8 +869,11 @@ APP_FAIR_PULSE <- APP_FAIR_PULSE_LOAD$d
 app_fair_pulse_why <- function(bg, year, gtc) {
   if (is.null(APP_FAIR_PULSE)) return(APP_FAIR_PULSE_LOAD$why)
   g <- as.numeric(attr(APP_FAIR_PULSE, "provenance")$pulse_gtc); yrs <- sort(unique(APP_FAIR_PULSE$release_year))
-  if (!isTRUE(all.equal(as.numeric(gtc), g)) || !(year %in% yrs) || !(bg %in% APP_FAIR_PULSE$scenario))
-    return(sprintf(APP_FAIR_PULSE_OFFGRID_FMT, g, min(yrs), max(yrs), diff(yrs[1:2])))
+  # The release-year slider IS the grid's years and the menu IS its scenarios (APP_PULSE_YEAR_RANGE), so in
+  # the app only the SIZE can be off the grid; the second message is for any other caller.
+  if (!isTRUE(all.equal(as.numeric(gtc), g))) return(sprintf(APP_FAIR_PULSE_OFFGRID_FMT[["size"]], g, g))
+  if (!(year %in% yrs) || !(bg %in% APP_FAIR_PULSE$scenario))
+    return(sprintf(APP_FAIR_PULSE_OFFGRID_FMT[["other"]], g, min(yrs), max(yrs), diff(yrs[1:2])))
   NULL
 }
 #' FaIR's answer for the pulse the user ran (its rows, labelled), or NULL off the grid
@@ -880,10 +884,36 @@ app_fair_pulse <- function(bg, year, gtc) {
   attr(d, "label") <- sprintf(APP_FAIR_PULSE_LAB_FMT, pv$model, as.integer(pv$n_configs))
   d
 }
+# The pulse's temperature SHAPE (Marcus 2026-10-15): his explanation, with the comparison sentence he chose
+# ("Name FaIR, hedge the shape"). MEASURED 2026-10-15 at hilda31w, 100 GtC released 2030: this model peaks +16 yr
+# (0.147 K), dips to 0.135 at +90, rises to 0.140 by 2300 (vvM); FaIR peaks +15, dips at +82, rises above its
+# early peak by 2300. vvH dips until ~+200 and barely rises; vvL never rises here before 2300 (FaIR does). No
+# "multiple models" claim: no literature source was verified, and this model's CO2-to-temperature step is FITTED
+# to FaIR, so FaIR is not independent evidence for the temperature half.
+APP_PULSE_SHAPE_NOTE <- paste(
+  "Temperature peaks in the first couple of decades after the pulse, as the ocean surface",
+  "equilibrates with the added heat. Then it declines, because the drop in CO\u2082 concentration",
+  "is faster than the decline in ocean heat uptake, until the CO\u2082 concentration decline begins",
+  "to flatten out but ocean heat uptake continues to decline, so net warming increases again.",
+  "FaIR shows the same shape for the same pulse; whether temperature rises again before 2300,",
+  "and by how much, depends on the background scenario.")
+
 # ⚠ DRAFTS for Marcus's wording (2026-10-12)
 APP_FAIR_PULSE_LAB_FMT <- "%s, %d-configuration mean (5\u201395 %% shaded)"
-APP_FAIR_PULSE_OFFGRID_FMT <- paste("FaIR was run for a %g GtC pulse released in %d-%d, every %d years;",
-                                    "set the pulse to one of those to compare.")
+# Marcus 2026-10-15: "FaIR was only run for 100 GtC pulses: set the pulse size to 100 GtC." The size is the grid's.
+APP_FAIR_PULSE_OFFGRID_FMT <- c(
+  size  = "FaIR was only run for %g GtC pulses: set the pulse size to %g GtC.",
+  other = paste("FaIR was only run for %g GtC pulses released in %d-%d, every %d years,",
+                "on the scenarios in this menu."))
+# The Futures checkbox serves TWO overlays: FaIR's scenario runs (Scenarios) and FaIR's pulse (Pulse lab). Marcus
+# 2026-10-15 asked for "Compare with FaIR (100 GtC pulse only)"; that is true of the pulse lab only, so the label
+# follows the pill (server.R updates it). The size is the grid's, never typed.
+APP_FAIR_CHECK_LAB_SCEN  <- "Compare with standard FaIR"
+APP_FAIR_CHECK_LAB_PULSE <- "Compare with FaIR (%g GtC pulse only)"
+app_fair_check_label <- function(mode) {
+  if (!identical(mode, "Pulse lab") || is.null(APP_FAIR_PULSE)) return(APP_FAIR_CHECK_LAB_SCEN)
+  sprintf(APP_FAIR_CHECK_LAB_PULSE, as.numeric(attr(APP_FAIR_PULSE, "provenance")$pulse_gtc))
+}
 APP_FAIR_PULSE_NOTE <- paste("FaIR is shown for the same pulse on the same scenario. Before 2025 this",
                              "model follows the observed carbon budget and FaIR its own history, so the",
                              "two release the pulse into slightly different worlds.")

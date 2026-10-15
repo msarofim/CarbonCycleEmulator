@@ -69,7 +69,7 @@ test_that("ON the grid FaIR is returned and labelled; OFF it nothing is, and the
   for (a in list(list("vvM", 2050, as.numeric(.pv$pulse_gtc) + 10), list("vvM", 2045, as.numeric(.pv$pulse_gtc)),
                  list("ssp245", 2050, as.numeric(.pv$pulse_gtc)))) {
     expect_null(do.call(.env$app_fair_pulse, a))
-    expect_match(do.call(.env$app_fair_pulse_why, a), "FaIR was run for", fixed = TRUE)
+    expect_match(do.call(.env$app_fair_pulse_why, a), "FaIR was only run for", fixed = TRUE)   # Marcus 2026-10-15
   }
 })
 

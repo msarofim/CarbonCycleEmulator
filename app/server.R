@@ -28,6 +28,9 @@
 `%||%` <- function(a, b) if (is.null(a)) b else a
 
 function(input, output, session) {
+  # The FaIR checkbox serves the Scenarios overlay and the pulse lab's 100 GtC pulse; its label says which (2026-10-15).
+  observeEvent(input$f_mode, updateCheckboxInput(session, "f_fair", label = app_fair_check_label(input$f_mode)),
+               ignoreInit = TRUE)
 
   # fmt_gtc() moved to app/R/plots.R (2026-09-08g): the diagram function needs it too
   fmt_pct <- function(x) sprintf("%.0f%%", 100 * x)
@@ -530,7 +533,8 @@ function(input, output, session) {
     # EPISODIC ERROR. "Consistently 0.1 high" and "fine except 1992 and 1998"
     # give nearly the same two numbers, and only the second is a story about
     # volcanoes and El Nino — which is what this tab is for.
-    txt <- sprintf(paste("Against the measured record over the same %d years:",
+    # "Relative to" is Marcus's (2026-10-15); it was "Against".
+    txt <- sprintf(paste("Relative to the measured record over the same %d years:",
                          "the full model runs %+.2f ppm/yr on average (typical",
                          "miss %.2f), and its single worst year is %d at %+.2f."),
                    r$full$n, r$full$bias, r$full$rms, r$full$worst_year,
@@ -975,7 +979,8 @@ function(input, output, session) {
                 APP_PULSE_LIN_SIZES[1], APP_PULSE_LIN_SIZES[2], APP_PULSE_LIN_SPREAD,
                 APP_PULSE_PER1000_ABOUT,
                 min(as.integer(names(APP_PULSE_PER1000_BY_HORIZON))),
-                max(as.integer(names(APP_PULSE_PER1000_BY_HORIZON))))))
+                max(as.integer(names(APP_PULSE_PER1000_BY_HORIZON))))),
+      p(APP_PULSE_SHAPE_NOTE))
   })
 
   output$f_notes <- renderUI({

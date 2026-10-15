@@ -194,11 +194,12 @@ CCX_MECHANISMS <- list(
     # a time-varying airborne fraction); the numbers are an app-level echo and
     # must not be quoted as the gate's decomposition. That is
     # calibration/diag_gateV_variability_drivers.R.
+    # Marcus 2026-10-15: "It is the largest driver of the variability in annual growth rate" is his.
+    # RE-MEASURED 2026-10-15 at hilda31w (app_wobble_shares_20261015_hilda31w): ENSO off removes 38 %.
     blurb = paste("ENSO moves carbon in and out of tropical land, and in and",
-                  "out of the surface ocean, year by year. It is the single",
-                  "largest reason the Keeling curve wobbles around its trend in",
-                  "this model — switch it off and about 40 % of the wobble",
-                  "goes with it."),
+                  "out of the surface ocean, year by year. It is the largest",
+                  "driver of the variability in annual growth rate — switch it",
+                  "off and about 40 % of the wobble goes with it."),
     # ⛔ THE TEMPERATURE HALF KEEPS RUNNING, and this caveat may not be
     # shortened to "El Nino off". Marcus 2026-09-25: "it does not flatten the
     # ENSO temperature effect, so that still exists." `apply` below zeroes the
@@ -214,12 +215,14 @@ CCX_MECHANISMS <- list(
     # the full model's scatter (0.268 -> 0.088 ppm/yr). Under the old land-only switch it was
     # 54 % (46 % left), which is why his draft said "half". Smoothing the emissions record
     # removes 12 % on its own (old switch). CHANGELOG 10-02 (w).
-    caveat = paste("This sets the El Niño index to zero, which removes every",
+    # Marcus 2026-10-15: "ENSO index" (defined) replaces "El Niño index", and the temperature
+    # sentence is his. 2026-10-15 re-measure: all three switches off leave 29 % ("about a third").
+    caveat = paste("This sets the ENSO index — a measure of how strong El Niño and",
+                   "La Niña conditions are — to zero, which removes every",
                    "response the model makes to it, on land and in the ocean.",
-                   "El Niño's own temperature signature is still in the observed",
-                   "temperature record this model is driven by, so the carbon",
-                   "cycle's response to that warming keeps running whatever this",
-                   "switch says.",
+                   "The ENSO temperature signal is not removed from the",
+                   "temperature driver: this switch only removes the other",
+                   "ENSO-related effects on carbon uptake.",
                    "Affects year-to-year variability, not the long-term trend.",
                    "In the model, even accounting for El Niño, temperature, and",
                    "aerosol light-diffusion effects, about a third of the wobble",
@@ -238,9 +241,12 @@ CCX_MECHANISMS <- list(
   volcanic = list(
     driver = "aod",  # CCX_DRIVERS; NULL = acts on a parameter, not an input
     label = "Volcanic haze (the diffuse-light effect)",
-    blurb = paste("A big eruption puts a haze of sulphate high in the",
-                  "atmosphere. It scatters sunlight, which sounds bad for",
-                  "plants but is not: scattered light reaches leaves that",
+    # Marcus 2026-10-15: the first two sentences are his ("something like"); "a climate effect" and the
+    # join into the existing diffuse-light sentence are the only changes.
+    blurb = paste("Some explosive volcanic eruptions put sulfate aerosols into",
+                  "the stratosphere, where they reflect sunlight and can persist",
+                  "long enough to have a climate effect. They also scatter light,",
+                  "which sounds bad for plants but is not: scattered light reaches leaves that",
                   "would otherwise sit in shade, so the world's vegetation",
                   "grows a little faster for a year or two and pulls extra",
                   "CO₂ out of the air. Switch it off and the dips after",
@@ -258,10 +264,10 @@ CCX_MECHANISMS <- list(
     # Marcus 2026-10-02 (carbotopecomment): lower-case, and the pointer to the warming switch
     # cut -- "warming is a mix of so many different things, it doesn't distinguish any
     # individual ENSO or volcanic warming effect out".
-    caveat = paste("This removes the light effect only. Eruptions also cool the",
-                   "planet, and this model is driven by the observed temperature",
-                   "record, which already contains that cooling — so the cooling",
-                   "half keeps running whatever this switch says."),
+    # Marcus 2026-10-15: his wording.
+    caveat = paste("This removes the diffuse scattering effect only. The planetary",
+                   "cooling is embedded in the observed temperature record, and",
+                   "is not removed by this switch."),
     apply = function(p, F) {
       # BOTH, deliberately. Zeroing the AOD columns is the physical statement
       # ("no volcanic aerosol") and would also catch a future consumer of them;

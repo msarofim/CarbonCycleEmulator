@@ -148,28 +148,45 @@ rv_plot_gradient <- function() rv_guard(rv_gradients(), function(x) {
 # ---------------------------------------------------------------------
 # CARD 3 -- the hemispheric air-sea disequilibrium, model vs GLODAP bottles
 # ---------------------------------------------------------------------
+# ⭐ 2026-10-15 (Marcus: "The chart makes it look like the problem is mostly in the two cold boxes, and it isn't
+# obvious from the chart that this is a symmetry problem"). The issue is the AREA-WEIGHTED hemisphere averages and
+# their difference (gate D's own quantity), so that panel now comes FIRST, with the measured difference's standard
+# error; the four boxes follow. The cold boxes are the largest misfits box by box, but they cover little area.
+RV_DISEQ_PANEL_HEMI <- "Hemisphere averages"
+RV_DISEQ_PANEL_BOX  <- "The four boxes"
 rv_plot_diseq <- function() rv_guard(rv_gateD(), function(x) {
   reg <- c("NH_ml", "NH_hs", "SH_ml", "SH_hs")
   reg <- reg[reg %in% names(x$region) & reg %in% names(x$obs_region)]
-  pretty <- c(NH_ml = "North, mixed layer", NH_hs = "North, cold box",
-              SH_ml = "South, mixed layer", SH_hs = "South, cold box")
+  pretty <- c(NH_ml = "North,\nmixed layer", NH_hs = "North,\ncold box",
+              SH_ml = "South,\nmixed layer", SH_hs = "South,\ncold box")
+  hemi <- c("North", "South", "North\nminus south")
+  lab_obs <- "GLODAP bottles"; lab_mod <- "Model"
   d <- rbind(
-    data.frame(region = pretty[reg], who = "Model",
-               value = as.numeric(x$region[reg])),
-    data.frame(region = pretty[reg], who = "GLODAP bottles",
-               value = as.numeric(x$obs_region[reg])))
-  d$region <- factor(d$region, levels = unname(pretty[reg]))
-  d$who <- factor(d$who, levels = c("GLODAP bottles", "Model"))
+    data.frame(panel = RV_DISEQ_PANEL_HEMI, region = hemi, who = lab_obs, se = c(NA, NA, x$se),
+               value = c(x$obs_hemi[["NH"]], x$obs_hemi[["SH"]], x$obs_asym)),
+    data.frame(panel = RV_DISEQ_PANEL_HEMI, region = hemi, who = lab_mod, se = NA,
+               value = c(x$hemi[["NH"]], x$hemi[["SH"]], x$asym)),
+    data.frame(panel = RV_DISEQ_PANEL_BOX, region = pretty[reg], who = lab_obs, se = NA,
+               value = as.numeric(x$obs_region[reg])),
+    data.frame(panel = RV_DISEQ_PANEL_BOX, region = pretty[reg], who = lab_mod, se = NA,
+               value = as.numeric(x$region[reg])))
+  d$panel  <- factor(d$panel, levels = c(RV_DISEQ_PANEL_HEMI, RV_DISEQ_PANEL_BOX))
+  d$region <- factor(d$region, levels = c(hemi, unname(pretty[reg])))
+  d$who    <- factor(d$who, levels = c(lab_obs, lab_mod))
+  dodge <- position_dodge(width = 0.72)
   ggplot(d, aes(region, value, fill = who)) +
-    geom_col(position = position_dodge(width = 0.72), width = 0.66) +
+    geom_col(position = dodge, width = 0.66) +
+    geom_errorbar(aes(ymin = value - se, ymax = value + se), position = dodge, width = 0.25,
+                  colour = "grey25", na.rm = TRUE) +
     geom_hline(yintercept = 0, colour = "grey55", linewidth = 0.4) +
+    facet_grid(~ panel, scales = "free_x", space = "free_x") +
     scale_fill_manual(values = stats::setNames(c(RV_COL_OBS(), RV_COL_MODEL()),
-                                               c("GLODAP bottles", "Model"))) +
+                                               c(lab_obs, lab_mod))) +
     labs(x = NULL, y = "Air–sea δ¹³C disequilibrium (‰)",
          caption = rv_cap(sprintf(
-           paste("North-minus-south asymmetry: model %+.3f‰ against %+.3f ± %.3f‰",
-                 "measured. The model has the right overall size and too little",
-                 "of the difference."),
+           paste("North-minus-south asymmetry (area-weighted hemisphere averages): model",
+                 "%+.3f‰ against %+.3f ± %.3f‰ measured. The model has the right overall size",
+                 "and too little of the difference."),
            x$asym, x$obs_asym, x$se))) +
     theme_ccx()
 })
@@ -200,7 +217,7 @@ rv_plot_variance <- function() rv_guard(rv_variability(), function(x) {
            # is MORE ENSO-correlated than the record is, so the variance it is
            # missing is not ENSO-shaped. Computed, so it cannot go stale.
            if (is.null(x$enso)) "" else sprintf(
-             paste("These anomalies track the El Niño index at r %+.2f for the model",
+             paste("These anomalies track the ENSO index at r %+.2f for the model",
                    "and %+.2f for the measurements (n = %d) — the model is if anything",
                    "more El Niño-driven than the record, so what is missing from its",
                    "variance is not El Niño-shaped."),
@@ -223,14 +240,20 @@ rv_plot_enso <- function() rv_guard(rv_enso_slope(), function(x) {
   lab_sol  <- "Model, ocean ENSO mechanisms off"
   d <- rbind(mk(x$obs, lab_obs), mk(x$full, lab_full), mk(x$sol, lab_sol))
   d$who <- factor(d$who, levels = c(lab_obs, lab_full, lab_sol))
-  ggplot(d, aes(index, anom, colour = who)) +
+  # ⭐ 2026-10-15 (Marcus: the lines did not show what the card says). The budget's fitted line was drawn FIRST,
+  # dark, and lay under the model's (slopes 1.05x apart), so only the model and the knockout were visible. It is
+  # now drawn LAST and dashed, so agreement shows as two lines that coincide.
+  lty <- stats::setNames(c("22", "solid", "solid"), c(lab_obs, lab_full, lab_sol))
+  ggplot(d, aes(index, anom, colour = who, linetype = who)) +
     geom_hline(yintercept = 0, colour = "grey70", linewidth = 0.3) +
     geom_point(size = 0.9, alpha = 0.5) +
-    geom_smooth(method = "lm", formula = y ~ x, se = FALSE, linewidth = 0.8) +
+    geom_smooth(data = d[d$who != lab_obs, ], method = "lm", formula = y ~ x, se = FALSE, linewidth = 0.8) +
+    geom_smooth(data = d[d$who == lab_obs, ], method = "lm", formula = y ~ x, se = FALSE, linewidth = 1.1) +
     scale_colour_manual(values = stats::setNames(
       c(RV_COL_OBS(), RV_COL_MODEL(), RV_COL_BAD()), c(lab_obs, lab_full, lab_sol))) +
-    guides(colour = guide_legend(nrow = 2)) +
-    labs(x = "Niño3.4 index (annual mean)",
+    scale_linetype_manual(values = lty) +
+    guides(colour = guide_legend(nrow = 2), linetype = guide_legend(nrow = 2)) +
+    labs(x = "ENSO index (Niño 3.4, annual mean)",
          y = "Ocean uptake anomaly (GtC/yr)",
          caption = rv_cap(paste(sprintf(
            paste("Slope per index unit: budget %+.3f ± %.3f, model %+.3f ± %.3f",
@@ -352,7 +375,7 @@ rv_plot_oclim <- function() rv_guard(rv_ocean_climate(), function(x) {
 
 # CARD 8b -- what it is worth: CO2 in 2300, lower by this much if this ocean's warming response were the ocean
 # models' size (its sea-surface warming response scaled by f, unrefitted; bars = the ocean models' +-1 sigma).
-RV_OCLIM_SCEN <- c(ssp585 = "SSP5-8.5 (older high scenario)", vvH = "High", vvM = "Medium")
+RV_OCLIM_SCEN <- c(vvH = "High", vvM = "Medium")   # SSP5-8.5 removed (Marcus 2026-10-15)
 rv_plot_oclim_stake <- function() rv_guard(rv_ocean_climate(), function(x) {
   t <- x$stake$table
   t <- t[match(names(RV_OCLIM_SCEN), t$scenario), ]

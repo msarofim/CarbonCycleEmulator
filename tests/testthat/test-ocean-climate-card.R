@@ -39,7 +39,9 @@ test_that("2. the card's qualitative words follow from the product", {
   expect_true(oc_about_twice(x))
   expect_true(grepl("about twice", c8$title, fixed = TRUE) && grepl("about twice", c8$plain, fixed = TRUE))
   expect_true(oc_decades_earlier(x))
-  expect_true(grepl("decades earlier", c8$plain, fixed = TRUE))
+  # 2026-10-15 (Marcus, "Update the pins"): his plain no longer says "decades earlier", so the text is held to
+  # the claim only WHERE it makes it -- if the phrase returns, the product must still support it.
+  expect_false(grepl("decades earlier", c8$plain, fixed = TRUE) && !oc_decades_earlier(x))
   # the futures chart's arm is the GCB-sized one, and the +-1 sd arms bracket it
   f <- x$stake$f
   expect_true(f[["f_T_lo"]] < f[["f_T"]] && f[["f_T"]] < f[["f_T_hi"]] && f[["f_T_hi"]] < 1)

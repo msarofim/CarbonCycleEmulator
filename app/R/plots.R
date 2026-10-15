@@ -71,7 +71,7 @@ KEY_GROWTH_OBS  <- "Measured (NOAA global marine reference)"
 KEY_PULSE_EXTRA  <- "The extra CO\u2082 (with the pulse, minus without)"
 KEY_PULSE_TAGGED <- "The pulse's own carbon atoms (tagged)"
 PANEL_PULSE_EXTRA  <- "The extra carbon"
-PANEL_PULSE_TAGGED <- "The pulse's own atoms"
+PANEL_PULSE_TAGGED <- "The pulse's carbon atoms"   # Marcus 2026-10-15
 PULSE_TAG_DECAY_NOTE <- paste("The tagged atoms leave the air within years, because the air swaps",
                               "carbon with land and ocean every year. The extra CO\u2082 stays far",
                               "longer, because carbonate chemistry limits how much EXTRA carbon",
@@ -369,7 +369,7 @@ plot_keeling <- function(out, obs, yr_range, hemi = "both", show_obs = TRUE,
            app_provenance_caption(sprintf(paste(
              "Solid = what the calibration scored against these stations: the",
              "hemispheric box minus a fitted station offset of %.2f ppm. Faint =",
-             "the box itself. Card 1 of Known issues has the residuals."), off))
+             "the box itself. Known issue 1 has the residuals."), off))
            else app_provenance_caption()) +
     theme_ccx()
 }
@@ -1072,9 +1072,12 @@ plot_growth_rate <- function(base, alt = NULL, obs = NULL, yr_range = c(1960, 20
   d <- d[d$year >= yr_range[1] & d$year <= yr_range[2], ]
   cols <- stats::setNames(c(PAL[["model"]], PAL[["off"]], PAL[["obs"]]),
                           c("Full model", label, KEY_GROWTH_OBS))
+  # Marcus 2026-10-15 ("Measured as dots, model as lines"): the record is annual MEASUREMENTS, so it is drawn
+  # as points; the two model runs stay lines, so the mechanism-off comparison reads as one curve against another.
+  is_obs <- d$who == KEY_GROWTH_OBS
   ggplot(d, aes(year, g, colour = who)) +
-    geom_line(linewidth = 0.7) +
-    geom_point(size = 0.8) +
+    geom_line(data = d[!is_obs, ], linewidth = 0.7) +
+    geom_point(data = d[is_obs, ], size = 1.6) +
     scale_colour_manual(values = cols[names(cols) %in% unique(d$who)]) +
     labs(x = LAB_YEAR, y = LAB_GROWTH,
          caption = app_provenance_caption(GROWTH_UNIT_NOTE)) +

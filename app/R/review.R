@@ -45,12 +45,14 @@ RV_CLASS_GLOSS <- c(
                      "air. Closing it means a different model, not a better fit."),
   # `accounting` ("the fit prefers a simpler version ...") went with the old card 6, its
   # only user, when that card was retired (2026-10-01).
-  shim       = paste("a fitted stand-in for a mechanism the model does not",
-                     "carry. It is named rather than hidden."),
+  # Marcus 2026-10-15: "Shims are model corrections that are not based on physical mechanisms." -- put in
+  # the glosses' fragment form, since each renders as "SHIM -- <gloss>".
+  shim       = "a model correction that is not based on a physical mechanism.",
   # N9 (Marcus 2026-09-22): his wording, which is better than mine.
+  # Marcus 2026-10-15: his wording (lower-case "we" for the fragment form).
   comparison = paste("we do not calibrate the model to match future projections,",
-                     "so it is not surprising that we might not match perfectly.",
-                     "But the long tail of carbon dioxide is robust."),
+                     "so the alignment between CarboTope and FaIR is an emergent",
+                     "property of having a physical model tuned to observed variables."),
   gap        = "something the product does not have yet.",
   # 2026-10-08 (j), card 8: neither "structural" (the hemispheres' separate oceans) nor "comparison" (written for the
   # pulse) describes it. ⚠ CLAUDE'S DRAFT, FOR MARCUS'S WORDING.
@@ -211,7 +213,7 @@ rv_gates_ready <- function() {
 rv_need_gates <- function() {
   if (!isTRUE(rv_gates_ready()))
     stop("the gate kernels (calibration/lib_design_gates.R) are not available ",
-         "in this deployment, so this card cannot show its measurement")
+         "in this deployment, so this issue cannot show its measurement")
   invisible(TRUE)
 }
 
@@ -301,9 +303,15 @@ RV_ENSO_WIN <- c(1959, 2024)
 # ⛔ 2026-10-08 (g): that test did NOT exist until then (no caller of
 # rv_enso_l2_relation() anywhere in tests/); hilda29e's 16.79 is "inside" and the
 # word stayed "below" with a green suite. It is now test-review-card-numbers.R.
-RV_ENSO_L2_VS_OBS <- "below"
+# 2026-10-15 (Marcus: "Apply minimal factual fixes"): hilda31w HOLDS w_enso_l2 at 16.79 (the interannual
+# cut's module), inside [14, 25], so the word is "inside" -- and "sits a little inside the range" does not
+# read, so the card renders rv_enso_l2_phrase() of the word and the test checks that phrase.
+RV_ENSO_L2_VS_OBS <- "inside"
 rv_enso_l2_relation <- function(w, bracket)
   if (w < bracket[1]) "below" else if (w > bracket[2]) "above" else "inside"
+rv_enso_l2_phrase <- function(rel)
+  switch(rel, below = "a little below", above = "a little above", inside = "inside",
+         stop("rv_enso_l2_phrase(): unknown relation '", rel, "'"))
 rv_enso_l2_bracket <- function()
   readRDS(ccx_path("data", "obs_eq_cell.rds"))$w0_prior$interannual$per_index_sv
 
@@ -475,11 +483,13 @@ rv_ocean_climate <- function() rv_memo("ocean_climate", function() {
 RV_CARDS <- list(
   list(id = 1, key = "repdc", class = "shim",
        title = "The model's CO₂ sits above Mauna Loa",
+       # Marcus 2026-10-15: the last two sentences are his ("until now the panel drew the box without it" was
+       # stale: the Keeling tab draws both). 2026-10-15 at hilda31w: fitted offset 5.5x the measured one.
        plain = paste("The model's northern box runs a few parts per million",
-                     "above the Mauna Loa record. That gap is not an error in the",
-                     "fit: the calibration scored the model through a fitted",
-                     "station-vs-box offset, and until now the panel drew the box",
-                     "without it. Both are now on the chart."),
+                     "above the Mauna Loa record. The calibration included an",
+                     "offset between the hemispheric box and the station data that",
+                     "the model could adjust. This offset is larger than the",
+                     "measured offset between the station and hemispheric data."),
        detail = paste("A hemispheric-mean box is not a remote marine station. The",
                       "mean includes continental boundary-layer air Mauna Loa never",
                       "samples, carrying extra CO₂ that is isotopically light, so",
@@ -559,7 +569,7 @@ RV_CARDS <- list(
                      "the northern surface ocean than the southern. The model has",
                      "the right global size but far too little of the asymmetry --",
                      "about a third of the observed difference."),
-       detail = paste("This is the same structural limit as card 2, seen in a",
+       detail = paste("This is the same structural limit as issue 2, seen in a",
                       "second, independent observation (GLODAP surface bottles",
                       "rather than atmospheric stations). The deficit is on the",
                       "northern side. There is a related quantitative tension",
@@ -570,25 +580,26 @@ RV_CARDS <- list(
                       "other. Note also that the southern cold box equilibrates",
                       "with the deep ocean, so its disequilibrium is a statement",
                       "about the model's deep δ¹³C, not its surface."),
-       ask = paste("Same question as card 2 -- these are one flaw with two",
+       ask = paste("Same question as issue 2 -- these are one flaw with two",
                    "observables. And: would an interhemispheric deep exchange be",
                    "worth building into a teaching model to close it?")),
   list(id = 4, key = "variance", class = "structural",
-       title = "Year-to-year variability is about 60% of observed",
+       # 2026-10-15 (Marcus: "Apply minimal factual fixes"): "about 60%" was 10-02's. At hilda31w it is 68 % on
+       # the What-if estimator (app_wobble_shares_20261015_hilda31w, 1980-2024) and 0.88x on this card's own
+       # chart (detrended, 1959-2024), so the title carries no number and the plain gives the range.
+       title = "Year-to-year variability is somewhat smaller than observed",
        # Marcus 2026-10-02 (carbotopecomment): "The app's ENSO switch is a sensitivity, not a
        # reconstruction." deleted. 60% still MEASURED 10-02: 0.268 vs 0.459 ppm/yr = 58%.
        plain = paste("The model's ENSO sensitivity is close to right -- push the",
                      "index and the ocean sink responds by nearly the amount the",
                      "Global Carbon Budget shows. But the total year-to-year",
-                     "wobble in CO₂ growth is only about 60% of the observed",
-                     "one.",
-                     # Marcus 2026-10-06 (carbotopecomments.10.2.26): "Change to" -- his wording,
-                     # in the app's CO₂ / El Niño style; the TIMING miss, beside the amplitude one.
-                     # Measured at hilda33p (enso_growth_fit_20261006_hilda33p, T2(b)): the model's
-                     # growth peaks +1 month after Nino 3.4 (r 0.68), the record's +5 (r 0.50).
-                     "The timing of the CO₂ growth peak after an El Niño is too early,",
-                     "peaking a month after the Pacific warmth index rather than five",
-                     "months from the observed record."),
+                     "wobble in CO₂ growth is only about 70–90% of the observed",
+                     "one, depending on the period and the method."),
+                     # 2026-10-15 (Marcus: "Is this statement still true?"): NO, and REMOVED. His 10-06 timing
+                     # sentence ("peaking a month after the Pacific warmth index rather than five months") was
+                     # measured at hilda33p (+1 vs +5). At hilda29e (enso_growth_fit_20261008_hilda29e) and at
+                     # hilda31w (enso_growth_fit_20261015_hilda31w, T2(b)) the model peaks +5 months (r 0.72),
+                     # the record +5 (r 0.50): the timing miss is gone.
        # A4 (Marcus 2026-10-01, "Fix Card 4"): this said the fitted strength
        # "lands inside the observed range". True at hilda29l (13.71, inside at
        # 1 sd); at hilda33d w_enso_l2 is 11.91 against Meinen's 14-25 Sv per
@@ -598,9 +609,9 @@ RV_CARDS <- list(
        # 10-08 g; before that no test did, whatever this said); the
        # numbers themselves are printed live in card 4b's caption.
        detail = paste("The sensitivity is carried by a physical mechanism -- a",
-                      "layer-3 upwelling anomaly driven by the Niño3.4 index,",
-                      sprintf("whose fitted strength sits a little %s the range",
-                              RV_ENSO_L2_VS_OBS),
+                      "layer-3 upwelling anomaly driven by the ENSO index (Niño 3.4),",
+                      sprintf("whose fitted strength sits %s the range",
+                              rv_enso_l2_phrase(RV_ENSO_L2_VS_OBS)),
                       "observed for equatorial transport variability (the",
                       "numbers are under the second chart). It replaced a pair of",
                       "fitted coefficients that had been overturning a",
@@ -628,9 +639,12 @@ RV_CARDS <- list(
                       # fails if the lag the canonical RUNS (fitted, or pinned by the cut's module) is more
                       # than one sd from the 2.5 written here (this named test-enso-lag.R, which never
                       # checked it; corrected 10-08 g). hilda29e pins 5.93 +/- 1.21: STALE.
-                      "\n\nFor the land uptake, the ENSO response is defined to occur",
-                      "2.5 months after the index based on the vegetation model",
-                      "response timing from the Global Carbon Budget.",
+                      # 2026-10-15 (Marcus: "Apply minimal factual fixes"): hilda31w HOLDS the land lag at 5.93
+                      # months (the interannual cut's module, +/- 1.21), not 2.5 (his 10-06 sentence, true at
+                      # hilda33p). test-review-card-numbers.R holds "six" to the lag the canonical runs.
+                      "\n\nFor the land uptake, the ENSO response occurs",
+                      "about six months after the index, the value a separate fit",
+                      "to the year-to-year CO₂ growth record gives.",
                       # N7 (Marcus 2026-09-22): "can we identify any commonalities
                       # between the years the model overshoots the growth rate,
                       # and/or between the years it undershoots?" Measured in
@@ -657,11 +671,13 @@ RV_CARDS <- list(
                    "And if the missing variability is not El Ni\u00f1o, not volcanic and",
                    "not a trend \u2014 what would you look for next?")),
   list(id = 5, key = "pulse", class = "comparison",
-       title = "A pulse of CO₂ decays faster here than in the multi-model mean",
-       plain = paste("Release a pulse and this model keeps less of it in the air",
-                     "at a century than the Joos et al. (2013) multi-model mean",
-                     "does. The eventual split between land, ocean and air at a",
-                     "thousand years is inside that study's range on every term."),
+       # Marcus 2026-10-15: title and ask are his; the plain is his own comment's statement ("We do decay
+       # faster than Joos et al. 2013 in the early years, but not as fast as FaIR"), checked at hilda31w:
+       # IRF 20/100/300 = 0.514/0.374/0.293 here, Joos 0.596/0.409/0.322, FaIR 0.483/0.364/0.291.
+       title = "Comparing CO₂ pulse decay rates to other sources",
+       plain = paste("A pulse of CO₂ leaves the air faster in this model than in the",
+                     "Joos et al. (2013) multi-model mean, most of all in the early",
+                     "decades, but not as fast as in FaIR."),
        detail = paste("This is a comparison and deliberately not a test: nothing",
                       "from that study is allowed to score this model, because a",
                       "long perturbation lifetime is supposed to emerge from the",
@@ -683,9 +699,7 @@ RV_CARDS <- list(
                       "in the first few decades, but after a thousand years the",
                       "split between land, ocean and air is close to the",
                       "multi-model mean on every term."),
-       ask = paste("The app teaches how long CO₂ lasts. Is a lifetime shorter",
-                   "than the multi-model mean -- with the shape inside its band --",
-                   "acceptable to teach, or does it undercut the lesson?")),
+       ask = "What is the best comparison for long-term CO₂ decay?"),
   # ⭐ RENUMBERED 2026-10-01 (Marcus: "renumber the cards"). The AIC card (the old
   # card 6) was retired the same day and first left a hole; the app has never been
   # deployed, so no comment can lead with an old number, and the hole was closed:
@@ -749,8 +763,8 @@ RV_CARDS <- list(
                       "allowed to move at all, carried at a stated number. Some",
                       "parameters are in both -- a stand-in that was switched off by",
                       "holding it at zero. The stand-ins that matter most for what",
-                      "this app claims are the station offset (card 1), the",
-                      "δ¹³C gradient offset (card 2 is scored net of it), and a",
+                      "this app claims are the station offset (issue 1), the",
+                      "δ¹³C gradient offset (issue 2 is scored net of it), and a",
                       "seasonal sea-surface-temperature amplitude fitted well",
                       "under the observed one.",
                       # 2026-10-06 (Marcus: "Add a line about k_w to the known issues tab"): wording
@@ -779,23 +793,29 @@ RV_CARDS <- list(
   # the two charts from data/ocean_climate_card.rds. The two qualitative claims ("about twice", "decades earlier")
   # are tied to that product by test-ocean-climate-card.R.
   list(id = 8, key = "ocean_climate", class = "response",
-       title = "The ocean loses uptake to warming about twice as strongly as ocean models do",
+       # Marcus 2026-10-15: title, plain's second sentence and the detail's first sentence are his. "about" is
+       # kept in the title: the per-K ratio is 1.8 +/- 0.4 at hilda31w, and test-ocean-climate-card.R ties it.
+       title = "Ocean CO\u2082 uptake declines with warming about twice as fast in CarboTope as in ocean models",
        plain = paste("Warmer seawater holds less CO\u2082, so as the sea surface warms the ocean",
-                     "takes up less. In this model that loss is about twice what the ocean",
-                     "models of the Global Carbon Budget show, and it appears decades earlier."),
-       detail = paste("This is a comparison, not a test: those ocean models are models, not",
-                      "measurements, and nothing from them scores this one. The seawater",
+                     "takes up less. In this model that decline happens about twice as quickly",
+                     "as in the Global Carbon Budget models."),
+       detail = paste("CarboTope was not tuned to this mechanism. The seawater",
                       "chemistry is not the cause -- how fast CO\u2082 pressure rises with",
-                      "temperature here matches the measured value. Our leading explanation,",
-                      "tested but not settled, is that this model's ocean mixes vertically so",
-                      "strongly that the surface keeps being refilled with carbon-rich water",
-                      "from below, where real surface water would adjust and partly offset the",
-                      "warming. Mixing less is not the fix: the same mixing is what the",
-                      "radiocarbon and the ocean's carbon uptake require, and weakening it",
-                      "shrinks the uptake and this effect together. The model also has no wind",
+                      # Marcus 2026-10-15: "tested but not settled," deleted; the mixing sentence and the
+                      # second-chart sentence are his ("in 2300" moved to the clause that names the year).
+                      # "carbon-rich" -> "has not adjusted to the warming": CLAUDE'S DRAFT answering his question
+                      # (H2 is that strong mixing defeats the surface's DIC adjustment, not deep-water richness).
+                      "temperature here matches the measured value. Our leading explanation",
+                      "is that this model's ocean mixes vertically so strongly that the",
+                      "surface keeps being refilled with water from below that has not",
+                      "adjusted to the warming, where real surface water would adjust and",
+                      "partly offset it. Mixing less would help this issue at the cost of",
+                      "matching radiocarbon and total carbon uptake. The model also has no wind",
                       "effect, which in at least one ocean model is the largest part of the",
-                      "climate effect. The second chart says what it is worth: how much lower",
-                      "CO\u2082 would be in 2300 if this ocean responded like the ocean models."),
+                      "climate effect. The second chart shows the implications of the",
+                      "discrepancy between CarboTope ocean uptake and Global Carbon Budget",
+                      "uptake: how much lower CO\u2082 would be in 2300 if this ocean responded",
+                      "like the ocean models."),
        ask = paste("Is an ocean that over-reacts to warming acceptable for teaching how",
                    "climate change weakens the carbon sinks, or should it be fixed before",
                    "the model is used to talk about the future?"))

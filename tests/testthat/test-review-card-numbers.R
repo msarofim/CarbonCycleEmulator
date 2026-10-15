@@ -34,8 +34,9 @@ rcn_review_text <- function() paste(readLines(file.path(ccx_root(), "app", "R", 
 sys.source(file.path(ccx_root(), "app", "R", "review.R"), envir = .rcn_rv)
 
 # card 4's typed values -- they change in the SAME commit as the copy
-RCN_CARD4_LAG      <- 2.5
-RCN_CARD4_LAG_TEXT <- "2.5 months after the index"
+# 2026-10-15 (Marcus: "Apply minimal factual fixes"): 2.5 -> "about six" (hilda31w holds 5.93 +/- 1.21).
+RCN_CARD4_LAG      <- 6
+RCN_CARD4_LAG_TEXT <- "about six months after the index"
 
 # The land ENSO lag the canonical RUNS and its sd, fitted OR pinned (`how`). For a pinned lag, `md5` / `base_lag`
 # are what the caller must check: the module check was taken AT this mode file, AT this lag.
@@ -85,7 +86,9 @@ test_that("card 4's 'a little <word> the range' is where the limb strength the c
   expect_length(br, 2L)
   expect_identical(.rcn_rv$rv_enso_l2_relation(run$w_enso_l2, br), .rcn_rv$RV_ENSO_L2_VS_OBS)
   # the card renders THAT word (it is sprintf'd in at load, so read the built card, not the source text)
-  expect_true(grepl(sprintf("sits a little %s the range", .rcn_rv$RV_ENSO_L2_VS_OBS), rcn_card4_detail(), fixed = TRUE))
+  # 2026-10-15: the card renders a PHRASE for the word ("inside" cannot follow "a little"), so check that phrase
+  expect_true(grepl(sprintf("sits %s the range", .rcn_rv$rv_enso_l2_phrase(.rcn_rv$RV_ENSO_L2_VS_OBS)),
+                    rcn_card4_detail(), fixed = TRUE))
 })
 
 test_that("card 7's k_w line: '1,446' IS the prior's centre, and 'about 1,850' is within one sd of the fit", {

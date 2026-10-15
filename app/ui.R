@@ -62,7 +62,7 @@ see_card <- function(id, what) {
   c_ <- rv_card(id)
   div(class = "caveat",
       tags$strong(sprintf("Known issue %d: ", c_$id)), what,
-      sprintf(" See \u201c%s\u201d \u2192 card %d, \u201c%s\u201d.",
+      sprintf(" See \u201c%s\u201d \u2192 issue %d, \u201c%s\u201d.",
               RV_TAB_TITLE, c_$id, c_$title))
 }
 
@@ -78,7 +78,8 @@ review_card <- function(id, plot_id = NULL, plot_height = "330px",
   c_ <- rv_card(id)
   url <- rv_card_url(id)
   div(class = "card-issue",
-      h4(sprintf("%d. %s", c_$id, c_$title)),
+      # "Issue N" (2026-10-15): Marcus's new comment text asks for "the issue number", so the number is labelled.
+      h4(sprintf("Issue %d: %s", c_$id, c_$title)),
       div(class = "card-class",
           tags$strong(toupper(c_$class)), " \u2014 ", RV_CLASS_GLOSS[[c_$class]]),
       p(c_$plain),
@@ -89,10 +90,10 @@ review_card <- function(id, plot_id = NULL, plot_height = "330px",
       if (is.null(url))
         div(class = "caveat",
             tags$strong("The comment link is not set in this build. "),
-            sprintf("Reply on the post and lead with \u201ccard %d\u201d.", c_$id))
+            sprintf("Reply on the post and mention issue %d.", c_$id))
       else
         p(tags$a(href = url, target = "_blank",
-                 sprintf("Comment on card %d \u2192", c_$id))))
+                 sprintf("Comment on issue %d \u2192", c_$id))))
 }
 
 navbarPage(
@@ -304,10 +305,9 @@ navbarPage(
         # observations belong: the ENSO switch means nothing until you can see
         # it move the model toward the data.
         hr(),
-        h5("The same run, year by year"),
-        p("The chart above is the level. This one is how much CO₂ went up in",
-          "each single year — which is where the interannual wobbles live, and",
-          "where switching a mechanism off is actually visible."),
+        # Marcus 2026-10-15 (CarboTopecomments.10.15.26): heading and sentence are his.
+        h5("Annual growth rate"),
+        p("The annual growth rate showcases the year-to-year variability in the trend."),
         plotOutput("c_growth", height = "300px"),
         textOutput("c_growth_note"),
         # ⭐ THE RESIDUAL STRIP (Marcus 2026-09-25): "Is the difference between
@@ -458,7 +458,7 @@ navbarPage(
         # run on the pulse lab's own pulse (data/fair_pulse_grid.rds), so the box is offered there again.
         conditionalPanel(
           "input.f_mode != 'Build your own'",
-          checkboxInput("f_fair", "Compare with standard FaIR", value = FALSE),
+          checkboxInput("f_fair", app_fair_check_label("Scenarios"), value = FALSE),   # relabelled per pill (server.R)
           # 2026-10-02: matched to Marcus's FaIR note -- the dashed CO2 line is NOT what this
           # model "is trying to reproduce"; only its CO2 -> temperature step is fitted to FaIR.
           helpText(class = "small",
@@ -529,8 +529,8 @@ navbarPage(
         # model, not quoted from a note" claim is cut from BOTH places it was
         # made (RV_TAB_LEAD was the other). What is left is the part a reader
         # needs -- why the tab pauses on first view.
-        p(tags$small(paste("The first time you open this tab some cards run the",
-                           "model again and take a few seconds."))),
+        p(tags$small(paste("The first time you open this tab, some issues run the",
+                           "model again, which takes a few seconds."))),
         hr(),
         review_card(1, "rv_repdc",   "320px"),
         review_card(2, "rv_gradient", "300px"),

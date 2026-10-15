@@ -73,11 +73,13 @@ AC_CHECKS <- list(
   c("C5 'exactly one reason' gone",      "for exactly one", NA),
   c("F1 FaIR text",                      "So the honest reading is", "Future scenario temperatures are a result"),
   c("F3 confound sentence gone",         "confound it", NA),
-  c("N1 acknowledgement wording",        NA, "any potential"),
+  # N1 SUPERSEDED 2026-10-15 by Marcus's new comment text (CarboTopecomments.10.15.26): it now pins that.
+  c("N1 acknowledgement wording",        "Anyone whose comment", "please include your full name in the comments."),
   c("N2 lead sentence cut",              "not quoted", NA),
   c("N4 mechanism not carrier",          "What carrier would you expect", "What mechanism might help"),
   c("N8 volcanic mechanism",             "for which there is no mechanism", "Pinatubo"),
-  c("N9 comparison gloss",               "not a gate. Nothing from this source", "long tail of carbon dioxide is robust"),
+  # N9 SUPERSEDED 2026-10-15: his new gloss.
+  c("N9 comparison gloss",               "not a gate. Nothing from this source", "property of having a physical model tuned to observed variables."),
   # ⚠ N10 SUPERSEDED IN PART 2026-10-01: its sentence was card 6's question, and card 6 was RETIRED (A1,
   # "Retire card 6"). The absent side still ratchets.
   c("N10 physical mechanism",            "When a named mechanism loses", NA),
@@ -141,9 +143,13 @@ AC_CHECKS_1006 <- list(
   c("H1 held rows: the column is wired",   NA, "held = APP_HELD_NAMES"),
   # carbotopecomments.10.2.26, his rulings of 10-06 on card 4 (the ENSO TIMING miss): his wording
   # replaced the 10-04 draft's in both places, so the draft's phrases must not appear either.
-  c("C4t card 4 timing, plain",  "Its timing is a little early, too", "peaking a month after the Pacific warmth index rather than five"),
+  # 2026-10-15: his timing sentence was FALSE since hilda29e (model and record both peak +5 months) and is
+  # REMOVED; the lag sentence was corrected to the 5.93 months hilda31w holds (Marcus: "Apply minimal factual fixes").
+  c("C4t card 4 timing, plain",  "Its timing is a little early, too", NA),
+  c("C4t card 4 timing removed", "peaking a month after the Pacific warmth index", NA),
   c("C4t card 4 timing, detail", "giving it the weight its year-to-year information supports",
-    "2.5 months after the index based on the vegetation model")
+    "about six months after the index, the value a separate fit"),
+  c("C4t card 4 lag, old value", "2.5 months after the index", NA)
 )
 
 ac_audit <- function(src, checks = AC_CHECKS) {
@@ -174,6 +180,54 @@ test_that("all 28 of Marcus's 2026-09-22 copy items are still applied", {
 test_that("all of Marcus's 2026-10-01 copy rulings are still applied", {
   problems <- ac_audit(.ac_src, AC_CHECKS_1001)
   expect_equal(problems, character(0), info = paste(problems, collapse = " | "))
+})
+
+# CarboTopecomments.10.15.26 (Marcus 2026-10-15): his wording, and the factual fixes he approved the same day.
+# Each PRESENT fragment sits inside ONE source string (comments are stripped, literals are not joined).
+AC_CHECKS_1015 <- list(
+  c("W growth heading",       "The same run, year by year", "Annual growth rate"),
+  c("W growth sentence",      "where switching a mechanism off is actually visible",
+    "The annual growth rate showcases the year-to-year variability in the trend."),
+  c("W relative to",          "Against the measured record", "Relative to the measured record over the same %d years:"),
+  c("W ENSO index defined",   "This sets the El Niño index", "This sets the ENSO index — a measure of how strong El Niño and"),
+  c("W ENSO temperature",     "own temperature signature", "temperature driver: this switch only removes the other"),
+  c("W ENSO blurb",           "largest reason the Keeling curve", "driver of the variability in annual growth rate — switch it"),
+  c("W volcano blurb",        "A big eruption puts a haze", "Some explosive volcanic eruptions put sulfate aerosols into"),
+  c("W volcano caveat",       "This removes the light effect only", "This removes the diffuse scattering effect only. The planetary"),
+  c("F tagged panel",         "The pulse's own atoms", "The pulse's carbon atoms"),
+  c("F off-grid message",     "set the pulse to one of those to compare", "FaIR was only run for %g GtC pulses: set the pulse size to %g GtC."),
+  c("F checkbox, pulse lab",  NA, "Compare with FaIR (%g GtC pulse only)"),
+  c("K comment text",         "lead your comment with the card number", "Comments are public on Substack. Be specific about what"),
+  c("K issue numbering",      "Comment on card %d", "Issue %d: %s"),
+  c("K shim gloss",           "a fitted stand-in for a mechanism", "a model correction that is not based on a physical mechanism."),
+  c("K comparison gloss old", "long tail of carbon dioxide is robust", NA),
+  c("K issue 1 plain",        "until now the panel drew the box", "offset between the hemispheric box and the station data that"),
+  c("K issue 4 title",        "Year-to-year variability is about 60% of observed", "Year-to-year variability is somewhat smaller than observed"),
+  c("K issue 4 share",        "only about 60% of the observed", "wobble in CO₂ growth is only about 70–90% of the observed"),
+  c("K issue 4 index name",   "Niño3.4 index (annual mean)", "ENSO index (Niño 3.4, annual mean)"),
+  c("K issue 5 title",        "decays faster here than in the multi-model mean", "Comparing CO₂ pulse decay rates to other sources"),
+  c("K issue 5 ask",          "acceptable to teach, or does it undercut the lesson?", "What is the best comparison for long-term CO₂ decay?"),
+  c("K issue 8 title",        "loses uptake to warming", "uptake declines with warming about twice as fast in CarboTope"),
+  c("K issue 8 first detail", "This is a comparison, not a test: those ocean models", "CarboTope was not tuned to this mechanism."),
+  c("K issue 8 deleted",      "tested but not settled", NA),
+  c("K issue 8 carbon-rich",  "refilled with carbon-rich water", "surface keeps being refilled with water from below that has not"),
+  c("K issue 8 mixing",       "Mixing less is not the fix", "partly offset it. Mixing less would help this issue at the cost of"),
+  c("K issue 8 second chart", "The second chart says what it is worth", "climate effect. The second chart shows the implications of the"),
+  c("K issue 8 SSP5-8.5 out", "SSP5-8.5 (older high scenario)", NA),
+  c("F temperature shape",    NA, "FaIR shows the same shape for the same pulse; whether temperature rises again before 2300,")
+)
+
+test_that("all of Marcus's 2026-10-15 copy rulings are still applied", {
+  problems <- ac_audit(.ac_src, AC_CHECKS_1015)
+  expect_equal(problems, character(0), info = paste(problems, collapse = " | "))
+})
+
+test_that("MUTATION: the 10-15 list fires when an old phrase returns or a new one goes", {
+  m1 <- paste(.ac_src, '  caveat = paste("This removes the light effect only. Eruptions also cool the")', sep = "\n")
+  expect_true(any(grepl("W volcano caveat", ac_audit(m1, AC_CHECKS_1015), fixed = TRUE)))
+  m2 <- gsub("What is the best comparison for long-term CO₂ decay?", "Is it acceptable?", .ac_src, fixed = TRUE)
+  expect_true(any(grepl("K issue 5 ask", ac_audit(m2, AC_CHECKS_1015), fixed = TRUE)))
+  for (ck in AC_CHECKS_1015) expect_true(!is.na(ck[[2]]) || !is.na(ck[[3]]), info = ck[[1]])
 })
 
 test_that("all of Marcus's 2026-10-06 copy rulings are still applied", {

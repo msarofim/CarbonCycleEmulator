@@ -2,6 +2,39 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-15 (b) — **Marcus's text review `CarboTopecomments.10.15.26.docx` APPLIED, plus the factual fixes and test-pin updates he approved. The affiliation is off `LICENSE` and `README.md` (`4746a1d`). The 34 app-facing test files read 1808 / 0: card 4's two by-design failures, red since 10-08, are GREEN because their sentences are now true.**
+
+- **His wording, applied:**
+  - What-if: the "Annual growth rate" heading and sentence; "Relative to"; the ENSO caveat (the "ENSO index" is now defined); the ENSO blurb's "largest driver" sentence; both volcano texts.
+  - Futures: "The pulse's carbon atoms"; FaIR's off-grid message.
+  - Known issues: the comment text; the SHIM gloss; issue 1's offset sentences; issue 5's title and question; the comparison gloss; issue 8's title, plain and detail edits; "tested but not settled" deleted; SSP5-8.5 dropped from issue 8's chart.
+- **Where I adapted his wording:**
+  - The glosses are in fragment form, because each renders as "SHIM — <gloss>".
+  - Issue 8's title keeps "about": the per-K ratio is 1.8 ± 0.4, and `test-ocean-climate-card.R` ties the phrase to the product.
+  - Issue 8's second-chart sentence keeps "how much lower CO₂ would be in 2300", so "in 2300" names the chart's year once.
+  - FaIR's checkbox: "Compare with FaIR (100 GtC pulse only)" in the pulse lab only. The same box overlays FaIR's SCENARIO runs on the Scenarios pill, where the label stays "Compare with standard FaIR".
+  - "card" → "issue" everywhere a reader sees it ("Issue N:" headers, "Comment on issue N", the teaching-tab pointers), because his comment text asks for "the issue number".
+- **His questions, measured at `hilda31w`:**
+  - **Issue 4 timing: FALSE, removed.** `enso_growth_fit_20261015_hilda31w`: the model's growth peaks +5 months after Niño 3.4 (r 0.72), the record's +5 (r 0.50). It was already false at hilda29e.
+  - **Issue 4's ENSO sensitivity vs the chart:** the claim holds (budget +0.115 ± 0.025, model +0.121 ± 0.053, 1.05×). The budget's fitted line was drawn FIRST and lay under the model's, so only the model and the knockout showed. It is now drawn last and dashed.
+  - **Issue 3's chart:** it now leads with the area-weighted hemisphere averages and their north-minus-south difference (model +0.092 ‰ against +0.286 ± 0.029 ‰, gate D's own quantity), then the four boxes. The cold boxes are the largest misfits box by box (−0.48 / −1.07 measured, +0.04 / +0.16 model) but carry little area.
+  - **"carbon-rich water from below":** the wrong descriptor. Deep water is richer in total dissolved carbon but poorer in anthropogenic carbon, and H2's mechanism is neither: strong mixing keeps replacing surface water before it can adjust to the warming. Reworded; this is my draft.
+  - **Issue 5:** the plain is his own statement, checked. IRF 20 / 100 / 300 is 0.514 / 0.374 / 0.293 here, 0.596 / 0.409 / 0.322 for Joos and 0.483 / 0.364 / 0.291 for FaIR.
+  - **What-if shares re-measured** (`app_wobble_shares_20261015_hilda31w`): ENSO off removes 38 % ("about 40 %" holds); all three off leave 29 % ("about a third").
+- **Ruled 10-15 (verbatim):**
+  - "Update the pins (Recommended)": N1, N9 and the 10-06 timing rows now hold his new wording. FaIR's fragment is now "FaIR was only run for". Issue 8's "decades earlier" check is now "if the phrase is there, it must be true". A new `AC_CHECKS_1015` block pins every new string, with a mutation test.
+  - "Apply minimal factual fixes (Recommended)", for issue 4:
+    - title "somewhat smaller than observed" (68 % on the What-if estimator, 0.88× on its own chart);
+    - plain "about 70–90 %";
+    - "sits inside the range" (16.79 Sv held, against 14–25), via `rv_enso_l2_phrase()`, so the range test checks the rendered phrase;
+    - lag "about six months" (5.93 ± 1.21 held). The lag test's typed `RCN_CARD4_LAG` moved 2.5 → 6 in the same commit, as its own comment prescribes.
+  - "Name FaIR, hedge the shape (Recommended)": the pulse lab's temperature box now carries his dip-and-rise explanation and "FaIR shows the same shape for the same pulse; whether temperature rises again before 2300, and by how much, depends on the background scenario."
+    - Measured for 100 GtC released in 2030. vvM: this model peaks +16 yr, dips at +90, and rises by 2300; FaIR peaks +15, dips at +82, and rises above its early peak by 2300. vvH barely rises, and vvL never rises here before 2300.
+    - There is no "multiple models" claim: no source was verified, and the CO₂-to-temperature step is fitted to FaIR.
+  - "Measured as dots, model as lines (Recommended)": the growth-rate chart.
+- **Verified in the browser at 1280 px:** every tab draws with no output error, and each new string renders. (In the hidden pane the plots report "figure margins too large": `innerWidth` was 0, so that was the pane, not the app.)
+- His `.docx` stays untracked, like the 09-26, 10-02 and 10-11 ones.
+
 ## 2026-10-15 (a) — **Pre-public deployment checks. The release is cut on `hilda31w` as BETA v1.0** (Marcus, verbatim: "Beta v1.0 is fine, because this is the first public version"). **`app/DEPLOY.md` is fixed:** it named a mode file two adoptions old, so a bundle built from it would have run on uncalibrated defaults. **The ship list is now a script, `app/make_deploy_bundle.sh`, and a bundle built by it RUNS:** every tab, the pulse lab, build-your-own and all nine card plots, with a clean log. **Cold start is 6–8 s to serving, not 73 s.**
 
 Marcus's posting plan (verbatim): "1) make github public. 2) post substack with the CarboTope link. 3) Push CarboTope with the Substack link."
