@@ -758,6 +758,15 @@ function(input, output, session) {
                     nonco2_scenario = input$s_bg, emissions = em)
   })
 
+  # The comparison line for "Build your own" is the scenario "Everything else follows" names (Marcus 2026-10-15,
+  # comments 10.15.26b: "the 2nd scenario should be the 'everything else follows' scenario"). It used to be the
+  # FIRST scenario ticked on the Scenarios tab, which the Build-your-own panel never shows. Captured at the press,
+  # like the run it is drawn against, so the pair cannot disagree about the background.
+  stylised_bg_run <- eventReactive(input$s_go, {
+    stats::setNames(list(app_run_coupled(APP_SPIN, input$s_bg, APP_FUTURE_YEARS)),
+                    names(APP_SCENARIOS)[match(input$s_bg, APP_SCENARIOS)])
+  })
+
   pulse_runs <- eventReactive(input$p_go, {
     yrs <- APP_PULSE_YEARS
     bg <- APP_SCEN_EMIS[APP_SCEN_EMIS$scenario == input$p_bg, ]
@@ -809,7 +818,7 @@ function(input, output, session) {
                          fair = if (isTRUE(input$f_fair)) app_fair_pulse(pr$bg, pr$year, pr$gtc))
     } else if (identical(input$f_mode, "Build your own")) {
       r <- stylised_run()
-      runs <- c(future_runs()[1], list(`Your scenario` = r))
+      runs <- c(stylised_bg_run(), list(`Your scenario` = r))
       # F5: run 1750-2150, SHOW 1900-2150. The two spans are separate
       # constants; see the note on APP_FUTURE_VIEW in global.R.
       plot_future(runs, input$f_yvar %||% APP_FUTURE_YVAR_DEFAULT,

@@ -36,7 +36,7 @@ RV_ASK        <- c("Deal-breaker", "Fixable", "Acceptable")
 RV_ASK_GLOSS  <- c(
   "Deal-breaker" = "this invalidates the lesson the model is built to teach",
   "Fixable"      = "worth the work, and here is the mechanism I would add",
-  "Acceptable"   = "a real limitation, correctly disclosed, fine for a teaching model")
+  "Acceptable"   = "any differences with other sources are limited, appropriately disclosed, and fine for a teaching model")   # Marcus 2026-10-15
 RV_CLASS_GLOSS <- c(
   # U5/N6 (Marcus 2026-09-22): "one ocean column per hemisphere" read as "no
   # ocean circulation", which is false at hilda29l. The limitation that is real

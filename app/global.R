@@ -95,9 +95,9 @@ APP_RELEASE_MODE <- "hilda31w"   # Marcus 2026-10-15: "Beta v1.0 is fine, becaus
                                  # (was hilda29e 10-08, hilda33p 10-06, hilda34g 10-03, hilda33d 10-01)
 # "frozen at this version" was dropped 2026-10-01: stale since the 09-30
 # unfreeze, and a freeze verdict is Marcus's (the B8 assessment record).
-APP_STAGE_NOTE   <- paste("Beta. What is under review is how much the model's",
-                          "remaining flaws matter.",
-                          "Teaching software — not peer-reviewed, not for citation.")
+# Marcus 2026-10-15 (comments 10.15.26b): "What is under review is how much ..." and "not for citation" deleted.
+APP_STAGE_NOTE   <- paste("Beta.",
+                          "Teaching software — not peer-reviewed.")
 # ⚠ STARTUP IS SLOW AND THE USER MUST BE TOLD BEFORE THEY WAIT. Measured on an
 # M4: 73 s idle, 116 s at load ~2.5 (2026-09-22), 2.8 min under load (four Julia
 # jobs). DEPLOY.md's older "~20 s" was a warm-cache number. shinyapps.io

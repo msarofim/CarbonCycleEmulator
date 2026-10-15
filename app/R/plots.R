@@ -56,6 +56,41 @@ LAB_D14C  <- "Δ¹⁴C (‰)"
 LAB_GTC   <- "Carbon (GtC)"
 LAB_TEMP  <- "Temperature above 1850–1900 (°C)"
 LAB_GROWTH <- "CO₂ growth (ppm per year)"
+# ⚠ SUPERSCRIPTS AND SUBSCRIPTS ARE DRAWN THROUGH plotmath (Marcus 2026-10-15, comments 10.15.26b: "the 4 in
+# Δ¹⁴C looks weird"). As Unicode characters the plot device takes ¹²³ (Latin-1) from its font and ⁴ / ₂ from a
+# fallback font, so Δ¹⁴C mixes two typefaces and the ₂ in CO₂ drops below the line (measured with ragg on macOS,
+# 2026-10-15). plotmath sets the digits from the same font at a fixed offset. The LAB_* / KEY_* constants stay
+# plain strings (test-plot-text-fits.R measures them); they are converted where they are drawn, for titles,
+# facet strips and legend keys. Caption prose keeps the characters: a sentence cannot be one plotmath call.
+PLOTMATH_SUP <- c("⁰" = "0", "¹" = "1", "²" = "2", "³" = "3", "⁴" = "4", "⁵" = "5",
+                  "⁶" = "6", "⁷" = "7", "⁸" = "8", "⁹" = "9", "⁺" = "+", "⁻" = "-")
+PLOTMATH_SUB <- stats::setNames(as.character(0:9), intToUtf8(0x2080:0x2089, multiple = TRUE))
+PLOTMATH_RX  <- "[⁰¹²³⁴-⁻₀-₉]"
+#' One label as a plotmath SOURCE string: text runs quoted and joined by `*`, a superscript run as ^"14" and a
+#' subscript run as ["2"] on the run before it. "Δ¹⁴C (‰)" -> "Δ"^"14"*"C (‰)".
+app_plotmath_str <- function(s) {
+  ch <- strsplit(s, "")[[1]]
+  if (!length(ch)) return('""')
+  kind <- ifelse(ch %in% names(PLOTMATH_SUP), "sup", ifelse(ch %in% names(PLOTMATH_SUB), "sub", "txt"))
+  r <- rle(kind); ends <- cumsum(r$lengths); starts <- ends - r$lengths + 1L
+  q <- function(x) paste0('"', gsub('(["\\\\])', "\\\\\\1", x), '"')
+  out <- ""
+  for (i in seq_along(r$values)) {
+    seg <- ch[starts[i]:ends[i]]
+    if (r$values[i] == "txt") {
+      out <- if (nzchar(out)) paste0(out, "*", q(paste(seg, collapse = ""))) else q(paste(seg, collapse = ""))
+    } else {
+      dig <- q(paste(c(PLOTMATH_SUP, PLOTMATH_SUB)[seg], collapse = ""))
+      if (!nzchar(out)) out <- '""'
+      out <- if (r$values[i] == "sup") paste0(out, "^", dig) else paste0(out, "[", dig, "]")
+    }
+  }
+  out
+}
+#' A title for labs(): an expression when the string carries a super/subscript, the string unchanged otherwise.
+app_plotmath <- function(s) if (grepl(PLOTMATH_RX, s)) parse(text = app_plotmath_str(s), keep.source = FALSE) else s
+#' Legend-key labels (a scale's `labels =`): one expression per break, so every key is set the same way.
+app_plotmath_labels <- function(x) parse(text = vapply(as.character(x), app_plotmath_str, ""), keep.source = FALSE)
 # The pulse lab's two y axes (F4). Named because the radio that switches
 # between them is in ui.R and the sentence that describes them is in server.R:
 # three files, one fact, and the standing rule is that they share a constant.
@@ -363,7 +398,7 @@ plot_keeling <- function(out, obs, yr_range, hemi = "both", show_obs = TRUE,
         c(lab_n, lab_s, "Measured, Mauna Loa", "Measured, South Pole",
           lab_nb, lab_sb))) +
     guides(colour = guide_legend(nrow = 2, byrow = TRUE)) +
-    labs(x = LAB_YEAR, y = LAB_CO2,
+    labs(x = LAB_YEAR, y = app_plotmath(LAB_CO2),
          caption = if (off != 0)
            # ⚠ NO SECOND WRAP. This used to re-wrap the assembled caption at 95
            # CHARACTERS on top of app_provenance_caption()'s own 150, because the
@@ -401,7 +436,7 @@ plot_seasonal <- function(out, obs, window = c(2000, 2024)) {
                        labels = c("Jan", "Mar", "May", "Jul", "Sep", "Nov", "Jan")) +
     scale_colour_manual(values = c(Model = PAL[["model"]],
                                    `Measured, Mauna Loa` = PAL[["obs"]])) +
-    labs(x = NULL, y = "CO₂ above the annual mean (ppm)",
+    labs(x = NULL, y = app_plotmath("CO₂ above the annual mean (ppm)"),
          subtitle = sprintf("Average seasonal cycle, %d–%d", window[1], window[2]),
          caption = app_provenance_caption()) +
     theme_ccx()
@@ -955,7 +990,7 @@ plot_counterfactual <- function(base, alt = NULL, yr_range, label) {
     geom_line(linewidth = 0.8) +
     scale_colour_manual(values = stats::setNames(c(PAL[["model"]], PAL[["off"]]),
                                                  c("Full model", label))) +
-    labs(x = LAB_YEAR, y = LAB_CO2, caption = app_provenance_caption()) +
+    labs(x = LAB_YEAR, y = app_plotmath(LAB_CO2), caption = app_provenance_caption()) +
     theme_ccx()
 }
 
@@ -1086,7 +1121,7 @@ plot_growth_rate <- function(base, alt = NULL, obs = NULL, yr_range = c(1960, 20
     geom_line(data = d[!is_obs, ], linewidth = 0.7) +
     geom_point(data = d[is_obs, ], size = 1.6) +
     scale_colour_manual(values = cols[names(cols) %in% unique(d$who)]) +
-    labs(x = LAB_YEAR, y = LAB_GROWTH,
+    labs(x = LAB_YEAR, y = app_plotmath(LAB_GROWTH),
          caption = app_provenance_caption(GROWTH_UNIT_NOTE)) +
     theme_ccx()
 }
@@ -1409,7 +1444,7 @@ plot_d13c <- function(out, obs, yr_range, hemi = "both", rep_dC = 0) {
                                       unique(c(mod$who, pts$who))]) +
     # 2026-10-15 review: the longer keys overflow one legend row at 760 px; two rows, as the Keeling chart
     guides(colour = guide_legend(nrow = 2, byrow = TRUE)) +
-    labs(x = LAB_YEAR, y = LAB_D13C,
+    labs(x = LAB_YEAR, y = app_plotmath(LAB_D13C),
          caption = app_provenance_caption(paste0(
            # 2026-10-15 review: "of card 1" -> "of Known issue 1"
            "Solid = the comparison the calibration scored (box minus the station offset of Known issue 1); ",
@@ -1437,7 +1472,7 @@ plot_d14c <- function(out, obs, yr_range) {
       "Model, Southern Hemisphere" = PAL[["sh"]],
       "Measured, Northern Hemisphere" = "#7b241c",
       "Measured, Southern Hemisphere" = "#1a5276")) +
-    labs(x = LAB_YEAR, y = LAB_D14C, caption = app_provenance_caption()) +
+    labs(x = LAB_YEAR, y = app_plotmath(LAB_D14C), caption = app_provenance_caption()) +
     theme_ccx()
 }
 
@@ -1509,7 +1544,7 @@ plot_future <- function(runs, yvar, ylab, view = NULL, fair = NULL, bands = NULL
                        alpha = 0.9, show.legend = FALSE)
   }
   g + geom_line(linewidth = 0.8) +
-    labs(x = LAB_YEAR, y = ylab, caption = app_provenance_caption(note)) +
+    labs(x = LAB_YEAR, y = app_plotmath(ylab), caption = app_provenance_caption(note)) +
     theme_ccx()
 }
 # The ribbons' opacity: faint enough that two overlapping scenarios' bands stay
@@ -1569,8 +1604,8 @@ plot_pulse_decay <- function(base_cl, pulse_cl, pulse_year, pulse_gtc, tag = NUL
     g <- g + geom_ribbon(data = band, aes(x = year, ymin = lo, ymax = hi), inherit.aes = FALSE,
                          fill = PAL[["off"]], alpha = FUTURE_BAND_ALPHA, show.legend = FALSE)
   g + geom_line(linewidth = 0.9) +
-    scale_colour_manual(values = stats::setNames(cols, keys), drop = TRUE) +
-    scale_linetype_manual(values = stats::setNames(lts, keys), drop = TRUE) +
+    scale_colour_manual(values = stats::setNames(cols, keys), drop = TRUE, labels = app_plotmath_labels) +
+    scale_linetype_manual(values = stats::setNames(lts, keys), drop = TRUE, labels = app_plotmath_labels) +
     guides(colour = guide_legend(ncol = 1), linetype = guide_legend(ncol = 1)) +
     scale_y_continuous(labels = function(x) paste0(round(100 * x), "%")) +
     labs(x = LAB_YEAR, y = LAB_PULSE_AIRBORNE,
@@ -1731,7 +1766,7 @@ plot_box_diagram <- function(fx, stock, p, n_layers = 10L, scale = 1) {
   # ⛔ LAND CLEARING IS ITS OWN ARROW (2026-09-22, Marcus): it was once ADDED INTO "respiration" (`fx$rh +
   # fx$luc`), hiding the flux the land-use convention is about (R1: an INTERNAL TRANSFER out of the land into the
   # air). It leaves BOTH land pools (pro rata, ccx_luc_pool_shares()), so it is ONE arrow rising from between the
-  # two land boxes, and the footnote says which pools it comes out of.
+  # two land boxes. (The footnote said which pools it comes out of until 2026-10-15; Marcus cut that sentence.)
   # 2026-10-15 LAYOUT (Marcus: legibility). Every label is anchored at `pos` along its own arrow (0 = tail,
   # 1 = head) and pushed off it by hj / vj, so a label can be slid away from a neighbor without moving the arrow.
   arrows_df <- rbind(data.frame(
@@ -1740,7 +1775,9 @@ plot_box_diagram <- function(fx, stock, p, n_layers = 10L, scale = 1) {
     y    = c(3.68, 2.4, 2.7, 3.76, 3.22, 4.7, 2.55),
     yend = c(2.8,  2.4, 3.68, 3.12, 3.92, 4.3, 3.62),
     val  = c(fx$gpp, fx$litter, fx$rh, as_down, as_up, fx$foss, fx$luc),
-    hj   = c(1.15, 0.5, -0.1, 0.45, 0.5, -0.2, -0.12),
+    # land-use change: hj -0.12 -> -0.05 with its name on two lines (Marcus 2026-10-15, comments 10.15.26b:
+    # "1.2 / land-use / change", closer to the arrow's line)
+    hj   = c(1.15, 0.5, -0.1, 0.45, 0.5, -0.2, -0.05),
     # litterfall's label sits UNDER its arrow (vj > 1), Marcus 2026-10-15; "respiration" is slid toward the air and
     # "air to warm sea" set below its arrow between it and the mixed-layer box; "warm sea to air" sits above its own
     vj   = c(0.5,  1.6, 0.5, 1.3, -0.35, 0.5, 0.5),
@@ -1753,7 +1790,7 @@ plot_box_diagram <- function(fx, stock, p, n_layers = 10L, scale = 1) {
              if (hs_on) "air to warm sea" else "air to sea",
              if (hs_on) "warm sea to air" else "sea to air",
              "fossil fuels",
-             tolower(CCX_FLUX_CHANNELS[["luc"]]))),
+             sub(" ", "\n", tolower(CCX_FLUX_CHANNELS[["luc"]]), fixed = TRUE))),
     diagram_mix_pair(4.82, 5.18, 2.6, 1.7, wr[["pump"]], wr[["ml_int"]]))
   xmax <- 6.1
   if (hs_on) {
@@ -1779,20 +1816,9 @@ plot_box_diagram <- function(fx, stock, p, n_layers = 10L, scale = 1) {
       nm   = c("air to cold sea", "cold sea to air", "cold deep to interior")),
       diagram_mix_pair(6.72, 7.08, 3.35, 1.7, fx$hs_pump, fx$hs_hd_net - fx$hs_pump))
   }
-  # ⚠ THE POOL SPLIT IS COMPUTED FROM THE SAME EXPRESSION THE MODEL USES
-  # (R/model.R's land-use block), not typed: `f_luc_wood` is a parameter and the
-  # pro-rata shares move with the pools' sizes, so a sentence naming "mostly the
-  # soil" has to be one that would change if that stopped being true.
-  luc_note <- local({
-    fw <- p$f_luc_wood
-    if (is.null(fw) || !is.finite(fw) || !is.finite(fx$luc) || fx$luc == 0) return("")
-    w <- if (fw >= 1) c(0, 1, 0, 0) else {
-      sh <- ccx_luc_pool_shares(p); v <- (1 - fw) * sh; v[2] <- v[2] + fw; v
-    }
-    veg <- w[1] + w[2]; soil <- w[3] + w[4]
-    sprintf(" Land-use change takes carbon out of the land pools themselves (%.0f%% soil, %.0f%% plants), not out of thin air.",
-            100 * soil, 100 * veg)
-  })
+  # 2026-10-15 (Marcus, comments 10.15.26b): the footnote no longer says which land pools land-use change
+  # draws on, nor that the warm arrows exclude the cold boxes -- "both of these should be the default
+  # assumption of someone looking at this chart".
   # one decimal below 10 GtC/yr, so the small cold-box flows do not round to 2 and 4
   arrows_df$lab <- sprintf(ifelse(arrows_df$val < 9.5, "%.1f\n%s", "%.0f\n%s"), arrows_df$val, arrows_df$nm)
   ggplot() +
@@ -1823,8 +1849,7 @@ plot_box_diagram <- function(fx, stock, p, n_layers = 10L, scale = 1) {
                fmt_gtc(stock$co2_global * ccx_const("GtC_PER_PPM")),
                fmt_gtc(stock$land_C), fmt_gtc(stock$ocean_C),
                paste0(
-                 if (hs_on) " The cold boxes are the high-latitude ocean; the warm arrows exclude them." else "",
-                 luc_note)),
+                 if (hs_on) " The cold boxes are the high-latitude ocean." else "")),
                app_text_px("diagram"), diagram_note_pt(DIAGRAM_NOTE_SIZE * scale))) +
     # ⚠ WRAPPED, NOT HAND-BROKEN -- the SIBLING of the footnote above, and it
     # kept its literal newline escape after that one lost its own, three lines

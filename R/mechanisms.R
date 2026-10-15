@@ -79,7 +79,7 @@ CCX_DRIVERS <- list(
     of    = function(F) F$enso
   ),
   aod = list(
-    label = "Volcanic haze: stratospheric aerosol optical depth",
+    label = "Volcanic aerosols: stratospheric aerosol optical depth",
     unit  = "AOD (dimensionless)",
     since = 1850L,
     of    = function(F) (F$aod_NH + F$aod_SH) / 2
@@ -247,7 +247,7 @@ CCX_MECHANISMS <- list(
   ),
   volcanic = list(
     driver = "aod",  # CCX_DRIVERS; NULL = acts on a parameter, not an input
-    label = "Volcanic haze (the diffuse-light effect)",
+    label = "Volcanic aerosols (the diffuse-light effect)",
     # Marcus 2026-10-15: the first two sentences are his ("something like"); "a climate effect" and the
     # join into the existing diffuse-light sentence are the only changes.
     blurb = paste("Some explosive volcanic eruptions put sulfate aerosols into",

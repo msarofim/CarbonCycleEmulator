@@ -142,7 +142,7 @@ rv_plot_gradient <- function() rv_guard(rv_gradients(), function(x) {
     geom_col(width = 0.6) +
     geom_errorbar(aes(ymin = value - se, ymax = value + se), width = 0.18,
                   colour = "grey25", na.rm = TRUE) +
-    facet_wrap(~what, scales = "free_y") +
+    facet_wrap(~what, scales = "free_y", labeller = as_labeller(app_plotmath_str, default = label_parsed)) +
     scale_fill_manual(values = stats::setNames(c(RV_COL_OBS(), RV_COL_MODEL()),
                                                c("Measured", "Model"))) +
     labs(x = NULL, y = "Mauna Loa minus South Pole",
@@ -190,7 +190,7 @@ rv_plot_diseq <- function() rv_guard(rv_gateD(), function(x) {
     facet_grid(~ panel, scales = "free_x", space = "free_x") +
     scale_fill_manual(values = stats::setNames(c(RV_COL_OBS(), RV_COL_MODEL()),
                                                c(lab_obs, lab_mod))) +
-    labs(x = NULL, y = "Air–sea δ¹³C disequilibrium (‰)",
+    labs(x = NULL, y = app_plotmath("Air–sea δ¹³C disequilibrium (‰)"),
          caption = rv_cap(sprintf(
            paste("North-minus-south asymmetry (area-weighted hemisphere averages): model",
                  "%+.3f‰ against %+.3f ± %.3f‰ measured. The model has the right overall size",
@@ -411,7 +411,7 @@ rv_plot_oclim_stake <- function() rv_guard(rv_ocean_climate(), function(x) {
   ggplot(d, aes(scen, v)) +
     geom_col(fill = RV_COL_MODEL(), width = 0.6) +
     geom_errorbar(aes(ymin = lo, ymax = hi), width = 0.16, colour = "grey25") +
-    labs(x = NULL, y = sprintf("Lower CO₂ in %d (ppm)", RV_OCLIM_YEAR),
+    labs(x = NULL, y = app_plotmath(sprintf("Lower CO₂ in %d (ppm)", RV_OCLIM_YEAR)),
          # 2026-10-15 review: "Of 1020 / 577 ppm." -> "Out of ... ppm in <year> (<scenarios>)", the scenario
          # names from RV_OCLIM_SCEN in the same order as the numbers
          caption = rv_cap(sprintf(paste(

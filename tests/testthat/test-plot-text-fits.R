@@ -157,11 +157,12 @@ test_that("3a. the BOX DIAGRAM's two footnotes fit, and neither is hand-broken",
   # therefore measures each at ITS OWN size, taken from the constant the
   # annotate() call is handed.
   notes <- list(
+    # 2026-10-15 (Marcus, comments 10.15.26b): the warm-arrows clause and the land-use sentence are cut; the
+    # two-hemisphere sentence (added earlier that day) is in. This is the footnote as it now renders.
     list(txt = paste0("Arrows are flows in GtC per year (2024). Stocks today: atmosphere 891 GtC, ",
                       "land 2,190 GtC, ocean 38,500 GtC. Each box exists twice \u2014 once per ",
-                      "hemisphere. The cold boxes are the high-latitude ocean; the warm arrows ",
-                      "exclude them. Land-use change takes carbon out of the land pools themselves ",
-                      "(61% soil, 39% plants), not out of thin air."),
+                      "hemisphere \u2014 and every flow shown is the sum of the two; the hemispheres ",
+                      "exchange carbon only through the atmosphere. The cold boxes are the high-latitude ocean."),
          size = e$DIAGRAM_NOTE_SIZE),
     list(txt = paste0("Photosynthesis and the sea move 330 GtC a year in and out of the air, ",
                       "so an average CO\u2082 molecule stays only ~4.0 years. ",

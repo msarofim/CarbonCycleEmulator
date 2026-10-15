@@ -2,6 +2,30 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-15 (l) — **Marcus's `Carbotopecomments10.15.26b.docx` APPLIED (13 items).** Read as plain text: a list of edits, no Word comments.
+
+- **Text:**
+  - Keeling's "ppm ." is fixed in `gloss()` (`.noWS = "outside"`, so every tooltip term). Every call writes its own spaces.
+  - The Known issues heading is now "Known issues and a request for feedback (…)".
+  - "Acceptable" now glosses as "any differences with other sources are limited, appropriately disclosed, and fine for a teaching model". The final period was dropped to match its two sibling bullets.
+  - "volcanic haze" → "volcanic aerosols": the Under-the-hood bullet (verb made plural) and both `R/mechanisms.R` labels.
+  - "What it cannot do" → "What it does not do". His note reads "what is does not do"; that is a typo.
+  - The hemispheres bullet now ends "but there is no exchange from one hemisphere's ocean to the other's." The tropical-box clause is cut.
+  - The "Two boxes of atmosphere" bullet is deleted.
+  - "not for citation" is cut in three places: the banner, the Under-the-hood bullet and `APP_STAGE_NOTE`. That note's "What is under review is how much …" sentence is deleted too. ⚠ README still says "not for citation"; it is not app text and is left for Marcus.
+- **The Under-the-hood diagram:**
+  - The land-use label is "1.2 / land-use / change" (the channel name split for this label only), with `hj` −0.12 → −0.05.
+  - The footnote loses "the warm arrows exclude them" and the land-use pool sentence. The code that computed that sentence (`luc_note`) is removed.
+  - `test-plot-text-fits.R`'s copy of the footnote, already stale (it lacked the two-hemisphere sentence), now matches what renders.
+- **Build your own** draws "Your scenario" against the scenario "Everything else follows" names (`stylised_bg_run()`, captured at the press). Before, the comparison was the first scenario ticked on the Scenarios tab, which that panel never shows. Browser: background High → the comparison key reads "High (rising to 2100)".
+- **"The 4 in Δ¹⁴C looks weird": the measured cause is two fonts in one symbol.**
+  - Google serves Inter in subsets, and none covers U+2070–209F. Canvas width of ⁴ under Inter equals the fallback's, while ¹ is Inter's own. So the browser drew ⁴ and ₂ in a fallback font beside Inter's ¹²³.
+  - Plots had the same split: ragg/Helvetica on macOS, rendered large, shows a thinner, lower ⁴ and a ₂ well below the line.
+  - **Page fix:** a script in `ui.R`'s head renders each run of those characters as `<sup>` / `<sub>` with Inter's digits, on load and on every Shiny update. Strings, tooltips and `<option>` text are untouched. Browser: after all 11 tabs are visited, 57 superscript and 74 subscript runs are converted, no raw ones remain, and there are no console errors.
+  - **Plot fix:** `app_plotmath()` / `app_plotmath_labels()` in `plots.R` turn axis titles, facet strips and the pulse-lab legend keys into plotmath (`"Δ"^"14"*"C (‰)"`). The `LAB_*` / `KEY_*` constants stay strings.
+  - ⚠ **Not fixed:** caption prose drawn inside plots, such as the bold diagram note "an average CO₂ molecule". A wrapped sentence cannot be one plotmath call. On shinyapps.io (Linux fonts) it may render consistently; not checked.
+- **Checked:** the 34 app-facing test files 1659 / 0, and `plot-text-fits` 105 / 0 after the re-pin. In the browser, every item renders as asked: all 11 tabs, Build your own run twice, no output errors.
+
 ## 2026-10-15 (k) — **(j)'s six dormant-bug fixes MERGED into main before the public release** (Marcus, verbatim: "Yes, merge it."). This reverses the 10-15 handoff's "NOT fixed before launch, because they change behaviour". Marcus asked: "Given that we haven't launched, is there any good reason not to merge and make this afternoon's release the best version we can make?" The answer given, measured here:
   - five of the six fixed paths are ones the app never runs (likelihood and calibration);
   - the ENSO k == 1 branch is not reached: monthly Niño 3.4's ACF falls below 1/e at lag 8, with r1 ≈ 0.94;

@@ -18,8 +18,11 @@
 
 # A unit gloss rendered as a dotted-underline tooltip.
 gloss <- function(term, meaning) {
+  # .noWS = "outside" (Marcus 2026-10-15, comments 10.15.26b: "ppm ." on the Keeling tab): htmltools put a
+  # newline between this tag and the next child, so a period after a gloss rendered with a space before it.
+  # Every gloss() call writes its own spaces ("The ", " is the unit"), so nothing loses a needed space.
   tags$abbr(title = meaning, style = "text-decoration: underline dotted; cursor: help;",
-            term)
+            term, .noWS = "outside")
 }
 
 # `takeaway()` and `info_box()` moved to global.R 2026-09-24: server.R needs them
@@ -40,7 +43,7 @@ provenance_banner <- function() {
   cls <- if (app_params$has_posterior) "prov prov-ok" else "prov prov-warn"
   div(class = cls,
       tags$strong(sprintf("%s \u2014 %s.", APP_RELEASE_NAME, app_params$status)),
-      " Teaching software \u2014 not peer-reviewed, not for citation.",
+      " Teaching software \u2014 not peer-reviewed.",   # "not for citation" cut, Marcus 2026-10-15
       " ", tags$em(sprintf("Reviewers: see the \u201c%s\u201d tab.", RV_TAB_TITLE)))
 }
 
@@ -134,6 +137,53 @@ navbarPage(
       .card-ask { background: #eef5fb; border-left: 4px solid #1b6ca8;
                   padding: 9px 13px; margin-top: 12px; border-radius: 3px; }
       .asklist { font-size: 0.95rem; }
+    ")),
+    # ⚠ SUPERSCRIPT AND SUBSCRIPT DIGITS (Marcus 2026-10-15, comments 10.15.26b: "the 4 in Δ¹⁴C looks weird").
+    # Google serves Inter in subsets, and none covers U+2070-209F, so the browser drew ⁴ (and the ₂ in CO₂) in a
+    # fallback font beside Inter's own ¹²³ (Latin-1): two typefaces in one symbol (measured 2026-10-15: canvas
+    # width of ⁴ under Inter = the fallback's). This renders every run of those characters as <sup>/<sub> with
+    # Inter's ordinary digits, on load and after every Shiny update. The R strings keep the Unicode characters;
+    # tooltips (title attributes) and <option> text are left alone. Plots: app_plotmath() in plots.R.
+    tags$script(HTML("
+      (function () {
+        var MAP = {'\\u2070':'0','\\u00b9':'1','\\u00b2':'2','\\u00b3':'3','\\u2074':'4','\\u2075':'5',
+                   '\\u2076':'6','\\u2077':'7','\\u2078':'8','\\u2079':'9','\\u207a':'+','\\u207b':'\\u2212',
+                   '\\u2080':'0','\\u2081':'1','\\u2082':'2','\\u2083':'3','\\u2084':'4','\\u2085':'5',
+                   '\\u2086':'6','\\u2087':'7','\\u2088':'8','\\u2089':'9'};
+        var RUN = /([\\u2070\\u00b9\\u00b2\\u00b3\\u2074-\\u207b]+)|([\\u2080-\\u2089]+)/g;
+        var ANY = /[\\u2070\\u00b9\\u00b2\\u00b3\\u2074-\\u207b\\u2080-\\u2089]/;
+        var SKIP = {SCRIPT: 1, STYLE: 1, TEXTAREA: 1, OPTION: 1, SELECT: 1, INPUT: 1, SUP: 1, SUB: 1, TITLE: 1};
+        function skipped(n) { for (var p = n.parentNode; p; p = p.parentNode) if (SKIP[p.nodeName]) return true; return false; }
+        function fix(t) {
+          var s = t.nodeValue, f = document.createDocumentFragment(), last = 0, m;
+          RUN.lastIndex = 0;
+          while ((m = RUN.exec(s))) {
+            if (m.index > last) f.appendChild(document.createTextNode(s.slice(last, m.index)));
+            var el = document.createElement(m[1] ? 'sup' : 'sub');
+            el.className = 'ccx-script';
+            el.textContent = m[0].split('').map(function (c) { return MAP[c] || c; }).join('');
+            f.appendChild(el); last = RUN.lastIndex;
+          }
+          if (last < s.length) f.appendChild(document.createTextNode(s.slice(last)));
+          t.parentNode.replaceChild(f, t);
+        }
+        function scan(root) {
+          if (!root) return;
+          if (root.nodeType === 3) { if (ANY.test(root.nodeValue) && !skipped(root)) fix(root); return; }
+          if (root.nodeType !== 1 || SKIP[root.nodeName]) return;
+          var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), hits = [], n;
+          while ((n = w.nextNode())) if (ANY.test(n.nodeValue) && !skipped(n)) hits.push(n);
+          hits.forEach(fix);
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+          scan(document.body);
+          new MutationObserver(function (ms) {
+            ms.forEach(function (m) {
+              if (m.type === 'characterData') scan(m.target); else m.addedNodes.forEach(scan);
+            });
+          }).observe(document.body, {childList: true, subtree: true, characterData: true});
+        });
+      })();
     "))),
     div(style = "padding: 0 14px;", provenance_banner())
   ),
@@ -537,7 +587,7 @@ navbarPage(
     fluidRow(
       column(
         9, offset = 0,
-        h3(sprintf("What this model gets wrong \u2014 and a question for you (%s)",
+        h3(sprintf("Known issues and a request for feedback (%s)",   # Marcus 2026-10-15 (comments 10.15.26b)
                    APP_RELEASE_NAME)),
         p(RV_TAB_LEAD),
         review_ask_block(),
@@ -674,13 +724,13 @@ navbarPage(
         h4("What it is fitted to"),
         p(tags$small("Observations the calibration scored the model against.")),
         tableOutput("h_data"),
-        h4("What it cannot do"),
+        h4("What it does not do"),   # Marcus 2026-10-15 (comments 10.15.26b)
         tags$ul(
           # 2026-10-15 review: "No methane ... Only CO₂" was false of the Futures temperatures (non-CO₂
           # forcing is prescribed there) and of the volcanic diffuse-light term.
           tags$li(paste("The carbon cycle tracks only CO₂. Methane, nitrous oxide, aerosols and",
                         "ozone enter only as prescribed warming in the Futures temperatures;",
-                        "volcanic haze enters only through its diffuse-light effect.")),
+                        "volcanic aerosols enter only through their diffuse-light effect.")),
           # U5/N6 (Marcus 2026-09-22): "No ocean circulation — diffusion only"
           # was STALE. The canonical carries HILDA cold surface and deep boxes
           # in each hemisphere, a biological pump in both columns, and an
@@ -692,9 +742,9 @@ navbarPage(
                         "does move between the surface and the deep ocean — by",
                         "mixing, by a biological pump, by sinking cold water at",
                         "high latitudes, and by an upwelling limb that responds",
-                        "to El Niño — but there is no deep exchange from one",
-                        "hemisphere's ocean to the other's, and no tropical",
-                        "ocean box between them.")),
+                        # Marcus 2026-10-15 (comments 10.15.26b): "no exchange", and the tropical-box clause cut
+                        "to El Niño — but there is no exchange from one",
+                        "hemisphere's ocean to the other's.")),
           # A6 (2026-10-01): "Two land pools" -> four; and "no nutrient
           # limitation" was true but incomplete once N deposition became a
           # driver (hilda33d) -- it adds a sink without limiting anything.
@@ -704,9 +754,8 @@ navbarPage(
                         # 2026-10-02: reworded to match Marcus's fertilization caveat
                         "its own, but a lack of nitrogen never limits the",
                         "response to CO₂ fertilization.")),
-          tags$li(paste("Two boxes of atmosphere. Nothing about where in a",
-                        "hemisphere anything happens.")),
-          tags$li("Teaching software. Not peer-reviewed, not for citation.")
+          # Marcus 2026-10-15 (comments 10.15.26b): the "Two boxes of atmosphere" bullet deleted; "not for citation" cut
+          tags$li("Teaching software. Not peer-reviewed.")
         ),
         h4("Which numbers this app is running on"),
         provenance_detail(),
