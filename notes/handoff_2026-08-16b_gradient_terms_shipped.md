@@ -78,7 +78,7 @@ Chasing why §4.4 said **+244.7 µmol/kg / −0.938 ‰** while the shipped
   `h_ml`, so the penalty is target²/2σ² and falls 81 → 53 log-units across 50 → 220. It pushes
   **against clause 1**, the thing the pump exists to fix.
 - **Freezing at `h_ml` = 75** overstates the miss by **1.61 σ_Δ** at the fitted 184, biasing
-  **in favour of** adopting a pump and a stronger one — at the conclusion the term exists to test.
+  **in favor of** adopting a pump and a stronger one — at the conclusion the term exists to test.
 
 **MARCUS TOOK: fixed depths (the shipped rds layers) + an `h_ml` GATE.** The reason it beats
 freezing: **at `h_ml` = 100 — the value the pump delivers (15d) — fixed depths are already
@@ -189,7 +189,7 @@ Writing §4.2's gate as literally specified would have **failed on the shipped q
 
 | # | task | status |
 |---|---|---|
-| ~~1–7, 6b, 10, 11~~ | objective, β, `luc_scale`, GLODAPv2, gradient, shares, seasonality, MM fertilisation, `sigma_co2`, `K_z(z)` scored, outcrop DEAD | **DONE** |
+| ~~1–7, 6b, 10, 11~~ | objective, β, `luc_scale`, GLODAPv2, gradient, shares, seasonality, MM fertilization, `sigma_co2`, `K_z(z)` scored, outcrop DEAD | **DONE** |
 | **6** | `LIK_EXCESS_C14_TARGET` | NOT a blocker |
 | **12** | **DIC + δ¹³C gradient terms** | **DONE 2026-08-16, `0f83dfe`** |
 | **9** | **THE PUMP** | **NOT BUILT. The other half of the round.** |
@@ -253,7 +253,7 @@ Writing §4.2's gate as literally specified would have **failed on the shipped q
 - **`luc-veg-debit` has never been merged** and is now a long way from `main`.
 
 **Still do NOT:** hand-tune stream weights (adding these terms was *adding a missing
-constraint*, the sanctioned move — do not let it become a licence to reweight); delete
+constraint*, the sanctioned move — do not let it become a license to reweight); delete
 `excess_c14_ocean` or `d14c_intcal`; free any land turnover parameter; delete the `kz` bracket
 bare; build the conveyor; splice any pre-2026-08-15 posterior; **compare any logL across the
 2026-08-16 boundary** (the objective moved ~199 units); quote §4.2's ~384 log-units or its

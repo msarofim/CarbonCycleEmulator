@@ -67,13 +67,13 @@ land use**. **No model reproduces it — and our model reproduces the literature
 as an independent draw. Law Dome's **air-age spectral width is 4.5–7.0 yr**, and the 1940–1960
 window's **13 samples are four groups spanning 18 yr** → 2–3.6 draws. Corrected: **± 0.016 →
 ± 0.041 ‰, 13.1 σ → 5.1 σ, range 5–7.** **Never quote 12.7 again.** The conclusion survives, so
-the 08-22 withdrawal of the LUC time-profile programme stands. **Same non-independence the panel
+the 08-22 withdrawal of the LUC time-profile program stands. **Same non-independence the panel
 flagged for the CO₂ ice term — when a correlated-rows defect appears in one stream, audit every
-stream built from those samples.** A third term (systematic/calibration, non-linear and localised)
+stream built from those samples.** A third term (systematic/calibration, non-linear and localized)
 is still unbounded and is now binding.
 
 **(c) The ice-vs-flask offset does not differ.** No download was needed — `obs$ice` IS the raw
-sample file (DATA.md mislabelled it "spline"; corrected). Overlap 1962–96: **ice − SPO
+sample file (DATA.md mislabeled it "spline"; corrected). Overlap 1962–96: **ice − SPO
 −0.31 ± 0.15 ppm**; FIRN −0.40 ± 0.19 (n=20), ICE −0.24 ± 0.23 (n=27), n.s. apart. Smoothing also
 fails on its **own correct predictor**: curvature R² 0.008 (p 0.27) vs growth rate R² 0.212.
 
@@ -92,7 +92,7 @@ model solve better. **I answered a different question and got the wrong answer.*
   2.22 ppm vs 3.14 elsewhere; logL/row −2.58, the second-best era) and concluded it was not the
   problem. **That is backwards.** Marcus's point is that it may fit well *because the parameters
   were bent to make it fit* — a good in-window residual is the symptom of the distortion, not
-  evidence against it. **Only a re-optimisation answers a leverage question.**
+  evidence against it. **Only a re-optimization answers a leverage question.**
 
 Keep both errors in view: the residual table in `R/likelihood.R`'s `LIK_ICE_DISCREPANCY` comment
 is correct as far as it goes and **must not be read as answering the sink question**.
@@ -103,14 +103,14 @@ is correct as far as it goes and **must not be read as answering the sink questi
 
 New switch, OFF by default: `CCX_ARTIFICIAL_SINK_{WIN,RATE}` in `R/forcing.R`, set via
 `CCX_SINK_RATE`. Window 1942–49 (the literature's), rate in GtC/yr. **Prescribed, unfitted,
-externally sized, carries no free parameter** — so it is *not* the §12c programme the panel
+externally sized, carries no free parameter** — so it is *not* the §12c program the panel
 withdrew, which fitted a free E_LUC shape and would have reported it as a mechanism.
 
 **(a) SIZING.** The removal does not stay out of the atmosphere 1:1 — the IRF decays it. At
 IRF@50 ≈ 0.38, erasing the model's +4.83 ppm 1960–97 excess needs **~3.4 GtC/yr over 8 yr**,
 *above* the literature's 2–3. That gap is itself a result.
 
-**(b) WHAT IT DOES, no re-optimisation, ice residual by era:**
+**(b) WHAT IT DOES, no re-optimization, ice residual by era:**
 
 | sink | 1750–1850 | 1850–1900 | 1900–1935 | 1935–1960 | 1960–1997 | **swing** |
 |---|---|---|---|---|---|---|
@@ -121,7 +121,7 @@ IRF@50 ≈ 0.38, erasing the model's +4.83 ppm 1960–97 excess needs **~3.4 GtC
 
 **It is a clean lever on exactly the late half — the pre-1935 record is untouched.**
 
-**And with `rep_dC` re-optimised on the CO₂ streams at each rate (1-D, everything else frozen):**
+**And with `rep_dC` re-optimized on the CO₂ streams at each rate (1-D, everything else frozen):**
 
 | sink | `rep_dC`* | co2_MLO | co2_SPO | co2_icecore | CO₂ total |
 |---|---|---|---|---|---|
@@ -181,7 +181,7 @@ of Marcus's concern — it is a statement that the instrument as built does not 
 
 Trustworthy CO₂ side: **CO₂ streams net +15.8** (`co2_icecore` **+34.4**, stations −20.3). Isotopes
 **−47.8** and **CONTAMINATED** — note `sigma_d14c` inflating +3.85 sd, which is the ¹⁴C error scale
-swelling to absorb the fossil-signature artefact, exactly as predicted. Total −38.2, of which the
+swelling to absorb the fossil-signature artifact, exactly as predicted. Total −38.2, of which the
 contaminated isotopes are −47.8: **on the readable streams the sink is net POSITIVE.**
 
 **(c-PINNED) THE PINNED RUN LANDED — `rep_dC` FALLS, AND ¹⁴C REJECTS THE HYPOTHESIS.**
@@ -224,7 +224,7 @@ to absorb it).
 
 **⇒ THIS IS THE ISOTOPIC APPORTIONMENT MARCUS ASKED FOR, AND IT DISCRIMINATES.** An ocean sink
 removes carbon at roughly the atmosphere's own ¹⁴C/C ratio and produces **no** such signature; a
-fossil-emissions reduction produces a large one. **¹⁴C therefore favours the OCEAN version** —
+fossil-emissions reduction produces a large one. **¹⁴C therefore favors the OCEAN version** —
 independently reaching where the literature's δ¹³C double-deconvolution already sits (oceans
 ≥ two-thirds; `ccx_1940s_plateau`). A LUC reduction (~−25 ‰, also ¹⁴C-depleted but not ¹⁴C-free)
 sits between the two and is the third arm worth running.
@@ -268,7 +268,7 @@ cd ~/Documents/2026/CodeProjects/CarbonCycleEmulator && claude --remote-control 
 > `notes/handoff_2026-08-23_sweep_refit_and_rep_dC.md` for the refit/Hessian/`rep_dC` state.
 >
 > **FIRST: check `calibration/output/pump_arms_SINK25/refit_sink25.log`.** A sink-on
-> re-optimisation was in flight. **Read only CO₂ and `rep_dC` from it** — §4c says why.
+> re-optimization was in flight. **Read only CO₂ and `rep_dC` from it** — §4c says why.
 >
 > **The live question is Marcus's:** is the fit being bent to a mid-century the field cannot
 > explain, at the expense of the modern period? **The 1-D evidence is strong — `rep_dC` goes
@@ -277,5 +277,5 @@ cd ~/Documents/2026/CodeProjects/CarbonCycleEmulator && claude --remote-control 
 > **If it is encouraging, §4d is the next build:** route the sink into the ocean box at its own
 > isotopic signature, which makes δ¹³C and ¹⁴C usable and fixes conservation.
 >
-> **Do NOT** quote 12.7 σ (it is ~5), re-centre `rep_dC`'s prior, point the ice-discrepancy window
+> **Do NOT** quote 12.7 σ (it is ~5), re-center `rep_dC`'s prior, point the ice-discrepancy window
 > at the plateau, or re-run arm D.

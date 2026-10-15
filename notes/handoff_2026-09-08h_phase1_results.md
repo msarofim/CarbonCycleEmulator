@@ -1,5 +1,5 @@
 # Handoff — 2026-09-08h. PHASE 1 RAN: the seven cheap tests of handoff 09-08g §1, at the canonical `hilda31`, NOTHING ADOPTED. Three predictions confirmed (T-L, T-G, T-ALK's "not a lever"), three falsified in an informative direction (T-D0's deep δ¹³C, T-hml's "no kink", T-I's sign), T-A0 partly (§1.7). Round 6 = C + D is confirmed as ONE refit, but D's mechanism reads differently from the assessment's.
-# **Every model number here is GENERATED at `hilda31` by the scripts named in each section (`outputs/diagnostics/*_20260908.{log,rds}`); every observation number is generated from the data files by the same scripts. The one recollection (Hoffert 1980's 4 m/yr) is labelled in T-A0.**
+# **Every model number here is GENERATED at `hilda31` by the scripts named in each section (`outputs/diagnostics/*_20260908.{log,rds}`); every observation number is generated from the data files by the same scripts. The one recollection (Hoffert 1980's 4 m/yr) is labeled in T-A0.**
 
 Read first: `notes/handoff_2026-09-08g_next_steps_cheap_tests_first.md` (the plan and the predictions),
 `notes/assessment_2026-09-08_acceptable_state.md` (options A–J). Memory: [[ccx_phase1_cheap_tests_20260908g]],
@@ -19,7 +19,7 @@ Read first: `notes/handoff_2026-09-08g_next_steps_cheap_tests_first.md` (the pla
   range whenever the cold box's SST anomaly is negative; pre-existing, ~30 k warnings across the suite's R-path tests.
 
 ## 1. The seven results (prediction → result)
-### 1.1 T-D0 — Martin remineralisation shape, unrefitted (`diag_td0_martin_shape.R`)
+### 1.1 T-D0 — Martin remineralization shape, unrefitted (`diag_td0_martin_shape.R`)
 The pump SHAPE is a DIC-excess profile whose diffusive return flux `ccx_pump_export()` turns into a source; a Martin
 shape is therefore F(z_k) = F(z_s)(z_k/z_s)^−0.858 at the interfaces, integrated with the model's OWN K(z). Two arms:
 `martin_tail` (GLODAP above the interface nearest 1000 m, Martin below, flux-continuous) and `martin_full` (Martin from

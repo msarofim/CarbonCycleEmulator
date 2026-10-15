@@ -14,7 +14,7 @@ conflict is **a failure in model structure**, both observables being real.
 |---|---|
 | **fossil** | **CORRECT.** Not a constant — built per year in `data-raw/build_calibration_data.R` [5b] as an emission-weighted mean over GCB's own by-fuel split, endmembers coal −24 / oil −26.5 / gas −44 / cement 0 / flaring −44 ‰ (Graven, Keeling & Rogelj 2020 GBC; Tans 1981; Andres et al. 2000 via Bush, Pataki & Ehleringer 2007). Cement is correctly separated as calcined carbonate at ~0 ‰. |
 | **land-use** | **CORRECT BY CONSTRUCTION.** No prescribed value: LUC is a transfer out of the vegetation box, carrying that box's own emergent ¹³C ratio (`d13c_bio` removed 2026-08-12). |
-| **ocean exchange** | **UNVERIFIED.** `alpha_as_down = 1 − 2/1000` (kinetic, invasion) and `alpha_as_up = 1 − 10/1000` (equilibrium, evasion), both hardcoded at `R/model.R:1532-1533`, both labelled "provisional", and both **temperature-independent** while the model has a seasonal SST cycle. The implied equilibrium offset is +8.08 ‰ ocean-over-atmosphere. **Not chased further — see §3, the ocean channel is not the culprit.** Still owed a citation and a T-dependence decision. |
+| **ocean exchange** | **UNVERIFIED.** `alpha_as_down = 1 − 2/1000` (kinetic, invasion) and `alpha_as_up = 1 − 10/1000` (equilibrium, evasion), both hardcoded at `R/model.R:1532-1533`, both labeled "provisional", and both **temperature-independent** while the model has a seasonal SST cycle. The implied equilibrium offset is +8.08 ‰ ocean-over-atmosphere. **Not chased further — see §3, the ocean channel is not the culprit.** Still owed a citation and a T-dependence decision. |
 | **photosynthesis** | `alpha_photo = 1 − 18/1000`, also "provisional". **The value is defensible; its APPLICATION is not.** |
 
 ## 2. THE BUG — `R/model.R:1040`
@@ -116,7 +116,7 @@ likelihood gap goes **−90.07 → −25.28**, and its composition inverts —
 | `d13c_seasonal_MLO` | −24.22 | (out of the top six) |
 | `gcb_land_sink` | −24.00 | **−24.00** |
 
-**The isotopic objection to a saturating fertilisation largely dissolves, and what is left is the
+**The isotopic objection to a saturating fertilization largely dissolves, and what is left is the
 GCB land sink — a carbon-budget objection, not an isotopic one.** Same caveat as §4: this is at
 parameters fitted with the bug, both arms move under a refit, and the free arm has to be re-run
 before anything about the ridge is claimed.
@@ -173,7 +173,7 @@ exactly with the one-token fix (which passes `alpha13 = 1` on the negative branc
 
 ## ⇒ WHAT IS OWED, AND IT IS MARCUS'S CALL
 
-1. **Adopt correction (1) or (2)** (§2). Second-order difference, but a real modelling statement.
+1. **Adopt correction (1) or (2)** (§2). Second-order difference, but a real modeling statement.
 2. **Fix BOTH cores** — `R/model.R:1040` and `src/ccx_core.cpp:370` — or parity will hide it again.
 3. **THE OBJECTIVE CHANGES.** Nothing fitted before is comparable, same class as the 2026-08-22
    ice-hemisphere change. **Every fitted vector is invalidated, including the adopted arm-N mode.**

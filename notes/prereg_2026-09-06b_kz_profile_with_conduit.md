@@ -7,8 +7,8 @@ loses the modern sink and the bomb uptake (D2 failed by 7×).
 
 **Marcus's ruling (2026-09-05) still governs** — stay true to how CCX's ocean works, not to HILDA.
 ⚠ This prereg tests HILDA's *configuration* because DESIGN §3.4a names it as the one candidate that
-does A and B together; the departure authorised on 09-05 (`q_attach_from`) is carried as an arm,
-not reverted. Every HS/HD arm is **NOT "HILDA's model"** and is labelled so.
+does A and B together; the departure authorized on 09-05 (`q_attach_from`) is carried as an arm,
+not reverted. Every HS/HD arm is **NOT "HILDA's model"** and is labeled so.
 
 ---
 

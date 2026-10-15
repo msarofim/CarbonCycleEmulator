@@ -50,7 +50,7 @@ premise that makes `sqrt(2(n−1))` the right denominator.
 
 ### Where the model's variability comes from (`diag_gateV_variability_drivers.R`)
 
-Knockouts at the canonical mode — temperature smoothed with an 11-yr centred mean (trend
+Knockouts at the canonical mode — temperature smoothed with an 11-yr centered mean (trend
 kept), `gamma_diff = 0`, all four `gamma_enso_*` = 0:
 
 | case | sd | z | variance lost |
@@ -74,7 +74,7 @@ lever this gate points at.
    contains whatever the solar cycle did to temperature — the same argument `R/forcing.R`
    already makes for volcanic cooling. A solar→temperature term would **double-count**. The
    only non-redundant addition would be a *direct irradiance → photosynthesis* path, i.e. a
-   new mechanism (the solar analogue of `gamma_diff`), not a new forcing column.
+   new mechanism (the solar analog of `gamma_diff`), not a new forcing column.
 2. **The observations show no significant cycle.** Best-fitting period in 9–13 yr is
    **9.4 yr** (not 11), amplitude 0.477 GtC/yr = 13.7 % of the anomaly's variance — but a
    white-noise null searched over the *same band* has median 0.316 and 95 % 0.502, so the
@@ -93,7 +93,7 @@ gate V would have shown.
   already score every year of, and re-judged the result at a typed 0.10 ‰ with no derivation.
 * **Gate 10 (natural deep-ocean Δ¹⁴C)** took its target *and* its sigma from
   `ccx_deep_d14c_target()` — the likelihood's own accessor. Its header said so in as many
-  words. A gate tied to the stream it checks cannot fail independently of the optimiser.
+  words. A gate tied to the stream it checks cannot fail independently of the optimizer.
   The observation is not lost: `d14c_deep_ocean` scores it and `test-likelihood.R` bounds
   `kz` through it.
 
@@ -157,7 +157,7 @@ reference and the estimator.
    Cant). The ocean bomb-¹⁴C inventory is scored, but ¹⁴C measures ventilation, not buffer
    capacity — and gate 12a's standing verdict is an ocean-*capacity* defect.
 4. **Atmospheric O₂/APO** — the independent observational split of land vs ocean sink. Needs
-   an O₂:C stoichiometry layer: a modelling job, not a test.
+   an O₂:C stoichiometry layer: a modeling job, not a test.
 
 ## Files
 

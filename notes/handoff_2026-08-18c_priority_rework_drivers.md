@@ -64,7 +64,7 @@ PREDICTION** — and the amplitude trend emerged at **+17 % (1960-80 → 2000-20
 (5.0 vs 3.0 ppm; d13C 0.37 vs 0.18 ‰) — `seas_T_amp` is the counter-cycle, the refit's job.
 
 **Control-drift decomposition** (measured, not assumed): +0.43 ppm/275 yr zero-emission =
-+0.33 **fertilisation rectifier** (real physics, shrinks with calibrated amplitude) + +0.10
++0.33 **fertilization rectifier** (real physics, shrinks with calibrated amplitude) + +0.10
 integrator quadrature over the polar-night kinks (cut from +0.22 by **720-point norms** in
 both cores; the residual is the integrator's own). Sine drifted +0.044.
 

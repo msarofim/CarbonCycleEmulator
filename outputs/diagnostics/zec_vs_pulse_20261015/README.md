@@ -63,7 +63,7 @@ Superposing the Joos et al. (2013) Table 5 response (`R/joos_irf.R`, `JOOS_T5`) 
   - The pulse is released over 2030: CO2 FFI at timepoint 2030.5 in FaIR, fossil in 2030 in CarboTope.
 - **Excess:** the CO₂ above preindustrial at 1 January 2030 + h, as a share of that at 1 January 2030.
   - FaIR uses its own airborne CO₂ accounting; the concentration route agrees to 4e-16 (G6).
-  - CarboTope uses the 12-month mean centred on each date, against its 1750 annual mean.
+  - CarboTope uses the 12-month mean centered on each date, against its 1750 annual mean.
 - **Pulse:** 100 GtC (the pulse lab's size), measured as the annual mean of year 2030 + h, i.e. h years after the
   release-year midpoint.
 - **Two pulse backgrounds:**

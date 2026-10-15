@@ -68,7 +68,7 @@ All committed and pushed (`0a4daf6` .. the 09-30 (p) CHANGELOG commit).
 2. **Read the refit:**
    - D4 against 56.1 ± 7.75 (`data/obs_npp_modern_target.rds`); if unresolved, it is a NAMED TENSION;
    - score the prereg's predictions at the refit (`notes/prereg_2026-09-30c_nonco2_drivers_imbalance.md`);
-   - **decompose the futures** (fertilisation shape vs `luc_scale`'s scenario land use vs the ocean)
+   - **decompose the futures** (fertilization shape vs `luc_scale`'s scenario land use vs the ocean)
      before attributing the Koven move;
    - ⚠ `dg_run` cannot yet score an `ndep_ret` ≠ 0 vector: `DG_YEARS` runs to 2025, the historical
      N-deposition series ends 2024, and `ccx_ndep_forcing()` refuses partial coverage by design. The fix

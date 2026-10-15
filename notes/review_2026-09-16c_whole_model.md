@@ -3,7 +3,7 @@
 **Marcus's three questions:** Is everything in the structure justified? Are there bugs? What are the remaining observational
 mismatches and the best avenues? Three read-only review passes were run in parallel (structure justification; adversarial code
 review with reproducing probes; the mismatch ledger from the scorecard, the mode file's streams and the memory indexes) and are
-synthesised here. Every number is from the tree or a named memory file; nothing is recalled. The three raw reports are in the
+synthesized here. Every number is from the tree or a named memory file; nothing is recalled. The three raw reports are in the
 session transcript; this note keeps what a decision needs.
 
 ---
@@ -32,7 +32,7 @@ support, not an identification. Fifteen of 62 constants are `status = "provision
 **Contradictions with DESIGN or a ruling** (each a concrete, checkable item):
 1. **`hs_frac` has two provenances.** `CCX_STRUCT_HILDA$hs_frac = 0.16` (`R/calibrate.R:1844`; the caveat register: "MEASURED on SST < 5 °C")
    while every HS data product — Holte HS MLD, the HS SST amplitude, gate S's mask, `obs_tr_box.rds` — uses the 57.14° boundary whose area
-   is 0.128 (09-14 e). Consequence: `u_hs`'s prior centre (34–47 Sv over the model's HS area) is 21.8 m/yr at 0.16 and ≈27.3 at 0.128
+   is 0.128 (09-14 e). Consequence: `u_hs`'s prior center (34–47 Sv over the model's HS area) is 21.8 m/yr at 0.16 and ≈27.3 at 0.128
    (×1.25); `pump_hs_gcm2`'s per-area meaning moves the same way. `hilda_c` carries 0.128, unadopted.
 2. **`h_hs`'s ruled prior is not built** (residence time h/u = 393/23.6 = 16.7 yr vs ~5 yr at the observed MLD).
 3. **`sst_NH/SH` 18/16 °C are TYPED** vs the measured, re-based 17.18/15.35 (whole-LS 22.3/18.7; 09-14 d/e); the T-dependent Zhang alphas
@@ -71,7 +71,7 @@ handover and the likelihood plumbing all checked CLEAN. Seven findings, ranked; 
 | 4 | The ocean-gradient rows are scored against the 0–100 m target with σ inflated by the like-for-like offset (option 5, 08-28 g) — at h_ml 65.2 the like-for-like DIC gradient is 246.9 vs the scored 233.1: a directional pull toward a too-small gradient (~0.5 σ_obs) that STRENGTHENS as h_ml shrinks, anti-correlated with the h_ml prior. Part of THC's "z +2.6 → +0.3" is this offset. | BIASES A ROW, mildly; Marcus's ruling | flag — a two-line alternate scorer would say whether the THC verdict flips |
 | 5 | Pre-1850 SST anomaly is HELD AT THE SINGLE YEAR 1850 (−0.042 K, `R/forcing.R:1057` rule = 2) while GMST and the periodic spinup use 0: every surface box starts the transient 0.04 K colder than its spun-up orbit — a ~0.5 µatm, ~0.05 ppm step at 1850. Below every σ, but a single-year baseline held for a century is the trap `~/.claude/CLAUDE.md` names. | LATENT | OPEN — pre-1850 = the 1850–1900 mean; changes every stream at the 4th decimal ⇒ a restamp, so a ruling |
 | 6 | `ccx_build_forcing()` defaults `prod_c14 = NA` and ships it as `c14_cosmo`: a bare `ccx_run(spin, ccx_build_forcing())` yields valid CO₂/δ¹³C and an all-NA Δ¹⁴C. Every calibration path overwrites it. | LATENT | OPEN — error on NA, or default to the spinup's value |
-| 7 | Smaller: the conveyor limbs divide by `a_oc` while the boxes they cross are `a_ls`/`a_ml` (a Sv-label error on a parked mechanism); `ccx_spinup`'s interior guess scales by `eq_on` not `d1_on` (Newton absorbs it); the HS seasonal guard reads sample extremes where the LS guard reads the interpolant's; the substep bound omits the entrainment, air–sea and HS rates (safe at the floor, unbounded by construction); gradient rows silently `next` when `err$grad_off_*` is absent; `alk_hs` is in mol/kg while `alk_eq`/`alk_tr` are µmol/kg; four `tryCatch → NULL` data reads (a corrupt `obs_glodap_deep.rds` would turn the pump OFF with `pump_grad > 0` and say nothing) — none in `CCX_RUN_INPUTS`; forcing is held over `[t_i, t_i + 1/12]` with `t_i` the month CENTRE (a uniform half-month lag; calendar-year sums unaffected; ENSO's γ absorbs it). | LATENT | record; fix opportunistically |
+| 7 | Smaller: the conveyor limbs divide by `a_oc` while the boxes they cross are `a_ls`/`a_ml` (a Sv-label error on a parked mechanism); `ccx_spinup`'s interior guess scales by `eq_on` not `d1_on` (Newton absorbs it); the HS seasonal guard reads sample extremes where the LS guard reads the interpolant's; the substep bound omits the entrainment, air–sea and HS rates (safe at the floor, unbounded by construction); gradient rows silently `next` when `err$grad_off_*` is absent; `alk_hs` is in mol/kg while `alk_eq`/`alk_tr` are µmol/kg; four `tryCatch → NULL` data reads (a corrupt `obs_glodap_deep.rds` would turn the pump OFF with `pump_grad > 0` and say nothing) — none in `CCX_RUN_INPUTS`; forcing is held over `[t_i, t_i + 1/12]` with `t_i` the month CENTER (a uniform half-month lag; calendar-year sums unaffected; ENSO's γ absorbs it). | LATENT | record; fix opportunistically |
 
 ---
 
@@ -102,7 +102,7 @@ DIC ratio inside the SH limb (SST sine 0.65 @ 4.1 vs entrained 1.0 @ 9.7 → net
 the HS box's seasonal pCO₂ cycle ~0.5 µatm vs SOM-FFN's 16.3 @ 7.5 (30×, unscored); `h_hs` 393 vs 103–128 m.
 
 **M4. The CO₂ level / mid-century seam (a data question).** `rep_dC` +3.35; the 1940s plateau (`co2_icecore` the worst row; `CCX_ICE_DISCREPANCY`
-OFF); six refits and four obs-artefact tests say it is a common-mode +10.7 GtC, not the plateau.
+OFF); six refits and four obs-artifact tests say it is a common-mode +10.7 GtC, not the plateau.
 
 **M5. Land takes up too fast in the first century.** IRF(100) 0.280 vs Joos 0.409 (a comparison, by ruling not chased); land sink +1.0 GtC/yr
 over GCB at the bare σ (z +2.0; +0.65 at the objective's ×3); β_max, not kz, is the lever (−232 to close gate 7).
@@ -130,7 +130,7 @@ Accepted / passing and not to be re-hunted: gates 1–3, 5 (trough form, inside 
 | 4 | **Option K** — gate the thermal : non-thermal ratio of the SH limb (Takahashi 2002 / SOM-FFN split, 40–90 °S), then pin/price `sst_seas_amp_SH` | M3's 2.4σ, the weak gate S | a data task + a gate, maybe a refit | days | the ratio 0.65 : 1.0 at SPO vs the product's split |
 | 5 | **Option B** — `ml_hi` = the HS box with its poleward MLD cycle under the HS Holte prior (R side written; C++ twin, prior, tests owed) | `h_hs`, the HS pCO₂ cycle (30×), HS δ¹³C → Q | refit (new structure label) | weeks | HS MLD 103–128 m; SOM-FFN 16.3 µatm @ 7.5; Quay 0.60 ± 0.10 |
 | 6 | **G′** — the iso-fit frontier on gate GL | says what H/GL cost the rest of the objective | diagnostic | hours | — |
-| 7 | Land first-century axis (saturating fertilisation / β_max) | M5 | refit | one array | GCB land at the bare σ; Joos stays a comparison |
+| 7 | Land first-century axis (saturating fertilization / β_max) | M5 | refit | one array | GCB land at the bare σ; Joos stays a comparison |
 | 8 | T5 tropical column | B1 → M2 | between refit and new class | 2–3 sessions + array | B1 +55.5; the preview says it inherits M1's exchange without an advective return |
 
 **Where this differs from the standing recommendations.** The 09-12 assessment ranked option A (the limb) first; the 09-13 g ruling took the

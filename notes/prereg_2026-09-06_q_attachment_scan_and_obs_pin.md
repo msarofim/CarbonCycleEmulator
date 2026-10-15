@@ -66,7 +66,7 @@ parameters, before any refit.**
   **Obs-pinned** = `kz` solved to hold it at `ccx_deep_d14c_target()$target` (read, not typed).
 - Every reference is recomputed in this run. No number is typed from a previous collect.
 - Tolerance for "an arm beats another": **0.05 in mean|z|** = 0.05 × 13.4 ‰ ≈ **0.7 ‰** on a free
-  layer. A JUDGEMENT, declared here so it cannot be chosen after the fact; it is ~5 % of the
+  layer. A JUDGMENT, declared here so it cannot be chosen after the fact; it is ~5 % of the
   arc's total range (2.55 → 1.74) and well above the shared-atmosphere coupling (4e-4 ‰).
 
 ---
@@ -97,7 +97,7 @@ to −109 ‰; the interior crosses that near layer 7, ~1160 m).
 | | prediction | falsifier |
 |---|---|---|
 | **B1** | **`kz` is monotone non-decreasing in the attachment index** — `tau_q` is per-layer, so each layer dropped is less exchange and `kz` must do more | any decrease beyond solver tolerance (1e-3 relative) |
-| **B2** | **no interior optimum:** `mean|z|_free` is minimised at layer 10, with every k < 10 worse by ≥ 0 (ties inside 0.05 count as "not worse") | some k < 10 beats 10 by > 0.05 |
+| **B2** | **no interior optimum:** `mean|z|_free` is minimized at layer 10, with every k < 10 worse by ≥ 0 (ties inside 0.05 count as "not worse") | some k < 10 beats 10 by > 0.05 |
 | **B3** | over k = 7 … 10 (attachments at and below the crossover) `mean|z|_free` is non-increasing | an increase > 0.05 between consecutive k |
 | **B4** | every arm SOLVES — no ceiling at `tau_q` = 538 | an arm with no `kz` holding the deep |
 | **B5** | HD, read ACROSS the scan, moves mostly with `kz` — its range across the scan is explained by `kz` to within the 3:1 ratio 09-05f measured | HD moves > 5 ‰ between two arms whose `kz` differ < 10 % |
@@ -182,4 +182,4 @@ over 84 % is exactly what D2 measures; the arithmetic does not settle it.
   incumbent's nuisances; it cannot say what a refit would find. A pass here is a reason to refit;
   a fail here is a reason to refit too — the difference is the prior on the outcome.
 - The carbonate formulation at `sst_hs` = 2 °C in a transient is the Lueker floor; the minimum
-  reached is printed and any excursion below 2 °C is labelled an extrapolation.
+  reached is printed and any excursion below 2 °C is labeled an extrapolation.

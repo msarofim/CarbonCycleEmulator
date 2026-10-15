@@ -68,7 +68,7 @@ well-mixed deep box **HD**, **beside** the low-latitude column, not under it. Ne
 Carrying two zero-mass boxes would make `ccx_spinup()`'s Newton Jacobian **and both isotope
 operators singular** (all-zero rows and columns). `NPH`/`NB` in `src/ccx_core.cpp` are file statics
 set by `unpack_aux()` from `aux$hs_on`, and **every entry point calls `unpack_aux()` before touching
-`y`**. Not re-entrant across threads with two different structures; the calibration parallelises by
+`y`**. Not re-entrant across threads with two different structures; the calibration parallelizes by
 FORKING, so each worker has its own copy.
 
 **P0 ✅** — `hs_frac = 0` bit-exact (32 boxes) with every HL parameter set; closure **1.33e-15**;
@@ -143,7 +143,7 @@ width; at the mode the model reads **−48.35**, already **z = −0.42** inside 
 ⇒ **It would pass by construction — a SILENT GATE.**
 
 ⭐ **HOW IT WAS ALMOST MEASURED WRONG.** The first pass used a 2-D **SLICE** (the other 24 held).
-That cannot establish redundancy — [[ccx_gates_priced]] measured that a **re-optimised** iso-fit
+That cannot establish redundancy — [[ccx_gates_priced]] measured that a **re-optimized** iso-fit
 frontier REVERSES what a one-at-a-time `kz` scan says. Redone on the **posterior's own directions**
 with the Laplace covariance already in the mode file: `sd = sqrt(gᵀ Σ g)`, **52 spinups, not 25
 refits**. ⚠ Slice and profile agreed this time — **that is not the same as the slice having been
@@ -167,7 +167,7 @@ unnecessary.**
   asserting that an air-sea flux does nothing.
 * ⚠⚠ **N1 IN THE FIRST PREREG WAS INVALID AND I BUILT IT THAT WAY.** It gated the LEVEL of the
   ≤ 500 m band against GLODAP — but at a **preindustrial** steady state that band carries no bomb
-  ¹⁴C, so the incumbent's own upper mean |z| is **4.54, essentially all artefact** (67 m: model
+  ¹⁴C, so the incumbent's own upper mean |z| is **4.54, essentially all artifact** (67 m: model
   −48.3 against an observed **+50.5**). This is the ⚠⚠ trap `handoff_2026-09-04` §5 states in so
   many words. **Only the between-arm DELTA is interpretable.** ⇒ **A control band must be chosen
   where the comparison is VALID, not where the defect is.**
@@ -217,7 +217,7 @@ structure stays in the repo, bit-exact off, available — and the arc closes.
 1. ⭐⭐ **The `q` attachment-depth decision** (above). Marcus's call, not a measurement.
 2. ⭐ **`DESIGN.md` §6** — the acceptance criteria still describe a retired gate set at a
    quarantined mode. Cheap, uncontroversial, and it has been owed for two handoffs.
-3. **LICENCE** — Marcus's call, blocks any public release.
+3. **LICENSE** — Marcus's call, blocks any public release.
 4. **The carbonate formulation** (§6) — only needed if the HS boxes ever go transient or below 2 °C.
 5. **A posterior**; `sst_seas_amp_NH` at −3.91σ; the provisional-constant triage; CITATION + DOI.
 

@@ -42,7 +42,7 @@ global.R")`, its spinup, its fitted forcing parameters, the same helpers `server
   wrong and (y) corrects it: “What if…?” runs the MECHANISM switches on the historical scenario
   and never had a step. `app_stylised_emissions()` takes fossil from the GCB history and land-use
   from the SSP background **for every year** — the `kind` switch only rewrites the future — so the
-  hybrid past was under all four stylised pathways. Gate 5 only ever compared two.
+  hybrid past was under all four stylized pathways. Gate 5 only ever compared two.
 - **Verified to be the inventory before being called one:** both curves are `(co2_NH+co2_SH)/2`
   annual-mean (`R/climate.R:196`), both see the same spliced IGCC temperature over history
   (`gmst_obs = TRUE`), and −84.5 GtC at a 270-yr airborne fraction of 30 % reproduces the −12.05.
@@ -62,9 +62,9 @@ would have been four chances to forget; same choke-point argument as the fitted 
 parameters that wrapper already carries.
 
 **Measured after: the Futures tab reproduces the Keeling tab at 2024 to the last digit (424.37
-both), the stylised path to 424.38. Worst step 13.58 → 0.00 ppm.**
+both), the stylized path to 424.38. Worst step 13.58 → 0.00 ppm.**
 
-- ⭐ **THE JOIN IS A RAMP, AND THE GRID DOES IT — nothing was harmonised.** The spliced table keeps
+- ⭐ **THE JOIN IS A RAMP, AND THE GRID DOES IT — nothing was harmonized.** The spliced table keeps
   the scenario's OWN rows at the years it reports them (the SSPs are annual to 2015, decadal
   after), so the first post-2024 node is **2030** and `ccx_annual_to_monthly()` crosses 2025–29
   exactly as it already does between two decadal nodes. No offset, no convergence year.
@@ -92,7 +92,7 @@ panel rendering); **zero `.shiny-output-error` nodes** in any of them.
 
 ## 5. NEXT — what is owed, and both are Marcus's
 1. ⏳ **R2 — `rep_dC`'s prior.** Unchanged from (o) §5b: the side test and N5 are in, the WIDTH is
-   the live question (σ 1.0 → 0.2 is −1.65 ppm at −17.6 log-units; centre and width INTERACT and
+   the live question (σ 1.0 → 0.2 is −1.65 ppm at −17.6 log-units; center and width INTERACT and
    must move together), and it is an OBJECTIVE change — a ruling, then a restamp of every mode.
    ⛔ >1/3 of the offset's value is isotopic; never a CO₂-only ruling.
 2. **Before the post:** set `APP_FEEDBACK_URL` and `APP_REPO_URL` in `app/global.R` (both

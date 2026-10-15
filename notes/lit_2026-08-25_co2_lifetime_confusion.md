@@ -63,7 +63,7 @@ Marcus recalls **an LBNL or LLNL scientist presenting an AGU poster ~10 years ag
 carrying this misconception. **I could not locate it, and I am not going to name a near-match as
 if it were one.**
 
-What was searched: general web; AGU Fall Meeting 2014–2016 programmes on `agu.confex.com`;
+What was searched: general web; AGU Fall Meeting 2014–2016 programs on `agu.confex.com`;
 site-restricted search of `agu.confex.com` and ADS; and LLNL/LBNL + residence-time combinations.
 
 Why a negative result here is weak evidence: AGU meeting **abstracts** from that era are poorly
@@ -104,13 +104,13 @@ and Santer's protest was about the book and the seminar, **not** about a residen
 |---|---|---|---|
 | 2011-08-04 | *Carbon cycle questions* | commenter: *"Atmospheric bomb tests show the true t½ of all [CO₂]atm is only about a decade"*; another: natural fluxes ~200 GtC/yr dwarf 6.4 GtC/yr fossil | **The single best exhibit we have.** The ¹⁴C-bomb argument AND its correction appear in the same thread — Ferdinand Engelbeen replies that *"the bomb tests only show the turnover of CO₂, not how fast an excess in mass is removed. That is much longer, around 40 years half life time."* **That is our two-pulse panel, in 2011, in words.** |
 | 2016-08-10 | *Murry Salby's latest presentation* | Salby: *"The premise of the IPCC that increased atmospheric CO₂ results from fossil fuels emissions is impossible."* | **Curry distances herself** — posts it "for discussion", does not endorse. Record it that way. |
-| 2023-03-24 | *Emissions and CO₂ concentration: an evidence-based approach* | Dengler & Reid: absorption has no significant temperature dependence and *"a current CO₂ emission pulse is absorbed with a 42 year half-life time"* ⇒ CO₂ stabilises near 475 ppm and Paris is met on current emissions | guest post; summarises **Dengler & Reid 2023, *Atmosphere* 14(3) 566** |
+| 2023-03-24 | *Emissions and CO₂ concentration: an evidence-based approach* | Dengler & Reid: absorption has no significant temperature dependence and *"a current CO₂ emission pulse is absorbed with a 42 year half-life time"* ⇒ CO₂ stabilizes near 475 ppm and Paris is met on current emissions | guest post; summarizes **Dengler & Reid 2023, *Atmosphere* 14(3) 566** |
 | 2023-09-26 | *Causality and climate* | Christofides, Koutsoyiannis, Onof, Kundzewicz: *"a unidirectional, potentially causal link with T as the cause and [CO₂] as the effect"*; human emissions "only 4 % of total emissions" | guest post; rests on **Koutsoyiannis et al., Proc. R. Soc. A 479:20220529 (2022)** and *Sci* (2023). The 4 % figure is the **gross-vs-net** error Cawley 2011 answers |
 
 **Rebuttal:** *…and Then There's Physics*, **"Scientifically intriguing?", 2023-10-01**, replying to
 the causality post. Note the author is **Ken Rice (Edinburgh) — a co-author on Köhler et al. 2018**,
 the peer-reviewed Harde rebuttal in Part 1. *(WebFetch is 403-blocked on that host; content
-characterised from search indexing, so treat the wording as indicative.)*
+characterized from search indexing, so treat the wording as indicative.)*
 
 ## Roy Spencer — and his position moved
 
@@ -163,7 +163,7 @@ consequences, and neither is comfortable:
    a TH-300/1000 or an `a0` test** — recorded here as a proposal, not a change.
 2. **Our own model is currently further from Joos at TH 20–100 than Spencer's one-box model is.**
    That is a real statement about our calibration, not rhetoric. It also strengthens the
-   fertilisation-saturation case: at `fert_k` = 60 our integrated IRF is **13.15 / 28.08 / 47.64**,
+   fertilization-saturation case: at `fert_k` = 60 our integrated IRF is **13.15 / 28.08 / 47.64**,
    inside at all three — and unlike theirs, our model keeps its long tail.
 
 ---
@@ -191,7 +191,7 @@ anthropogenic — a question the isotopes settled before either post was written
 strongest available argument that the app's tab addresses a live confusion at the top of the
 policy chain, not a blog-comment curiosity. **Report the arc, not the endpoint.**
 
-## 3.2 Spencer's FIXED EQUILIBRIUM is a second defect, and we have measured its analogue
+## 3.2 Spencer's FIXED EQUILIBRIUM is a second defect, and we have measured its analog
 
 Part 2 named the single exponential. Marcus names the other half: Spencer's sink is
 `k·(C − 295 ppm)` with **both `k` and the 295 held constant forever**. The ocean's uptake
@@ -268,7 +268,7 @@ overstating the isotopes' role understates how thoroughly settled this is.** Mar
    range of the past million years.
 2. **Mass balance.** Cumulative emissions exceed the atmospheric increase by more than 2×, so the
    natural world is a **net sink**. Needs no model, no isotopes, no fitted parameter.
-3. **Isotopes + carbon-cycle modelling**, "fully understood by the 1980s".
+3. **Isotopes + carbon-cycle modeling**, "fully understood by the 1980s".
 
 **Lines 1 and 2 each suffice on their own.** The draft says so directly: those two facts *"are
 enough in and of themselves to be strong evidence for an anthropogenic cause"*.
@@ -301,7 +301,7 @@ they are what makes question two answerable.
 | 2009 / 2017 / 2023 | Essenhigh / Harde / Stallinga (Part 1) |
 
 **Part 1's "recurs every 6–8 years since 2009" is superseded.** The correct statement: **the physics
-was settled in 1957 and formalised in 1979; the confusion first reached print in 1993; a paper was
+was settled in 1957 and formalized in 1979; the confusion first reached print in 1993; a paper was
 written in 1997 for the sole purpose of ending it; and it has recurred at least four times since.**
 
 ## 4.3 The draft anticipated gate 12b by fourteen years

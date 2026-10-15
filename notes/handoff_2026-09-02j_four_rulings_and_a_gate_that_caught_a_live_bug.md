@@ -52,7 +52,7 @@ pre-check predicted.
 the old form and onto the whole land chain (**35.5 yr**) in the new one:
 +0.083 GtC/yr × 33.5 yr = **+2.77 GtC = −1.31 ppm** against a measured **−0.58**. Same sign, 2.3×
 over — as a full-equilibrium estimate should be after 76 yr against a 36 yr constant with the ocean
-and CO₂ fertilisation damping it.
+and CO₂ fertilization damping it.
 ⇒ **The same coefficient means something different in the two structures**, so **−65.74 is an UPPER
 BOUND** a refit should largely recover.
 
@@ -74,10 +74,10 @@ The **`enso` flux channel is retired** (`R/fluxes.R`); `land_net` drops its `- c
 ## 2. ✅ RULING 2 — THE GATES GET BOUNDS (`c811b82`)
 
 **GATE 7** now judges at the **objective's own sigmas** — land 1.50, ocean **0.40 uninflated** (the
-asymmetry is the objective's, `R/likelihood.R:1608-1612`) — and `DG_G7_NSD` 1 → **2**, harmonised
+asymmetry is the objective's, `R/likelihood.R:1608-1612`) — and `DG_G7_NSD` 1 → **2**, harmonized
 with `DG_Q_NSD` / `DG_G5_NSD` / `DG_GD_NSD`. **All arms PASS** (from90 land **+0.72**; the bare-σ
 +2.15 is still printed). ⚠ **Still not independent** — aligning a sigma cannot make a restatement
-out-of-sample, so **do not chase it in the refit**. ⭐ `dg_gate7_verdict()` finally centralises the
+out-of-sample, so **do not chase it in the refit**. ⭐ `dg_gate7_verdict()` finally centralizes the
 verdict, which had been INLINE in both callers.
 
 **GATE 4** gets an **ORDERING and no threshold** (its claim is "must not be SMOOTHER than this").
@@ -90,7 +90,7 @@ DERIVED sigma**, because ⛔ **Hua publishes none**: leave one zone out of the o
 ⚠ **Pooling the hemispheric quantities over all 12 combinations repeats each value and biases the sd
 ~10 % LOW** — silently stricter than the data warrant. Each hemisphere uses its own draws.
 Result: **FAIL on the NH PEAK TIME (+2.11 to +2.15σ, ~0.95 yr late)**; the lag is comfortably inside
-at −0.45 to −0.75. ⇒ **The gate LOCALISES the miss: it is the peak TIME, not the lag.**
+at −0.45 to −0.75. ⇒ **The gate LOCALIZES the miss: it is the peak TIME, not the lag.**
 
 ✅ All bounds **mutation-tested permanently**, in BOTH directions — gates 4 and 5 fail everywhere,
 and **a gate that can only fail is as uninformative as one that can only pass**.

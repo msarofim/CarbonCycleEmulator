@@ -76,7 +76,7 @@
   and the scratch-worktree diffs (`*_worktree.diff`) behind every "(+uncommitted)" stamp.
 - **Data:** `data/constraint_map.rds` rebuilt at hilda34g.
 
-## 4. Open items, roughly in order (none is a blocker; each is Marcus's to prioritise)
+## 4. Open items, roughly in order (none is a blocker; each is Marcus's to prioritize)
 1. **The background task "Diagnose the SPO seasonal-row cliff near start 017"** runs in a separate session (worktree
    `.claude/worktrees/pensive-burnell-a9bf40`). It was told not to change any stored logpost without a priced
    objective change and Marcus's ruling. **Read its result and merge its branch; it may touch `CHANGELOG.md`'s top.**
@@ -84,7 +84,7 @@
    prefer ~2.6 months. The What-if fit and the observed growth timing want ~5 (T7: +15.4 % at a further 3 months). The
    growth-rate row was declined 09-26, to be re-proposed only "with a NEW reason"; this may be one. Not raised yet.
 3. **The untested greening reading** (§1). A test: refit or profile the lag-0 control with `npp_tsens` constrained
-   positive, or score hilda34g with the lag set to 0 and `npp_tsens` re-optimised conditionally.
+   positive, or score hilda34g with the lag set to 0 and `npp_tsens` re-optimized conditionally.
 4. **`k_w`'s marginal price at 1446**: a re-fit at fixed `k_w` (offered, not run). The conditional price is 1784
    log-units, the Laplace one ~47.
 5. **The "δ¹³C in ice cores" family label** in the app's "What pins down what?" tab is MY choice, parallel to

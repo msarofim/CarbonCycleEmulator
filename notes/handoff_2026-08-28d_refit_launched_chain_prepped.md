@@ -17,7 +17,7 @@
    test's premise. Both are hard stops, not defaults. §3
 4. **Nothing is quarantined and nothing is repointed**, still deliberately. §3
 5. **Two bugs in my own new code were found by TESTING, not review** — both in the same trap. §4
-6. **`CCX_MODE_RETIRED` now carries a reason PER ARM.** Behaviour-preserving today; it is what
+6. **`CCX_MODE_RETIRED` now carries a reason PER ARM.** Behavior-preserving today; it is what
    lets tomorrow's retirement state *its own* cause instead of the isotope fix's. §2
 
 ---
@@ -34,7 +34,7 @@ thread, run from a **FROZEN copy** of the driver committed beside it so the trac
 - **Warm-started from a byte copy of the incumbent canonical mode.** Safe across the objective
   change because `par_mode` is band-INDEPENDENT and is re-encoded under this run's table;
   `u_mode` would NOT have been.
-- **Gates H1/H2/H3 all pass in the log** — shipped support un-renormalised, the shipped init 75
+- **Gates H1/H2/H3 all pass in the log** — shipped support un-renormalized, the shipped init 75
   accepted, and the three ocean-gradient rows LIVE with finite `sd_eff` at 31 / 75 / 199 m.
 - **The warm start reads −1544.6 against a file that says −1544.6** — a MATCHED read.
 - ⚠ **The launch was gated on the MACHINE.** 08-28c left it open because a Julia SLR job was
@@ -74,7 +74,7 @@ Five stages in the only safe order: **check → read → quarantine → repoint 
 in `ccx_mode_file()`'s error as ONE hardcoded sentence — the isotope fix `6bda464`, quarantined
 under `20260825_seas_isotope_rectification/`. Correct while a single objective change had retired
 every arm; **option 5 (`2153bd6`) is a second one**, so the shared sentence would state the wrong
-cause and point at the wrong directory. `test-mode-file.R`'s check **generalises rather than
+cause and point at the wrong directory. `test-mode-file.R`'s check **generalizes rather than
 relaxes**: each entry must name a quarantine path AND a cause commit, whatever they are for that arm.
 
 ### What was VERIFIED, not asserted
@@ -115,7 +115,7 @@ relaxes**: each entry must name a quarantine path AND a cause commit, whatever t
      pre-08-28 run — the logit is over a 4.857× wider support.
    - `diag_ridge_reparam.R` — **WIDENED, LADDER SHIFTED.** `RR_THRESH` is a set of ABSOLUTE
      logpost levels; on the shipped support the same vector scores lower by exactly
-     **log(170/35) = 1.5805** (pure prior renormalisation — the same −1.5805 08-28c calls the
+     **log(170/35) = 1.5805** (pure prior renormalization — the same −1.5805 08-28c calls the
      bounded refit's narrowed-prior constant; verified numerically). Left as typed it would have
      shifted every verdict one rung, silently. The shift is now COMPUTED, not typed.
    - `diag_landed_gap_streams.R` — **DELIBERATELY NOT WIDENED.** Its GATE 1 reproduces arms'

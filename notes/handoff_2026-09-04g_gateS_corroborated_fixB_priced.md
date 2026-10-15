@@ -129,7 +129,7 @@ mutation-tested against the exact bug**.
    would have killed a live mechanism.
 2. ⛔ **`forcing_enso.rds` IS MONTHLY, GCB IS ANNUAL.** `merge(..., by = "year")` replicated each GCB
    row **twelve times**: n **66 → 792**, t inflated by ≈√12 to a meaningless **+11.30**.
-   ⇒ annualised: **+0.1153**, t **+4.69**.
+   ⇒ annualized: **+0.1153**, t **+4.69**.
 
 `lon_mask()` gates its own span; `stopifnot(nrow == n_years)` guards the merge.
 

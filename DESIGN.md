@@ -151,7 +151,7 @@ d M_atm[h]/dt =
     C++ ocean sum stops before it.
   - **Spinup:** it is pinned in all three solves (aseasonal 12C Newton, isotope operators, periodic
     Newton and monodromy). It has zero fluxes, so it would make each of them singular.
-  - **Isotopes:** its ¹³C/C is the passive pool's (a modelling choice, not a cited constant) and its
+  - **Isotopes:** its ¹³C/C is the passive pool's (a modeling choice, not a cited constant) and its
     ¹⁴C is 0.
   - `aux$land0` and the land-use pro-rata shares count exchanging carbon only.
   - `ccx_stock_readout()` is the one readout of every reservoir, and it refuses a box without a
@@ -172,7 +172,7 @@ d M_atm[h]/dt =
     max(ndep_h, 0) GtC/yr, atmosphere → `soil_slow`, at `alpha_photo` with the atmosphere's ¹⁴C.
     A RETENTION FLUX ∝ the deposition LEVEL, not an NPP multiplier: the multiplier's sink tracked
     d(ndep)/dt and failed the pre-registered sink-per-N gate (CHANGELOG 09-30 l/m). Prior lognormal,
-    centre 3.9 (whole-forest ~13 kg C/kg N × forest share 0.30), log-sd 0.67 (0.6–8.7 read as ±2σ);
+    center 3.9 (whole-forest ~13 kg C/kg N × forest share 0.30), log-sd 0.67 (0.6–8.7 read as ±2σ);
     `soil_slow` only (a wood/soil split needs a cited ¹⁵N partition; both kept, Marcus 10-01).
   - **Greening** (`npp_tsens`): NPP × exp(`npp_tsens` · GMST), sign-free prior N(0, 0.029) /K
     (SD of MAGICC6's C4MIP σ_NPP, Meinshausen 2011 Table B4).
@@ -238,7 +238,7 @@ d M_atm[h]/dt =
   top of the β-fertilization one that stands for S_LAND. Measured in
   `calibration/diag_1900_deficit.R`; gated by `tests/testthat/test-luc-permanence.R`.
   `f_luc_perm = 1` (the mass-consistent point) is the default and is **not** in
-  `CCX_PARAM_TABLE`; `f_luc_perm = 0` reproduces the 2026-08-12–13 behaviour and exists so
+  `CCX_PARAM_TABLE`; `f_luc_perm = 0` reproduces the 2026-08-12–13 behavior and exists so
   the regression stays measurable.
   **Known residual, measured not assumed:** the debit lands on wood (37 yr) while the
   equilibrium reduction is pro rata across pools, 70 % of it in a 500-yr passive soil. So
@@ -256,7 +256,7 @@ d M_atm[h]/dt =
   [VERIFY]. Ocean areas A_oc[N] < A_oc[S] [VERIFY — SH is ocean-dominated].
   > ✅ **k_g (`k_w`) CITED 2026-10-02 (W5; objective #15; Marcus: "1446, log-sd 0.2"):** lognormal(1446
   > m/yr, 0.2) = Naegler (2009)'s corrected four-study mean, 16.5 cm/h, ± ~20 % (Wanninkhof 2014).
-  > `R/constants.R` `KW_PRIOR_CENTRE` / `_LOGSD` carry the sources and the ice-free / water-vapour caveats.
+  > `R/constants.R` `KW_PRIOR_CENTRE` / `_LOGSD` carry the sources and the ice-free / water-vapor caveats.
 - **Mixed-layer carbonate chemistry:** pCO₂_ml = f(DIC_ml, T) via the Joos et al. (1996)
   polynomial perturbation fit [VERIFY exact coefficients], times the temperature factor
   exp(0.0423 · ΔSST) (≈4.23 %/°C, Takahashi [VERIFY]). ΔSST = scaled IGCC GMST anomaly.
@@ -334,7 +334,7 @@ surface and sluggishly in the abyss"), which is why it is listed ahead of B.
   >
   > **CLAUSE 3 PASSES DECISIVELY** — a very gentle decay (K falls to 0.61·`kz` at the
   > bottom) lands the deep on target at the same sink, at slightly *better* logL, with one
-  > parameter and only `kz` re-optimised.
+  > parameter and only `kz` re-optimized.
   > **CLAUSE 1 FAILS** — `h_ml` stays at 184 m. A fixes the deep age; it does **not** supply
   > what `h_ml` is faking. Only the pump has done that.
   > **`z_K` WOULD BE WEAKLY IDENTIFIED.** The logL spread from `z_K` ∞ to 3000 is ~2 units
@@ -342,7 +342,7 @@ surface and sluggishly in the abyss"), which is why it is listed ahead of B.
   > but it means adopting A puts real weight on the deep-Δ¹⁴C **n_eff choice that
   > `data-raw/build_glodap_deep_targets.R` explicitly left UNRESOLVED** (five candidate
   > sigmas spanning 15×). **Resolve that before, not after.**
-  > **CAVEAT:** two of 19 parameters re-optimised. `k_w`, `bomb_total` and the land are
+  > **CAVEAT:** two of 19 parameters re-optimized. `k_w`, `bomb_total` and the land are
   > still at constant-K values.
 
 **B. High-latitude / outcrop conduit** — a direct surface↔interior path that bypasses the
@@ -368,7 +368,7 @@ different cost:
     bit-exact), and HILDA's **published depth-independent `q` FAILS** here: HD sits near −109 ‰
     and the interior crosses −109 at ~1000 m, so a single-endmember bulk exchange ages the column
     above that depth and **youngens** it below — and the whole scored band is below, already too
-    young against GLODAP. **Marcus 2026-09-05 authorised departing from HILDA** provided the
+    young against GLODAP. **Marcus 2026-09-05 authorized departing from HILDA** provided the
     result stays true to how CCX's own ocean works. Attaching `q` at the **bottom** takes the
     scored band **2.048 → 1.739**, under the 09-04k2 reduced form's **1.81** and toward this
     section's own **|z| < 1** benchmark — ⛔ but still **not** reaching it, and **NOT adopted**.
@@ -399,7 +399,7 @@ different cost:
     the low-latitude rate (`hs_asx_frac`), HILDA's attachment + `K(z)` at `z_K` 253 solves at
     K_deep **309–602** (HILDA's 465) with all three levels and the contrast inside 1σ, and its
     matched-parameter transient (−193 to −255 vs `ent26`, of which −115 to −134 is the recoverable
-    pump-δ¹³C artefact) is the best of the arc. ⇒ objective change #9 (the profile as one MVN row
+    pump-δ¹³C artifact) is the best of the arc. ⇒ objective change #9 (the profile as one MVN row
     with the measured covariance) and a refit — `notes/prereg_2026-09-07_hilda_refit_design.md`.
     `notes/collect_2026-09-06c_structure_identifiability.md`. Still NOT adopted.
   - **B2, HILDA proper.** A separate two-box high-latitude reservoir alongside the
@@ -453,7 +453,7 @@ smaller `kz` reduces it, and A does not deliver one.
 
 They are complements for a different and better-evidenced reason: **A fixes clause 3
 (deep Δ¹⁴C) and cannot touch clause 1 or rows 4–5; C fixes clause 1 and rows 4–5 and only
-half-fixes clause 3.** The measured division of labour is the argument, not the export.
+half-fixes clause 3.** The measured division of labor is the argument, not the export.
 
 **What the export excess actually indicts is `kz` itself** — 9× Ledwell's NATRE thermocline
 diffusivity, (1.7 ± 0.2) × 10⁻⁵ m² s⁻¹ = 536 m² yr⁻¹
@@ -570,7 +570,7 @@ CHANGELOG 10-05.
     small SH share [VERIFY]) troposphere.
     **No test-yield series and no τ_strat parameter are needed.** This model has no
     stratospheric box, so what it wants is delivery, not production — and the delay kernel
-    this line originally specified is *measured* rather than parameterised: two
+    this line originally specified is *measured* rather than parameterized: two
     exponentials fitted to the Tans (1981) / Telegadas (1971) stratospheric ¹⁴C inventory,
     **39.97 kmol at τ = 1.00 yr** and **27.75 kmol at τ = 10.15 yr**. UNSCEAR 2000 Annex C
     is no longer required.
@@ -601,7 +601,7 @@ CHANGELOG 10-05.
 | MEI | MEIv2 1979+ spliced to extended MEI (1871–2005) | splice documented; overlap regression |
 | Bomb ¹⁴C | Yield-history shape × P_bomb [CAL] | via τ_strat kernel |
 | Cosmogenic ¹⁴C | Constant (spinup balance) | v2: solar modulation |
-| N deposition on land (2026-09-30) | NOx + NH₃ emissions above 1750 (CMIP7 vV v1.1.1; RCMIP SSPs ratio-harmonised to CMIP7 by 2050) × land 0.60 × NH 0.83 | `data/forcing_ndep.rds` (`data-raw/build_ndep_forcing.R`); "historical" = CMIP7 to 2023, then the seven-marker mean (2024, 2025); pulse experiments HOLD it at the reference year (`ccx_pulse_forcings()`) |
+| N deposition on land (2026-09-30) | NOx + NH₃ emissions above 1750 (CMIP7 vV v1.1.1; RCMIP SSPs ratio-harmonized to CMIP7 by 2050) × land 0.60 × NH 0.83 | `data/forcing_ndep.rds` (`data-raw/build_ndep_forcing.R`); "historical" = CMIP7 to 2023, then the seven-marker mean (2024, 2025); pulse experiments HOLD it at the reference year (`ccx_pulse_forcings()`) |
 | Future scenarios | SSP CO₂ emissions (fossil+LUC) from RCMIP-format CSVs (reuse FaIR-project inputs — flagged question Q3) + stylized generators | §7 |
 
 ### 3.7 Numerics
@@ -617,7 +617,7 @@ CHANGELOG 10-05.
   RK4 bound at the MLD interpolant's continuous extremes, using the held `kz_int` profile. It
   STOPS (−Inf in the objective) where that bound needs more than `CCX_SUBSTEPS_MAX`, i.e. within
   ~0.1–0.2 m of h_ml from the P8 wall, rather than clamp. The sampled-extreme bound it replaced let
-  RK4 run unstable near the wall, and the objective there was integrator artefact (CHANGELOG
+  RK4 run unstable near the wall, and the objective there was integrator artifact (CHANGELOG
   10-03 j, 10-04 a).
 - Spinup: analytic/iterative steady state at 1750 (χ₀ ≈ 277–278 ppm from Law Dome
   [VERIFY]), Δ¹⁴C_atm ≡ 0 ‰ by construction, δ¹³C_atm at its preindustrial value.
@@ -718,7 +718,7 @@ fractionation constants, ocean areas/depth/layering, SST-anomaly scaling of GMST
   > likewise a design-stage sketch and is not maintained. Two corrections, both dated:
   > **(a) 2026-08-11 — ρ RETIRED, and the series are no longer scored monthly.** The AR(1)
   > model was correct arithmetic on a wrong premise: as ρ→1 the fitted σ collapses to the RMS
-  > of residual *increments* and the level goes unpenalised (σ_co2 fell to 0.074 ppm while a
+  > of residual *increments* and the level goes unpenalized (σ_co2 fell to 0.074 ppm while a
   > +50 ppm level bias cost 13.7 log-units). It was also applied on observation *index*, so a
   > 16-month SPO gap counted as one step. Replaced by an **annual reduction** — per-station,
   > per-year level/trend/first-harmonic via `ccx_year_harmonic()` — scored with **independent**
@@ -741,7 +741,7 @@ fractionation constants, ocean areas/depth/layering, SST-anomaly scaling of GMST
   > 1 σ (ocean 0.4, land 0.5 GtC/yr), with no multiplier. The sentence above is the original spec.
   - **Objective #14, the imbalance allocation, D3 (spec change 2026-09-30, Marcus: "the calibration
     should have freedom to move it where it helps the model solve best"; canonical from `hilda33d`).**
-    GCB's budget imbalance I(t) (11-yr centred smooth of imbalance + cement carbonation, ruled) moves
+    GCB's budget imbalance I(t) (11-yr centered smooth of imbalance + cement carbonation, ruled) moves
     the two sink rows' targets: land GCB_land + s_land · I(t), ocean GCB_ocean + s_ocean · I(t), with
     FITTED shares on the simplex (stick-broken: `imb_share_land` ~ Beta(1, 2), `imb_share_ocean_rest`
     ~ U(0, 1) = the flat Dirichlet). No emissions share: it would be collinear with `luc_scale`.
@@ -934,7 +934,7 @@ What fixed alkalinity suppresses is the *return* — deep ALK rising and diffusi
 
 **That return channel is small, and the reason is that the model is already right.**
 `ALK_SURFACE` = 2300 µmol/kg against GLODAP's **2303.4** on the shipped 0–100 m layer, so a
-tracer cannot improve the present-day level — it can only let the modelled surface ALK *drift*
+tracer cannot improve the present-day level — it can only let the modeled surface ALK *drift*
 away from it, and alkalinity is near-conserved over 1750–2024. Priced: d(Revelle)/d(ALK) =
 **−0.0005 per µmol/kg**, so a 10 µmol/kg drift moves the buffer factor **0.05 %**. Against
 `h_ml` faking uptake at the ~150 m level that is not a competitive channel.
@@ -999,7 +999,7 @@ line of pump code runs. Same contract `w_up = 0` already carried.
 
 | parameter | default | what it is |
 |---|---|---|
-| `pump_grad` | **0** (off) | the preindustrial bottom-box-minus-mixed-layer DIC gradient the pump holds, µmol/kg — re-normalised on each grid's own layers so it delivers **exactly** what it names |
+| `pump_grad` | **0** (off) | the preindustrial bottom-box-minus-mixed-layer DIC gradient the pump holds, µmol/kg — re-normalized on each grid's own layers so it delivers **exactly** what it names |
 | `pump_carb_frac` | **0.23** | carbonate share, **pinned by GLODAP's alkalinity gradient** (§5.2d), not fitted |
 | `pump_mode` | `"N"` | `"N"` nutrient-limited (mass fixed) / `"D"` DIC-limited. **Both ported, choice deferred to the refit** (Marcus 2026-08-16) |
 
@@ -1078,7 +1078,7 @@ biased it 287.8 vs 272.3.
 scanning `pump_carb_frac` ∈ {0.12, 0.23, 0.34} gives full logL −2492.3 / **−2485.8** / −2497.5;
 the quadratic vertex is **0.214 ± 0.026**, i.e. **0.61 σ** from the 0.23 that GLODAP's alkalinity
 gradient pinned. The transient rows and the observed ALK/DIC stoichiometry agree about the split —
-which is §5.2d's argument arriving from the other direction, and it is **not** a licence to fit
+which is §5.2d's argument arriving from the other direction, and it is **not** a license to fit
 the share.
 
 **Still open, and deliberately**: whether `pump_grad` ships at a fixed value or becomes a fitted
@@ -1139,7 +1139,7 @@ seven are re-derived deliberately.
 2. **`pump_grad` is FITTED** — the 20th parameter, `tr = "log"`, prior
    `dlnorm(log(PUMP_GRAD_OBS), 0.25)`. Everything else about the pump stays structural: the export
    shape is GLODAP's own profile, the carbonate share is pinned by GLODAP's alkalinity gradient.
-3. **The prior mildly double-counts GLODAP and this is stated, not hidden.** Its centre is the same
+3. **The prior mildly double-counts GLODAP and this is stated, not hidden.** Its center is the same
    observation `ocean_grad_dic` scores. The ±25 % width is ~4.5× the likelihood's own 13.1 µmol/kg,
    so the data dominate — but check the posterior against the prior before calling a pump magnitude
    "constrained".
@@ -1322,7 +1322,7 @@ It is not a claim about the refit's answer.
 
 The band exists because a fixed-depth target is like-for-like with the model's boxes only near 100 m.
 That is a **representation error**, and the honest way to carry one is **in quadrature**,
-`σ_eff(h)² = σ_obs² + σ_rep(h)²`, **with dnorm's normalisation term retained** — so inflating is
+`σ_eff(h)² = σ_obs² + σ_rep(h)²`, **with dnorm's normalization term retained** — so inflating is
 *charged for* rather than free, and the gain is bounded (the best any inflation can do is
 `σ_eff = |miss|`). It is **not a tuning knob**: `σ_rep(h)` is measurable as the gap between the
 shipped fixed-depth target and the like-for-like model-box target at that `h_ml`.
@@ -1513,7 +1513,7 @@ only — measured ≤ 1.3e-16 relative on the canonical's final state, code revi
 > +2.3 at the canonical, all three rows toward the target); (ii) the land-sink σ at GCB's stated 0.5 GtC/yr with NO ×3 multiplier,
 > symmetric with the ocean row (`LIK_LAND_SINK_INFLATE` 3 → 1; **−27.0** at the canonical, the whole batch's cost: the land sits
 > +1.0 GtC/yr over GCB 2015–24 and the row now says so — the refit's question); (iii) Naegler 2009's net-CO₂-uptake correction on the
-> excess-¹⁴C centres, 1975 ×1.03 / 1995 ×1.08, because the model's row CONTAINS that component (`LIK_EXCESS_C14_UPTAKE_CORR`; +1.2;
+> excess-¹⁴C centers, 1975 ×1.03 / 1995 ×1.08, because the model's row CONTAINS that component (`LIK_EXCESS_C14_UPTAKE_CORR`; +1.2;
 > the target set stays `table4_obs_range` for the reason recorded in `R/likelihood.R`); (iv) the pre-1850 SST anomaly at the
 > product's 1850–1900 mean instead of the single year 1850 (`FORC_SST_PRE1850_MEAN`; +0.6, mostly `co2_icecore`); (v) `h_hs` under
 > the Holte HS prior (lognormal, median 175 m, log-sd 0.42 — the HS annual mean 115 and max 268 as its 16/84 % points; a PRIOR
@@ -1525,7 +1525,7 @@ only — measured ≤ 1.3e-16 relative on the canonical's final state, code revi
 > #12 runs under `hilda_c` (the 09-14 h constants: `hs_frac` 0.128, whole-LS SSTs 22.3/18.7, `alpha_photo_eps` 15.6) and the `u_hs`
 > prior converts its Sv bracket at the LIVE `hs_frac` (21.8 → 27.3 m/yr there).**
 >
-> **RETIRED gates, and why (do not re-run them as criteria):** **4** airborne-fraction smoothness — no power (a trend artefact,
+> **RETIRED gates, and why (do not re-run them as criteria):** **4** airborne-fraction smoothness — no power (a trend artifact,
 > 70 % noise; 09-04); **8** δ¹³C Suess and **10** natural Δ¹⁴C profile — restatements of scored rows (a gate cannot judge the
 > objective at its own σ; 09-02 ledger ruling). Their tables below are kept as PROVENANCE at the quarantined `from90`.
 >
@@ -1584,7 +1584,7 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
    (§ the pin offset, `diag_landed_gap_streams.R` gate 1).
 
    `diag_af_trend_levers.R` at `from90` attributes the +0.0080 that exists:
-   fertilisation saturation supplies **+0.0145** of it (linearising the form flips
+   fertilization saturation supplies **+0.0145** of it (linearizing the form flips
    the trend to −0.0065) and the Revelle buffer **+0.0095**; ocean warming +0.0031,
    land warming +0.0013, and clearing-costs-capacity **+0.0001 — nothing**. The
    reach scan says `q10` alone could close the remaining +0.0069 gap at `q10` ≈ 2,
@@ -1732,7 +1732,7 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
    belongs with the seasonal arc's SH-land amplitude finding.
 
    ⚠ **ESTIMATOR SENSITIVITY IS LARGE AND THE GATE MUST BE READ ON GROWTH, NOT LEVELS.**
-   Scripps' own `co2_deseas` and a 12-month centred moving average — applied to the
+   Scripps' own `co2_deseas` and a 12-month centered moving average — applied to the
    *same* observed record — differ by up to **0.449 ppm**, ~7 % of the amplitude and
    half the growth signal, while their **growth ratios differ by only 0.0065**. The
    model is therefore compared on the moving average (the only route with a model
@@ -1760,8 +1760,8 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
    under the log form at β 0.75, so the flip halved the land miss without closing it.
    The land sink is compared GROSS — the model's d(land_C)/dt **plus E_LUC** — because
    GCB's `land_sink` column is the residual sink alone; conflating the two inverted this
-   term's pull on fertilisation for months (see `R/likelihood.R`, the GCB block).
-   `calibration/diag_fert_saturating.R` §3. **Re-measure on any fertilisation or
+   term's pull on fertilization for months (see `R/likelihood.R`, the GCB block).
+   `calibration/diag_fert_saturating.R` §3. **Re-measure on any fertilization or
    `luc_scale` default change.**
 
    **STATUS AT THE THEN-CANONICAL, NOW QUARANTINED MODE (2026-08-27, `diag_design_gates_at_mode.R` at
@@ -1973,7 +1973,7 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
     integrated IRF at TH 100 of **34–47 yr on a preindustrial background against 45–62 on
     present-day**; the model must reproduce the **PI < PD ordering**.
     `calibration/diag_joos_irf.R` (~40 s). **Status at default parameters (2026-08-14, the
-    saturating fertilisation form at `fert_k` 120 / `beta_max` 0.4913): PASSES — 12.4 / 25.6
+    saturating fertilization form at `fert_k` 120 / `beta_max` 0.4913): PASSES — 12.4 / 25.6
     / 41.9 yr, inside at all three horizons with margin.** Still below the best estimate at
     every one, so the model remains on the low side of the literature — the *conservative*
     direction for the app's argument, which must be stated rather than discovered by a reader.
@@ -1985,7 +1985,7 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
     re-measured. `calibration/diag_joos_beta_scan.R` established that the log form passes only
     at β ≲ 0.50 while the CO₂ record wants 0.75, which is the structural defect review §4.1
     diagnosed and item 7 fixed by replacing the functional form. **Re-measure this line
-    whenever a fertilisation default moves; it is not a description, it is a measurement.**
+    whenever a fertilization default moves; it is not a description, it is a measurement.**
 
     **STATUS AT THE THEN-CANONICAL, NOW QUARANTINED MODE (2026-08-27, `Rscript calibration/diag_joos_irf.R
     from90`): THE GATE NOW PASSES AT TWO OF THREE HORIZONS — the first time any
@@ -2085,7 +2085,7 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
     is 0.168 (4.7×); this model at `from90` is at **0.709 where its own locus is
     0.083 — 8.5×** (2026-08-27; it was 0.707 / 0.075 / 9.4× at the pre-fix mode).
 
-    **The band [0.593, 0.979] is CONSTRUCTED and is labelled so wherever it prints.** Joos
+    **The band [0.593, 0.979] is CONSTRUCTED and is labeled so wherever it prints.** Joos
     publishes no 5–95 % range at TH 300, so Table 4's TH-100 relative width (0.754–1.244) is
     borrowed — a spread measured on a time-*integral* at 100 yr, transferred onto a *ratio* at
     300. **The discrimination does not rest on it:** the one-box models sit 36× and 16× below
@@ -2094,7 +2094,7 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
     **Mutation-tested inside the diagnostic** (`mutate_test_gates`): a single exponential tuned
     to this model's *own* IRF(100) scores 0.0750, and the gate `stopifnot`s that it is
     rejected. `tests/testthat/test-joos-irf.R` additionally pins the null identity for six time
-    constants and both parameterisations.
+    constants and both parameterizations.
 
     **12b IS NOT A SUPERSET OF 12a — they fail in opposite directions and both are needed.** A
     τ = 10⁴ yr exponential passes 12b (ratio 0.980) and is rejected by 12a (integrated 99.5 vs
@@ -2159,7 +2159,7 @@ Tabs (working names, undergrad-facing):
    effects are visible; final size TBD) and year → paired baseline/pulse runs, showing the
    pulse-decay curve, "how much is left after N years", and how the answer *depends on the
    background* (Revelle saturation). This is the pulse-matched-with-baseline requirement.
-8. **Under the hood** — box diagram **with its arrows labelled by the model's own flux
+8. **Under the hood** — box diagram **with its arrows labeled by the model's own flux
    trace** (`R/fluxes.R`; ~70 GtC/yr photosynthesis and ~95 each way air–sea against ~11 of
    emissions — the arrows *are* the residence-time lesson), parameter table with posterior
    ranges, data sources, model caveats, link to repo.
@@ -2208,7 +2208,7 @@ panel ships with a caption claiming it teaches where carbon goes.
 arguments, with links, can sit at the end.** So this is an appendix inside tab 8, not a
 sixth headline tab, and it is written as *published claim → published response → which
 panel of this app bears on it*. It names arguments and their sources; it does not
-characterise the people making them. **The wording is Marcus' call before this ships.**
+characterize the people making them. **The wording is Marcus' call before this ships.**
 
 | claim, as published | published response | panel |
 |---|---|---|

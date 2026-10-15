@@ -25,7 +25,7 @@ signature *grows*, to 196 % by 2024) cannot imitate it.
 
 **Its implausible magnitude is not a defect.** As a physical ocean sink 9.4 GtC/yr is absurd
 (today's whole global ocean sink is ~3). As a *probe* it is prescribed, unfitted, carries no free
-parameter and is labelled artificial — it asks a counterfactual, not a mechanism.
+parameter and is labeled artificial — it asks a counterfactual, not a mechanism.
 
 ---
 
@@ -63,7 +63,7 @@ one I identified. That is a real falsifier and it is why the runs are FREE rathe
 ## P4 — the isotopes stay quiet
 
 `sigma_d14c` will **not** inflate (the `foss` probe pushed it +3.85 σ, 6.13 → 8.96, absorbing a
-Suess artefact). Predicted |Δ`sigma_d14c`| < 1 σ at every rate. At the mode the ocean probe pays
+Suess artifact). Predicted |Δ`sigma_d14c`| < 1 σ at every rate. At the mode the ocean probe pays
 **+0.90** on Δ¹⁴C and **+0.68** on δ¹³C, against `foss`'s −66.89 / −6.62.
 
 ---
@@ -75,7 +75,7 @@ Suess artefact). Predicted |Δ`sigma_d14c`| < 1 σ at every rate. At the mode th
   decimals. The switch reaches the sampler; the four runs are four different objectives.
 - **KNOWN CONSTANT OFFSET, does not affect the scan.** `ccx_make_logpost()` at default bounds
   gives −1858.2676 at the adopted mode where the file says −1859.3225. The refit driver
-  renormalises the `h_ml` prior over its [85, 120] band; this offset is the same in all four arms
+  renormalizes the `h_ml` prior over its [85, 120] band; this offset is the same in all four arms
   and cancels in every comparison below. **Do not compare these logposts to the arm files'.**
 - Runs are 4-way PARALLEL with BLAS pinned to one thread each (`OMP_NUM_THREADS=1`,
   `VECLIB_MAXIMUM_THREADS=1`, `OPENBLAS_NUM_THREADS=1`) — ~158 MB RSS per arm on a 10-core /
@@ -148,4 +148,4 @@ parameter, and the ~15 log-units the free run recovered were bought entirely by 
 ## P7 — the isotopes, again
 
 `sigma_d14c` stays within **1 σ** (it was −0.15 free). The pin cannot change that: the probe's
-Δ¹⁴C excursion is 0.12–0.16 ‰ by construction and there is no Suess artefact to absorb.
+Δ¹⁴C excursion is 0.12–0.16 ‰ by construction and there is no Suess artifact to absorb.

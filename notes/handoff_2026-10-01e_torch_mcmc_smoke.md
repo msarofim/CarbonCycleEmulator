@@ -108,7 +108,7 @@ ssh torch 'cd /scratch/ms17839/CarbonCycleEmulator && rm -rf outputs/mcmc_smoke 
   It uses the same machinery as the held Laplace evidence, so the two bands differ only in where the draws came
   from.
 - **Rule:** whether a band ships (lifting `APP_RIBBONS_HOLD`) is Marcus's decision.
-- ⚠ Judge convergence on R-hat and ESS, not acceptance. The fertilisation ridge is curved, and a random walk in
+- ⚠ Judge convergence on R-hat and ESS, not acceptance. The fertilization ridge is curved, and a random walk in
   u-space crosses it slowly.
 
 ## 3. Traps (`nyu-torch-hpc` + this project)
@@ -138,7 +138,7 @@ ssh torch 'cd /scratch/ms17839/CarbonCycleEmulator && rm -rf outputs/mcmc_smoke 
 ## 5. Still open for Marcus (unchanged from (d))
 - **B8:** the verdict (§5) and the acts (§7) of `notes/assessment_2026-10-01_hilda33d_DRAFT.md`.
 - **The copy in Claude's wording, his to edit:** the card 4 and 5 sentences, the land-pools line, the
-  fertilisation caveat, the pulse-box sentence, and the one sentence added to card 6 (bands).
+  fertilization caveat, the pulse-box sentence, and the one sentence added to card 6 (bands).
 - **The review list's §C** (13 older items), including the deploy checklist (both URLs are placeholders).
 - **The A9 copy items:**
   - the emissions switch's blurb (it also removes N deposition);

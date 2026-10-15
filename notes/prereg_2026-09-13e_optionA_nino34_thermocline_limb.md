@@ -52,7 +52,7 @@ the SH positive — the pump's divergence construction on a thin seasonal layer.
 the quantity, not the instant.**
 
 ## 3. First-principles sizing (the pre-check, before any run)
-Supply anomaly per unit γ_A: ΔS = γ_A · N · A_ls · Δc, Δc the contrast per metre. At Δc ≈ 30 µmol/kg
+Supply anomaly per unit γ_A: ΔS = γ_A · N · A_ls · Δc, Δc the contrast per meter. At Δc ≈ 30 µmol/kg
 over the two low-latitude columns (A_ls ≈ 3.0e14 m²): 3.0e14 × 1025 × 30e-6 × 12 g / 1e15 ≈ **0.11
 GtC/yr per (m/yr) per index unit** at 100 % conversion. The observed slope is +0.1153 ± 0.0246, so
 at full efficiency ~1 m/yr per index would carry it; with the mixed layer's own buffering (only part
@@ -74,7 +74,7 @@ longer "physical" (the obs-implied 26 Sv is the whole modulated equatorial upwel
 - It decides whether **the sign and the magnitude are reachable at a physical γ_A without a refit**
   — the assessment's question. It does NOT retire `gamma_enso_ocn_*` (that is a refit with the limb
   in BOTH cores + parity), does not build a tropical box, and adopts nothing.
-- "Physical γ_A" is T-A0's obs-implied 26 Sv (2.8 m/yr over A_ls) — a MODEL-DERIVED scale, labelled as
+- "Physical γ_A" is T-A0's obs-implied 26 Sv (2.8 m/yr over A_ls) — a MODEL-DERIVED scale, labeled as
   such; the observation is the GCB slope (+0.1153 ± 0.0246, n 66) and the pCO₂ reservoir (+55.5 µatm,
   needing 0.24× itself = 13.15 µatm over 4.1 % of area = 0.64 µatm over `ml_lo`).
 - The estimator is the scorecard's (09-04g: annual ocean uptake ~ year + Niño3.4, 1959–2024, calendar

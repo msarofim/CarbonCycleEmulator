@@ -3,7 +3,7 @@
 **Ruling (Marcus, 2026-09-07):** after the round-1 result (`handoff_2026-09-07_hilda_refit_result.md`):
 the profile scored as **(mean level, A−B, B−deep)**, three rows with declared sigmas (level 10.26 ‰ =
 the deep row's `sd_w/√n_eff` convention; contrasts 2.29 / 4.04 ‰ = the 60° bootstrap), each a
-**generalised-normal with shape 4** (cost |z|⁴/2: 1σ 0.5, 2σ 8, 3σ 40, 5σ 312) — a plausibility cost for
+**generalized-normal with shape 4** (cost |z|⁴/2: 1σ 0.5, 2σ 8, 3σ 40, 5σ 312) — a plausibility cost for
 a bounded representation error, on these three rows only. Plus the two coupled fixes: **`h_hs` FITTED**
 (box [20, 500]; a migrated ancestor starts at its own `h_ml`) and **the exchange floor lowered to 0.02**.
 

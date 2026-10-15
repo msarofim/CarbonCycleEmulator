@@ -25,7 +25,7 @@ specified future decay. The distinction is the whole cost.
 In GCB's accounting, forest regrowth on abandoned land is **already inside E_LUC** — the bookkeeping
 models compute net E_LUC as **gross deforestation emissions − gross regrowth removals**. The
 residual land sink is the response of land to CO₂ and climate. **GCB already separates regrowth from
-fertilisation**; they just live in different terms. CCX takes GCB's **net** E_LUC as a prescribed
+fertilization**; they just live in different terms. CCX takes GCB's **net** E_LUC as a prescribed
 input (`DATA.md:105`, "GCB 2025 bookkeeping").
 
 ⇒ **"Adding regrowth" is un-netting an input the model already has**, not adding a process.
@@ -48,7 +48,7 @@ have NOT verified which sheet/columns the 2025 edition carries.**
 ⇒ **Step one is acquisition, and it is the risk.** If the gross split is unavailable at annual
 resolution for 1750–2024, Tier 1 as specified cannot be built from observation and the choice goes
 back to Marcus (a prescribed regrowth KERNEL driven by past clearing would be the fallback — but
-that is a modelling assumption, not an observation, and must be labelled as one).
+that is a modeling assumption, not an observation, and must be labeled as one).
 
 ### Design notes for whoever builds it
 - **"Decays to zero in the future" falls out for free** if regrowth is driven by past clearing: as
@@ -90,10 +90,10 @@ difference that FLIPS SIGN** (+0.09 full record, −0.37 in 2015–23), which is
 acted on — a gate is a DESIGN decision and Marcus takes those.
 
 ### (k) The figure ⇒ `calibration/fig_land_sink_vs_gcb.R`
-Both conventions drawn (residual sink + net land flux), 5-yr centred smooth (**Marcus's request —
+Both conventions drawn (residual sink + net land flux), 5-yr centered smooth (**Marcus's request —
 NOT the app's `APP_LUC_SMOOTH_YR` = 11**), GCB's imbalance as a band. ⚠ Band containment measured,
 **not eyeballed**: **4 of 7 decades inside** (1970s misses by 0.01, 1980s by 0.20, **2020–24 by
-1.04** — the one real excursion). Colours **computed** — the repo's `#B03060`/`#1F4E79` scored
+1.04** — the one real excursion). Colors **computed** — the repo's `#B03060`/`#1F4E79` scored
 protan ΔE 7.9, re-stepped to `#C2185B`/`#12395C`.
 
 ---
@@ -107,7 +107,7 @@ alias-list trap — read it before touching this).
 the file it named was **already clean**. It was `emissions_v160_cmip7_ssp245_harmonized.csv`, from
 `scripts/build_emissions_v160_ssp245.py`.
 ⛔⛔ **The canonical spelling is NOT one side of the alias pair** — FaIR wants `kt HFC4310mee/yr`
-(second) but `Mt NO2/yr` for NOx (**first**). Normalising to one side would have broken the other.
+(second) but `Mt NO2/yr` for NOx (**first**). Normalizing to one side would have broken the other.
 ⚠ **Commit `b1889af` is on branch `heat-ed-morbidity`, not `main`** — unrelated to that branch's
 topic; **may want cherry-picking**, and it is **not pushed**.
 ⚠ `calibration_v160/` is gitignored ⇒ re-run the builder to reproduce the corrected CSV.

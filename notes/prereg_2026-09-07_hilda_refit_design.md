@@ -90,7 +90,7 @@ log-units on the row (its −5σ contrast) relative to the independent form.
 - **§4's sea-ice cross-check is DONE and it passes**: the observation-and-law factor is **0.653**
   (`data/obs_hs_exchange_factor.rds`; ice × wind 1.064, Schmidt 0.549), within 1 sd of the fitted
   0.74 ± 0.10. ⚠ Open-water fraction ALONE (this section's original statistic) is 0.651 by two
-  cancelling omissions; the full factor is the one to quote. Question 4 can be answered either way
+  canceling omissions; the full factor is the one to quote. Question 4 can be answered either way
   on the same number: as a cross-check it passes; as a prior it would be N(0.65, ~0.05) with the
   window spread as the width. `hs_frac` is now measured (0.160) rather than HILDA's.
 - **§3's scans are DONE** (`calibration/diag_declared_param_scans.R`): every declared parameter's

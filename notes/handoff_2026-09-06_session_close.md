@@ -18,7 +18,7 @@ mis-read.
 ## 1. ⛔⛔ THE FINDING, AND THE HALF OF IT THAT IS A REFUTATION
 
 Marcus's ruling opened it: *"We don't need to stay true to HILDA, but we should stay true to the
-conceptual way that the simplified model's ocean works."* That **authorised the departure** and
+conceptual way that the simplified model's ocean works."* That **authorized the departure** and
 **forbade the cheap version of it** — attaching `q` low *because it scores better* would be tuning
 geometry to the residual. So the prereg argues from CCX's own structure and declares the attachment
 set from a **non-score criterion with no free boundary**.
@@ -54,7 +54,7 @@ off-control numbers (0.377, 3.092) **decompose only — never quote them as scor
    the predicted *direction* was wrong too. **The test caught it, not me**: it failed at
    `ccx_default_params()` because the effect is ~1–3 ‰ with **no robust sign**.
 ⇒ ⭐⭐ **AN ISO-DEEP CONTROL LICENSES EXACTLY ONE COMPARISON — the intermediate PROFILE, which is
-what it equalises the deep age FOR. Read every quantity it does not pin at MATCHED `kz`.**
+what it equalizes the deep age FOR. Read every quantity it does not pin at MATCHED `kz`.**
 ⇒ [[iso_deep_control_licenses_one_comparison]].
 
 ## 3. ✅ THE TWO DEBTS PAID ON 09-06
@@ -139,7 +139,7 @@ is what stops the two re-merging by drift.** ⇒ [[memory_index_split_beats_trim
 
 ## 8. ⇒ STANDING RULES THIS SESSION ADDED
 
-* ⭐⭐ **A CONTROL LICENSES ONLY THE COMPARISON IT WAS BUILT FOR.** It equalises ONE quantity; read
+* ⭐⭐ **A CONTROL LICENSES ONLY THE COMPARISON IT WAS BUILT FOR.** It equalizes ONE quantity; read
   everything it does not pin at MATCHED values of whatever it moved. ⚠ **The confound is CREATED BY
   the control, which is why it does not look like one.** And **the quantity a control pins has NO
   POWER** — measure how much of your statistic is dead weight, and report it rather than quietly

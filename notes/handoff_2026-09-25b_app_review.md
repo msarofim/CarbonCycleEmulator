@@ -31,7 +31,7 @@ reach zero — but the pedagogy is his. **Ask him to rewrite it.** `app/server.R
 `"Build your own"` branch of the takeaway; the conditional structure should survive any rewording.
 
 ### (b) Four static findings NOT fixed, each re-verified by grep — Marcus's call
-Not touched because none was in scope of what he ruled in, and three of them are judgement calls:
+Not touched because none was in scope of what he ruled in, and three of them are judgment calls:
 
 1. **Four "Years shown" sliders hardcode `min = 1750, max = 2024`** (`app/ui.R:136, 176, 264, 328`)
    against `APP_HIST_YEARS <- c(1750, 2024)` (`global.R:51`), whose own comment says *"changing a

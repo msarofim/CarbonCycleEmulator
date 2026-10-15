@@ -40,7 +40,7 @@ these notes here.
 ## 1. 27q — THE 2×2 WITH THE ADMISSIBLE LEVER
 
 Prereg `36e4051` BEFORE the driver; `calibration/diag_admissible_2x2_land_ocean.R`;
-collect `notes/collect_2026-08-27q_...md`. Six arms (LAND and JOINT at BOTH the prior centre 5.0502
+collect `notes/collect_2026-08-27q_...md`. Six arms (LAND and JOINT at BOTH the prior center 5.0502
 and bracket HI 7.1012, because which end to pin is a methodological choice and measuring is cheaper
 than picking). Both interactions parameter-balanced, 5−4−6+5 = 0.
 
@@ -147,7 +147,7 @@ beside a figure that WAS read from the rds, so re-running 27n moved one and not 
 
 Prereg `805e8c4` BEFORE the driver; `calibration/diag_hml_unbound_profile.R`; 26 points, all
 converged. `h_ml` fixed over the **SHIPPED** [30, 200], `beta_max`/`fert_k`/`k_w`/`kz`/`pump_grad`
-re-optimised at each point — the configuration never previously run. **H1 ✓ H2 ✗ H3 ✗ H4 ✗.**
+re-optimized at each point — the configuration never previously run. **H1 ✓ H2 ✗ H3 ✗ H4 ✗.**
 
     198 off +3.19 | 160 off +6.02 | 120.01 off +7.03 || 119.99 LIVE -1.40
     96.47 LIVE +0.00 (mode) | 85.01 LIVE +0.35 || 84.99 off +7.65
@@ -158,13 +158,13 @@ re-optimised at each point — the configuration never previously run. **H1 ✓ 
 3. **Beyond the cliff there is +0.09 of pull**, then it DECLINES. **32 m is 4.57 WORSE than 75 m.**
 
 **08-16g's "argmax 32 m, pull 236 vs a 10.0 cliff, 24×" was measured with 19 params FROZEN and DOES
-NOT REPRODUCE.** 5 free is CONSERVATIVE and ONE-WAY, so this **generalises to 20**.
+NOT REPRODUCE.** 5 free is CONSERVATIVE and ONE-WAY, so this **generalizes to 20**.
 
 **THE CLIFF *IS* THE THREE ROWS, TO 0.3 %:** just inside the edge they sum **−7.275** against a
 **−7.300** cliff; outside they are **ABSENT from `ccx_loglik`'s output, not zero.** ⇒ **the bound is
 load-bearing, but 7.30 of the 7.39 advantage at the argmax is three skipped Gaussians. The objective
 does not prefer a shallower mixed layer — it prefers BEING SCORED ON LESS DATA.** At the upper edge
-~1.0 is re-optimisation freedom on top (`pump_grad` 273.4 → 324.0).
+~1.0 is re-optimization freedom on top (`pump_grad` 273.4 → 324.0).
 
 **H3 ✗ and it INVERTS:** `kz` is pushed **HARDER** onto its rail as `h_ml` falls (92.4 → **98.2 %**),
 releasing only going DEEPER (**57.7 %** at 198 m). **My hypothesis had the sign backwards.**

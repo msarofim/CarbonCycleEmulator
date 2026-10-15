@@ -66,15 +66,15 @@ Status labels: **V** = verified in full text (location given). **V\*** = seen on
 | R9 | Kaplan 2011 (KK10), *Holocene* 21:775, 10.1177/0959683610386983; Pongratz 2009, *GBC* 23, 10.1029/2009GB003488 | pre-industrial ALCC | KK10 **325–357** vs HYDE 137–189 Pg C by 1850. Pongratz: 53 GtC for 800–1850; **legacy "indirect emissions" offset regrowth for decades**; an 1850 equilibrium start is "a significantly disturbed state" | abstracts | A |
 | R10 | Stocker 2011, *Biogeosci.* 8:69, 10.5194/bg-8-69-2011 | residual non-ALCC flux | ≈0 over 1005–1700. Doubling pre-1700 area lowers the modern residual sink (1980s −1.7 → −1.3 GtC/yr) **via less 20th-century clearing, not regrowth** | §4.4 pp. 76–7 | V |
 | R11 | Bauska 2015, *Nat. Geosci.* 8:383, 10.1038/ngeo2422 | WAIS δ¹³C deconvolution, 755–1850 | net land C **+~30 GtC/kyr**; LUC (−30 to −97 GtC/kyr) needs a natural offset; **after ~1700 CO2 rises and δ¹³C falls** | pp. 1–2 | V |
-| R12 | Rubino 2016, ***Nat. Geosci.*** 9:691, 10.1038/ngeo2769 (not Nat. Commun.); Koch 2019, *QSR* 207:13, 10.1016/j.quascirev.2018.12.004; **King 2024**, *Nat. Commun.* 15, 10.1038/s41467-024-45894-9 | LIA / 1610 dip | Rubino: cooling-driven respiration drop, not regrowth (A). Koch: 7.4 (IQR 4.9–10.8) Pg C regrowth, 47–67 % of the dip (A). King: the sharp 1610 minimum **may be an artefact**; −0.5 ppm/decade 1516–1670, land sink 0.26 Pg C/yr (V, C) | abstracts; King Results | A/V |
+| R12 | Rubino 2016, ***Nat. Geosci.*** 9:691, 10.1038/ngeo2769 (not Nat. Commun.); Koch 2019, *QSR* 207:13, 10.1016/j.quascirev.2018.12.004; **King 2024**, *Nat. Commun.* 15, 10.1038/s41467-024-45894-9 | LIA / 1610 dip | Rubino: cooling-driven respiration drop, not regrowth (A). Koch: 7.4 (IQR 4.9–10.8) Pg C regrowth, 47–67 % of the dip (A). King: the sharp 1610 minimum **may be an artifact**; −0.5 ppm/decade 1516–1670, land sink 0.26 Pg C/yr (V, C) | abstracts; King Results | A/V |
 
-Initialisation: MAGICC6, Hector and OSCAR start at **equilibrium** (V; OSCAR rescales NPP ×0.92 because its TRENDY equilibrium is 1901–30, §2.3). Only LPX-Bern (a DGVM) starts transient, from −20,050 AD (GCB 2025 Suppl. S2.2). **No simple model starts from a land deficit.**
+Initialization: MAGICC6, Hector and OSCAR start at **equilibrium** (V; OSCAR rescales NPP ×0.92 because its TRENDY equilibrium is 1901–30, §2.3). Only LPX-Bern (a DGVM) starts transient, from −20,050 AD (GCB 2025 Suppl. S2.2). **No simple model starts from a land deficit.**
 
 ## 1d. N-deposition forcing datasets (identified, not downloaded; read 2026-09-30)
 - **CMIP6** `NCAR-CCMI-2-0`: Hegglin, Kinnison, Lamarque 2016, DOI 10.22033/ESGF/input4MIPs.1125.
   - CAM-Chem; drynhx, drynoy, wetnhx, wetnoy; 250 km; monthly **1850–2014** plus an 1850 climatology.
   - SSP files `NCAR-CCMI-ssp{119,126,245,370,434,460,534os,585}`: monthly **2015–2099** (2100 for some).
-  - ⚠ Licence: CC BY 4.0 in the legacy CV, CC BY-SA 4.0 on the WDC page. Size not stated. This is the TRENDY forcing (HaNi §2.5).
+  - ⚠ License: CC BY 4.0 in the legacy CV, CC BY-SA 4.0 on the WDC page. Size not stated. This is the TRENDY forcing (HaNi §2.5).
   - V: legacy CV JSON, WDC page.
 - **CMIP7** `FZJ-CMIP-nitrogen-2-0`: Hegglin, Kinnison, Ma, Stein, Jöckel; DOI 10.25981/ESGF.input4MIPs.CMIP7/2584172; cite "Ma et al. (GMD)" (paper not found).
   - WACCM; same variables; 2°×2.5°; netCDF CF-1.7; CC BY 4.0.
@@ -102,7 +102,7 @@ Arithmetic inputs:
   - A saturating ΔN/(1 + ΔN/N_sat) is optional (N17). Hemispheric means (~7 kg N/ha/yr) sit below site saturation.
   - Leave out the Janssens Rh channel in v1. Whole-ecosystem C-N responses already include it.
 - **(ii) Prior.** Put it on r = extra NPP (kg C) per kg N deposited on **land**; then γ_N,h = r·10⁻³/NPP0_h.
-  - Centre **r ≈ 6** (C: 19.4 kg C/kg N forest NPP (N9) × forest share 0.30 of land deposition; that share is 0.25–0.36 = 23.1/(63.9–92.7)).
+  - Center **r ≈ 6** (C: 19.4 kg C/kg N forest NPP (N9) × forest share 0.30 of land deposition; that share is 0.25–0.36 = 23.1/(63.9–92.7)).
   - Log-SD ≈ 0.9, so 2σ reaches CLM4.5's 36 (C: 1500/41.6, N16).
   - This gives **γ_N ≈ 0.8–1.0 × 10⁻⁴ per Tg N/yr** (NPP0 70–56).
   - Gate: CCX's sink per ΔNdep should fall inside 0.6–8.7 kg C/kg N (land-mean, table below).
@@ -146,14 +146,14 @@ Arithmetic inputs:
 - **(c-ii) Regrowth not in E_LUC: small and weakly constrained.**
   - Regrowth after abandonment, harvest and shifting cultivation **is in E_LUC** (R1, R3). The repo already holds it as GCB 2025 "forest regrowth (total)" in `data/forcing_luc_gross_split.rds`. So `f_luc_perm < 1` **double counts**.
   - What remains outside E_LUC: recovery from natural disturbance (only a net sink if the disturbance regime changed), fire suppression (US ~0.04 Pg C/yr, R6) and pre-850 demography. Pugh's ~0.6 "demography alone" cannot be split from R3 using the abstract (R7).
-  - If built: a prescribed, decaying additive sink into wood with prior centre 0 and half-normal width ~0.2 Pg C/yr. **That width is my judgement.** It is scenario-independent and decays to 0.
+  - If built: a prescribed, decaying additive sink into wood with prior center 0 and half-normal width ~0.2 Pg C/yr. **That width is my judgment.** It is scenario-independent and decays to 0.
 - **(v) Double counting.**
   - ⚠ The fitted **luc_scale 0.85 already is a recovery-like sink** of 0.26 / 0.26 / 0.23 GtC/yr in the three windows (C: 0.15 × E_LUC 1.755 / 1.714 / 1.520). Any (c) term trades against it.
   - Use RSS-corrected S_LAND only (R4). Pre-2025 editions are ~19 % higher.
 
 ## 3. Bottom line for design
 1. **N dep: build it** (CMIP6 CCMI 1850–2014+SSP, or CMIP7 FZJ-2-0 1850–2022; emissions proxy to 2300). Linear NPP multiplier has precedents (CNit, C4MIP ε).
-2. Expected N-dep sink is **small: central 0.11–0.17 GtC/yr (7–9 % of S_LAND), range 1–19 %**. It will not remove the fertilisation excess alone.
+2. Expected N-dep sink is **small: central 0.11–0.17 GtC/yr (7–9 % of S_LAND), range 1–19 %**. It will not remove the fertilization excess alone.
 3. Prior on **r ~ 6 kg C NPP per kg N on land (log-SD 0.9)**. Gate on the implied sink per N.
 4. CCMI deposition is 30–45 % below obs: choose knowingly; consider a deposition-scale uncertainty.
 5. The N-dep future (plateau, then a decaying sink) is what the PI wants. Literature: 2–10 % of the future sink (N18).

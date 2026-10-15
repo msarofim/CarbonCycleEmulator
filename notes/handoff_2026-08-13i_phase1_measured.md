@@ -48,7 +48,7 @@ Like for like — each model at **its own** CO₂-consistent β — the 2015-202
 risk from it at all: `diag_conveyor.R`'s deep-Δ¹⁴C columns are **bit-identical** across the
 fix at every `kz` and every `q_conv` tested.
 
-Re-measured at the re-centred default (β 0.60), the ocean picture is **better than 13c
+Re-measured at the re-centered default (β 0.60), the ocean picture is **better than 13c
 recorded**, not worse:
 
 | | at β 0.38 (stale) | at β 0.60 (shipped) | obs |
@@ -97,7 +97,7 @@ and larger than 13h's numbers because those were the net-vs-gross trap).
 
 ## 3. The three PHASE 1 blockers, measured
 
-### 3.1 `beta` re-centred 0.38 → 0.60 — DONE (`9200bc2`, `cc3abd5`)
+### 3.1 `beta` re-centered 0.38 → 0.60 — DONE (`9200bc2`, `cc3abd5`)
 
 Not one criterion's answer; four agree to within 0.02 (`diag_recentre_beta.R`):
 
@@ -114,7 +114,7 @@ was a coarse-grid point at the mode's other parameters; it is superseded, not co
 
 ### 3.2 The LUC debit — MEASURED, still Marcus' (`b3108d7`)
 
-`f_luc_wood` added to both cores as a switch, default 1 = the shipped wood-only behaviour,
+`f_luc_wood` added to both cores as a switch, default 1 = the shipped wood-only behavior,
 bit-identical, with a parity gate on the new branch.
 
 | LUC airborne fraction ÷ fossil's | 50 yr | 100 yr | 150 yr | 200 yr |
@@ -143,7 +143,7 @@ turnover. The two were conflated. The "70 % in a 500-yr pool" half of the argume
 13h §2.1c measured δ¹³C to be nearly inert for the LAND parameters at 0.44 ‰. Two things
 to add:
 
-- On the re-centred model it is nearly inert for **β** too: the 1-D β optimum moves 0.597
+- On the re-centered model it is nearly inert for **β** too: the 1-D β optimum moves 0.597
   → 0.617 between σ 0.44 and σ 0.10.
 - But it is **NOT** inert for `kz`. δ¹³C is the one stream that pulls `kz` upward,
   monotonically to 16,000, and how hard it pulls is set entirely by σ. So the σ decision
@@ -160,13 +160,13 @@ What survives is 12d §8's different reason — the bound leaks — and **its pr
 likelihood term, not a bare deletion**. Measured on the current model:
 
 1. **The bracket has not moved.** Re-bisected: Δ¹⁴C −200 at kz **3828.9**, −150 at
-   **6201.0**, against the incumbent [3830, 6200]. Neither `404d66d` nor the β re-centring
+   **6201.0**, against the incumbent [3830, 6200]. Neither `404d66d` nor the β re-centering
    touched it.
 2. **The leak is +7.0 to +8.1 ‰**, uniform over kz 1000–10686. At the hi bound the deep
    ocean is −150.0 at the defaults and −142.7 at `mode_fit`'s vector; the bracket
    re-bisects to [3601, 5703] there. It is a property of (model, parameter vector).
 3. **The bound is not binding.** The 1-D log-posterior in kz has an **interior maximum at
-   kz = 5000** — the bracket's own init and centre — under **both** candidate σ_d13c.
+   kz = 5000** — the bracket's own init and center — under **both** candidate σ_d13c.
    CO₂ alone peaks there too. Only δ¹³C pulls up, and it is outvoted in both σ sets.
    *Stated with its limit:* 12d's runaway to 10,686 was a 16-parameter conditional optimum
    on the pre-`404d66d` model at β 0.088. A 1-D profile cannot rule that out.
@@ -180,12 +180,12 @@ to replace the bracket with and which was never built.
 ## 4. Six failing tests, three of them new and DELIBERATELY left failing
 
 Project rule: a newly failing test is **reported, not edited**. All three new failures are
-caused by the β re-centring and each has been re-derived rather than labelled.
+caused by the β re-centering and each has been re-derived rather than labeled.
 
 | test | reads | diagnosis |
 |---|---|---|
 | `test-likelihood.R:114/117` | `cost(+1 ppm)` = −4.7, wants > 100 | **The fixture's bias is gone, not the property.** The symmetric curvature `(cost(+1)+cost(−1))/2` is **+26.40 at BOTH β**, and `cost(+50)` = 64,439. The AR(1) loophole is still shut; the test reads it through an offset that no longer exists. Station CO₂ residuals went RMS **13.28 → 1.09 ppm**, mean −0.02. |
-| `test-likelihood.R:135` | σ_co2 0.0744 now BEATS 5 | At RMS 1.09 ppm with `LIK_CO2_REP_ERR` = 1.0, the ML σ_co2 is ≈ 0.4 and **5 is no longer a "sane" comparator**. The profile argmax moved 15 → 0.2, one grid index off the bottom, so the neighbouring interior-maximum assertion is fragile too. |
+| `test-likelihood.R:135` | σ_co2 0.0744 now BEATS 5 | At RMS 1.09 ppm with `LIK_CO2_REP_ERR` = 1.0, the ML σ_co2 is ≈ 0.4 and **5 is no longer a "sane" comparator**. The profile argmax moved 15 → 0.2, one grid index off the bottom, so the neighboring interior-maximum assertion is fragile too. |
 | `test-climate.R:121` (new) + `:122` (old) | 26.4 ppm vs > 30; 0.086 °C vs > 0.1 | **One phenomenon, not two.** Higher β damps the carbon-climate loop gain. The test header quotes ~111 ppm / ~0.3 °C, which this model has never produced — so both thresholds were always aspirational. |
 | `test-mechanisms.R:32` (old) | ENSO switch moves CO₂ at 2100 by 0.20 ppm, wants > 0.5 | **Re-derived, and it is not only the statistic.** The ENSO flux is an internal soil↔atmosphere transfer, so it changes variability, not level — but the mechanism is also weak: at `gamma_enso` = 0.5 the model's 1960-2024 CO₂ growth-rate sd is **0.584 vs observed 0.712 (82 %)**; it matches at γ ≈ 1.5–2, and `mode_fit` chose **0.927**. The log-posterior is nearly flat 0.5 → 1.0 (−4028.4 vs −4030.4). |
 
@@ -221,14 +221,14 @@ gradient error, and a 2020s low bias in both hemispheres.
   a default has moved under recorded numbers (`kz` 4000 → 5000 was the first).
 - **The net-vs-gross land-sink trap was live in `diag_d13c_suess.R` until `cc3abd5`.**
   Its §3 table in any older output compares the model's NET land flux to GCB's GROSS sink.
-- `mode_fit.rds` is now stale in **five** ways: 13g §0.5's four, plus the β re-centring.
+- `mode_fit.rds` is now stale in **five** ways: 13g §0.5's four, plus the β re-centering.
 - New diagnostics: `diag_recentre_beta.R`, `diag_luc_prorata.R`, `diag_kz_bracket.R`.
 
 ## 7. Commits (this session)
 
 | | |
 |---|---|
-| `9200bc2` | Re-centre the default beta 0.38 → 0.60 on the converted-land model |
+| `9200bc2` | Re-center the default beta 0.38 → 0.60 on the converted-land model |
 | `b3108d7` | The pro-rata land-use debit, as a switch, and what it would cost |
 | `5743ef2` | diag_kz_bracket: the bracket is not binding, and 13h §2.1a's reason is not the one that survives |
 | `cc3abd5` | Units: the model's land flux is NET, GCB's land_sink is GROSS — fix four sites |
@@ -256,7 +256,7 @@ cd ~/Documents/2026/CodeProjects/CarbonCycleEmulator && claude --remote-control 
 
 §4 above says six. **That was a bad grep on my part** — `test-pulse.R:83, 100, 101, 113`
 were in the same suite output and I did not read past the first hundred lines. The β
-re-centring broke the **Pulse Lab** too, and that is the most consequential of the ten
+re-centering broke the **Pulse Lab** too, and that is the most consequential of the ten
 because it is a claim the app teaches.
 
 **`test-pulse.R:100/101` — "the airborne fraction depends on the background — Revelle
@@ -282,7 +282,7 @@ it is written to teach.**
 This is a real constraint on the β default that none of the four calibration criteria sees,
 and it deserves to be weighed against them. Two ways out, neither taken:
 - keep the default at a β where the app's claim survives (≲ 0.53), and accept a CO₂ bias;
-- give the fertilisation a saturating form, which is a **model-structure** change and
+- give the fertilization a saturating form, which is a **model-structure** change and
   therefore PHASE-3-class work, not a fixture tweak.
 
 *A methods note on how this was nearly missed twice.* A first attempt to scan β by
@@ -300,7 +300,7 @@ the "suspicious uniformity ≈ bug signal" rule doing its job; the standalone pr
 | 3 | `sigma_d13c` | **left free**, as now. No code change. |
 | 4 | the failing-test re-derivations | **none written.** All left failing. |
 
-The pro-rata switch forced a second β re-centring: **0.60 → 0.75**, by the 1-D
+The pro-rata switch forced a second β re-centering: **0.60 → 0.75**, by the 1-D
 log-posterior optimum (the criterion the default has always tracked). Under pro rata the
 four criteria spread more than they did under wood-only — 0.712 (decade CO₂ bias) against
 0.753–0.770 (the three whole-record ones) — and the default follows the cluster. **Note
@@ -332,7 +332,7 @@ cheaper ordering.
   explicit `f_luc_wood = 1`. That is a correction to a test written this session, not a
   weakening of an inherited one.
 - `test-luc-permanence.R:104` (`f_luc_perm = 0 reproduces the pre-2026-08-13 behaviour`)
-  now fails: reproducing that behaviour needs **both** `f_luc_perm = 0` **and**
+  now fails: reproducing that behavior needs **both** `f_luc_perm = 0` **and**
   `f_luc_wood = 1`, and the test only sets the first. Left failing, per decision 4 —
   but it is a one-line fixture correction whenever that decision is revisited.
 - `test-luc-permanence.R:88` fails at 0.189 against a > 0.2 threshold on the FOSSIL

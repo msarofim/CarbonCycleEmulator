@@ -61,7 +61,7 @@ The partition ratio moves too, **and the two arms disagree in sign**, so both mu
 | SPO δ¹³C-per-ppm | PsnNet | GPP end |
 |---|---|---|
 | raw (rest of the block frozen) | 1.930 | 1.950 — **worse** |
-| conditional (block re-optimised) | 1.940 | **1.834 — better** |
+| conditional (block re-optimized) | 1.940 | **1.834 — better** |
 
 MLO control 0.965 → 0.965, invariant: the SH move is not contaminating the NH station.
 

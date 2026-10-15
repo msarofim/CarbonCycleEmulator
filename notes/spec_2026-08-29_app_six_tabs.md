@@ -4,7 +4,7 @@
 ## 1. THE TABS AS SPECIFIED
 
 **① Global historic atmospheric CO₂**
-- Graph A: observed vs modelled CO₂ over time, **by month** (the Keeling curve).
+- Graph A: observed vs modeled CO₂ over time, **by month** (the Keeling curve).
 - Graph B: **annual year-over-year CO₂ increase**.
 - Key input graphs: **CO₂ emissions (fossil / LUC)**, **ENSO**, **volcanic AOD**, **temperature**.
 - Right-hand panel: **four checkboxes — ENSO, volcanoes, warming, human emissions — on or off in

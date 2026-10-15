@@ -79,7 +79,7 @@ antiphase regimes, and that the model matches the residual. If the SH-mean brack
 **FALSIFIER: it contains it** ⇒ A1 is not evidence about the Southern Ocean specifically, and the
 conclusion is weakened to "some SH ocean regime".
 
-## A4 — THE NARROWED BRACKET (LABELLED WEAKER IN ADVANCE, AND NON-BINDING)
+## A4 — THE NARROWED BRACKET (LABELED WEAKER IN ADVANCE, AND NON-BINDING)
 
 With τ taken from the fitted interhemispheric exchange time the lag is `arctan(ωτ)` rather than
 the full 0–3 months. Reported for information.
@@ -87,7 +87,7 @@ the full 0–3 months. Reported for information.
 ⚠ **THIS ROW MAY NOT FAIL THE GATE**, for three reasons stated before it is computed:
 (1) it neglects the k and K₀ seasonality the caveat above names; (2) the SH box loses signal to
 sinks as well as to exchange, so a τ from `tau_ex` alone is an **upper bound** and the implied lag
-is biased **LATE**; (3) it is a one-box idealisation of a two-hemisphere model. It is printed
+is biased **LATE**; (3) it is a one-box idealization of a two-hemisphere model. It is printed
 beside A1, never in place of it.
 
 ---
@@ -97,7 +97,7 @@ beside A1, never in place of it.
 ## B0 — the observable is REFERENCE-FREE, deliberately
 
 This product carries **no atmospheric pCO₂ field and no stated reference year**, so an absolute
-ΔpCO₂ would need an assumed normalisation year. The primary observable is therefore an
+ΔpCO₂ would need an assumed normalization year. The primary observable is therefore an
 **internal contrast** — a band's area-weighted annual-mean pCO₂ **minus the global ocean
 area-weighted annual-mean** — which is invariant to any uniform offset and so needs neither.
 The absolute disequilibrium is reported **only** as a sensitivity swept over reference years, and
@@ -126,7 +126,7 @@ term is consequently an additive flux with a free coefficient, not an upwelling 
 **FALSIFIER: a tropical or equatorial box exists** ⇒ the pre-test's premise is wrong and Fix B is
 a parameter question, not a structural one.
 
-This is labelled a **code reading**. It cannot be "confirmed" by a run.
+This is labeled a **code reading**. It cannot be "confirmed" by a run.
 
 ## B3 — PRICING, FROM OBSERVATIONS ON BOTH SIDES
 
@@ -160,5 +160,5 @@ driven by the observed index. ⚠ Gate V's own record says a FAIL there **is not
 - **A climatology is not an error bar.** This product carries no per-month spread, so the phases
   have no observational uncertainty attached. Spread ACROSS BANDS is the honest scale — the same
   statement prereg 2026-08-27f made.
-- **The equatorial-Pacific longitude mask is a judgement** (160 °E–80 °W). It is declared here,
+- **The equatorial-Pacific longitude mask is a judgment** (160 °E–80 °W). It is declared here,
   before the result, and the sensitivity to widening it is reported.

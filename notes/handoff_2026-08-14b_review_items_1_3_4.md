@@ -53,7 +53,7 @@ physics, no defaults, no fixtures.**
   across the half-month the monthly grid leaves outside and under-count the end years.
 - **`LIK_GCB_LAND_SD` 0.9 → 0.5**, with the whole GCB uncertainty block now quoted verbatim
   from `data-raw/downloads/gcb2025_global_budget.csv` (ocean ±0.4, land ±0.5, E_LUC ±0.7
-  GtC/yr, fossil ±5 %, all 1σ). The 0.9 was labelled "GCB stated" with **no provenance in
+  GtC/yr, fossil ±5 %, all 1σ). The 0.9 was labeled "GCB stated" with **no provenance in
   the repo**. This is a change to the objective and is logged as one.
 
 **Consequence to carry:** gate 7's land miss at β 0.75 is **+4.4σ**, not the +2.5σ the
@@ -117,14 +117,14 @@ high.
   drives `luc_scale` to a prior edge.**
 - **The LUC hemispheric share is TIME-VARYING and the constant 0.55 is wrong at both ends.**
   From OSCAR v3.1's *Regional* sheet: NH share falls **0.838 (1750–1849) → 0.398
-  (1990–2018)**. Within-region NH fractions are geographic judgements so everything is
+  (1990–2018)**. Within-region NH fractions are geographic judgments so everything is
   bracketed — and the conclusion survives the whole bracket (pre-1950 even the low bound is
   ≥0.60; post-1990 even the high bound is ≤0.53). **~23 GtC of early land-use carbon is in
   the wrong hemisphere.**
 - **The objective cannot see the shares.** Fossil share 0.90 → 0.97 moves the MLO−SPO CO₂
   gradient by **0.84 ppm** — most of the model's 1.09 ppm error — for **5.1 log-units**.
 - **The δ¹³C-gradient-from-shares lead is DEAD.** Across the whole plausible range the
-  modelled δ¹³C gradient moves only −0.213 to −0.258 against an observed −0.074. The 3×
+  modeled δ¹³C gradient moves only −0.213 to −0.258 against an observed −0.074. The 3×
   miss is structural. Review §3.4's "cheapest unexplored lead" is now explored and negative.
 - **Omitted input seasonality biases the fitted NEP amplitude by ~8 %.** Bounding test:
   LUC + fossil seasonality of plausible size is worth **+0.369 ppm** of MLO peak-to-peak —
@@ -159,7 +159,7 @@ without being told to; the prior supplied only a width.
 
 The first run of `diag_beta_luc_profile.R` held σ_d13c at the table's 0.10 and put the
 argmax at **β 0.70 — refuting the prediction**. The refutation was conditional: at σ 0.10
-δ¹³C contributes ~740 log-units in favour of high β while carrying a known unclosed 0.53 ‰
+δ¹³C contributes ~740 log-units in favor of high β while carrying a known unclosed 0.53 ‰
 **structural** misfit, i.e. σ 0.10 asserts that misfit is measurement noise. At 0.44 and at
 5.00 the answer is identical, so **0.10 is the outlier**. The refutation is in the file's
 header, not deleted.
@@ -193,7 +193,7 @@ runaway bare deletion produces (kz → 10,686, deep Δ¹⁴C −112.7 ‰):
 | **full spatial spread (n_eff = 1)** | **45.9** | **1.4σ** | **DOES NOT HOLD kz** |
 
 **And the incumbent bracket [3830, 6200] is effectively a hard ±25 ‰ box — tighter than
-every candidate but the most aggressive.** So *deleting the bracket in favour of an "honest"
+every candidate but the most aggressive.** So *deleting the bracket in favor of an "honest"
 likelihood term would LOOSEN the constraint, not tighten it.* Marcus' A2 decision 1 ("delete
 + add a term") was taken believing the opposite. **Re-take it.**
 
@@ -220,7 +220,7 @@ tripwire doing its job. Updated to 17 **with the reason written in**, plus two n
 
 **The pulse failures now have EXTERNAL corroboration** — `diag_joos_beta_scan.R` reproduces
 the same defect against Joos et al. (2013) at the same β. They are the model reporting a
-real structural failure. **Leave them failing until the fertilisation form changes.**
+real structural failure. **Leave them failing until the fertilization form changes.**
 
 ---
 
@@ -238,7 +238,7 @@ Review §7's list with items 1, 3, 4 struck and the new findings folded in.
 | **5b** | **NEW — time-varying LUC hemispheric share**, from OSCAR regions | §2.2; do it *with* 5, since 5 is what would score it |
 | **5c** | **NEW — sourced monthly seasonality for both emission inputs** (GFED; a monthly fossil product) | §2.2; ~8 % bias in `seas_amp_NH` |
 | **6** | **re-take `sigma_d13c` and `LIK_EXCESS_C14_TARGET`** | §3.2 — σ_d13c now decides β |
-| **7** | **saturating fertilisation**, to review §4.1's design target | **the highest-value structural item, now unblocked and untouched** |
+| **7** | **saturating fertilization**, to review §4.1's design target | **the highest-value structural item, now unblocked and untouched** |
 | **8** | **THEN the refit**, ~18 parameters | blocked on 2, 5, 6, 7 |
 | **9** | **pump**, on review §4.2's pre-registered ocean-sink test | targets now quantified (§2.1) |
 
@@ -282,7 +282,7 @@ cd ~/Documents/2026/CodeProjects/CarbonCycleEmulator && claude --remote-control 
 > `notes/review_2026-08-14_architecture.md` §§0 and 7. Items 1, 3 and 4 are done. **Three
 > decisions are waiting (§4) and the first of them — the deep-Δ¹⁴C σ — inverted what 13i
 > §A3 assumed, so do not delete the `kz` bracket on the old reasoning.** If the decisions
-> are in hand, the highest-value remaining work is **item 7, the saturating fertilisation
+> are in hand, the highest-value remaining work is **item 7, the saturating fertilization
 > form**, to the design target in review §4.1: reproduce β ≈ 0.7's historical integral with
 > β ≈ 0.5's marginal slope at 388 ppm. It is the one component with a demonstrated failure
 > against an external benchmark, and `luc_scale` explicitly did **not** remove the need for

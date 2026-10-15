@@ -30,7 +30,7 @@ then the design's §8 addendum. ⚠ Sessions launch from `FaIRtoFrEDI/`; use `gi
 * The Schmidt coefficients are cited at ONE REMOVE (pySeaFlux reproducing Wanninkhof 2014 Table 1;
   Wiley was 403). Sc(20 °C) = 668 checks. Verify against the PDF if one lands in ClaudeDocs/Papers.
 * The design's own cross-check statistic (open water alone, 0.651) equals the full factor (0.653) by
-  two cancelling omissions. It would have "confirmed" the fit for the wrong reason.
+  two canceling omissions. It would have "confirmed" the fit for the wrong reason.
 * The design's mutation number (≥ 9) was calibrated on the −5σ arm; it fails on the −2.9σ arm. §8
   says which arm the gate names.
 
@@ -49,7 +49,7 @@ then the design's §8 addendum. ⚠ Sessions launch from `FaIRtoFrEDI/`; use `gi
 * Logs: `outputs/diagnostics/{diag_declared_param_scans,diag_objective9_profile_row,build_glodap_profile_covariance,suite}_20260906*.log` + the `.rds` beside each.
 
 ## 5. ⇒ STANDING RULES THIS SESSION ADDED
-* ⭐⭐ **PRICE EVERY TERM OF A LAW BEFORE QUOTING THE ONE THAT MATCHES.** Two cancelling omissions
+* ⭐⭐ **PRICE EVERY TERM OF A LAW BEFORE QUOTING THE ONE THAT MATCHES.** Two canceling omissions
   produce a number indistinguishable from the right one.
 * ⭐ **A MUTATION-GATE NUMBER IS PER ARM.** Name the arm it was calibrated on, or the gate fails on
   a weaker arm and looks like a defect in the row.

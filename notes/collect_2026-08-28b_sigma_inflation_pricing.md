@@ -19,7 +19,7 @@ measurement.**
 
 **B1 ✗ as I pre-registered I expected**: the argmax is at **82 m**, 3 m outside the lower edge.
 **B2 ✓ is what decides the question**: 0.033 is **21× below** the refit's own restart noise floor
-(0.70) and below the optimiser's own restart tolerance. **An argmax 3 m outside a band by 0.033
+(0.70) and below the optimizer's own restart tolerance. **An argmax 3 m outside a band by 0.033
 log-units is not a preference the fit can act on.**
 
 ## 2. BOTH CLIFFS ARE GONE, AND THE 120 EDGE IS THE SURPRISE

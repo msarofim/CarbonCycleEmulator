@@ -1,11 +1,11 @@
-# PREREG — 2026-09-05f. **`q`'s ATTACHMENT DEPTH: THE BOXED ANALOGUE OF THE ML↔BOTTOM CONDUIT.**
+# PREREG — 2026-09-05f. **`q`'s ATTACHMENT DEPTH: THE BOXED ANALOG OF THE ML↔BOTTOM CONDUIT.**
 
 Scores nothing yet. Written **before** the branch exists and before any run.
 Follows `handoff_2026-09-05_hilda_boxes_arc.md` §7, which put this decision to Marcus.
 
 **MARCUS'S RULING (2026-09-05):** *"We don't need to stay true to HILDA, but we should stay true to
 the conceptual way that the simplified model's ocean works."*
-⇒ The departure from HILDA is **authorised**. The constraint is **coherence with CCX's own ocean**,
+⇒ The departure from HILDA is **authorized**. The constraint is **coherence with CCX's own ocean**,
 and that constraint — not the score — has to carry the choice.
 
 ---
@@ -35,7 +35,7 @@ with the high-latitude deep box. In CCX's column the interior is reached **by di
 no such direct path exists except the one being added. What HS/HD represents physically is **deep
 water formation** — dense water sinking at high latitude to **fill the deep**, with the water above
 reached by mixing. **Attaching `q` at depth is therefore what CCX's ocean concept already says.**
-It is a departure from **HILDA**, which is authorised; it is *not* a departure from **CCX**.
+It is a departure from **HILDA**, which is authorized; it is *not* a departure from **CCX**.
 
 ⚠ **WHY THIS IS NOT `w_out` COMING BACK.** `w_out`'s distributed return injects **mixed-layer**
 water (−29.8 ‰) into every interior layer. This injects **HD** water (−109 ‰) into the **deep
@@ -46,7 +46,7 @@ own comment at the `tau_q` block already draws the first half of that distinctio
 
 **The conceptually-coherent attachment is also the better-scoring one, and I formed the argument
 AFTER seeing that the reduced form scored 1.81 against the structure's 2.05.** That is the exact
-shape of a physics rationalisation. Two guards, both binding:
+shape of a physics rationalization. Two guards, both binding:
 
 1. **The attachment set is declared from a NON-SCORE criterion** (§3) and there is **no free
    boundary to tune**.
@@ -79,14 +79,14 @@ and choosing a boundary there violates the standing rule that **a control band m
 the comparison is VALID, not where the defect is** (`handoff_2026-09-05` §8). It would also be a
 tunable boundary, i.e. geometry fitted to the residual.
 
-✅ **DECLARED: the BOTTOM BOX ONLY** — `kk = grid$nl`. It is the **direct boxed analogue of the
+✅ **DECLARED: the BOTTOM BOX ONLY** — `kk = grid$nl`. It is the **direct boxed analog of the
 ML↔bottom reduced form that was actually tested**, it has **no free boundary**, and it cannot be
 accused of being fitted. If and only if it works, the boundary becomes a **separate, later,
 declared** question — not a knob inside this test.
 
 **Scan:** `tau_q` over HILDA's own prior **538 ± 510 yr** (and below it, since the pre-check demands
 ~2.7× more exchange = shorter `tau_q`). Report **whether the `tau_q` that works is inside that
-prior** — an arm that only works outside HILDA's prior is a different claim and must be labelled so.
+prior** — an arm that only works outside HILDA's prior is a different claim and must be labeled so.
 `u_hs` held at HILDA's **38 m/yr**. `kz` re-solved per arm to hold the bottom box at **−156.145**,
 the same iso-deep protocol as 09-04k2 — so `kz` relief and profile shape stay comparable.
 

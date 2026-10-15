@@ -13,7 +13,7 @@ changed.** Nothing fitted before it is comparable, there is no canonical mode, a
 
 1. **a canonical mode**, because the repo has none and every diagnostic and the app resolve one;
 2. **the ridge verdict**, because the fix removed most of what was rejecting a saturating
-   fertilisation. Re-scored under the patch AT PRE-FIX PARAMETERS, the pin90-vs-reference likelihood
+   fertilization. Re-scored under the patch AT PRE-FIX PARAMETERS, the pin90-vs-reference likelihood
    gap fell **−90.07 → −25.28**, and its composition inverted: `d13c_seasonal_SPO` −38.16 → −8.98,
    `d13c_seasonal_MLO` out of the top six, and what remained was **`gcb_land_sink` −24.00**, a
    CARBON objection. That is not a result — both arms move under a refit — but it is why the ridge
@@ -27,7 +27,7 @@ here, so a global rescale is not an escape route being closed.
 | arm | pin | seeded at | the question it answers |
 |---|---|---|---|
 | `refit_20260825f_ref` | none | the quarantined arm-N mode | **restores a canonical mode.** Warm start; the driver rejects a warm start that is worse than or not finite under the new objective, so a bug-fitted seed cannot survive by inertia. |
-| `refit_20260825f_from90` | **none** | the K = 90 ridge cell | **Does a second basin exist NOW?** The control, and the one that can settle the programme. Falsified under the old objective — the free arm climbed back to `fert_k` 554.98. |
+| `refit_20260825f_from90` | **none** | the K = 90 ridge cell | **Does a second basin exist NOW?** The control, and the one that can settle the program. Falsified under the old objective — the free arm climbed back to `fert_k` 554.98. |
 | `refit_20260825f_pin90` | `fert_k` = 90 | the K = 90 ridge cell | **prices forced saturation under the corrected objective.** Its logpost is NOT comparable to a free arm's without removing the near-delta prior offset. |
 
 `pin60` and `pin120` are NOT re-run. They bracketed a cost curve whose middle point is the one that
@@ -52,7 +52,7 @@ leverage the stream table implies.
 **P3 — the free-from-90 arm returns to `fert_k` > 400.** The likelihood preferred shallow saturation
 by 86.7 log-units before, of which the isotopic part is now largely gone but `gcb_land_sink` −24.00
 is not. **PREDICT: it climbs back above 400.** **FALSIFIER: it lands below 200**, which would be a
-second basin and would REOPEN the fertilisation-shape programme in full.
+second basin and would REOPEN the fertilization-shape program in full.
 
 **P4 — `rep_dC` stays high.** It sat at 5.566 prior sd and did NOT move in any of the four 08-25b
 arms. Nothing in this fix touches the CO₂ level streams. **PREDICT: |rep_dC| > 4.0 at the reference

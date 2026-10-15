@@ -11,7 +11,7 @@ curvature noise of order 1e-5 / (3e-4)² ≈ 110.
 - So the WTC read had **no Laplace sd** for the two new names.
 
 **Fixed** at `9200485` by Marcus's ruling ("Most-stable step (Recommended)", CHANGELOG 2026-10-13 c). A no-plateau
-direction now takes the interior grid step whose curvature disagrees least with its neighbours.
+direction now takes the interior grid step whose curvature disagrees least with its neighbors.
 
 ## Files (as the 2026-10-13 07:36 land chain produced them at `065697f`; committed as landed in `a9b6601`)
 

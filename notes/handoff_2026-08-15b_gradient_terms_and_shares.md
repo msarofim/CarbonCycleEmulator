@@ -45,9 +45,9 @@ ends. OSCAR v3.1's *Regional* sheet gives a flux-weighted NH share of **0.838 (1
 misplaced by 1959. Full table and provenance in **DATA.md §6a**.
 
 **Why it is a measurement and not a preference.** The within-region NH fractions are geographic
-judgements, so the product ships a lo/central/hi bracket — and **the direction survives all of
+judgments, so the product ships a lo/central/hi bracket — and **the direction survives all of
 it**: pre-1950 even the low end is ≥ 0.60, post-1990 even the high end is ≤ 0.53. The ends do
-not overlap under any admissible judgement. 0.55 is not even the flux-weighted mean (0.620).
+not overlap under any admissible judgment. 0.55 is not even the flux-weighted mean (0.620).
 
 **Three traps, all gated (`test-luc-nh-share.R`, 22 assertions, two mutation-tested):**
 
@@ -104,7 +104,7 @@ improvement — the same shape as 5c. **Do not expect 5b to raise the log-poster
 ### 3.2 What shipped
 
 Streams `co2_gradient`, `d13c_gradient`. Parameters `grad_off_co2` ~ N(0, 0.5 ppm),
-`grad_off_d13c` ~ N(0, 0.15 ‰). **Both priors are centred at ZERO** — centring them on the
+`grad_off_d13c` ~ N(0, 0.15 ‰). **Both priors are centered at ZERO** — centering them on the
 measured offsets would tell the model the answer and then credit it for agreeing; the prior
 *widths* put the measured values near 1 sd.
 
@@ -135,7 +135,7 @@ measured status.
 - **5b's land-use bracket.** The term pulls toward the **LO** end (+191 log-units at σ = 0.35 vs
   +4 for the hi end). Nothing has been changed on that basis — it is one term's preference, not
   a measurement — but **expect the refit to push the share down**, and if it lands at the
-  bracket edge that is the signal the within-region judgements need revisiting rather than the
+  bracket edge that is the signal the within-region judgments need revisiting rather than the
   parameter being right.
 - **The δ¹³C gradient lead is dead, again and more firmly.** 5b moved it −0.245 → −0.238 ‰
   against an observed −0.074. The shares are not the cause of the 3× miss; part 3 now says why
@@ -218,7 +218,7 @@ touched.**
 | ~~5c~~ | sourced input seasonality | **DONE** `0cd9fbb` |
 | **6** | `LIK_EXCESS_C14_TARGET` | **NOT a blocker** — 15 §9 |
 | **6b** | **`sigma_co2`: fix it or drop it — DO NOT SAMPLE IT** | **NEW BLOCKER on 8.** 15 §4.1: unidentified, pinned at a boundary, will hurt mixing and covariance conditioning. This is what the refit is now held on |
-| ~~7~~ | saturating fertilisation | **DONE** |
+| ~~7~~ | saturating fertilization | **DONE** |
 | **8** | **THE REFIT**, 20 parameters, ~6–7 h | **HELD by Marcus 2026-08-15.** Structurally unblocked; do NOT start without re-asking |
 | **9** | pump | do the cheap `h_ml` capacity-vs-export decomposition FIRST (15 §4.2) |
 

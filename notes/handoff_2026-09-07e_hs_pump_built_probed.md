@@ -18,7 +18,7 @@ then `handoff_2026-09-07d_area_fix_and_hs_options.md`.
 At 60 gC m⁻² yr⁻¹ (3.47 GtC/yr from 16 % of the ocean): HD − HS +127 (obs +116–185), bottom − HS δ¹³C −0.70 (obs
 −0.87), profile inside 2σ (level −1.70), sink/bomb unmoved, Δlik **+17.2**, δ¹³C row +18.9 of the −27.6 it had lost.
 P3 needed 20; P6 needed HS surface δ¹³C to fall toward +1.31 and it rose to +2.08. **Gate FAIL by the letter; the
-mechanism is doing exactly what the end-member probe said was missing.** The launch is a judgement call ⇒ Marcus.
+mechanism is doing exactly what the end-member probe said was missing.** The launch is a judgment call ⇒ Marcus.
 
 ## 3. State / open
 Torch idle. 30 parameters in the table; two mode-file tests fail on purpose (no 30-name canonical). Owed regardless:

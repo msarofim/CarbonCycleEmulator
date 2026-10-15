@@ -16,8 +16,8 @@ this one; 21c is provenance for everything except §6.
    low — it was **1.1**. And **DESIGN §6 gate 7 is NOT stale**, contra 21c §6. §3.
 4. **`rep_dC` = +5.18 σ is not a representation offset.** It is 97 % common-mode and it absorbs
    the late half of a **~9 ppm swing** that changes sign in the 1940s. §4. **This is the
-   session's real finding and it is bigger than the app.** **It survived four obs-artefact
-   tests (§10) — and those tests localised it to a mid-century growth-rate pause.**
+   session's real finding and it is bigger than the app.** **It survived four obs-artifact
+   tests (§10) — and those tests localized it to a mid-century growth-rate pause.**
 5. **The absolute CO₂ level is effectively unconstrained after 1958** — 210 log-units of
    likelihood per log-unit of prior, against an ice-core term ~100× weaker than the stations.
    The calibration fits the **shape** of the Keeling curve, not its height. §4.
@@ -44,7 +44,7 @@ this one; 21c is provenance for everything except §6.
 | `calibration/diag_rep_dC_shape.R` | is the offset a level, a trend, or a swing — 5 gates | 6 s |
 
 Both are new and committed. Neither needs an argument. `diag_app_params.R` is the one to re-run
-after any change to a fertilisation default or an emissions input.
+after any change to a fertilization default or an emissions input.
 
 **Files changed:** `app/global.R` (the resolution block, two wrappers), `app/server.R` (4 call
 sites), `R/climate.R` (`ccx_run_coupled()` pass-through, additive, defaults from
@@ -189,7 +189,7 @@ the swing, and GATE E says the prior is not the binding object.
 
 Pre-existing, parameter-independent, and not previously written down. `diag_app_params.R`
 gate 5. Tab 1 (Keeling) runs `scenario = "historical"` → the GCB 2025 budget. Tab 5 (Futures)
-runs `ccx_run_coupled()` on an SSP → the SSP/LUH2 harmonisation. Over 1750–2020:
+runs `ccx_run_coupled()` on an SSP → the SSP/LUH2 harmonization. Over 1750–2020:
 
 | | fossil | **land-use** | total |
 |---|---|---|---|
@@ -201,7 +201,7 @@ runs `ccx_run_coupled()` on an SSP → the SSP/LUH2 harmonisation. Over 1750–2
 499.6 ppm at 2100 carrying the same deficit — so every scenario on that tab is ~13 ppm low
 against the historical tab drawn four tabs to the left, and the app presents both as "the
 model". **This is an emissions-inventory question, not a parameter question, and it is a
-decision (harmonise the SSP historical segment to GCB? caption the discontinuity? both?) rather
+decision (harmonize the SSP historical segment to GCB? caption the discontinuity? both?) rather
 than a bug to fix.**
 
 ---
@@ -238,7 +238,7 @@ Asked directly this session. Split by claim, because the answer is not the same 
   in both hemispheres (§4 GATE C). The isotopic fingerprints, the bomb spike and its drawdown,
   the seasonal cycle on physical drivers, the counterfactual mechanism switches — these are
   what the app is for and they hold up.
-- **Pulse behaviour, with a caption.** Gate 12 passes. Carbon conservation over a 970-year
+- **Pulse behavior, with a caption.** Gate 12 passes. Carbon conservation over a 970-year
   post-pulse run closes to 0.000 %.
 - **The structural questions closed in 21c.** The ridge, the Hessian, the δ¹³C veto. Those
   closures survive everything found here.
@@ -291,8 +291,8 @@ cd ~/Documents/2026/CodeProjects/CarbonCycleEmulator && claude --remote-control 
 > committed — do not re-open it. **Do NOT trust handoff 21c §6's numbers; §3 here shows they do
 > not reproduce.**
 >
-> **The open scientific question is §4/§10: a ~9 ppm swing that survived four obs-artefact
-> tests and localises to a mid-century growth-rate pause the model does not reproduce.**
+> **The open scientific question is §4/§10: a ~9 ppm swing that survived four obs-artifact
+> tests and localizes to a mid-century growth-rate pause the model does not reproduce.**
 > §11 killed the simple version of §7's hypothesis — **no land parameter fixes both ends** — so
 > do NOT refit. §11a and §12 say what is actually needed.
 >
@@ -315,7 +315,7 @@ cd ~/Documents/2026/CodeProjects/CarbonCycleEmulator && claude --remote-control 
 
 ---
 
-## 10. THE SWING SURVIVED FOUR OBS-ARTEFACT TESTS — AND THEY LOCALISED IT
+## 10. THE SWING SURVIVED FOUR OBS-ARTIFACT TESTS — AND THEY LOCALIZED IT
 
 **Marcus 2026-08-21 challenged §4 on exactly the right grounds:** ice and air are not the same
 measurement. Firn air is enclosed over years, so an ice sample is a *smoothed* atmosphere with a
@@ -353,7 +353,7 @@ within DE08 alone.**
 
 **The ice-derived growth rate nearly halves in the 1950s (0.376 → 0.207) and then jumps to
 0.523. The model runs smoothly through it.** So §4's "under-accumulates then over-accumulates"
-understated how localised this is: the error is −0.05 to −0.10 ppm/yr in 1870–1920, **+0.15 to
+understated how localized this is: the error is −0.05 to −0.10 ppm/yr in 1870–1920, **+0.15 to
 +0.33 in 1930–1965**, and back to ~0 by the 1970s. **It is one mid-century feature, not a drift.**
 
 **TEST 3 — FIRN SMOOTHING, scanned rather than asserted** (the repo carries no citation for a
@@ -374,8 +374,8 @@ a measurement that has no gas age.
 
 ### 10a. WHAT THIS DOES NOT SETTLE
 
-**Whether the mid-century pause is real atmosphere or an enclosure artefact COMMON to all Law
-Dome cores.** TEST 1 rules out core-*specific* artefacts; it cannot rule out a shared firn
+**Whether the mid-century pause is real atmosphere or an enclosure artifact COMMON to all Law
+Dome cores.** TEST 1 rules out core-*specific* artifacts; it cannot rule out a shared firn
 process, because every core here is from one site. Resolving it needs an **independent core**
 (WAIS Divide, Siple Dome) or the Law Dome literature. **There is no papers folder on this
 machine and no citation is asserted.** This is the open question, not an assumed answer.
@@ -409,8 +409,8 @@ what no parameter can express.
 | fert_k → 1000 | −0.56 σ | +0.40 σ | +0.332 | **449.2** |
 
 **q10 → 2.0 improves BOTH sinks for +4.5 ppm of CO₂ and ~zero mid-century damage.** The
-fertilisation knobs buy more land-sink reduction and cost +20–25 ppm. q10 acts through warming,
-which is concentrated where the sink error is; fertilisation acts on the whole record.
+fertilization knobs buy more land-sink reduction and cost +20–25 ppm. q10 acts through warming,
+which is concentrated where the sink error is; fertilization acts on the whole record.
 
 **Why q10 sits at 1.0907** — respiration feedback of 1.011 at today's warming, i.e. none.
 21c §2 established that the **seasonal** rows put it there through the exact ridge with
@@ -482,7 +482,7 @@ Reading the mode's three misses together rather than one at a time: **land +2.04
 ocean −0.62 σ too weak, CO₂ ~+5 ppm too high.** Total uptake is roughly right and the
 **partition** is wrong. That predicts a specific kind of lever — one moving uptake *from* land
 *to* ocean, which fixes all three at once (ocean up, CO₂ down, land down twice, because lower
-CO₂ also means less fertilisation). `diag_land_eagerness.R` TEST E found exactly one:
+CO₂ also means less fertilization). `diag_land_eagerness.R` TEST E found exactly one:
 
 | lever | d(land) | d(ocean) | d(CO₂) | |
 |---|---|---|---|---|
@@ -508,8 +508,8 @@ the exit condition: *"delete it only after a refit shows the term holding kz alo
    1.9. The deep-¹⁴C term *prefers lower* kz; the ocean-sink term prefers higher; **the CO₂
    record outvotes both.**
 3. **And `rep_dC` does not rescue it.** Since those streams carry a free +5.18 σ offset, the
-   obvious suspicion was that the pin is an artefact of freezing it — 21c §2c's trap, committed
-   by me. **Profiled with `rep_dC` re-optimised at every kz, the optimum moves 6462 → 6528,
+   obvious suspicion was that the pin is an artifact of freezing it — 21c §2c's trap, committed
+   by me. **Profiled with `rep_dC` re-optimized at every kz, the optimum moves 6462 → 6528,
    worth +0.6 log-units.** The pin survives: `rep_dC` can *translate* the record and kz changes
    its *shape*, and a free offset does not rescue a curvature miss.
 

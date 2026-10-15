@@ -115,11 +115,11 @@ Written on Marcus's request ("Approve all five, then write the handoff note").
   - `CCX_MODE_L2_ARM_PINS` = the limb arm's own nine (`CCX_MODE_OBJ15_PINS`), so a nine-pin array is refused (the 10-06 reason the old alias existed);
   - #16's ten pins match NO ruled set: a #16 re-run must rule its own.
 - **The multistart driver changed** (10-07 m, 10-08 c):
-  - a seeded slot moves only fitted names, and an unseedable one runs a labelled dispersed draw;
+  - a seeded slot moves only fitted names, and an unseedable one runs a labeled dispersed draw;
   - duplicate starts are refused;
   - `best` is always f(the kept u) (`ms_kept_pair()`);
   - the DEAD gate has an exact identity branch, "UNPAIRED BEST". Start files carry `dead_branch`, `claim_gaps`, `pairing`.
-  - A PINNED new-basin reference is labelled as such.
+  - A PINNED new-basin reference is labeled as such.
 - **#18 (pass 1)'s id 13** stays recorded `dead` in its start file. It was a false positive of the old pairing (10-08 a); the statement is in CHANGELOG (a).
 - `test-l2-enso-limb.R`'s "held at 0" test is DORMANT: no registered mode holds `w_enso_l2` = 0 with the shim at 0. It skips, as it has since 09-20 r.
 - **Untracked files that are NOT this session's:** `carbotopecomment.9.26.26.docx`, `carbotopecomments.10.2.26.docx`, `outputs/diagnostics/smoke/`, `outputs/mcmc_smoke/`. Leave them.

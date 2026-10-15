@@ -1,4 +1,4 @@
-# Handoff — 2026-09-22 (q). **Marcus's two R2/N5 questions, answered by measurement. The marine arm is EXTERNALLY VALIDATED and it STRENGTHENS the tie result instead of weakening it — the continental sites turn out to be the part of the network that OBEYS the mass balance. And T3 sizes the mass-weighting term at −0.98 ppm, which makes the `rep_dC` residue 36 % LARGER and is bigger than the entire relief re-centring the prior would buy. ⛔ On the way it found the model's code calling the same box a WHOLE ATMOSPHERE where it converts mass and a TROPOSPHERE where it feeds bomb-¹⁴C.**
+# Handoff — 2026-09-22 (q). **Marcus's two R2/N5 questions, answered by measurement. The marine arm is EXTERNALLY VALIDATED and it STRENGTHENS the tie result instead of weakening it — the continental sites turn out to be the part of the network that OBEYS the mass balance. And T3 sizes the mass-weighting term at −0.98 ppm, which makes the `rep_dC` residue 36 % LARGER and is bigger than the entire relief re-centering the prior would buy. ⛔ On the way it found the model's code calling the same box a WHOLE ATMOSPHERE where it converts mass and a TROPOSPHERE where it feeds bomb-¹⁴C.**
 
 > Self-contained for this half of the session. **Read first, in this order:** handoff **(p)**
 > (the splice and the copy gate — the earlier half of the same session) · CHANGELOG 09-22 **(z)**
@@ -78,7 +78,7 @@ than either arm claiming to be the answer.
   **TROPOSPHERE** per hemisphere with no stratospheric box"* — which is **why** the bomb-¹⁴C input
   is a stratosphere→troposphere FLUX rather than a production rate. Both are load-bearing where they
   sit; they cannot both describe the same box, and **`rep_dC` absorbs the difference.**
-- **Inputs, each labelled in the log.** `f_strat` **0.1645** DERIVED (area-weighted mean tropopause
+- **Inputs, each labeled in the log.** `f_strat` **0.1645** DERIVED (area-weighted mean tropopause
   166.6 hPa from a 100→300 hPa profile, flat-tropopause sensitivities printed); `γ` **1.837 ppm/yr**
   OBSERVED from the repo's own MLO (1.866) / SPO (1.808) series over 1989–2014; `Γ`, the
   **mass-weighted** stratospheric mean age, **ASSUMED and carried as a BAND 1.5–5.0 yr**.
@@ -91,22 +91,22 @@ than either arm claiming to be the answer.
   at its MASS share — an order-of-magnitude BOUND, not a measurement) **−0.98** = **−0.215 ppm**:
   the box should sit slightly **BELOW** its station. The model has it **+3.408** above.
   **Discrepancy +3.62 NH / +3.79 SH, against +2.67 / +2.81 without this term — 36 % / 35 % larger.**
-- ⭐⭐ **THE DECISION-RELEVANT COMPARISON FOR R2.** Re-centring the prior on the measured offset
+- ⭐⭐ **THE DECISION-RELEVANT COMPARISON FOR R2.** Re-centering the prior on the measured offset
   moves it **+0.74 ppm**; this term moves the TARGET **−0.98** the other way — **ratio 1.33 (NH),
-  1.21 (SH): larger than the entire relief re-centring buys.** ⇒ **rule R2 against the LARGER
+  1.21 (SH): larger than the entire relief re-centering buys.** ⇒ **rule R2 against the LARGER
   residue, not the smaller one.**
 - **The one download that would sharpen it:** an observational mass-weighted stratospheric mean age.
   Everything else in the calculation is measured or bounded.
 
 ## 4. WHERE R2 STANDS NOW, and what is left
 **Nothing about R2 has been adopted and it is still a ruling.** What has changed is the size of the
-thing being ruled on: the residue is **+3.62 ppm**, not +2.67, and re-centring buys less than the
+thing being ruled on: the residue is **+3.62 ppm**, not +2.67, and re-centering buys less than the
 correction costs. From the test menu put to Marcus, **T3 is done**; three remain:
 
 1. **T1 — the product profile along a `rep_dC` ladder.** Fix `rep_dC` at 3.52 → 0.78, **fully**
-   re-optimise the rest at each rung (the 09-22 (u) side test moved 8 of 29), and read the
+   re-optimize the rest at each rung (the 09-22 (u) side test moved 8 of 29), and read the
    **PRODUCTS**, not just loglik: IRF(100), the 1000-yr partition, airborne fraction, gate D's
-   asymmetry, the δ¹³C gradient, `CO2_PI`, the GCB sink split. **Flat products ⇒ R2 is a labelling
+   asymmetry, the δ¹³C gradient, `CO2_PI`, the GCB sink split. **Flat products ⇒ R2 is a labeling
    decision; a product that moves ⇒ it is a physics decision.** This is the direct answer to
    "potential impact" and needs no objective change.
 2. **T2 — the release test.** (u) says the cost of forcing `rep_dC` down lands on `co2_icecore`

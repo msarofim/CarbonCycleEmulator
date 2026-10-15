@@ -22,7 +22,7 @@ is the same lever (the two families differ by 4.7 on `ocean_grad_d13c`).
 
 ## 3. ⇒ THE RULING, then the tests
 Options: (a) **an HS pump** — export from HS (the Southern-Ocean/N-Atlantic export that C9 deferred),
-sized like the LS pump's, so HD carries remineralised DIC; (b) **a preformed-DIC/δ¹³C end-member for HS**
+sized like the LS pump's, so HD carries remineralized DIC; (b) **a preformed-DIC/δ¹³C end-member for HS**
 (HS DIC set by the observed high-latitude surface DIC, ~2150 vs ~1950 low-lat, rather than by air–sea
 equilibrium alone); (c) stop: record HILDA's structure as ventilation-right / biology-wrong and return
 to the column with #10. Cheap first test for (a)/(b): at the winner's vector, add an HS export equal to

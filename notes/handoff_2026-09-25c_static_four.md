@@ -58,7 +58,7 @@ footnotes clipping. ⇒ `known_unchecked_slot_is_a_pending_finding`.
 ### ⭐⭐ THE PATTERN: every finding grew when it was MEASURED rather than re-read
 Three of the four were mis-stated **in a direction that would have misled the fix**:
 
-- **#3 `CCX_BASE_SIZE`.** The review said moving the constant alone desynchronises the budgets.
+- **#3 `CCX_BASE_SIZE`.** The review said moving the constant alone desynchronizes the budgets.
   **It moves nothing** — `theme_ccx()` is a complete theme, its explicit element sizes win, and
   `CAPTION_PT`/`SUBTITLE_PT` already tracked the signature (13 and 20 on that term both give 10/12).
   The live exposure is the **other** direction: move the SIGNATURE and `test-plot-text-fits.R`
@@ -68,7 +68,7 @@ Three of the four were mis-stated **in a direction that would have misled the fi
   averaging (−0.004 over 1959–2024, **−0.044** one year earlier). ⛔ And the roxygen's *"closes to
   3e-14"* is the **GCB BUDGET IDENTITY's** closure — a different equation. This one closes at
   **−0.006**, the `num` column of 09-24 (i)'s table. **Twelve orders of magnitude, borrowed from the
-  neighbouring paragraph.**
+  neighboring paragraph.**
 - **#4 the footnote's literal `\n`.** The flagged sibling was real — and the one that "had been
   fixed" had **never fitted**. At the 424 px diagram panel (budget **383.5 px**): footnote 1
   **480.0 px**, footnote 2 **404.4 px**. Now 364.8 / 367.2.
@@ -87,7 +87,7 @@ The `ui.R` year lint forbids a literal year in a `min =`/`max =`; it matched the
 defect's text, so a raw-line gate reports **every repair as a relapse**.
 ⚠ The tempting response — narrow the pattern until it goes quiet — narrows it past the case it
 exists to catch. Both strippers are **quote-aware** (a `#` inside a string is content; `ui.R`
-carries hex colours). ⇒ `text_gate_matches_its_own_comment`
+carries hex colors). ⇒ `text_gate_matches_its_own_comment`
 
 ### (b) A GATE THAT PASSED FOR THE WRONG REASON
 3a's pixel assertion **cannot fail**: it wraps with `app_wrap_px()` and measures the result against

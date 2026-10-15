@@ -27,7 +27,7 @@ refit) is **still not started, and is now blocked on a ruling it did not anticip
 6. ✅ **BOTH SPLIT CONTRACTS NOW HARD-ERROR** — and "both active" is NARROWER than it sounds. §4
 7. ⛔ **MY IDENTIFIABILITY ARGUMENT FOR THE ENSO SPLIT IS DEAD.** `soil_fast` IS old
    photosynthate. The recommendation changed as a result. §5
-8. ⭐ **THE ALPHA REVIEW CAME BACK CLEAN** — all four sites, marshalling, spinup, ¹⁴C. §5
+8. ⭐ **THE ALPHA REVIEW CAME BACK CLEAN** — all four sites, marshaling, spinup, ¹⁴C. §5
 9. ⇒ **FOUR RULINGS OWED before the refit.** §6
 
 ---
@@ -83,9 +83,9 @@ decision and was NOT made here.**
 as hard `stop()` guards (feasibility, encoding, bands, objective-purity) in the same file that
 reports DESIGN gate 4/5/7. Flagged, not renamed.
 
-✅ **Fixed, no judgement required:** `DG_G7_NSD` now names gate 7's bound in the library (it was a
+✅ **Fixed, no judgment required:** `DG_G7_NSD` now names gate 7's bound in the library (it was a
 bare literal `1` duplicated into BOTH callers' verdict lines, while the library header claims "one
-kernel, two callers" — the kernel was centralised 08-31f, the verdict was not).
+kernel, two callers" — the kernel was centralized 08-31f, the verdict was not).
 ⚠ It is **1 where `DG_Q_NSD` is 2**, both distributional claims on a stated sigma. Recorded at the
 constant, **NOT ruled on**.
 
@@ -94,7 +94,7 @@ gate a source class, bound + claim kind, scored?, and power. **The power column 
 written down**, and it re-reads the whole set.
 ⛔ **NOT ONE LAW-DERIVED GATE EXISTS.** Everything is observational or model-derived. Candidates
 named, none built: carbonate/Revelle consistency, Henry's-law solubility, and — **most valuable,
-since gate 12a reports an ocean-CAPACITY defect it cannot localise** — an **ocean DIC inventory vs
+since gate 12a reports an ocean-CAPACITY defect it cannot localize** — an **ocean DIC inventory vs
 GLODAP**, observational and currently ungated.
 ⇒ **Verdict on "rewrite the gates from scratch": NO, restructure.** The estimators are the
 expensive part and they are sound (gate 5's parabolic peak refinement, gate 7's linear end
@@ -171,14 +171,14 @@ which is its purpose. The only live writer of a retired name was §3(b).
 **(b) THE T-DEPENDENT ALPHAS: CLEAN.** Formula identity R↔C++ term for term, both in **Celsius**;
 **all four application sites** (invasion, evasion, both ENSO ocean limbs, prescribed sink) call
 `ccx_alpha_as` once per hemisphere per step on the **seasonal** SST and reuse it — no site reads
-`aux$sst`; marshalling **set-difference empty both directions** (nine fields); spinup correct via
+`aux$sst`; marshaling **set-difference empty both directions** (nine fields); spinup correct via
 `R/spinup.R:125`, evaluated at the annual mean as a fixed point must be; ¹⁴C inheritance verified
 (`f14 = F_C * r14`, no fractionation, both cores, header now states the reasoning).
 ⚠ Two documentation gaps, no numerical defect: **`ALPHA_AS_FCO3` box-averaging** is undocumented
 (0.082 is the mean of measured NH 0.0856 / SH 0.0786, which survive only inside the constant's
 `source` string), and **GATE Q re-implements the `eps_dicg` polynomial** rather than calling
 `ccx_alpha_as` — deliberately, to stay non-self-referential, but a **structural** change to the
-alphas would desynchronise it silently.
+alphas would desynchronize it silently.
 ⛔ **A CLAIM WALKED BACK:** the review flagged silent extrapolation past Zhang's 21 °C kinetic
 anchor at ~21.2 °C. It used a seasonal half-amplitude of ~2.0-2.24; the **fitted** value is 0.937 at
 `from90` and **1.069 across all ten survey starts**. Measured peaks **20.23** and **20.07 °C** —
@@ -230,7 +230,7 @@ productivity limb and a respiration limb would be **isotopically identifiable**.
 * On whole-record gross carbon: **0.04 ‰** of atmospheric δ¹³C against a **0.05 ‰** representation
   error — **BELOW NOISE**. ¹⁴C is the larger contrast (**+35 to +52 ‰** post-bomb) and still comes
   to **3.6 ‰** against a fitted `sigma_d14c` of **6.1** — **ALSO BELOW NOISE**.
-* ⇒ **The data CANNOT apportion the term.** A fitted partition would be a judgement width wearing a
+* ⇒ **The data CANNOT apportion the term.** A fitted partition would be a judgment width wearing a
   fitted coefficient's name — the [[ccx_npp_frac_anchor]] / `npp_frac_NH` failure mode.
 
 ⛔ **NOR IS IT A DOUBLE-COUNTING FIX.** GMST does carry ENSO (**r = +0.41**, **+0.53 at the 3-month
@@ -265,7 +265,7 @@ tropical continents by GPP, respiration and fire) — stays unrepresented either
 **THE REFIT (morning handoff §7) IS OTHERWISE UNCHANGED** and still owed: 25-parameter set, arm N,
 from the 09-01 basin. ⭐ **This session independently corroborated the one-basin finding** — all ten
 starts at **−1495.795/797** with parameters identical to three decimals — which is the evidence the
-polish-vs-dispersed-multistart judgement rests on. Torch verdict out loud before launching
+polish-vs-dispersed-multistart judgment rests on. Torch verdict out loud before launching
 ([[consider_torch_first]]); the traps in that handoff still apply.
 
 ---
@@ -284,7 +284,7 @@ polish-vs-dispersed-multistart judgement rests on. Torch verdict out loud before
 * **Still owed, unchanged from the morning:** the four observed SPO constants (total 1.168 / land
   0.683 / ocean 0.522 / phase 8.52) are **not in `R/constants.R`** and are replicated across ~10
   diagnostics.
-* The gate-7 `beta_max`×0.80 pass is a **mutation-test artefact, not a proposal.** It says the gate
+* The gate-7 `beta_max`×0.80 pass is a **mutation-test artifact, not a proposal.** It says the gate
   is satisfiable; it is not a suggestion to move `beta_max`.
 
 ---

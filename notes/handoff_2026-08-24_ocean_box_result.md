@@ -36,7 +36,7 @@ construction and a gate asserts it (all three remove 20.0000 GtC).
 The two `test-fluxes.R:99/100` failures are the **pre-existing by-design ones** — verified against
 a clean `git stash` before and after.
 
-> **ONE GATE HAD TO BE REWRITTEN, and the correction generalises.** Asserting closed-system ¹⁴C
+> **ONE GATE HAD TO BE REWRITTEN, and the correction generalizes.** Asserting closed-system ¹⁴C
 > conservation failed at **4.2e-4 — which is λ, not a leak.** ¹⁴C decays, which is why
 > `test-conservation.R` gates C and ¹³C only. What must be conservative is the **sink's own
 > contribution**: on-minus-off, which closes to 1e-12 in all three tracers and is strictly
@@ -57,7 +57,7 @@ Worst-cell `|ocean|/|foss|` = **0.017** against a pre-registered ≤0.20, absolu
 against a pre-registered <1 ‰. δ¹³C the same, worst ratio **0.070**. On the likelihood at the
 mode, `foss` pays **−46.8** on `d14c_NH` and −13.4 on `d14c_SH`; `ocean` pays **−0.20 / +0.47**.
 
-**The 23c ¹⁴C rejection reproduces at the mode, un-refitted** — so it was never an artefact of
+**The 23c ¹⁴C rejection reproduces at the mode, un-refitted** — so it was never an artifact of
 that refit's `sigma_d14c` inflation.
 
 ## 3. P3 — AND THE CARBON BUDGET KILLS IT
@@ -155,5 +155,5 @@ cd ~/Documents/2026/CodeProjects/CarbonCycleEmulator && claude --remote-control 
 > carbon budget kills it at any plausible magnitude. §6 carries the two open decisions.
 >
 > **Do NOT** re-run the three arms expecting a refit to change them (§4), build `ocean_deep`
-> without settling its profile (§6.2), quote 12.7 σ, re-centre `rep_dC`'s prior, or ship either
+> without settling its profile (§6.2), quote 12.7 σ, re-center `rep_dC`'s prior, or ship either
 > `pump_arms_SINK25*` directory.

@@ -39,7 +39,7 @@ interpreted, and the sign pattern confirms it exactly:
 - **EXPORT arm** — 75 m-worth of ML carbon divided by `dz[0] = 184` ⇒ a spuriously weak
   gradient ⇒ under-ventilation. Observed: deep Δ¹⁴C −133, sink 1.53.
 
-Both are the artefact, in the direction the artefact predicts. Neither is physics.
+Both are the artifact, in the direction the artifact predicts. Neither is physics.
 
 ## A second, smaller defect in the same file
 

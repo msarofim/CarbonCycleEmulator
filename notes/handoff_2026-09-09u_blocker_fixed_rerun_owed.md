@@ -32,7 +32,7 @@ now carrying the four review findings), `INDEX_ccx_seas.md`, [[ccx_pedagogical_n
 `A.seas_ml != 0 && P.seas_ml_on != 0`. **`A.seas_ml` survives only as a data-presence conjunct.**
 - ⚠ **`seas_ml_on` also had to be named in `ccx_cpp_par()`'s CURATED RETURN LIST** (`p[c(...)]` at the
   end of the function). Injecting the field without naming it there reaches the core as an
-  **out-of-bounds read, not a value** — a curated marshalling list is a SECOND place absence is
+  **out-of-bounds read, not a value** — a curated marshaling list is a SECOND place absence is
   decided, and both had to be edited. **Remember this for the next parameter.**
 - ⭐ **The mirror case is refused loudly**: `ccx_seas_ml_marshal_check(p, aux)` (`R/cpp.R:119`, called
   from `ccx_run_fast` and `ccx_deriv_fast`) stops when `p` says ON and `aux` has no `mld_coef`, which
@@ -82,31 +82,31 @@ pre-09-03, and `CHANGELOG.md:2528` already carries "P2 −5.14 → +0.24 ✅ the
 ⇒ **There is no SH solubility strain to relax, and relaxing toward the prior would INCREASE the
 swing.** Restated:
 - **The amplitude cut must come from RETIRING the shim** (`ent_seas_amp_SH` 21.04 against a derived
-  centre of 10.95 — and see §6, that centre is itself ~2× too large, making the strain worse).
-- ⭐ **The acceptance test should be NH-centred**: the live strain is `sst_seas_amp_NH` at −2.96
+  center of 10.95 — and see §6, that center is itself ~2× too large, making the strain worse).
+- ⭐ **The acceptance test should be NH-centered**: the live strain is `sst_seas_amp_NH` at −2.96
   (1.067 K against an observed 2.237 K), the hemisphere the SH-only shim never served and the new
   bi-hemispheric mechanism does.
-- ⚠ Keep the nuance: `R/constants.R:340-344` declares that prior's WIDTH a judgement covering an
+- ⚠ Keep the nuance: `R/constants.R:340-344` declares that prior's WIDTH a judgment covering an
   area-weighted-vs-gas-exchange-weighted estimator gap. **The strain is real; its exact size is not.**
 - ⛔ **P8 is an ENFORCED gate and the refit will hit it**: the stop is **76.146 m** (bisected), and
   **61.3 % of `h_ml`'s own prior lies past it — its MEDIAN, 83.94 m, is past it.** The prior's own
   comment (`R/calibrate.R:148-155`) says it encodes a mean-vs-max ambiguity **round 6 discharges**;
-  re-centre on the LS annual mean **59.7 m** at adoption (→ 23.8 % exposure, 5–11 % at a narrower
+  re-center on the LS annual mean **59.7 m** at adoption (→ 23.8 % exposure, 5–11 % at a narrower
   width). **Do this BEFORE launching a 24-start array or ~3 starts in 5 die at the guard.**
 
 ## 6. OWED, FROM THE REVIEW, NOT YET DONE
-- ⭐ **`.ENT_SO_SST_AMP = 3.0` is PEAK-TO-PEAK while labelled "half-amplitude"** (40–90 S measured
+- ⭐ **`.ENT_SO_SST_AMP = 3.0` is PEAK-TO-PEAK while labeled "half-amplitude"** (40–90 S measured
   1.4995 half / 2.9990 p2p; the SH hemispheric half 1.7464 reproduces the registered
   `SST_SEAS_AMP_SH_OBS` to 5 s.f., which is the like-for-like validation). The consumer needs a half.
   ⛔ **Fix BOTH legs in one edit** — review §8 reports the pCO₂ leg is p2p AND per-cell so the biases
-  do not cancel (centre ~2.1–2.3× high). **I did not verify the pCO₂ leg.**
+  do not cancel (center ~2.1–2.3× high). **I did not verify the pCO₂ leg.**
 - ⚠ **The comment at `R/constants.R:41-42`** — *"the band ... swings harder than the hemisphere"* — is
   **falsified** like-for-like and should go with the fix.
 - **`test-seas-lag-split.R:199`** hand-rolls a contract `ccx_seed_unencodable()` implements; it will
   re-break on the next parameter addition. Pre-existing, not this session's.
 - **The app teaches a model the code is not** (`app/ui.R:265`: "a mixed layer over ten diffusive
   layers", beside a diagram already updated to the seven-box HILDA form).
-- **§8's unverified leads**, worst first: F2 (above), F3 (guard uses the month-centre max; a ~0.64 m
+- **§8's unverified leads**, worst first: F2 (above), F3 (guard uses the month-center max; a ~0.64 m
   window where winter `dz_1` goes negative silently), F4 (substeps), the canonical mode file's stored
   stream set being 4.75 log-units short with a printing-only adoption gate, `ccx_loglik()` returning a
   finite 0 when every stream vanishes, GATE Q having no `test-gate-bounds` coverage.
@@ -115,7 +115,7 @@ swing.** Restated:
 
 ## 7. NON-OBVIOUS STATE
 - **`seas_ml` is still NOT in `CCX_PARAM_TABLE`** — a plain switch in `ccx_default_params()`. Must not
-  be freed. `seas_ml_on` is a MARSHALLING field, not a parameter: it is derived in `ccx_cpp_par()`
+  be freed. `seas_ml_on` is a MARSHALING field, not a parameter: it is derived in `ccx_cpp_par()`
   every call and must never be set by hand or stored in a mode file.
 - **The three pre-existing test failures are unchanged and were not fixed** (only diagnosed).
 - **`INDEX_ccx_seas.md` is ~17.3 KB of an 18 KB hard ceiling** and now carries its own "split owed"

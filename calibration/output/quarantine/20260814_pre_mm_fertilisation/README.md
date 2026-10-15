@@ -1,13 +1,13 @@
-# QUARANTINE — pre-MM-fertilisation posterior mode, 2026-08-14
+# QUARANTINE — pre-MM-fertilization posterior mode, 2026-08-14
 
 ## What applies
 
-Not a bug: a **model-structure change**. On 2026-08-14 the CO₂-fertilisation form
+Not a bug: a **model-structure change**. On 2026-08-14 the CO₂-fertilization form
 flipped from `NPP = NPP₀(1 + β ln(χ/χ₀))` to Michaelis–Menten,
 `NPP = NPP₀(1 + β_max·Δχ/(K + Δχ))` (`CCX_FERT_MM`, review item 7). `beta` left
 `CCX_PARAM_TABLE`; `beta_max` and `fert_k` entered it, 17 parameters → 18.
 
-**MM is NOT a reparameterisation of the log form.** As `fert_k → ∞` MM goes *linear*, not
+**MM is NOT a reparameterization of the log form.** As `fert_k → ∞` MM goes *linear*, not
 logarithmic, so **no substitution carries a `beta` posterior across**. This file is a
 posterior for a different model.
 
@@ -16,7 +16,7 @@ posterior for a different model.
 - `mode_fit.rds` — the 17-parameter MAP fit under the log form at β 0.75. It is the source
   of the `sigma_d13c = 0.440` / `sigma_co2 = 0.301` / `sigma_d14c = 4.16` values that
   `diag_recentre_beta.R` and `diag_beta_luc_profile.R` quote by hand, and of the
-  `mode_fit`-labelled column in several diagnostics. Those files are pinned to
+  `mode_fit`-labeled column in several diagnostics. Those files are pinned to
   `CCX_FERT_LOG`, so they remain reproducible against it.
 
 ## Canonical replacement
@@ -29,7 +29,7 @@ log-form posterior through an MM model.
 
 `calibration/diag_excess_c14.R` reads `calibration/output/mode_fit.rds` directly and falls
 back to an earlier quarantine copy when absent — it will now find neither at the canonical
-path and use its own fallback. That is the intended behaviour: it is a log-form diagnostic.
+path and use its own fallback. That is the intended behavior: it is a log-form diagnostic.
 
 ## Why it was not deleted
 

@@ -49,8 +49,8 @@ note without settling P4.
 
 ## N1b — THE CONTROL, rebuilt because the first one was compromised
 The collect note's §4 retracts N1's LEVEL: at a preindustrial steady state the ≤ 500 m band is
-dominated by the ABSENT bomb spike, so its mean |z| of 4.5 is an artefact, not a ventilation error.
-**The valid control is the DELTA between arms, which shares that artefact.**
+dominated by the ABSENT bomb spike, so its mean |z| of 4.5 is an artifact, not a ventilation error.
+**The valid control is the DELTA between arms, which shares that artifact.**
 **PREDICT: the ≤ 500 m band does not degrade relative to the 134 m arm's 3.98 by more than 0.5 z.**
 **FALSIFIER: it does** ⇒ a thinner HS is buying the deep at the surface's expense.
 

@@ -38,7 +38,7 @@ per-volume concentration` (the cell's idiom; D1 closes; a uniform column is a fi
   ⚠ Stated, not claimed settled: the LS-interior exit at layer k is the Munk-column assumption (1966); my recollection (uncited in
   the tree) is that Toggweiler & Samuels 1995 and Marshall & Speer 2012 put most of the real deep return in the Southern Ocean,
   which in this model is the HS box — a return that already exists as the `u_hs` / `q` EXCHANGE. The THC limb's k = 10 exit (into
-  the bottom layer, then to the ML) is the nearest built analogue and is in the grid.
+  the bottom layer, then to the ML) is the nearest built analog and is in the grid.
 **Overlap risk, stated with its check.** The HILDA HD↔interior exchange `q` (`tau_q` 538) and `u_hs` are ALREADY the model's
 high-latitude ventilation; the THC limb adds an ADVECTIVE path beside them. In the unrefitted probe both stay at the canonical
 values, so every THC point is read against the canonical ventilation, not a refitted one. A refit would trade them — the array's
@@ -49,7 +49,7 @@ question, not this probe's.
 any array frees it, the `w_vent` precedent; init 20), `k_thc = 1L` (return layer, 1-BASED; STRUCTURAL, not fitted, on `p` not in the
 table — the `k_e1` precedent). Prefix check: no existing param or aux name begins with `w_thc` / `k_thc` / `thc_` and neither is a
 prefix of one (`w_up`, `w_out_*`, `w_eq`, `w_vent`, `k_w`, `k_eq`, `k_e1/2` checked). Absence = 0 = OFF.
-**Aux.** `thc_on = hs_on && pump_field == "martin" && w_thc > 0` (integer; ONE resolver, marshalled), `k_thc`, `thc_share[2] =
+**Aux.** `thc_on = hs_on && pump_field == "martin" && w_thc > 0` (integer; ONE resolver, marshaled), `k_thc`, `thc_share[2] =
 a_hs_h / Σ a_hs`. Under `"solved"` the limb is INERT (E's contract: the solved field is diffusion's fixed point, not an advective
 one); `w_thc > 0` with `hs_frac = 0` ERRORS by name (no HS box to route through); `k_thc` outside 1..nl errors by name; `w_thc`
 non-finite / negative errors by name. `ccx_pump_field_inert("solved")` gains `w_thc`; `CCX_PARAM_ABSENT_OK` gains `w_thc`;
@@ -76,8 +76,8 @@ equals the martin/W=0 point of the 09-14 h probe (D alone) to 1e-6 — the limb 
 CONTROL: the canonical STRUCTURE (solved field, no limb) × f — arm A's raw numbers already exist (PK-2) and are re-read here for
 the same f grid so the control is like-for-like on this script's harness (f = 0.2 is new).
 **Stages.** (1) RAW: every point, one C++ run, the 25 rows and the diagnostics (below). (2) ARM C: for each arm and each k, the
-(W, f) point with the best raw like-for-like is re-optimised over arm C's names `{beta_max, fert_k, q10, kz_deep_frac, h_ml, k_w,
-bomb_total, sigma_d14c}` (Nelder–Mead 1500 + BFGS 100, the PK-2 machinery); the CONTROL is re-optimised the same way at the same
+(W, f) point with the best raw like-for-like is re-optimized over arm C's names `{beta_max, fert_k, q10, kz_deep_frac, h_ml, k_w,
+bomb_total, sigma_d14c}` (Nelder–Mead 1500 + BFGS 100, the PK-2 machinery); the CONTROL is re-optimized the same way at the same
 f (PK-2 has × 0.5 / 0.7; × 0.35 / 0.2 are run here). Selection by raw score is PART OF THE PROCEDURE and stated; no point is
 chosen after reading stage 2. (3) The best THC point additionally at `tau_q × {0.5, 2}` (the overlap check, two runs).
 **Reads per point** (all from `dg_run`): the 25-row Δlik vs the canonical; `excess_c14_ocean` and the 1975/1995 ocean bomb
@@ -98,7 +98,7 @@ kmol of bomb ¹⁴C delivered by each pathway at 1975 / 1995 (the PK-1 recorder,
       the canonical is at 82.8, z +2.9);
   (b) OBSERVATION — `ocean_grad_dic` inside its own σ: 233 ± 25.2 µmol/kg (the canonical 302.9, z +2.8; the E mode 346.6);
   (c) ORDERING — at the same f, the stage-2 (arm C) score of the new structure ≥ the stage-2 score of the CONTROL (the canonical
-      structure under the same re-optimisation at the same kz: −86 at × 0.5, −19 at × 0.7 from PK-2; × 0.35 / 0.2 run here).
+      structure under the same re-optimization at the same kz: −86 at × 0.5, −19 at × 0.7 from PK-2; × 0.35 / 0.2 run here).
       This is the like-for-like "does the structure do at least as well as the canonical's soft kz hold", not a number I chose;
   (d) OBSERVATION — the export is Nowicki's 9.08 by construction (prescribed), and the PI layer-2 DIC is NOT inverted below the
       ML (the E mode's −66 µmol/kg was real and disqualifying; the read is on the annual mean of the mass-at-the-time reader

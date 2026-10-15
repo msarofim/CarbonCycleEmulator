@@ -114,7 +114,7 @@ rank.
 
 **What did NOT change**: `CCX_MS_MAXIT = 6000` (the **wall**, not the cycle budget, stops a round —
 3 × 6,000 evals is ~111 min at 0.37 s/eval, so a 180 min task does not reach two cycles); the
-dispersion **centre** (still the COLD init); and the objective and parameter table —
+dispersion **center** (still the COLD init); and the objective and parameter table —
 `port_targets.csv` still stands at `53ef03d`, `n_par = 25`, and **nothing needed it re-run**.
 
 ## 4. ✅ WHAT WAS VERIFIED, AND HOW
@@ -133,7 +133,7 @@ dispersion **centre** (still the COLD init); and the objective and parameter tab
   ⇒ **an unreachable guard is not a guard** [[mutation_test_gates]].
 - **Suite 1365 / 6 FAIL / 2 skip**, the same six. ⚠ A 7th appeared on the first run —
   `test-parity.R:235`, the 50 ms/run performance budget, at **0.0530 s** — and it is **CONTENTION,
-  not a regression**: three optimiser tasks were running beside the suite (load 7.6) and the file
+  not a regression**: three optimizer tasks were running beside the suite (load 7.6) and the file
   passes 57/57 alone [[eta_in_days_is_not_a_slow_run]].
 
 ⚠ **Use a FRESH output directory.** The default moved to

@@ -12,7 +12,7 @@
 
 ⇒ **The product is the CHAIN, not the endpoint.** A defect blocks release if it breaks the chain:
 - **an observable matched BY CANCELLATION is a broken link, however good the match;**
-- **a wrong-signed mechanism cancelled by a fitted coefficient is worse than a visible miss** — a
+- **a wrong-signed mechanism canceled by a fitted coefficient is worse than a visible miss** — a
   reader takes the wrong physics away, the one thing a teaching model must not do;
 - **a benchmark miss with the right mechanism is acceptable, and is a research question.**
 
@@ -23,7 +23,7 @@ says it is.** Of the three broken links stated on 09-03, **one is fixed, one is 
 still ungated on its larger half, and one is unchanged and is the real blocker.**
 
 The heaviest remaining work is **not** scientific. It is that **the two public-facing documents
-describe a different model from the one in the repo** (§3), and that the repo has **no licence** (§4).
+describe a different model from the one in the repo** (§3), and that the repo has **no license** (§4).
 
 ---
 
@@ -106,7 +106,7 @@ Niño3.4 with a year term, n = 66 — the same estimator on both sides):
 | model, **solubility only** (patch off) | **−0.1274** | 0.0318 | **−0.432** |
 
 ⭐ **This is exactly the defect the standard in §0 names as disqualifying**: a wrong-signed mechanism
-cancelled by a fitted coefficient. Four `gamma_enso_*` parameters exist to paper over it, and
+canceled by a fitted coefficient. Four `gamma_enso_*` parameters exist to paper over it, and
 **0.356 of coefficient buys only +0.181 of net slope** because it must first cancel the −0.127. The
 model still ends up at **0.46× the observed sensitivity**.
 ⇒ A student switching ENSO on in the app sees roughly the right answer produced by the wrong
@@ -131,7 +131,7 @@ Nothing here is hard; all of it is disqualifying if a reader reaches it first.
 
 1. ⛔⛔ **`README.md` says the model is "calibrated by Bayesian MCMC". IT IS NOT.** There is no
    posterior; `calibration/output/posterior_draws.rds` does not exist. The model sits at a
-   **MAP mode found by multistart optimisation**. ✅ **The app is honest about this in-product**
+   **MAP mode found by multistart optimization**. ✅ **The app is honest about this in-product**
    ("A single best fit, not yet a posterior — no uncertainty ranges are shown"); the README is not.
 2. ⛔ **`README.md`'s status line is stale**: *"model core built and running end-to-end on
    uncalibrated defaults; calibration and app pending."* Both halves are wrong — `ent26` was adopted
@@ -152,7 +152,7 @@ Nothing here is hard; all of it is disqualifying if a reader reaches it first.
    either.
 6. ⚠ **20 of 48 registered constants carry `status = "provisional"`**, including `ALK_SURFACE`,
    `CO2_PI_PPM`, `OCEAN_AREA_*`, `NPP_GLOBAL_PI` and all the `SPO_SEAS_*` family. Many are
-   conservative labelling rather than genuinely unsourced — but **a public release needs that triage
+   conservative labeling rather than genuinely unsourced — but **a public release needs that triage
    done and the label to mean one thing.**
 
 **Current gate status at `ent26`, measured today** — PASS: **G** (−0.06), **Q** (+1.27),
@@ -163,7 +163,7 @@ Retired: 4, 8, 10. Comparison only: 12/12a/12b.
 
 ## 4. TIER 3 — REPO MECHANICS
 
-1. ⛔⛔ **THERE IS NO LICENCE FILE.** Without one the code is "all rights reserved" by default and
+1. ⛔⛔ **THERE IS NO LICENSE FILE.** Without one the code is "all rights reserved" by default and
    nobody may legally reuse it. **This is the single hardest blocker in the document and the
    cheapest to clear.** It is also a decision only Marcus can make.
 2. ⚠ **No git remote.** 82 MB of `.git`, 1043 tracked files — publishable as-is once a home is chosen.
@@ -195,7 +195,7 @@ Retired: 4, 8, 10. Comparison only: 12/12a/12b.
 ## 6. RECOMMENDED ORDERING
 
 **Before anything is public**
-1. **Licence.** Marcus's decision; blocks everything else. (§4.1)
+1. **License.** Marcus's decision; blocks everything else. (§4.1)
 2. **Correct `README.md`** — the MCMC claim and the status line. Two sentences. (§3.1, §3.2)
 3. **Rewrite `DESIGN.md` §6** against the 09-04 ledger, and restate or qualify "all must pass".
    (§3.4, §3.5)
@@ -208,7 +208,7 @@ Retired: 4, 8, 10. Comparison only: 12/12a/12b.
    methodological choice and it is Marcus's**:
    (a) **retire it** and rebase the seasonal targets on independent products (the SOM-FFN route is
    already built and already carries gate S);
-   (b) **generalise it** to a rotating ocean signature — a two-vector rather than two-scalar
+   (b) **generalize it** to a rotating ocean signature — a two-vector rather than two-scalar
    inversion, which is the physically honest version of the same idea;
    (c) **freeze it at `alpha_as_tdep = 0`** as declared provenance only, and say so at every constant.
    ⚠ A "gate L" depends on this and should NOT be built before it is settled.

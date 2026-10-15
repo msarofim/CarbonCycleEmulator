@@ -2,11 +2,11 @@
 
 **Ruling (Marcus, 2026-09-07f):** (1) a literature prior on the HS export; (2) the HS-surface observations as SCORED
 rows; (3) launch on Torch after a sweep of the model and launch code. Supersedes the 09-07e DRAFT (its history is
-in git: the probe's gate failed by its letter — P3 +18.9 of 20, P6 wrong-signed — and the launch was a judgement
-call; this is the judgement).
+in git: the probe's gate failed by its letter — P3 +18.9 of 20, P6 wrong-signed — and the launch was a judgment
+call; this is the judgment).
 
 ## What is fitted / declared
-- Fitted (30): round 2's 29 + **`pump_hs_gcm2`** (HS export per unit area, gC m⁻² yr⁻¹, remineralised in HD), box
+- Fitted (30): round 2's 29 + **`pump_hs_gcm2`** (HS export per unit area, gC m⁻² yr⁻¹, remineralized in HD), box
   [0.5, 200]. **Prior: lognormal, median 22.9, log-sd 0.6** (2.5–97.5 %: 7–74) — `data-raw/build_hs_export_prior.R`
   from the polar-Antarctic-zone float export of Liniger et al. 2025 (2.01 molC m⁻² yr⁻¹, doi:10.1029/2024GB008193)
   and Arteaga et al. 2019 (1.80, doi:10.1029/2019GB006236); the width carries the NH half of the box and the export

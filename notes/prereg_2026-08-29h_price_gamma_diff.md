@@ -6,7 +6,7 @@
 
 ## 0. WHY
 
-08-29g landed diffuse-light fertilisation and measured, **FROZEN at the mode's other parameters**:
+08-29g landed diffuse-light fertilization and measured, **FROZEN at the mode's other parameters**:
 
 | `gamma_diff` | 1992 | sd | r | Δlogpost frozen |
 |---|---|---|---|---|
@@ -20,7 +20,7 @@ scan predicted" (handoff 08-25b §7). **This run asks what it actually costs.**
 
 ## 1. THE DESIGN
 
-Grid `gamma_diff` ∈ {0, 0.125, 0.25, 0.50, 0.75, 0.97}. At each, re-optimise
+Grid `gamma_diff` ∈ {0, 0.125, 0.25, 0.50, 0.75, 0.97}. At each, re-optimize
 
     SLICE = c("beta_max", "fert_k", "q10", "rep_dC")
 
@@ -29,13 +29,13 @@ that the frozen cost is a **CUMULATIVE CO₂ LEVEL OFFSET** — the enhancement 
 land pools and returns it over pool turnover times, so repeated eruptions leave the level low, and
 the level rows (0.53–0.58 ppm RMS, outvoting everything 40:1) pay. **`rep_dC` IS a CO₂ level bias
 (~6 ppm, [[ccx_rep_dc_co2_bias]]), so if the story is right `rep_dC` absorbs much of the cost, and
-if it is wrong it will not.** `beta_max`/`fert_k` are the ρ=+0.998 fertilisation pair and `q10` the
+if it is wrong it will not.** `beta_max`/`fert_k` are the ρ=+0.998 fertilization pair and `q10` the
 temperature sensitivity — the secular compensators.
 
 ## 2. GATES
 
 - **H0 — CONTROL.** `gamma_diff` = 0 conditional must return **0.00 ± 0.05** (the slice is already
-  at its optimum there). **FAIL ⇒ the optimiser is broken and nothing below is read.**
+  at its optimum there). **FAIL ⇒ the optimizer is broken and nothing below is read.**
 - **H1 — THE PRICE.** Conditional Δlogpost at `gamma_diff` = 0.25. Bands, fixed here, the 08-29d
   scale: **CHEAP ≤ 20 | MODERATE ≤ 100 | PROHIBITIVE > 100.**
 - **H2 — THE LEVEL-OFFSET HYPOTHESIS, and it is a real test.**
@@ -62,7 +62,7 @@ temperature sensitivity — the secular compensators.
 
 - **No adoption.** `gamma_diff` stays 0 whatever this says; making it the 22nd FITTED parameter is a
   separate decision requiring a full refit, not a conditional slice.
-- **It does not choose a value.** The Pinatubo-matching γ (≈0.97) and the r-maximising γ (≈0.25–0.5)
+- **It does not choose a value.** The Pinatubo-matching γ (≈0.97) and the r-maximizing γ (≈0.25–0.5)
   differ by 2–4×, and nothing here resolves which target is wanted.
 - **It cannot price the mechanism against a RESTRUCTURED model** — plan items ②–⑤ all move the
   objective, and this price is against today's.

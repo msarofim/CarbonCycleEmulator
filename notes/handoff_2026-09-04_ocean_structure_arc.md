@@ -158,7 +158,7 @@ boxes over 16 % of area — never quote them together); the **GEOMETRY** is test
    profile). ⚠ The equatorial box's ENSO case survives **only** if a tropical box's sign differs from
    every within-column lever — untested, and it is the assumption everything rests on.
 3. ⭐ **`DESIGN.md` §6** — the acceptance criteria describe a retired gate set at a quarantined mode.
-4. **LICENCE** — Marcus's call, blocks any public release.
+4. **LICENSE** — Marcus's call, blocks any public release.
 5. **`sst_seas_amp_NH` at −3.91σ**, still the worst prior violation, still undiagnosed; the SH's twin
    was relieved by giving it a MECHANISM.
 6. **A posterior** (both blockers gone at `ent26`); a **Joos hypothesis**; the provisional-constant

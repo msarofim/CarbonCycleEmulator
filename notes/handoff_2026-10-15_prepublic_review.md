@@ -33,7 +33,7 @@ then show me the uncertainty band text for review"), 2026-10-15 ~11:10.
   - "Apply all (Recommended)" for the cleanups;
   - "Facts-only README + banners (Recommended)";
   - "Trim to a public version (Recommended)" for CLAUDE.md.
-- **Dormant model bugs:** NOT fixed before launch, because they change behaviour. Marcus started the proposed
+- **Dormant model bugs:** NOT fixed before launch, because they change behavior. Marcus started the proposed
   session "Fix six dormant CarboTope model bugs" (`local_443fd6a2-…`), which works in its own worktree.
 
 ## 3. Open items, in order

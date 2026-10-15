@@ -69,7 +69,7 @@
   "about three months" holds (`diag_timing_row_reread.R`).
 - **Why the timing is early:** moving the lag to 5 months costs −11.99; the seasonal-cycle rows pay 63 % (MLO −3.59,
   SPO −2.41), GCB's land sink −1.37. GCB's land sink is the largest pull OFF short lags (+2.78 of +5.62).
-- **H2 test** (`diag_h2_time_shape.R`, against GCB Fig. S10 digitised by `data-raw/build_gcb2025_s10_ocean_climate.R`,
+- **H2 test** (`diag_h2_time_shape.R`, against GCB Fig. S10 digitized by `data-raw/build_gcb2025_s10_ocean_climate.R`,
   gated on GCB's stated −0.20): CCX −0.48 ± 0.07 vs GCB −0.29 ± 0.05 GtC/yr per K (1.63×); the gap grows from ~0;
   emergence 1973 vs 1999.
 - **H2 stake** (`diag_h2_futures_stake.R`; SST anomaly × 0.613 = GCB-sized): CO₂ in 2300 SSP5-8.5 −23.6 ppm (17–30 over
@@ -78,7 +78,7 @@
 - **`f_luc_wood` = 0:** cited at `CCX_F_LUC_WOOD_DEFAULT` (Dorheim et al. 2024 Hector §2.2.2; GCB 2025 Suppl. S.2.2);
   neither supports the debit's composition (72 % soil).
 
-## 4. Open items (each is Marcus's to prioritise)
+## 4. Open items (each is Marcus's to prioritize)
 1. **The `k_w` line on card 7 is MY DRAFT** ("One fitted value is a compromise …"): his wording to approve or change.
 2. **H2's next step.** The signature and the stake are measured. The options on record:
    - a refit at lower `kz` (`kz` is held by the sink and bomb rows; ~13–16 h on the Mac's CPU clock, or Torch);

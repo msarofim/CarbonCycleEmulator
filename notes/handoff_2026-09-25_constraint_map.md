@@ -142,7 +142,7 @@ Row TOTALS (log-units): δ¹³C level & gradient **26**, CO₂ level 18, Δ¹⁴
 ### ⛔⛔ THREE READING TRAPS, all captioned in the app, all of which I walked into first
 1. **A share of a small row is not a finding.** `CO₂ in ice cores` is 31.6 % "held by" the seasonal
    cycle on a row worth 2.8 against CO₂ level's 18. The chart therefore draws MAGNITUDE and prints
-   each row's total beside it; a row-share heatmap would have coloured those two the same.
+   each row's total beside it; a row-share heatmap would have colored those two the same.
 2. **A component's bar is a SUM over its parameters.** Ranking components by total made
    *air-sea gas exchange* — a group of ONE — read as least-watched, when its single parameter `k_w`
    has the **HIGHEST total leverage of all 29**. ⭐ *A sum is not a rate until you divide by the
@@ -185,7 +185,7 @@ now measured-vs-predicted drop.
 - **Palette.** New pair `pull_up` **`#b2182b`** / `pull_down` **`#2166ac`**, scored **21.2** minimum
   over normal/protan/deutan/tritan against the ≥ 8 target. ⚠ **The land-use brown/teal was
   deliberately NOT reused** despite already having a receipt: a reader who has just learned
-  brown = clearing two tabs away would read brown = wants-higher here. **Same colours, different
+  brown = clearing two tabs away would read brown = wants-higher here. **Same colors, different
   meaning, is its own bug.**
 - **Naming.** The observation-family strings are **typeset in the DIAGNOSTIC** (δ¹³C, Δ¹⁴C, CO₂) and
   are the app's axis labels and the subject of its computed prose. A pretty-name lookup in

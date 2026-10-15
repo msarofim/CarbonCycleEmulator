@@ -88,7 +88,7 @@ at each.
   LONGER one. I reasoned from the amplitude alone and the row is phase-driven — **the same scalar
   reading of a vector decomposition that `diag_seas_channel_decomp.R`'s own header records as
   having been wrong in both directions in August.**
-- **And my first readout of P3 was an artefact of my own grid.** Log spacing put 1.181 eight times
+- **And my first readout of P3 was an artifact of my own grid.** Log spacing put 1.181 eight times
   closer to the fitted 1.159 than 0.992 was, so all four rows read "wants LONGER" off the SPACING.
   Replaced with a symmetric central difference in ln τ. [[argmax_flat_optima]].
 - **Free convergence check:** slope ÷ curvature puts the optimum at `tau_ex` **1.156** against the
@@ -105,7 +105,7 @@ at each.
 - **A climatology is not an error bar.** This product carries no spread I am using, so these
   phases have no observational uncertainty attached — unlike the inversion's, which are
   bootstrapped. **The spread ACROSS BANDS is the honest scale** and it is reported.
-- **The +3-month quarter-cycle conversion in P4 is an idealisation** and was labelled the weakest
+- **The +3-month quarter-cycle conversion in P4 is an idealization** and was labeled the weakest
   of the four before it ran. Real loss makes the true lag shorter, which is exactly the 1.13
   months §2 measures against the Southern Ocean.
 - The `tau_ex` profile is FROZEN in the other 20 parameters and therefore overstates every cost;

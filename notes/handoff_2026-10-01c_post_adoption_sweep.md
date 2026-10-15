@@ -30,7 +30,7 @@
   - New tests in `tests/testthat/test-mechanisms.R`: under each switch, the canonical is BLIND to its
     driver (exactly 0 change under a +1 K climate record, or with every human carbon input doubled).
     Each test carries a column inventory. Mutation-tested.
-  - Verified in the app: warming off 418, emissions off 282, fertilisation off 483 ppm, against 425.
+  - Verified in the app: warming off 418, emissions off 282, fertilization off 483 ppm, against 425.
   - **Full suite at `4fd433d`: 5482 passed, 0 failed, 0 errors, 5 skipped**
     (`outputs/diagnostics/suite_20261001_post4fd433d_all.log`).
 - ⛔ **NAMED RED: `test-pulse-linearity.R`, 5 failures.** It fails on every tree that contains
@@ -61,7 +61,7 @@ All are in the review note with options and numbers. Recommendations in brief:
 | B3 | the AIC gate's row set under mixed objectives | drop the two moved GCB rows when the arms' D3 gates differ; card 6's live ΔAIC uses the same rule |
 | B3b | `CCX_MODE_PINNED_PARENT` is hilda29l's free parent; hilda33d has none | re-document it now; a #14 free-parent wave only if he wants the pins re-priced |
 | B4 | the drafted labels for the four gated names | `ndep_ret`'s "stored" reads as NET, but 10.19 is GROSS (net 7.0) |
-| B5 | the fertilisation switch: behaviour or words? | change the words; it stays CO₂ fertilisation only |
+| B5 | the fertilization switch: behavior or words? | change the words; it stays CO₂ fertilization only |
 | B6 | the emissions-interpolation flip (`35f38dc`, "option 1") MISSED the #14 refit | put it on the next refit's launch checklist, or flip and restamp now |
 | B7 | posterior ribbons | Laplace, 1000 draws, 5–95 %, vV futures first; MCMC later as the check |
 | B8 | the new assessment record | ask whether to draft the evidence before or after B1–B3 |
@@ -74,7 +74,7 @@ All are in the review note with options and numbers. Recommendations in brief:
      the caption verdict (`app/R/plots_review.R:340`) must follow the sign;
    - the pulse box: the sentence, then re-pin the constants and the test (§1);
    - the drivers list and table (`app/server.R:79–80`, `1208–1221`) gain N deposition (`data/forcing_ndep.rds`,
-     the vV-harmonised NOx + NH₃ emissions proxy);
+     the vV-harmonized NOx + NH₃ emissions proxy);
    - the version label plus its test (B2), and DEPLOY.md lines 36, 87 and 101.
 2. **B3 / B3b in code:** the row-set rule in `tests/testthat/test-mode-file.R:306–330`, and the stale
    red-#1 / red-#2 comment blocks there.

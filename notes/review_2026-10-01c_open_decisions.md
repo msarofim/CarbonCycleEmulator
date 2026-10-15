@@ -1,7 +1,7 @@
 # REVIEW 2026-10-01 (c) — what is waiting on Marcus after the `hilda33d` adoption
 
 > ⭐ **RULED 2026-10-01 (Marcus), all of §A and §B — applied in CHANGELOG 10-01 (j), (k), (l), (m).**
-> Verbatim: "1) Retire card 6. 2) Say about 1.4 dC per 1000 GtC. 3) Delete the fertilisation sentence where it
+> Verbatim: "1) Retire card 6. 2) Say about 1.4 dC per 1000 GtC. 3) Delete the fertilization sentence where it
 > appears. 4) Fix Card 4 and 5, and the land pools, and add N deposition as a driver. 5) update the version to BETA
 > v1.0 CarboTope. 6) Do the recommendation. 7) Follow recommendations. 8) If it is a gross rate, then name it that.
 > 9) Reword: is should be specifically about CO2 fertilization, with nitrogen effects a different arm (even though
@@ -34,7 +34,7 @@ All measurements are at `hilda33d`, with BLAS pinned, on the commits named.
    | switch | what it missed | 2024 CO₂ in the app, before → after |
    |---|---|---|
    | "Warming's effect on the carbon cycle" | `npp_tsens` (the greening term), contradicting its own caveat ("only the carbon cycle's response to that warming") | 419.5 → **418** (the effect goes from −5.3 to −6.8 ppm) |
-   | "Our emissions" ("nature alone") | the ANTHROPOGENIC N deposition, built from NOx + NH₃ emissions (your D2 (a) emissions proxy) and already classed as emissions-driven by `ccx_hold_climate()` | 277.0 → **282.3**. The N sink had been cancelling the warming release the caveat promises. |
+   | "Our emissions" ("nature alone") | the ANTHROPOGENIC N deposition, built from NOx + NH₃ emissions (your D2 (a) emissions proxy) and already classed as emissions-driven by `ccx_hold_climate()` | 277.0 → **282.3**. The N sink had been canceling the warming release the caveat promises. |
 
    - New tests: under the warming switch, the canonical's run is BLIND to a +1 K shift in the climate
      record; under the emissions switch, it is blind to doubling every human carbon input. Each test
@@ -86,7 +86,7 @@ The app is not deployed (`APP_FEEDBACK_URL` is still a placeholder), so no reade
 - ⚠ The claim "flat in pulse size but NOT in when you look" no longer holds. The figure varies about
   ±3 % across horizons, and it RISES after +100 yr.
 - The physics: the slower pulse decay (IRF(100) 0.288 → 0.360) now balances the thermal lag, which is
-  the TCRE-like behaviour. That is arguably a better lesson.
+  the TCRE-like behavior. That is arguably a better lesson.
 - Against AR6's TCRE the box's number is now 1.36, 82 % of the 1.65 best estimate and inside the likely
   range. It was 1.03, 62 %, before.
 - **Needs your sentence.** The constants and the test's "falls with horizon" assertion then follow it.
@@ -95,11 +95,11 @@ The app is not deployed (`APP_FEEDBACK_URL` is still a placeholder), so no reade
 - `app/ui.R:346–350` (the "Why there is no separate 'no land sink' switch" box);
 - `app/server.R:168–169`;
 - `app/server.R:1072–1074`;
-- `R/mechanisms.R:90–95`, the fertilisation switch's label "(the land sink)", "Switch it off and the
+- `R/mechanisms.R:90–95`, the fertilization switch's label "(the land sink)", "Switch it off and the
   land stops taking up carbon", and "there is no separate land-uptake mechanism".
 
-N retention is a second long-term sink. With fertilisation off it still holds **30 GtC** on land by
-2024, and CO₂ is 9.4 ppm lower than with both off. See B5 for the behaviour question.
+N retention is a second long-term sink. With fertilization off it still holds **30 GtC** on land by
+2024, and CO₂ is 9.4 ppm lower than with both off. See B5 for the behavior question.
 
 **A4. Card 4 says "whose fitted strength lands inside the observed range".**
 - `w_enso_l2` is **11.91 ± 1.81** Sv/index at hilda33d, against Meinen's [14, 25]. That is below the range
@@ -137,7 +137,7 @@ N retention is a second long-term sink. With fertilisation off it still holds **
 - Some verdict phrases print regardless of the computed value: `app/R/plots_review.R:168–169`, `:202–203`
   and `:235`, and `app/server.R:178–183`.
 - Typed numbers that still hold but will drift at the next refit: cards 1–4 and 8, and the constraint-map
-  judgements.
+  judgments.
 
 ---
 
@@ -178,7 +178,7 @@ Where the stale label lives:
   unfreeze;
 - `app/DEPLOY.md:36, 87, 101`: "ships as beta v1.0-hilda29l", and hilda29l's file named as the
   parameter set the app runs on;
-- README's status block, which is already dual-labelled correctly;
+- README's status block, which is already dual-labeled correctly;
 - **No test pins the label**, which is why it drifted silently.
 
 Options:
@@ -226,7 +226,7 @@ and `gcb_ocean_sink` score against targets moved by s · I(t) (`R/likelihood.R:2
 
 | name | drafted label | unit | fitted | note |
 |---|---|---|---|---|
-| `ndep_ret` | "Carbon stored per unit of nitrogen deposited on land" | kg C per kg N | 10.19 | ⚠ GROSS. The realised NET is 7.0 kg C/kg N (1990–2023), and "stored" reads as net. |
+| `ndep_ret` | "Carbon stored per unit of nitrogen deposited on land" | kg C per kg N | 10.19 | ⚠ GROSS. The realized NET is 7.0 kg C/kg N (1990–2023), and "stored" reads as net. |
 | `npp_tsens` | "Plant growth's response to warming" | per °C | −0.00785 | Correct, but opaque: it means −0.8 % NPP per °C |
 | `imb_share_land` | "Share of the carbon budget's unexplained gap assigned to the land" | — | 0.593 | |
 | `imb_share_ocean_rest` | "Ocean's share of the gap the land does not take" | — | 0.208 | Accurate. The ocean's share of the WHOLE gap is (1 − 0.593) × 0.208 = 0.085. |
@@ -235,13 +235,13 @@ Constraint-map components (`calibration/diag_constraint_map.R:141,155`) are also
 - `ndep_ret` and `npp_tsens` → "Land uptake";
 - the two shares → "Input scalings & reporting".
 
-### B5. The fertilisation switch: change the behaviour, or the words? (from A3)
+### B5. The fertilization switch: change the behavior, or the words? (from A3)
 
 - (a) The switch also zeroes `ndep_ret`, so "the land sink" stays true.
-- (b) The switch stays CO₂ fertilisation only, and the text changes (A3).
+- (b) The switch stays CO₂ fertilization only, and the text changes (A3).
 - (c) Add a separate "Nitrogen deposition" switch (a feature).
 
-**Recommendation: (b).** N retention is not CO₂ fertilisation, and (c) is worth it only if you want
+**Recommendation: (b).** N retention is not CO₂ fertilization, and (c) is worth it only if you want
 students to see the N sink on its own.
 
 ### B6. ⚠ A ruled change that missed its refit: the piecewise-constant emissions interpolation
@@ -277,7 +277,7 @@ futures to 2150) is ≤ 2.8 s; one log-posterior evaluation is about 0.2 s.
 - ⚠ The Laplace spread is ±39 ppm (SSP5-8.5 2300), and it is linear. MCMC would also test whether that
   spread is honest, given the `h_ml` near-degeneracy and the `npp_tsens` ridge.
 - The bands inherit the σ-audit items: the uninflated `gcb_ocean_sink` σ narrows them.
-- **Recommendation: (A), 1000 draws, 5–95 %, the vV futures first, labelled "Gaussian approximation at
+- **Recommendation: (A), 1000 draws, 5–95 %, the vV futures first, labeled "Gaussian approximation at
   the best fit, conditional on the nine held values"; (B) later as the check.**
 - Torch: (A) does not need it; (B) does (ask first).
 
@@ -304,7 +304,7 @@ weightiest of them and is lifted out above.
 
    These were carried as "deploy blockers, all yours" until 09-27c, then dropped.
 2. **R2, the `rep_dC` prior.** You reopened it 09-29. The menu is `notes/r2_explained_2026-09-30.md` §6:
-   (a) keep it as a named shim, or (c) σ 0.2 centred on 0.776, at −16.0. No ruling yet.
+   (a) keep it as a named shim, or (c) σ 0.2 centered on 0.776, at −16.0. No ruling yet.
 3. **The σ-audit's three objective items:**
    - `gcb_ocean_sink` 0.4 uninflated;
    - the `excess_c14_ocean` target set;

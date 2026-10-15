@@ -123,7 +123,7 @@ correction stays — it was wrong twice over and is now right — but it is not 
 
 ### 3b. The explanation: it is the price of the pure-diffusion ocean
 
-`calibration/diag_d13c_levers.R`, the ocean analogue of the `ra_ratio` test. `k_w` is the
+`calibration/diag_d13c_levers.R`, the ocean analog of the `ra_ratio` test. `k_w` is the
 only lever found anywhere that is not paid for somewhere else:
 
 | k_w (m/yr) | δ¹³C bias | CO₂ bias | Δ¹⁴C bias | land share |
@@ -134,7 +134,7 @@ only lever found anywhere that is not paid for somewhere else:
 | 6000 | −0.034 | +4.81 | −1.62 | 45 % |
 
 **And it is not available.** 1500 m/yr *is* the Wanninkhof global-mean CO₂ transfer
-velocity the prior is centred on (DESIGN.md line 102; ~16.5 cm/hr = 1450 m/yr). 4000 is
+velocity the prior is centered on (DESIGN.md line 102; ~16.5 cm/hr = 1450 m/yr). 4000 is
 2.7× it, **+2.45 σ**. So the model needs 2.7× more gross air-sea exchange than a real
 piston velocity delivers.
 

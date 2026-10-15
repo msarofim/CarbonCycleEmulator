@@ -31,7 +31,7 @@ items marked **DATA TASK** or **SOURCE NEEDED** are not numbers yet.
 | what it represents | the flux (0.64 µatm swing over 84 % of the surface) | the reservoir (13 µatm swing over 4.1 %) AND the mean +55.5 µatm excess |
 | new observable rows | none (the GCB slope is already in the ENSO rows) | **B1: cell pCO₂ − surface mean +55.5 µatm** (mean state; pins W0); the cell's pCO₂ swing per index unit (13.15 µatm from B3 — pins γ); tropical Δ¹⁴C stations from `obs_d14c_station_validation` (held out by everything today) |
 | retires | `gamma_enso_ocn_NH/SH` → fitted first, read → 0 (ruling-4 idiom, [[no_power_null]]) | same |
-| cores | R + C++ + parity; spinup unchanged (the limb is one more advective idiom like `w_up`) | R + C++ + parity; `ccx_box_names`/`ccx_new_state`; `aux` areas (`a_ls` shrinks by `eq_frac` — the fitted mean state moves); spinup Newton (32 → 36 columns); `cpp.R` marshalling; likelihood readers (§4); tests; the app |
+| cores | R + C++ + parity; spinup unchanged (the limb is one more advective idiom like `w_up`) | R + C++ + parity; `ccx_box_names`/`ccx_new_state`; `aux` areas (`a_ls` shrinks by `eq_frac` — the fitted mean state moves); spinup Newton (32 → 36 columns); `cpp.R` marshaling; likelihood readers (§4); tests; the app |
 | cost | days | weeks (option B's scale; option B's R side `5ed31cf` is the closest scaffold — the HS box is the idiom) |
 | refit | one Torch array (hilda30c space + 2) | one array (+ 2–3 free, several pinned to observations) |
 | risk | W0–`kz` degeneracy; nothing new is TESTED | the mean state moves (area, a new source box) — the deep/HS rows may re-price; the A_ls change touches GATE S's SO limb (`seas_ml` is whole-model) |
@@ -99,7 +99,7 @@ form: a mean with a floor, so the flux never reverses — the anomaly-only probe
 - `alk_eq`: GLODAP `glodap_talk_subset.csv` over the band, 0–50 m (the DIC cut is done: 1982.9 µmol/kg surface median).
 - The source-water contrast by layer for the k_eq choice: done above (+115 / +176 at 100–150 / 150–200 m).
 - **SOURCE NEEDED, not a data cut**: an EUC / STC transport and its ENSO variation, to say whether 15–26 Sv per Niño3.4 unit
-  is physical. Until then the Sv figure is a MODEL requirement, labelled so.
+  is physical. Until then the Sv figure is a MODEL requirement, labeled so.
 
 ## 6. Pre-registered predictions for the FIRST build (to be written into its prereg, not tested here)
 PE1 with `w_eq` at the B1-pinned value the solubility-only ENSO r flips positive at `gamma_eq` ≤ 1 per index unit (a

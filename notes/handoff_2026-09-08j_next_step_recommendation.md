@@ -4,7 +4,7 @@
 # **§5.3 SAYS TO BUILD OPTION B — DO NOT.** Marcus ruled **OPTION A** (the true time-varying mixed layer) on 09-09h, because B is pCO₂-side, moves no carbon, and so carries **no isotopic signature in either isotope**: its P4 is compromised before it runs. **A is BUILT in the R core (09-09j, `799249c`).**
 # **§5.5's Torch sizing is also premature**: the round is stopped at P1 pending a ruling on P1's band, and the **C++ twin is not built**.
 # ⇒ **The live documents are `notes/prereg_2026-09-09g_round6_seasonal_ml.md` (P1–P8, build order) and CHANGELOG 09-09g→09-09j.** Everything below is provenance for how the round was chosen.
-# **Every model number here is GENERATED at the canonical `hilda31` by scripts named in the 09-08h/i handoffs (`outputs/diagnostics/*_20260908.*`). The two recollections (Hoffert 1980's 4 m/yr; equatorial upwelling "tens of Sv") are labelled where used.**
+# **Every model number here is GENERATED at the canonical `hilda31` by scripts named in the 09-08h/i handoffs (`outputs/diagnostics/*_20260908.*`). The two recollections (Hoffert 1980's 4 m/yr; equatorial upwelling "tens of Sv") are labeled where used.**
 
 Read first: `notes/handoff_2026-09-08i_cheap_probes.md` (the probes), `notes/handoff_2026-09-08h_phase1_results.md`
 (Phase 1), `notes/assessment_2026-09-08_acceptable_state.md` (options A–J, still the option list),
@@ -15,7 +15,7 @@ and the Joos ruling), [[ccx_seasonal_h_ml_option]].
 ## 1. State of the model (canonical `hilda31`, unchanged since 09-08f; nothing adopted since)
 | chain link | at hilda31 | what the last two days changed |
 |---|---|---|
-| **ENSO → ocean (THE BLOCKER)** | 0.53× obs, solubility-only r −0.52 cancelled by fitted γ | T-A0: an ENSO-modulated upwelling gives the RIGHT sign, linearly, at ~26 Sv modulated (about the real equatorial upwelling — a recollection); the whole-column limb costs −135…−4001 unrefitted. **A is ruled out as built; B (a shallow tropical box with a thermocline return) is the build** |
+| **ENSO → ocean (THE BLOCKER)** | 0.53× obs, solubility-only r −0.52 canceled by fitted γ | T-A0: an ENSO-modulated upwelling gives the RIGHT sign, linearly, at ~26 Sv modulated (about the real equatorial upwelling — a recollection); the whole-column limb costs −135…−4001 unrefitted. **A is ruled out as built; B (a shallow tropical box with a thermocline return) is the build** |
 | Seasonal NH strain | `sst_seas_amp_NH` −2.96 | unchanged; option C is the mechanism (pre-checked 8–14 µmol/kg untuned) |
 | Hemispheric δ¹³C (H) | contrast +6.5σ; gradient 1.97× | GL added (level z −13.3) — FAIL, in the ledger |
 | **Bomb ¹⁴C (gate 5)** | "NH peak +2.17σ late" | **an argmax on a double-peaked curve; the model's first-peak timing matches to 0.00 yr; the real miss is the trough (51 vs 111 ‰)** — the statistic needs replacing |
@@ -26,7 +26,7 @@ and the Joos ruling), [[ccx_seasonal_h_ml_option]].
 | Posterior | none | not blocked by the model; blocked by the σ_rep table's bin-edge shelf (a ruling) |
 
 ## 2. What the probes settled (so the next session need not re-derive it)
-1. **D (Martin remineralisation) cannot be done without E.** At the model's K(z) the diffusive return below ~1000 m
+1. **D (Martin remineralization) cannot be done without E.** At the model's K(z) the diffusive return below ~1000 m
    carries 0.004 GtC/yr; Martin at the literature export sends 0.84 through that interface (204× short). The profile
    form at a held gradient (T-D0) starves the export instead of delivering light carbon. So "round 6 = C + D" is
    withdrawn as a design: a shape change does not deliver D's physics.
@@ -66,7 +66,7 @@ and the Joos ruling), [[ccx_seasonal_h_ml_option]].
 | **C — the seasonal mixed layer, derived amplitude (option B of the 09-08d note)** | the NH strain (−2.96) by a MECHANISM; the mean-vs-max `h_ml` ambiguity; `ent_seas_amp_SH` (a fitted compensator) retires; ¹³C signature scored by the `d13c_seasonal_*` rows | 1 day + a Torch array (~2.5 h wall) | LOW: pre-checked untuned to the observed order; P1–P5 drafted | **1** |
 | **B — the tropical upwelling box** (shallow, thermocline return, ~26 Sv modulated) | THE BLOCKER (ENSO sign); some of H; the first advective limb | 1–2 weeks: structure, spinup fixed point, C++ parity, app | MEDIUM: T-A0 sized it; the deep must stay untouched (the Δ¹⁴C rows) | **2** |
 | **E — the ventilation limb** (subduction + deep return) | the ROOT: the export, the δ¹³C gradient/level, D's return path, K(z)'s 4–40× | weeks | HIGH: the research question | **3 (after B; B's machinery is reused)** |
-| D — Martin remineralisation | the export shape | — | needs E first | shelved |
+| D — Martin remineralization | the export shape | — | needs E first | shelved |
 | A | — | — | ruled out as built | — |
 | I | — | — | ruled out (and the miss was the estimator) | — |
 | Posterior at hilda31 | the first posterior | a day after ruling 2 | low | with ruling 2 |
@@ -82,7 +82,7 @@ design is unconstrained without B's shallow return in place; B is E's first inst
 ## 5. THE RECOMMENDED NEXT STEP, concretely: round 6 = C alone
 1. Rulings 1–3 (§3) and the data check (§3.4), in that order; commit each.
 2. **Prereg `notes/prereg_2026-09-0X_round6_seasonal_ml.md`** from the 09-08d note's P1–P5, with two additions:
-   - P6: `sst_seas_amp_NH`'s prior-z relaxes from −2.96 to inside 2σ (the load-bearing prediction, the NH analogue of
+   - P6: `sst_seas_amp_NH`'s prior-z relaxes from −2.96 to inside 2σ (the load-bearing prediction, the NH analog of
      09-03's P2), AND the SH amplitude the mechanism derives lands in [10, 17] µmol/kg at the round-5 gradient.
    - P7: the modern surface−deep δ¹³C gradient (0.40 at `hilda31`) does not move by more than the `ocean_grad_d13c`
      row's σ_eff (0.16) — entrainment is a surface-cycle mechanism and must not be a deep lever in disguise.

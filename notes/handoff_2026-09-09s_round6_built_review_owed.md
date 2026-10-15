@@ -43,7 +43,7 @@ layer **entrains real water** — carbon and both isotopes — from layer 1.
   entrainment limbs; the substep bound; and a `record = TRUE` stash of `pco2_ml` / `sst_ml`.
 - `src/ccx_core.cpp`: `mld_eval()`, the local `dzl`/`dzml`/`ml_mass`, the two limbs, `Aux.seas_ml`
   plus the Fourier harmonics (zero-filled when off).
-- `R/cpp.R`: the marshalling; **the STOP guard is GONE** now that parity covers the mechanism.
+- `R/cpp.R`: the marshaling; **the STOP guard is GONE** now that parity covers the mechanism.
 - `tests/testthat/test-seas-ml.R` (new, ~90 assertions) and three new blocks in `test-parity.R`.
 
 **Design facts worth not re-deriving:**
@@ -136,7 +136,7 @@ prior.
 - ⚠ **The `ml` box's identity.** P1c's central finding is that a **low-latitude** box is being driven
   by an **SH-wide** MLD climatology. **Is `ml` low-latitude, hemispheric, or undefined?** The answer
   is not clearly written anywhere, and three separate rulings now depend on it.
-- ⚠ **`h_hs = 401.1 m`** — a "high-latitude SURFACE" box four hundred metres thick. Defensible as a
+- ⚠ **`h_hs = 401.1 m`** — a "high-latitude SURFACE" box four hundred meters thick. Defensible as a
   HILDA water mass; **hard to teach**. Worth an explicit look.
 - ⚠ **`ALK` is a single constant** and `.ENT_DIC_SURF = 2150` is **uncited and ~5.6 % above** the
   GLODAP surface value gate G scores against (~2035) — flagged in `constants.R` and never resolved.

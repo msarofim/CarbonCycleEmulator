@@ -1,10 +1,10 @@
 # ASSESSMENT — is CarbonCycleEmulator in an acceptable state, and if not what are the best options? (2026-09-08f)
-# Written at the ADOPTION of the round-5 winner as the HILDA canonical (Marcus, 2026-09-08). **Every model number is GENERATED** at that vector (`diag_whole_model_scorecard.R` arm C, `diag_hilda31asx_predictions.R`, the spinup read in CHANGELOG 09-08f); the Martin exponent was SOURCED while writing it (Martin et al. 1987 DSR 34:267, 1.53 (z/100)^−0.858, r² 0.81, n 48); the one remaining recollection (Ledwell's pycnocline diffusivity) is labelled.
+# Written at the ADOPTION of the round-5 winner as the HILDA canonical (Marcus, 2026-09-08). **Every model number is GENERATED** at that vector (`diag_whole_model_scorecard.R` arm C, `diag_hilda31asx_predictions.R`, the spinup read in CHANGELOG 09-08f); the Martin exponent was SOURCED while writing it (Martin et al. 1987 DSR 34:267, 1.53 (z/100)^−0.858, r² 0.81, n 48); the one remaining recollection (Ledwell's pycnocline diffusivity) is labeled.
 
 ## 0. The standard (Marcus, 09-03; `notes/assessment_2026-09-04_public_readiness.md` §0)
 A pedagogical model, not an emulator: **the product is the CHAIN** — "constrain the model with seasonal and isotopic data ⇒
 long perturbation lifetimes emerge." A defect blocks release if it breaks a link: an observable matched by CANCELLATION, or a
-wrong-signed mechanism cancelled by a fitted coefficient. A benchmark miss with the right mechanism is a research question.
+wrong-signed mechanism canceled by a fitted coefficient. A benchmark miss with the right mechanism is a research question.
 
 ## 1. VERDICT: NOT YET ACCEPTABLE — one chain link is still broken, and it is the same one as on 09-04
 The ocean-structure arc (09-04 → 09-08e, rounds 1–5) delivered a deep ocean the model never had: the Δ¹⁴C profile inside 1σ,
@@ -23,7 +23,7 @@ the release blocker on 09-04 and it is the release blocker today.
 | **Seasonal cycle — ocean phase** | GATE S: SPO ocean limb 0.415 ppm @ 8.96 mo, bracket [7.41, 10.41] | ✅ PASS | 09-04 |
 | Seasonal — partition (land/ocean limbs) | adoption read: SPO SH-land limb 1.66× the inverted land (ent26 1.68×), SH-ocean 0.415 @ 8.96, δ¹³C-per-ppm SPO 1.19 / MLO 0.97 | ✅ weak pass, unchanged | 09-04 |
 | Seasonal — NH strain | `sst_seas_amp_NH` prior-z **−2.96** (no NH entrainment channel) | ⚠ strained | 09-03 |
-| **ENSO → ocean** | slope 0.53× obs; solubility-only **r −0.52 (wrong sign)** cancelled by `gamma_enso_ocn` | ⛔ **BROKEN LINK — the blocker** | 09-04 |
+| **ENSO → ocean** | slope 0.53× obs; solubility-only **r −0.52 (wrong sign)** canceled by `gamma_enso_ocn` | ⛔ **BROKEN LINK — the blocker** | 09-04 |
 | Interannual variability | GATE V −2.77σ (too smooth) | FAIL, non-blocking (downstream of ENSO) | 09-04 |
 | **Hemispheric differences** | GATE H contrast +6.51σ: δ¹³C gradient **1.97×** observed, absorbed by a fitted offset; CO₂ control passes | ⛔ FAIL | 09-04i |
 | **Isotopes — bomb ¹⁴C** | GATE 5: NH peak **+2.17σ late**; lag and orderings fine | FAIL | 09-02 |
@@ -40,7 +40,7 @@ the release blocker on 09-04 and it is the release blocker today.
 1. **One sink demand, three unpriced knobs.** Rounds 3–5 moved 0.15 GtC/yr of modern uptake from the declared flush
    (70 Sv) to the cold-box exchange (1.83) to the piston velocity (+31 %): each time the fit took the cheapest quantity
    without a prior. Pinning both structure quantities to their observations left `k_w` — inside its prior — so nothing is
-   strained by the sink now. But the lesson generalises: **any quantity without an observation prior is a compensator.**
+   strained by the sink now. But the lesson generalizes: **any quantity without an observation prior is a compensator.**
 2. **The LS column ventilates only by diffusion, and the diffusivity is 4–40× real.** At the winner K(100 m) = 11,700 m²/yr
    = 3.7 cm²/s, K(1000 m) 0.4 cm²/s, K_deep 0.04 (Ledwell et al. 1993's pycnocline 0.1 cm²/s is a RECOLLECTION). Every
    gradient must be held against it, so the LS pump exports **37 GtC/yr** (real global ~10, Nowicki 2022) concentrated above
@@ -52,7 +52,7 @@ the release blocker on 09-04 and it is the release blocker today.
    T-independent the HS surface drops +2.41 → +0.70 and gate Q goes wrong-signed (−0.03) — so the term is the 2 °C EQUILIBRIUM
    fractionation, shipped correctly on 09-02. By box at PI (SH): ML +2.57, HS +3.22, HD/bottom +1.29 against an observed deep
    ~+0.4 — the whole ocean is 0.4–1.3 ‰ heavy and the HS box equilibrates a heavy deep toward a cold equilibrium. Switching the
-   HS pump OFF makes the deep HEAVIER (+2.51), so the pump is doing its job and the deep simply lacks remineralised light carbon
+   HS pump OFF makes the deep HEAVIER (+2.51), so the pump is doing its job and the deep simply lacks remineralized light carbon
    below 1000 m (0.18 GtC/yr from the LS pump vs ~1.2 real) — **option D is the candidate for Q and the HS δ¹³C**, not the
    alphas. Neither the flush nor the exchange moves it (u_hs ×2: +2.37; hs_asx ×2: +2.45).
 4. **The short lifetime is a LAND question** (option H, run 09-08f). Pulse partition at the canonical: 100 yr air 0.28 /
@@ -68,7 +68,7 @@ the release blocker on 09-04 and it is the release blocker today.
 | **A** | **ENSO-modulated upwelling limb** ("Fix B-lite"): scale the interior→ML exchange at the ML base by (1 − γ·Niño3.4) in the existing hemispheric boxes, γ ≥ 0 by construction, so the ocean's ENSO response is upwelling suppression (right sign) and `gamma_enso_ocn` (the additive flux) retires | link 2 (the blocker), and V downstream | 1–2 days, both cores | Probe unrefitted at the canonical: does the solubility-only r flip from −0.52 to ≥ +0.3 at a γ the observed +55 µatm reservoir (`ccx_fixB_reservoir_priced`) implies? Prereg before building | **yes** — A vs B |
 | **B** | **Fix B proper: a tropical box** (equatorial upwelling reservoir, +55.5 µatm; the model's representable tropical-minus-global contrast is exactly 0) | link 2; the δ¹³C gradient (H) if the upwelled water is light; the ventilation root (§3.2) partly | 1–2 weeks (structure, spinup, parity, app) | Same probe as A on the built box; H's z at the refit | **yes** |
 | **C** | **The seasonal mixed layer, option B** (`notes/options_2026-09-08d_seasonal_h_ml.md`): entrainment amplitude DERIVED from the Holte cycle × the model's sub-ML DIC step, both hemispheres, ¹³C carried; `ent_seas_amp_SH` retires | the NH strain (−2.96), the mean-vs-max `h_ml` ambiguity, the seasonal isotope rows | 1 day + refit | Pre-checked: SH 10–17 / NH 8–14 µmol/kg untuned. P2: the NH strain relaxes; P4: `d13c_seasonal_*` must not pay | yes (round 6?) |
-| **D** | **Martin-curve remineralisation for the LS pump** (a SOURCED exponent replaces GLODAP's shallow shape below the profile's span) | the 4× LS export, the deep supply (0.18 → ~1 GtC/yr below 1000 m), and hence the HS export's +2.3σ | 1 day + refit | Pre-check: with b = 0.86 the LS pump at its current 37 GtC/yr puts 5 GtC/yr below 1000 m — too much; the test is whether the refit lowers `pump_grad`/`kz` together and the HS export falls toward its prior | yes |
+| **D** | **Martin-curve remineralization for the LS pump** (a SOURCED exponent replaces GLODAP's shallow shape below the profile's span) | the 4× LS export, the deep supply (0.18 → ~1 GtC/yr below 1000 m), and hence the HS export's +2.3σ | 1 day + refit | Pre-check: with b = 0.86 the LS pump at its current 37 GtC/yr puts 5 GtC/yr below 1000 m — too much; the test is whether the refit lowers `pump_grad`/`kz` together and the HS export falls toward its prior | yes |
 | **E** | **A ventilation (mode-water) limb**: subduction from the LS ML into layers 2–5 with an upwelling return, sized on Talley's 8 Sv SAMW/AAIW + subtropical subduction | the §3.2 root: lets `kz` fall toward real values; H, the export, the ENSO sign share this mechanism with B | weeks | Falsifiable prediction: `kz` at the refit falls > 3× with the deep row still held | yes — the long-term structure |
 | **F** | ✅ DONE 09-08f (§3.3): the term is the 2 °C equilibrium fractionation on a deep 0.85 ‰ too heavy ⇒ the fix is **D**, not the alphas | gate Q, HS δ¹³C | done | — | — |
 | **G** | **Gate the δ¹³C gradient LEVEL** (objective: the gradient rows score variation through a fitted offset) | H becomes fittable; nothing physical | hours | Mutation-tested row; then read what the fit pays to close 1.97× | yes (objective) |

@@ -1,7 +1,7 @@
 # Handoff — CarbonCycleEmulator, 2026-09-01f
 # **THE TWO OWED FIXES ARE PAID. THE PRIOR SCREEN IS DONE AT BOTH CLUSTER REPS.**
 # **AND MEASURING THE `sst_seas_amp` WIDTH MADE THE FLAG *BIGGER*, NOT SMALLER —
-# −4.71 → −12.2. The judgement width was GENEROUS to the fit.**
+# −4.71 → −12.2. The judgment width was GENEROUS to the fit.**
 # **NEXT: the SEASONAL FLUX re-pricing (§4) and `alpha_as_up` (§5). NOTHING ADOPTED.**
 
 **Repo:** `~/Documents/2026/CodeProjects/CarbonCycleEmulator/`, trunk `main`, clean at **`023a2c9`**.
@@ -66,7 +66,7 @@ bound. It also means round 2's stated purpose — resuming timed-out tasks — *
 they simply timed out AT the answer, within 0.0022 of the converged ones.)
 
 **The instrument had to change before the answer meant anything.** `SST_SEAS_LOGSD` = 0.25 and
-`NPP_FRAC_NH_SD` = 0.04 are widths `R/calibrate.R` itself labels as JUDGEMENTS; `seas_T_amp_*` get
+`NPP_FRAC_NH_SD` = 0.04 are widths `R/calibrate.R` itself labels as JUDGMENTS; `seas_T_amp_*` get
 `ccx_bracket_lnorm()`, a MEASURED ambiguity. Sorting them together ranks an invented width above a
 measured one. Every z now prints its provenance — **BRACKET / JUDGEMENT / UNLABELLED**, where
 UNLABELLED means *the code does not say*, not *measured* — derived by deparsing each prior closure.
@@ -101,7 +101,7 @@ coordinates sit at |z| ≤ 0.68 against N(0, 2) — not running to the prior, no
 ⚠ Their fitted values are worth a look: ocean **−0.950 (NH) / +1.187 (SH)**, strongly ANTIsymmetric,
 where both seeds assumed a symmetric +0.10 or +0.326 each.
 
-**Two errors of mine, both caught by output contradicting a label I wrote.** I labelled
+**Two errors of mine, both caught by output contradicting a label I wrote.** I labeled
 `refit_20260831_seas_lag_split/` as the 22-par post-split refit from its DIRECTORY NAME — it holds a
 **21-parameter vector with the scalar `seas_lag_p`**. And the attribution header was typed, then
 went stale within the hour. Counts, lag/ENSO field names and the header are now READ or DERIVED.
@@ -111,7 +111,7 @@ went stale within the hour. Counts, lag/ENSO field names and the header are now 
 ## 3. ⛔ THE WIDTH IS MEASURED, AND IT GOES THE WRONG WAY (`023a2c9`)
 
 `data-raw/build_sst_seas_amp_bracket.R`. **Marcus's constraint governs the design: the amplitude
-factors are NOT true observables.** That rules out recomputing a flux-weighted number and recentring
+factors are NOT true observables.** That rules out recomputing a flux-weighted number and recentering
 on it as truth. What can be measured is the SPREAD across defensible weightings — the LAND pair's
 idiom exactly.
 
@@ -126,14 +126,14 @@ months apart and those are VECTORS.
 | NH | 2.2374 | 3.0813 | **0.160** | 0.25 |
 | SH | 1.6577 | 2.0104 | **0.097** | 0.25 |
 
-| | fitted | z now | z, new WIDTH | z, WIDTH + CENTRE |
+| | fitted | z now | z, new WIDTH | z, WIDTH + CENTER |
 |---|---|---|---|---|
 | `sst_seas_amp_NH` | 1.069 | −2.95 | −4.62 | −5.62 |
 | `sst_seas_amp_SH` | 0.538 | −4.71 | **−12.22** | −12.68 |
 
-⇒ **The measured ambiguity is NARROWER than the judgement it replaces and the flux weighting moves
+⇒ **The measured ambiguity is NARROWER than the judgment it replaces and the flux weighting moves
 the anchor UP, away from the fitted value. 0.25 was GENEROUS to the fit.** The width can no longer
-be the explanation for −4.71. ⚠ Replacing the WIDTH and moving the CENTRE are **two decisions**; the
+be the explanation for −4.71. ⚠ Replacing the WIDTH and moving the CENTER are **two decisions**; the
 second asserts something new about where a non-observable should sit and is **not taken**.
 `R/constants.R` is unedited.
 
@@ -175,7 +175,7 @@ is on disk**. Same gap as §4.
 | `ent_seas_amp_SH` | default 0, NOT fitted | the SH entrainment channel, perturbing mixed-layer DIC seasonally |
 
 [[default_off_hides_the_bug]]. ⛔ **DO NOT re-propose "switch `ent` on" as a new idea** — the arc
-priced it and it was blocked: P3 FAILED (re-optimised, the fit picked `ent` = 4.16, **below** the
+priced it and it was blocked: P3 FAILED (re-optimized, the fit picked `ent` = 4.16, **below** the
 5–30 physical band), and 08-27q's admissible 2×2 concluded that rotating the ocean into phase
 **removes** the SH cancellation and **overshoots the total by 18 %**.
 
@@ -273,7 +273,7 @@ If it comes out two orders below the observable, the term is real physics and st
 explanation — and that is worth knowing in an afternoon rather than after a refit.
 
 **⚠ AND IT IS A DEFAULT-OFF MECHANISM WHEN IT LANDS.** Ship it with an explicit non-zero test, a
-behaviour-preserving default that reproduces the current model BIT FOR BIT at zero, and the
+behavior-preserving default that reproduces the current model BIT FOR BIT at zero, and the
 migration contract from [[split_name_must_hard_error]] / [[default_off_hides_the_bug]].
 
 ---

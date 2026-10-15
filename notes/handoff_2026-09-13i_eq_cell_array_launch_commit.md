@@ -26,7 +26,7 @@
 - Tests: counts 31 → 33 (`test-ent-seas-fitted:20`, `test-likelihood:571`); R3 test + P0a re-expressed in `test-eq-cell.R`; two
   fixture seeds (`test-enso-split:218`, `test-seas-lag-split:140`) — **flagged for veto**, see CHANGELOG (i) §Tests.
 
-## 2. To launch (Torch — the standing verdict: no licence/substrate blocker, 24 parallel starts the laptop would serialise)
+## 2. To launch (Torch — the standing verdict: no licence/substrate blocker, 24 parallel starts the laptop would serialize)
 ```
 bash calibration/torch/make_bundle.sh            # → /tmp/ccx_torch_bundle.tar.gz; scp + untar per its printout
 CCX_MS_STRUCT=hilda_eq CCX_MS_PIN=ent_seas_amp_SH=0 CCX_MS_PREFLIGHT=1 sbatch --array=0-5,25,45 --time=00:15:00 calibration/torch/multistart.sbatch

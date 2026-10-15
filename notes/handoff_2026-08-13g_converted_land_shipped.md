@@ -17,9 +17,9 @@ Supersedes **13f §4** (the decision is taken and built). 13f §§1–3 stand as
 2. **`f_luc_perm = 0` reproduces the bug exactly** and is tested. That is how the
    regression stays measurable; it is not a supported configuration.
 3. **THE DEFAULT `beta` IS NOW WRONG BY CONSTRUCTION.** At 0.38 the model runs **+17.5 ppm
-   high at 2024**, because 0.38 was re-centred on 2026-08-12 *against the bug*. The CO₂
+   high at 2024**, because 0.38 was re-centered on 2026-08-12 *against the bug*. The CO₂
    record's 1-D preferred β moves **0.30 → 0.50**. **Do not quote any absolute CO₂ number
-   at the default parameters until a refit or at minimum a re-centring.**
+   at the default parameters until a refit or at minimum a re-centering.**
 4. **THE δ¹³C MISFIT GOT WORSE, as predicted in 13f §3 and now measured on a clean
    comparison:** the 1900→2020 Suess decline goes −2.209 → **−2.366 ‰**, 7.1 % faster,
    against a model already ~25 % too fast. **The 13b/13c ocean conclusions were measured on
@@ -110,7 +110,7 @@ AR(1)-era fixture in handoffs **12d, 13, 13b, 13c and 13e**. They now pass, and 
 was systematically low — and at `f_luc_perm = 1` it is **+534.5**.
 
 **The suite had been reporting this bug since the day it landed, and the report was
-relabelled five times.** A failing test you have explained away is still data. The two
+relabeled five times.** A failing test you have explained away is still data. The two
 remaining failures (`test-climate.R:122`, 0.092 against a 0.1 threshold;
 `test-mechanisms.R:32`, 0.29 against 0.5) are **still uninvestigated and should now be
 treated as claims rather than as furniture.**
@@ -157,7 +157,7 @@ treated as claims rather than as furniture.**
    21–25 % too fast" headline and the whole `sigma_d13c` argument, were measured on a model
    with part of its Suess forcing switched off. **Do not settle the three ocean decisions on
    the old numbers.**
-2. **Re-centre `beta`** (or accept that defaults are provisional until the refit). +17.5 ppm
+2. **Re-center `beta`** (or accept that defaults are provisional until the refit). +17.5 ppm
    at 2024 is not a fixture anyone should build an app panel on.
 3. **Decide the pro-rata question** (§2) — it is the difference between a 0.5× and a 1×
    land-use airborne fraction on the century that matters most for the app.

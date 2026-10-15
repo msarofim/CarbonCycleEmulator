@@ -30,7 +30,7 @@ means over the mass at the time (the ruled reader), `pCO₂(DIC_ml, T_eq) − pC
 
 Reading: at 27 Sv the cell's DIC is already BELOW the mixed layer's (it has degassed); the whole +133 is the T-term. Remove the T-term
 and the upwelled thermocline contrast alone gives **+61 at Meinen's transport — inside 1σ of the +55.5 observation**. The fit reached
-+73 by STARVING the cell (10.7 Sv) until its DIC deficit (−64 / −93) cancelled most of the T-term. Cold surfacing is worth 7.9 µatm
++73 by STARVING the cell (10.7 Sv) until its DIC deficit (−64 / −93) canceled most of the T-term. Cold surfacing is worth 7.9 µatm
 per °C; `k_eq` = 1 is worth −30; both −45 — each a quarter of the gap. **Neither is the lever. The lever is the DIC of the water the cell
 exchanges with: it must be equilibrated warm.** (The real band surface has DIC 1983 at 27 °C — GLODAP `obs_eq_cell$dic_eq$surface` —
 against the model's 1989 at 18 °C: the same DIC, ~9 °C apart, is the +130.)

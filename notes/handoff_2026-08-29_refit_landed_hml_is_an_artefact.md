@@ -17,7 +17,7 @@ That is a DECISION (§3), not an unfinished step.
 2. ⚠ **It reproduced the 14-minute crippled SMOKE TEST to three decimals**, which INVERTS
    08-28c §3's reading of that smoke. §1
 3. ⚠ **The +4.06 is ENTIRELY PRIOR CREDIT; the fit got WORSE by 1.199.** §1
-4. ⚠ **`h_ml` = 35.38 m is an ARTEFACT, not a repair** — MEASURED twice, §2.
+4. ⚠ **`h_ml` = 35.38 m is an ARTIFACT, not a repair** — MEASURED twice, §2.
 5. ⚠ **I ASSERTED THE PHYSICS BACKWARDS and retracted it in place** — a shallower mixed layer makes
    the SH ocean limb SMALLER, not larger. §2
 6. ⚠ **I ALSO WITHDREW my own "decoupling" explanation** when its test fired P2. §2
@@ -47,7 +47,7 @@ smaller. Do not read that banner without its magnitudes.
 | **loglik** | **−1.201** | **−1.199** |
 | `h_ml` | 35.38 m | **35.38 m** |
 
-⇒ **08-28c §3's reading is INVERTED.** It called the smoke's 35.38 m an artefact of its budget —
+⇒ **08-28c §3's reading is INVERTED.** It called the smoke's 35.38 m an artifact of its budget —
 *"a crippled run wanders down soft directions… the real refit needs its FULL restart/cycle budget."*
 It did not wander. Twenty restarts, two cycles and a polish went to the same point. **The smoke was
 measuring the mode.** What §3 got RIGHT is the part that matters: the gain is prior credit.
@@ -56,7 +56,7 @@ Prior movers: `sst_seas_amp_SH` **+4.326**, `sst_seas_amp_NH` +1.769, `rep_dC` +
 itself **COSTS −2.049**. `kz` still rails at 95.3%. `prior_z` improved for every flagged parameter
 (`sst_seas_amp_SH` −6.321 → −5.595) while `h_ml`'s |z| went 0.446 → **1.857**.
 
-## 2. WHY 35.38 m IS AN ARTEFACT — TWO MEASUREMENTS, AND TWO RETRACTIONS OF MINE
+## 2. WHY 35.38 m IS AN ARTIFACT — TWO MEASUREMENTS, AND TWO RETRACTIONS OF MINE
 
 **(a) `diag_hml_seasonal_limbs.R` (`924711d`) — the REPAIR hypothesis, REFUTED.** Method copied from
 `diag_admissible_2x2_land_ocean.R`, not reinvented: same knockout cases, same PEAK-TO-PEAK `amp()`,
@@ -104,7 +104,7 @@ the **ANTI-physical direction** relative to the arc's known defect.
 ⚠ **ALSO RETRACTED: my "revisit the `sst_seas_amp_*` priors" suggestion.** `ccx_prior_z()` is the
 POST-fix implementation — unconstrained coordinate, Jacobian included, prior's own mode found by
 scan, BOTH tails carried with the smaller used (a z of −6 is a lower cumulative of 1e-9 that
-`1 − upper` would destroy). **The −6.32 is real, not a scale artefact.** And `INDEX_ccx_seas.md` is
+`1 − upper` would destroy). **The −6.32 is real, not a scale artifact.** And `INDEX_ccx_seas.md` is
 explicit that the priors are the part ANCHORED ON OBSERVATIONS: `sst_seas_amp_SH` sits at ~21% of
 observed *because* SH land is ~1.9× too big and the ocean must shrink to hold the observed total.
 **The prior is not what is wrong. The partition is.** I reasoned from the z magnitude without
@@ -145,7 +145,7 @@ What it already establishes, so none of it is re-derived:
   unexplained term in the budget.
 - **THE SIZE SHOULD GO *UP*; the missing piece is CANCELLATION.** `SEAS_NPP_AMP_SH` is **NOT** the
   bug — at phi = −30 MOD17 gives A = 0.50 but CMIP6 **0.94**, a 1.9× disagreement the OPPOSITE way
-  from the assumed bracket. CT2022 has SH land cancelling **74.9%** of its gross swing vs NH 31.8%
+  from the assumed bracket. CT2022 has SH land canceling **74.9%** of its gross swing vs NH 31.8%
   (2.72× asymmetry) and **the model UNDER-CANCELS**. [[sh_land_undercancels]]
 - **The SH (shape, size) pair is a DEGENERATE RIDGE — the SH latitude is NOT determined.**
   [[sh_pair_is_a_degenerate_ridge]]

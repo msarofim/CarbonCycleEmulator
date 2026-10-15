@@ -52,6 +52,6 @@ mode**, and must not be quoted as one.
 
 ## Do not quote
 
-`logpost -2293.5` from this directory, for two independent reasons: it was maximised over a
+`logpost -2293.5` from this directory, for two independent reasons: it was maximized over a
 **different parameter set** (17 vs the post-decision count), and it was **not converged**.
 Comparing it to any later mode is meaningless in both directions.

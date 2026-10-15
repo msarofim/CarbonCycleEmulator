@@ -54,7 +54,7 @@ a fudge factor for its Revelle-driven growth along the trajectory (measured up t
 `kz` ∈ {175,790, 4e5, 1e6} must all still fail. Otherwise the "no NAs" test could pass because
 the cases were never unstable.
 
-**Generalisable lesson:** an `anyNA` → `-Inf` guard in a likelihood is a *silent prior*. Before
+**Generalizable lesson:** an `anyNA` → `-Inf` guard in a likelihood is a *silent prior*. Before
 believing a posterior boundary, check whether the integrator can represent the region at all.
 
 ---
@@ -86,9 +86,9 @@ bias parameters (4+ more on an 18-parameter, 2.4e6-condition-number problem, and
 rail); continuous-time AR(1) (fixes the sampling defect, leaves the loophole).
 
 `ccx_year_harmonic()` fits, per calendar year, `v ~ 1 + (t − midyear) + sin(2πφ) + cos(2πφ)`.
-Intercept = deseasonalised, detrended annual level, immune to partial month coverage; sin/cos =
+Intercept = deseasonalized, detrended annual level, immune to partial month coverage; sin/cos =
 the seasonal statistic. **The same estimator runs on model and observations**, so neither NOAA's
-deseasonalisation nor the model's seasonal shape has to be trusted separately.
+deseasonalization nor the model's seasonal shape has to be trusted separately.
 
 `rho` retired: **18 → 17 parameters**, scored terms **4,713 → 632**.
 
@@ -100,7 +100,7 @@ relocated the swamping rather than removed it.
 **Tried and rejected mid-implementation:** scoring the seasonal cycle as the multi-year *mean*
 harmonic (4 terms). It made the seasonal cycle weaker than its own side effect — moving
 `seas_amp_NH` 20 → 24 GtC/yr cost 1.2 log-units on the seasonal term but 6 on the CO₂ *level*
-term, via rectification against the log fertilisation term. Per-year scoring (~50 pairs per
+term, via rectification against the log fertilization term. Per-year scoring (~50 pairs per
 station) restores the ordering: 62 log-units against the level term's 6.
 
 **Performance regression caught:** the first implementation called `ccx_year_harmonic()` on four
@@ -207,7 +207,7 @@ differently than they might look.
 
 **The gross-flux fix was applied to air-sea and interhemispheric exchange only.** The land
 uptake flux in `R/model.R:169` is still **NPP**, and the reason the ocean argument does not
-transfer is worth stating, because it is easy to over-generalise:
+transfer is worth stating, because it is easy to over-generalize:
 
 The air-sea interface was singular for isotopes because it was represented by its **net** flux,
 which is *exactly zero* at preindustrial equilibrium — so a net-only interface transferred no
@@ -245,7 +245,7 @@ shape correction, just not big enough on its own.
 **Caveat on that verdict:** the lag is the whole calculation and it is not well constrained
 here. If a large share of autotrophic respiration draws on stored non-structural carbohydrate
 rather than recent photosynthate, the effective lag is months and this moves to first-order.
-That is a literature question, not a modelling one, and it is worth ten minutes before dismissing.
+That is a literature question, not a modeling one, and it is worth ten minutes before dismissing.
 
 ### 6.3 The ocean hypothesis is stronger — and the arithmetic makes it sharper
 
@@ -317,7 +317,7 @@ mapped directly. Over `kz` ∈ [250, 16000] × `h_ml` ∈ [30, 200]:
 
 ### (b) The trade-off — CONFIRMS the single-`kz` conflict
 
-At each fixed `kz`, re-optimising the parameters that can compensate
+At each fixed `kz`, re-optimizing the parameters that can compensate
 (`k_w`, `h_ml`, `bomb_total`, `sigma_d14c`, `sigma_co2`, `beta`, `q10`):
 
 | kz | logpost | deep Δ¹⁴C | prod/canon | **bomb_total** | bomb-win rms | CO₂ rms |
@@ -333,7 +333,7 @@ ocean costs **~90 log-units** and takes bomb-window rms from 69 to 81–94 ‰. 
 cannot serve both the decadal transient and the millennial age. **The fix is structural — an
 advective term or a second ventilation timescale — not a retune.**
 
-Note also that `k_w` swings 6808 → 3348 across the table: the optimiser trades surface exchange
+Note also that `k_w` swings 6808 → 3348 across the table: the optimizer trades surface exchange
 against deep mixing to hold total ocean bomb uptake roughly fixed, because that is what the
 observed atmospheric decline requires.
 
@@ -343,7 +343,7 @@ observed atmospheric decline requires.
 `bomb_total` sits at **151–154 kmol at every `kz` in the table**, including `kz` = 2000 where
 the ocean is far less ventilated. Ventilation does not explain it.
 
-Pinning `bomb_total` at the citable 102 kmol and re-optimising everything else:
+Pinning `bomb_total` at the citable 102 kmol and re-optimizing everything else:
 
 | | bomb_total | NH peak Δ¹⁴C | bomb-win rms | ocean/land/atm bomb ¹⁴C |
 |---|---|---|---|---|
@@ -428,7 +428,7 @@ CO₂ rms has already blown out to 11.98 ppm. That is the two-pool land structur
 parameter: N&L's biosphere has **four pools (leaves, twigs, wood, + soil) and 2200 PgC**,
 which lets a fast pool exchange ¹⁴C while a slow pool stores carbon. Ours cannot separate them.
 
-**One more thing the reviewer response settles, in our favour.** Mouchet's central critique of
+**One more thing the reviewer response settles, in our favor.** Mouchet's central critique of
 Dentith et al. is that carrying ¹⁴C as a *ratio* (DI¹⁴C/DI¹²C) *"implicitly assumes that local
 air-sea CO₂ disequilibrium remains constant with time"* and is therefore *"not fit for
 addressing bomb radiocarbon at a time of major change in atmospheric CO₂"*. **Our model is on
@@ -485,7 +485,7 @@ ventilation — the thing ¹⁴C is in the model *for* — is not believable.
   can be reproduced. Do not wire it back in.
 - `ccx_build_forcing()` **warns** when it holds GMST flat past the observations. Two existing
   tests now wrap it in `suppressWarnings` with a comment — they check the emissions columns,
-  and warning about the column they don't read is correct behaviour.
+  and warning about the column they don't read is correct behavior.
 - The FaIR export lives in `data-raw/downloads/fair_v145_ssp/` with a MANIFEST. Regenerate with
   `source ~/climate-env/bin/activate && python run_fair_ssps_for_ccx.py` **from FaIRtoFrEDI**,
   then `Rscript data-raw/build_climate_module.R` here.

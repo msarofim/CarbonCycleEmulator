@@ -38,7 +38,7 @@ leaks the index's decadal structure into the level rows at equal interannual slo
 **R3 — the PRIOR on `w_enso_l2`.** Flat on [0, 60] Sv/index (recommended; the 09-14 (b) precedent for `gamma_eq`: "flat keeps the
 verdict's power — the array MEASURES γ; the observation lognormal would pass by construction"), with the Meinen bracket
 **14–25 Sv/index as the VERDICT** (§4 PE2), not the prior. Box top 60 = 2.4× the bracket's top and 1.9× today's unrefitted need,
-so the mode is not pinned by the box. Alternative: lognormal on the bracket (centre 18.7, log-sd 0.29) — declined for the reason above.
+so the mode is not pinned by the box. Alternative: lognormal on the bracket (center 18.7, log-sd 0.29) — declined for the reason above.
 
 **R4 — the SHIM `gamma_enso_ocn_NH/SH`.** PINNED at 0 in the array (the E-array precedent, `R/calibrate.R:531-532`: "one limb
 carries the modulation, option A is subsumed"). The alternative — leave them free and read "→ 0 within 1 se" (the cell's PE2) — is
@@ -94,7 +94,7 @@ rows (canonical −1400.30). GATE V: sd 0.553 vs 0.933 ± 0.084 (0.59×, z −4.
 ## 2. What is built — ONE fitted name, two structure constants, both cores
 
 **Fitted.** `w_enso_l2` — **Sv per Niño3.4 unit, WHOLE-BAND (both hemispheres, split equally)**; `tr = "logit"`, box **[0, 60]**,
-init **18.7** (the bracket's geometric centre), prior flat (R3). Joins `CCX_PARAM_ABSENT_OK` (`R/calibrate.R:1067`): absent from
+init **18.7** (the bracket's geometric center), prior flat (R3). Joins `CCX_PARAM_ABSENT_OK` (`R/calibrate.R:1067`): absent from
 every registered file = 0 = no limb, seeded at init by `ccx_mode_start()`. ⛔ Name check: prefixes nothing in the table
 (`w_eq`, `w_vent`, `w_thc`, `w_up`, `w_out_*` — the `w_e` → `w_eq` incident; `test-mode-struct-lint`).
 **Structure constants** (in `CCX_STRUCT_HILDA` and inherited by `hilda_c`, range-checked BY NAME like `q_attach_from`):
@@ -111,14 +111,14 @@ i.e. an exchange of EQUAL volume each way on the two boxes' true per-volume conc
 T-A2's difference form, `diag_ta2_enso_return_depth.R:70-73`, and to the cell's up/down limb pair at equal W). `h_ml(t)` is the
 SAME thickness the ML's own limbs use at t (seasonal under `seas_ml`). Bulk transport only (α = 1; ¹⁴C unfractionated by
 convention). No pump, no air–sea, no change to the solved field. **C++ twin** in the E-loop's position (`src/ccx_core.cpp:1015`),
-`Par` field `w_enso_l2`, `Aux` fields `k_l2`, `w0_l2`, marshalled BY NAME through `ccx_cpp_par()` / `ccx_cpp_aux()`
+`Par` field `w_enso_l2`, `Aux` fields `k_l2`, `w0_l2`, marshaled BY NAME through `ccx_cpp_par()` / `ccx_cpp_aux()`
 (`R/cpp.R:240-260, :355`), zero-filled when absent. R twin beside the E loop (`R/model.R:3136`). `enso` needs no forcing change.
 **Contracts (P0, each a test, each MUTATION-tested — break the guarded thing and the test must fail):**
 - **P0a ABSENT = BIT-EXACT**: `w_enso_l2` = 0 (and absent) reproduces `hilda30h`'s `y` `expect_identical` in BOTH cores; its stored
   streams to 1e-12; the port targets unchanged.
 - **P0b SPINUP UNTOUCHED**: the periodic spinup with `w_enso_l2` = 25 is bit-identical to the canonical's (enso = 0 there).
 - **P0c CONSERVATION**: total carbon and each isotope conserved to 1e-12 over the transient with the limb at 25 (equal volumes).
-- **P0d PARITY**: R vs C++ at `w_enso_l2` = 25, every box every tracer, rel < 1e-10, and identical `add_flux` labelling (the
+- **P0d PARITY**: R vs C++ at `w_enso_l2` = 25, every box every tracer, rel < 1e-10, and identical `add_flux` labeling (the
   flux trace counts it in `ocean_net`, as the shim is).
 - **P0e THE FLOOR**: at 25 Sv/index the floor binds in 10.4 % of months (measured on the forcing, §0 R1); the slope from the
   floor form vs the unclipped linear form differs by < 10 % — RECORDED, and if larger, the array's verdict names it.
@@ -169,8 +169,8 @@ in an annual regression (Meinen's swing is a monthly peak-to-peak over ONE event
 of the physics. Not that GATE V closes (ENSO is 66 % of its knockout at ent26 but the model has 33 % of the observed interannual
 variance and "louder is not righter", [[ccx_gate_v_variability]]). Not a hemispheric split (R5).
 
-## 6. Order and artefacts
-Rulings R1–R6 → param table + structure constants + `CCX_PARAM_ABSENT_OK` → R limb → C++ twin + marshalling → `test-l2-enso-limb.R`
+## 6. Order and artifacts
+Rulings R1–R6 → param table + structure constants + `CCX_PARAM_ABSENT_OK` → R limb → C++ twin + marshaling → `test-l2-enso-limb.R`
 (P0a–P0f, mutation-tested) → suite on a frozen copy (the standing reds only) → the unrefitted probe (PE1–PE2, N1;
 `outputs/diagnostics/l2_enso_limb_probe_2026MMDD.{log,rds}`) → `ccx_ms_reference_set()` branch + `test-ms-reference-set` →
 port targets → bundle → frozen tree → Mac preflight 24/24 → the wave (after the control wave is read) → collect → PA1–PA6 →

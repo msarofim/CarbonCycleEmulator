@@ -39,11 +39,11 @@ new run.
 ## What may still be quoted from this file, and what may not
 
 - **May:** the fact that gates 7 and 12 both passed at an 18-parameter mode under
-  the Michaelis–Menten fertilisation form; the finding that `h_ml` has an interior
+  the Michaelis–Menten fertilization form; the finding that `h_ml` has an interior
   optimum near 184 m; the `r(luc_scale, fert_k) = −0.907` sampling hazard.
 - **May not:** any parameter value as "the calibrated value"; the log-posterior
   −2221.3 as comparable with anything computed after 2026-08-15 (the objective has
   two more streams, so the numbers are not on the same scale); the gradient
-  behaviour reported in `diag_gradient_terms.R` part 3 for "the MAP mode", which
+  behavior reported in `diag_gradient_terms.R` part 3 for "the MAP mode", which
   is this file's parameters run through a forcing it was never fitted to and is
-  labelled as such in that file.
+  labeled as such in that file.

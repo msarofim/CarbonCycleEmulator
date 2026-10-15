@@ -73,7 +73,7 @@ and took SH land 1.308 → 1.071.
 
 **③ Land carbon — FAILS ITS GATE.** DESIGN gate 7, 2015–2023: **land 3.56 vs GCB 2.410 ± 0.50 =
 +2.30 σ FAIL** (ocean 2.97 vs 3.202 ± 0.40 = −0.58 σ, PASS). The land takes up ~1.15 GtC/yr too
-much. Fertilisation is Michaelis–Menten with `beta_max`/`fert_k` at ρ = +0.998 and FACE constraining
+much. Fertilization is Michaelis–Menten with `beta_max`/`fert_k` at ρ = +0.998 and FACE constraining
 only the SHAPE ([[ccx_face_fert_k_ceiling]], [[face_ceiling_is_the_headline_in_disguise]]).
 
 **④ Ocean carbon — GOOD, with one flag.** Sink −0.58 σ; the three GLODAP gradient rows are small
@@ -122,7 +122,7 @@ into one.
 (`gamma_enso` already exists), volcanic/climate variability in the land flux. **This is the only
 place where higher-frequency forcing genuinely helps — and it is INTERANNUAL, not sub-monthly.**
 
-**E. Unblock the posterior.** Reparameterise `h_ml` or smooth the pump's `1/eps` kinks so the
+**E. Unblock the posterior.** Reparameterize `h_ml` or smooth the pump's `1/eps` kinks so the
 objective is C1; justify or widen the `kz` bracket it rails against. Without this there is no
 posterior, only a mode.
 
@@ -153,7 +153,7 @@ Three ways a shorter step could still have mattered, all ruled out or too small:
    effect requires ADDING stochastic sub-monthly forcing, which is a different study, and it is
    second-order against a 12° phase error.
 3. **Phase resolution.** The phases are set ANALYTICALLY (`SEAS_PHI_EFF`, `seas_lag_p`,
-   `SEAS_T_LAG`), not by the discretisation. A finer step cannot move an analytic phase.
+   `SEAS_T_LAG`), not by the discretization. A finer step cannot move an analytic phase.
 
 **⇒ VERDICT: shortening the timestep addresses none of ①–⑧.** The monthly step is the model's
 OUTPUT and FORCING resolution, not its integration step, and the integration is already converged.

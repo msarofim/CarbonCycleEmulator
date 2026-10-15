@@ -9,7 +9,7 @@ handoff. Read first: `notes/prereg_2026-09-07b_hilda_refit_round2.md` (R1–R8),
 ## 1. WHAT CHANGED FROM ROUND 1 (Marcus's rulings, 2026-09-07)
 1. **Objective #10** replaces the MVN row: three rows on (mean level, A−B, B−deep) with declared sigmas
    (level 10.26 = the deep row's convention; contrasts 2.29 / 4.04 from the bootstrap), each a
-   generalised normal with **shape 4** (cost |z|⁴/2: 2σ 8, 3σ 40, 5σ 312). Under it round 1's winner
+   generalized normal with **shape 4** (cost |z|⁴/2: 2σ 8, 3σ 40, 5σ 312). Under it round 1's winner
    scores −321 on the rows, the column −242, the structural basin −24 (leads by 178).
 2. **`h_hs` fitted** (29th; box [20, 500]; migrated ancestors start at their own `h_ml`).
 3. **Exchange floor 0.02** (round 1 sat at the old floor 0.220).

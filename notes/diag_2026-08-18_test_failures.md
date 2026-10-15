@@ -89,7 +89,7 @@ endpoint bar to all six mechanisms. Measured |Δ CO₂| vs base:
 | switch | @2100 | max over series | year of max |
 |---|---|---|---|
 | emissions | 212.158 | 225.341 | 2083 |
-| fertilisation | 200.496 | 201.185 | 2101 |
+| fertilization | 200.496 | 201.185 | 2101 |
 | ocean_sink | 116.054 | 116.211 | 2100 |
 | revelle | 33.986 | 34.107 | 2100 |
 | warming_feedback | 18.103 | 18.140 | 2100 |
@@ -102,7 +102,7 @@ Not a code defect.
 
 ## 4. `test-luc-permanence.R:104` — |af| = 0.074 vs bar < 0.02 — **STALE TEST PREMISE (+ a real stale comment)**
 
-The test asserts `f_luc_perm = 0` reproduces the pre-2026-08-13 behaviour (recorded signature:
+The test asserts `f_luc_perm = 0` reproduces the pre-2026-08-13 behavior (recorded signature:
 0.072 @50 → 0.002 @100 → −0.003 @150). It sets **one** knob. Reproducing that model needs **two**:
 
 | `f_luc_perm` | `f_luc_wood` | af@50 | af@100 | af@150 | |
@@ -119,12 +119,12 @@ RIGHT; nobody acted on it.**
 
 **REAL DEFECT FOUND ALONGSIDE (minor, but in a load-bearing place).** `R/cpp.R:104-105` reads:
 
-> *"WHERE the debit comes from. Unlike `f_luc_perm` this default IS the old behaviour, because
+> *"WHERE the debit comes from. Unlike `f_luc_perm` this default IS the old behavior, because
 > `f_luc_wood` = 1 is the incumbent decision, not a bug."*
 
 **`R/model.R:159` sets `CCX_F_LUC_WOOD_DEFAULT <- 0`.** The comment asserts a default the code does
 not have — **in the exact block whose stated purpose is preventing the R and C++ cores from silently
-running different models** ("which is exactly what `gamma_enso` did"). Behaviour is fine (both sides
+running different models** ("which is exactly what `gamma_enso` did"). Behavior is fine (both sides
 read the same constant); the comment is stale and actively misleading.
 
 ---

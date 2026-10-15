@@ -1,4 +1,4 @@
-# COLLECT 2026-08-29g — **VOLCANIC DIFFUSE-LIGHT FERTILISATION IS IN, AND IT IS THE FIRST
+# COLLECT 2026-08-29g — **VOLCANIC DIFFUSE-LIGHT FERTILIZATION IS IN, AND IT IS THE FIRST
 # CHANGE THAT MAKES THE MODEL *MORE RIGHT* RATHER THAN LOUDER**
 # r **0.571 → 0.625**. But the FROZEN likelihood cost is steep and must be priced CONDITIONALLY.
 
@@ -17,7 +17,7 @@ eruption (Gu et al. 2003 *Science* 299:2035; Mercado et al. 2009 *Nature* 458:10
 
 **Six sites, R and C++ twins kept in parity:**
 - `R/cpp.R` — `aod_NH`, `aod_SH` appended LAST to `CCX_FORCING_COLS`; `gamma_diff` added to the
-  marshalled parameter list and defaulted in `ccx_cpp_par()`.
+  marshaled parameter list and defaulted in `ccx_cpp_par()`.
 - `R/forcing.R` — new `ccx_aod_at()` loader (zero outside coverage); columns emitted by
   `ccx_build_forcing()` and passed per-month by `ccx_forcing_at()`.
 - `src/ccx_core.cpp` — `N_FORCING` 15 → **17**; `f[15]`/`f[16]` with the isfinite→0 absence
@@ -70,7 +70,7 @@ whole session that makes the model **MORE RIGHT** rather than merely louder — 
 signal.**
 
 **⚠ AND THE TWO OPTIMA DISAGREE.** Matching the Pinatubo anomaly needs **`gamma_diff` ≈ 0.97**;
-maximising the correlation wants **≈ 0.25–0.50**, a factor of 2–4 lower. Reproducing one FEATURE and
+maximizing the correlation wants **≈ 0.25–0.50**, a factor of 2–4 lower. Reproducing one FEATURE and
 fitting the RECORD are different targets, and this is the second time today that distinction has
 mattered (the first: ENSO's variance-matching vs squared-error-optimal amplitude).
 
@@ -124,4 +124,4 @@ the volcanic climate signal. ⚠ **Adding an AOD → temperature term would doub
 My argument was not wrong about the consequence — it was wrong about which concept owns it.
 ⚠ **The consequence is real and is now documented at the call site: once `gamma_diff` ≠ 0, "climate
 held" does NOT imply "volcanically quiet", and a diagnostic needing a quiet run must zero AOD
-itself.** Behaviour-neutral today, since `gamma_diff` defaults to 0.
+itself.** Behavior-neutral today, since `gamma_diff` defaults to 0.

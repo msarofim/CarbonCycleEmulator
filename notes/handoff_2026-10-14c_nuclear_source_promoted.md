@@ -70,7 +70,7 @@ request ("Yes, write the handoff and remove the two suite worktrees"), 2026-10-1
    - **The pure-R core runs none of the four forcing guards.**
      - `ccx_run_prepared()` (`R/cpp.R:555–558`) checks the ENSO index, AOD mode, `nuc_share` and ndep; `ccx_run()` (`R/forcing.R` ~1342) checks none.
      - Adding them can't move a number, but pure-R tests that pair a default forcing with params naming another index would start to stop.
-   - **`h_ml`'s upper truncation**, now characterised:
+   - **`h_ml`'s upper truncation**, now characterized:
      - The substep cap stops `h_ml` at 75.02 m at the mode; the P8 geometry wall is at 75.14 m. Raising the cap would gain ≤ 0.12 m.
      - DESIGN.md (substep bullet) already says so. Nothing to decide unless a card should say it.
    - ~~`ccx_nuclear_c14_annual()` only warns~~: **DONE** (§1, j).

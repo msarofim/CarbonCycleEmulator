@@ -1,4 +1,4 @@
-# Quarantine 2026-10-12: Joos 2013 split labelled "±1 sd" (it is ±2 s.d.)
+# Quarantine 2026-10-12: Joos 2013 split labeled "±1 sd" (it is ±2 s.d.)
 
 Marcus, 2026-10-12: "Quarantine + README (Recommended)".
 
@@ -11,7 +11,7 @@ The section is **§4.3** (pp. 2806–2807). The ± are **±2 s.d. half-widths**:
 Fixed in `3c45224` / `55206e3` (CHANGELOG 2026-10-12 (n)).
 
 **Every NUMBER in these logs is right.** Only the two label strings are wrong. They are quarantined
-because a ±2 s.d. half-width labelled "±1 sd" is the 10-02 halved-z bug class (CHANGELOG 10-02 w):
+because a ±2 s.d. half-width labeled "±1 sd" is the 10-02 halved-z bug class (CHANGELOG 10-02 w):
 read at face value, it doubles the apparent spread a model's partition is judged against.
 One s.d. is half of each printed ±: ocean 3.5 / 6 / 6, land 8 / 10 / 7 GtC.
 

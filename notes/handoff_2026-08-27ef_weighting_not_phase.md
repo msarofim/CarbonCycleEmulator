@@ -61,7 +61,7 @@ the area mean** — the Southern Ocean's ΔpCO2 peaks **7.41** against the inver
 signal to exchange and sinks). The subtropical limb, at 1.52, cannot produce 8.52 at any lag.
 
 **⇒ `sst_seas_amp_SH` CANNOT FIX THIS — the parameter scales a phase it cannot rotate.** 27d's
-conclusion that its −6.32 σ flag is the model penalised for a correct refusal SURVIVES, on a
+conclusion that its −6.32 σ flag is the model penalized for a correct refusal SURVIVES, on a
 better-founded reason than the one I gave it.
 
 **P2 CONFIRMED, and it converts the mechanism from my reading into a measurement**: south of
@@ -87,7 +87,7 @@ the NH ocean component's phase error is +1.16 months against the SH's −5.17.
   from amplitude alone on a row that is phase-driven: **the same scalar reading of a vector
   decomposition that `diag_seas_channel_decomp.R`'s own header already records as having been
   wrong in both directions in August.**
-- **My first P3 readout was an artefact of my own grid.** Log spacing put 1.181 eight times closer
+- **My first P3 readout was an artifact of my own grid.** Log spacing put 1.181 eight times closer
   to the fitted 1.159 than 0.992 was, so all four rows read "wants LONGER" off the SPACING.
   Replaced by a symmetric central difference in ln τ — **which is the form to reuse.**
 - **Free convergence check:** slope ÷ curvature puts the optimum at **1.156** vs the stored
@@ -96,7 +96,7 @@ the NH ocean component's phase error is +1.16 months against the SH's −5.17.
 ## 3. ⇒ NEXT: latitude bands, on the SH OCEAN limb — and how to pose it
 
 This is Marcus's own named candidate from handoff 27, arrived at from a different direction. **It
-is a structural change and is his call to authorise**, not mine. What §1 gives it that it did not
+is a structural change and is his call to authorize**, not mine. What §1 gives it that it did not
 have before is a target with a number and a phase: two SH ocean bands, a subtropical one that the
 current SST channel already describes correctly, and a Southern-Ocean one peaking ~5.9 months
 away from it.
@@ -105,7 +105,7 @@ away from it.
 1. **The seasonal entrainment term does not exist in the model at all.** The SH ocean's only
    seasonal driver is `sst_seas_amp_SH`. A band split with no new mechanism gives two solubility
    channels in the same phase and buys nothing — **the band and the mechanism have to land
-   together**, which is a bigger change than a reparametrisation.
+   together**, which is a bigger change than a reparametrization.
 2. **Note what banding has and has not been tested on.** `R/model.R:218` records that latitude
    banding was tested and REJECTED on the NH **land NPP shape** (`diag_npp_twobox.R`: every
    multi-box fit deletes its own low-latitude boxes). Different limb, different hemisphere — **no

@@ -127,7 +127,7 @@ from this run are usable.**
 ## 7. Open items, roughly in priority order
 
 1. **Get the MCMC converging** (§4) — blocks everything downstream.
-2. **Digitise UNSCEAR 2000 Annex C** annual atmospheric test yields → unlocks bomb-era
+2. **Digitize UNSCEAR 2000 Annex C** annual atmospheric test yields → unlocks bomb-era
    ¹⁴C, lets `LIK_USE_BOMB_WINDOW` be set TRUE, and removes the largest caveat.
 3. **Source the 7 provisional constants**; check `SST_PCO2_SENSITIVITY` for double counting.
 4. Optional ocean bomb-¹⁴C inventory constraint (GLODAP-era) as an integral check.

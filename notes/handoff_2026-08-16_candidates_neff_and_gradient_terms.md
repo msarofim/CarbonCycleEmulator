@@ -37,11 +37,11 @@ and the ordering. 15d's pump result stands unchanged.
 | `calibration/diag_dic_gradient.R` | the pump, zero fitted parameters (15d) | ~15 min |
 | `calibration/diag_ocean_candidates.R` | candidates A and B1 on the same five rows | ~40 min |
 | `calibration/diag_deep_d14c_neff.R` | `n_eff` measured seven ways | ~1 min |
-| `calibration/diag_deep_d14c_sigma_choice.R` | point σ vs marginalised σ | <5 s |
+| `calibration/diag_deep_d14c_sigma_choice.R` | point σ vs marginalized σ | <5 s |
 
 **DESIGN.md §3.4a** is the canonical candidate list and carries every measured result.
 **No model file was changed** except `R/likelihood.R`'s comment block for
-`LIK_D14C_DEEP_NEFF` (documentation only, no behaviour change).
+`LIK_D14C_DEEP_NEFF` (documentation only, no behavior change).
 
 ---
 
@@ -86,7 +86,7 @@ unmet by everything except the pump — but it is not earned.
 
 Correlogram: ρ < 0.5 by **~5,500 km**, ρ < 0 by **~9,000 km**, −0.37 beyond 15,000 km.
 
-**Admissible set** (the judgement call, written down): **6.4** (correlogram, ρ floored),
+**Admissible set** (the judgment call, written down): **6.4** (correlogram, ρ floored),
 **11.9** (60° blocks), **26.0** (30° blocks), **110.1** (correlogram, empirical ρ). Excluded
 with reasons: Kish 3408 (assumes an independence the correlogram refutes), 10°/20° blocks
 (block ≪ decorrelation scale, biased high).
@@ -102,7 +102,7 @@ candidates agreed. It now arbitrates a structural decision: **candidate A flips 
 and the conservative end of the measured range is 18.15 ‰.** Representation error, still zero,
 adds in quadrature and pushes exactly that way.
 
-**Marginalising was measured and I was wrong about it.** ν = 2.12 from the measured spread.
+**Marginalizing was measured and I was wrong about it.** ν = 2.12 from the measured spread.
 It changes *neither* decision — still holds `kz` (4.67 against a 4.50 threshold), still adopts
 A (+0.82). What it costs is margin: the runaway penalty falls **4.3×**, from a 4× margin to a
 4 % one, so under it this term **could never replace the `kz` bracket.** The trade is *honest
@@ -199,7 +199,7 @@ terms are being added to prevent.
 
 `sd_w` is **53.9 µmol/kg** for deep DIC and **0.327 ‰** for deep δ¹³C. At n_eff = 20 that is
 σ = 12.05 and 0.0732. **But n_eff was measured for Δ¹⁴C, not for these fields** — DIC and δ¹³C
-have their own spatial structure. `diag_deep_d14c_neff.R` generalises to them with a field
+have their own spatial structure. `diag_deep_d14c_neff.R` generalizes to them with a field
 argument; that is a ~1 min re-run and it should happen before the terms ship.
 
 ---
@@ -208,7 +208,7 @@ argument; that is a ~1 min re-run and it should happen before the terms ship.
 
 | # | task | status |
 |---|---|---|
-| ~~1–7, 6b~~ | objective, β, `luc_scale`, GLODAPv2, gradient, shares, seasonality, MM fertilisation, `sigma_co2` | **DONE** |
+| ~~1–7, 6b~~ | objective, β, `luc_scale`, GLODAPv2, gradient, shares, seasonality, MM fertilization, `sigma_co2` | **DONE** |
 | **6** | `LIK_EXCESS_C14_TARGET` | NOT a blocker |
 | **9** | the pump | all three clauses PASS, via the background state not export (15d) |
 | **10** | depth-dependent `K_z` | **scored.** Owns clause 3 only |
@@ -256,7 +256,7 @@ argument; that is a ~1 min re-run and it should happen before the terms ship.
 - **`luc-veg-debit` has never been merged** and is now a long way from `main`.
 
 **Still do NOT:** hand-tune stream weights (adding the §4 terms is *adding a missing
-constraint*, which is the sanctioned move — do not let it become a licence to reweight);
+constraint*, which is the sanctioned move — do not let it become a license to reweight);
 delete `excess_c14_ocean` or `d14c_intcal`; free any land turnover parameter; delete the `kz`
 bracket bare; build the conveyor; splice any pre-2026-08-15 posterior; quote a logL from a
 diagnostic not given the gradient offsets; lower `LIK_CO2_REP_ERR` as housekeeping; quote the

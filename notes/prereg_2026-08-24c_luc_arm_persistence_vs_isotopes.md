@@ -75,8 +75,8 @@ Laplace evidence are NOT comparable to a free arm's** — read parameters and pe
 **Q2 — is the read contaminated, as `foss`'s was?**
 
 - **P3: `sigma_d14c` stays within 0.5 σ**, against `foss`'s **+3.85 σ** (which absorbed the
-  14C-free artefact) and `ocean`'s ≤0.15 σ. The luc arm's Δ¹⁴C excursion is **1.75 %** of `foss`'s,
-  so there is no Suess artefact to absorb. *Falsifier:* > 1.5 σ — and if it fires, P1's read is
+  14C-free artifact) and `ocean`'s ≤0.15 σ. The luc arm's Δ¹⁴C excursion is **1.75 %** of `foss`'s,
+  so there is no Suess artifact to absorb. *Falsifier:* > 1.5 σ — and if it fires, P1's read is
   contaminated and must be reported as such rather than quoted.
 
 **Q3 — the second escape route, with `luc_scale` pinned.**
@@ -88,7 +88,7 @@ Laplace evidence are NOT comparable to a free arm's** — read parameters and pe
 **Q4 — the ice term, which is where the plateau arc's sharpest signal was.**
 
 - **P5: `co2_icecore` improves and lands near `foss`'s, not `ocean`'s.** At the mode the arms give
-  `foss` **+13.78**, `luc` **+12.33**, `ocean` **+0.48**. After re-optimisation the sign must stay
+  `foss` **+13.78**, `luc` **+12.33**, `ocean` **+0.48**. After re-optimization the sign must stay
   positive. *Falsifier:* negative, i.e. the refit spends the ice term.
 
 **PROVENANCE GATE, checked before any of the above is read.** The warm-start logpost must be
@@ -100,7 +100,7 @@ trap of 08-24b §6 says a warm-started scan can look finished while carrying the
 
 ## 4. WHAT WOULD BE CONCLUDED
 
-- **P1 predicted + P3 holds** ⇒ the confound is **discharged in favour of persistence**, 08-24b §3's
+- **P1 predicted + P3 holds** ⇒ the confound is **discharged in favor of persistence**, 08-24b §3's
   mechanism argument becomes a measurement, and **`ocean_deep` is never built** — its only stated
   purpose was this discrimination.
 - **P1 falsified** ⇒ the isotopic signature drives `rep_dC`, which would be a genuinely new result:
@@ -110,4 +110,4 @@ trap of 08-24b §6 says a warm-started scan can look finished while carrying the
 
 Nothing here re-opens the plateau: 08-24a and 08-24b both stand, and `rep_dC` still belongs to the
 century drift. This measures **which property of a probe moves `rep_dC`**, which is what makes the
-century-drift programme's next probe designable.
+century-drift program's next probe designable.

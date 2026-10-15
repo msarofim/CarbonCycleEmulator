@@ -71,17 +71,17 @@ capable of returning >100 % without anything physical improving. That is the rea
 - **C0 — METHOD CONTROL.** At `u0`: SPO total 1.1402, SH_land 1.3080, NH_origin 0.821, ratio 1.930
   (each within 0.5 %), harness offset within 0.5 of −1.5805. **FAIL ⇒ nothing below is read.**
 - **C1 — REPRODUCTION.** |INCUMBENT + 1546.195| ≤ 0.10, |OCEAN_only + 1533.627| ≤ 0.10,
-  |LAND_mid + 1575.950| ≤ 0.30, |LAND_hi + 1589.795| ≤ 0.30. A miss is an OPTIMISER verdict, not a
+  |LAND_mid + 1575.950| ≤ 0.30, |LAND_hi + 1589.795| ≤ 0.30. A miss is an OPTIMIZER verdict, not a
   physical one, and voids the arm.
 - **C2 — NESTING.** Every free-`q10` arm ≥ its 27q pinned counterpart − 0.02 (`RESTOL`); the pinned
-  point is feasible in the free arm's space. Any violation ⇒ optimiser failure.
+  point is feasible in the free arm's space. Any violation ⇒ optimizer failure.
 - **C3 — POWER, BEFORE ANY NULL IS BELIEVED** ([[no_power_null]]). `q10` must actually move and the
   ridge must actually be ridden: in **both** LAND arms, |ln q10_fit / ln q10_pin − 1| ≥ 0.03 **and**
   the product `seas_T_amp_NH · ln(q10)` within 2 % of the INCUMBENT's. If `q10` does not move, C4
   is a no-power null and is not read as evidence for anything.
 - **C4 — THE STATISTIC.** recovered_free at mid and hi, against pinned 42.9 % / 43.7 %:
   - **≥ 65 % at either end ⇒ `q10` EXPLAINS the contrast.** The recovery fraction is a slice
-    artefact and 42.9 % is the number that survives; 27j's 83.6 % is not a channel property.
+    artifact and 42.9 % is the number that survives; 27j's 83.6 % is not a channel property.
   - **within [33, 54] % at BOTH ends ⇒ `q10` does NOT explain it.** The fraction is stable under the
     slice, so the 83.6-vs-42.9 gap belongs to the **LEVER** — the SHAPE of the vacancy, prereg 27q
     §4's alternative — and the arc's target moves to what distinguishes a productivity vacancy from
@@ -90,7 +90,7 @@ capable of returning >100 % without anything physical improving. That is the rea
 - **C5 — DIRECTION.** land cost falls ≥ 5 % at both ends (the leak operating). Predicted from 27p:
   ≈ 29.8 (mid) and ≈ 43.6 (hi).
 - **C6 — PHYSICAL.** SH_land in LAND_hi ≥ 1.15 (27p says 1.216, vs 0.859 pinned) — i.e. confirm on
-  this harness that a free `q10` means **the defect is not imposed**, not merely not penalised.
+  this harness that a free `q10` means **the defect is not imposed**, not merely not penalized.
 
 ## 3. ⚠ THE SECONDARY STATISTIC, AND WHY IT IS THE HONEST ONE
 
@@ -99,7 +99,7 @@ fraction whose denominator moved 3.7× is exactly that failure mode. So the run 
 
     per-ppm interaction  =  INTERACTION  /  (SH_land[INCUMBENT] - SH_land[LAND])      [log units / ppm]
 
-which normalises by the vacancy actually opened rather than by its price. On the existing runs:
+which normalizes by the vacancy actually opened rather than by its price. On the existing runs:
 
     27j    67.280 / 0.3828 = 176 /ppm
     27q    34.470 / 0.305  = 113 /ppm   (mid)      70.887 / 0.449 = 158 /ppm  (hi)

@@ -39,13 +39,13 @@ From there, five threads:
 5. **`rep_dC` futures along CONVERGED ladders.** To 1σ:
    - `hilda29l`: +271 ppm (SSP5-8.5 2300).
    - φ = 0: +63 ppm. ⇒ **Its leverage is mostly the φ loop.**
-   - ⭐ At the measured offset (0.776), φ = 0 fertilisation = `beta_max` 1.97 / `fert_k` 644, **inside the
+   - ⭐ At the measured offset (0.776), φ = 0 fertilization = `beta_max` 1.97 / `fert_k` 644, **inside the
      literature band**, for −45.0. The R2 prior ruling (09-23) still stands. CHANGELOG (h), (k).
 6. **`NPP_GLOBAL_PI`: "1 and then 4".**
    - **Option 1 is applied:** the value stays 60, status provisional, with citations (TAR + brackets).
    - **Measured:** the model's 2001–23 NPP is **70** vs MOD17 52.75. The model has no pre-1750 clearing,
      so the constant IS its 1750 NPP.
-   - **Option 4, ruled:** centre = mean of the verified totals = **56.06**; σ widened for n = 3 to the
+   - **Option 4, ruled:** center = mean of the verified totals = **56.06**; σ widened for n = 3 to the
      84 % one-sided UCB = **7.76**. Arms: A = v0k + AOD anomaly; B1 = A + the NPP row (NPP₀ fixed);
      B2 = + a fitted NPP₀ scale.
    - **POWER CHECK: B1 moves modern NPP by −0.01 GtC/yr.** The row is decorative at this σ, so nothing
@@ -56,7 +56,7 @@ From there, five threads:
      CHANGELOG (i)–(k).
 7. **`NPP_GLOBAL_PI` is left for a ruling** on potential vs actual. It turned out moot in model terms:
    see 6.
-8. **Tests:** Marcus authorised extending the registry tripwires. `test-constants-batch.R:14` is extended
+8. **Tests:** Marcus authorized extending the registry tripwires. `test-constants-batch.R:14` is extended
    (labels `hilda_csl3v0ka`, `hilda_csl3v0kan`). The 38-parameter count tests are to be extended only if B2
    is built.
 
@@ -108,7 +108,7 @@ From there, five threads:
   (`test-mode-file.R:323`), 5042 pass. ⚠ An earlier read at `39d2056` was taken from a PARTIAL log (4 fails
   seen; the finished log had 7). The other six were all my new labels: the lint (driver fixed), two copies
   of the label registry (`test-constants-batch`, `test-tr-box`) and `test-struct-v0`'s prior-on set. The
-  last three were extended with Marcus's authorisation; `test-struct-v0` now also ASSERTS that A and B1
+  last three were extended with Marcus's authorization; `test-struct-v0` now also ASSERTS that A and B1
   carry the prior. **Always wait for the log's final line.**
 - **Two identity numbers** for re-running anything:
   - v0k basin-1 stored logpost is **−1424.746523**; arm A at the same vector is −1424.207126.

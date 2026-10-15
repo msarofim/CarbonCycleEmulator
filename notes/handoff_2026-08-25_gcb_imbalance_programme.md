@@ -1,4 +1,4 @@
-# Handoff — CarbonCycleEmulator, 2026-08-25: the GCB budget imbalance as the successor programme
+# Handoff — CarbonCycleEmulator, 2026-08-25: the GCB budget imbalance as the successor program
 
 **Repo:** `~/Documents/2026/CodeProjects/CarbonCycleEmulator/`, trunk `main`, clean at `1e11a23`.
 **Tests:** 1028 pass, 2 fail — both the **pre-existing by-design** `test-fluxes.R:99/100`.
@@ -21,7 +21,7 @@
 5. **FACE answers a better question than the one asked.** It cannot supply a marginal prior for
    `beta_max` — but it puts a **ceiling on `fert_k` at ~1374–1400**, and the probes sit at 1738/1784. §4.
 6. **`beta_max` is not the identified object.** The uniform prior is not merely uninformative. §4.
-7. **THE SUCCESSOR PROGRAMME IS THE GCB IMBALANCE, AND IT IS AN INPUT PROBLEM.** §5–§7.
+7. **THE SUCCESSOR PROGRAM IS THE GCB IMBALANCE, AND IT IS AN INPUT PROBLEM.** §5–§7.
 8. The imbalance integrates to **37.8 ppm** over 1850–2024, **56 % of it before 1959** — and it is
    **scored nowhere**. §5.
 9. Still no posterior. Objective unchanged. All sink switches still default OFF.
@@ -154,7 +154,7 @@ the most honest; (c) changes no result but leaves the escape route open.
 
 ---
 
-## 5. THE SUCCESSOR PROGRAMME: GCB'S OWN BUDGET IMBALANCE
+## 5. THE SUCCESSOR PROGRAM: GCB'S OWN BUDGET IMBALANCE
 
 **This is where `rep_dC` work goes, and it is an INPUT problem, not a calibration one.**
 
@@ -173,7 +173,7 @@ understanding of the contemporary carbon cycle"*. Measured from `data/gcb_budget
 | 2010s | +0.429 | | 2000 | 70.57 | 33.22 |
 | 2020s | **−0.072** | | **2024** | **80.29** | **37.80** |
 
-**Three facts that set the programme:**
+**Three facts that set the program:**
 
 1. **It integrates to 37.8 ppm, and 56 % of that lands before 1959.** `rep_dC` at the mode is
    **5.566 ppm** — **3.8× smaller** than the pre-1959 cumulative alone. The fit is absorbing a
@@ -198,7 +198,7 @@ sink do not account for year-to-year variability before 1959."* Pre-1959 atmosph
 > separated from the error — this is [[like_for_like_forcing]] and "read the producer before
 > indicting the product" applied to an input rather than to one of our own files.
 
-## 6. THE PROGRAMME, IN THE ORDER IT SHOULD RUN
+## 6. THE PROGRAM, IN THE ORDER IT SHOULD RUN
 
 **Nothing here needs a refit until step 4**, which is deliberate: the plateau arc spent six refits
 to learn something four at-mode measurements could have ranked first.
@@ -207,14 +207,14 @@ to learn something four at-mode measurements could have ranked first.
   candidate generator of the whole shape. Test: fit the imbalance's own trend **separately** on
   1850–1958 and 1959–2024 and test for a step at the seam; and compare GCB's pre-1959 atmospheric
   growth (Joos & Spahni 2008) against the Law Dome/firn record **we already score**. If the
-  pre-1959 imbalance is largely a seam artefact, the century drift's input explanation shrinks by
-  more than half and the programme changes shape immediately. **Run this first.**
+  pre-1959 imbalance is largely a seam artifact, the century drift's input explanation shrinks by
+  more than half and the program changes shape immediately. **Run this first.**
 - **G2 — PRICE THE TRANSFER, DON'T ASSUME IT.** [[ccx_swing_not_carbon]] establishes
   r = 0.771 / slope 0.781 on **growth rates**. The quantity `rep_dC` absorbs is a **level**. The
   transfer from a GtC/yr imbalance to an atmospheric ppm offset is **damped by the sinks' response**
   and is not the naive `cum/2.124` used in §5's table. Measure it: run the model with emissions
   perturbed by the imbalance series and read the CO₂ **level** response. §5's ppm column is an
-  **upper bound**, and is labelled as one.
+  **upper bound**, and is labeled as one.
 - **G3 — DECIDE WHOSE ERROR IT IS, WITH THE ISOTOPES.** The imbalance is a residual: it could be
   emissions too high, sinks too low, or growth too low. **These have different δ¹³C signatures** and
   the isotopes already discriminated once on this arc (the 5.1 σ terrestrial rejection). Reuse the
@@ -233,7 +233,7 @@ to learn something four at-mode measurements could have ranked first.
    FACE gives a *reasoned* ceiling where before there was only a hand-set implausibility bound, so
    "pinning crosses from testing the model into constraining it to an answer" is now weaker.
 3. **Whether G1 outranks everything.** If the pre-1959 imbalance is mostly a methodology seam, the
-   century-drift programme is much smaller than §5 makes it look.
+   century-drift program is much smaller than §5 makes it look.
 
 ## 8. NON-OBVIOUS STATE
 

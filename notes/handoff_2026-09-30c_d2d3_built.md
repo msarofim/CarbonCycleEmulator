@@ -27,7 +27,7 @@ All committed and pushed (`d2790be..3eb4fe2`, plus this handoff).
 |---|---|---|
 | D3 preview (fixed vector) | Today's GCB imbalance + cement (0.63 GtC/yr) is split land 56 %, E_LUC via `luc_scale` 37 %, ocean 12 %. RAW I(t) is 64 % interannual noise | (i) |
 | D3 machinery | Shares on the simplex move the two GCB sink targets; absent = objective #13 bit-exact; mutations M1–M8 caught | (j) |
-| D3-alone screen | P-D3-1..4 PASS: **fertilisation RISES 2–5 %**, `luc_scale` → 1 | (k) |
+| D3-alone screen | P-D3-1..4 PASS: **fertilization RISES 2–5 %**, `luc_scale` → 1 | (k) |
 | D2 literature pass | Subagent, spot-checked. (a) N dep supported but 7–9 % of S_LAND; (b) a POSITIVE greening term is not supported; (c) a 1750 deficit is contradicted, and regrowth is already in net E_LUC | (k) |
 | Rulings | See §2 | (l), (m) |
 | D2 build | N-dep forcing data (emissions proxy), cited constants, greening term, N-retention flux; all OFF by default; all mutation-tested | (l), (m) |
@@ -39,22 +39,22 @@ All committed and pushed (`d2790be..3eb4fe2`, plus this handoff).
 are quoted only from a full refit, per the R2 lesson):
 - The record WANTS the N-retention sink at **4–6 kg C/kg N**, the literature's central value: +5.3 log-units
   (N alone), +7.4 (N + greening).
-- It spends it on fertilisation: **enh(410) −12 % / −19 %**.
+- It spends it on fertilization: **enh(410) −12 % / −19 %**.
 - Modern NPP moves **69.6 → 67.7 / 66.8**, against the observed 56.1 ± 7.75. D4 is moving, NOT resolved.
 - Greening fits **≈ 0** in every arm, and q10 FALLS. P-D2-4 fails in every arm, so the record and the
   literature agree there is no greening term.
 - **N + greening + D3 is the only combination that moves the future toward Koven**: z(2100–2200) 2.27 → 1.93,
-  K 872 → 799 (more saturating), SSP5-8.5 2300 +61 ppm. ⚠ The +61 mixes the fertilisation shape, `luc_scale`
+  K 872 → 799 (more saturating), SSP5-8.5 2300 +61 ppm. ⚠ The +61 mixes the fertilization shape, `luc_scale`
   (which also scales scenario land use) and the ocean. Decompose it before attributing.
 
 ## 2. Rulings (Marcus, 2026-09-30, via the question tool; the chosen option labels verbatim)
 
-- **D3 I(t):** "Smooth + cement". An 11-yr centred mean (window shrinking at the ends) of (imbalance + cement
+- **D3 I(t):** "Smooth + cement". An 11-yr centered mean (window shrinking at the ends) of (imbalance + cement
   carbonation); constant shares.
 - **D2 (a) forcing:** "Emissions proxy". NOx-N + NH₃-N above 1750, × land fraction 0.60, × NH share 0.83.
-  SSPs are ratio-harmonised to the CMIP7 history, converging by 2050.
+  SSPs are ratio-harmonized to the CMIP7 history, converging by 2050.
 - **D2 (a) form:** "Retention flux". F_h = `ndep_ret` × 1e-3 × max(ndep_h, 0) GtC/yr, atmosphere →
-  `soil_slow`, at `alpha_photo`. The prior on `ndep_ret` is lognormal, centre 3.9 kg C/kg N, "2-sigma spanning
+  `soil_slow`, at `alpha_photo`. The prior on `ndep_ret` is lognormal, center 3.9 kg C/kg N, "2-sigma spanning
   0.6–8.7".
 - **D2 (b):** "Sign-free prior". NPP × exp(`npp_tsens` · GMST), `npp_tsens` ~ N(0, 0.029) /K.
 - **D2 (c):** "Don't build". `luc_scale` is the model's existing recovery-like freedom (~0.23–0.26 GtC/yr).
@@ -110,7 +110,7 @@ closure. A refit cannot fit them until they are in `CCX_PARAM_TABLE`.
 - Read D4 against 56.1 ± 7.75 (`data/obs_npp_modern_target.rds`). If it is unresolved, write it into the new
   assessment as a **named tension**.
 - Score the prereg's predictions at the refit, not only at the screen.
-- **Decompose the futures** (fertilisation shape vs `luc_scale`'s scenario land use vs ocean) before
+- **Decompose the futures** (fertilization shape vs `luc_scale`'s scenario land use vs ocean) before
   attributing the Koven move.
 
 ### Step 4: D1, the app
@@ -135,7 +135,7 @@ closure. A refit cannot fit them until they are in `CCX_PARAM_TABLE`.
 **My decisions, flagged for Marcus:**
 1. `ndep` is classified **NON-CLIMATE** in `ccx_hold_climate()`'s inventory (`test-so-entrainment.R`), so a
    held-climate run keeps deposition moving with its scenario.
-2. The retention prior's centre is 3.9 with log-sd 0.67. Its 95 % interval is **1.0–15**, not exactly 0.6–8.7.
+2. The retention prior's center is 3.9 with log-sd 0.67. Its 95 % interval is **1.0–15**, not exactly 0.6–8.7.
 3. The retention flux goes into `soil_slow` only. A wood/soil split would need a cited ¹⁵N partition.
 4. The model's `npp` readout EXCLUDES the retention flux (≤ 0.2 GtC/yr).
 

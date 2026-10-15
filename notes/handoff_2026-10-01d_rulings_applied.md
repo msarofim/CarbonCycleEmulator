@@ -29,7 +29,7 @@
 | 6 | B1 | D4 exclusive; "+0.50 GtC/yr retained via N deposition" beside it (re-read after the flip: 67.67, z +1.50) | `2cee507`, `0afefec` |
 | 7 | B3/B3b | `ccx_comparable_rows()` in the AIC gate; the parent re-documented | `2cee507` |
 | 8 | B4 | `ndep_ret` "Gross carbon uptake per unit of nitrogen deposited on land" | `2cee507` |
-| 9 | B5 | the fertilisation switch reworded, CO₂ fertilisation only; Marcus: no separate N switch | `2cee507` |
+| 9 | B5 | the fertilization switch reworded, CO₂ fertilization only; Marcus: no separate N switch | `2cee507` |
 | 10 | B6 | `CCX_EMIS_METHOD_DEFAULT` "constant"; six files priced and restamped; 10 test re-pins approved | `3d38d56`, `4f5e5db`, `46d96f3` |
 | 11 | B7 | Laplace ribbons built → **failed their check → HELD**; MCMC built for Torch, NOT submitted | `c12af28`, `0afefec` |
 | 12 | B8 | drafted: `notes/assessment_2026-10-01_hilda33d_DRAFT.md` | this commit |

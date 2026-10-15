@@ -24,7 +24,7 @@ its own comment: *"unit-annual-mean"*.
 gate 7 through the direct path — at ANY value.** Analytically the removed factor is
 `I₀(A·ln q10 / 10)`, which over 1.0391 → 3.4945 would have been only **1.000044 → 1.000495, i.e.
 +0.045 %** — on ~20 GtC/yr of SH heterotrophic respiration, **~0.009 GtC/yr against a 1.15 GtC/yr
-gap, ~130× too small even if it were NOT normalised out.**
+gap, ~130× too small even if it were NOT normalized out.**
 
 **A null here would therefore mean NOTHING** ([[no_power_null]]). So the run does two things:
 
@@ -34,7 +34,7 @@ gap, ~130× too small even if it were NOT normalised out.**
   the code is wrong** and that is the finding.
 - **T2 — THE REAL QUESTION.** Evaluate gate 7 at the STORED seasonal-fix vectors from
   `outputs/diagnostics/price_the_lag.rds` (shipped-gross arms at lag 1.7677 / 2.00 / 2.25 / 2.50,
-  where the WHOLE slice was re-optimised). This asks whether the seasonal-fix CONFIGURATION moves
+  where the WHOLE slice was re-optimized). This asks whether the seasonal-fix CONFIGURATION moves
   gate 7 through any path, not whether `seas_T_amp_SH` does.
 
 ## 2. GATES
@@ -46,7 +46,7 @@ gap, ~130× too small even if it were NOT normalised out.**
 - **T2 — the statistic.** Land sink at each stored arm vs 3.56, against GCB 2.410 ± 0.50.
   **"MOVES" = |Δ land| ≥ 0.25 GtC/yr (half a σ) at lag 2.25.**
   **PREDICTED: it does NOT move — |Δ| < 0.25** — because the only slice members with an annual-mean
-  carbon path are `q10` (PINNED in those arms) and `seas_T_amp_NH` (same normalisation), so nothing
+  carbon path are `q10` (PINNED in those arms) and `seas_T_amp_NH` (same normalization), so nothing
   in that configuration has a route to the annual budget.
 - **T3 — IF T2 moves, ATTRIBUTE IT.** Report which parameter carries it by re-evaluating the arm
   with each slice member reverted to the mode one at a time. No gate; it is a decomposition.

@@ -42,7 +42,7 @@ file lands when its task finishes.
     1.83 → 2.05) + 0.05 (its own prior).
   - Futures: SSP5-8.5 2300 +13.5 ppm, against the stratification feedback's own +5.5.
   - Size: ν's factor is ×1.011 in 2015–24 but ×1.070 at 2300.
-  - The MM fertilisation slope falls to 0.21 of today's by 2300.
+  - The MM fertilization slope falls to 0.21 of today's by 2300.
   - The nine existing pins are all ocean-side; this is the first land pin.
 - **A correction to the old handoff's §4.** "P0 masks the ocean; the total looks less wrong than either part" was
   OVERSTATED. In GtC the total's error (0.76) is larger than the ocean's (0.16). The right direction: **the ocean's
@@ -194,13 +194,13 @@ file lands when its task finishes.
    - The app's `npp_tsens` row (`app/R/params_meta.R:122`) will show a pinned 0. The greening wording on the cards
      is Marcus's to write.
 
-## 6. Open items carried over (each is Marcus's to prioritise)
+## 6. Open items carried over (each is Marcus's to prioritize)
 1. **#16's landing** (§5).
 2. **H2, the ocean thermal excess in the low-latitude column.** DEFERRED by ruling. The candidates:
    - a time-shape comparison against GCB Fig. S10 per protocol (cheap; no model change);
    - a refit at a lower kz (expensive);
    - a structural surface-DIC damping in Bunsen 2024's spirit (a proposal).
-3. **`hs_asx_frac`'s judgement width** (KEPT): `k_w` ≈ 1900 is a prior compromise, to be disclosed. Widening it needs
+3. **`hs_asx_frac`'s judgment width** (KEPT): `k_w` ≈ 1900 is a prior compromise, to be disclosed. Widening it needs
    a proposal with a cited width and a plan for the `h_hs` bracket, since `h_hs` reached 472.6 of its 500 m in the
    `k_w` arm.
 4. **H1's observed-ratio arm.** It needs a gridded SST download (HadSST4 or HadISST1), which needs his permission.
@@ -237,7 +237,7 @@ file lands when its task finishes.
 - **Carried:**
   - the coupled futures hold the 1850 GMST (−0.052 K) back to 1750 (pre-existing, noted);
   - MAGICC is restricted (cite M11);
-  - a frozen tree from before `92b5756` has the old multistart overrun behaviour (not #16's: `aa76fb5` includes
+  - a frozen tree from before `92b5756` has the old multistart overrun behavior (not #16's: `aa76fb5` includes
     option A);
   - the multi-line-shell lesson: stage, check `git diff --cached --stat`, then commit, as separate steps.
 - **Untracked in the repo, and not this session's:** `carbotopecomment.9.26.26.docx`, `carbotopecomments.10.2.26.docx`,

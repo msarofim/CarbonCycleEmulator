@@ -109,9 +109,9 @@ the held one today.)
 - Whether `OCEAN_AREA_NH/SH` (provisional 1.55/2.06e14) should be sourced from a bathymetry — Nowicki's OCIM grid gives 1.463 /
   2.031e14 (wet cells), which is NOT a source, only a second reading.
 
-## 6. Order and artefacts
+## 6. Order and artifacts
 1. Constants + prior reader + parameters + the field (R) → `test-option-e` P0a/P0e.  2. The loop (R) + guards + stability → P0b/c/f.
-3. C++ twin + marshalling → P0d.  4. The unrefitted probe → `outputs/diagnostics/option_e_probe_20260914.{log,rds}`.
+3. C++ twin + marshaling → P0d.  4. The unrefitted probe → `outputs/diagnostics/option_e_probe_20260914.{log,rds}`.
 5. Table + migration + structure `hilda_e` + the logpost guard.  6. Full suite; CHANGELOG; handoff; memory.  7. The array (Torch;
 "consider Torch first" — the verdict is Torch: 36 names × ≥ 30 starts is the laptop's day).
 
@@ -119,7 +119,7 @@ the held one today.)
 - **`w_e` → `w_vent`, `gamma_e` → `gamma_vent`.** The prereg's names were PREFIXES of existing parameter names (`w_eq`,
   `gamma_eq`, `gamma_enso_*`), and R's `$` on a list PARTIAL-MATCHES when the exact name is absent: `is.null(p$w_e)` on a list
   without `w_e` returned `w_eq`'s value, so the "absent = 0 = OFF" contract silently read the CELL's transport as the loop's.
-  Caught by the C++ marshalling (`Index out of bounds: w_e`) on the first parity run — the memory tree's encoder-trap family
+  Caught by the C++ marshaling (`Index out of bounds: w_e`) on the first parity run — the memory tree's encoder-trap family
   (`INDEX_conv`). Renamed rather than patched with `[[`: a name that cannot partial-match is the structural fix. Every
   occurrence of the two names above reads with the new ones.
 - **The solved-field guard is INERTNESS, not an error.** §1 said `w_vent > 0` with `pump_field = "solved"` errors by name. Built

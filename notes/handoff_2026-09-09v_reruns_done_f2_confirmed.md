@@ -109,7 +109,7 @@ For the offset there is a real argument **both** ways — the spinup **PINS** at
 `CO2_PI_PPM`, so a limit-cycle solve may absorb the offset into the *ocean* state instead of leaving
 it in the air. ⛔ **Building one is the test. Do not price round 6 on either answer.**
 
-## 5. REVIEW §4 — SST leg CONFIRMED, pCO₂ leg REFUTED, centre re-derived
+## 5. REVIEW §4 — SST leg CONFIRMED, pCO₂ leg REFUTED, center re-derived
 Reproduced independently from ERSSTv5 1975–2024 with the repo's own `sc_harm` + cos-lat weighting.
 **VALIDATION:** the SH hemispheric half-amp returns **1.7464 K**, reproducing the registered
 `SST_SEAS_AMP_SH_OBS = 1.74644` to 5 s.f. ⇒ the band row is like-for-like.
@@ -120,7 +120,7 @@ Reproduced independently from ERSSTv5 1975–2024 with the repo's own `sc_harm` 
 | **BAND 40–90 S** | **1.4995** | **2.9990** ⇒ the shipped `.ENT_SO_SST_AMP = 3.0` |
 | NH hemisphere | 2.2374 | 4.4748 |
 
-✅ **`.ENT_SO_SST_AMP = 3.0` IS the peak-to-peak**, labelled "half-amplitude" — a true factor of 2.
+✅ **`.ENT_SO_SST_AMP = 3.0` IS the peak-to-peak**, labeled "half-amplitude" — a true factor of 2.
 ✅ `R/constants.R:41-42`'s *"the band … swings harder than the hemisphere"* is **FALSIFIED**
 like-for-like (1.4995 < 1.7464); it only reads true comparing a p2p against a half-amp.
 ⛔ **BUT THE REVIEW'S SECOND LEG IS WRONG.** It reported `.ENT_SO_PCO2_AMP = 19.45` as *also* p2p,
@@ -131,14 +131,14 @@ hence "≈2.1–2.3× too large". The repo's own **uncontaminated, obs-only**
 
 **Re-derived by COMPUTATION** ([[derived_must_mean_computed]]):
 
-| case | in-band | centre | fitted 21.04 ÷ centre |
+| case | in-band | center | fitted 21.04 ÷ center |
 |---|---|---|---|
 | shipped | 29.6812 | 10.9524 | 1.92 |
 | SST leg only | 19.1840 | 7.0789 | 2.97 |
 | **both legs fixed (1.4995 half, 16.26 area-mean)** | **17.7581** | **6.5528** | **3.21** |
 | review's assumption (both p2p) | 14.8371 | 5.4749 | 3.84 |
 
-⇒ the shim sits at **3.21×** its corrected centre. **The review's DIRECTION survives — retiring the
+⇒ the shim sits at **3.21×** its corrected center. **The review's DIRECTION survives — retiring the
 shim is better supported than the shipped 1.92× implied — but its MAGNITUDE was overstated.**
 
 ## 6. ⛔ THE FOUR RULINGS OWED — all Marcus's, none taken
@@ -146,9 +146,9 @@ shim is better supported than the shipped 1.92× implied — but its MAGNITUDE w
    shock in a **pedagogical** model ⇒ [[ccx_pedagogical_not_emulator]]. Its refit value is unknown
    until built.
 2. **The pCO₂ leg's estimator** — area-mean **16.26** (box-consistent, and what the SST leg uses)
-   vs per-cell **19.68**. The 09-09 log flags this as an owed ruling. Centre 6.5528 vs 7.0789.
-3. **`h_ml`'s prior re-centring** (review §3) — P8's stop is 76.146 m and **61.3 % of the prior lies
-   past it, its MEDIAN 83.94 included**; re-centring on the LS annual mean 59.7 m drops exposure to
+   vs per-cell **19.68**. The 09-09 log flags this as an owed ruling. Center 6.5528 vs 7.0789.
+3. **`h_ml`'s prior re-centering** (review §3) — P8's stop is 76.146 m and **61.3 % of the prior lies
+   past it, its MEDIAN 83.94 included**; re-centering on the LS annual mean 59.7 m drops exposure to
    23.8 %. Without it ~3 starts in 5 die at the guard. **Moves a prior.**
 4. **Retire `ent_seas_amp_SH` (31 → 30)?** P12 reproduced unchanged and still supports it, now at
    3.21× rather than 1.92×.
@@ -166,7 +166,7 @@ shim is better supported than the shipped 1.92× implied — but its MAGNITUDE w
   [[residual_named_not_computed]]. **The repair is a FIFTH ruling owed to Marcus.**
   *(The measured facts in the original — 23 rows, −1434.670, the `d14c_deep_ocean`-without-profile
   stream set — were all correct; only the ATTRIBUTION of the leftover was invented.)*
-- The other §8 leads (F3 the guard's month-centre max, F4 substeps, GATE Q's missing
+- The other §8 leads (F3 the guard's month-center max, F4 substeps, GATE Q's missing
   `test-gate-bounds` coverage, `ccx_loglik()`'s finite 0) — untouched, still `[R]`.
 - §6/§7 pedagogy: the app prose (`app/ui.R:265` still says "a mixed layer over ten diffusive
   layers"), the `ml` box's identity, `q10`, `h_hs`.

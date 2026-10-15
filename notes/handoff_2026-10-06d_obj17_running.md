@@ -34,7 +34,7 @@ superseded by §5 here.
 - **Stage 1 at hilda33p:** lag **5.8432** months, land **×1.30120** (0.66071 / 0.63322), `w_enso_l2` **14.7262**.
   - Profile: 1σ 4.46–7.28, 2σ 2.88–8.99; the canonical's 2.61 is outside 2σ.
   - Laplace 1σ: lag 1.25, scale 0.294, `w_enso_l2` 1.28.
-- **Priced on the canonical, on #17's own rows:** B1 −10.86 unrefitted; B2 −10.25 (five land names re-optimised), of which
+- **Priced on the canonical, on #17's own rows:** B1 −10.86 unrefitted; B2 −10.25 (five land names re-optimized), of which
   the seasonal rows −13.25. SSP5-8.5 2300 −3.53 ppm, vvH −1.78. The built objective reproduces the preview's B1 to 3.7e-11.
 - **Tests:**
   - `test-iav-cut.R` 119 / 0, nine source mutations caught;
@@ -85,7 +85,7 @@ superseded by §5 here.
   REF = −1119.9835 likelihood). The preview's B3 (seasonal names freed too) did not recover the seasonal rows, so
   little better than −10 is expected.
 - **The futures** should move by roughly −3.5 ppm (SSP5-8.5 2300). A move of tens of ppm would be a red flag:
-  `gamma_diff` is held, and its absence is what kept the fertilisation pair still in the preview.
+  `gamma_diff` is held, and its absence is what kept the fertilization pair still in the preview.
 - **⚠ Compare on LIKELIHOOD, never stored logposts.** #17 pins four names #16 fits, so the prior terms differ. The two
   objectives also score DIFFERENT rows. Read both vectors on BOTH objectives (§4 step 4).
 

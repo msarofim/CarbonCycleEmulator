@@ -69,12 +69,12 @@ the run inside its FIRST restart at 23 min — that is the cheap-smoke knob, and
 ## ⚠ Caveats carried
 
 - **The Laplace evidence of a widened run is NOT comparable to an unwidened one** — a uniform prior
-  over a wider support has a different normalising constant. Read **parameters** and **per-stream
+  over a wider support has a different normalizing constant. Read **parameters** and **per-stream
   logL**, never evidence. (Same caveat the pin block carries for pins.)
 - **The Hessian this run reports is still subject to the owed step study.** 08-31c measured that at
   the `lifted` point `kz` is the ONE coordinate with step-dependent curvature — plausibly because a
   logit pressed against its bound has a vanishing Jacobian (3.6× compressed at the canonical mode,
-  ~10× at the 08-30 arms). **If that hypothesis is right this probe should also stabilise `kz`'s
+  ~10× at the 08-30 arms). **If that hypothesis is right this probe should also stabilize `kz`'s
   Hessian entry**, which is a second, independent thing to read off it.
 - **Nothing here changes what ships.** `CCX_WIDEN_PARAMS` mutates the table in-session only, behind
   gates that refuse a no-op, a narrowing, a non-logit parameter, and any edit that touches more than

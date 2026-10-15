@@ -43,7 +43,7 @@ The two holders are partially redundant, so their shares add to more than 100 %.
 
 **Why this matters.** Forcing the offset down also moves gate D (the interhemispheric δ¹³C
 asymmetry) and gate GL toward their observations. **The offset is absorbing real structural strain,
-not mislabelled noise.**
+not mislabeled noise.**
 
 ## 3. The 09-23 ruling, for the record
 
@@ -56,14 +56,14 @@ no successor arc. That is the current state.
 - **The 09-23 shelf expired.** It was a profile of the objective at `hilda29l`, so it lapsed when φ
   was set to 0.
 - **Today's re-read** (`calibration/diag_rep_dc_shelf_v0k.R`) takes it from the φ = 0 ladder that
-  already existed (09-29 k): 9 rungs, everything else re-optimised at each. It uses T4p's argument:
+  already existed (09-29 k): 9 rungs, everything else re-optimized at each. It uses T4p's argument:
   a profile contains the answer for every prior on that parameter.
 - **Checks:** GATE SHAPE passes (monotone and concave) and the REST identity is 0.
 
 **The φ = 0 shelf** (`outputs/diagnostics/rep_dc_shelf_v0k_20260930.log`). Each cell is the fitted
 `rep_dC`, with its likelihood cost against the fitted optimum:
 
-| prior σ | centred 0 | centred on the measured 0.776 | centred −0.215 (mass-weighted) |
+| prior σ | centered 0 | centered on the measured 0.776 | centered −0.215 (mass-weighted) |
 |---|---|---|---|
 | 1.0 (shipped) | inert: stays 3.27 | inert | inert |
 | 0.5 | 2.70 (−2.9) | 2.90 (−1.5) | 2.65 (−3.3) |
@@ -73,11 +73,11 @@ no successor arc. That is the current state.
 **Futures** (09-29 k, same ladder):
 - `rep_dC` 3.27 → 1.0 moves SSP5-8.5 2300 CO₂ by **+63 ppm** and vvH by **+26 ppm**.
 - At `hilda29l` the same move was **+271 ppm**. Most of that was the φ vegetation loop amplifying a
-  fertilisation change. Setting φ = 0 removed that amplifier.
+  fertilization change. Setting φ = 0 removed that amplifier.
 
-## 5. The new finding: R2 works through the fertilisation SHAPE, and the two are separable
+## 5. The new finding: R2 works through the fertilization SHAPE, and the two are separable
 
-Along the φ = 0 ladder, the present-day fertilisation enhancement (NPP gain at 410 ppm) stays at
+Along the φ = 0 ladder, the present-day fertilization enhancement (NPP gain at 410 ppm) stays at
 **0.337–0.340 on every rung**, while the saturation constant K falls:
 
 | `rep_dC` | 3.27 | 2.0 | 1.0 | 0.776 | 0.0 |
@@ -88,7 +88,7 @@ Along the φ = 0 ladder, the present-day fertilisation enhancement (NPP gain at 
 So lowering `rep_dC` is, on the land side, a pure *shape* move. The historical amplitude is untouched,
 and the curve saturates sooner. That shape change is what moves the future.
 
-Today's fertilisation profile (CHANGELOG 09-30 d) moved K to 625 by itself, with `rep_dC` left free.
+Today's fertilization profile (CHANGELOG 09-30 d) moved K to 625 by itself, with `rep_dC` left free.
 That cost only **−5.6**. So:
 
 - **The −40 at the measured offset is almost all `rep_dC`'s own cost** (the ice anchor and the bomb
@@ -104,7 +104,7 @@ That cost only **−5.6**. So:
     - the free arm cost **−198** (mostly `d13c_level_MLO` −124), not −40;
     - K stayed at 859 instead of falling to 644;
     - the future moved **−23 ppm**, not the ladder's +63.
-  - A narrow re-fit finds a different re-organisation. **The direction of R2's effect on the future
+  - A narrow re-fit finds a different re-organization. **The direction of R2's effect on the future
     depends on which names absorb the strain**, which is itself a reason to price R2 only at a full
     refit.
   - What still holds is the COST inequality above: the shape row's −5.6 is an upper bound, so at least
@@ -115,19 +115,19 @@ That cost only **−5.6**. So:
 | option | `rep_dC` | record cost | what it changes |
 |---|---|---|---|
 | (a) as ruled 09-23: N(0, 1) | 3.27 | 0 | nothing; stays a named shim |
-| (b) re-centre on 0.776, σ 1.0 | 3.27 | 0 | nothing (inert) |
-| (c) re-centre on 0.776, σ 0.2 | 1.74 | −16.0 | offset 2.2× the measured one instead of 4×; K ≈ 737 (PCHIP through the ladder); a partial fertilisation-shape move |
+| (b) re-center on 0.776, σ 1.0 | 3.27 | 0 | nothing (inert) |
+| (c) re-center on 0.776, σ 0.2 | 1.74 | −16.0 | offset 2.2× the measured one instead of 4×; K ≈ 737 (PCHIP through the ladder); a partial fertilization-shape move |
 | (d) hard pin at 0.776 | 0.776 | −39.8 | offset = measurement; K 644; SSP5-8.5 2300 about +63 to +69 ppm (between the ladder's rung 1.0 and the K 625 profile row) |
 | (e) fix the structure (IHDE) | — | — | declined 09-23 |
 
 **My reading, for you to rule on.** R2's likelihood cost is mostly `rep_dC`'s own. Its effect on the
-future, though, is re-organisation-dependent (§5 test): at a full re-fit the ladder moves K and adds
+future, though, is re-organization-dependent (§5 test): at a full re-fit the ladder moves K and adds
 ~+63 ppm, while a narrow re-fit moves the future the other way. So the future consequence of (c) or
-(d) should be quoted from a full refit, not from this menu. On labelling alone:
+(d) should be quoted from a full refit, not from this menu. On labeling alone:
 If you want the offset to look like the representation term it is named for, (c) is the defensible
 version:
 - σ 0.2 is Francey et al. 2019's floor for such a term;
-- it is centred on the measured value;
+- it is centered on the measured value;
 - it costs −16.
 
 (a) remains defensible as a named shim. Neither option fixes anything structural. The strain the

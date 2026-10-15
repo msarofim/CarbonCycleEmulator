@@ -23,7 +23,7 @@ We continued `handoff_2026-09-29_passive_soil.md`:
 - **"Run all the cheap measurements"** to answer them.
 
 Every run is at arm A (`hilda_csl3v0ka`), v0k basin 1. The control is the fixed-stock τ-500
-rebalanced vector (11 names re-optimised).
+rebalanced vector (11 names re-optimized).
 
 ## 2. Decisions and positions (Marcus), in order
 1. **"Expand on the decision points"** was answered in chat (not a file).
@@ -40,7 +40,7 @@ rebalanced vector (11 names re-optimised).
    0.51 at 1–2 m. The runs used 0–1 m, which gives 0.195, an inert mass of 292 GtC and an
    exchanging passive stock of 1208.
 4. **"Run all the cheap measurements."** Done: A–D, plus two follow-ups the results required (the
-   literature-fertilisation arm and the q10-pinned NPP scan).
+   literature-fertilization arm and the q10-pinned NPP scan).
 
 ## 3. Results (all in CHANGELOG (u)/(v); every identity and gate passed)
 - **(u) Fixed-stock futures at τ 2000 / 3000 / 5000:** SSP5-8.5 2300 +137 / +153 / +182 ppm.
@@ -52,9 +52,9 @@ rebalanced vector (11 names re-optimised).
   - ⇒ The passive pool cannot fix the radiocarbon defects.
 - **B. Sink → source (SSP5-8.5):**
   - **No flip at the fitted vector**, at frozen q10 2.0, or at re-fitted q10 2.0 (loglik −35.9).
-  - **A flip in 2274 only at literature fertilisation (β_max 1.34, K 580) plus q10 2.0.** That run
+  - **A flip in 2274 only at literature fertilization (β_max 1.34, K 580) plus q10 2.0.** That run
     sits inside Koven's ±1σ for 2100–2200 and 2200–2300.
-  - **The lever is the fitted fertilisation:** NPP goes 60 → 137 by 2200. A flip needs
+  - **The lever is the fitted fertilization:** NPP goes 60 → 137 by 2200. A flip needs
     q10^(ΔT/10) > NPP/NPP0.
   - **q10 is held low by the seasonal temperature-amplitude observation priors** (~40 of 46
     logpost units). One q10 serves the seasonal and the century scales.
@@ -80,11 +80,11 @@ rebalanced vector (11 names re-optimised).
    - ⚠ **No go-ahead to build has been given.**
 2. **τ_slow prior** (the old item 1: a / b / c). It is reframed by D. With an inert pool, Shi's
    bulk constrains the pair (f, τ), not τ alone.
-3. **The fertilisation strength** is now the main sink → source lever. The fitted β_max 2.55 /
+3. **The fertilization strength** is now the main sink → source lever. The fitted β_max 2.55 /
    K 868 lies above the 09-28 (c) literature band (β_max 1.3–2.0, K 500–750).
-   - It is tied to R2: at the measured `rep_dC` offset (0.776), φ = 0 fertilisation lands inside
+   - It is tied to R2: at the measured `rep_dC` offset (0.776), φ = 0 fertilization lands inside
      the band (β_max 1.97, K 644) for −45.0 ([[ccx_rep_dc_lever_is_the_phi_loop]]).
-   - Proposed caveat wording, not yet accepted: "the fitted CO₂ fertilisation is stronger than the
+   - Proposed caveat wording, not yet accepted: "the fitted CO₂ fertilization is stronger than the
      literature supports, and one q10 does two jobs." Marcus's own framing was "a major caveat".
 4. **R2 write-up, when Marcus asks for it.** Source material:
    - `ccx_rep_dc_prior.md` (the 09-23 ruling, T1 / T2 / T3 / T4p);
@@ -127,7 +127,7 @@ rebalanced vector (11 names re-optimised).
   - `soil_d14c_shi2020_carve`;
   - `npp0_scan_resfree_leaf-wood-soil_fast_fixpassive` and `…_q10pin1.10151`;
   - plus the `.stdout` files.
-- **Code:** no model behaviour changed. No file in `R/` or `src/` was touched.
+- **Code:** no model behavior changed. No file in `R/` or `src/` was touched.
 
 ## 6. Non-obvious state and traps
 - **Nothing is running. No worktrees remain** besides `main`.
@@ -147,7 +147,7 @@ rebalanced vector (11 names re-optimised).
   - A carve-out (smaller exchanging stock) RAISES it.
   - A re-fit roughly halves a frozen effect.
   - Always say which mode.
-- **The literature-fertilisation arm is FROZEN.** Its record cost was not computed. It is a
+- **The literature-fertilization arm is FROZEN.** Its record cost was not computed. It is a
   mechanism test, not a candidate.
 - `carbotopecomment.9.26.26.docx` is untracked and belongs to Marcus. Leave it alone.
 - **Full test suite not re-run.** No `R/` code changed. The last suite log is

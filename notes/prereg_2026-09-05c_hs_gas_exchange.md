@@ -76,4 +76,4 @@ low-latitude column, carrying the bomb-¹⁴C uptake and the air-sea disequilibr
 scores. Nothing here proposes moving it, and the arm is reported as "what HILDA's gas exchange would
 give", never as an alternative model. **If HS needs a different gas exchange from the LS box, that
 is a claim about HIGH-LATITUDE gas exchange — and HILDA explicitly assumes the opposite
-(`g_l = g_h`, their Table 1), so it would be a departure from the source and must be labelled.**
+(`g_l = g_h`, their Table 1), so it would be a departure from the source and must be labeled.**

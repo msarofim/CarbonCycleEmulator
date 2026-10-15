@@ -21,7 +21,7 @@
 before `calibration/diag_joint_land_ocean_refit.R` existed.** No gate was moved.
 **Nothing in `R/` or `src/` was touched.** All four arms converged (1 restart, last gain 0.0000).
 
-    Rscript calibration/diag_joint_land_ocean_refit.R    # ~75 min, four optimiser arms
+    Rscript calibration/diag_joint_land_ocean_refit.R    # ~75 min, four optimizer arms
 
 ---
 
@@ -56,7 +56,7 @@ count balances to zero, so unlike a bare challenger-minus-incumbent gap — whic
 refused to read as a model comparison — **this contrast is interpretable.** That is what four arms
 bought.
 
-**OCEAN-only reproduces 27g** under a better-converged optimiser: ent **4.31** against 27g's 4.16,
+**OCEAN-only reproduces 27g** under a better-converged optimizer: ent **4.31** against 27g's 4.16,
 **+11.93** against +11.62. The design is doing what it did before; only the land is new.
 
 ## 2. WHAT CHANGED MECHANICALLY — the channel was being SUPPRESSED by the land error
@@ -110,7 +110,7 @@ this experiment, but it is not explained by it either, and it should not be quot
 
 ---
 
-## 4. ⇒ WHAT THIS DOES AND DOES NOT LICENCE
+## 4. ⇒ WHAT THIS DOES AND DOES NOT LICENSE
 
 **Established.** The land and ocean corrections interact, strongly and in the predicted direction,
 with a parameter-balanced statistic. 27g's entrainment channel is vindicated on the evidence it
@@ -120,7 +120,7 @@ than as a counterweight. The standing partition target moves **1.93 → 1.390**,
 single arm (1.834 land, 1.765 ocean) and the best this arc has produced.
 
 **NOT established, and must not be quoted as if it were.**
-- **This is not a licence to adopt the GPP end.** `seas_npp_amp_SH` was FIXED, not fitted, and a
+- **This is not a license to adopt the GPP end.** `seas_npp_amp_SH` was FIXED, not fitted, and a
   clean interaction shows the two corrections couple — not that 0.352 is the right value. PsnNet
   and GPP disagree by 1.4× and the model uses one end without saying why. **Marcus's call, on the
   measurement's terms.**
@@ -139,6 +139,6 @@ single arm (1.834 land, 1.765 ocean) and the best this arc has produced.
   residual is a land SIZE error of ~1.33×, and the size is half of a pair whose shape has never
   been re-fitted for the SH. This is the direct descendant of P4's failure.
 - **(B) PIN `sst_seas_amp_SH`, or price it honestly.** It is at 37.6 % of its observed value with
-  z −3.92, cancelling the channel that now works. [[orthogonality_bounds_efficiency]] — if the
+  z −3.92, canceling the channel that now works. [[orthogonality_bounds_efficiency]] — if the
   conclusion needs the lever pinned, pin it and measure the exchange rate rather than arguing
   about it.

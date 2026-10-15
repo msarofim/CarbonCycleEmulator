@@ -68,7 +68,7 @@ Sampled sd over the curvature's (Laplace) marginal sd, in the fitting coordinate
 | `beta_max` | 1.04× | **1.37×** |
 | `fert_k` | 0.90× | **1.14×** |
 | `ndep_ret` | 1.15× | **0.96×** |
-| `h_ml` | 5.2× (centre −4.4 sd) | **2.94×** (centre −2.36 sd) |
+| `h_ml` | 5.2× (center −4.4 sd) | **2.94×** (center −2.36 sd) |
 | next largest | 1.4× (`kz_deep_frac`, `h_hs`, `imb_share_ocean_rest`) | **1.54×** `bomb_share_NH`, **1.54×** `seas_lag_p_NH`; 1.33–1.36× `h_hs`, `imb_share_ocean_rest`, `kz_deep_frac` |
 
 - The other 22 names fall between 0.95× and 1.25×.

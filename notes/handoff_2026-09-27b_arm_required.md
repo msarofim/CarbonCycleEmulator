@@ -59,7 +59,7 @@ distinguishable in their own logs. Verified: `canonical` and `hilda29l` give ide
 
 ⚠ **A correction that is now in the record**: I had said changing the default would "re-mean every
 past gate-12 number". **Overstated.** `JOOS_SRC` writes the arm into the log, so past runs were
-labelled — badly placed, but recorded. Nothing retroactive was ever at stake.
+labeled — badly placed, but recorded. Nothing retroactive was ever at stake.
 
 ⭐ **Marcus's standing frame is intact: no number, band or threshold changed. Joos and FaIR remain
 COMPARISONS, not targets to meet.**

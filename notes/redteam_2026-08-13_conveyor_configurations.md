@@ -3,7 +3,7 @@
 **CarbonCycleEmulator, 2026-08-13, branch `luc-veg-debit` at `7db1a5a`.** Marcus approved
 building the conveyor and asked for a red-team review of the available configurations,
 through four lenses: **ocean**, **atmosphere**, **isotope**, **reduced-complexity
-modelling**. He also asked that the review cover the *refit* — "once it is in properly,
+modeling**. He also asked that the review cover the *refit* — "once it is in properly,
 the other constants might all shuffle around into a new equilibrium and I would like to
 test that" (§6 below, and it is the best part of the proposal).
 
@@ -52,7 +52,7 @@ is **~9× the measured thermocline diapycnal diffusivity**: Ledwell's NATRE trac
 at ~300 m in the subtropical NE Atlantic gives **(1.7 ± 0.2) × 10⁻⁵ m² s⁻¹ = 536 m²/yr**.
 The model's interior diffusivity is not an eddy diffusivity; it is a fiction standing in
 for ventilation, exactly as §4.3 says. A conveyor is the mechanism that lets `kz` fall
-toward a number an oceanographer would recognise. **That is worth doing on its own, and it
+toward a number an oceanographer would recognize. **That is worth doing on its own, and it
 is independent of whether δ¹³C improves.**
 
 **Against Config A as specified — the mid-depth dead zone.** Sending the NH mixed layer
@@ -61,7 +61,7 @@ papers over that. **Under the conveyor `kz` is supposed to fall a long way (§4.
 and then the NH interior becomes genuinely stagnant while the NH bottom box is directly
 ventilated** — young bottom water underneath anomalously old mid-depth water. **The
 Atlantic does not look like that.** It is well ventilated top to bottom; the inversion the
-model would produce is an artefact of a non-local pipe past nine boxes.
+model would produce is an artifact of a non-local pipe past nine boxes.
 
 **Also: the depth is wrong for the water mass being named.** `oc10` is bottom water. NADW
 occupies roughly 1500–3000 m — the model's `oc8` (1314–1861 m) and `oc9` (1861–2628 m).
@@ -150,7 +150,7 @@ signal it is testing for.**
 
 ---
 
-## 4. THE REDUCED-COMPLEXITY MODELLING EXPERT
+## 4. THE REDUCED-COMPLEXITY MODELING EXPERT
 
 **The communications case is the strongest part of the proposal and it survives this
 review — but only in its honest form.** "Water sinks in the North Atlantic, crosses the

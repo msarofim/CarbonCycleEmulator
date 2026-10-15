@@ -21,7 +21,7 @@ result.**
 3. **The relief `foss` bought was payment for its PERMANENT LEVEL SHIFT**, not for the plateau. §3.
 4. **There is no rate at which relieving the plateau improves the plateau term.** §4 — the model
    already sits 1.67 ppm BELOW the ice there.
-5. **P3 was FALSIFIED and the lesson generalises.** §5. I claimed an escape route was closed by
+5. **P3 was FALSIFIED and the lesson generalizes.** §5. I claimed an escape route was closed by
    construction; it moved 2.94 σ.
 6. **Four of my thresholds/labels were wrong, one fired against a CORRECT result.** §6.
 7. **DE-RANK the plateau.** `rep_dC` belongs to the century drift, already traced to GCB's own
@@ -138,7 +138,7 @@ All caught by reading output, none by a gate. One fired **against a correct resu
 
 1. **`ocean_deep` — now for a NEW reason.** `ocean` differs from `foss` in **two** ways,
    persistence AND isotopic signature, so §3's pair does not strictly isolate which drives the
-   `rep_dC` difference. The mechanism argument favours persistence (`rep_dC` is a CO₂ *level*
+   `rep_dC` difference. The mechanism argument favors persistence (`rep_dC` is a CO₂ *level*
    offset; only persistence touches the level after 1960) but it is an argument, not a
    measurement. **`ocean_deep` has `foss`'s CO₂ trajectory and `ocean`'s isotopes, so it
    discriminates them directly.** Its vertical profile is a mechanism choice — pump export shape
@@ -146,7 +146,7 @@ All caught by reading output, none by a gate. One fired **against a correct resu
 2. **Carried from 23c:** whether to pin `beta_max`/`fert_k`. §5 shows the ridge IS the second
    escape route. Pinning three levers closes both known routes but may cross from testing the
    model into constraining it to an answer.
-3. **The century drift** (§7) as the successor programme to the plateau arc.
+3. **The century drift** (§7) as the successor program to the plateau arc.
 
 ## 9. NON-OBVIOUS STATE
 
@@ -181,5 +181,5 @@ cd ~/Documents/2026/CodeProjects/CarbonCycleEmulator && claude --remote-control 
 > relief was payment for a permanent level shift. §8 carries the three open decisions.
 >
 > **Do NOT** re-run the six arms expecting a different answer, build `ocean_deep` without settling
-> its vertical profile, attribute `rep_dC` to the plateau, quote 12.7 σ, re-centre `rep_dC`'s
+> its vertical profile, attribute `rep_dC` to the plateau, quote 12.7 σ, re-center `rep_dC`'s
 > prior, or ship any `ocean_probe_scan` / `pump_arms_SINK25*` output.

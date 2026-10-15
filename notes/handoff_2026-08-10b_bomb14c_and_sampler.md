@@ -33,7 +33,7 @@ in 1963 — delivering the big test series with no stratospheric residence. Tele
 measurements say 56–60 % of the Naegler & Levin total was still *in the stratosphere* in
 Dec 62 – Feb 63.
 
-**Sources** (both extract cleanly with `pdftotext -layout`; no figure digitising):
+**Sources** (both extract cleanly with `pdftotext -layout`; no figure digitizing):
 
 | Reference | Role |
 |---|---|
@@ -135,7 +135,7 @@ Diagnosis, in order:
    `co2_NH` above **kz ≈ 177,000**, which `ccx_make_logpost()` converts to `-Inf` via its
    `anyNA` guard. Almost certainly a diffusion stability limit at `substeps = 4L`.
 
-**So the optimiser maximised into a numerical wall.** The likelihood wants even faster
+**So the optimizer maximized into a numerical wall.** The likelihood wants even faster
 ocean mixing and was stopped by the integrator, not by the data or the prior.
 
 ### The mode is not physically credible
@@ -176,13 +176,13 @@ tails and `kz` runs to the solver wall. This is also the most likely reason the 
    is silently truncated by numerics.
 2. **Fix the AR(1) pathology.** Options: cap `rho` well below 1 (say 0.95); put an
    informative prior on `sigma_*` from the actual measurement precision rather than a wide
-   lognormal; or drop AR(1) in favour of an explicit representation-error term. This is a
+   lognormal; or drop AR(1) in favor of an explicit representation-error term. This is a
    methodological choice — flag it for Marcus rather than picking one.
 3. Re-run `run_modefind.R` → `recompute_hessian.R` → `run_repilot.R` and check `q10`
    returns to a physical value.
 4. Only then production: 50k × 4, gate on **R̂ < 1.05 AND ESS ≥ 400**.
 5. Separately, the **−118 ‰ bomb-window bias** — worth checking whether it is absorbed once
-   the error model is fixed, since a bias-blind likelihood cannot currently penalise it.
+   the error model is fixed, since a bias-blind likelihood cannot currently penalize it.
 
 Also still open from the previous handoff: 7 provisional constants (and the
 `SST_PCO2_SENSITIVITY` double-counting check), the optional GLODAP ocean bomb-¹⁴C

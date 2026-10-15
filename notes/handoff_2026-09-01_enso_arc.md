@@ -24,7 +24,7 @@ file is the ENSO arc only.**
 3. ⛔ **The conveyor is REFUTED as the fix** — wrong sign, implausible magnitude, worsens deep Δ¹⁴C.
    Killed in one minute by a static scan, before any plumbing was built. §4
 4. ⭐ **The model sits in a COMPENSATING-ERROR state**: land 53 % too weak, ocean wrong-signed, the
-   two cancelling **87 %** in atmospheric CO₂. **An ocean-only term would make things worse.** §5
+   two canceling **87 %** in atmospheric CO₂. **An ocean-only term would make things worse.** §5
 5. ✅ **Marcus specified a FOUR-PARAMETER design** (land/ocean × NH/SH, each carrying its own path's
    fractionation) and **that isotope choice is what makes them identifiable.** NOT IMPLEMENTED. §6
 6. ⚠ **I over-read a single event and was corrected. The retraction was right about the METHOD and
@@ -122,7 +122,7 @@ BUDGET IDENTITY, not by a magnitude heuristic — which got it wrong):
 | **observed** | −0.665 | **+0.119** | **+0.757** |
 | model | −0.352 (53 %) | **−0.155** | +0.404 (53 %) |
 
-**Land short by −0.314, ocean off by +0.274 — opposite effects on the atmosphere, cancelling 87 %.**
+**Land short by −0.314, ocean off by +0.274 — opposite effects on the atmosphere, canceling 87 %.**
 That is why growth is a respectable 53 % while both components are badly wrong, and **why the fit
 never forced it: CO₂ outvotes partition 40:1**, so only the weak streams can see the error.
 
@@ -150,7 +150,7 @@ implementation. ⚠ `enso_share` is a hardcoded `list(NH = 0.5, SH = 0.5)` (`R/m
 design **replaces**.
 
 **Implementation needs:** R + C++ twins, a parity test, an `N_FORCING` bump if a forcing column is
-added, and **a behaviour-preserving default** — the land term must reproduce exactly at
+added, and **a behavior-preserving default** — the land term must reproduce exactly at
 `gamma_enso_land_NH = gamma_enso_land_SH = gamma_enso/2` with the ocean terms 0. (The `gamma_diff`
 adoption did NOT have one; it should have.)
 

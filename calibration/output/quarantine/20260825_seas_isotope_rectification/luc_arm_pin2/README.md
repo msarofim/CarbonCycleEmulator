@@ -16,7 +16,7 @@ bought by a widened ¹⁴C error bar. Predictions: `notes/prereg_2026-08-25_p3_s
 
 **It could not have returned a clean number whichever way it landed.**
 `calibration/diag_luc_arm_ridge_confound.R`, run the same day, measured a LARGER confound that
-this run leaves wide open: the `luc` arm travelled ALONG the (`beta_max`, `fert_k`) ridge
+this run leaves wide open: the `luc` arm traveled ALONG the (`beta_max`, `fert_k`) ridge
 (`beta_max` +9.16 sd, `fert_k` +7.43 sd, `enh(420 ppm)` changed only 2.4 %), and that ridge is
 itself a `rep_dC` lever worth several sd. With the sink OFF and every other coordinate at the
 reference mode, the arm's ridge position alone puts `rep_dC` at **7.220 (+6.80 sd)** against the
@@ -43,4 +43,4 @@ see `CHANGELOG.md` 2026-08-25c).
 and `fert_k` has `tr = "logit"` (`R/calibrate.R:68`); the driver errors with *"pin is a LOGNORMAL
 near-delta and fert_k has tr = \"logit\"; add the matching family before pinning it"*. Either add a
 logit-family near-delta, or narrow the bound the way `h_ml` is narrowed in
-`run_modefind_pump_arms.R:217-229` (with the prior renormalised over the new support).
+`run_modefind_pump_arms.R:217-229` (with the prior renormalized over the new support).

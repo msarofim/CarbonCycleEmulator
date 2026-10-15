@@ -50,7 +50,7 @@ explaining the plateau.
 
 **RESIDUAL CONFOUND, stated because it is not resolved here:** `ocean` differs from `foss` in TWO
 ways — temporal persistence AND isotopic signature — so this pair does not isolate which explains
-the `rep_dC` difference. The mechanism argument favours persistence (`rep_dC` is a CO₂ *level*
+the `rep_dC` difference. The mechanism argument favors persistence (`rep_dC` is a CO₂ *level*
 offset; only persistence touches the level after 1960; `sigma_d14c` is a ¹⁴C error scale on other
 streams) but that is an argument, not a measurement. **`ocean_deep` would discriminate directly** —
 it has `foss`'s CO₂ trajectory and `ocean`'s isotopes.

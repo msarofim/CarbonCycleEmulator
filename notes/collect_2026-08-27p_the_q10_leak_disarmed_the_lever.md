@@ -30,7 +30,7 @@ driver existed**. **No gate moved.** Driver `calibration/diag_seas_slice_q10_pin
 (**at small amplitude only the product `A_T · ln(q10)` is identified**), leaving q10 only the
 nonlinear part."* `q10` is **GLOBAL** — one parameter for both hemispheres.
 
-⇒ In 27n's five-parameter slice the optimiser rode that documented ridge:
+⇒ In 27n's five-parameter slice the optimizer rode that documented ridge:
 
 | a_t (K) | q10 | seas_T_amp_NH | **NH product** | **SH product** | SH-land |
 |---|---|---|---|---|---|
@@ -54,7 +54,7 @@ LEVEL rows and `gcb_land_sink` identify and a seasonal arm has no business dragg
 
 - **S0 ✓ the pin costs −1.36** at the landed point (band [−5, 0]; the sign is an exact requirement).
 - **S5 ✓ `gcb_land_sink` moves −0.04 = 0.03 % of the bill.** The pin does not trade a seasonal
-  problem for a budget one — the risk it carried by construction did not materialise.
+  problem for a budget one — the risk it carried by construction did not materialize.
 
 ## 3. THE RESULT
 

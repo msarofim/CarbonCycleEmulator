@@ -60,7 +60,7 @@ the ENSO lag `L_MEI`: DESIGN specified it as fitted, it was never built, and not
 | C5 | l.1300, 1581–83 | **Gate 7 judges the sinks against bare GCB** | ✓ `dg_gcb_target()` uses bare GCB, while objective #14 scores GCB + s·I(t) (audit, CHANGELOG:932). |
 | C6 | l.1383–85 | **Coverage of gates 1 and 2** | (audit) no whole-system ¹⁴C budget test with production on; gate 2's forward drift run checks only atmospheric CO₂ and Δ¹⁴C. |
 | C7 | l.1450–56 | **Gate 4's pre-registration** (LUC time-profile changes are scored against gate 4) | (audit) orphaned when gate 4 retired (09-04e). It matters only if the LUC time profile changes. |
-| C8 | §7 | **App items needing a ruling** | (audit) the "no land sink" toggle: merged into fertilisation at the first build, premise retracted 10-01, B5 declined a whole-sink switch. §7b's five bars to 3000 vs the three-reservoir chart to 2300 you asked for (F2, 09-22 r). The pulse lab's "depends on the background" is never shown. The parameter table has no "posterior ranges". "One-sentence" takeaways mostly run 2–3 sentences, several in your own wording. The pre-launch checklist has gone untracked since 09-27c. |
+| C8 | §7 | **App items needing a ruling** | (audit) the "no land sink" toggle: merged into fertilization at the first build, premise retracted 10-01, B5 declined a whole-sink switch. §7b's five bars to 3000 vs the three-reservoir chart to 2300 you asked for (F2, 09-22 r). The pulse lab's "depends on the background" is never shown. The parameter table has no "posterior ranges". "One-sentence" takeaways mostly run 2–3 sentences, several in your own wording. The pre-launch checklist has gone untracked since 09-27c. |
 
 ## D. Your 08-29 app spec — decided, parked 09-22, partly unbuilt
 

@@ -43,7 +43,7 @@
 - **Gate mechanism.**
   - The label gate (09-30 p) is one flag over ONE all-or-nothing set: the four D2/D3 names. Adding the lag to that
     set breaks `hilda33d`, because its own label opens the gate but it lacks the new name.
-  - ⇒ **Generalise to several gates, one flag and one set each.** That touches ~14 sites: calibrate.R 1088-1285,
+  - ⇒ **Generalize to several gates, one flag and one set each.** That touches ~14 sites: calibrate.R 1088-1285,
     1584, 1700, 2683; model.R:598; paths.R:655; params_meta.R:166; global.R:287.
   - A new label chained from `kaidgb` opens both gates. Extend `GP_OPEN_LABELS` and the four label ledgers.
 - **Tests**, from the templates `test-npp-tsens.R`, `test-ndep.R`, `test-l2-enso-limb.R`:

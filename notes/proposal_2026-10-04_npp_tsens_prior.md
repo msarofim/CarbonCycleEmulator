@@ -53,7 +53,7 @@ The lit note's own bottom line (items 6–7): the sign is unresolved; σ_T and q
 historical sink; pin one through the seasonal cycle or IAV, or fit to the GCB net climate effect.
 
 ## 3. What the model says now (the preview, section G)
-At hilda34g's lag, with `npp_tsens` HELD and the other 7 land-block names re-optimised (all four converged):
+At hilda34g's lag, with `npp_tsens` HELD and the other 7 land-block names re-optimized (all four converged):
 
 | `npp_tsens` (/K) | Δ likelihood | `beta_max` | SSP5-8.5 2300 (ppm) | vvH 2300 | net climate effect on S_LAND, 2015–24 (GtC/yr) |
 |---|---|---|---|---|---|
@@ -83,7 +83,7 @@ At hilda34g's lag, with `npp_tsens` HELD and the other 7 land-block names re-opt
 | P3 GCB net-climate row (+ P0), `q10` HELD | +0.0066 | 1452 | +0.08 |
 | P4 pin at 0 | 0 | 1462 | −0.04 |
 - **P0, keep the sign-free N(0, 0.029)** (the 09-30 ruling): the status quo.
-- **P1, re-centre on the C4MIP mean, N(−0.006, 0.029):** the literature's own numbers in the model's own functional form.
+- **P1, re-center on the C4MIP mean, N(−0.006, 0.029):** the literature's own numbers in the model's own functional form.
 - **P2, a CMIP6-informed prior, N(−0.015, 0.020):** my conversion of Varney's γ_NPP. Shown for scale; I would not
   recommend a prior built on my own unit conversion.
 - **P3, a GCB net-climate-effect ROW** (−0.8 ± 0.7 GtC/yr, 2015–24, TRENDY definition) in the objective, not a prior.
@@ -93,7 +93,7 @@ At hilda34g's lag, with `npp_tsens` HELD and the other 7 land-block names re-opt
 - **P4, pin `npp_tsens` at 0** (a ruled pin, like the nine): a term whose sign the record cannot fix is not fitted.
 
 **What it says.**
-- **No literature-centred prior moves the sign.** The record's profile (sd 0.0085) is 3.4× narrower than the
+- **No literature-centered prior moves the sign.** The record's profile (sd 0.0085) is 3.4× narrower than the
   literature's own spread (0.029), so a prior at that width shifts the mode by 0.0005 (P1) to 0.003 (P2), and the
   futures by ≤ 4 ppm.
 - A prior that DID decide the sign would have to be several times tighter than the C4MIP spread. The literature does

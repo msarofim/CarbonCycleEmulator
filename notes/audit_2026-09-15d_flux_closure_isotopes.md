@@ -42,7 +42,7 @@ moves C with zero isotopes if the source box's C ≤ 0 (R :1939, C++ :438) — r
 | LS / HS biological pumps | R :2592–2610, :2811 / C++ :738, :849 | none upward | carbon yes, by design: export arrives in the interior through `add_flux`; the field (diffusion, or diffusion + `w_vent` under "martin") returns it |
 
 Cosmetic, both cores identically, `q_conv = 0` in every registered mode: **I1** the conveyor books its volume on `a_oc`
-(R :2700, :3121–3129) not the LS column's `a_ls`, so `q_conv` in Sv is mislabelled by (1 − f_hs) under HILDA — all four legs
+(R :2700, :3121–3129) not the LS column's `a_ls`, so `q_conv` in Sv is mislabeled by (1 − f_hs) under HILDA — all four legs
 scale together, so it still closes; **I2** its deep interhemispheric leg reads the ANNUAL-MEAN grid (`grid$dz[cg$s + 1]`) while
 the within-column legs read the seasonal `gr$dz` — matters only at `conv_sink = 1` with `seas_ml` on. **I4** under `eq_on` the
 solved pump field is solved with `kappa ∝ a_ls` (R :3302) while the deriv's top interface carries `a_ml` — off by a_eq/a_ls
@@ -57,7 +57,7 @@ uniform column was NOT flux-free (a permanent oc1 → ml diffusive flux ∝ K·c
 annual-mean ML, 595 at a mid-excursion instant, both cores). Carbon stayed conserved (the paths are antisymmetric), so no
 conservation gate could see it and the Newton would have converged on a wrong equilibrium without error. **No registered mode
 is affected** — `hilda_tr` has eq AND tr on, and P0g tested only that pair. **Fix:** one flag `aux$d1_on = eq_on || tr_on`, set in
-`ccx_prepare()` next to `a_ml` and derived in C++ `unpack_aux()` from the two marshalled switches (so the cores cannot disagree);
+`ccx_prepare()` next to `a_ml` and derived in C++ `unpack_aux()` from the two marshaled switches (so the cores cannot disagree);
 the three sites read it. **Test:** `test-tr-box.R` "P0g-tr" — the uniform tr-only column is flux-free at the annual-mean ML
 (< 1e-12) and at a seasonal instant the ONLY ocean tendency is the entrainment pair at exactly conc × a_ml × dh/dt (< 1e-9),
 both cores, parity 1e-10; POWER: forcing `d1_on = 0` on the same state gives 376 GtC/yr. Every registered mode is bit-exact

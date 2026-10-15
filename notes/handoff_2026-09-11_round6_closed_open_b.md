@@ -45,9 +45,9 @@ repoint → `seas_ml` capability → the round-6 refit — and ended one ruling 
    require the canonical to win on THAT; the comment and the assertion now agree.
 7. **Round 6 refuted as built, mechanism retained; B next** (Marcus, on my recommendation). The decisive read is
    **GATE P7**: the modern surface−deep δ¹³C gradient −0.309 → **+0.018** (target −0.861), DIC 302 → **385** (233)
-   — the seasonal ML homogenises the isotope gradient and steepens the DIC one, both away from obs. Pedagogically
+   — the seasonal ML homogenizes the isotope gradient and steepens the DIC one, both away from obs. Pedagogically
    that is a broken link (a reader takes away the wrong physics). What it bought: priors +6.2, P2 relaxed
-   (z −2.89 → −2.07, NOT inside 2σ), P12 half (`ent_seas_amp_SH` 18.7 → 9.5, 1.45× centre). Hypothesis (mine, in the
+   (z −2.89 → −2.07, NOT inside 2σ), P12 half (`ent_seas_amp_SH` 18.7 → 9.5, 1.45× center). Hypothesis (mine, in the
    prereg): ONE cause for P7 and the ENSO sign — the ML has no latitude structure (P1c: an 84 %-subtropical box
    given the hemispheric MLD cycle); the same split that gives `seas_ml` a high-latitude box gives Fix B its
    tropical one. Hence B before E.
@@ -94,7 +94,7 @@ root `MEMORY.md` (header list 20 → 27 sub-indexes; the "check with `wc -c`" li
 **Preregistered (sign + bound written before any run):** **P7′** — `seas_ml = 1` on `ml_hi` PASSES GATE P7 (if not,
 the entrainment formulation is wrong: STOP); **PB1** — solubility-only ENSO r flips positive at a physical
 modulation and `gamma_enso_*` |sum| 0.356 → < 0.18; **PB2** — two SH regimes, GATE S still passes on `ml_hi`;
-**PB3** — P2 inside 2σ, `ent` ≤ 1.5× centre or retired; **PB4** — Δ¹⁴C rows < 1 log-unit each; **PB5** — no loss on
+**PB3** — P2 inside 2σ, `ent` ≤ 1.5× center or retired; **PB4** — Δ¹⁴C rows < 1 log-unit each; **PB5** — no loss on
 likelihood vs `hilda31p`; **PB6** — CO₂ seasonal rows < 1.
 **First thing in the B session:** re-run the FULL suite (`stop_on_failure = FALSE`; read `failed` AND `error`) — the
 last full run (12,990 / 2 / 1 / 4, the pre-existing pair) predates `test-gate-p7.R`, the option-2 rewrite and the
@@ -105,7 +105,7 @@ P7 ledger entry, each green alone.
   `CCX_MS_STRUCT=hilda CCX_MS_SEAS_ML=0 Rscript calibration/make_port_targets.R` first, or the port gate refuses (correctly).
 - ⚠ **`seas_ml = 1` has a HARD WALL at h_ml ≈ 75 m** (P8 guard → −Inf, finite at 74, −6.4e8 at 75). The cold init
   (h_ml 75.0) sits ON it. Feasible references + the derived penalty are what make an array survivable.
-- ⚠ **Every stored logpost before 09-10 is in another objective's units** (prior re-centring 09-09w −0.811; spinup
+- ⚠ **Every stored logpost before 09-10 is in another objective's units** (prior re-centering 09-09w −0.811; spinup
   adoption 09-09x −10.16 at `hilda31`). Compare on likelihood or re-score. `hilda31p` unrefitted at `seas_ml = 1` is
   −1634.68 (−154) and is NOT evidence about the mechanism.
 - ⚠ **`rep_dC` +3.17** — the worst strain in the model, untouched by every ocean option and not B's job. Owed.

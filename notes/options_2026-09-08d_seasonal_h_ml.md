@@ -7,7 +7,7 @@ The model has ONE time-constant `h_ml` and the observation has two numbers for i
 and the annual maximum **118 m** (09-08c). But the model ALREADY carries a seasonal mixed-layer mechanism in
 disguise: `ent_seas_amp_SH` (26th parameter, freed 09-03, [[ccx_seasonal_entrainment_hypothesis]]) adds a prescribed
 sinusoidal DIC anomaly to the SH mixed layer's pCO₂ computation (`R/model.R:1848`, `ccx_core.cpp:534`), peaking at the
-registered `CCX_ENT_SEAS_PEAK_MO` 7.50, with a FITTED amplitude (winner **21.2 µmol/kg**, `ent26` 19.0, prior centre
+registered `CCX_ENT_SEAS_PEAK_MO` 7.50, with a FITTED amplitude (winner **21.2 µmol/kg**, `ent26` 19.0, prior center
 10.95 derived from the in-band 29.68 × the band's area fraction). That parameter IS "winter entrainment of DIC-rich
 water when the mixed layer deepens" — represented as a fitted compensator with no physical link to how deep the
 mixed layer goes. And the NH has no such channel at all, which is where the strain now sits (`sst_seas_amp_NH`
@@ -54,7 +54,7 @@ like-for-like test for (A)'s EMERGENT anomaly is an open ruling ⇒ [[verify_the
 
 **Pre-check of the seasonal DIC amplitude the mechanism implies** (half the
 f-swing × ΔC): SH (0.680 − 0.202)/2 × 42–70 = **10–17 µmol/kg**; NH (0.652 − 0.257)/2 × 42–70 = **8–14 µmol/kg**.
-Against: the fitted SH amplitude 21.2 (winner) / 19.0 (`ent26`), the prior centre 10.95, the in-band observation
+Against: the fitted SH amplitude 21.2 (winner) / 19.0 (`ent26`), the prior center 10.95, the in-band observation
 29.68 before dilution. ⇒ **The mechanism sizes to the observed order with nothing tuned** — the same out-of-sample
 support criterion the HS pump met ([[ccx_hs_pump_probe]]). ⚠ These are first-principles pre-checks at the winner's
 gradient; the gradient itself is a fitted quantity (the LS pump, `kz`), so the number is model-conditional.
@@ -95,7 +95,7 @@ log-sd ln(118/59.7)/2 = 0.341 so the mean and the max are ±1σ. Cheapest; answe
 - P1 at the winner, unrefitted, SH amplitude lands in [10, 17]; the `co2_seasonal_SPO` / `d13c_seasonal_SPO` rows move
   by < the fitted shim's 21.2 would predict (the mechanism is smaller than the compensator).
 - P2 the NH gains an amplitude in [8, 14] peaking Jan–Feb, and `sst_seas_amp_NH`'s strain (−2.83) RELAXES on refit —
-  the load-bearing test, the NH analogue of 09-03's P2.
+  the load-bearing test, the NH analog of 09-03's P2.
 - P3 the SPO ocean limb's phase stays inside GATE S's bracket [7.41, 10.41] with the peak moved from 7.50 to 8.0.
 - P4 the `d13c_seasonal_*` rows IMPROVE or hold — entrainment's isotopic signature is the discriminant;
   if they PAY, the mechanism is wrong in the isotope and (B) is refuted as built.

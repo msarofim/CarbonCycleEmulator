@@ -8,7 +8,7 @@ caveats; (3) `h_hs` **declared** (follows `h_ml`); (4) `hs_asx_frac`'s observati
 ## What is fitted, what is declared
 - **Fitted (28):** the 26 of `ent26` + `kz_deep_frac` (logit box [0.005, 1], init 0.05) +
   `hs_asx_frac` (logit box [0.2, 2], init 1). `kz` re-bisected on the structure: **[1161.6, 27808.0]**
-  (k = 3σ, `diag_kz_bracket_hilda36.R`), init 5683.6 (geometric centre).
+  (k = 3σ, `diag_kz_bracket_hilda36.R`), init 5683.6 (geometric center).
 - **Declared (`ccx_apply_structure("hilda")`):** `hs_frac` 0.16 (measured 0.160), `u_hs` 38, `tau_q` 538,
   `sst_hs` 2, `q_attach_from` 1 (HILDA's, the observed contrast), `kz_zscale` 253; `h_hs` = `h_ml`.
 - **Objective:** #8 (intermediate rows) + **#9 ON** (the profile as one MVN row, 60°). Baseline for
@@ -30,7 +30,7 @@ caveats; (3) `h_hs` **declared** (follows `h_ml`); (4) `hs_asx_frac`'s observati
 | R7 (new) | `tau_q`-direction check: the fitted `hs_asx_frac` does NOT sit at a box bound (the scans showed the CO₂ rows reward weakening the conduit; with `tau_q` declared, the exchange factor is the only lever left) | at 0.2 or 2 |
 
 ## Known caveats going in
-- The logit Jacobian pulls f toward the box centre by ~1.7 log-units between 0.05 and 0.5 (stated in the table).
+- The logit Jacobian pulls f toward the box center by ~1.7 log-units between 0.05 and 0.5 (stated in the table).
 - The `kz` bracket is a support at fixed f; R6 tests it.
 - A refit's port gate compares against targets measured on the Mac at THIS commit and structure.
 - 09-06d audit: the R-path `ccx_run()` ocean inventory excluded HS/HD (fixed; the objective's C++ path never did).

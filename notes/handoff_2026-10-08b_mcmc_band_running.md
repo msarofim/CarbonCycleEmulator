@@ -40,7 +40,7 @@ Written on Marcus's request ("Yes, write the handoff note"), 2026-10-08 ~21:50 E
   - **NOT converged by Vehtari et al. (2021)'s reference:** R-hat max 1.13 (`ndep_ret`), `beta_max` 1.08, all 30 quantities > 1.01; min bulk ESS 21, min tail ESS 37.
   - The log-posterior has been stable at the Gaussian level (−1181) since ~5k.
   - Post-adaptation acceptance is LOW, 0.056–0.075 (optimal ~0.23 in 29-D): slow mixing.
-  - `h_ml`: posterior median 57.4 m (90 % 47.5–69.9) against the mode's 64.6. The mode is at ~80th percentile; 5 % of draws are within 5 m of the 42.5 floor; the chains agree (54.5–59.8). The Laplace understates its spread ~4×; along the fertilisation ridge it OVERstates it.
+  - `h_ml`: posterior median 57.4 m (90 % 47.5–69.9) against the mode's 64.6. The mode is at ~80th percentile; 5 % of draws are within 5 m of the 42.5 floor; the chains agree (54.5–59.8). The Laplace understates its spread ~4×; along the fertilization ridge it OVERstates it.
 - **The band from the 50k snapshot is BUILDING** (`build_futures_ribbons.R --draws=…snap50k/pooled_u.rds --cores=6 --out=outputs/diagnostics/futures_ribbons_mcmc_20261008j_hilda29e_snap50k.rds`):
   - R PID 64314, started ~21:07, expected ~45–60 min;
   - stdout `/private/tmp/claude-501/…/scratchpad/ribbons50k.out` (scratch: lost if the session ends; its own log is `outputs/diagnostics/futures_ribbons_mcmc_20261008j_hilda29e_snap50k_<date>.log`, untracked until committed).

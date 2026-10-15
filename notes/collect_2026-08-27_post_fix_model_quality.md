@@ -128,9 +128,9 @@ INVERTED.**
 
 | param | fitted | observed | ratio | note on the z |
 |---|---|---|---|---|
-| `sst_seas_amp_SH` | **0.360** | 1.746 | **0.21 — 4.9× too small** | width `SST_SEAS_LOGSD` = 0.25 is a **stated JUDGEMENT** (DESIGN 5.2: "no bracket for it exists"), so −6.32 is partly a statement about that width |
+| `sst_seas_amp_SH` | **0.360** | 1.746 | **0.21 — 4.9× too small** | width `SST_SEAS_LOGSD` = 0.25 is a **stated JUDGMENT** (DESIGN 5.2: "no bracket for it exists"), so −6.32 is partly a statement about that width |
 | `sst_seas_amp_NH` | 0.937 | 2.237 | 0.42 — 2.4× too small | same caveat |
-| `seas_T_amp_SH` | **1.039** | bracket **3.59–7.10** | **29 % of the LOW end** | bracket width = the weighting ambiguity, not a judgement |
+| `seas_T_amp_SH` | **1.039** | bracket **3.59–7.10** | **29 % of the LOW end** | bracket width = the weighting ambiguity, not a judgment |
 | `seas_T_amp_NH` | 23.46 | bracket 11.45–17.92 | **131 % of the HIGH end** | " |
 
 **The fit buys its seasonal cycle by cranking NH LAND far above any observed amplitude

@@ -23,7 +23,7 @@ independently verified by me** — treat as a lead, not a fact, and verify befor
 
 `ccx_spinup()` builds `aux <- ccx_prepare(p)` from the **un-zeroed** `p` (`R/spinup.R:151`) and only
 *then* sets `p0$seas_drivers <- 0` (`R/spinup.R:227`) — and every equilibrium solve runs through the
-**C++** path. **So the zeroing is honoured by R and ignored by C++.**
+**C++** path. **So the zeroing is honored by R and ignored by C++.**
 
 **MEASURED (mine).** At the canonical `hilda31`, `ccx_prepare()` then the spinup's own zeroing:
 
@@ -75,9 +75,9 @@ Handoff 09-09s §3/§4 and `CHANGELOG.md:32` set the refit's target as: *cut the
 ~2.6× by relaxing the fitted solubility amplitude (`sst_seas_amp_SH` — the parameter whose prior-z
 was **−5.14** precisely because it stood in for entrainment)*.
 
-**MEASURED at `hilda31` (mine), using the lognormal median as the centre:**
+**MEASURED at `hilda31` (mine), using the lognormal median as the center:**
 
-| | prior centre | fitted | prior-z |
+| | prior center | fitted | prior-z |
 |---|---|---|---|
 | `sst_seas_amp_NH` | 2.23739 K | 1.0668 K | **−2.96** |
 | `sst_seas_amp_SH` | 1.74644 K | **1.9110 K** | **+0.36** |
@@ -93,18 +93,18 @@ of the stale number is the code comment `R/calibrate.R:529`, which correctly say
 2026-09-03 at the refit winner" — the qualifier was dropped on the way into the handoff.
 
 ⇒ **THE STATED ROUTE DOES NOT EXIST.** There is no SH solubility strain to relax; at +0.36 the
-parameter sits *above* its prior centre, so "relaxing" it toward the prior would **increase** the
+parameter sits *above* its prior center, so "relaxing" it toward the prior would **increase** the
 swing, not cut it. Two consequences for the refit:
 - The SH over-swing is **DIC-side**: `ent_seas_amp_SH` is fitted **21.04** against a derived prior
-  centre of **10.95** (1.92×). Retiring the shim is the lever that cuts the amplitude.
+  center of **10.95** (1.92×). Retiring the shim is the lever that cuts the amplitude.
 - ⭐ **The live strain is the NH** (−2.96; fitted 1.067 K against an observed 2.237 K, less than
   half) — the hemisphere the SH-only shim never served and the new **bi-hemispheric** mechanism does.
-  **The refit's acceptance test should be NH-centred.**
+  **The refit's acceptance test should be NH-centered.**
 
 ⚠ **One nuance kept, which the gist would delete**: `R/constants.R:340-344` declares the ocean pair's
-prior *width* a **judgement**, not a measurement (0.25 log, ±28 %), explicitly covering the gap
+prior *width* a **judgment**, not a measurement (0.25 log, ±28 %), explicitly covering the gap
 between "the area-weighted mean we can compute and the gas-exchange-weighted mean the parameter
-actually is". So −2.96 is measured against a centre the file itself flags as the wrong estimator.
+actually is". So −2.96 is measured against a center the file itself flags as the wrong estimator.
 The strain is real; its exact size is not.
 
 ---
@@ -125,7 +125,7 @@ base. **MEASURED by bisection (mine): the stop is at `h_ml = 76.146 m`** — mat
 
 (The 0.798 m at `h_ml` 75 reproduces the handoff's own figure, validating the setup.)
 
-⛔⛔ **`h_ml`'s prior is lognormal, centre 83.94 m, log-sd 0.341** ⇒ **its MEDIAN LIES PAST THE STOP,
+⛔⛔ **`h_ml`'s prior is lognormal, center 83.94 m, log-sd 0.341** ⇒ **its MEDIAN LIES PAST THE STOP,
 and P(h_ml > 76.146) = 61.3 %.** A dispersed 24-start Torch array drawing `h_ml` from its prior puts
 ~3 starts in 5 into an immediate `stop()`.
 
@@ -134,15 +134,15 @@ defensible readings of Holte 2017 **"for a time-constant thickness"** — LS ann
 LS annual **max 118 m** — and *"the prior ENCODES the mean-vs-max ambiguity **a seasonal mixed layer
 would resolve**"*. **Round 6 resolves exactly that ambiguity by construction** (mean-preserving:
 `h_ml` now IS the annual mean, the max is supplied by the climatology). ⇒ **the prior is wrong by
-construction the moment the mechanism is adopted, and nobody re-centred it.**
+construction the moment the mechanism is adopted, and nobody re-centered it.**
 
-**Priced (mine):** re-centring on the LS annual mean 59.7 m drops guard exposure 61.3 % → **23.8 %**
+**Priced (mine):** re-centering on the LS annual mean 59.7 m drops guard exposure 61.3 % → **23.8 %**
 at the same width, and to **11.2 % / 5.2 %** at log-sd 0.20 / 0.15 — a narrowing the discharged
 ambiguity independently justifies.
 
 ---
 
-## 4. ⛔ A FACTOR-OF-TWO IN ONE LEG OF `ent_seas_amp_SH`'s PRIOR CENTRE. `[V]`
+## 4. ⛔ A FACTOR-OF-TWO IN ONE LEG OF `ent_seas_amp_SH`'s PRIOR CENTER. `[V]`
 
 `.ENT_SO_SST_AMP <- 3.0` is documented `R/constants.R:38` as *"K, seasonal SST **half-amplitude** of
 the 40-90 S BAND (ERSSTv5)"*. **It is the PEAK-TO-PEAK.**
@@ -168,10 +168,10 @@ than the hemisphere containing it"* — **falsified like-for-like**: 1.4995 < 1.
 
 ⛔ **DO NOT FIX ONE LEG ALONE** (the 09-09q discipline). `[R]` reports `.ENT_SO_PCO2_AMP = 19.45` is
 *also* p2p *and* the phase-blind per-cell estimator, so the two biases **do not cancel** — they run
-the same way on top of a shared factor of 2, putting the shipped centre 10.95 at **≈2.1–2.3× too
+the same way on top of a shared factor of 2, putting the shipped center 10.95 at **≈2.1–2.3× too
 large**. **I did not verify the pCO₂ leg.** Verify both, then re-derive in one edit.
 
-⇒ Against a corrected centre (~5), the fitted **21.04** is not 1.9× but **~4×** its prior — which
+⇒ Against a corrected center (~5), the fitted **21.04** is not 1.9× but **~4×** its prior — which
 **strengthens** the §2 reading that the shim is doing DIC-side work the physics does not support, and
 strengthens the case for retiring it.
 
@@ -191,7 +191,7 @@ convention is not stated". The **band IS stated** (`R/constants.R:38-39`, and it
 *"dt; f_ent = per-cell (h_m − h_min)/h_m, **cos-lat mean over 12-month LS cells**"*, and
 `$consts` gives `lat_hs = 57.1401196211109`, itself derived from `hs_frac`. The `h_ml` prior carries
 the same mask (`data/obs_h_ml_prior.rds$source`: *"LS |lat| < 57.14 deg"*). **The SH LS band really
-does peak in August** (`month_max = 8`); that is not an aggregation artefact.
+does peak in August** (`month_max = 8`); that is not an aggregation artifact.
 
 ⇒ The A1 phase gap is better explained by **A1's own 0–90 °S aggregation** mixing the January-peaking
 thermal subtropics with the July/August-peaking Southern Ocean — the 4.4× antiphase cancellation
@@ -240,7 +240,7 @@ figure got a conditional, the sentence did not.
 ⚠ Related, `[V]`: `sst_hs = 2 °C` at the canonical sits **exactly on the lower edge** of the
 carbonate tables' fitted range [2.0, 35.0]. The suite emitted **10 457 warnings**, overwhelmingly
 `carb_constants()` extrapolation. Two costs: the cold box does its chemistry at/past the edge of its
-parameterisation, and a genuinely new warning is invisible in that volume.
+parameterization, and a genuinely new warning is invisible in that volume.
 
 ---
 
@@ -255,10 +255,10 @@ parameterisation, and a genuinely new warning is invisible in that volume.
   centuries. ⛔ **If true this reverses the 09-09j/09-09k "no periodic spinup is needed" conclusion,
   which was argued by construction from the very `seas_drivers` zeroing that §1 shows C++ ignores.**
   Verify immediately after §1.
-- **F3** — the guard uses `max(f_month)` (month centres, 1.68168) but the continuous series peaks at
+- **F3** — the guard uses `max(f_month)` (month centers, 1.68168) but the continuous series peaks at
   1.68760, so there is reportedly a ~0.64 m window (`h_ml` 75.50–76.15) where winter `dz_1` goes
   **negative** and the guard stays silent.
-- **F4** — `ccx_substeps_for()` reportedly still under-resolves: month-centre extremes rather than
+- **F4** — `ccx_substeps_for()` reportedly still under-resolves: month-center extremes rather than
   continuous, and it omits the entrainment operator's own bound entirely; ~19 returned vs ~46 needed
   at `h_ml` 75. Not live at the canonical (need ≈1.5, floor 4 dominates). ⇒ the honest claim is
   **"the floor covers the canonical"**, not "the bound is right".
@@ -326,7 +326,7 @@ rebuilt not assigned over (antiphase confirmed by parity to 4e-12); `dz_ML + dz_
 `dz_mid[1]` invariant; the `seas_ml = 0` bit-identity genuine — **with the caveat that "off" is
 decided by two different predicates, which is §1**; every `status = "derived"` constant genuinely
 computed and matching its prose (the typed-"derived" class is fixed); no reads-its-own-output gate;
-no binned-σ shelf beyond one labelled instance.
+no binned-σ shelf beyond one labeled instance.
 
 ⚠ **One stale status header found** `[V]`: `notes/handoff_2026-09-08j…`'s own header still says *"the
 round is stopped at P1 … and the C++ twin is not built"* — both overtaken by 09-09m and 09-09o. A
@@ -340,13 +340,13 @@ turn ([[status_field_carries_the_query]]).
 1. ⛔ **Fix §1, then re-run P10/P11/P12/P1c.** Quarantine the pre-fix outputs first. **No refit until
    this lands** — §1 silently redefines the very target §2 corrects.
 2. **Verify F2 immediately after** — if the periodic spinup is owed, the round's cost changes.
-3. **Re-derive `ent_seas_amp_SH`'s prior centre with BOTH legs fixed** (§4), in one edit.
-4. **Restate the refit's target** (§2): NH-centred, the amplitude cut coming from retiring the shim.
-5. **Re-centre `h_ml`'s prior on the LS annual mean at adoption** (§3) — required by the guard,
+3. **Re-derive `ent_seas_amp_SH`'s prior center with BOTH legs fixed** (§4), in one edit.
+4. **Restate the refit's target** (§2): NH-centered, the amplitude cut coming from retiring the shim.
+5. **Re-center `h_ml`'s prior on the LS annual mean at adoption** (§3) — required by the guard,
    discharged by the mechanism. Consider the per-hemisphere `h_ml` test (§5).
 6. Verify the §8 leads, worst first: the canonical mode file's stream set, then GATE Q's coverage.
 7. Pedagogy: the app prose (§7), the `ml` box's identity, `q10`, `h_hs`.
 
 ⛔ **NOT DONE, DELIBERATELY: nothing was fixed.** The instruction was review first; every fix above
-is Marcus's call, and several (the prior re-centring, retiring the shim, the mode-file re-promotion)
+is Marcus's call, and several (the prior re-centering, retiring the shim, the mode-file re-promotion)
 move stored logposts or canonical artifacts.

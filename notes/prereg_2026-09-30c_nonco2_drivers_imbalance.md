@@ -21,9 +21,9 @@ Standing: the arm-A refit HOLDS until D2 and D3 are built and screened.
 
 - The CO₂ record fixes the historical total uptake, and the ocean sits on GCB. That leaves the land
   sink fixed too (CHANGELOG 09-30 c, d).
-- The model has ONE mechanism that scales with CO₂ to supply it, fertilisation.
+- The model has ONE mechanism that scales with CO₂ to supply it, fertilization.
   - The fitted β_max is 2.55 with K 868 ppm.
-  - Every forward fertilisation response is 1.3–1.9σ above the literature, all on the same side.
+  - Every forward fertilization response is 1.3–1.9σ above the literature, all on the same side.
   - Koven's post-2100 windows are missed at z +2.3 / +1.6 (09-30 g scorecard).
 - Parametric alignment is exhausted (09-30 g, J1–J6 and G1–G3). Every land knob trades against the
   others under the fixed uptake.
@@ -35,12 +35,12 @@ Standing: the arm-A refit HOLDS until D2 and D3 are built and screened.
 
 ### 2a. N deposition: BUILD. ⚠ FORM RULED 2026-09-30 (m): a RETENTION FLUX, not the multiplier below
 > **Superseded form.** The multiplier described in this subsection was built (`c0ae37b`) and failed this note's
-> own P-D2-2 gate by construction. Its sink tracks d(ndep)/dt: 0.37–0.70 kg C/kg N at the prior centre
+> own P-D2-2 gate by construction. Its sink tracks d(ndep)/dt: 0.37–0.70 kg C/kg N at the prior center
 > (`diag_ndep_form_efficiency.R`).
 >
 > **The ruled form** (`65bc714`):
 > - F_h = `ndep_ret` × 1e-3 × max(ndep_h, 0) GtC/yr, from the atmosphere into `soil_slow`, at `alpha_photo`.
-> - `ndep_ret` is lognormal: centre **3.9 kg C/kg N** (`NDEP_RET_PRIOR_CENTRE`), log-sd **0.67**
+> - `ndep_ret` is lognormal: center **3.9 kg C/kg N** (`NDEP_RET_PRIOR_CENTRE`), log-sd **0.67**
 >   (`NDEP_RET_PRIOR_LOGSD`).
 > - P-D2-2 now reads: `ndep_ret` inside its prior's 2σ AND the implied sink per N inside 0.6–8.7.
 >
@@ -54,7 +54,7 @@ Standing: the arm-A refit HOLDS until D2 and D3 are built and screened.
   - Precedents: MAGICC-CNit's exp(f1·AD), which is linear at these magnitudes, and the C4MIP ε metric
     (lit N19, N22).
   - The Janssens Rh channel stays out: whole-ecosystem C–N responses already contain it (lit §2a(i)).
-- **Prior.** γ_N is lognormal, centre **1.0e-4 per Tg N/yr**, log-sd **0.9**.
+- **Prior.** γ_N is lognormal, center **1.0e-4 per Tg N/yr**, log-sd **0.9**.
   - r = 5.8 kg C of extra NPP per kg N on land: Du & de Vries 2018's 19.4 for forests × the forest
     share 0.30.
   - γ_N = r × 1e-3 / NPP₀ (C, lit §2a(ii)).
@@ -68,7 +68,7 @@ Standing: the arm-A refit HOLDS until D2 and D3 are built and screened.
   - NH / SH split 0.83 / 0.17 (C, from Tan 2018 Table 5).
   - It is the only source that covers every scenario the model runs, to 2300.
   - Seam: the SSPs' CMIP6 history is 8.4 Tg N/yr above the CMIP7 history at 2014, so they are
-    harmonised at the seam (§6.5).
+    harmonized at the seam (§6.5).
 - **Expected.** A sink of 0.1–0.2 GtC/yr, 7–9 % of S_LAND, falling after mid-century in every scenario.
   NPP rises only 0.3–0.5 %.
 
@@ -113,10 +113,10 @@ relative to 1750 (Tg N/yr).
 | vV VL | | | | | | | 33.2 | 19.0 | 1.4 | −1.4 |
 
 - ⭐ **N deposition's FUTURE falls in every scenario**: it rises to about mid-century, then declines. It
-  is the opposite of CO₂ fertilisation's monotone future, which is D2's purpose.
+  is the opposite of CO₂ fertilization's monotone future, which is D2's purpose.
 - ⚠ **Seam:** CMIP6 history is 8.4 Tg N/yr ABOVE CMIP7 at 2014 (91.3 vs 82.9; different CEDS vintages).
-  An SSP run spliced onto the CMIP7 history needs a harmonisation choice (§6).
-- ⚠ The vV post-2100 extensions ramp emissions to ~0 by 2300: a stylised tail, like their CO₂.
+  An SSP run spliced onto the CMIP7 history needs a harmonization choice (§6).
+- ⚠ The vV post-2100 extensions ramp emissions to ~0 by 2300: a stylized tail, like their CO₂.
 - Not yet applied: the fraction deposited on LAND and the NH/SH split. Both come from the literature
   pass or a deposition dataset.
 
@@ -125,7 +125,7 @@ relative to 1750 (Tg N/yr).
   - The resulting sink is ≈ (dΔNPP/dt) × τ_eff + ΔNPP × (share reaching the passive pool).
   - With τ_eff ~ 40 yr (wood-dominated) and the passive litter share 0.05, that is ≈ 31 · x(2020) GtC/yr.
   - A 0.3 GtC/yr sink needs x(2020) ≈ 1 %, i.e. ΔNPP ≈ 0.65 GtC/yr.
-  - ⇒ (a) cannot move the 70-vs-56 NPP tension; it moves the fertilisation budget.
+  - ⇒ (a) cannot move the 70-vs-56 NPP tension; it moves the fertilization budget.
 - **(b) Greening, (1 + γ_T ΔT) on NPP against q10^(ΔT/10) on respiration.**
   - Rh ≈ NPP near equilibrium, so γ_T = ln(q10)/10 cancels the INSTANTANEOUS response: 0.069 /K at
     q10 2, 0.0095 /K at the fitted 1.10.
@@ -177,9 +177,9 @@ relative to 1750 (Tg N/yr).
 
 ### 4.1 D3 alone
 - **P-D3-1.** The rows gain ≥ +8 (the fixed-vector floor) under any treatment.
-- **P-D3-2.** ⚠ **D3 alone does NOT lower fertilisation.**
+- **P-D3-2.** ⚠ **D3 alone does NOT lower fertilization.**
   - Today `gcb_land_sink` pulls the land sink DOWN: in the 09-30 (d) profile it IMPROVED by
-    +12.6 / +15.6 as fertilisation was cut.
+    +12.6 / +15.6 as fertilization was cut.
   - A free s_land releases that pull. β_max, or the enh(410) amplitude, stays within ±5 % of the
     control or RISES, and `luc_scale` moves toward 1.
   - FAILS if the enhancement at 410 ppm falls by more than 5 %.
@@ -196,8 +196,8 @@ relative to 1750 (Tg N/yr).
 
 ### 4.2b What the MULTIPLIER-form screen scored (09-30 l; the retired form's record)
 - **P-D2-1:** PASS in DN and DNT (enh −2.2 / −8.7 %); FAIL with D3 (DNTb +2.4 %).
-- **P-D2-2:** PASS, but only because the fit pushed γ to 2–5× its centre: 0.84–2.06 kg C/kg N. At the
-  centre the form gives 0.40.
+- **P-D2-2:** PASS, but only because the fit pushed γ to 2–5× its center: 0.84–2.06 kg C/kg N. At the
+  center the form gives 0.40.
 - **P-D2-3:** PASS.
 - **P-D2-4:** FAIL in every arm: σ_T ≈ 0 (+0.004 to −0.006 /K), and q10 does not rise.
 - **P-D2-5:** PASS.
@@ -224,7 +224,7 @@ relative to 1750 (Tg N/yr).
   - each D2 driver alone;
   - all three D2 drivers together;
   - all three plus D3.
-- The scorecard is the acceptance view: pools, NPP, GPP, sinks vs GCB, soil Δ¹⁴C vs Shi, fertilisation
+- The scorecard is the acceptance view: pools, NPP, GPP, sinks vs GCB, soil Δ¹⁴C vs Shi, fertilization
   responses, q10, and the Koven windows.
 - ⚠ Structural choices are priced only at a FULL refit (the R2 lesson, 09-30 g).
 
@@ -249,15 +249,15 @@ relative to 1750 (Tg N/yr).
    - the CMIP7 FZJ-CMIP-nitrogen-2-0 gridded deposition for 1850–2022, then the proxy (a download;
      4 of 7 scenarios, to 2100 only);
    - the CMIP6 NCAR-CCMI-2-0 (TRENDY's forcing; 30–45 % below the observation-based 2010s totals).
-5. **The SSP seam for the proxy:** ratio-harmonise each SSP to the CMIP7 history at its last shared
-   year, converging by 2050 (recommended); or splice without harmonising, which gives an 8 Tg N/yr step.
+5. **The SSP seam for the proxy:** ratio-harmonize each SSP to the CMIP7 history at its last shared
+   year, converging by 2050 (recommended); or splice without harmonizing, which gives an 8 Tg N/yr step.
 6. **(b) climate greening:**
    - build it with a sign-free prior 0 ± 0.03 /K (recommended: the ruling's freedom, the literature's
-     centre);
+     center);
    - a hemispheric sign-constrained form (NH ≥ 0, SH ≤ 0): a suggestion with no literature numbers;
    - drop it.
 7. **(c) recovery:**
    - do not build it, and record `luc_scale` as the model's existing recovery-like freedom (recommended);
-   - a small prescribed decaying sink into wood, prior centre 0 with a half-normal 0.2 GtC/yr (a
-     judgement, not a receipt);
-   - (c-i) as a labelled sensitivity arm only.
+   - a small prescribed decaying sink into wood, prior center 0 with a half-normal 0.2 GtC/yr (a
+     judgment, not a receipt);
+   - (c-i) as a labeled sensitivity arm only.

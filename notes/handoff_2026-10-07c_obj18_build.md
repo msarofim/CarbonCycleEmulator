@@ -24,8 +24,8 @@
 - **The redesign, priced at B** (10-07 d / e; `calibration/diag_iav_redesign_price.R` @`e891fa9`). The redesign is #17 + the DETRENDED ENSO index + `gcb_ocean_sink` scored on its LOW-PASS part.
   - **Resistance to `w_enso_l2` (14.73 → 16.71) on the whole main objective:** #17 −1.29; low-pass ocean row alone −0.74; detrended index alone −0.66; **both −0.10**.
   - **Stage 1 is index-blind** (≤ 0.08σ). At B: lag 5.8483, scale 1.2978, `w` 16.6051.
-  - **No pump ratchet:** `pump_grad` and `kz` re-optimised at the higher `w` move ≤ 0.05 sd.
-  - **The detrended index costs ≤ −7.6 in fit at this basin**, almost all in the ice cores. It is an upper bound: re-optimising more names can only do better at this basin.
+  - **No pump ratchet:** `pump_grad` and `kz` re-optimized at the higher `w` move ≤ 0.05 sd.
+  - **The detrended index costs ≤ −7.6 in fit at this basin**, almost all in the ice cores. It is an upper bound: re-optimizing more names can only do better at this basin.
   - **The futures:** the index's own effect is +6.3 to +7.2 ppm (SSP5-8.5, 2300) at a fixed `beta_max`. (d)'s "+23" was mostly a slide along the `beta_max`/`fert_k` ridge. MEASURED, 2300 CO₂ spans about **±35 ppm at 1σ** along that ridge alone (natural space; non-Gaussian).
 - **Code:** `main` at this note's commit, pushed. Since the 10-07 suite (`a6cf879`, CLEAN 6598 / 0 / 3) only `calibration/diag_*` drivers changed. No `R/`, no tests.
 
@@ -68,7 +68,7 @@
 - **The ridge:** along `beta_max`/`fert_k`, 2300 CO₂ spans ~±35 ppm at 1σ. The natural-space and u-space optima differ: #17's `beta_max` is 2.163 vs B's stored 2.099, about 7 ppm. Read any #18-vs-#17 futures difference against this.
 - **Under #17 the likelihood alone still rises at `beta_max` 2.55.** The u-space upper side is closed by `beta_max`'s logit Jacobian near its band edge (3), not by data.
 - **The noise floor** (~1e-6): every reproduce-gate needs ≥ 1e-5.
-- **`h_ml`'s Hessian is UNSTABLE** at both #17 basins. The cut posterior ("Laplace + propagation", RULED, not built) needs care along `h_ml` and along the fertilisation ridge ([[laplace_fails_on_fertilisation_ridge]]).
+- **`h_ml`'s Hessian is UNSTABLE** at both #17 basins. The cut posterior ("Laplace + propagation", RULED, not built) needs care along `h_ml` and along the fertilization ridge ([[laplace_fails_on_fertilisation_ridge]]).
 - `tests/testthat/test-review-card-numbers.R` fails BY DESIGN on any adoption that moves the lag. Update the copy WITH Marcus, not the test.
 - `calibration/torch/port_targets.csv` still holds the canonical's targets.
 - The app preview (localhost:7788) is not running.

@@ -15,7 +15,7 @@ One mechanism gated on **two different objects**:
 
 `ccx_spinup()` builds `aux <- ccx_prepare(p)` from the **un-zeroed** `p` (`R/spinup.R:151`) and only
 **then** sets `p0$seas_drivers <- 0` (`:227`) — and every equilibrium solve runs through the C++
-path. So the zeroing was honoured by R and **ignored by C++**.
+path. So the zeroing was honored by R and **ignored by C++**.
 
 **RE-MEASURED 2026-09-09v** at `hilda31`, by running one probe in two frozen trees differing only
 by the documented one-line mutation (`calibration/diag_seas_ml_spinup_leak_probe.R`):
@@ -100,10 +100,10 @@ All five basenames are now regenerated in `outputs/diagnostics/` (2026-09-09v). 
 - `seasonal_ml_geometry_20260909.{rds,log}` — pure geometry, no `ccx_spinup`/`ccx_run` call.
 - `so_pco2_amplitude_20260909.{rds,log}` — **ran at 16:36, INSIDE the contaminated window**, and
   checked 09-09v: it is observation-only (no model call), so it is correctly excluded. Its
-  19.45-vs-16.26 estimator finding stands and is load-bearing for `ent_seas_amp_SH`'s prior centre.
+  19.45-vs-16.26 estimator finding stands and is load-bearing for `ent_seas_amp_SH`'s prior center.
 
 ## 5. Why kept rather than deleted
 They are the regression test for the fix and the only measure of the bug's size. The pre-fix
-behaviour is reachable in one line — drop the `seas_drivers` conjunct in `ccx_cpp_par()`:
+behavior is reachable in one line — drop the `seas_drivers` conjunct in `ccx_cpp_par()`:
 `p$seas_ml_on <- as.integer(!is.null(p$seas_ml) && p$seas_ml > 0)` — which is the mutation used both
 to confirm `tests/testthat/test-parity.R`'s new tests and to produce §1's pre-fix column.

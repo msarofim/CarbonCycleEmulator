@@ -74,7 +74,7 @@ argued:** with seasonality off the two independent routes agree to **0.2 %** (4.
 **GOTCHA now closed:** `gamma_enso` was **absent** from `ccx_default_params()`, so
 `ccx_deriv()` died with "argument is of length zero" on default parameters while
 `ccx_cpp_par()` silently substituted 0 — an **R-vs-C++ divergence about what the defaults
-mean**. Now `0`, which is behaviour-preserving. **Not** the table's init of 0.5: that would
+mean**. Now `0`, which is behavior-preserving. **Not** the table's init of 0.5: that would
 have silently changed every existing default-parameter result.
 
 **App:** `APP_FLUX` / `APP_FLUX_NOW` in `app/global.R` (~2 s at startup, R path);
@@ -173,7 +173,7 @@ project's original motivation and had never been written down as a specification
 not on the debunking."* So DESIGN §7 gains **tab 5 "How long does it last?"** and **tab 6
 "What drives CO₂?"**, and the fallacious arguments become a **short signposting appendix
 inside "Under the hood" (§7a)**, not a tab — *published claim → published response → which
-panel bears on it*, naming arguments rather than characterising people.
+panel bears on it*, naming arguments rather than characterizing people.
 **NEITHER TAB IS IMPLEMENTED. The §7a wording is Marcus' call before it ships.**
 
 **All four references verified against Crossref, not recalled.** Essenhigh (2009)
@@ -253,7 +253,7 @@ gradient is set by **export ÷ ventilation**, those observables constrain ventil
 **and it does not depend on choosing a deep-Δ¹⁴C target first.** That makes it a candidate
 route *around* blocking decision #2 rather than through it.
 
-**The honest costs.** +2 parameters at least (export production, remineralisation depth
+**The honest costs.** +2 parameters at least (export production, remineralization depth
 scale) on top of the conveyor's Q, against a panel that has just concluded the model is at
 the right complexity. A pump also injects surface-¹⁴C carbon into the deep non-locally,
 which makes the deep **younger** — working *against* the deep-age constraint, magnitude
@@ -272,9 +272,9 @@ already displays. The conveyor bought nothing a student would see (panel §2); t
 - **`data/forcing_emissions_historical.rds` changed.** Anything cached against it is stale.
 - **`data-raw/downloads/oscar_gcb2020_eluc.xlsx` is tracked**, and
   `build_calibration_data.R` now needs **`readxl`**.
-- **`ccx_default_params()` gained `gamma_enso = 0`.** Behaviour-preserving; see §2.
+- **`ccx_default_params()` gained `gamma_enso = 0`.** Behavior-preserving; see §2.
 - **`ccx_run()` gained `fluxes = FALSE`; `ccx_deriv()` gained `record = FALSE`.**
-  `add_flux()` gained `lab = NULL`. All default to the old behaviour.
+  `add_flux()` gained `lab = NULL`. All default to the old behavior.
 - **`ccx_run(fluxes = TRUE)` is the PURE-R path and is slow** (~60k deriv calls over
   275 yr). Fine for a diagnostic or app startup, **never** in a sampler loop.
 - `calibration/diag_joos_irf.R` defines `ccx_hold_forcing()`, `ccx_pulse_state()`,

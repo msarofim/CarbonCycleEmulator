@@ -27,7 +27,7 @@ inverted, and the rest of this handoff is written on the corrected framing.
 
 ## 1. ⭐ THE UNIFYING DIAGNOSIS: THE MODEL MATCHES ITS OBSERVABLES BY CANCELLATION
 
-In **all three** places the model reproduces an observable by cancelling two wrong things rather
+In **all three** places the model reproduces an observable by canceling two wrong things rather
 than by getting the mechanism right:
 
 | observable | matched? | by what |
@@ -147,7 +147,7 @@ mechanism is right they should SHRINK; if they do not, the term is still paperin
 **below Joos's asymptote a₀ = 0.2173** at 300 yr — an EQUILIBRIUM statement.
 ⚠ **The refit made it marginally WORSE** (IRF(100) 0.284 → 0.276), so more fitting will not fix it.
 
-⭐ **THE HYPOTHESIS: A PERMANENT LAND SINK.** Michaelis–Menten fertilisation at `fert_k` = 328.09 /
+⭐ **THE HYPOTHESIS: A PERMANENT LAND SINK.** Michaelis–Menten fertilization at `fert_k` = 328.09 /
 `beta_max` = 0.726 keeps NPP elevated indefinitely under raised CO₂ with no nutrient limit and no
 turnover ceiling, so the land goes on absorbing forever. Joos's a₀ is set by ocean equilibration
 against a **finite** buffer; a permanent land sink pushes airborne below it. Consistent with
@@ -161,7 +161,7 @@ carbon is the culprit.**
 on a held forcing; Joos's protocol pulses at **2015** on a PD100 background. My atmospheric fractions
 (0.205 at 100 yr) do not even reconcile with the diagnostic's own IRF (0.276), which is how I caught
 it. Redo it on the protocol background ⇒ [[like_for_like_forcing]].
-⚠ Also ruled out already, with power: **`kz` is NOT the lever** (re-optimising frontier), and the
+⚠ Also ruled out already, with power: **`kz` is NOT the lever** (re-optimizing frontier), and the
 land axis reaches only IRF(100) = 0.342 before gate 7 overshoots. **Do not write another rate study**
 ([[ccx_gates_priced]]).
 
@@ -191,7 +191,7 @@ are independent and C needs its own fix.
   ENSO ocean response is anti-phase **should** be short of variability. **Do not treat gate 4 as a
   separate defect until B lands.**
 * **No posterior.** Hessian conditioned 1.11e6. ⭐ The refit measured the softest direction
-  precisely: `h_ml` 148.33 vs 154.00 m is worth **0.094 log-units** — enough to reparameterise
+  precisely: `h_ml` 148.33 vs 154.00 m is worth **0.094 log-units** — enough to reparameterize
   `h_ml` or profile it out and sample the other 24, which is cheaper than fixing the conditioning.
 * **`CCX_MODE_CANONICAL` is STILL `from90`**, a 21-parameter ancestor. The refit adopted nothing.
 * **Torch**: the refit ran under QoS **`cpu48`** (2-day wall, cpu=3000), **not `cpu_short`** — the

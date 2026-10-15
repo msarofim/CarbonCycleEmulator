@@ -44,7 +44,7 @@ in question** — see §5.
 
 ### 2.1 The stated grounds were measured and THREE OF FOUR FAILED
 
-The analytic frame reorganises the question. The level sd was √(σ² + c²) with c fixed at 1.0, so
+The analytic frame reorganizes the question. The level sd was √(σ² + c²) with c fixed at 1.0, so
 σ\* = √(R² − c²) — **no interior optimum whenever the pooled residual RMS R < c**. That is a
 statement about **R**, not about the parameter, and the repo straddles the threshold:
 
@@ -58,7 +58,7 @@ the other side. The margin at the mode is **0.789 ppm**.
 
 - **"pinned at a boundary"** — not on the scale the sampler uses. `sigma_co2` was
   log-transformed, so σ → 0 is u → −∞ and the lognormal prior closes it smoothly; the posterior
-  mode is **interior and unimodal** at both points. The edge was an artefact of natural units.
+  mode is **interior and unimodal** at both points. The edge was an artifact of natural units.
 - **"will hurt covariance conditioning"** — **max |r| = 0.043** (with `luc_scale`), against
   **0.907** for the worst pair in the same Laplace matrix. Very nearly orthogonal to everything.
 - **"unidentified"** — tightened **2.08×** vs prior at the mode, **5.79×** at defaults; **4th of
@@ -82,7 +82,7 @@ err$sigma_co2 ABSENT  -> sd = LIK_CO2_REP_ERR        <- the objective
 err$sigma_co2 PRESENT -> sd = sqrt(s^2 + REP^2)      <- legacy parity
 ```
 
-**The absence is the NEW behaviour, which inverts this repo's usual absence-skips-a-stream
+**The absence is the NEW behavior, which inverts this repo's usual absence-skips-a-stream
 idiom.** Deliberate: an updated caller says so by dropping the field; a stale one keeps its old
 weight instead of being silently re-weighted. **Every pre-today diagnostic passes `sigma_co2` and
 therefore still runs on the OLD, softer sd** — verified, `diag_sigma_co2.R` reproduces
@@ -108,7 +108,7 @@ the retirement.
 - **DESIGN.md §5.2 corrected** — it still described *both* the AR(1) model retired on 2026-08-11
   *and* a free σ_add for CO₂. Both corrections dated in place; §5.1's draft table marked
   unmaintained; `R/likelihood.R` / `CCX_PARAM_TABLE` named authoritative.
-- `LIK_CO2_REP_ERR` now carries its receipt (co-located MLO programmes disagree 0.39–0.59 ppm
+- `LIK_CO2_REP_ERR` now carries its receipt (co-located MLO programs disagree 0.39–0.59 ppm
   RMS, n = 702) **and** the note that it is **conservative, not tight** — χ²/dof ≈ 0.38 at the
   last mode. **Lowering it is a stream-weight change, flagged and NOT taken.**
 
@@ -135,7 +135,7 @@ quantity. Disagreeing makes "mixed-layer concentration" mean two different thing
 timestep.
 
 It announced itself: at h = 184 m, BOTH **+425.9**, CAPACITY **−26,203.8**, EXPORT **−29,035.3**
-— an **interaction of +55,665 against an effect of +426**. The sign pattern confirms the artefact
+— an **interaction of +55,665 against an effect of +426**. The sign pattern confirms the artifact
 in both arms. Post-mortem:
 `calibration/output/quarantine/20260815_h_ml_inconsistent_grid_arms/README.md`.
 
@@ -172,7 +172,7 @@ deep-Δ¹⁴C term **z +1.70 → +4.47**, away from a target (−175.3 ± 10.3 �
 on the **under-depleted** side; at kz ×1.4 the two CO₂ level streams lose **712 log-units**
 between them (over-absorption, sink 3.37).
 
-**A biological pump exports carbon as sinking particles and remineralises it at depth — adding
+**A biological pump exports carbon as sinking particles and remineralizes it at depth — adding
 uptake WITHOUT mixing surface water down.** Nothing currently in the model can do that. This is
 the mechanism argument 15 §4.2 gestured at, now measured.
 
@@ -208,7 +208,7 @@ is what would separate them.**
   specific to the dominant stream; a free scale on a minor one is a robustness valve, not a
   feedback loop. `sigma_d13c`'s freedom was its own decision (15 §1, decision 3).
 - **The absence contract now has TWO opposite conventions in `err`,** and this is the live
-  footgun: **gradient offsets absent → streams SKIPPED**; **`sigma_co2` absent → new behaviour,
+  footgun: **gradient offsets absent → streams SKIPPED**; **`sigma_co2` absent → new behavior,
   tighter sd.** Name your arguments and check `by_stream` for ABSENT streams before quoting
   anything.
 - Everything from 15b §6 that is not superseded still stands: three switches reproduce history
@@ -223,7 +223,7 @@ is what would separate them.**
 
 | # | task | status |
 |---|---|---|
-| ~~1–5c, 7~~ | objective, β, `luc_scale`, GLODAPv2, gradient, shares, seasonality, MM fertilisation | **DONE** |
+| ~~1–5c, 7~~ | objective, β, `luc_scale`, GLODAPv2, gradient, shares, seasonality, MM fertilization | **DONE** |
 | **6** | `LIK_EXCESS_C14_TARGET` | **NOT a blocker** — 15 §9 |
 | ~~6b~~ | **`sigma_co2`** | **DONE** `10d6780` — retired |
 | **8** | **THE REFIT**, 19 parameters, ~5.4 h | **structurally UNBLOCKED.** Held only by the fork below |
@@ -236,7 +236,7 @@ defaults or a four-change-old quarantined one. **Marcus deferred this deliberate
 cold — do not pick one and start.**
 
 If the pump goes first it needs its own design decisions signed off before any code:
-export-production formulation, remineralisation depth profile, and whether the particle flux
+export-production formulation, remineralization depth profile, and whether the particle flux
 carries ¹³C/¹⁴C fractionation (it must carry the isotopes; the question is the fractionation).
 
 **Still do NOT:** hand-tune stream weights; delete `excess_c14_ocean` or `d14c_intcal`; free any

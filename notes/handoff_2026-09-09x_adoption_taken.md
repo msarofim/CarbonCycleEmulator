@@ -16,7 +16,7 @@ Read first: **CHANGELOG 09-09x (2)** then **09-09x** — every number with its d
 > ⭐⭐ **UPDATE 2026-09-10 — THE REFIT IS SUBMITTED AND RUNNING: job `17318015`, 24/24 on partition
 > `cs`.** Item 1 below is DONE; read `CHANGELOG.md` **2026-09-10** for it. ⛔ **`cpu_short` PUT 20 OF
 > 24 TASKS ON A GPU NODE where this job got 13–18 % of a core**; the first array (`17316364`) was
-> cancelled and resubmitted on `cs`. ⛔ **`--exclude` IS REFUSED BY THE CLUSTER** — a GPU-free
+> canceled and resubmitted on `cs`. ⛔ **`--exclude` IS REFUSED BY THE CLUSTER** — a GPU-free
 > PARTITION is the only mechanism. ⚠ **`cs` has `QoS=N/A`**, so `cpu_short`'s caps (6 h; cpu=32,
 > mem=120G) DO NOT BIND — the 6 h wall and `%24` are now deliberate choices, kept because the
 > restart/polish arithmetic is derived against them.

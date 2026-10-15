@@ -30,7 +30,7 @@ throughout — not mine, not touched.** Everything here was run single-threaded 
 
     sigma_eff(h)^2 = sigma_obs^2 + (shipped target - like-for-like target(h))^2
 
-normalisation RETAINED, so inflating is charged for and the gain is bounded by the density peak.
+normalization RETAINED, so inflating is charged for and the gain is bounded by the density peak.
 
 - **`data-raw/build_glodap_sigma_rep.R` -> `data/obs_glodap_sigma_rep.rds`.** The **SIGNED**
   like-for-like target on a **1 m grid over `h_ml`'s whole support**, measured off GLODAP by the
@@ -69,7 +69,7 @@ normalisation RETAINED, so inflating is charged for and the gain is bounded by t
 
 `CCX_ARM_OUTDIR` + `CCX_ARM_RESTARTS=1 CCX_ARM_CYCLES=1 CCX_ARM_MAXIT=60`, 14.2 min, warm-started
 from the canonical mode at 96.47 m. **It reported `h_ml` = 35.38 m, "gaining" 4.1** — apparently
-contradicting Stage B's interior maximum. **Diagnosed, not rationalised:**
+contradicting Stage B's interior maximum. **Diagnosed, not rationalized:**
 
     DELTA (smoke - old):  logpost +4.060 = prior +7.399   jac -2.139   loglik -1.201
     prior movers: sst_seas_amp_SH +4.145 | sst_seas_amp_NH +1.632 | rep_dC +1.088

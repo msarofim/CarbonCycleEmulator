@@ -58,7 +58,7 @@
 - **CHANGELOG:** 10-05 (g), (h), (i) and (j).
 - **Outside the repo** (not committed):
   - `~/ccx_frozen/20261005f_obj16_land.sh`, the landing helper.
-  - `~/ccx_frozen/20261005g_ocgobm`, my TEST worktree (a git worktree, now at `f35ca59`). Its scratch: `calibration/output/SCRATCH_obj16like_NOT_A_FIT/` (hilda34g relabelled, NOT a fit), `DRYRUN_wave/`, `DRYRUN_refit_obj16/`, `DRYRUN_logs/`, and `outputs/diagnostics/*_DRYRUN*`, `*_obj16dry*`, `*_obj16like*`.
+  - `~/ccx_frozen/20261005g_ocgobm`, my TEST worktree (a git worktree, now at `f35ca59`). Its scratch: `calibration/output/SCRATCH_obj16like_NOT_A_FIT/` (hilda34g relabeled, NOT a fit), `DRYRUN_wave/`, `DRYRUN_refit_obj16/`, `DRYRUN_logs/`, and `outputs/diagnostics/*_DRYRUN*`, `*_obj16dry*`, `*_obj16like*`.
 - **Memory:**
   - `handoff_stale_label_is_a_claim` (new, with an `INDEX_conv` pointer);
   - `ccx_ocean_climate_effect_vs_gcb` (the #16 section and its description).
@@ -134,10 +134,10 @@ them runs.
 - **The scorecard:** no gate verdict flips.
 - If all 24 land in this one basin, the read will look like this. A better basin among the dispersed starts would change it.
 
-## 7. Open items (each is Marcus's to prioritise)
+## 7. Open items (each is Marcus's to prioritize)
 1. **#16's landing** (§5). This session lands it tonight if it stays open. Adoption is his.
 2. **H2,** the ocean thermal excess in the low-latitude column (DEFERRED by ruling). ⚠ Under #16 the like-for-like headline grows by the feedback's ≈ −0.02.
-3. **`hs_asx_frac`'s judgement width** (KEPT): `k_w` ≈ 1900 is a disclosed prior compromise. #16 moves it 1902.7 → 1894.7.
+3. **`hs_asx_frac`'s judgment width** (KEPT): `k_w` ≈ 1900 is a disclosed prior compromise. #16 moves it 1902.7 → 1894.7.
 4. **H1's observed-ratio arm.** It needs a gridded SST download, which needs his permission.
 5. **Card 4 wording** (`notes/draft_2026-10-04_card4_enso_timing.md`): his text.
 6. **The hilda34g assessment's verdict.** If #16 is adopted, ask whether it becomes a #16 assessment.
@@ -155,7 +155,7 @@ them runs.
   - A second match STOPS the script. `CCX_O16_MODE` / `CCX_O16_WAVE` override them, and `CCX_O16_TAG` tags a test run.
 - **The outdir's name** writes pins as `=0`, from the launch string. `ccx_pin_label()` prints `=0.00`. Never rebuild the name from `ccx_pin_label()`.
 - **Scratch in the test tree:**
-  - `SCRATCH_obj16like_NOT_A_FIT` is hilda34g relabelled with #16's structure and pins. Its logpost and streams are hilda34g's.
+  - `SCRATCH_obj16like_NOT_A_FIT` is hilda34g relabeled with #16's structure and pins. Its logpost and streams are hilda34g's.
   - The `DRYRUN_*` dirs come from a COPY of start 001.
   - Never copy either into the repo.
 - **The end-of-run watch.** The background waiter hit the 2-h limit for background commands at 15:00 and was NOT restarted.

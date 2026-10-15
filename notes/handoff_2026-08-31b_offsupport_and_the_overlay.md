@@ -57,7 +57,7 @@ and ocean. Settling them one at a time costs one refit each; settling them toget
   `test-prior-z.R:38`). All say one true thing — the stored modes are 21-parameter files in a
   22-parameter build. **The refit is their fix**, so they are an OUTPUT of the refit, not an input.
 - **`PIN_PRIOR_CREDIT` / `test-mode-file.R`'s premise.** 08-31 showed the arm gap WIDENED under
-  refitting and the excess −9.52 is a likelihood differential re-optimisation cannot recover, so the
+  refitting and the excess −9.52 is a likelihood differential re-optimization cannot recover, so the
   premise is **permanently** false. Needs REWRITING, not re-tolerancing, and not by a refit.
 - **`b0 = 3.017`** against a derived bar of 4.0 but **2.8× the external floor (1.087 ppm)**. Its
   fixture is on `ccx_default_params()`, so **no refit will move it.** Model-quality item.

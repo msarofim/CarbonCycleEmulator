@@ -54,7 +54,7 @@ finished.** If the process is gone and `calibration/output/mode_fit.rds` exists,
 if the file is absent, it was killed and must be re-run.
 
 **Do not compare `-2331.2` to any earlier mode.** The quarantined `-2374.1` and `-2359.3` were
-maximised by different likelihoods on a different model. They are not comparable and saying so
+maximized by different likelihoods on a different model. They are not comparable and saying so
 is the point of the quarantine README.
 
 When it has converged:
@@ -83,7 +83,7 @@ soil layout underneath it can help. **The vegetation had to be split too.**
 land's bomb-¹⁴C uptake is **linear** once the carbon fluxes are fixed, so a candidate topology's
 inventory integrates straight from an atmospheric Δ¹⁴C history — ~1 ms per candidate, no core
 rebuild — instead of restructuring 32 boxes once per idea. Building the prescribed version first
-would have meant doing the restructure twice. The generalisable form is in memory as
+would have meant doing the restructure twice. The generalizable form is in memory as
 `feedback_offline_emulator_before_restructure`.
 
 Four sections:
@@ -96,7 +96,7 @@ Four sections:
   target: the model's troposphere was short *because* its land took too much, so designing
   against the model's own depressed atmosphere would understate how inert the land must be.
 - **[3] the refinement surface — it is FLAT.** 0.60/30/0.04 and 0.70/40/0.04 both sit near 6 %
-  RMS. That is what licenses calling the defaults a defensible centre. **Four knobs against
+  RMS. That is what licenses calling the defaults a defensible center. **Four knobs against
   three targets would fit anything; do not present these as fitted values.**
 - **[4] what the fix cost** — §7.
 
@@ -205,19 +205,19 @@ package, not a box.
 
 ---
 
-## 6. φ closed itself, and β was re-centred
+## 6. φ closed itself, and β was re-centered
 
 **φ.** `test-pulse.R:112/113` — the Joos airborne-fraction benchmark that φ = 0.5 broke — **now
 pass unmodified**. `diag_land_structure.R` [1] shows why: φ's effect **flipped sign**. Under the
 two-pool land, raising φ grew the vegetation pool and drew CO₂ *down* (413.7 → 322.2 ppm across
-the grid) — the capacity term was mostly amplifying CO₂ fertilisation, more veg → more NPP →
+the grid) — the capacity term was mostly amplifying CO₂ fertilization, more veg → more NPP →
 more veg, and that positive loop over-drained the pulse. Under the four-pool land CO₂ **rises**
 with φ (426.8 → 476.8) and land carbon **falls** (1.015 → 0.916 of its 1750 value), because LUC
 debits **wood** and wood is most of the vegetation — so φ now costs capacity when land is
 cleared, which is the job it was added to do. **No clamp needed; φ stays 0.5.** Still not
 bounded: every value to 1.10 (φ·f = 1.28) is stable.
 
-**β** re-centred 0.40 → **0.38**, in `ccx_default_params()` **and** the `CCX_PARAM_TABLE` init,
+**β** re-centered 0.40 → **0.38**, in `ccx_default_params()` **and** the `CCX_PARAM_TABLE` init,
 which must track it. Set by the **1-D optimum of the real log-posterior** with every other
 parameter at its table init (−4560.2 → −4530.6); the CO₂-at-2020 route agrees independently.
 Much smaller than handoff-b's expected 0.25–0.30, because that estimate was for the LUC debit
@@ -268,7 +268,7 @@ the recommendation.
 |---|---|---|
 | `test-climate.R:122` | **NEW** — γ_L, §7 | feedback 0.091 °C, bound 0.1. **Structural.** Not absorbable: q10 would have to reach ~4–5. |
 | `test-mechanisms.R:32` | **NEW** — small `soil_fast` | ENSO switch moves CO₂ 0.29 ppm, bound 0.5. **Absorbable** — `gamma_enso` is calibrated (prior N(0,2)); the test pins it at 0.5. |
-| `test-likelihood.R:114` | stale fixture | `cost(1) = −89.9` (was −139.2). Improved by the β re-centring, still negative. |
+| `test-likelihood.R:114` | stale fixture | `cost(1) = −89.9` (was −139.2). Improved by the β re-centering, still negative. |
 | `test-likelihood.R:117` | stale fixture | same fixture, monotonicity |
 
 **The two likelihood failures still are not a loophole.** The AR(1) pathology they were written
@@ -293,7 +293,7 @@ None of the four has been modified or skipped, per the standing rule.
 | f | Ocean ventilation / the single mixing timescale | b (if B, this is the live defect) | the whole residual under framing B |
 | g | Stratospheric box **+ source rebuilt as an injection rate** | b, f | §5 — real, but a package, and probably after f |
 | h | Ocean carbon inventory (32,827 vs ~38,000 GtC; DIC exactly uniform with depth) and ¹⁴C production (**359** vs ~545 mol/yr — note it got *worse* with the new land, 382 → 359, and is unexplained) | f | large and unexplained |
-| i | Temperature-dependent NPP, if γ_L is judged too weak | d | a modelling decision, not a bug fix |
+| i | Temperature-dependent NPP, if γ_L is judged too weak | d | a modeling decision, not a bug fix |
 | j | Production MCMC: 50k × 4, gate on **R̂ < 1.05 AND ESS ≥ 400** | a, c, e | the app picks up `posterior_draws.rds` automatically |
 
 ---
@@ -339,9 +339,9 @@ None of the four has been modified or skipped, per the standing rule.
 | `818fe93` | Offline land-topology scan: a soil-only split cannot reach N&L's partition |
 | `e236fba` | Four-pool land: the bomb-14C partition error is closed |
 | `16d2bb2` | diag_land_topology [4] + CHANGELOG: the 14C bounds the soil carbon-climate feedback |
-| `1703f2a` | Re-centre beta to 0.38, and stop hardcoding the app's CO2 bias |
+| `1703f2a` | Re-center beta to 0.38, and stop hardcoding the app's CO2 bias |
 | `f924412` | Port diag_land_structure to the four-pool land; handoff 2026-08-12c |
-| `85ef079` | diag_stratosphere: the delivery error may be a framing artefact, not a defect |
+| `85ef079` | diag_stratosphere: the delivery error may be a framing artifact, not a defect |
 
 New diagnostics, all runnable from the repo root:
 `calibration/diag_land_topology.R`, `calibration/diag_stratosphere.R`.

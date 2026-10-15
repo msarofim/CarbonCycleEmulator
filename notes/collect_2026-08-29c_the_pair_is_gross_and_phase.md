@@ -71,9 +71,9 @@ log-unit rule admits because the prior is that wide. It moves θ by 0.7–2.2°,
 ## 4. WHAT THIS DOES NOT LICENSE
 
 - **Nothing is adopted.** `SEAS_NPP_AMP_SH` stays **0.5027** (`status="data"`); the CMIP6 0.94 is a
-  DIAGNOSTIC value under Marcus's authorisation 1 and is **not an observational constraint**.
+  DIAGNOSTIC value under Marcus's authorization 1 and is **not an observational constraint**.
   Every `seas_T_amp_SH` above 7.1012 and every lag off the mode is a MEASUREMENT under
-  authorisation 2, not a fitted value. `ccx_mode_file()` still resolves `from90`.
+  authorization 2, not a fitted value. `ccx_mode_file()` still resolves `from90`.
 - **The likelihood cost of moving the lag is UNMEASURED here.** The fit chose 1.7677 against an
   init of 2.25 and a profiled optimum of 2.0, so something is paying for it — and `seas_lag_p` is
   GLOBAL, so it moves the NH too. **That cost is the first thing the next arm must price**, and it

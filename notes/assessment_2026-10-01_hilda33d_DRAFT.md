@@ -55,7 +55,7 @@ comparisons).
   by **+4.18**.
 - On `test-mode-file`'s comparable rows it led by +4.68, measured at `2cee507` before the flip.
 - The pre-flip scorecard also read +4.18 to two decimals, so the flip did not move the comparison.
-- With two more fitted names, that is ΔAIC ≈ −4.4 in the canonical's favour.
+- With two more fitted names, that is ΔAIC ≈ −4.4 in the canonical's favor.
 
 **The free parent.** `CCX_MODE_PINNED_PARENT` is hilda29l's (`hilda32f`, #13). **hilda33d has none** (B3b, option
 (i)): the pins' price under #14 has not been measured (option (ii), not ruled).
@@ -92,7 +92,7 @@ comparisons).
    - A Laplace band was built: 1000 draws, byte-identical twice, the seed recorded and re-run-verified.
    - Scored on the objective, the draws sit a median **25.5 log-units below the Gaussian**, and the **importance ESS
      is 8 of 1000**.
-   - The Hessian is right AT the mode, but the posterior is strongly non-Gaussian along the CO₂-fertilisation ridge
+   - The Hessian is right AT the mode, but the posterior is strongly non-Gaussian along the CO₂-fertilization ridge
      (`beta_max` / `fert_k` / `ndep_ret`): 5× the curvature at 0.2 sd, ~30× at 0.5.
    - So the band was **held** (Marcus). Any stored-covariance spread along that ridge (10-01 (a)'s ±39 ppm) is local,
      not a posterior spread.
@@ -130,7 +130,7 @@ comparisons).
 ## 7. What the freeze would BE (the acts) — [Marcus]
 - **The model:** canonical `hilda33d` (`calibration/output/refit_20261001_hilda33d_obj14_hilda_csl3v0kaidgb/mode_fit_pumpN.rds`,
   via `ccx_mode_file()`). 33 fitted names and nine held. Likelihood −1369.3386 on 26 rows, logpost −1405.411447.
-  Hessian PD (cond 1.7e6), right at the mode, and NOT a usable Gaussian along the fertilisation ridge (§4.3).
+  Hessian PD (cond 1.7e6), right at the mode, and NOT a usable Gaussian along the fertilization ridge (§4.3).
 - **The objective:** #14, with the constant emissions interpolation.
 - **The suite at the final state:** `ca14204`, **5534 passed, 0 failed, 0 errors, 4 skipped** (frozen `git archive` + the two git-ignored inputs; `outputs/diagnostics/suite_20261001_ca14204_all.log`).
 - **A version tag?** [Marcus.] The existing git tag `v1.0-hilda29l` marks the 09-22 freeze. The app's release name is

@@ -23,7 +23,7 @@
 - **The MCMC check:**
   - **The smoke PASSED** (job 18966349, 4 × 600 iterations). All four tasks COMPLETED 0:0, and the port gate matched to −2.04e−8.
     Seeds 20261002–05 are recorded, MaxRSS is 530–556 MB, and the rate is 0.47–0.54 s/iteration.
-  - **Marcus asked to save Torch time** and to rule out runs that would need cancelling (CHANGELOG q, verbatim). Then
+  - **Marcus asked to save Torch time** and to rule out runs that would need canceling (CHANGELOG q, verbatim). Then
     he ruled **"Staged, 4 chains (Recommended)"**.
   - **STAGE 1 = job 18969240**, RUNNING since 14:35 10-01 on cs648 / cs662 / cs664 / cs667.
     - It runs production settings (n 1e5, adapt 3e4, thin 20, ckpt 500) with an **8 h self-stop**:
@@ -176,7 +176,7 @@ might be editing).
 ## 5. Still open for Marcus
 - **The MCMC readout** (step 4), then stage 2 and the band (steps 5–6).
 - **B8:** the verdict (§5) and the acts (§7) of `notes/assessment_2026-10-01_hilda33d_DRAFT.md`.
-- **The copy in Claude's wording, his to edit:** the card 4 and 5 sentences, the land-pools line, the fertilisation
+- **The copy in Claude's wording, his to edit:** the card 4 and 5 sentences, the land-pools line, the fertilization
   caveat, the pulse-box sentence, and card 6's one added sentence (bands).
 - **The review list's §C** (13 older items), including the deploy checklist (both URLs are placeholders).
 - **The A9 copy items:** the emissions switch's blurb (it also removes N deposition), the N-retention arrow in the box

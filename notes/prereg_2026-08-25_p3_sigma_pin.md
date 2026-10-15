@@ -15,7 +15,7 @@ no power reads exactly like a null with power:
   1251`); `sigma_d14c` enters the Δ¹⁴C terms only. ρ(`rep_dC`, `sigma_d14c`) = **−0.146** in the
   reference posterior (−0.285 in the arm). `rep_dC`'s real partners are **`k_w` −0.784** and
   **`bomb_total` −0.731**, and both moved hard in the arm (+5.685, +4.522 σ).
-- **T3 fixed-state re-optimisation — VACUOUS, and measured to be.** Resetting `sigma_d14c` to the
+- **T3 fixed-state re-optimization — VACUOUS, and measured to be.** Resetting `sigma_d14c` to the
   reference moves the 1-D `rep_dC` argmax by **exactly 0.000 ppm**, in both the arm and the
   control. Per this project's own rule, all-exactly-zero is treated as a code path until disproven,
   so it was **mutation-tested**: across `sigma_d14c` ∈ {2, 6.13, 7.22, 20, 60} the argmax is
@@ -34,7 +34,7 @@ wider ¹⁴C error bar let them — so only a refit with `sigma_d14c` held can s
 
 Identical to `calibration/output/luc_arm_pinluc/` in every setting — arm N, `CCX_SINK_MODE=luc`,
 rate 2.5, `luc_scale` pinned 0.898400, `RESTARTS=8 CYCLES=2`, h_ml [85, 120] — **plus**
-`sigma_d14c` pinned at the reference **6.125078** via the generalised `CCX_PIN_PARAMS`. Output
+`sigma_d14c` pinned at the reference **6.125078** via the generalized `CCX_PIN_PARAMS`. Output
 `calibration/output/luc_arm_pin2/` — SCRATCH.
 
 ## Predictions

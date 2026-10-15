@@ -27,10 +27,10 @@ So for every grid point:
     UPPER(h) = lp_shipped(h) − rows_shipped(h) + Σ_rows −log(√(2π) σ_eff(h))
 
 `rows_shipped(h)` is the σ_obs value in band and **exactly 0 out of band** (the skip).
-`σ_eff(h)² = σ_obs² + σ_rep(h)²`, dnorm's normalisation **retained**, which is what makes
+`σ_eff(h)² = σ_obs² + σ_rep(h)²`, dnorm's normalization **retained**, which is what makes
 inflation charged-for rather than free (16g §2.4).
 
-**Both bounds are rigorous, in opposite directions, for the SAME reason:** re-optimising the five
+**Both bounds are rigorous, in opposite directions, for the SAME reason:** re-optimizing the five
 free parameters with the rows switched on can only *raise* the objective above its value at the
 stored vector (LOWER), and can never raise any row above its own density peak (UPPER). So the
 value the §6 refit would report at each `h` lies in `[LOWER(h), UPPER(h)]`, and
@@ -125,7 +125,7 @@ logL of artifact** for a challenger that did not match its incumbent's path
 So `ccx_ocean_grad_scored()` is overridden **in the driver's environment only** to (a) drop the
 band gate and (b) return the shrunk `v'`; the per-row constant `Σ −log(σ_eff(h)/σ_obs)` is added
 to the reported logpost afterwards. **`h_ml` is FIXED at every profile point, so that constant is
-constant within a point and cannot influence the optimisation** — it only makes the reported
+constant within a point and cannot influence the optimization** — it only makes the reported
 number the inflated one.
 
 ⚠ **GUARD, and the run ABORTS if it fails:** at the mode's stored vector the overridden path must
@@ -136,9 +136,9 @@ is a real cross-check of both. [[mutation_test_gates]]
 ## B.2 PRE-REGISTERED PREDICTIONS — AND I EXPECT B1 TO FAIL
 
 - **B1 — the inflated argmax lands INSIDE [85, 120].** ⚠ **I PREDICT THIS FAILS.** Stage A's
-  overlap is 0.541 and the 82 m vector was optimised with the rows OFF, so switching them on gives
-  it real re-optimisation freedom (up to its 0.55 width), while the in-band points were already
-  optimised against these rows at nearly this σ and can gain ~0.13 at most. **Expected argmax
+  overlap is 0.541 and the 82 m vector was optimized with the rows OFF, so switching them on gives
+  it real re-optimization freedom (up to its 0.55 width), while the in-band points were already
+  optimized against these rows at nearly this σ and can gain ~0.13 at most. **Expected argmax
   75–85 m, just outside the lower edge.** *Falsifier of my expectation:* an in-band argmax.
 - **B2 — THE HEADLINE. The residual pull is ≤ 0.70**, the refit's own restart noise floor.
   *Bar:* `best(out-of-band) − best(in-band) ≤ 0.70`. *Falsifier:* > 0.70 ⇒ inflation leaves a pull

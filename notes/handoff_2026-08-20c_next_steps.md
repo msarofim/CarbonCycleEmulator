@@ -216,7 +216,7 @@ Probe job `16075825`, `cpu_short`, 25 s. Artifacts at `/scratch/ms17839/ccx-prob
 **Edited today:**
 - `calibration/diag_sst_seas_zeroing.R` — correction block + named `SSTZ_OBS_P2P` constants.
   The original (wrong) premise is marked WRONG in place, not rewritten.
-- `R/model.R`, `src/ccx_core.cpp` — the two seasonal-lag comments only. **No behaviour change**;
+- `R/model.R`, `src/ccx_core.cpp` — the two seasonal-lag comments only. **No behavior change**;
   values identical, 889 tests pass.
 
 **Unchanged and still authoritative:** `calibration/run_modefind_pump_arms.R`,

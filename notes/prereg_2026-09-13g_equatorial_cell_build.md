@@ -67,7 +67,7 @@ STARTING GUESS (cell at its own Henry point, the HS idiom `:337-344`) and the Ne
 ## 3. Likelihood changes (three, each with its power stated)
 - **R1 — the B1 reservoir row (NEW).** Model: the cells' area-weighted annual pCO₂ MINUS the area-weighted pCO₂ over ALL surface
   boxes (`ml` NH/SH, `hs` NH/SH, `eq` NH/SH), averaged over **2000–2015** (the contrast is invariant to the epoch to first order —
-  both sides ride the atmosphere; the product states no normalisation year, CHANGELOG 09-04g B1c). pCO₂ from box DIC via the SAME
+  both sides ride the atmosphere; the product states no normalization year, CHANGELOG 09-04g B1c). pCO₂ from box DIC via the SAME
   carbonate call the deriv uses (a parity test between reader and deriv, P0e). Target **+55.47**, σ **6.77** (ruling 5).
   Power: at `w_eq = 0` the cell IS the ML and the contrast is ~0 ⇒ z ≈ −8; the row has power on W0 by construction.
 - **R2 — the surface reader (ruling 3).** `ccx_model_ocean_gradient()` (`R/likelihood.R:1175-1191`) surface term becomes the
@@ -101,7 +101,7 @@ Not rows (checks only): the per-hemisphere B1 halves (+43.4 NH / +67.7 SH), B3's
   24–30 Sv) to the T-A2 requirement; BELOW 0.4 says the cell amplifies (residence time), ABOVE 1.1 says layer 2 is too lean.
 - **PE8** (array): fitted `w_eq` within the prior's **2σ (21–33 Sv)** AND B1's z within ±1.5 — if the fit needs W0 outside
   Meinen's range to hit +55.5, the cell's pCO₂ excess is set by something the first build lacks (a pump, or a shallower `k_eq`).
-- **PE9** (check, the asymmetry): the modelled NH/SH cell contrasts are EQUAL by construction (one velocity, near-equal areas);
+- **PE9** (check, the asymmetry): the modeled NH/SH cell contrasts are EQUAL by construction (one velocity, near-equal areas);
   obs are +43.4 / +67.7. The pre-registered SENSITIVITY — W split SH-heavy in the observed ratio 1.56 — is run ONCE after the
   array and read on `co2_gradient`; it is NOT the default and is not fitted.
 ### N1 — the negative control
@@ -115,11 +115,11 @@ not that the cell fixes GATE V (PE3 may fail and is non-blocking); not that the 
 choice); not that the SH-heavy asymmetry is representable (PE9 is a sensitivity). `gamma_enso_ocn_*` is not retired by this
 prereg — PE2 decides.
 
-## 6. Order and artefacts
+## 6. Order and artifacts
 Data product amendment (`w0_prior` element: 27 ± 3 Sv, Meinen 2001, into `obs_eq_cell.rds`) → R side (`model.R`: names, resolver,
 aux, deriv block, outputs; `spinup.R`: guess + Newton gate; `likelihood.R`: R1, R2, `ccx_box_mass_at`; `calibrate.R`: `w_eq`,
 `gamma_eq`, R3; `paths.R`: a new registered mode — **proposed name `hilda30e`**, struct = `hilda30c`'s + `eq_frac_*`, `h_eq`, `sst_eq`,
-`sst_eq_enso`, `alk_eq`, `k_eq`; pins unchanged, `ent_seas_amp_SH = 0`) → C++ twin + `cpp.R` marshalling → tests
+`sst_eq_enso`, `alk_eq`, `k_eq`; pins unchanged, `ent_seas_amp_SH = 0`) → C++ twin + `cpp.R` marshaling → tests
 (`test-eq-cell.R`: P0a–P0g) → unrefitted probe (`calibration/diag_eq_cell_probe.R`: PE1, N1, PE6) → one Torch array (32 free
 names: `hilda30c`'s 30 + `w_eq` + `gamma_eq`) → PE2–PE5, PE7–PE8 → PE9 sensitivity. Every log and rds under
 `outputs/diagnostics/eq_cell_*_2026MMDD.*`; the array's incumbent follows the array's pins ([[ccx_pinned_arms]]).

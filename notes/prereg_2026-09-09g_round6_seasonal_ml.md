@@ -50,7 +50,7 @@ from the **source box's own ratio** (`R/model.R:1441-1443`), so the evasion limb
 one thing solubility cannot fake — cannot be tested as designed.**
 
 Entrained water is light in δ¹³C **and older in Δ¹⁴C**. Option A carries **both for free and
-correctly**, and needs **no ¹⁴C fractionation term at all**: the model stores Δ¹⁴C, normalised to
+correctly**, and needs **no ¹⁴C fractionation term at all**: the model stores Δ¹⁴C, normalized to
 α₁₄ = α₁₃², so a Δ¹⁴C tracer crosses a fractionating interface unfractionated and adding an alpha
 would double-count ~17 ‰ ≈ 3× `sigma_d14c` (`R/model.R:1445-1455`; the one live trap in `MEMORY.md`).
 
@@ -59,7 +59,7 @@ compromised **before** it runs.
 
 ---
 
-## 3. ⭐⭐ THE GEOMETRY, MEASURED — and it is FAVOURABLE, with one hard bound
+## 3. ⭐⭐ THE GEOMETRY, MEASURED — and it is FAVORABLE, with one hard bound
 
 ### 3a. The grid must be DECOUPLED from the moving ML base
 `ccx_ocean_grid(h_ml)` derives **every interior thickness** from `h_ml`:
@@ -138,7 +138,7 @@ if a future mode file sets `h_hs = 0`.
    transient on ML timescales (months).
    ⚠ **The one thing to CHECK, not assume:** unlike the pCO₂-side shim, (A) moves **real carbon**
    seasonally, so it rectifies onto the annual-mean state. The model already accepts that class of
-   rectification as physics (seasonal SST, the fertilisation rectifier). **Measure the annual-mean
+   rectification as physics (seasonal SST, the fertilization rectifier). **Measure the annual-mean
    drift over the first decades of the transient**; only if it fails to settle does a periodic
    steady state become necessary. ⇒ **The round is materially cheaper than §6 first scoped it.**
 
@@ -201,7 +201,7 @@ if a future mode file sets `h_hs = 0`.
   ⛔ **pCO₂ IS NOT FLUX**: these may not be quoted as flux amplitudes.
 
 - **P2 ⭐ LOAD-BEARING.** On refit, `sst_seas_amp_NH`'s prior-z relaxes from **−2.96** to **inside
-  2σ**. The NH analogue of 09-03's P2, and the reason the round exists. ⛔ If it does not relax, the
+  2σ**. The NH analog of 09-03's P2, and the reason the round exists. ⛔ If it does not relax, the
   NH strain is not seasonal entrainment.
 - **P3 (phase).** The SPO ocean limb's phase stays inside **GATE S's bracket [7.41, 10.41]**, the
   peak moving from the registered **7.50** to the observed **8.0**. ⭐ The phase now comes from
@@ -259,9 +259,9 @@ if a future mode file sets `h_hs = 0`.
 - **P12 ✅ THE COMPENSATOR MUST BECOME REDUNDANT — EXECUTED, PASSES, and it found more than it
   was asked.** `calibration/diag_p12_compensator_redundant.R` + `diag_p12_streams.R`.
   ⛔ **P12 AS WRITTEN WAS NOT TESTABLE BY A REFIT, and that had to be caught first**:
-  `ent_seas_amp_SH` is `tr = "log"` with a lognormal prior centred 10.95, so **0 is unrepresentable
+  `ent_seas_amp_SH` is `tr = "log"` with a lognormal prior centered 10.95, so **0 is unrepresentable
   in the encoded space and has prior probability ZERO** — a refit can never reach it and a logpost
-  can never favour it ⇒ [[runnable_is_not_encodable]]. ⭐ But **0 IS representable in the MODEL**
+  can never favor it ⇒ [[runnable_is_not_encodable]]. ⭐ But **0 IS representable in the MODEL**
   (`R/model.R` skips the shim at exactly 0), so a **LIKELIHOOD PROFILE can visit the off state that
   a refit cannot** — which makes the profile *more* informative here. **Scored on the likelihood,
   never the logpost.** ⭐ One spinup served all 20 runs, **asserted not assumed** (max|diff| exactly
@@ -333,6 +333,6 @@ ruling. ⛔ **No Joos row anywhere in this prereg.**
 
 ## 7. What this round does NOT touch
 The ENSO ocean sign (**the blocker** — the tropical box, weeks), the ventilation limb (E), Martin
-remineralisation (D, needs E first), `alk_hs` (closed: not a lever), and the three open σ-audit
+remineralization (D, needs E first), `alk_hs` (closed: not a lever), and the three open σ-audit
 items — of which **`gcb_ocean_sink`'s uninflated 0.4 GtC/yr is an objective change needing its own
 ruling**, separately from this one.

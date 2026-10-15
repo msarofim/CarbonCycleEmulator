@@ -19,7 +19,7 @@ Scores `notes/prereg_2026-08-27g_so_entrainment_channel.md`, written before a li
 existed. **Six predictions: two PASS, one PARTIAL, one INCONCLUSIVE, one FAILED — and the failure
 is the result.**
 
-Scope authorised by Marcus 2026-08-27: **4a** (a second seasonal air-sea channel, no new state),
+Scope authorized by Marcus 2026-08-27: **4a** (a second seasonal air-sea channel, no new state),
 with 4b held conditional on this residual. Estimator: **`|mean vector|`**, so the standing SPO
 partition target is **1.93×**.
 
@@ -28,7 +28,7 @@ partition target is **1.93×**.
 ## THE ONE-LINE RESULT
 
 **The channel does exactly what it was built to do, and the fit declined to use it that way.**
-Given the freedom, the optimiser spent the new channel on *permission to double the wrong-phase
+Given the freedom, the optimizer spent the new channel on *permission to double the wrong-phase
 solubility limb* — `sst_seas_amp_SH` 0.360 → 0.741, worth **+16.8 of prior** — while keeping the
 NET ocean component in austral autumn, where it always was. **The model reproduced the observed
 76 % cancellation internally, with its own two limbs.**
@@ -89,8 +89,8 @@ likelihood cost is thin and spread (`co2_seasonal_MLO` −1.59, `co2_seasonal_SP
 - **`tau_ex` IS fittable, carries the 0.821 ppm NH import, and I FROZE IT.**
 
 So the fit was asked to fix a partition while being denied every lever on the half of it that is
-too big. **P3's failure may be an artefact of the slice rather than of the physics, and that is a
-hypothesis for a NEW pre-registered test — not a licence to re-run this one with `tau_ex` added
+too big. **P3's failure may be an artifact of the slice rather than of the physics, and that is a
+hypothesis for a NEW pre-registered test — not a license to re-run this one with `tau_ex` added
 and relabel the result.**
 
 Note that 27e **exonerated `tau_ex` as a PARTITION lever** (the SPO δ¹³C-per-ppm ratio moves 4.2 %
@@ -115,7 +115,7 @@ order.**
    a hemispheric mean is larger, **the NH leak into SPO gets worse** — which is the quantity
    binding above. NOAA's network measures it.
 
-## Artefacts
+## Artifacts
 
 - `R/model.R` `CCX_ENT_SEAS_PEAK_MO = 7.50`, `ent_seas_amp_SH` (default 0); twin in
   `src/ccx_core.cpp`; `tests/testthat/test-so-entrainment.R` (35 assertions).

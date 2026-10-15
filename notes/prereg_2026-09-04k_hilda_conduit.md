@@ -50,7 +50,7 @@ motivation as the only one standing.
 ## P3 — THE SHAPE, and the one that would make it convincing
 **PREDICT: the improvement is concentrated at 1622 m and 2268 m** (currently z +3.25 / +2.57 in the
 scored band) rather than spread evenly, because that is where the over-mixing sits.
-⚠ Weakest of the three: with only three scored layers this is a weak shape claim and is labelled so
+⚠ Weakest of the three: with only three scored layers this is a weak shape claim and is labeled so
 in advance.
 
 ## What is NOT claimed

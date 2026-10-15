@@ -13,8 +13,8 @@ failures in `test-fluxes.R:99/100` are unchanged; the full suite was NOT re-run 
 
 ## 0. STATE IN EIGHT LINES
 
-1. **The GCB-imbalance programme is CLOSED.** Not a century drift, and 0.43–1.5 σ from zero. §1.
-2. **Gate 4's failure is a fertilisation SATURATION-SHAPE problem.** Marcus's first-named lever
+1. **The GCB-imbalance program is CLOSED.** Not a century drift, and 0.43–1.5 σ from zero. §1.
+2. **Gate 4's failure is a fertilization SATURATION-SHAPE problem.** Marcus's first-named lever
    (ocean stratification) is genuinely absent from the model **and cannot deliver the trend**. §2.
 3. **The pre-registered 4-arm refit FALSIFIED P1**: the free arm returns `fert_k` to **554.98**.
    There is no second basin. §3.
@@ -36,8 +36,8 @@ carry **63 %** in 17 % of the years), and the only resolved seam is in **GCB's p
 pre-1959 growth is Joos & Spahni 2008, a reconstruction of the Law Dome record we already score.
 
 **The `luc_arm_pin2` refit was STOPPED** at 1 h 25 (`calibration/output/luc_arm_pin2/README.md` says
-so in its first line). It left the largest confound open: the `luc` arm travelled **along** the
-fertilisation ridge, and that ridge alone puts `rep_dC` at **7.220 (+6.80 σ)**. Consequence:
+so in its first line). It left the largest confound open: the `luc` arm traveled **along** the
+fertilization ridge, and that ridge alone puts `rep_dC` at **7.220 (+6.80 σ)**. Consequence:
 **08-24c's −5.014 σ headline is UNDERSTATED by ~2×**, not contaminated — the mechanism is worth
 **−9.6 to −11.8 σ**. **`sigma_d14c`'s provenance question is still OPEN; an absent run is not a
 result.**
@@ -49,7 +49,7 @@ absent** — `R/model.R:846`, the interior flux is `p$kz * gradient` with `kz` *
 **But it cannot deliver the trend:** `kz` moves the AF *level* hard (0.490 at 2000 → 0.415 at 9000)
 and its *trend* by **±0.0002 across that entire range**. Building it would have been the wrong lever.
 
-The answer was travelling **along** the ρ = +0.997 (`beta_max`, `fert_k`) ridge at fixed present-day
+The answer was traveling **along** the ρ = +0.997 (`beta_max`, `fert_k`) ridge at fixed present-day
 enhancement — the one direction the historical CO₂ integral cannot identify.
 
 ## 3. The refit, collected against its pre-registration
@@ -116,7 +116,7 @@ half-life) **pass it at all three horizons** while our model failed all three.
 **The statistic is `IRF(300)/IRF(100)`, and its null is exact:** for any single exponential,
 whatever τ, it equals `IRF(100)²`. Parameter-free. Joos 0.787 (own null 0.167); our model 0.707
 (own null 0.075); the two one-box models sit **on** their nulls, 16–36× below the floor. The band
-[0.593, 0.979] is **CONSTRUCTED** (Table 4's TH-100 relative width borrowed) and labelled so
+[0.593, 0.979] is **CONSTRUCTED** (Table 4's TH-100 relative width borrowed) and labeled so
 everywhere; the discrimination does not rest on it. **12b is not a superset of 12a** — a τ = 10⁴ yr
 exponential passes 12b and is rejected by 12a — and a test pins the pair.
 

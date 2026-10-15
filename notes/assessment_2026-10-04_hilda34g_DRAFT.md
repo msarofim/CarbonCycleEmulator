@@ -41,7 +41,7 @@ comparisons).
 - **The release moved:** "BETA v1.0 CarboTope" is cut on hilda34g ("Move v1.0 to hilda34g").
 - **The substep controller is fixed** (10-03 j, 10-04 a; merged 10-04 d).
   - Near the P8 wall the RK4 count under-resolved the SH winter mixed layer, and the objective there was integrator
-    artefact.
+    artifact.
   - No registered mode moves (all at 4 substeps).
 - **The greening sign was tested** (10-04 e). The lag SETS the sign of `npp_tsens` (§4.3).
 

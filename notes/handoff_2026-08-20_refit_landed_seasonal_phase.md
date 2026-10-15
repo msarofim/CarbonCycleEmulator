@@ -10,10 +10,10 @@ this note's result. Its §1–§4 (the `ARM_HESS_EPS` check and the `h_ml` kink)
    `calibration/output/pump_arms/`. Log `refit_20260818.log`. 32.6 h wall clock.
 2. **NEITHER MODE IS CONVERGED** (both hit the restart cap while still gaining), and they
    stopped UNEQUALLY — N gaining 0.45–1.24/restart, D 0.10–0.12. **N is further from its
-   mode, and that asymmetry favours D.**
+   mode, and that asymmetry favors D.**
 3. **DO NOT QUOTE THE EVIDENCE.** D − N = +10.61, and it is not usable: two non-converged
    modes, `kz` pinned in both, D's `log|-H|` carrying two step-unstable rows to N's one, and
-   the optimisation asymmetry pointing the same way as the margin.
+   the optimization asymmetry pointing the same way as the margin.
 4. **THE ARMS ARE INDISTINGUISHABLE** — all 21 coordinates agree within ~0.1 prior-sd except
    `h_ml` (0.8σ). That, not the evidence, is the result.
 5. **THREE DIAGNOSTICS RAN AFTER THE REFIT AND TWO OF THEM OVERTURNED MY FIRST READING.**
@@ -37,7 +37,7 @@ structure makes them **structural, not search artifacts**.
 
 **Standing questions.** `kz` PINNED both arms (98.8 % / 98.2 %) — §5.2h P2 again. `h_ml`
 INTERIOR, gradient rows LIVE both (95.66 / 88.39 m). `pump_grad` 310.71 / 319.23, ABOVE the
-233.11 prior centre and above the old 1-D optimum 274.5.
+233.11 prior center and above the old 1-D optimum 274.5.
 
 **The pre-launch Hessian checks earned their place.** `h_ml` was CLEAR of the kinks in both
 arms (gaps 2.75 m / 10.02 m vs steps reaching 2.2e-3 / 9.2e-4 m). Step-stability flagged `kz`
@@ -105,7 +105,7 @@ So the likelihood sharply and genuinely wants ~0.09 K. **The −6σ is against t
 LIKELIHOOD has a clean interior optimum there.** The parameter is not railing — it is being
 told, by a phase-sensitive stream, that the physical value is 513 log-units wrong.
 
-**NEXT TEST, and it is the one that settles it:** compare the MODELLED MLO CO2 seasonal phase
+**NEXT TEST, and it is the one that settles it:** compare the MODELED MLO CO2 seasonal phase
 against the OBSERVED phase the likelihood already scores (`ccx_year_harmonic` on obs vs model,
 the sin/cos coefficients, not the amplitude). If the model's phase is 1–2 months late, the
 geometry is the bug and `sst_seas_amp` is the messenger. The "expected" column above is my
@@ -132,13 +132,13 @@ signature.** What it is: **the mode carries a ~6 ppm roughly uniform CO2 level b
 
 This is a model/input problem wearing the parameter, and it connects to the standing
 `ccx_co2_level` ("CO2 vs GCB budget disagree") and `ccx_luc_input` ("30 ppm misfit is an INPUT
-error") threads. Some share is also incomplete optimisation — the mode is not converged.
+error") threads. Some share is also incomplete optimization — the mode is not converged.
 
 ### 3c. `seas_T_amp_NH` = 48 K IS A DEGENERACY WITH `q10`
 
 `q10` fell **2.2275 → 1.2613** (below its literature range) while `seas_T_amp_NH` rose to
 **48.07 K** (impossible as a land seasonal temperature amplitude). Only the product enters, so
-the realised respiration swing is **9.3×** peak-to-trough — large but not absurd:
+the realized respiration swing is **9.3×** peak-to-trough — large but not absurd:
 
 ```
 Jan 0.43  Feb 0.28  Mar 0.25  Apr 0.28  May 0.43  Jun 0.75
@@ -149,7 +149,7 @@ Jul 1.31  Aug 1.97  Sep 2.28  Oct 1.97  Nov 1.31  Dec 0.75
 now has seasonal duty") resolving into an unphysical corner. **Neither parameter is
 individually interpretable at this mode.**
 
-## 4. N vs D — there IS a reason beyond fit, and it favours N
+## 4. N vs D — there IS a reason beyond fit, and it favors N
 
 **DESIGN.md line 723 labels them: `"N"` nutrient-limited (mass fixed) / `"D"` DIC-limited.**
 
@@ -206,6 +206,6 @@ cd ~/Documents/2026/CodeProjects/CarbonCycleEmulator && claude --remote-control 
 > Read `notes/handoff_2026-08-20_refit_landed_seasonal_phase.md`. The 21-parameter two-arm
 > refit landed; **the arms are indistinguishable and the evidence is not quotable**. The live
 > work is **§3a, the seasonal phase geometry** — every driver peaks 1–2 months late and that is
-> probably why `sst_seas_amp` is being zeroed. Start with the modelled-vs-observed MLO CO2
+> probably why `sst_seas_amp` is being zeroed. Start with the modeled-vs-observed MLO CO2
 > seasonal PHASE comparison named at the end of §3a. Do not re-adjudicate N vs D until the
 > seasonal model is fixed — that is where the arms differ.

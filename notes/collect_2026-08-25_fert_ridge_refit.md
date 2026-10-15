@@ -1,4 +1,4 @@
-# Collection — the 4-arm fertilisation-ridge refit. 2026-08-25.
+# Collection — the 4-arm fertilization-ridge refit. 2026-08-25.
 
 Against `notes/prereg_2026-08-25b_fert_ridge_refit.md`, written before launch.
 **ALL FOUR ARMS FINISHED** (8 h 53; all wrote `pump_arms_comparison.rds`). Measured with
@@ -34,7 +34,7 @@ ridge (enh(420) = 0.2074 by construction). With `fert_k` pinned, the fit moved *
 | pin60 | 0.2944 | 0.4807 | 0.2074 | **0.3387** |
 
 Pinning one coordinate of a ρ = +0.997 pair does **not** hold the pair. The fit raises present-day
-fertilisation 26–63 % above the ridge value, which restores most of the CO₂-level fit — and `rep_dC`
+fertilization 26–63 % above the ridge value, which restores most of the CO₂-level fit — and `rep_dC`
 with it. **The frozen scan's cells are not on the posterior's manifold.**
 
 ## P3 — HOLDS, and it no longer means what it was supposed to mean.
@@ -61,7 +61,7 @@ Gate 4 at the landed modes (target: trend +0.0148, sd 0.0483):
 
 **The gate-4 fix is REAL and survives the refit** — trend −0.0007 → +0.0107, decadal sd 0.019 →
 0.030, correlation −0.06 → +0.48, all with 19 other parameters free to undo it and none of them
-doing so. A saturating fertilisation genuinely produces airborne-fraction time-dependence.
+doing so. A saturating fertilization genuinely produces airborne-fraction time-dependence.
 
 **But gate 7 goes the WRONG WAY.** The frozen scan predicted the land sink improving to +1.26 σ at
 K = 120; it landed at **+2.62 σ, worse than the reference's +2.12**. That improvement was a
@@ -80,14 +80,14 @@ Corrected:
 |---|---|
 | gate 4's AF trend responds to saturation | **HOLDS** — the one real result |
 | gate 7's land sink comes inside 1 σ | **RETRACTED** — lands at +2.62 σ, worse than baseline |
-| `rep_dC` falls to its prior centre | **RETRACTED** — stays at 4.1–5.0 of 5.566 |
+| `rep_dC` falls to its prior center | **RETRACTED** — stays at 4.1–5.0 of 5.566 |
 | gate 12 passes at all three horizons | **HOLDS** — measured at the landed modes, see below |
 | four problems, one cause | **RETRACTED** — **two** gates respond, two other things break, `rep_dC` does not move |
 
 **And the cost is now priced.** Buying +0.011/decade of AF trend costs **47 log-units** and **+0.5 σ
 on the land sink**, and the free arm says the posterior declines the trade.
 
-[[sens_scan_achievable]] in its purest form: the scan ranked the work correctly — fertilisation
+[[sens_scan_achievable]] in its purest form: the scan ranked the work correctly — fertilization
 shape *is* the lever gate 4 responds to — and was wrong about everything it inferred beyond that.
 
 ## THE FULL LANDED PICTURE — all four arms, all gates
@@ -124,7 +124,7 @@ artifact; 19 free parameters had every chance to undo them.
 **And `rep_dC` does not move** (5.566 → 4.967/4.734/4.138).
 
 So the model is being pulled two ways by its own objective: **the pulse-response and
-airborne-fraction-variability gates want strong fertilisation saturation; the CO₂ station levels and
+airborne-fraction-variability gates want strong fertilization saturation; the CO₂ station levels and
 the GCB land sink want weak saturation.** The likelihood, weighted as it currently is, chooses weak
 — by **86.7 log-units** at pin90, of which the frozen decomposition showed **93 % lives in
 `co2_level_MLO` + `co2_level_SPO`**, the two streams whose absolute level is absorbed by the

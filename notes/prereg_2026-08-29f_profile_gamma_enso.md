@@ -34,7 +34,7 @@ To reach the observed 0.900 from a 0.173 non-ENSO baseline requires an ENSO cont
 - **E4 — WHO REFUSES.** The by-stream decomposition at γ = 3.05. **PREDICTED: `co2_level_MLO` and
   `co2_level_SPO` carry ≥ 50 %** — ENSO adds year-to-year structure to the very rows that are
   currently fitted to 0.53–0.58 ppm RMS, and by [[ccx_stream_leverage]] they outvote everything.
-- **E5 — CONDITIONAL BUY-BACK.** Re-optimise a small carbon slice (`beta_max`, `fert_k`, `q10`) at
+- **E5 — CONDITIONAL BUY-BACK.** Re-optimize a small carbon slice (`beta_max`, `fert_k`, `q10`) at
   each γ. Frozen costs are upper bounds and this repo has been burned reading them as prices
   (handoff 08-25b §7). No gate — this repo has no stable prior for the buy-back fraction.
 - **E6 — DOES IT EVEN HELP THE FIT'S OWN TARGET?** Report r (model vs obs anomaly) along the
@@ -45,6 +45,6 @@ To reach the observed 0.900 from a 0.173 non-ENSO baseline requires an ENSO cont
 
 - **No adoption.** `gamma_enso` stays at 0.85119.
 - **It does not price volcanoes.** 08-29e showed the thermal path can supply ≤ 7 % of Pinatubo and
-  the missing mechanism is diffuse-light fertilisation; nothing here tests that.
+  the missing mechanism is diffuse-light fertilization; nothing here tests that.
 - **It cannot attribute the residual variance.** Fires, hydrology, GCB methodology and observational
   error all live in the 0.900 and none is separated here.

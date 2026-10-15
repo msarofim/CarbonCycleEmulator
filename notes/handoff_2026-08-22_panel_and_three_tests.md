@@ -9,13 +9,13 @@ below, which undercuts it twice with measurements.
 
 ## 0. STATE IN TEN LINES
 
-1. **A four-expert panel reviewed the model** (carbon cycle, reduced-complexity modelling, code,
+1. **A four-expert panel reviewed the model** (carbon cycle, reduced-complexity modeling, code,
    observations). Each read the code, not just the handoff. §1 is the merged ranking.
 2. **THE OBJECTIVE CHANGED TODAY.** The ice term now scores against `co2_SH`, not `co2_NH`.
    **Nothing fitted before `d6adb58` is comparable across it.** §2.
 3. **The ice term was scored against the wrong hemisphere** — and the diagnostic that produced
    the swing table used the *other* one. Worth +16.9 log-units and 16 % of the swing. §2.
-4. **21d TEST 2's mid-century localisation was the smoother.** Raw estimator moves the minimum
+4. **21d TEST 2's mid-century localization was the smoother.** Raw estimator moves the minimum
    from the 1950s to the 1940s. **The pause is real and 4.7× the noise floor** — the decade was
    wrong, the feature is not. §3a.
 5. **The model's growth-rate error tracks GCB's own budget imbalance: r = 0.771, slope 0.781**
@@ -40,7 +40,7 @@ Four reviewers, run independently. Where I verified a claim myself it is marked 
 | 1 | **[V]** Ice term scored against `co2_NH`; Law Dome is 66.7 °S — **FIXED today**, §2 | 1 line |
 | 2 | **[V]** Most of the mid-century swing is GCB's own budget imbalance, not the model, §3b | — |
 | 3 | **[V]** §4 GATE E's mechanism is backwards: levels are scored **annually** (126 rows, not 1523 monthly), and the level is *over*-constrained by an ice term whose rows are not independent | half day |
-| 4 | **[V]** TEST 2's localisation is a LOESS artefact — **MEASURED today**, §3a | — |
+| 4 | **[V]** TEST 2's localization is a LOESS artifact — **MEASURED today**, §3a | — |
 | 5 | `q10` is structurally incapable: 93 % of soil C is in a τ=500 yr pool ⇒ γ_L ≈ −4 GtC/K vs C4MIP −45.1 ± 50.6 | 3 h–3 d |
 | 6 | Six of 21 parameters sit 2.4–6.3 σ outside their priors, three of them *measured climatology* (`sst_seas_amp_NH` = 0.47 K vs observed 2.24 K) | 1 d |
 | 7 | **[V]** DESIGN gates measured at **defaults**; the app ships the **mode**. `diag_joos_irf.R:97` has no mode path. Gate 12 at the shipped vector has never been measured, against a 6 % TH100 margin | 2 h |
@@ -48,7 +48,7 @@ Four reviewers, run independently. Where I verified a claim myself it is marked 
 | 9 | **[V]** The `intersect()` silent-drop mechanism is still live (`R/calibrate.R:615`, `app/global.R:117`); 11 scripts hardcode the never-existed `mode_fit.rds`, 3 degrade silently, 2 print default output under a `POSTERIOR MODE` heading | 3 h |
 | 10 | **[V]** Cement carbonation (0.21 GtC/yr) is in the data and absent from the forcing — 0.42 σ of gate 7, free | 1 h |
 | 11 | GCB sink terms score one systematic as 66 independent annual draws | half day |
-| 12 | `rep_dC`'s N(0, 1.0) prior is mis-**centred**: both stations must read *below* their box means, so the physical expectation is positive, not zero | 1 h + data |
+| 12 | `rep_dC`'s N(0, 1.0) prior is mis-**centered**: both stations must read *below* their box means, so the physical expectation is positive, not zero | 1 h + data |
 
 **Not yet acted on and cheap:** #7, #8, #9, #10.
 
@@ -82,7 +82,7 @@ and the conclusion hold; quote 16.9.)*
 
 ## 3. THE SWING: RE-MEASURED, RE-ATTRIBUTED, AND ISOTOPICALLY CONSTRAINED
 
-### 3a. TEST 2's localisation was the smoother — but the pause is real
+### 3a. TEST 2's localization was the smoother — but the pause is real
 
 `calibration/diag_swing_estimator.R` (new). 21d TEST 2 differentiated a
 `loess(CO2ppm ~ year, span = 0.25)` fitted over 1850–1996 — **an effective window of ~36 yr, wider
@@ -98,7 +98,7 @@ than the decadal feature it was resolving.** On a raw within-decade OLS with no 
 
 **But it does not weaken the finding, it strengthens it.** Measured against SPO flask (no firn,
 no gas age) on the *same* estimator over their overlap, this record's decadal-growth error bar is
-**RMS 0.098 ppm/yr**. The raw pause sits 0.459 ppm/yr below its neighbours — **4.7× the noise
+**RMS 0.098 ppm/yr**. The raw pause sits 0.459 ppm/yr below its neighbors — **4.7× the noise
 floor.** The decade was wrong; the feature is real and better resolved than 21d claimed.
 
 ### 3b. The swing largely belongs to GCB, not to the model
@@ -133,7 +133,7 @@ stated errors 0.01–0.19 ‰, sitting on disk and NOT in the objective** — th
 scored start in 1978.
 
 The candidate causes carry different signatures: emissions error ≈ −25 to −28 ‰; land sink ≈ −18 ‰;
-ocean sink ≈ −2 ‰ (and isotopically slow); a firn/sampling artefact preserves the ratio, because
+ocean sink ≈ −2 ‰ (and isotopically slow); a firn/sampling artifact preserves the ratio, because
 firn diffusion is near species-independent.
 
 **GATE 1 — the two residuals are decoupled.**
@@ -159,16 +159,16 @@ by that factor; GATE 6 supersedes them.**
 
 **CAVEAT, and it must ride with the number.** This assumes the model's δ¹³C is a fair probe.
 Memory `ccx_d13c_suess` records the δ¹³C Suess overshoot as **structural**, and the monotone
-−0.0014 ‰/yr drift in GATE 4 is very likely it. A real signal could in principle be cancelled by
+−0.0014 ‰/yr drift in GATE 4 is very likely it. A real signal could in principle be canceled by
 that bias — but the bias is linear in time and the signal would have to be equal, opposite and
-localised. Not generic, and testable against an independent δ¹³C product.
+localized. Not generic, and testable against an independent δ¹³C product.
 
 **Read it as:** *no terrestrial or emissions explanation of the swing survives the isotopes* —
 **not** as "the swing is not carbon".
 
 **GATE 2 is confounded and marked not-to-quote in the file:** its ratio statistic divides by a CO₂
 residual that passes through zero inside the test window, so its "+5.70 sd" is a denominator
-artefact.
+artifact.
 
 ---
 
@@ -253,13 +253,13 @@ cd ~/Documents/2026/CodeProjects/CarbonCycleEmulator && claude --remote-control 
 
 > Read `notes/handoff_2026-08-22_panel_and_three_tests.md`. **The objective changed on
 > 2026-08-22** (ice → `co2_SH`); nothing fitted earlier is comparable. **Do NOT start the §12c
-> LUC time-profile programme** — §4 here undercuts it twice.
+> LUC time-profile program** — §4 here undercuts it twice.
 >
 > **The open scientific question is now narrower and better posed than 21d's:** a mid-century CO₂
 > growth-rate pause that is real (4.7× its own noise floor), correlates with GCB's published
 > budget imbalance at r = 0.77, and carries **no isotopic signature** — 12.7 σ against a
 > terrestrial or emissions source. That combination points at the ocean, at a CO₂-only record
-> artefact, or at compensating errors, and §3c's caveat names the one way the isotope test could
+> artifact, or at compensating errors, and §3c's caveat names the one way the isotope test could
 > be wrong.
 >
 > **Cheapest unstarted items, all measured and all under a day:** gates 4/5/7/12 **at the shipped

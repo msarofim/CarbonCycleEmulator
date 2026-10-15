@@ -113,9 +113,9 @@ flagged (handoff item 7; one `h_ml` for both hemispheres means the SH residual's
 Not that T1 fixes GATE V; not that 14–25 Sv per index is reproduced (PT3 predicts NOT); not that `h_ml`'s ridge resolves; not that the
 SH-heavy asymmetry is representable. `hilda_eq` and `start_011` remain reproducible provenance; `hilda30c` is canonical throughout.
 
-## 7. Order and artefacts
+## 7. Order and artifacts
 R side (`model.R`: names, resolver, defaults, prepare/aux, deriv block, outputs, bound; `spinup.R`; `likelihood.R`; `fluxes.R`; `forcing.R`;
-`calibrate.R`: `ccx_struct_hilda_tr()` + the label) → C++ twin + `cpp.R` marshalling → `test-tr-box.R` (P0a–g, N-T1, mutations) → the full
+`calibrate.R`: `ccx_struct_hilda_tr()` + the label) → C++ twin + `cpp.R` marshaling → `test-tr-box.R` (P0a–g, N-T1, mutations) → the full
 suite (the standing reds: the GATE Q pair + `test-seas-lag-split:205`) → `diag_tr_box_probe.R` (PT1, PT6, R3's read, PT7) → R5 → the array
 under `CCX_MS_STRUCT=hilda_tr CCX_MS_SEAS_ML=1 CCX_MS_PIN=ent_seas_amp_SH=0`, new `port_targets.csv`, proposed mode name `hilda30t` → PT2–PT5.
 Logs and rds under `outputs/diagnostics/tr_box_*_2026MMDD.*`.

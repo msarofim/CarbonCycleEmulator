@@ -9,7 +9,7 @@
 ## 0. STATE IN EIGHT LINES
 
 1. **§2's ridge claim is CONFIRMED, exactly.** `seas_T_amp_NH` × ln(`q10`) is conserved to
-   0.2 % across a 2.5× range of `q10`; the re-optimised `A_T` at `q10` = 2.0 is 3.2695 K
+   0.2 % across a 2.5× range of `q10`; the re-optimized `A_T` at `q10` = 2.0 is 3.2695 K
    against the analytic 2.2513/ln 2 = 3.2479.
 2. **§2's DIAGNOSIS is half right and its SUCCESS CRITERION is not reachable.** Damping both
    land amplitude priors by 0.2838 flips `q10` = 2.0 from losing by 63.7 log-units to
@@ -90,8 +90,8 @@ No model runs — the parameter vectors are already on disk.
 | 1.70 | 4.46 | 0.37 | −45.9 | +12.5 |
 | 2.00 | 3.45 | 0.28 | **−63.7** | +4.0 |
 
-Damping applied to **both** priors (NH centre 14.32 → 4.06 K, SH 5.05 → 1.43 K; the bracket
-ends scale, so the centre scales and the width does not).
+Damping applied to **both** priors (NH center 14.32 → 4.06 K, SH 5.05 → 1.43 K; the bracket
+ends scale, so the center scales and the width does not).
 
 **Read it as: the repair has leverage, and it does not reach its own success criterion.**
 The sign flips; the landing is `q10` ≈ 1.35–1.5, not 2.0. And **the decisive lever is the
@@ -100,9 +100,9 @@ product at a large `q10`, and that is where most of the 50.3 sits. §2 as writte
 proposed re-anchoring on the NH argument.
 
 **Two caveats, and they matter.** The damping 0.2838 is **DERIVED** to put the mode's
-product at the literature `q10` — the most favourable value the hypothesis could have, and
+product at the literature `q10` — the most favorable value the hypothesis could have, and
 not a measurement. §2 step 2's requirement for provenance stands and is now the gate on the
-whole thing. And the `land` points were optimised under the CURRENT priors, so the damped
+whole thing. And the `land` points were optimized under the CURRENT priors, so the damped
 column is a **lower bound** on what a refit would find.
 
 ### 2d. What to do
@@ -168,12 +168,12 @@ whose ±1 σ spans 11.4–17.9 K: **one grid point inside the entire prior.**
 The |z| > 3 list loses two of six. §2's headline pair was also mixing a file value with an
 analytic one; the honest pair is **+2.65 / −2.43**, a symmetric ~2.5 σ tug.
 
-Also: **the prior CENTRE for `seas_T_amp_NH` is 14.3215 K**, the geometric mean of the
+Also: **the prior CENTER for `seas_T_amp_NH` is 14.3215 K**, the geometric mean of the
 bracket (`ccx_bracket_lnorm`), not the LO end 11.445. The joint prior implies **4.41×** the
 modulation the mode accepts, not 3.52×.
 
 Replaced by one `ccx_prior_z()` in `R/calibrate.R`, integrating in the unconstrained
-coordinate where every prior in the table has scale O(1) by construction, centred on the
+coordinate where every prior in the table has scale O(1) by construction, centered on the
 PRIOR's mode rather than on x, carrying both tails so −6.27 survives.
 `tests/testthat/test-prior-z.R` pins it to the analytic answer for every closed-form prior.
 27 assertions.
@@ -205,13 +205,13 @@ channel being off, it wants it off, which is consistent with `ccx_seas_chan_budg
   objective (`partial`|`lik`). Tiers are `pair` / `pairSH` / `block` / `land`.
 - **Never read the `pair` tier alone.** It freezes `seas_T_amp_SH` while `q10` — which both
   hemispheres share — moves, so it charges the NH profile for an SH misfit it did not cause.
-  `pair` minus `pairSH` is the size of that artefact and it is large (the amp axis: 217.6
+  `pair` minus `pairSH` is the size of that artifact and it is large (the amp axis: 217.6
   spread vs 111.8).
-- **One optimiser cell is bad:** `q10` = 2.3, BLOCK tier, `lik` objective — non-monotonic
+- **One optimizer cell is bad:** `q10` = 2.3, BLOCK tier, `lik` objective — non-monotonic
   (`d13c_seasonal_MLO` −36.7 against −3.4 at `q10` = 2.0). A different local optimum. Read
   PAIRSH there.
 - **`calibration/diag_phi_eff_profile.R` still carries the double-`luc_scale` bug** in its
-  `by_stream`/`gcb_land_sink` column. Its optimisation went through `ccx_make_logpost()` and
+  `by_stream`/`gcb_land_sink` column. Its optimization went through `ccx_make_logpost()` and
   its seasonal-row conclusions never touch LUC, so its published findings stand — but do not
   copy that idiom again. `ccx_forcing_eluc_annual()` reads the forcing's `e_luc` columns, so
   it must be taken BEFORE the `luc_scale` column multiply.

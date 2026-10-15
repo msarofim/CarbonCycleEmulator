@@ -70,8 +70,8 @@ it convolves came from OSCAR's share.
 
 ⭐ **An FIR convolution will NOT work here** and cost a debugging cycle: a kernel long enough for
 τ = 60 yr is longer than the 275-year series, and `stats::filter(method="convolution")` then
-returns NA across the entire fit window. The one-pole recursion needs no history — initialised at
-its own equilibrium for the first year's input, the initialisation error is gone many τ before
+returns NA across the entire fit window. The one-pole recursion needs no history — initialized at
+its own equilibrium for the first year's input, the initialization error is gone many τ before
 1959.
 
 ---
@@ -180,13 +180,13 @@ renderer, wrong convention, the "extreme attribution" caption disappearing).
   the ≥8 target is currently unreproducible**. The tool self-checks (LMS matrices are exact
   inverses; neutrals invariant under all three dichromacies). `node` is absent, so the skill's own
   validator cannot arbitrate. **The figure was NOT changed on an unreproduced disagreement** —
-  flagged for Marcus, and the new panel's colours were chosen with margin (worst pair **10.9**) so
+  flagged for Marcus, and the new panel's colors were chosen with margin (worst pair **10.9**) so
   nothing turns on it. ⇒ [[palette_check_unreproduced]]. **The imbalance panel will hit this same
   question** — pick with margin and score it.
 - ✅ **RESOLVED 09-24 (p) — existing copy (was flagged).** `output$w_luc_note` credits the land's crossing to
   "CO₂ fertilisation **and forest regrowth on former farmland**". With Tier 1 drawn directly below
   it, that is visibly imprecise: **regrowth is inside the LUC INPUT, not inside the natural land
-  sink**, and fertilisation is the model's only long-term land-uptake term
+  sink**, and fertilization is the model's only long-term land-uptake term
   ([[ccx_land_sink_single_term]]). Copy is Marcus's; the suggestion is to end the sentence at
   "CO₂ fertilisation".
 - **Two app instances were left running**: PID 61815 on **:7788** (pre-dates this session, Marcus's,
@@ -206,11 +206,11 @@ renderer, wrong convention, the "extreme attribution" caption disappearing).
    clipping at every viewport width. ([[subtitles_clip_too]])
 2. ~~The `w_luc_note` copy fix~~ ✅ **DONE 09-24 (p)**, `b1c39d8`. It was two corrections, not one:
    the regrowth attribution AND "larger sink than GCB" left standing as an unqualified fault.
-   ⭐ **Adding a panel falsified copy two charts above it** — re-read the neighbours when a chart lands.
+   ⭐ **Adding a panel falsified copy two charts above it** — re-read the neighbors when a chart lands.
 3. ~~Resolve the palette discrepancy~~ ✅ **DONE 09-25**, `c55eaba`. Re-stepped to `#C4315F` /
    `#16345A` (protan 12.6), the MINIMAL change clearing a floor of 12; the receipt is now a GATE
    (`test-figure-palette.R`). ⛔ **Which implementation is right is STILL UNKNOWN** — the pair was
-   moved so the answer stops mattering for this figure. ⚠ Neither colour could be held fixed.
+   moved so the answer stops mattering for this figure. ⚠ Neither color could be held fixed.
 4. ~~Cherry-pick `b1889af`~~ ✅ **UNTANGLED ONTO `main` 09-25**, FaIRtoFrEDI `c97055a`, pushed.
    Three commits: port the v160 generators, the unit fix (builder hunk only), a `--self-test`.
    ⚠ Done in a SEPARATE WORKTREE because Marcus's `egu_sprm_memo_draft.docx` is dirty in the main

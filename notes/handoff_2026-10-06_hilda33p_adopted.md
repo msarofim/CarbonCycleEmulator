@@ -53,7 +53,7 @@
 | What-if, ENSO off | 36 % of the wobble removed (the blurb keeps "about 40 %", ruled) |
 | pulse box, per 1000 GtC | 1.448 / 1.379 / 1.358 / 1.402 at +20 / 50 / 100 / 200 yr |
 
-## 4. Open items (each is Marcus's to prioritise)
+## 4. Open items (each is Marcus's to prioritize)
 1. **App wording, his text:**
    - (a) **The warming switch's blurb** ("A warmer world respires soil carbon faster and holds less CO₂ in seawater…") does not mention that the switch now also removes the MIXING SLOWDOWN. DESIGN §3.4a S's ready sentence: "warming is strongest at the surface, so the upper ocean becomes more layered and mixes less, and the carbon we add is carried down into the deep ocean more slowly."
    - (b) **The `npp_tsens` row** ("Plant growth's response to warming") shows a bare 0. A note such as "held at 0: the record cannot fix its sign" would be his wording.
@@ -67,7 +67,7 @@
    - The survey found one basin; the expected value is low.
 5. **Carried, unchanged:**
    - H2 (deferred). The ocean's thermal excess is now 1.87× GCB like-for-like.
-   - `hs_asx_frac`'s judgement width (kept; `k_w` ≈ 1895 at hilda33p).
+   - `hs_asx_frac`'s judgment width (kept; `k_w` ≈ 1895 at hilda33p).
    - H1's observed-ratio arm (needs his permission for a gridded SST download).
    - Card 4 wording.
    - The substep held-K rule for `ccx_tr_box_eigbound()` (optional).

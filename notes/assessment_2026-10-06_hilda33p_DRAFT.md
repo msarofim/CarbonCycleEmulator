@@ -49,7 +49,7 @@ comparisons).
   - the land ENSO lag **2.61 ± 0.41 months** (hilda34g 2.64 ± 0.39).
 - **The release moved:** "BETA v1.0 CarboTope" is cut on hilda33p ("Move v1.0 to the new mode").
 - **The `k_w` price arm was read** (10-05 a): Naegler's 1446 m/yr fits BETTER on likelihood (+2.75). Its whole −20
-  posterior price is ONE prior, `hs_asx_frac`'s, at z +6.5, whose width is a stated judgement. Kept. At hilda33p
+  posterior price is ONE prior, `hs_asx_frac`'s, at z +6.5, whose width is a stated judgment. Kept. At hilda33p
   `k_w` is 1894.7 ± 53.7.
 - **H1 was tested** (10-05 c): the high-latitude box carries only ~18 % of the ocean's thermal climate effect. The
   excess lives in the low-latitude column, which leaves H2 (§4.5).
@@ -123,12 +123,12 @@ under #16 is not measured.
 3. **The greening sign: closed by ruling.** `npp_tsens` is pinned at 0 (P4, 10-05 d). The app's parameter table
    marks it "held", with the other nine pins (10-06 c).
 4. **`k_w` sits at ~1895 m/yr against Naegler's 1446.** The price arm (10-05 a) says the data alone would take 1446
-   (+2.75 on likelihood); the posterior keeps ~1900 because of ONE judgement-width prior, `hs_asx_frac`'s (§6.5).
+   (+2.75 on likelihood); the posterior keeps ~1900 because of ONE judgment-width prior, `hs_asx_frac`'s (§6.5).
    Disclosed on Known-issues card 7 since 10-06 (j) (wording drafted for Marcus).
 5. **The ocean's climate effect is 1.87× GCB's, like-for-like** (§3.3). The excess is THERMAL: at hilda34g the SST
    part alone (−0.45) was 3.4× one GOBM's warming part under the same protocol (10-04 p), and at hilda33p it is
    −0.452. H1 found the high-latitude box carries only ~18 % of it (its observed-ratio arm is closed, 10-06 j).
-   - **H2 TESTED (10-06 j)** against GCB's Fig. S10, digitised and gated: CCX's effect responds −0.48 ± 0.07 GtC/yr per K
+   - **H2 TESTED (10-06 j)** against GCB's Fig. S10, digitized and gated: CCX's effect responds −0.48 ± 0.07 GtC/yr per K
      of SST warming against the GOBMs' −0.29 ± 0.05 (ratio 1.63 ± 0.35), the gap grows from ~0 with the warming, and
      CCX's effect emerges ~26 years earlier (1973 vs 1999). That is H2's signature, not an emulation offset, and not
      the missing wind term (same sign as the gap).
@@ -136,7 +136,7 @@ under #16 is not measured.
      (17–30 over GCB's ±1σ), ~19 under vvH, ~11 under vvM, under 3.5 for the five lower markers; 3–8 ppm at 2100.
    - Acting on it (a refit at lower kz, or a structural surface-DIC damping) is Marcus's call.
 6. **Uncertainty.** The app shows no bands. They are HELD by ruling (10-02, after the MCMC check): the Laplace band
-   failed its check, and the sampler did not converge on the fertilisation ridge.
+   failed its check, and the sampler did not converge on the fertilization ridge.
 7. **Strained priors (|z| > 2):** `q10` −2.53, `kz_deep_frac` −2.79, `pump_hs_gcm2` +2.15, **`rep_dC` +4.16**, the
    same four as at hilda34g. The last is the named shim the ice-CO₂ cut freed to take up the station offset (10-03 g).
 
@@ -163,7 +163,7 @@ under #16 is not measured.
    descriptors, the sink→source caveat.
 5. **New since 10-04:**
    - H2, kz's vertical exchange: TESTED and its stake MEASURED (§4.5); acting on it is open;
-   - `hs_asx_frac`'s judgement width, which holds `k_w` at ~1900 (kept; disclosed on card 7);
+   - `hs_asx_frac`'s judgment width, which holds `k_w` at ~1900 (kept; disclosed on card 7);
    - CLOSED 10-06 (j): H1's observed-ratio arm, the card-4 wording (applied), the substep held-K rule for
      `ccx_tr_box_eigbound()`, and the resume of #16's 8 sleep-affected starts.
 

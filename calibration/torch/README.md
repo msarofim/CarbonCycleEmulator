@@ -76,8 +76,8 @@
 >   evals is ~111 min at the ~0.37 s/eval a 2×-slower node implies, so a 180 min task does not
 >   reach even two cycles. The guard already shortens restarts to fit; raising maxit would change
 >   nothing a round actually executes.
-> * **The dispersion CENTRE** is still the COLD init — neither known basin, so the survey is not
->   centred on an answer.
+> * **The dispersion CENTER** is still the COLD init — neither known basin, so the survey is not
+>   centered on an answer.
 > * **The objective and the parameter table.** `port_targets.csv` still stands at `53ef03d`,
 >   `n_par = 25`, kz [4379.1, 8109.9]; **nothing here re-ran it and nothing needs to.**
 >
@@ -94,7 +94,7 @@
 > core compiles in ~18 s). **Preflight array `0-5,25,45` (job 16731571): 8/8 COMPLETED, exit 0:0**,
 > and **every start value matches the Mac to the digit**. `PORT GATE (a)` verified at **rel
 > 1.1e-13 – 2.3e-13** against a 1e-8 tolerance, at all three reference points, on the compute nodes.
-> **THE PORT IS VERIFIED.** Nothing has been optimised; the production array has NOT been submitted.
+> **THE PORT IS VERIFIED.** Nothing has been optimized; the production array has NOT been submitted.
 >
 > ⭐ **MEASURED s/eval ON THE COMPUTE NODES: 0.245–0.455, median ~0.33** — the number that could not
 > be obtained from the Mac, and essentially the ~0.37 this design assumed. **`CCX_MS_MAXIT = 6000`
@@ -155,7 +155,7 @@ is untouched, and the survey writes `start_*.rds` files no other code reads.
 | choice | value | where it came from |
 |---|---|---|
 | dispersion **sd** | **1.0466** in u-space (0.9592 before the pool was fixed; 1.0493 at 22 parameters) | **MEASURED**: the per-coordinate RMS distance between the two KNOWN basins, recomputed at every run — pooled over the 21 coordinates at least one of them FITTED, not over all 25. `CCX_MS_SPREAD` overrides. |
-| dispersion **centre** | the COLD hand-set init | Neither known basin, so the survey is not centred on an answer. |
+| dispersion **center** | the COLD hand-set init | Neither known basin, so the survey is not centered on an answer. |
 | **budget per start** | 3 restarts × 6000 maxit × 6 cycles, **180 min** wall | `cpu_short` caps at 240 min; the task's own budget stops it at 180, so **"OUT OF TIME" is a clean exit 0 with a checkpoint, never a SLURM kill**. A restart would have to overrun its measured projection by **>3×** to reach the cap; the worst contention ever measured on this model was 1.61×. ⭐ **On the WALL clock, pinned** (D1, CHANGELOG 2026-10-05 o: Torch keeps wall because SLURM's `--time` is a wall limit; the Mac runner budgets CPU time). The budget's env name is `CCX_MS_BUDGET_MIN` since then; `CCX_MS_WALL_MIN` is still read. |
 | **N starts** | 40 (`--array=6-45`) | Arbitrary, and the only one of the four with no measurement behind it. Kept at 40 for round 1 deliberately: buy DEPTH in round 2, not width in round 1. |
 | **the fixed head** | 6 ids (`0-5`), of which **3 are ENSO-seeded** | **MEASURED**, and it is the 09-01k re-cut: the migrated mode files are not modes of this space, so the baseline a survey is judged against has to be produced BY the survey. |
@@ -289,7 +289,7 @@ and partition strings, `R_LIBS_USER`. **Every one of those is decided in the fir
 task**, and the preflight exercises all of them, on the compute nodes, for ~10 CPU-minutes total. It
 also returns the one number that cannot be measured from the Mac: **s/eval on a real node**.
 
-What the preflight does *not* cover is long-run behaviour — the wall guard, checkpointing, the
+What the preflight does *not* cover is long-run behavior — the wall guard, checkpointing, the
 polish, memory over 3 h. But that is pure R control flow: machine-independent, and all of it tested
 locally end to end. The residual is memory drift over hours, and **`%10` covers exactly that**: ten
 tasks expose it while thirty wait, and `scancel` is one command. ⚠ **The throttle only protects you
@@ -326,13 +326,13 @@ The whole bundle was extracted to a clean directory and driven through **the rea
    `calibration/lib_run_inputs.R` asserts every run-time input **by name** before the wall budget, so
    the next missing file says so instead of surfacing as "the port is broken".
 2. ⛔ **A resumed reference task failed the port gate spuriously.** Gate (a) read whatever the run
-   *started from*, which after a checkpoint resume is the optimiser's progress, not the reference
+   *started from*, which after a checkpoint resume is the optimizer's progress, not the reference
    point — so re-submitting an array to continue it (this README's own advice) aborted with a false
    "this machine does not reproduce the objective". Gate (a) now always evaluates the **fixed**
    point; gate (b)'s ordering still uses the resumed one. Re-mutation-tested: it still fires on a
    genuinely perturbed target.
 3. **The sbatch body hardcoded `/scratch/ms17839/...`**, so it could never be run anywhere else. The
-   body is parameterised (`CCX_PROJ`, `CCX_SKIP_MODULES`); the `#SBATCH` directives stay literal
+   body is parameterized (`CCX_PROJ`, `CCX_SKIP_MODULES`); the `#SBATCH` directives stay literal
    because SLURM parses them before any shell runs.
 4. ⚠ **`mkdir -p logs` inside the script does not create the directory `--output` writes to** —
    SLURM opens that file first. `setup_torch.sh` creates it, which is why setup is not optional.
@@ -358,13 +358,13 @@ across samples on an idle laptop, and it was being extrapolated 6,000× to proje
 ⭐ **EVERY TASK VERIFIES THE PORT, not only ids 0–2.** A dispersed task evaluates the new-basin
 reference point once (well under a second) and checks it against `port_targets.csv`. This is a
 fairshare protection, not elegance: without it, an array submitted without its gate batch — or after
-the parameter table moved — would spend **46 × 3 h** optimising a different objective, and only the
+the parameter table moved — would spend **46 × 3 h** optimizing a different objective, and only the
 collector would ever notice. With it, a broken port kills every task in about two seconds.
 
 ## The port gate — read it before scaling
 
 Ids **1** and **2** start at points converged on the Mac **under the 21-parameter objective**, so
-they are the two the port targets were measured at — not points this build's optimiser must
+they are the two the port targets were measured at — not points this build's optimizer must
 reproduce. Each is gated **twice**, with each bound matching its own claim:
 
 * **(a) the FIXED REFERENCE point is an EVALUATION**, so two machines must agree to floating point.
@@ -376,7 +376,7 @@ reproduce. Each is gated **twice**, with each bound matching its own claim:
   ⚠ **Re-run `make_port_targets.R` and re-ship the CSV whenever the parameter table moves.** The
   09-01 `kz` re-bisection shifted every logpost; the driver now REFUSES a target measured under a
   different bracket rather than reading the shift as a port fault.
-* **(b) the FINAL value is an OPTIMISATION**, so the only available claim is an **ordering** — it may
+* **(b) the FINAL value is an OPTIMIZATION**, so the only available claim is an **ordering** — it may
   not come back worse than it started. That one runs on *every* task, not just the references.
 
 ⚠ **The target is NOT each mode file's stored `logpost`.** The 08-30 incumbent stores −1547.1579
@@ -404,7 +404,7 @@ detectable, which is why the file carries its commit.
 ## ROUND 2 OF THE 26-PARAMETER SURVEY (planned 2026-09-03, job `16837149`)
 
 **WHY THERE IS A ROUND 2, AND WHY IT IS NOT ROUND 1 REPEATED.** Round 1 ran ids 0–39; **ids 40–45
-were CANCELLED deliberately** (Marcus, on the marginal-value question below). Of the 30 tasks
+were CANCELED deliberately** (Marcus, on the marginal-value question below). Of the 30 tasks
 complete at that point, **24 were dispersed draws and 23 hit the same basin**, so six more draws
 **at the same dispersion** would have tested exactly what the first 24 tested. That is this
 project's own standing caution: *"the bound is 4 dispersed starts at ONE dispersion, not a proof"*
@@ -418,7 +418,7 @@ project's own standing caution: *"the bound is 4 dispersed starts at ONE dispers
    silently splits one array across two builds.
 
 ### (a) SETTLE id 12 — the one genuine open question in round 1
-It finished at **−1508.7786**, 61.9 log-units above the basin, and is labelled `CONVERGED` — but its
+It finished at **−1508.7786**, 61.9 log-units above the basin, and is labeled `CONVERGED` — but its
 last two restarts read `SHORTENED to maxit 2591 / 1348 by the wall budget` with `gain 0.0000`. So
 "converged" here means *the cycle-gain test passed on restarts the wall had already truncated*, which
 is a weaker claim than the label makes. ⚠ It reached only **cycle 2 of 6**.
@@ -443,8 +443,8 @@ to **say in the directory name what the dispersion came from**.
 - **No 2× dispersion.** At the measured sd 1.0466 the draws already start at −144,561 (id 12) and
   −333,427 (id 25). Doubling it puts starts in numerically absurd regions where the budget is spent
   climbing back rather than exploring — **cost without power**.
-- ⭐ **The more informative change is the dispersion CENTRE, not its scale, and it is not an env
-  var.** Every draw is dispersed about the **COLD init**, so the survey tests "can the optimiser
+- ⭐ **The more informative change is the dispersion CENTER, not its scale, and it is not an env
+  var.** Every draw is dispersed about the **COLD init**, so the survey tests "can the optimizer
   climb from anywhere". Dispersing about the **found optimum** would instead test "is there
   structure NEAR the answer" — which is the `h_ml`-ridge question and the one a posterior would care
   about ([[ccx_hessian_is_the_blocker]]). That needs a small code change to the start-point block

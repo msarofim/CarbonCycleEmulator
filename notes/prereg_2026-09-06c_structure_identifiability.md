@@ -13,7 +13,7 @@ gradient term, so the check is a LOCAL statement about the data's leverage, not 
 
 ## 1. THE PARAMETERS, on the log scale
 
-| candidate (new) | centre | prior width available (log) | source of the width |
+| candidate (new) | center | prior width available (log) | source of the width |
 |---|---|---|---|
 | `kz_deep_frac` (f) | 0.166 | none | — |
 | `kz_zscale` (z_K) | 253 m | none | HILDA's value, one remove |
@@ -66,16 +66,16 @@ this check.
 the Hessian at the working arm is **indefinite** — four directions of positive logL curvature —
 because the point is far from an optimum of this objective: gradients of **−3460 (`k_w`)**,
 **+6114 (`bomb_total`)**, **−1025 (`hs_asx_frac`)** per log-unit. Conditional sds are tiny in every
-direction (0.003–0.14; `tau_q` alone is convex); the marginals, taken off a regularised matrix, are
+direction (0.003–0.14; `tau_q` alone is convex); the marginals, taken off a regularized matrix, are
 inflated by near-perfect trades — `hs_asx_frac` vs `k_w` **r −0.97**, vs `u_hs` **−0.94**,
 `u_hs` vs `k_w` +0.84, f vs `z_K` −0.74. **Marginal sds off an indefinite matrix are not a count**,
 so I1–I6 as scored there are not the answer; §2's caveat ("a local statement about the data's
 leverage") became the finding. Two things did land: **`h_hs` HAS power in the transient** (16 log-units
-on `d14c_SH`; the 09-05b "no lever" was a STEADY-STATE result and I over-generalised it in §3), and
+on `d14c_SH`; the 09-05b "no lever" was a STEADY-STATE result and I over-generalized it in §3), and
 the coupling structure above is real (I3, I5 pass on any reading).
 
 **The second run** re-scores the same six predictions **at the conditional optimum** of the same ten
-log-parameters — the likelihood maximised with everything else at `ent26`, no priors, box bounds
+log-parameters — the likelihood maximized with everything else at `ent26`, no priors, box bounds
 only to keep values physical (f ≤ 1; z_K 50–3000 m; `u_hs` 1–400; `tau_q` 30–5000; `hs_asx_frac`
 0.05–5; `h_hs` 20–500; `kz` 500–20000; `k_w` 300–6000; `bomb_total` 60–200; `h_ml` 30–300), L-BFGS-B
 with a 0.01 log gradient step. Any parameter on a bound is reported as such. The Hessian is then
@@ -128,10 +128,10 @@ supported through the bomb rows** (0.65–0.74, marginal sd ≤ 0.10); f is not 
 profile.
 
 **The question that remains is a price**, and the repo's method for it is the iso-fit frontier
-([[ccx_gates_priced]]): re-optimise everything at each step of a constraint and self-check the
+([[ccx_gates_priced]]): re-optimize everything at each step of a constraint and self-check the
 frontier's likelihood against the true objective. Here the constraint is the slabs' weight,
 multiplied by **W ∈ {3, 10, 30}** as a DEVICE (n_eff × W in the accessor, the objective itself is
-unchanged); at each W the ten parameters are re-optimised from the working arm, then every point is
+unchanged); at each W the ten parameters are re-optimized from the working arm, then every point is
 re-scored under the TRUE objective (W = 1). The **price** of holding the intermediate profile is
 the true-objective loss at the smallest W whose optimum puts both slabs inside |z| < 1.5.
 

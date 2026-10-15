@@ -109,7 +109,7 @@ Every `file:line` below was found by grep in the checkout at `f0def17`. None is 
 
 **Must agree with** `ship_copy_facts_2026-10-09.md` §B, F1–F5. Where the current text disagrees:
 - "so the band would have been too wide". F1: "Not re-measurable at `hilda29e`… The ~2× factor (CO₂ 0.41×, GMST 0.58×) is `hilda33d`'s, 10-02."
-- "well-behaved enough to quote individual standard errors". F2: near 1× along fertilisation; 5.2× for `h_ml`; 1.4× for three others.
+- "well-behaved enough to quote individual standard errors". F2: near 1× along fertilization; 5.2× for `h_ml`; 1.4× for three others.
 - "Running a real sampler is planned … no sampler has yet converged". F3: "A sampler HAS run." R-hat max 1.046 (`beta_max`), 8 of 30 above 1.01, min bulk ESS 105. The chains agree to ≤ 3.5 ppm CO₂ (21 % of the band's width).
 - "There is no posterior, so there are no ribbons". Once the hold lifts, a band IS drawn: F4, F5, and "What the band IS".
 - **The title "There are no uncertainty bands, anywhere" (`review.R:707`) is ALREADY false, even under the hold** (added 2026-10-12 from the code review, lane L7): FaIR's 5–95 % bands are drawn now on card 5a (10-12 i) and in the pulse lab (10-12 k). The hold suppresses only the futures ribbons, so the title is wrong today, not only once the hold lifts.
@@ -631,7 +631,7 @@ The brief put the residual strip (C14) and the orphaned "The first is" (C15) in 
                         "high-latitude box gets, and the two cannot both hold."),
   ```
 - **Status:** `DRAFT` (CHANGELOG 10-06 (j): "card 7's `k_w` line, DRAFTED for his review"). See F3.
-- **Must agree with:** CHANGELOG 10-06 (j): 1894.7 ± 53.7 at `hilda33p`; the prior centre is 1,446. The test re-checks the fit at the current canonical.
+- **Must agree with:** CHANGELOG 10-06 (j): 1894.7 ± 53.7 at `hilda33p`; the prior center is 1,446. The test re-checks the fit at the current canonical.
 - **Gate:** `test-review-card-numbers.R:90`, "card 7's k_w line …". It REQUIRES `"against the literature's 1,446"` and `"about 1,900 m per year"`, and the fitted k_w within one sd of 1900.
 
 ---
@@ -815,7 +815,7 @@ Whether Marcus has since accepted any of them is not recorded in the CHANGELOG e
 
 The timing sentence (C3) is pinned only by `test-app-review-copy.R:144` (C4t), which currently PASSES. CHANGELOG 10-08 (g) and 10-11 (c) also list the title (C2), Pinatubo (C6) and the estimator-dependent last sentence (C7). All five are listed above.
 
-**F6 — Open in handoff 10-12b §4, not copy, not itemised here:**
+**F6 — Open in handoff 10-12b §4, not copy, not itemized here:**
 - the early-drawdown next step (`notes/early_drawdown_diagnosis_2026-10-12.md`);
 - the tie spread resting on one pair of basins;
 - FaIR's temperature response not drawn in the pulse lab;

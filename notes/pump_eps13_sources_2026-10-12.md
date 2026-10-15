@@ -16,7 +16,7 @@
     by WebFetch's helper model. Check those locators by eye before they go into the registry.
   - **Abstracts only**, from the Crossref or OpenAlex APIs: Goericke & Fry 1994, Freeman & Hayes 1992,
     Young 2013, Tagliabue & Bopp 2008, Eide 2017b, Sonnerup 1999, Broecker & Maier-Reimer 1992 and
-    King & Howard 2004. WebFetch summarised these rather than quoting them.
+    King & Howard 2004. WebFetch summarized these rather than quoting them.
 - **Labels.** **"My arithmetic"** marks every number I computed. It is a check, not a sourced value.
   **"Secondary"** means the number was seen only as quoted by another paper.
 - **Sign convention.** Everything is in the code's convention: ε = 1000·(R_product / R_source − 1).
@@ -53,10 +53,10 @@
 
 Four independent lines meet near −22 ‰ relative to surface DIC:
 
-1. **Deep-ocean δ¹³C–PO₄ slope (data; integrated over remineralised organic matter, effectively preindustrial).**
+1. **Deep-ocean δ¹³C–PO₄ slope (data; integrated over remineralized organic matter, effectively preindustrial).**
    - Claret, Sonnerup & Quay (2021), §3.2.1, Eq. 3, Fig. 9a, pp. 11–12: the deep Pacific
      (30°S–30°N, >2000 m) slope in GLODAPv2.2020 is −1.01 ± 0.02 ‰ per µmol/kg.
-     - With C:P 117 and a mean DIC of 2325 this gives remineralised organic matter at −20.07 ‰.
+     - With C:P 117 and a mean DIC of 2325 this gives remineralized organic matter at −20.07 ‰.
      - With C:P 124 ± 10 it gives −19 ‰.
    - That number is **relative to the deep DIC** the carbon is added to. The code's ε is relative to
      the **surface source**.
@@ -67,7 +67,7 @@ Four independent lines meet near −22 ‰ relative to surface DIC:
      - Suess shift 0.66 ‰ (Liu 2021 §4; Schmittner 2013 p. 5808 gives 0.67).
    - Result: **ε ≈ −22.0 ‰** at C:P 117 and −20.8 ‰ at C:P 124.
      - The C:P uncertainty dominates: 117 ± 14 gives **−24.7 to −19.8 ‰** (my arithmetic).
-   - This is the most like-for-like constraint. It measures what is actually remineralised, DOC
+   - This is the most like-for-like constraint. It measures what is actually remineralized, DOC
      included, and it is immune to the suspended-versus-sinking POC question.
 2. **Published εp(CO₂aq) relations, export-weighted at 278 µatm (my arithmetic, §D).**
    - The three relations come from Kwon et al. 2021 Table 1, p. 9: Goericke & Fry 1994, Popp et al.
@@ -91,7 +91,7 @@ Four independent lines meet near −22 ‰ relative to surface DIC:
      (absolute).
 
 **Against the code's −20 ‰.**
-- −20 is about 2 ‰ less negative than the centre.
+- −20 is about 2 ‰ less negative than the center.
 - It equals the **low-latitude-only** or **Freeman & Hayes** end of the range.
 - The −19 (Liu 2021, citing Eide 2017b) and −20 (Morée 2018) values in the decomposition literature
   enter a Broecker & Maier-Reimer δ¹³C_bio = (ε/DIC)·C:P·ΔPO₄ formula. There ε is relative to the
@@ -116,7 +116,7 @@ Four independent lines meet near −22 ‰ relative to surface DIC:
 - (ii) A preindustrial-constant versus a CO₂-dependent ε.
   - This is also structural.
   - The εp(CO₂aq) relations are weak (Goericke & Fry 1994, abstract), so a CO₂-dependent form adds
-    a parameterisation choice, not a measurement.
+    a parameterization choice, not a measurement.
 - (iii) Any change is **refit-class**: the constant is in the fitted objective (constants worklist row 1).
 
 ### `PUMP_EPS13_CARB`: recommended **keep +1 ‰, 1σ ≈ 1 ‰** (range 0 to +2), relative to DIC
@@ -147,7 +147,7 @@ Four independent lines meet near −22 ‰ relative to surface DIC:
 5. **Model practice spans 0 to +2 ‰** (§C). +1 ‰ is the midpoint.
 
 **Verdict.**
-- +1 ‰ sits at the centre of a 0 to +2 ‰ bracket.
+- +1 ‰ sits at the center of a 0 to +2 ‰ bracket.
 - No source gives an export-weighted biogenic value.
 - Its leverage is about 0.02 ‰ per ‰, so the bracket is not worth a refit on its own.
 
@@ -159,12 +159,12 @@ Four independent lines meet near −22 ‰ relative to surface DIC:
 
 | # | Value as published | Reference phase | Weighting | Period | Method | Citation (vintage) | Locator | Converted to code ε | Like-for-like? | Primary/secondary |
 |---|---|---|---|---|---|---|---|---|---|---|
-| O1 | slope −1.01 ± 0.02 ‰ per µmol/kg PO₄ → remineralised OM −20.07 ‰ (C:P 117) or −19 ‰ with C:P 124 ± 10 | deep DIC (δ¹³C_DIC,deep ≈ 0) | integrated remineralisation, deep Pacific | effectively preindustrial (no Suess signal below 2000 m, same page) | GLODAPv2.2020 regression | Claret, Sonnerup & Quay 2021, GBC 35:e2020GB006757, doi:10.1029/2020GB006757 (2021) | §3.2.1, Eq. 3, Fig. 9a, pp. 11–12 | **−22.0** (C:P 117); −20.8 (C:P 124); −24.7…−19.8 (C:P 117 ± 14) (my arithmetic) | **Best available**; C:P-limited | primary (NOAA IR copy) |
+| O1 | slope −1.01 ± 0.02 ‰ per µmol/kg PO₄ → remineralized OM −20.07 ‰ (C:P 117) or −19 ‰ with C:P 124 ± 10 | deep DIC (δ¹³C_DIC,deep ≈ 0) | integrated remineralization, deep Pacific | effectively preindustrial (no Suess signal below 2000 m, same page) | GLODAPv2.2020 regression | Claret, Sonnerup & Quay 2021, GBC 35:e2020GB006757, doi:10.1029/2020GB006757 (2021) | §3.2.1, Eq. 3, Fig. 9a, pp. 11–12 | **−22.0** (C:P 117); −20.8 (C:P 124); −24.7…−19.8 (C:P 117 ± 14) (my arithmetic) | **Best available**; C:P-limited | primary (NOAA IR copy) |
 | O2 | 30°S–30°N mean δ¹³C_POC −20.1 ± 1.3 ‰ | absolute | surface POC | modern (compiled 1994) | compilation | Goericke & Fry 1994 via Claret 2021 | Claret p. 12 | ≈ −21.5 modern; ≈ −21 preindustrial (my arithmetic) | partly (low latitudes, suspended) | **secondary** |
 | O3 | εp–CO₂aq relation weak; cannot be calibrated easily from modern POC | CO₂(aq) | — | modern | compilation | Goericke & Fry 1994, GBC 8:85, doi:10.1029/93GB03272 (1994) | abstract (Crossref) | — | context | primary (abstract) |
-| O4 | α_POC←aq = −0.00935·log₁₀[CO₂] + 0.99626 | CO₂(aq) | fit | modern | regression | Goericke & Fry 1994, as transcribed in Kwon et al. 2021, GBC 35:e2020GB006684, doi:10.1029/2020GB006684 | Kwon Table 1, p. 9 | export-weighted preindustrial −22.9 (§D) | parameterisation | secondary |
-| O5 | α_POC←aq = −0.017·log₁₀[CO₂] + 1.0034 | CO₂(aq) | fit | — | porphyrin/POC regression | Popp et al. 1989, as given in Schmittner 2013 Eq. 7 (p. 5796), Liu 2021 Eq. 10, Kwon 2021 Table 1 | as listed | export-weighted preindustrial −23.4 (§D) | parameterisation | secondary |
-| O6 | α_POC←aq = −0.01203·log₁₀[CO₂] + 1.00119 | CO₂(aq) | fit | — | GEOSECS-based compilation | Freeman & Hayes 1992, GBC 6:185, doi:10.1029/92GB00190; fit via Kwon 2021 Table 1 | abstract (Crossref) + Kwon p. 9 | export-weighted preindustrial −20.7 (§D) | parameterisation | abstract primary; fit secondary |
+| O4 | α_POC←aq = −0.00935·log₁₀[CO₂] + 0.99626 | CO₂(aq) | fit | modern | regression | Goericke & Fry 1994, as transcribed in Kwon et al. 2021, GBC 35:e2020GB006684, doi:10.1029/2020GB006684 | Kwon Table 1, p. 9 | export-weighted preindustrial −22.9 (§D) | parameterization | secondary |
+| O5 | α_POC←aq = −0.017·log₁₀[CO₂] + 1.0034 | CO₂(aq) | fit | — | porphyrin/POC regression | Popp et al. 1989, as given in Schmittner 2013 Eq. 7 (p. 5796), Liu 2021 Eq. 10, Kwon 2021 Table 1 | as listed | export-weighted preindustrial −23.4 (§D) | parameterization | secondary |
+| O6 | α_POC←aq = −0.01203·log₁₀[CO₂] + 1.00119 | CO₂(aq) | fit | — | GEOSECS-based compilation | Freeman & Hayes 1992, GBC 6:185, doi:10.1029/92GB00190; fit via Kwon 2021 Table 1 | abstract (Crossref) + Kwon p. 9 | export-weighted preindustrial −20.7 (§D) | parameterization | abstract primary; fit secondary |
 | O7 | typical bulk marine OM about −21 ‰ against mean surface DIC near +2 ‰ | absolute vs DIC | none (round numbers) | modern | introductory statement | Schmittner et al. 2013, BG 10:5793, doi:10.5194/bg-10-5793-2013 (2013) | p. 5794 | ≈ −23 (my arithmetic) | weak | primary |
 | O8 | zonal δ¹³C_POC about −20 ‰ at low latitudes, −25 to −30 ‰ at high latitudes; POC about 2 ‰ lower in the 1990s than preindustrial (model) | absolute | surface POC | 1990s | G&F data vs UVic | Schmittner 2013 | §5.2.1, p. 5806 | — | context | primary |
 | O9 | mean detritus 0–100 m −29.6 ‰ vs DIC −6.5 ‰ (const-gasx run) | model DIC | volume mean, 0–100 m | preindustrial-type spin-up | UVic model, Popp εp | Schmittner 2013 | p. 5799 | **−23.1** (my arithmetic) | close (volume-weighted, not export) | primary (model) |
@@ -174,9 +174,9 @@ Four independent lines meet near −22 ‰ relative to surface DIC:
 | O13 | εphoto = −20 ‰ model constant, citing Lynch-Stieglitz 1995 and Tagliabue & Bopp 2008 | model surface DIC | — | — | adopted | Morée, Schwinger & Heinze 2018, BG 15:7205, doi:10.5194/bg-15-7205-2018 | p. 7207; Eq. 3, p. 7208 | −20 as a model choice | same definition; not a measurement | primary (choice) |
 | O14 | arithmetic mean δ¹³C_POC −23.96 ‰; median −22.46 ‰; 1990s medians ≥ −22 ‰ (<30°), about −24 ‰ (Arctic), ≤ −28 ‰ (Southern Ocean); non-SO density maximum −19.9 ‰ (1960s) → about −23 ‰ (2010s); decline about 3 ‰, about 2× Suess | absolute | unweighted, all depths and methods | 1964–2015 | 4732-point compilation | Verwega et al. 2021, ESSD 13:4861, doi:10.5194/essd-13-4861-2021 (2021) | §3.1 Eq. 3; §4.2; abstract; §6, Fig. 11a; §8 | about −25.4 unweighted modern (my arithmetic) | **no** (absolute, modern, unweighted) | primary (WebFetch extraction) |
 | O15 | εp rose since the 1960s, >0.015 ‰/yr in the subtropics; Bermuda trap record supports it | CO₂(aq) | surface POC + trap | 1960–2010 | compilation | Young et al. 2013, GBC 27:505, doi:10.1002/gbc.20045 (2013) | abstract (Crossref) | sign of the transient | context | primary (abstract) |
-| O16 | δ¹³C_POC sensitive by 10–17 ‰ to the carbon species assimilated, growth rate and CO₂aq | — | — | 1860–2000 | PISCES model | Tagliabue & Bopp 2008, GBC 22:GB1025, doi:10.1029/2007GB003037 | abstract (Crossref) | parameterisation spread | context | primary (abstract) |
+| O16 | δ¹³C_POC sensitive by 10–17 ‰ to the carbon species assimilated, growth rate and CO₂aq | — | — | 1860–2000 | PISCES model | Tagliabue & Bopp 2008, GBC 22:GB1025, doi:10.1029/2007GB003037 | abstract (Crossref) | parameterization spread | context | primary (abstract) |
 | O17 | trap (sinking) organic matter heavier than surface by about 4 ‰ (SAZ) / 2 ‰ (PFZ) in spring; seasonal mean 1.5 / 1.8 ‰ | absolute | sinking vs suspended | 1997–98 | SO traps | Lourey, Trull & Tilbrook 2004, DSR-I 51:281, doi:10.1016/j.dsr.2003.10.002 | abstract, **seen only in a search-engine extract** (repository page refused) | would make export less negative than surface POC | relevant, **unverified** | secondary / unverified |
-| O18 | culture-model organic δ¹³C plateaus at about −23 to −24 ‰ relative to DIC at low utilisation | DIC | culture | lab | coccolithophore model + culture | McClelland et al. 2017, Nat. Commun. 8:14511, doi:10.1038/ncomms14511 | Results (PMC HTML, WebFetch extraction) | −23 to −24 | lab only | primary (extraction) |
+| O18 | culture-model organic δ¹³C plateaus at about −23 to −24 ‰ relative to DIC at low utilization | DIC | culture | lab | coccolithophore model + culture | McClelland et al. 2017, Nat. Commun. 8:14511, doi:10.1038/ncomms14511 | Results (PMC HTML, WebFetch extraction) | −23 to −24 | lab only | primary (extraction) |
 
 ### Carbonate relative to DIC (or HCO₃⁻)
 
@@ -195,7 +195,7 @@ Four independent lines meet near −22 ‰ relative to surface DIC:
 
 ---
 
-## (c) Model parameterisations found
+## (c) Model parameterizations found
 
 | Model (paper) | Organic | Carbonate | Locator |
 |---|---|---|---|

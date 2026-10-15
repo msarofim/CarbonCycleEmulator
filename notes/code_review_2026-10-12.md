@@ -68,7 +68,7 @@ So the stored `err` (9–11; the row's summary is min 9, max 11, n = 251) is the
 
 - The row's weight is about 6.4× too small.
 - An implausibly small χ²/n would have been the tell.
-- The row's log-likelihood moves −640.62 → −543.76 at the canonical. That is a normalisation shift, not by itself a statement about fit.
+- The row's log-likelihood moves −640.62 → −543.76 at the canonical. That is a normalization shift, not by itself a statement about fit.
 - **Fixing it changes the objective**, so the fitted `hilda29e` mode, every stored logpost and the MCMC band were all fitted with the wrong weight.
 - Nothing in CHANGELOG / DESIGN / memory records this choice.
 
@@ -81,7 +81,7 @@ So the stored `err` (9–11; the row's summary is min 9, max 11, n = 251) is the
 | # | Where | Defect | Status |
 |---|---|---|---|
 | A1 | `app/server.R:889-896`, Scenarios takeaway | The span is taken from the FIRST and LAST ticked scenarios, not the min and max. All 7 ticked prints "366 to 825 ppm, 1.5 to 4.6 °C"; the truth is 305–825 ppm, 1.3–4.6 °C. {VL, LN, L} prints "366 to 367"; the truth is 305–367. The default {L, M, H} happens to be right. | [verified] code |
-| A2 | `app/server.R:67`, Keeling takeaway | `which.min(abs(o$t - 1958))` is an exact tie between the Dec-1957 and Jan-1958 month centres; the first wins, so it prints "in 1957". The same tie hits `server.R:685` (Dec 1849 for "since 1850"; no year is printed there). | [verified] code |
+| A2 | `app/server.R:67`, Keeling takeaway | `which.min(abs(o$t - 1958))` is an exact tie between the Dec-1957 and Jan-1958 month centers; the first wins, so it prints "in 1957". The same tie hits `server.R:685` (Dec 1849 for "since 1850"; no year is printed there). | [verified] code |
 | A3 | `app/server.R:69, 92`, Keeling takeaway | "Today" is ONE month (Dec 2024) of the raw NH box (the chart's FAINT line, 427 ppm). It is set against an MLO mean over a typed `year >= 2023`: 39 months, running past the run's end. The scored line's 2024 mean is 422.8. The +3 ppm "gap" is mostly `rep_dC`, the offset the 09-22 like-for-like fix took off the chart. | reviewer |
 | A4 | `app/server.R:168-169`, `w_luc_note` | The net-sink crossing year is computed from DIFFERENCED ANNUAL MEANS. That is the half-year-offset construction `app_sinks_annual` was fixed away from on 09-24 (o) for the other two panels on the tab. It prints 1970; the calendar-year construction gives 1969. | [verified] code |
 | A5 | box diagram (`app/R/plots.R:1670, 1681`, from `APP_FLUX_NOW`, 2024) | Three effects on the warm "to the deep" arrow. **(a)** It double-counts the cold route: `fluxes.R:95-96` says `hs_pump` is inside `pump` and `hs_hd_net` inside `ml_int`, and the cold arrows draw them again. The printed "63 down … 61 back up" would be about 59 / 59 warm-only. **(b)** The layer-2 ENSO limb writes `dy` outside the flux trace: 0.28 GtC/yr missing in 2024, 1.06 in 2015. **(c)** The trace samples month-OPENING states, which aliases the SH seasonal-ML entrainment: trace-mean d(ML C)/dt is 1.208 against an integrated 0.431 GtC/yr (2024). `ocean_net` is unaffected. | (a) [verified] code; (b), (c) reviewer |
@@ -115,16 +115,16 @@ Also live, but it is COPY (Marcus's):
   - It also cites `OBS_SPLICE_YEARS`, which does not exist (the window is a literal `last - 10`, copied at `joos_irf.R:363`).
   - The method is the standing multi-year convention. The WORDS are wrong, and an undergrad sees a drop.
 - **PD100 time axis** (`joos_irf.R:318, 321`): the forward table's labels run a year behind real time, so AOD enters a year early and "release at 2015" is real 2016.0. Measured as negligible: IRF(100) 0.37912 → 0.37921. The held CO₂ for the free background is the Dec-2010 opening state, 0.76 ppm off the hold target (`joos_irf.R:413`).
-- **Seasonal rows** compare INSTANTS at month centres with monthly MEANS. The first harmonic shrinks by sinc(π/12) = 0.9886. Undocumented; ±0.2–1.2 log-units per row at the mode.
+- **Seasonal rows** compare INSTANTS at month centers with monthly MEANS. The first harmonic shrinks by sinc(π/12) = 0.9886. Undocumented; ±0.2–1.2 log-units per row at the mode.
 - **Stale labels and comments:**
-  - `climate.R:19`: the module is labelled "calibration 1.4.5"; the file is calib 1.6.0. The fitted range is given as 278–1687 ppm; the module says 278–1797.
+  - `climate.R:19`: the module is labeled "calibration 1.4.5"; the file is calib 1.6.0. The fitted range is given as 278–1687 ppm; the module says 278–1797.
   - `likelihood.R:59-62, 436-439` and `DESIGN.md:722` say the land-sink σ is inflated; `LIK_LAND_SINK_INFLATE` = 1.0 since 09-16 d.
   - `likelihood.R:151` and `calibrate.R:983` say `rep_dC` −4.19 would be needed; the canonical fits +4.21.
   - `KW_PRIOR_LOGSD`'s citation: the ±3.2 belongs to the uncorrected 15.9.
   - Defaults vs `CCX_PARAM_TABLE`: `kz` 5000 vs 5683.5 ("MUST track"), `tau_ex` 1.3 (rejected station basis), `k_w` 1500 vs 1446. All are fitted on the canonical.
   - P8 seasonal-ML guard (`model.R:1352`): it quotes a 27 m margin; at hilda29e it is 7.6 m (it trips at h_ml ≈ 75.5).
   - Entrainment amplitudes 29.68 / 10.95 vs live 17.76 / 6.55 (`model.R:2154`).
-  - The fertilisation pole is "~106 ppm" (`model.R:959`); at `fert_k` 120 it is 156.9.
+  - The fertilization pole is "~106 ppm" (`model.R:959`); at `fert_k` 120 it is 156.9.
   - Phase comments 3 months off (`tau_ex_seas_phase`, `seas_phase_NH`; dormant).
   - "SH land centroid" −30 vs the measured −15.12 (`model.R:242`).
   - Header "32 boxes / 96 states"; the canonical has 38.
@@ -136,7 +136,7 @@ Also live, but it is COPY (Marcus's):
   - Card 6's title "no uncertainty bands, anywhere" (`review.R:707`) is already false: FaIR bands are drawn on card 5a and in the pulse lab. **ADD to worklist A2.**
 - **`pump_grad`** is no longer "exactly the model's bottom-minus-ML gradient" under the HS conduit (calibrate.R:631-640): spun-up 372.6 / 363.0 vs 314.7. With `tau_q` = 0 it is 315.4.
 - **The kinetic α_as line** is "used only inside 5–21 °C" (`constants.R:762`). The NH low-latitude SST is above 21 °C in 85 % of months, and every HS evaluation is at 1.6–3.3 °C.
-- **Periodic spin-up diagnostics:** `co2` is the annual mean, but `d13c` / `d14c` are start-of-year (`periodic_spinup.R:307`); the printout says −6.473 vs target −6.469 when the annual mean is exactly −6.469. Also: "zeroes four seasonal paths", where the code zeroes three and the behaviour is still right; and stale line citations.
+- **Periodic spin-up diagnostics:** `co2` is the annual mean, but `d13c` / `d14c` are start-of-year (`periodic_spinup.R:307`); the printout says −6.473 vs target −6.469 when the annual mean is exactly −6.469. Also: "zeroes four seasonal paths", where the code zeroes three and the behavior is still right; and stale line citations.
 - **`CCX_MODE_RETIRED`** stopped growing 09-17: `hilda30c`, `30h`, `31p`, `30e`, `30s` return "unknown mode" instead of the retirement reason.
 - **Typed where they should derive:**
   - `APP_HIST_YEARS <- c(1750, 2024)` (`global.R:51`), while `APP_SPLICE_YEAR` is read from data. A GCB update would move one and not the other.
@@ -146,7 +146,7 @@ Also live, but it is COPY (Marcus's):
 - **Docs:**
   - CLAUDE.md and DESIGN §8 say `data-raw/constants.R`; the file is `R/constants.R`.
   - DESIGN §6's ledger still names `hilda30c` as the canonical.
-  - DESIGN:109 specifies the LOG fertilisation form; the canonical runs MM.
+  - DESIGN:109 specifies the LOG fertilization form; the canonical runs MM.
   - CLAUDE.md:55 and DESIGN:613/1417 say "bit-parity"; it is roundoff parity, documented in `ccx_core.cpp:17-25`.
 - **Latent `$` partial-matching hazard.** Names that prefix other names (`fert_k` / `fert_k_prior`, `beta` / `beta_max`, `kz` / `kz_*`, `tau_ex` / `tau_ex_seas_*`, `sst_eq` / `sst_eq_enso`, `sst_tr` / `sst_tr_enso`) break the stated rule at `model.R:2094`. Demonstrated: with `fert_k` deleted and `fert_k_prior` = 1, `ccx_fert_factor(400)` silently uses K = 1. Latent, because `ccx_overlay_par` refuses deletions and the canonical carries every name.
 - **Misplaced roxygen blocks:** `model.R` 531, 345, 1349, 4855; `cpp.R:186`; `paths.R` 685, 760.
@@ -196,6 +196,6 @@ Also live, but it is COPY (Marcus's):
 - **The P8 guard truncates h_ml's posterior.** No pooled draw sits above 75.34 m (0 of 17 000), while the prior band reaches 200. The guard is ruled (10-04 a); its effect on the band's tail is not recorded.
 - **The MCMC proposal is too wide.** Post-adaptation acceptance is 5.9–7.5 %, against about 23 % optimal at 29-d. That is consistent with ESS 105 / R-hat 1.046. The MH step is still valid.
 - **First pulse-lab point vs FaIR.** In the release year, FaIR's annual mean is a two-endpoint trapezoid and CCX's is the mean of 12 opening states. That puts CCX about 4 % low on that one point (0.446 vs 0.465).
-- **No water-vapour correction on pCO₂** (`model.R:2924`). Not ruled, not measured.
-- **Absolute-unit ¹⁴C sources** (nuclear, GBq) enter with `/R14_STD` only, with no δ¹³C normalisation. Not measured.
+- **No water-vapor correction on pCO₂** (`model.R:2924`). Not ruled, not measured.
+- **Absolute-unit ¹⁴C sources** (nuclear, GBq) enter with `/R14_STD` only, with no δ¹³C normalization. Not measured.
 - **The Build-your-own comparison line** is the first TICKED scenario, not the run's own background.

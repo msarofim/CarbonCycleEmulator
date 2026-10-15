@@ -11,12 +11,12 @@ family) / 156–176 (1.4 behind); HS δ¹³C 2.46 → 2.35. **The sink moved: `h
 0.653), `kz` 9047 → 15058, `kz_deep_frac` 0.025 → 0.0067 (K_deep 101), sink 3.03 → 2.96; rows: `d14c_NH` +2.9,
 `d13c_level_MLO` +2.3, `ocean_grad_d13c` +2.1, `co2_icecore` −1.9, `gcb_ocean_sink` −1.6. Prereg 09-08d: R2–R6 PASS, **R1 FAIL
 the other way, R7 (10 starts) and R8 FAIL, R10 FAIL** — and the mechanical "observation holds" reading does not apply.
-Pending 26 tasks cancelled 10:50 EDT (`scancel --state=PENDING 17185969`). **Ids 10–19 finish ~12:40 and close the record at
+Pending 26 tasks canceled 10:50 EDT (`scancel --state=PENDING 17185969`). **Ids 10–19 finish ~12:40 and close the record at
 20 starts** — collect with `rsync … multistart_20260908d_hilda31/` then `Rscript calibration/diag_hilda31_predictions.R`
 (it prints PARTIAL: 20 of 46; R7's power is reduced — say so in the CHANGELOG line that closes round 4).
 
 ## 2. Round 5 (prereg 09-08e)
-`hs_asx_frac` keeps its box, gets lognormal(0.653, 0.15) — the 0.15 is a **JUDGEMENT** (2.8× the measured component spread
+`hs_asx_frac` keeps its box, gets lognormal(0.653, 0.15) — the 0.15 is a **JUDGMENT** (2.8× the measured component spread
 0.053; the hemispheric 0.44 is representation error and would let 1.83 stand). 1.83 sits at z +6.9. `u_hs` and `h_ml` keep
 round 4's priors; 31 parameters. **THE question: with both the flush and the exchange honest, where does the sink go?**
 Priced routes: `u_hs` back up (2.6 log-units — PREDICTED), `k_w` (2× costs 1.5) / `kz`, the land (gate 7's land row), or no

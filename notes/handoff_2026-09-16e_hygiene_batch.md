@@ -16,7 +16,7 @@
 ## 2. What is now true (the numbers a next session must not re-derive)
 - **Objective = #12** (five items, each with a reproduction switch; `R/likelihood.R` at `LIK_D14C_EVERY_BOX`, DESIGN §6 note): (i) the
   deep/slab Δ¹⁴C rows read EVERY box in their window, HD included (`ccx_d14c_window_read` / `ccx_d14c_deep_read`); (ii) land-sink σ at
-  GCB's 0.5, `LIK_LAND_SINK_INFLATE` 3 → 1; (iii) Naegler 2009's net-uptake correction ×1.03 / ×1.08 on the excess-¹⁴C centres; (iv) pre-1850
+  GCB's 0.5, `LIK_LAND_SINK_INFLATE` 3 → 1; (iii) Naegler 2009's net-uptake correction ×1.03 / ×1.08 on the excess-¹⁴C centers; (iv) pre-1850
   SST anomaly at the product's 1850–1900 mean (`FORC_SST_PRE1850_MEAN`); (v) `h_hs` under the Holte HS lognormal (median 175.4 m, log-sd
   0.422; `data/obs_h_hs_prior.rds`, `data-raw/build_h_hs_prior.R`). Priced per item at every registered mode
   (`outputs/diagnostics/hygiene_batch_price_20260916.log`): canonical **+2.32 / −26.95 / +1.17 / +0.59, prior −1.69 = −22.76 on the

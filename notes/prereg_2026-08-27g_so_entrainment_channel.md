@@ -1,7 +1,7 @@
 # PRE-REGISTRATION — does a correctly-phased SOUTHERN-OCEAN ENTRAINMENT CHANNEL
 # fix the SPO seasonal partition, at constant ocean state?
 
-**Written 2026-08-27, BEFORE any line of the channel was written.** Scope authorised by Marcus
+**Written 2026-08-27, BEFORE any line of the channel was written.** Scope authorized by Marcus
 2026-08-27: **version 4a of handoff `…27g` §4** — a second seasonal air-sea channel, **no new
 boxes and no new state** — with 4b (a genuine second SH ocean column) held conditional on what
 4a's residual looks like. Companion decision the same day: the seasonal amplitude estimator is
@@ -95,7 +95,7 @@ be reported as one.**
 
 ## P2 — THE HANDOFF'S OWN PREDICTION: the objection was to the PHASE, not the AMPLITUDE
 
-With the channel on and the seasonal parameters re-optimised, **`sst_seas_amp_SH` should RISE from
+With the channel on and the seasonal parameters re-optimized, **`sst_seas_amp_SH` should RISE from
 0.360 toward its observed 1.746, without the seasonal rows objecting.**
 
 **PREDICT: `sst_seas_amp_SH` ≥ 0.60 and its prior z better than −5.0** (from −6.32), with
@@ -112,7 +112,7 @@ residual — is wrong.
 the inversion's 8.52 (the midpoint is 5.94) — read from `diag_seas_signature_inversion.R`, with
 `diag_seas_channel_decomp.R`'s SH air-sea channel (4.17 today) as the cross-check.
 **FALSIFIER: it stays within 1.0 month of 3.35** — the channel would then be adding amplitude in
-the season the model already had, which is a reparametrisation of `sst_seas_amp_SH`, not a fix.
+the season the model already had, which is a reparametrization of `sst_seas_amp_SH`, not a fix.
 
 ## P4 — THE STANDING TARGET: the partition residual falls
 
@@ -143,10 +143,10 @@ drivers further out has moved the problem, not solved it — and would be report
   `K0` is in the 7.50. Both bear on AMPLITUDE, so P1's 30 µmol/kg pre-check is an order-of-
   magnitude statement, not a calibration.
 - **No posterior, and no claim about one.** There is still no converged sampler; every number here
-  is at the single canonical mode, and a 1-D re-optimisation is not a refit of the model.
+  is at the single canonical mode, and a 1-D re-optimization is not a refit of the model.
 - **Frozen scans OVERSTATE cost.** `seas_T_amp`×`q10` is an exact ridge (product held to 0.2 % over
   a 2.5× `q10` range, [[ccx_seas_q10_ridge]]) and `beta_max`/`fert_k` absorb 85 % of a frozen cost.
-  **Read shape and direction, not Δlogpost**, from anything scanned at frozen neighbours.
+  **Read shape and direction, not Δlogpost**, from anything scanned at frozen neighbors.
 - **Not claimed: that entrainment is the only candidate mechanism.** Seasonal wind-driven
   gas-transfer and sea-ice cover both modulate the same limb in the same season. This tests whether
   a correctly-phased ocean channel closes the residual — **not which physical process supplies it.**

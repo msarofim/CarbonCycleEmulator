@@ -17,7 +17,7 @@ file; nothing is recalled. Torch verdict, said aloud: **laptop** — ≤ 300 C++
   rows are NOT what holds kz up on their own; something else does. The candidates are the ocean sink row, the δ¹³C rows, the
   CO₂ record itself, and the DIC gradient.
 - 08-31 ([[ccx_gates_priced]], 32-box column, pre-HILDA / pre-K(z) / pre-periodic): forcing kz down on a frontier that
-  re-optimises `beta_max`/`fert_k`/`q10` makes every gate worse because the LAND takes over the drawdown. A RAW one-at-a-time
+  re-optimizes `beta_max`/`fert_k`/`q10` makes every gate worse because the LAND takes over the drawdown. A RAW one-at-a-time
   scan manufactures its answer ([[match_incumbents_optim]]). ⇒ the kz scan here has a raw arm AND a land-compensated arm,
   and the second is the one that is read for "what holds kz".
 - 09-08 (c): an unrefitted 1-D pin is charged FIRST through the CO₂-level rows. Expected, and why arm B exists.
@@ -53,9 +53,9 @@ error for C, and the ¹⁴C closure must be within 2× that relative error. **Mu
 **PK-2 — the kz SCAN, two arms** (`calibration/diag_kz_pump_scan.R`, the C++ objective via `ccx_make_logpost(by_stream =
 TRUE)` under the file's pins). Grid `kz × {0.35, 0.5, 0.7, 1, 1.4}` (log-spaced; the box is [1161.6, 27808]). Everything else
 at the canonical vector; the pump re-solves (export ∝ kz). **Arm A — raw.** **Arm B — LAND-COMPENSATED:** at each kz,
-`beta_max`, `fert_k`, `q10` re-optimised on the full logpost (`optim`, Nelder–Mead from the canonical, then BFGS polish; the
+`beta_max`, `fert_k`, `q10` re-optimized on the full logpost (`optim`, Nelder–Mead from the canonical, then BFGS polish; the
 08-31 recipe), every other name held. **GATE PK-2g (self-check):** at kz × 1 the arm-B optimum must reproduce the stored
-logpost (−1426.2428 after the pin shift) within 1e-3 — an optimiser that improves on the mode is a finding about the mode,
+logpost (−1426.2428 after the pin shift) within 1e-3 — an optimizer that improves on the mode is a finding about the mode,
 not a pass. Per point, both arms: the 25-row likelihood breakdown (Δ vs the canonical), the total, and the diagnostics: solved
 export, `beta_max`, ML exchange rate, the modern surface–deep DIC gradient (the `ocean_grad_dic` reader), ocean sink 2010s,
 atmospheric δ¹³C 2010 and its 1990–2010 trend, the seasonal δ¹³C amplitude at MLO, bomb ocean inventory 1975, IRF(100) if
@@ -77,10 +77,10 @@ BECAUSE the partition moved (land substituting for ocean) or because the ocean's
   ML + layers 1–4 (≤ 435 m) + HS + HD; of the excess that entered layers 1–4, ≥ **70 %** came by diffusion from above
   (entrainment included), ≤ 30 % via the conduit (`hd → oc_k`). Basis: `tau_q` 538 yr on a_ls·dz_k volumes is 2–3 orders
   slower than kz/dz² over the top 300 m.
-- **P2A (raw scan).** At kz × 0.5 the CO₂-level + ice-core rows carry the largest charge (the 09-08c behaviour); the bomb rows
+- **P2A (raw scan).** At kz × 0.5 the CO₂-level + ice-core rows carry the largest charge (the 09-08c behavior); the bomb rows
   `d14c_NH + d14c_SH` charge ≥ **20** log-units combined (less ocean uptake ⇒ the 1965 atmospheric peak too high); the
   export halves to ~22.8 GtC/yr and the DIC-gradient row moves < 3 (the PI gradient is prescribed).
-- **P2B (land-compensated — THE READ).** With the land three re-optimised at kz × 0.5, the CO₂-level rows recover to within
+- **P2B (land-compensated — THE READ).** With the land three re-optimized at kz × 0.5, the CO₂-level rows recover to within
   **10** of the canonical, and the charges that remain rank: `d13c_level_MLO + SPO` ≥ **20** combined (the ¹³C budget prices
   the ocean/land partition — the double-deconvolution constraint; land carbon carries ε ≈ −18 ‰, ocean ≈ −2 ‰, so a land
   substitute leaves the atmosphere too heavy), `d14c_NH + SH` ≥ 10, `gcb_ocean_sink` ≥ 5 (z_ocean falls as in 08-31). **If the
@@ -93,7 +93,7 @@ BECAUSE the partition moved (land substituting for ocean) or because the ocean's
   partition moves); the ocean's ¹³C uptake per GtC changes < 10 %.
 
 ## 4. Not claimed
-- Nothing here is a frontier over the full parameter set: arm B re-optimises three land names only (the 08-31 recipe), so a
+- Nothing here is a frontier over the full parameter set: arm B re-optimizes three land names only (the 08-31 recipe), so a
   charge that a fourth name could absorb is over-stated. Arm B's ranking is a read of WHICH rows, not a price.
 - No σ changes, no new rows, no refit, no promotion. The scoping note that follows is the deliverable; the E array's
   `port_targets.csv` is stale for any other array and stays so until the next launch regenerates it.
@@ -116,8 +116,8 @@ BECAUSE the partition moved (land substituting for ocean) or because the ocean's
 - **A3 (POST-HOC — stamped after reading arms A/B of PK-2, log `outputs/diagnostics/kz_pump_scan_20260915.log`, first run).**
   Arm B's read: the CO₂ rows recover (−0.2 at kz × 0.5), the δ¹³C level rows move −4.4 (P2B's δ¹³C prediction REFUTED), and the
   charge that holds kz is the ATMOSPHERIC BOMB ROWS (−202 of −295) with `gcb_ocean_sink` −28 and `d14c_profile_level` −28 (the
-  latter a parametrisation coupling, K_deep = kz·f). Arm B held every ocean name. **Arm C added**: at kz × {0.5, 0.7, 1} the land
-  three PLUS `kz_deep_frac`, `h_ml`, `k_w`, `bomb_total`, `sigma_d14c` re-optimised — can the bomb rows be satisfied at low kz by
+  latter a parametrization coupling, K_deep = kz·f). Arm B held every ocean name. **Arm C added**: at kz × {0.5, 0.7, 1} the land
+  three PLUS `kz_deep_frac`, `h_ml`, `k_w`, `bomb_total`, `sigma_d14c` re-optimized — can the bomb rows be satisfied at low kz by
   the SURFACE names alone, without a loop? **Prediction P2C (before the run):** at kz × 0.5 the bomb rows stay ≤ −100 (the
   surface names recover less than half of −202: `h_ml` is a capacity the seasonal rows also price, 09-08c), `d14c_profile_level`
   recovers to ≥ −5 (`kz_deep_frac` takes it), and the total stays ≤ −150. If the total at × 0.5 instead comes within 30 of the

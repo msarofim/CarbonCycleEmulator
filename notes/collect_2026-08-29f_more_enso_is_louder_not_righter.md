@@ -33,7 +33,7 @@ Observed sd **0.8996**; the model's non-ENSO baseline is **0.1725**.
 
 ## 2. ⚠ TWO OF MY GATES PRINTED VERDICTS THAT THE NUMBERS DO NOT SUPPORT
 
-**(a) E1 "FAIL — the response SATURATES" is an ESTIMATOR ARTEFACT, not a model property.** I defined
+**(a) E1 "FAIL — the response SATURATES" is an ESTIMATOR ARTIFACT, not a model property.** I defined
 `sd_ENSO = sqrt(sd² − sd_off²)`, which assumes the ENSO and non-ENSO components are ORTHOGONAL. They
 are not — El Niño warms, and the GMST-driven response is correlated with it — so quadrature
 subtraction is invalid and the ratio drifts 43.8 %. **On an estimator that is actually linear-valid,
@@ -55,7 +55,7 @@ verdict string asserting a mechanism the measurement does not establish.
 **This is interpretation, flagged as such, not a gate.** For a predictor of correlation `r`, the
 squared-error-optimal scaling gives a fitted series with sd = `r × sd_obs`, **not** sd = `sd_obs` —
 classic regression attenuation. Here that is `0.571 × 0.900` = **0.514**, against the model's 0.301
-and the variance-matching 0.750. **Matching the observed variance and minimising squared error are
+and the variance-matching 0.750. **Matching the observed variance and minimizing squared error are
 different objectives, and the fit is correctly doing the second.**
 
 ⇒ **γ ≈ 1.5 costs only −5.46 and takes sd 0.301 → 0.427**; γ = 2.0 costs −17.11 for sd 0.530. For a
@@ -69,7 +69,7 @@ result.** Nothing is adopted; γ stays 0.85119.
   channel explains ~33 % of the observed anomaly variance in TIMING and cannot explain more by
   getting louder.
 - ⇒ **the remaining 2/3 must come from mechanisms that are ABSENT**, and the one we now have data
-  for is **volcanic diffuse-light fertilisation** (08-29e: the thermal path supplies ≤ 7 % of
+  for is **volcanic diffuse-light fertilization** (08-29e: the thermal path supplies ≤ 7 % of
   Pinatubo, measured ~0 %).
 - **`gcb_land_sink` being the largest ENSO objector is a NEW link to gate 7** (land sink +2.30 σ).
   Two independent arcs now touch that row. Untested.

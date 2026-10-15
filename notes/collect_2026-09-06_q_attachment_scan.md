@@ -133,7 +133,7 @@ The deep term gains **+1.74** in every run (by construction). Everything else pa
   mixed layer, not by anything below** — the standing gate-5 miss is not an ocean-interior problem
   at all. ⇒ [[no_power_null]]; the gate should not be quoted as evidence about the interior.
 - ⛔ **D5** — the land sink moves 2.8–3.8 log-units in the HS arms, through the atmosphere (higher
-  CO₂ ⇒ more fertilisation). A side effect, reported; not a land mechanism.
+  CO₂ ⇒ more fertilization). A side effect, reported; not a land mechanism.
 - ⚠ **`sst_hs` reached 1.62 °C** in both HS transients — 0.38 °C below the Lueker floor, an
   EXTRAPOLATION of the carbonate constants. Small and smooth; flagged, not hidden.
 

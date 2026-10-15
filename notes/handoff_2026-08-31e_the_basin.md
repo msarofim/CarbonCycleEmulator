@@ -56,7 +56,7 @@ objective drift**, and it would have read as a discovery.
       probe - incumbent          +51.7336
 
 ⇒ ⛔ **THE WIDENING CONTRIBUTED NOTHING.** The handoff's cross-bracket **+51.9** survives at **+51.73**
-once the reparameterisation is removed **by construction** rather than estimated. The probe's own
+once the reparameterization is removed **by construction** rather than estimated. The probe's own
 recorded-band offset — the widened-`kz` constant — measures **+1.33**, against 08-31d's predicted
 "≈1.5". **It was never a bracket question.**
 
@@ -186,7 +186,7 @@ justifies §8.5's abandoned restarts after the fact.
 
 ⇒ **the +51.73 lower bound was right to 0.27.** The polished mode file is a **22-parameter file
 recorded under the SHIPPED bands** (`hml_bound` [30, 200], `kz_bracket` [3942.5, 6528]), so it
-carries **no reparameterisation constant at all** and is directly comparable with anything fitted on
+carries **no reparameterization constant at all** and is directly comparable with anything fitted on
 this objective.
 
 ## 8.3 ⭐ THE RESULT THAT FEEDS RULING #1: `kz` MOVES *AWAY* FROM THE CEILING
@@ -225,7 +225,7 @@ A 20-restart budget was launched first and killed at 3 h (`398691b`; log preserv
 1–2 **bit-identically**, confirming determinism under `ARM_SEED = 2026`).
 
 Two errors in the original ETA, both recorded so they are not repeated:
-1. ⛔ **Restart length generalised from ONE datapoint.** Restart 1's 10,545 evals (early `reltol`
+1. ⛔ **Restart length generalized from ONE datapoint.** Restart 1's 10,545 evals (early `reltol`
    convergence from a polished start) was the EXCEPTION; restarts 2–3 used 17,503 and **20,001** =
    maxit. The "halves cycle 1" claim was wrong.
 2. ⛔ **CONTENTION, not a slow run** ([[eta_in_days_is_not_a_slow_run]]): **0.150 → 0.241 s/eval

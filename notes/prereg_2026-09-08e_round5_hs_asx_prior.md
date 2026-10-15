@@ -1,7 +1,7 @@
 # PRE-REGISTRATION — ROUND 5: the cold box's exchange factor under ITS observation; where does the sink go? (2026-09-08e). Written BEFORE launch; binding.
 
 **Ruling (Marcus, 2026-09-08):** "Design round 5, and cancel everything on Torch after the running wave." Round 4's pending
-tasks were cancelled at 10:50 EDT; ids 0–19 (6 fixed + 14 dispersed) complete or finish by ~12:40 and are the round-4 record.
+tasks were canceled at 10:50 EDT; ids 0–19 (6 fixed + 14 dispersed) complete or finish by ~12:40 and are the round-4 record.
 
 ## What round 4 said (10 of 20; `notes/handoff_2026-09-08d_round4_scorecard_seasonal.md` §6)
 `u_hs` freed under the observed overturning went DOWN to 15 m/yr (z −1.48), the likelihood improved +5–7 over round 3, the
@@ -12,7 +12,7 @@ with a box and no prior. ⇒ The sink demand is real and the model has three kno
 
 ## The space (31 parameters, unchanged count; structure `hilda`; objective #10 + #11)
 - **`hs_asx_frac`** keeps its box [0.02, 2.0]; its flat prior becomes lognormal on the measured **0.653**, log-sd **0.15**
-  (`data/obs_hs_asx_prior.rds`, `data-raw/build_hs_asx_prior.R`). ⚠ **The width is a JUDGEMENT**, 2.8× the measured
+  (`data/obs_hs_asx_prior.rds`, `data-raw/build_hs_asx_prior.R`). ⚠ **The width is a JUDGMENT**, 2.8× the measured
   component spread (time windows 0.61–0.66 plus the Schmidt-at-model-T alternative, in quadrature ≈ 0.06). The product's
   other sampled spread — hemispheres, NH 0.32 / SH 0.78, log-sd 0.44 — is the REPRESENTATION error of one factor serving
   two hemispheres, not uncertainty in the global number; at 0.44 the fit would keep 1.83 for 2.7 log-units and the round

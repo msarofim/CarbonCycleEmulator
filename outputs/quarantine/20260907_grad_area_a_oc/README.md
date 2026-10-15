@@ -28,7 +28,7 @@ nothing failed. Fixed 2026-09-07d by `ccx_column_area()`; mutation-tested in
 
 **Not quarantined, but affected:** the round-1 scoring (`multistart_20260907_hilda28`, CHANGELOG
 2026-09-07) and every 09-05/09-06 conduit arm's `ocean_grad_dic`/`_alk` read; the FIT of rounds 1 and 2
-was optimised against the deflated rows (the optimiser saw a 16 % smaller DIC gradient and pushed
+was optimized against the deflated rows (the optimizer saw a 16 % smaller DIC gradient and pushed
 `pump_grad` to +3.2 prior-z). The start files in `calibration/output/multistart_20260907b_hilda29/`
 are kept in place — they are the record of what the objective-with-bug found — and are superseded
 only by a refit under the corrected rows.

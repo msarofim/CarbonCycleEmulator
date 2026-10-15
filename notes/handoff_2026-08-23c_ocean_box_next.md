@@ -10,7 +10,7 @@ refit, the Hessian). **This one is self-contained on the sink arc and specifies 
 ## 0. STATE IN EIGHT LINES
 
 1. **THE NEXT STEP IS THE OCEAN-BOX FLUX.** Concrete spec in §4. It is the only way to test the
-   hypothesis the isotopes actually favour, and every piece it needs already exists.
+   hypothesis the isotopes actually favor, and every piece it needs already exists.
 2. **¹⁴C REJECTS the reduced-fossil-emissions hypothesis** — the session's real result. §3.
 3. **Marcus's concern has support**: pinning `luc_scale` moves `rep_dC` 5.57 → 4.10. §2.
 4. **But the model routes around every prescribed perturbation** — twice now, via two different
@@ -42,7 +42,7 @@ attributes the plateau (`notes/lit_2026-08-23_1940s_co2_plateau.md`).
 ## 2. WHAT THREE RUNS SHOWED
 
 Switch: `CCX_ARTIFICIAL_SINK_{WIN,RATE}` in `R/forcing.R` (via `CCX_SINK_RATE`), window 1942–49,
-prescribed and **unfitted** — so it is *not* the §12c LUC programme the panel withdrew, which
+prescribed and **unfitted** — so it is *not* the §12c LUC program the panel withdrew, which
 fitted a free shape and would have reported a mechanism.
 
 | | sink OFF | sink 2.5, `luc` free | sink 2.5, `luc` **pinned** |
@@ -69,7 +69,7 @@ said 2.21, so the direction is right and the magnitude is being eaten by somethi
 - run 3, with that pinned: **`beta_max` 0.93 → 2.70 with `fert_k` 423 → 1738** — the
   Michaelis-Menten pair recorded at **ρ = +0.997** (`ccx_seas_q10_ridge`).
 
-> **THE METHODOLOGICAL FINDING, and it generalises past this model:** before running a
+> **THE METHODOLOGICAL FINDING, and it generalizes past this model:** before running a
 > prescribed-perturbation experiment, **enumerate every free direction that can undo it globally**,
 > not just the obvious one. A near-degenerate pair is an escape route even when neither member
 > looks related to the perturbation.
@@ -101,7 +101,7 @@ absorb it.
 |---|---|---|---|
 | fossil emissions overstated | −28 ‰ | large: removes ¹⁴C-free C ⇒ Δ¹⁴C **rises** | **REJECTED, ~52 logL** |
 | LUC emissions overstated | ~−25 ‰ | intermediate (depleted, not ¹⁴C-free) | **untested — 3rd arm** |
-| **ocean sink** | ~atmospheric, small ε | **~none** — removes C at the atmosphere's own ¹⁴C/C | **FAVOURED, untested** |
+| **ocean sink** | ~atmospheric, small ε | **~none** — removes C at the atmosphere's own ¹⁴C/C | **FAVORED, untested** |
 
 This independently reaches where the literature's δ¹³C double-deconvolution already sits (oceans
 ≥ two-thirds of the uptake; Rubino et al. 2019). **Two different isotopes, two different methods,
@@ -112,7 +112,7 @@ same answer.**
 ## 4. THE NEXT STEP: ROUTE THE FLUX INTO THE OCEAN BOX
 
 **Why it is now the priority rather than cleanup:** §3 says ¹⁴C is what separates the hypotheses,
-and the ocean version is the one ¹⁴C favours — but it **cannot be tested at all** with the current
+and the ocean version is the one ¹⁴C favors — but it **cannot be tested at all** with the current
 switch, which is a *negative emission*, not an ocean uptake. The instrument to test the surviving
 hypothesis does not exist yet.
 
@@ -176,7 +176,7 @@ Both would have been quoted; both are in the code comments now.
 2. **"The mid-century window is where the fit is being damaged, so down-weighting it will help."**
    Answered the wrong question: I used **residuals** (the outcome of a fit) to argue **leverage**.
    The plateau window fits *well* precisely because the parameters may have been bent to it. Only a
-   re-optimisation answers a leverage question. The per-era table in `LIK_ICE_DISCREPANCY`'s
+   re-optimization answers a leverage question. The per-era table in `LIK_ICE_DISCREPANCY`'s
    comment is correct about **offsets and σ** and **must not be read as answering the sink
    question.**
 
@@ -210,7 +210,7 @@ cd ~/Documents/2026/CodeProjects/CarbonCycleEmulator && claude --remote-control 
 > conservation, and the **pre-registered ¹⁴C null** in §4d.5.
 >
 > **Why:** ¹⁴C rejected the reduced-fossil-emissions hypothesis at ~52 log-units (§3), and the
-> ocean version — the one both ¹⁴C and the published δ¹³C deconvolution favour — **cannot be
+> ocean version — the one both ¹⁴C and the published δ¹³C deconvolution favor — **cannot be
 > tested with the current switch at all.**
 >
 > **Then §4e:** the three-arm isotopic comparison (fossil −28 ‰ done, LUC −25 ‰, ocean air-sea ε)
@@ -220,5 +220,5 @@ cd ~/Documents/2026/CodeProjects/CarbonCycleEmulator && claude --remote-control 
 > prescribed perturbations already; pinning a third lever may cross from testing the model into
 > constraining it to an answer.
 >
-> **Do NOT** ship either `pump_arms_SINK25*` directory, quote 12.7 σ (it is ~5), re-centre
+> **Do NOT** ship either `pump_arms_SINK25*` directory, quote 12.7 σ (it is ~5), re-center
 > `rep_dC`'s prior, or point the ice-discrepancy window at the plateau.

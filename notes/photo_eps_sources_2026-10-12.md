@@ -25,7 +25,7 @@
 2. The total is Δ_tot = (1 − f₄)·Δ_C3 + f₄·Δ_C4. The published global estimates differ mostly through f₄, the C4 share of GPP, which ranges from under 10 % to 30 % across the process models (Suits 2005 Table 1; van der Velde 2014 Table 2).
 3. The most recent and observation-constrained f₄ is **19.5 ± 1.9 %** (Luo et al. 2024).
 4. Re-weighting every process model that publishes its C3 and C4 endmembers to that share gives **15.0–17.1 ‰, mean 16.45, median 16.67** (my arithmetic, §B4).
-5. A decomposition with Δ_C3 = 19.5 ± 0.7, Δ_C4 = 5 ± 1 and f₄ = 0.195 ± 0.03 gives **16.67 ± 0.74**. A 2×10⁵-draw Monte Carlo matches it (16.67, sd 0.74). The input spreads are my judgement, set from the published ranges (my arithmetic).
+5. A decomposition with Δ_C3 = 19.5 ± 0.7, Δ_C4 = 5 ± 1 and f₄ = 0.195 ± 0.03 gives **16.67 ± 0.74**. A 2×10⁵-draw Monte Carlo matches it (16.67, sd 0.74). The input spreads are my judgment, set from the published ranges (my arithmetic).
 6. The single best citable number is **Still et al. 2003: 16.5 ‰, assimilation-weighted, C4 = 23 % of GPP.** It is indistinguishable from the synthesis.
 
 **How the other values compare:**
@@ -37,7 +37,7 @@
 | **17** | Quay 2003's a-priori value for 1970–1990 (Bakwin 1998). | Consistent (+0.5), but its ±5 makes it uninformative. |
 | **18** | The C3-dominated value that comparable box models use by convention: Keeling 2017, Graven 2020, Trudinger's box-diffusion model (α = 0.982), Francey 1995 (18.0, secondary). | ≈2σ above the biosphere-wide estimate. It is like-for-like only if C4 is ≤ ~10 % of GPP, which the observation-constrained 19.5 % excludes. |
 
-**⚠ Methodological choice, flagged and not resolved (§E).** The GPP-weighted mean is the right value for CCX's gross GPP limb and its equilibrium pool δ. The net CO₂-fertilised sink and the NH seasonal NEP are probably C3-dominated, though. Budget box models may use 18 for exactly that reason, and the Graven/Lavergne box model gives C4 zero fertilisation. One constant cannot be right for both.
+**⚠ Methodological choice, flagged and not resolved (§E).** The GPP-weighted mean is the right value for CCX's gross GPP limb and its equilibrium pool δ. The net CO₂-fertilized sink and the NH seasonal NEP are probably C3-dominated, though. Budget box models may use 18 for exactly that reason, and the Graven/Lavergne box model gives C4 zero fertilization. One constant cannot be right for both.
 
 **⚠ Time dependence (§C).** The evidence on drift over 1750–2024 conflicts:
 - **For an increase:** atmospheric δ¹³C budgets infer +0.014 ± 0.007 ‰ ppm⁻¹ (Keeling 2017). Over CO₂ 277 → 422 ppm that is **+2.0 ± 1.0 ‰** (my arithmetic).
@@ -90,7 +90,7 @@ A constant anchored on the 1983–2008 process-model era is defensible. A CO₂-
 
 | Value Δ (‰) | C4 share of GPP | Weighting | Period | Method | Citation (vintage, DOI) | Locator | Like-for-like? | Primary / secondary |
 |---|---|---|---|---|---|---|---|---|
-| **14.8** (C3 17.8, range 12.9–19.6 by biome; C4 3.6) | **21 %** | GPP | climatology (monthly) | Gridded climate, stomatal optimisation | Lloyd & Farquhar 1994, Oecologia 99:201–215, doi:10.1007/BF00627732 | Abstract **[HTML, Springer]**. Also Suits 2005 ¶10 p. 5 and Table 1 p. 6; van der Velde 2014 Table 2 p. 6559. | **Yes** in definition. C3 is low by later standards; the authors call it slightly below the commonly used 18–20. | Primary (abstract) + 2 secondary |
+| **14.8** (C3 17.8, range 12.9–19.6 by biome; C4 3.6) | **21 %** | GPP | climatology (monthly) | Gridded climate, stomatal optimization | Lloyd & Farquhar 1994, Oecologia 99:201–215, doi:10.1007/BF00627732 | Abstract **[HTML, Springer]**. Also Suits 2005 ¶10 p. 5 and Table 1 p. 6; van der Velde 2014 Table 2 p. 6559. | **Yes** in definition. C3 is low by later standards; the authors call it slightly below the commonly used 18–20. | Primary (abstract) + 2 secondary |
 | **15.7** (C3 20.0, C4 4.4) | **27 %** | net assimilation | GCM-coupled SiB2 run | SiB2 + GCM | Fung et al. 1997, GBC 11(4):507–533, doi:10.1029/97GB01751 | Abstract gives a range of **12–16** for "the global flux-weighted mean" **[HTML, Carnegie page]**. The 15.7 is from Suits Table 1 p. 6 and van der Velde Table 2. | Yes; f₄ high | Range primary; 15.7 secondary |
 | **18.1** with agricultural mask; **18.6** natural vegetation | **15 %** | ecosystem Δ_e | 0.5° climatology | BIOME4 | Kaplan, Prentice & Buchmann 2002, GBC 16(4), doi:10.1029/2001GB001403 | Abstract **[HTML, Lund LUP]**. The 15 % and C3 20.0 ± 1.0 are from Suits Table 1 p. 6 and ¶12 p. 8. | Yes; f₄ low (Kaplan pers. comm. in Suits ¶12) | Primary (values) + secondary (f₄) |
 | **16.5** (published as −16.5) | **23 %** (35.3 of 150 PgC yr⁻¹) | assimilation | 1980s–1990s | SiB2 + C3/C4 map (remote sensing, crop maps) | Still, Berry, Collatz & DeFries 2003, GBC 17(1), 1006, doi:10.1029/2001GB001807 | Abstract **[HTML, EarthRef ERR 74609]**. Article number from Suits' reference list (txt l.1515). Values corroborated by Ovwemuvwose 2026 §1, §3.4. | **Yes** | Primary (abstract) |
@@ -122,7 +122,7 @@ A constant anchored on the 1983–2008 process-model era is defensible. A CO₂-
 | 18.5 % including crops (16.2 % natural) | 2001–2016 | Lavergne et al. 2026, Commun. Earth Environ., doi:10.1038/s43247-025-03102-6 | Results **[HTML, PMC12851932]** |
 | 27 / 15 / 24 or 25 / ≈30 / < 10 % | various | Fung / Kaplan / Suits / van der Velde / Scholze | Suits Table 1; van der Velde Table 2 |
 
-### B4. Harmonisation to f₄ = 19.5 % (my arithmetic)
+### B4. Harmonization to f₄ = 19.5 % (my arithmetic)
 
 Δ_tot = (1 − 0.195)·Δ_C3 + 0.195·Δ_C4, using each paper's own endmembers:
 
@@ -146,7 +146,7 @@ A constant anchored on the 1983–2008 process-model era is defensible. A CO₂-
 |---|---|---|---|---|
 | **18 ‰, constant** in the standard run. Variants: linear in CO₂; or constant 1765–1955, then linear in time. | 3-box land + 1-D diffusive ocean | Keeling et al. 2017, PNAS 114(39):10361–10366, doi:10.1073/pnas.1619240114 | Results ¶1 and SI Table S1 (SI not read) **[HTML, PMC5625891]** | Primary (main text) |
 | **18 ‰ constant** ("standard mode"). The original 3-box configuration overpredicts the δ¹³CO₂ decline at constant Δ. | Graven et al. 2020 simple carbon-cycle model | as described by Lavergne et al. 2026 | Methods ("Simple carbon cycle model"); Results, Fig. 6 **[HTML]** | Secondary for Graven 2020. Graven's own SI Text S1/S2 failed to load. |
-| C3 **18** / C4 **6**, constant (test); C4 box with zero CO₂ fertilisation | Graven 2020 box model, re-partitioned | Lavergne et al. 2026 | Results / Fig. 6; Methods **[HTML]** | Primary |
+| C3 **18** / C4 **6**, constant (test); C4 box with zero CO₂ fertilization | Graven 2020 box model, re-partitioned | Lavergne et al. 2026 | Results / Fig. 6; Methods **[HTML]** | Primary |
 | α(atm→biosphere) = **0.982**, i.e. ε = 18 in CCX's form; biosphere fractionation variation "assumed to be negligible" | Enting–Lassey box-diffusion model | Trudinger 2001 PhD thesis, Ch. 4 (CSIRO e-print `trudinger_2001a4.pdf`) | Table 4.1, p. 126; §4.2, p. 122 (pdftotext) | Primary |
 | **18.0** | double deconvolution | Francey et al. 1995 | van der Velde Table 2 p. 6559 | Secondary (not read) |
 | **18.7** | Bern double deconvolution | Joos & Bruno 1998, GBC 12:277–295, doi:10.1029/98GB00746 | van der Velde Table 2 p. 6559 | Secondary. Bern repository blocked (Anubis). |
@@ -174,7 +174,7 @@ A constant anchored on the 1983–2008 process-model era is defensible. A CO₂-
 **Against a large increase:**
 - **Keller et al. 2017** (BG 14:2641, doi:10.5194/bg-14-2641-2017). From 76 tree-ring records: small average 20th-century changes in Δ and cᵢ/cₐ, and iWUE up about 27 % since 1900. LPX-Bern matches; CLM4.5 roughly doubles the iWUE change (abstract **[HTML]**). Full-text numbers not obtained (PDF over 10 MB).
 - **Lavergne et al. 2022:** JULES global Δ "stayed nearly constant" over 1979–2016, and the pooled tree-ring trend is not significant, p = 0.097 (Abstract; §3.1.2 **[HTML]**).
-- **Scholze et al. 2003**, via Ballantyne 2011 (BGD p. 4617, l. 22–24): a modelled ≈0.4 ‰ **decrease** in discrimination, mainly from increased water stress. Secondary.
+- **Scholze et al. 2003**, via Ballantyne 2011 (BGD p. 4617, l. 22–24): a modeled ≈0.4 ‰ **decrease** in discrimination, mainly from increased water stress. Secondary.
 
 **Composition (C3/C4):**
 - **Kaplan 2002:** the agricultural mask lowers Δ_e by **0.5 ‰** (18.6 → 18.1), mostly from C4 crops on naturally C3 land (abstract).
@@ -202,7 +202,7 @@ A constant anchored on the 1983–2008 process-model era is defensible. A CO₂-
 - **No.** In comparable box models the standard is a **constant 18** (Keeling 2017 standard run; Graven 2020 "standard mode"; Trudinger, which assumes the variation negligible).
 - The **CO₂-linear form** is the main published alternative (Keeling 2017; Lavergne 2026 "CO₂-driven"). Graven 2020 uses a CO₂-dependent form after Schubert & Jahren 2015 for projections only (§8); its coefficients are in SI Text S2, not read.
 - Process models (LPJ, SiBCASA, JULES) compute Δ prognostically.
-- Both budget studies found that a **constant** Δ makes the modelled δ¹³C decline steeper than observed (Keeling 2017 Results; Lavergne 2026: a 0.30 ‰ gap over 2012–2016 at constant Δ, 0.16 with varying Δ, 0.08 with varying Δ and f₄). This bears on the trend, not on the level of the constant.
+- Both budget studies found that a **constant** Δ makes the modeled δ¹³C decline steeper than observed (Keeling 2017 Results; Lavergne 2026: a 0.30 ‰ gap over 2012–2016 at constant Δ, 0.16 with varying Δ, 0.08 with varying Δ and f₄). This bears on the trend, not on the level of the constant.
 
 ---
 
@@ -224,8 +224,8 @@ A constant anchored on the 1983–2008 process-model era is defensible. A CO₂-
 1. **GPP-weighted versus sink-weighted.** In CCX the net land sink and the land-use emissions carry the same ε as gross GPP.
    - Fung 1997's abstract says land/ocean partitioning needs, among other things, "the fractions of C3 and C4 vegetation involved in the biospheric uptake".
    - Scholze 2008's abstract: the C4 land-use experiment shifts about 1 PgC yr⁻¹ from inferred land sources to ocean fluxes in a double deconvolution.
-   - The Graven/Lavergne box model gives C4 zero CO₂ fertilisation (Lavergne 2026 Methods).
-   - If the fertilised sink is C3-dominated, its effective Δ is nearer the C3 value of about 19–20 than the GPP-weighted 16.5. That may be why budget models keep 18.
+   - The Graven/Lavergne box model gives C4 zero CO₂ fertilization (Lavergne 2026 Methods).
+   - If the fertilized sink is C3-dominated, its effective Δ is nearer the C3 value of about 19–20 than the GPP-weighted 16.5. That may be why budget models keep 18.
    - One constant cannot serve both the gross exchange and the net sink. Options: (i) GPP-weighted 16.5, the literal answer to the question asked; (ii) an effective about 18 as in the budget models; (iii) a structural C3/C4 split. **Not resolved here.**
 2. **Hemispheres.** No hemispheric C3 + C4 value was found in any text read; they exist only as maps or zonal plots (Suits Fig. 4 and 8; van der Velde Fig. 2a). CCX applies one scalar to both hemispheres. The NH seasonal δ¹³C rows see a mostly C3 extratropical source. Miller 2003's NH flux signatures (Suits Fig. 8) imply roughly 15–18 ‰, a figure reading only.
 3. **Interannual variability** is 0.3 ‰ (Scholze thesis) or ±0.04 ‰ detrended (van der Velde). Both are negligible for a constant.

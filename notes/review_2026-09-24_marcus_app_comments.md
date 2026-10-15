@@ -51,7 +51,7 @@ catches, and the app's whole premise is that a reader can trust its facts.
 | id | where | change |
 |---|---|---|
 | C1 | `app/server.R` Keeling takeaway | his rewrite. ⚠ **FLAGGED** — see §3 |
-| C2 | `app/server.R` `w_luc_note` | his land-use rewrite (regrowth + fertilisation named as the cause) |
+| C2 | `app/server.R` `w_luc_note` | his land-use rewrite (regrowth + fertilization named as the cause) |
 | C3 | `app/ui.R` airborne fraction | his rewrite ("ratio of emissions to the rise", "should not be attributed to one factor alone") |
 | C4 | `R/mechanisms.R` `warming_feedback$blurb` | "stops noticing the warming" → **"this amplifying feedback goes away"** |
 | C5 | `R/mechanisms.R` `warming_feedback$caveat` | he doubts it is relevant ("we only care about warming because of its carbon-cycle effects"). ⚠ **FLAGGED** — see §3 |
@@ -104,8 +104,8 @@ catches, and the app's whole premise is that a reader can trust its facts.
   and the recent decade specifically, not a gate failure.
 - **Q2 (#14) — is the Revelle effect on year-to-year SCATTER really that large?** He is surprised.
   ⇒ [[implausible result = bug]] applies: **measure before reassuring.**
-- **Q3 (#15) — could forest regrowth be separated from CO₂ fertilisation, and would it close the GCB
-  gap?** ⛔ Structural: in this model fertilisation IS the land sink (`R/mechanisms.R` fertilisation
+- **Q3 (#15) — could forest regrowth be separated from CO₂ fertilization, and would it close the GCB
+  gap?** ⛔ Structural: in this model fertilization IS the land sink (`R/mechanisms.R` fertilization
   caveat). **RULING.**
 - **Q4 (#18) — is >half the wobble really the emissions record's own year-to-year shape?** He is
   surprised, expecting emissions to be smooth apart from COVID / the USSR / 2008. ⚠ The claim is
@@ -117,7 +117,7 @@ catches, and the app's whole premise is that a reader can trust its facts.
 ## 5. Rulings I need
 1. **F5** — the 1900–2150 span (it moves the splice into mid-frame).
 2. **F3** — the ENSO/warming temperature split (blocked on a decomposition the repo lacks).
-3. **Q3** — forest regrowth as a separate sink from fertilisation (a model change).
+3. **Q3** — forest regrowth as a separate sink from fertilization (a model change).
 4. **C1 / C5** — the two copy items in §3, where his edit and the panel's purpose disagree.
 5. **Priority order for F1, F2, F4.**
 

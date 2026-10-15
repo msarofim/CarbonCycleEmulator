@@ -41,16 +41,16 @@ both arms, printed under the growth chart, plus whether the switch moved the mod
 measurements. No fourth panel; the tab stays at three. On the shipped default it reads **1991 at
 +1.02 ppm/yr** — Pinatubo, the model's known biggest interannual miss, now COMPUTED on the page
 rather than asserted in a comment. ⛔ `app_annual_growth()` was extracted because the
-annualisation had been written THREE times; the gate pulls the chart's own series back out of the
+annualization had been written THREE times; the gate pulls the chart's own series back out of the
 built ggplot to assert the number and the picture still agree.
 
 1. **F4 — the temperature/CO₂ radio** on "Build your own" and "Pulse lab" (it exists on
    Scenarios). Small, self-contained.
 2. **F5 — the 1900–2150 span** on Scenarios and Build-your-own. APPROVED, with the mid-frame
    splice accepted. ⚠ Re-check the splice caption reads correctly once the splice is mid-frame.
-3. **Q3 + Q1 as ONE investigation** — forest regrowth vs CO₂ fertilisation. ⭐ Still the only open
+3. **Q3 + Q1 as ONE investigation** — forest regrowth vs CO₂ fertilization. ⭐ Still the only open
    item that could move a number, and the testable hypothesis is unchanged: the model crosses land
-   source→sink in **1971** against the measured **1989**, and an over-strong single fertilisation
+   source→sink in **1971** against the measured **1989**, and an over-strong single fertilization
    term doing the work of both is exactly what makes the sink appear too early. ⛔ Costs a new pool
    or flux, a new fitted name and a REFIT — same freeze consideration F3 had.
 

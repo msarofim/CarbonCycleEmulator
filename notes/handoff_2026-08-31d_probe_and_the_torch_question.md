@@ -38,7 +38,7 @@ which layer, with what σ.**
 
 **On the layer the likelihood actually scores** (gated against DESIGN §5.2j's published ends,
 reproduced to 0.05 ‰): `kz` 3942.5 → −219.75 ‰ = **z −4.34**; `kz` 6528 → −162.78 ‰ = **z +1.22**.
-⇒ **a 5.55σ box centred 1.56σ BELOW the sourced target.** On the *mode's* own map the sourced 2σ top
+⇒ **a 5.55σ box centered 1.56σ BELOW the sourced target.** On the *mode's* own map the sourced 2σ top
 is **6529.1** against the shipped 6528 — the ceiling **is a 2σ cutoff**.
 
 ⚠ **The law route is closed WITH A RECEIPT, not a shrug.** DESIGN §3.4 already prices `kz` at
@@ -90,7 +90,7 @@ simplex-collapse signature). **This does NOT certify the exit condition met.**
     h_ml       35.25 ->  134.11 m  (+280 %)  <- inside its UNCHANGED band
     seas_T_amp_SH +278 %, fert_k +63 %, beta_max +20 %, kz -1.5 %
 
-Decomposition is **ARITHMETIC, NOT MEASUREMENT**: ≈1.5 reparameterisation (predicted **+1.49** from
+Decomposition is **ARITHMETIC, NOT MEASUREMENT**: ≈1.5 reparameterization (predicted **+1.49** from
 the parameter values *before looking*; observed +1.5), ≈11.3 the `seas_lag_p` split, leaving **≈39
 that is a better `h_ml`**. **The control that separates them — the staged refit, split with the
 SHIPPED bracket — HAS NOT BEEN RUN.**
@@ -104,7 +104,7 @@ bracket question. **It also means the 6 test failures' "the refit is their fix" 
 
 ### Two 08-31c predictions confirmed, both confounded
 
-- **`kz`'s Hessian entry stabilised** — the morning's step study found `kz` the ONE step-dependent
+- **`kz`'s Hessian entry stabilized** — the morning's step study found `kz` the ONE step-dependent
   coordinate at `lifted`; the probe reports **all 22 stable**. (Jacobian compression: a logit at
   95.1 % of its bracket has `dkz/du` compressed 3.6–10×.)
 - **Conditioning 5.36e5 → 6.84e4**, ~8×, against [[ccx_hessian_is_the_blocker]]'s 1.11e6.
@@ -125,7 +125,7 @@ The probe is the **first all-parameters-free evidence on OPTION A**. `seas_lag_p
 1. ⛔ **`kz_bracket` was RECORDED AND NEVER RESTORED. HIGH.** The driver has written it since 08-16
    for the reason it states beside `hml_bound` — *"`par_mode` is band-independent; `u_mode`,
    `hessian` and `cov` are NOT"* — and `ccx_mode_params()` / `ccx_adopt_mode_band()` restored only
-   `hml_bound`. **Invisible for a fortnight because every file's `kz_bracket` equalled the shipped
+   `hml_bound`. **Invisible for a fortnight because every file's `kz_bracket` equaled the shipped
    table.** The probe wrote the first file where they differ, and on it the standard
    `ccx_unc_to_par(md$u_mode)` idiom decodes `kz` as **4685.5 against a true 6302.4 — 26 % wrong,
    silently.** Recorded bands now live ONCE in `CCX_MODE_BAND_FIELDS`; both functions restore **and
@@ -162,7 +162,7 @@ moot the warm start entirely. **Settling them one at a time costs one refit each
 
 **MY RECOMMENDATION ON #1, and it has NOT changed with the probe:** **re-bisect wide.** The probe
 strengthens "delete" but does not reach it — my evidence is one non-converged run, and
-`R/likelihood.R` records that under the Student-t marginalisation of `n_eff` the runaway penalty
+`R/likelihood.R` records that under the Student-t marginalization of `n_eff` the runaway penalty
 drops **4.3× (20.1 → 4.67 against a 4.50 threshold)**, concluding in terms that *"under it this term
 could NEVER replace the `kz` bracket."* Representation error in that σ is still **zero**. Re-bisecting
 at a stated k fixes both documented defects (wrong layer, uncited target) without betting a refit on

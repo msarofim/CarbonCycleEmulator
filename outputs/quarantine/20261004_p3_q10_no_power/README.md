@@ -1,7 +1,7 @@
 # QUARANTINE 2026-10-04 — the P3 preview: no POWER on `q10`
 
 ## 1. The defect (a design defect, not a code bug)
-`calibration/diag_p3_netclimate_preview.R` @`c6e3873` (Marcus 10-04: "Preview P3 with q10 freed") re-optimises the
+`calibration/diag_p3_netclimate_preview.R` @`c6e3873` (Marcus 10-04: "Preview P3 with q10 freed") re-optimizes the
 8-name land block plus `q10`, every other name held.
 - That block frees `q10` to only **0.15 of its marginal sd** (hilda34g's stored covariance; `npp_tsens`: 0.93).
 - `q10`'s partners sit outside it: `seas_lag_p_NH` r +0.80, `npp_frac_NH` +0.68, `seas_T_amp_SH` −0.59, `tau_ex` +0.47.
@@ -25,7 +25,7 @@
   - `npp_tsens` 0.00885 → 0.00667;
   - net climate effect +0.118 → +0.078 GtC/yr;
   - SSP5-8.5 2300 1448.6 → 1451.8 ppm.
-- They CROSS-CHECK the powered repair with a real optimiser: the Newton step gives 0.00663 and +0.078.
+- They CROSS-CHECK the powered repair with a real optimizer: the Newton step gives 0.00663 and +0.078.
 - **The canonical P3 result is `outputs/diagnostics/p3_powered_step_20261004.{log,rds}`**
   (`calibration/diag_p3_powered_step.R` @`b44e20b`; CHANGELOG 10-04 k). With power 0.87–1.00, `q10` moves < 0.04 sd,
   and P3 ≈ P0.

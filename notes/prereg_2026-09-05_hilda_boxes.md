@@ -44,8 +44,8 @@ where given, model where not): **HS −120 ± 30 ‰**, **HD −136 ‰ (model)*
 reason for building boxes rather than tuning a rate: HS water sinks **before it equilibrates**.
 
 ⚠ **THE GAS-EXCHANGE EQUALITY IS THEIR ASSUMPTION, NOT A MEASUREMENT** — they justify it by sea ice
-suppressing exchange in winter and roughly cancelling the stronger high-latitude winds, citing
-Shaffer & Sarmiento. It is inherited here as an assumption and labelled as one.
+suppressing exchange in winter and roughly canceling the stronger high-latitude winds, citing
+Shaffer & Sarmiento. It is inherited here as an assumption and labeled as one.
 
 ## 2. WHAT WE ARE BUILDING — and where it DEPARTS from HILDA, deliberately
 
@@ -58,7 +58,7 @@ and the order (`src/ccx_core.cpp:39`), so this is a twin change with a parity te
 | **C1** | HS area | **`f_hs` = 0.16 of EACH hemisphere's ocean area** | gives 16 % globally, HILDA's number, with no extra assumption. ⚠ **Physically the real HS is SH-heavy** (Antarctic ≫ N. Atlantic). The SH-weighted allocation is the pre-registered sensitivity, not the default. |
 | **C2** | HS thickness | **= `h_ml` (134.15 m at `ent26`)** | HILDA uses 75 m for both surface boxes; our LS mixed layer is a FITTED 134 m already doing extra duty. Making HS a *different depth* would add a parameter and confound the test. Alternative: pin HS at HILDA's 75 m. |
 | **C3** | HD | **one well-mixed box, `h_ml` → 3700 m, over the HS area** | HILDA exactly. |
-| **C4** | `q` (HD↔Interior) | **exchange with EVERY interior layer in proportion to its volume**, total flux `V_interior / τ_q`, `τ_q` = 538 yr | HILDA's Interior is one advective-diffusive continuum and `q` is *"assumed independent of depth"*; volume-proportional is the discretisation of that. ⚠ **This DOES reach the intermediate layers — and that is the point.** It injects **HD water (−136 ‰), not surface water (−40 ‰)**, which is exactly how it differs from `w_out`, whose distributed return injected the mixed layer and over-ventilated the middle. |
+| **C4** | `q` (HD↔Interior) | **exchange with EVERY interior layer in proportion to its volume**, total flux `V_interior / τ_q`, `τ_q` = 538 yr | HILDA's Interior is one advective-diffusive continuum and `q` is *"assumed independent of depth"*; volume-proportional is the discretization of that. ⚠ **This DOES reach the intermediate layers — and that is the point.** It injects **HD water (−136 ‰), not surface water (−40 ‰)**, which is exactly how it differs from `w_out`, whose distributed return injected the mixed layer and over-ventilated the middle. |
 | **C5** | `w` | **NOT built** | HILDA's own `w` = 0.44 ± 0.56 m/yr is **consistent with zero**, and our `w_up`/`q_conv` already exist, sit at 0 at `ent26`, and were measured dead (`+0.11010` derivative, wrong sign for Fix B, 09-04i). Adding a third advective lever would confound. |
 | **C6** | HS air-sea | **same per-area gas-exchange coefficient as LS** | HILDA's `g_l = g_h`, §1. Inherited as an assumption. |
 | **C7** | HS temperature | **a new constant `SST_HS`, ≥ 2 °C** | ⚠ **HARD CONSTRAINT FOUND BEFORE BUILDING:** `data-raw/build_carbonate_tables.R` fits K0/K1/K2/Kb/Kw on `T_GRID = seq(2, 35, 0.25)`, so **below 2 °C the carbonate polynomials extrapolate**. HILDA says "< 5 °C" and nothing more. ⇒ the value must be **derived from an observation** (area-weighted SST over the HS region) and the tables **re-fitted down to −2 °C** if that lands below 2. Provisional 2.0 °C is a placeholder, NOT a source. |
@@ -98,7 +98,7 @@ parameter here was fitted to one.
 ### P2 — THE CEILING: does a real HS box make HILDA's own `u` feasible?
 **PREDICT: at `u` = 38 m/yr over the HS area (6.08 m/yr global-equivalent), a `kz` EXISTS that holds
 the deep box at −156.145.**
-**FALSIFIER: no `kz` holds it** ⇒ the 09-04k2 ceiling was NOT an artefact of the missing box, and
+**FALSIFIER: no `kz` holds it** ⇒ the 09-04k2 ceiling was NOT an artifact of the missing box, and
 the conduit's usable strength in our column is ~6× below the strength HILDA fitted — which would
 mean our column and HILDA's cannot both be right about the deep.
 
@@ -117,7 +117,7 @@ P1 alone — which would not be enough to carry new boxes.
 ⚠ **Reaching |z| < 1 is NOT predicted.** Saying so in advance: the honest expectation is partial
 closure, and a result between 1 and 1.81 is a **confirmation**, not a disappointment.
 
-### P5 — THE SHAPE, weakest and labelled so
+### P5 — THE SHAPE, weakest and labeled so
 **PREDICT: HD lands near −136 ‰** (HILDA's own model value, not an observation — so this is a
 model-to-model comparison and is reported, never used as a gate), **and the unscored 1160 m peak
 improves further than the shim's +1.98.**
@@ -128,7 +128,7 @@ from the interior rather than the other way round.
 **PREDICT: the upper ocean (≤ 500 m, currently z +0.61 — the layer that MATCHES) does not degrade
 by more than 1 z-unit.**
 **FALSIFIER: it does** ⇒ `q` is injecting into the wrong place and C4's volume-proportional
-discretisation is wrong, whatever P4 says.
+discretization is wrong, whatever P4 says.
 
 ## 4. WHAT IS EXPLICITLY NOT CLAIMED
 

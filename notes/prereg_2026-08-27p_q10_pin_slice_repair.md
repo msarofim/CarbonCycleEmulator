@@ -28,7 +28,7 @@ identified**), leaving q10 only the nonlinear part."
 ⇒ Three facts follow, and none of them is a new hypothesis:
 
 1. **The NH product is held to 2.9855 ± 0.0009 = 0.03 %** while its two factors move **2.77×** and
-   **3.7× in ln-space**. The optimiser is riding the documented ridge, not fitting anything.
+   **3.7× in ln-space**. The optimizer is riding the documented ridge, not fitting anything.
 2. **`q10` IS SHARED WITH THE SH.** Sliding it down the NH ridge cancels the SH perturbation. The SH
    product — the quantity the arm actually perturbs — rose only **0.10769 → 0.26719 = 2.48×**, where
    at pinned `q10` the same grid gives **6.83×**. **THE ARM DELIVERED 36 % OF ITS OWN LEVER.**
@@ -36,7 +36,7 @@ identified**), leaving q10 only the nonlinear part."
    its measured HIGH end (17.92 K)** — a driver amplitude 4.4× outside its own bracket.
 
 ⇒ **27n's "84 % buy-back" is NOT the likelihood restoring the signal through legitimate
-re-optimisation. 64 % of it is `q10` undoing the perturbation through a flat direction.** That is
+re-optimization. 64 % of it is `q10` undoing the perturbation through a flat direction.** That is
 `[[no_power_null]]` in a new dress: not a null with no lever, but a lever **silently attenuated by a
 route back through a shared parameter**. 27n's P4 verdict (−35.11, "the prediction was wrong") and
 its P8 headline (**1.79× obs, 15.3 % of the excess closed**) are therefore measured on a
@@ -48,8 +48,8 @@ which `co2_seasonal_SPO` carries −187.21. The veto in 27o §6 stands. What is 
 
 ## 1. THE REPAIR, AND WHY PINNING `q10` IS NOT A LOSS OF FREEDOM
 
-27o §7 offered two repairs: **drop `q10`**, or **reparameterise to (product, ratio)**. They are the
-same slice up to a relabelling, and the simpler one is exact:
+27o §7 offered two repairs: **drop `q10`**, or **reparameterize to (product, ratio)**. They are the
+same slice up to a relabeling, and the simpler one is exact:
 
 > With `q10` **PINNED** and `seas_T_amp_NH` **FREE**, the NH product `seas_T_amp_NH · ln(q10)` still
 > spans its whole range. Nothing identified by the seasonal rows is removed. What IS removed is
@@ -66,7 +66,7 @@ measures it.
     27n FREE: c("sst_seas_amp_NH", "sst_seas_amp_SH", "seas_T_amp_NH", "seas_lag_p", "q10")
 
 `seas_T_amp_SH` is the profiled parameter and is OUT of both, as in 27n. Grid = 27n's
-`TA_COND` bracket points **unchanged**: 1.0391 (landed), 3.5915 (LO), 5.0502 (centre), 7.1012 (HI).
+`TA_COND` bracket points **unchanged**: 1.0391 (landed), 3.5915 (LO), 5.0502 (center), 7.1012 (HI).
 `q10` is pinned at the **mode's 1.13579**, not at any conditional landing.
 
 ## 3. THE PRE-REGISTERED GATES

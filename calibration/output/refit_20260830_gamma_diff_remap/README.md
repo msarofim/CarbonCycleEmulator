@@ -7,7 +7,7 @@ This is the refit handoff 08-30 declared **OWED AND NOT RUN**. Nothing here is a
 ## WHY THIS DIRECTORY EXISTS
 
 The objective changed AGAIN on **2026-08-29k (`a2298dc`)**: `CCX_GAMMA_DIFF_DEFAULT = 0.25` (diffuse
-light ON by default, explicitly **not** behaviour-preserving) and `ccx_pump_shape()` replaced by a C1
+light ON by default, explicitly **not** behavior-preserving) and `ccx_pump_shape()` replaced by a C1
 cumulative remap. **Every pre-adoption fitted vector is non-comparable**, including the incumbent
 canonical mode. Measured: the incumbent's own logpost falls **40.49** across the adoption
 (`calibration/diag_attribute_the_seven.R` part 5).
@@ -23,8 +23,8 @@ is the first fitted under both cores agreeing.**
   arm is what re-measures `PIN_PRIOR_CREDIT` and closes the one deliberately-failing test
   (`test-mode-file.R`), whose recomputed gap moved **−11.49 → −19.86** across gamma — a LIKELIHOOD
   differential, not provenance drift.
-- **`h_ml` UNBOUNDED over its shipped support [30, 200]**, prior NOT renormalised. This is already
-  the tracked driver's behaviour since the 08-28 inversion, and both original reasons for the bound
+- **`h_ml` UNBOUNDED over its shipped support [30, 200]**, prior NOT renormalized. This is already
+  the tracked driver's behavior since the 08-28 inversion, and both original reasons for the bound
   are now discharged: the sigma-inflation adoption retired the skip, and the C1 remap removed the
   26 kinks. Startup gates H1/H2/H3 confirm it each run.
 
@@ -58,7 +58,7 @@ unconverged polish, is the right order for the recorded CONDITIONAL price of dif
 
 ⚠ **DO NOT READ PARAMETER VALUES OFF THE SMOKE.** `handoff_2026-08-28c` §3 makes this point against
 its own smoke's alarming `h_ml` = 35.38 m, whose entire gain was prior credit bought with a worse
-fit. This smoke lands `h_ml` at 35.25 / 36.99 — the SAME behaviour, and it is a MAXIT=60 artefact
+fit. This smoke lands `h_ml` at 35.25 / 36.99 — the SAME behavior, and it is a MAXIT=60 artifact
 until the converged run says otherwise. `kz` still rails (95.1 % / 97.7 %), as it has every time.
 
 ## ⚠ A GATE IN THIS DRIVER THAT CAN NO LONGER FAIL

@@ -3,11 +3,11 @@
 **Ruling (Marcus, 2026-09-07d):** "Scope the HS pump and move forward with it if it looks like a plausible fix."
 Context: `notes/options_2026-09-07d_hs_biology.md` §1–2; the end-member probe ([[ccx_hs_endmember_probe]]) showed
 the HS box's DIC is right (2169 = observed SH surface 2163) and the deep under it lacks +116–185 µmol/kg and
-−0.87 ‰ of remineralised carbon.
+−0.87 ‰ of remineralized carbon.
 
 ## The mechanism (built 2026-09-07d, both cores)
 `pump_hs_rel` = HS per-area export ÷ the LS pump's per-area NET export (Σ over layers of the solved divergence
-field, org + carb, over `a_ls`). Export from HS is remineralised in HD (one box), two limbs at the LS pump's
+field, org + carb, over `a_ls`). Export from HS is remineralized in HD (one box), two limbs at the LS pump's
 `pump_carb_frac` and `PUMP_EPS13_ORG` / `PUMP_EPS13_CARB` fractionation, ¹⁴C unfractionated, DIC-limited scaling
 under `pump_mode = "D"` against HS's preindustrial carbon. **0 = OFF, bit-exact** (`aux$pump_hs` NULL, nothing
 emitted; guarded by `tests/testthat/test-pump-hs.R`). Pays choice C9 of `prereg_2026-09-05_hilda_boxes.md`.
@@ -42,5 +42,5 @@ First run, sizing "relative to the LS field": `rel` 1 = **14.0 GtC/yr** from HS 
 **+2.1** — the mechanism works and was over-sized. Log kept: `outputs/diagnostics/diag_hs_pump_probe_20260907_run1_rel.log`.
 **Change made:** the parameter is now ABSOLUTE, `pump_hs_gcm2` (gC m⁻² yr⁻¹), comparable to the export
 literature and independent of the fitted LS field. **Judged point for the second run** (the prereg's stated
-alternative): the scan value {15, 30, 45, 60, 90, 120} whose HD − HS lands nearest the CENTRE of P1's window —
+alternative): the scan value {15, 30, 45, 60, 90, 120} whose HD − HS lands nearest the CENTER of P1's window —
 chosen by P1's own statistic so P2–P7 stay out-of-sample. Predictions P2–P7 unchanged.

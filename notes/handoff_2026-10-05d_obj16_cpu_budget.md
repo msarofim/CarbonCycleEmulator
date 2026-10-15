@@ -126,7 +126,7 @@ Run from the repo root once the end line exists. ⚠ Do not edit these scripts w
 | 918–919 | the rate probe: `MS_SEC_PER_EVAL`, the median of 5 timed evaluations, in wall seconds |
 | 960 | `elapsed_min()` |
 | 973–981 | `polish_reserve_min()` and `maxit_for_budget()`, which size each restart from `MS_WALL_MIN - elapsed_min()` and the observed rate |
-| 996, 1003 | each restart's timing → `restart_min`, normalised by `ms_restart_minutes()` |
+| 996, 1003 | each restart's timing → `restart_min`, normalized by `ms_restart_minutes()` |
 | 999 | the restart's deadline, `as.numeric(t0) + 60 * (MS_WALL_MIN - polish_reserve_min())`, in epoch seconds |
 | 1034 | the polish's sizing, `ms_polish_maxit(MS_WALL_MIN - elapsed_min(), …)` |
 | 1043 | the polish's deadline, `as.numeric(t0) + 60 * MS_WALL_MIN` |
@@ -137,7 +137,7 @@ It runs BEFORE every objective evaluation (driver line 545).
 
 ### 5.4 The design (the recommendation; the decisions in §5.5 come first)
 1. **ONE clock function, `ms_clock()`, in `lib_ms_deadline.R`.** It returns seconds on the chosen clock:
-   - `"wall"`: `as.numeric(Sys.time())`, today's behaviour, bit for bit;
+   - `"wall"`: `as.numeric(Sys.time())`, today's behavior, bit for bit;
    - `"cpu"`: `sum(proc.time()[c("user.self", "sys.self")])`, this R process's own CPU seconds. Children are excluded, and there are none. BLAS is pinned to one thread by both runners (`run_multistart_mac.sh:72`, `multistart.sbatch:370`), so CPU time cannot outrun wall time.
    - It is selected by a named constant read from `CCX_MS_CLOCK`, VALIDATED: an unknown value stops, never falls back.
 2. **Every site in §5.3 reads `ms_clock()`, and nothing else does.**
@@ -164,14 +164,14 @@ It runs BEFORE every objective evaluation (driver line 545).
   - Keep 300 CPU-min (each start gets the compute the design intended), or lower it to hold the old wall ETA?
 - **D3. Comparability.** Every existing run was budgeted on WALL time: the #14/#15 arms, `k_w` = 1446 and #16. Their out-of-time counts are wall-clock facts.
   - A convergence or out-of-time count compared across runs must name the clock, like-for-like ([[like_for_like_forcing]]'s discipline).
-  - #16's sleep-affected starts stay labelled as such.
+  - #16's sleep-affected starts stay labeled as such.
 - **D4. A wall ceiling under the CPU clock?** Optional: stop a start at, say, 2× its budget in WALL time, so a badly oversubscribed machine cannot run a task for days ([[eta_in_days_is_not_a_slow_run]]).
 - **D5. The alternative design, an "AWAKE wall clock",** would exclude any gap between consecutive objective calls longer than G (≫ the slowest evaluation, ~30 s near the h_ml wall).
   - It keeps wall semantics while awake, and it is identical to wall-clock on Torch.
   - It is more machinery for the same sleep-proofing, and Marcus asked for CPU time. Recorded so it is not re-invented.
 
 ### 5.6 Tests (each new gate MUTATION-TESTED: break what it guards, confirm it fails)
-- **T1 Behaviour-preserving.**
+- **T1 Behavior-preserving.**
   - With `CCX_MS_CLOCK=wall` (or unset, if D1 keeps wall the default), `test-ms-deadline.R`'s 8 tests (D1–D8) pass unchanged.
   - A preflight smoke run's log is identical below its stamp lines.
 - **T2 The clock switch.**
@@ -186,15 +186,15 @@ It runs BEFORE every objective evaluation (driver line 545).
 
 ### 5.7 Scope
 - About 15 lines in the driver, 10 in `lib_ms_deadline.R`, and ~60 lines of tests.
-- Nothing in `R/` changes: the objective, the likelihood and the optimiser's path are untouched while no deadline is reached.
+- Nothing in `R/` changes: the objective, the likelihood and the optimizer's path are untouched while no deadline is reached.
 - ⛔ **Not before #16 has landed.** The running tree is frozen at `aa76fb5`, so the repo may be edited, but the landing reads the run as launched, on its wall clock.
 
-## 6. Open items (each is Marcus's to prioritise)
+## 6. Open items (each is Marcus's to prioritize)
 1. **#16's landing** (§4), then adoption by ruling.
 2. **The CPU-time budget** (§5): rule D1–D5, then build and test.
 3. **Optional:** resume the sleep-affected out-of-time starts (12, 14, 15, and 16–19 if they also run out of time) from their checkpoints, as a survey add-on. A resume gets a fresh budget. Ruled "stays an option".
 4. **H2,** the ocean thermal excess (DEFERRED). Under #16 the like-for-like headline grows by the feedback's ≈ −0.02.
-5. **`hs_asx_frac`'s judgement width** (KEPT): `k_w` ≈ 1900 is a disclosed prior compromise; #16 puts it at ~1895.
+5. **`hs_asx_frac`'s judgment width** (KEPT): `k_w` ≈ 1900 is a disclosed prior compromise; #16 puts it at ~1895.
 6. **H1's observed-ratio arm.** It needs a gridded SST download, with his permission.
 7. **Card 4 wording**: his text.
 8. **The hilda34g assessment's verdict.** If #16 is adopted, ask whether it becomes a #16 assessment.
@@ -211,7 +211,7 @@ It runs BEFORE every objective evaluation (driver line 545).
 - **Waiter globs:** `start_[0-9][0-9][0-9].rds`, never `start_*.rds`, which also matches the `_ckpt` files.
 - **The read script's globs** (`multistart_20261005f_hilda_csl3v0kaidgbem_seasml1_pin_*npp_tsens=0_sd1.0452` and `refit_*_obj16_hilda_csl3v0kaidgbem`) must match exactly once. `CCX_O16_MODE` / `CCX_O16_WAVE` override them.
 - **The outdir's name** writes pins as `=0`, from the launch string. Never rebuild it from `ccx_pin_label()`, which prints `=0.00`.
-- **The test tree** `~/ccx_frozen/20261005g_ocgobm` holds scratch only: `SCRATCH_obj16like_NOT_A_FIT` (hilda34g relabelled, NOT a fit) and the `DRYRUN_*` dirs. Never copy them into the repo.
+- **The test tree** `~/ccx_frozen/20261005g_ocgobm` holds scratch only: `SCRATCH_obj16like_NOT_A_FIT` (hilda34g relabeled, NOT a fit) and the `DRYRUN_*` dirs. Never copy them into the repo.
 - **Session cron jobs** are in-memory, die with the session, and auto-expire after 7 days.
 - **Untracked in the repo, and not this session's:** `carbotopecomment*.docx`, `outputs/diagnostics/smoke/`, `outputs/mcmc_smoke/`.
 - **Carried from 10-05b §7:**

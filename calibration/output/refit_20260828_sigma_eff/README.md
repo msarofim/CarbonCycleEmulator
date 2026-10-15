@@ -97,8 +97,8 @@ non-adoption and the regression baseline for any future h_ml work. Never delete 
    **reviewed code change** introducing a NEW named constant with its own justification — reusing
    the retired one would be the retired objective wearing the new one's clothes, which is precisely
    what `2153bd6` set out to stop.
-2. **A bound is not a pin.** The 08-16g mechanism BOUNDED `h_ml` to [85, 120] **and renormalised its
-   prior over that band** — that renormalisation is what produced the −1.5805 offset constant. A
+2. **A bound is not a pin.** The 08-16g mechanism BOUNDED `h_ml` to [85, 120] **and renormalized its
+   prior over that band** — that renormalization is what produced the −1.5805 offset constant. A
    true pin at 96.47 is a different object again (one fewer d.o.f.), and which of the two is wanted
    is itself a decision, not an implementation detail.
 3. **The machine was busy.** At 2026-08-29 10:30 four Julia workers were each at ~99 % CPU (load

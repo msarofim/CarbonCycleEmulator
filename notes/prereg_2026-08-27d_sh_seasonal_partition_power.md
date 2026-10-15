@@ -115,7 +115,7 @@ reject the observed SH drivers, and the structural case for the box gets stronge
 - **The slice is FROZEN in the other 19 parameters** and therefore OVERSTATES cost, per §4's
   third bullet. It is read for SHAPE and RATIO between rows, never as a refit's Δlogpost.
 - The `SST_SEAS_LOGSD` = 0.25 caveat stands: `sst_seas_amp_SH`'s prior z is partly a statement
-  about a judgement width, so the RATIO to the observed 1.746 is the robust half.
+  about a judgment width, so the RATIO to the observed 1.746 is the robust half.
 
 ---
 

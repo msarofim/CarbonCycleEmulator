@@ -126,7 +126,7 @@ meant COMPARE on likelihood), under the ADOPTED periodic spinup, **at `seas_ml =
 **What it is for, and neither is answered today:**
 - **P2** — does the NH strain relax? `sst_seas_amp_NH` is at **z −2.89** with the mechanism OFF.
 - **P12** — does `ent_seas_amp_SH` retire? It fell only **21.038 → 18.695** (z +2.10, still **2.85×**
-  its corrected centre 6.5525) with its intended substitute switched off.
+  its corrected center 6.5525) with its intended substitute switched off.
 
 **Torch, and it is all measured** ⇒ [[torch_cpu_short_spans_gpu_nodes]]:
 `--partition=cs` (NOT `cpu_short`, which spans 74 GPU nodes where this job gets 13–18 % of a core;

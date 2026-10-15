@@ -4,7 +4,7 @@
 ## 0. The standard (Marcus, 09-03; `notes/assessment_2026-09-04_public_readiness.md` §0)
 A pedagogical model, not an emulator: **the product is the CHAIN** — "constrain the model with seasonal and isotopic data ⇒
 long perturbation lifetimes emerge." A defect blocks release if it breaks a link: an observable matched by CANCELLATION, or a
-wrong-signed mechanism cancelled by a fitted coefficient. A benchmark miss with the right mechanism is a research question.
+wrong-signed mechanism canceled by a fitted coefficient. A benchmark miss with the right mechanism is a research question.
 Nothing derived from Joos 2013 may score the model (Marcus 09-08h): 12 and L are comparisons.
 
 ## 1. VERDICT: NOT YET ACCEPTABLE — the same link is broken as on 09-04 and 09-08, and the seasonal mixed layer did not touch it
@@ -48,7 +48,7 @@ Two things this evaluation found about the EVALUATION MACHINERY, both fixed this
 | Seasonal — the SH ocean limb's ANATOMY | SST sine 0.898 @ 4.13 **opposed by** entrained water 0.824 @ 9.68 + shim 0.503 @ 9.80 → net 0.465 @ 8.96 | SST 0.817 @ 4.01 vs shim 1.142 @ 9.69 → 0.365 | ⚠ two RIGHT-signed mechanisms in opposition (Takahashi-type thermal vs DIC), only their NET is gated; the shim still carries **38 %** of the DIC side | 09-12 |
 | Seasonal — NH entrainment channel | the NH mixed layer contributes **0.63 ppm @ 3.8 mo** at MLO, in phase with the 6.87 ppm cycle; `sst_seas_amp_NH` z **−1.73** (1.45 K vs 2.25 observed) | absent; z −2.89 | ✅ the 09-03 "NH has no entrainment channel" is CLOSED | 09-11 |
 | Seasonal — what the ML shows a reader | h(t) 35–109 m (mean 64.8); DIC cycle **±13 µmol/kg** (NH max Feb, SH max Aug), surface δ¹³C **±0.07–0.08 ‰** | ±2 µmol/kg, ±0.01 ‰ | ✅ (the handoff's "±40 µmol/kg" does NOT reproduce under the annual-mean reader; the prereg's untuned 8–17 does) | 09-12 |
-| **ENSO → ocean** | slope +0.0658 = **0.57× obs**; solubility-only **−0.169, r −0.525 (wrong sign)** cancelled by `gamma_enso_ocn` NH 0.341 / SH 0.045 | 0.53×; r −0.523; γ 0.306 / 0.092 | ⛔ **BROKEN LINK — the blocker** | 09-04 |
+| **ENSO → ocean** | slope +0.0658 = **0.57× obs**; solubility-only **−0.169, r −0.525 (wrong sign)** canceled by `gamma_enso_ocn` NH 0.341 / SH 0.045 | 0.53×; r −0.523; γ 0.306 / 0.092 | ⛔ **BROKEN LINK — the blocker** | 09-04 |
 | Interannual variability | GATE V −2.63σ (too smooth, 0.77×) | −2.72 | FAIL, non-blocking (downstream of ENSO) | 09-04 |
 | **Hemispheric differences** | GATE H contrast **+6.52σ**; GATE GL z **−8.68** (bare −13.32): δ¹³C gradient **1.97×**; CO₂ control −1.03 se PASS | +6.53 / −8.72 | ⛔ FAIL | 09-04i |
 | **Isotopes — bomb ¹⁴C** | GATE 5 (trough form since 09-09b): NH trough z **−1.79**, SH peak +1.48, lag −0.94, orderings ok | −1.81 | ✅ PASS (was FAIL in the retired peak-time form; the NH first-peak TIME matches obs) | 09-09b |
@@ -85,7 +85,7 @@ Likelihood by group, C − B (the arc's own accounting): gradients +0.47, d13c_s
    304 against 233 ± 29; the deep DIC row was already the model's worst structural row), GATE Q +0.22σ worse with the SH
    surface heavier (+0.893). Entraining sub-ML water into a seasonal ML pulls on the vertical gradients, so the LS column's
    ventilation-by-diffusion-only root (09-08 §3.2: `kz` 4–40× real, the LS pump 37 GtC/yr above 400 m) is now load-bearing
-   for the seasonal link too. Option D (Martin remineralisation) and E (a ventilation limb) gain a second motivation.
+   for the seasonal link too. Option D (Martin remineralization) and E (a ventilation limb) gain a second motivation.
 4. **The lifetime miss is a first-century miss.** At Joos's own 1000-yr horizon the partition is inside the ensemble's
    spread (land +1.16σ, ocean −0.84σ, air −0.68σ); at 100 yr the land holds 40 % and IRF(100) is 0.279 vs 0.409. The
    09-08 reading ("the land share is ~2.5× the ensemble's") was a 100-yr share against a 1000-yr benchmark; like-for-like the
@@ -97,7 +97,7 @@ Likelihood by group, C − B (the arc's own accounting): gradients +0.47, d13c_s
 6. **Two diagnostic numbers disagree and neither has been arbitrated**: the solubility-only ENSO correlation at `ent26` is
    **−0.432** in the 09-04g diagnostic (`diag_gateS_indep_and_fixB.R` PART B, the number in memory) and **−0.522** in the
    scorecard (both claim the 09-04g estimator: annual uptake ~ year + Niño3.4, 1959–2024). Same sign, same verdict, 20 %
-   apart. Not chased here; the test is to run both at the same arm and diff the index annualisation / window / detrend.
+   apart. Not chased here; the test is to run both at the same arm and diff the index annualization / window / detrend.
 
 ## 4. Options, re-ranked by payoff to the CHAIN per unit cost (each with the test that decides it)
 The 09-08f list, updated: **C is DONE**; **A/B are option B's rulings 1–2** (`ccx_option_b_rulings`); **P7′ is no longer B's
@@ -107,9 +107,9 @@ motivation**; **G is built** (GATE GL) and **I is retired**.
 | **A** | **The Niño3.4-modulated upwelling LIMB on `ml_lo`** (option B ruling 2; "Fix B-lite"): scale the interior → ML exchange by (1 − γ·Niño3.4), γ ≥ 0, so the ocean's ENSO response is upwelling suppression with the RIGHT sign and `gamma_enso_ocn_*` retires | link 2 — the blocker; V downstream | 1–2 days, both cores + parity | UNREFITTED probe at `hilda31s`: does the solubility-only r flip from −0.525 to ≥ +0.3 at a γ the +55 µatm reservoir implies (`ccx_fixB_reservoir_priced`)? Prereg first | **yes — A before anything else** |
 | **B** | Option B proper: `ml_hi` = the HS box with its own poleward MLD cycle (rulings 1, 3–6; R side written, C++/parser/`h_hs` prior/tests owed) | P1c box identity (a low-latitude box carrying a high-latitude cycle); the HS δ¹³C / Q via a seasonal cold box | weeks | its prereg §2a–2c; the HS Holte prior must land `h_hs` 417 → ~103–128 m first | yes — after A |
 | **C′** | **Retire the shim**: refit `hilda31s` with `ent_seas_amp_SH` PINNED to 0 (one Torch array, `seas_ml` 1) | tells whether entrained water carries the whole DIC side of the SH ocean limb | one array | GATE S must still pass; `co2_seasonal_SPO` / `d13c_seasonal_SPO` must not pay > 1 log-unit each; the thermal:DIC ratio (option K) read before and after | yes — cheap, and it is P12's original promise |
-| **D** | Martin-curve remineralisation for the LS pump (b = 0.858 SOURCED) | the deep DIC row (−17.4), Q (the heavy deep), `pump_hs` +2.39, `kz_deep_frac` −2.38 — and now the entrainment source (§3.3) | 1 day + refit | the refit lowers `pump_grad`/`kz` together and the HS export falls toward its prior; P7 re-read | yes |
+| **D** | Martin-curve remineralization for the LS pump (b = 0.858 SOURCED) | the deep DIC row (−17.4), Q (the heavy deep), `pump_hs` +2.39, `kz_deep_frac` −2.38 — and now the entrainment source (§3.3) | 1 day + refit | the refit lowers `pump_grad`/`kz` together and the HS export falls toward its prior; P7 re-read | yes |
 | **E** | A mode-water ventilation limb (subduction from the LS ML with an upwelling return) | the §3.3 root; shares physics with A | weeks | `kz` falls > 3× at the refit with the deep row held | research direction |
-| **G′** | Price closing GATE GL (an iso-fit frontier re-optimising at each step, the `ccx_gates_priced` method) | says what the 1.97× costs the rest of the objective — H/GL cannot be fixed by fitting (three refits have not moved it 0.01) | hours | the frontier's likelihood pinned to the objective's (the 253-log-unit self-check) | no ruling needed (diagnostic) |
+| **G′** | Price closing GATE GL (an iso-fit frontier re-optimizing at each step, the `ccx_gates_priced` method) | says what the 1.97× costs the rest of the objective — H/GL cannot be fixed by fitting (three refits have not moved it 0.01) | hours | the frontier's likelihood pinned to the objective's (the 253-log-unit self-check) | no ruling needed (diagnostic) |
 | **K** | **Gate the thermal : non-thermal ratio inside the SH ocean limb** against an OBSERVATION (Takahashi et al. 2002's decomposition, or SOM-FFN's thermal/non-thermal pCO₂ split over the same 40–90 °S product GATE S uses) | §3.1: two opposing right-signed terms with an ungated ratio | a data task, then a gate | source first (none in the repo yet); power measured on the record (`hilda31p` vs `hilda31s` anatomy) before adoption | yes (a new gate is a ruling) |
 | **M** | A per-hemisphere knockout HANDLE on the MLD cycle (zero one hemisphere's harmonics in `ccx_prepare`, R + C++ parity) — a diagnostic switch, not a mechanism | GATE S hemisphere-clean; completes the 27q decomposition at `seas_ml` 1 | hours + parity test | the override read this session (0.451 @ 9.41) reproduces through the handle | no ruling needed |
 | **N** | Resolve §3.6 (the two ENSO estimators) | diagnostic hygiene before A's probe is read | an hour | both scripts at one arm, diffed | no |
@@ -125,6 +125,6 @@ with the next structural refit, whichever of A/B that is. **B** is the build aft
 The IRF gap (a comparison; §3.4 narrows the hypothesis to the first century and the partition is inside Joos's spread at
 1000 yr); GATE V (non-blocking, downstream of A); `rep_dC` +3.11 (the CO₂ level bias, a data question, unchanged by every
 refit); `q10` −2.11; the deep DIC gradient 304 vs 233 ± 29 (inside 2.5σ_eff and the arc's declared cost, owed to D); the
-shim at 8.16 IF C′ is run (it is 1.25× its centre, z +0.44, not strained — but a reader must be told it moves no carbon);
+shim at 8.16 IF C′ is run (it is 1.25× its center, z +0.44, not strained — but a reader must be told it moves no carbon);
 GATE G +1.24; the NH mixed-layer leak in GATE S (0.45 mo, both readings inside the bracket) until M lands; the absence of a
 posterior sample (the Hessian is now clean; the P8 wall at 4σ is the sampling hazard, not a mode hazard).

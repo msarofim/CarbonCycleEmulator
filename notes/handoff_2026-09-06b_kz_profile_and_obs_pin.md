@@ -85,13 +85,13 @@ posterior fitted with ONE surface box.
 tasks). The questions, in the order they bind:
 1. **Which of {f, `z_K`, `u_hs`, `tau_q`, an HS-specific air–sea exchange factor, `h_hs`} are FREE**,
    and which are declared at HILDA's values. An HS exchange factor is the one every residual points
-   at; HILDA's own justification is winter ice cover cancelling stronger high-latitude winds.
+   at; HILDA's own justification is winter ice cover canceling stronger high-latitude winds.
 2. **Attachment and `hs_frac` as DECLARED choices** (bottom, 0.16), not fitted — the profile cannot
    rank the attachment (§2) and the scan showed it is a step, not a slope.
 3. **The `kz` bracket re-bisected on the 36-box structure** — [4379, 8110] was bisected for the
    column and obs-pinned conduit arms sit at 1061–1747.
 4. Priors for the new parameters from HILDA's Table 1 (`u_hs` 38 ± 17, `tau_q` 538 ± 510, K₀ 465,
-   z₀ 253), labelled model-derived, vintage 1992.
+   z₀ 253), labeled model-derived, vintage 1992.
 Then, in the old order: DESIGN §6 rewritten at `ent26`; `INDEX_cmp_pulse.md` at 17,736 B.
 
 ## 6. ⚠ NON-OBVIOUS STATE
