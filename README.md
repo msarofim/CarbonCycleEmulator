@@ -23,7 +23,7 @@ pathways, and matched pulse/baseline experiments.
 **Audience:** people with an introductory environmental-science background (think
 undergraduate environmental studies).
 
-Teaching software, not peer-reviewed, not for citation.
+Teaching software, not peer-reviewed.
 
 ## Status (2026-10-15)
 

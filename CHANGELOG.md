@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-15 (o) — **README: "not for citation" cut** (Marcus: "Yes, cut it from the README"), to match the app (l). It now reads "Teaching software, not peer-reviewed."
+
 ## 2026-10-15 (n) — **The app-text review APPLIED in full** (Marcus, verbatim: "Apply all the app text suggestions"). This covers the three items that were his until now: issue 7's "slightly", issue 4's class gloss, and the start-up note.
 
 - **Facts and consistency:**
