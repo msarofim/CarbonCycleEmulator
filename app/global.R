@@ -359,12 +359,13 @@ app_params <- local({
                      " sinks",
                      if (.n_pin) paste0(", with ", .n_pin,
                                         " further values held at stated numbers") else "",
-                     # B7 (2026-10-01): TRUE AGAIN under "Hold the bands" (APP_RIBBONS_HOLD
-                     # below). If a band ever ships, this clause must go with it.
-                     ". A single best fit, not yet a posterior — no",
-                     " uncertainty ranges are shown, and the fit constrains the",
-                     " shape of these curves more tightly than their absolute",
-                     " height.")
+                     # 2026-10-15 (Marcus's band copy): the band shipped (APP_RIBBONS_HOLD
+                     # below), so "not yet a posterior -- no uncertainty ranges are shown" went
+                     # with the lift; the last sentence is the approved text, unchanged.
+                     ". Each line is this single best fit. On the Futures tab,",
+                     " the CO\u2082 view also shades the range across runs that",
+                     " vary the fitted parameters. The fit constrains the shape",
+                     " of these curves more tightly than their absolute height.")
     break
   }
   if (file.exists(post_file)) {
@@ -530,15 +531,13 @@ APP_RIBBONS_FILE <- file.path(CCX_ROOT, "data", "futures_ribbons.rds")
 # RE-SHIPPED at the canonical hilda31w (Marcus 2026-10-14: "Ship the hilda31w band (Recommended)";
 # CHANGELOG 10-14 e-f): the hilda31w MCMC band (4 chains to 200k, 17 000 draws; chains agree to
 # <= 4.76 ppm, 21 % of the width, median 11 %) is in data/futures_ribbons.rds
-# (calibration/promote_futures_ribbons.R). The hold now
-# waits ONLY on the copy, which is Marcus's: the band's label (provenance$label, rendered by
-# APP_RIBBON_NOTE), card 6's title and text (app/R/review.R), the parameter panel's "not yet
-# a posterior" clause above, and (2026-10-10, "Omit it on temperature") the temperature view's
-# sentence, APP_RIBBON_NOTE_TEMP below. Lift it (NULL) in the SAME commit as that copy:
-# test-futures-ribbons.R fails a lift while any of the four is still open.
-APP_RIBBONS_HOLD <- paste("held until the copy lands (ship ruled 2026-10-09): the band's label, card 6",
-                          "and the parameter panel still describe an app with no band, and the",
-                          "temperature view's sentence is not yet worded")
+# (calibration/promote_futures_ribbons.R).
+# ⭐ LIFTED 2026-10-15 with Marcus's copy (drafted on "Draft all four for me to edit", his one edit
+# applied; notes/band_copy_drafts_2026-10-15.md): the band's label (provenance$label, label_ruled),
+# card 6 (app/R/review.R), the parameter panel's clause above and APP_RIBBON_NOTE_TEMP below, in ONE
+# commit. test-futures-ribbons.R asserts all four are consistent with a lift and pins their numbers.
+# To hold again, set a string here: the loader then draws nothing and says nothing.
+APP_RIBBONS_HOLD <- NULL
 APP_RIBBONS <- local({
   if (!is.null(APP_RIBBONS_HOLD)) return(list(ok = FALSE, held = TRUE, why = APP_RIBBONS_HOLD))
   if (!file.exists(APP_RIBBONS_FILE))
@@ -554,25 +553,30 @@ APP_RIBBONS <- local({
   c(list(ok = TRUE), r)
 })
 # The caption sentence, from the artifact's own record (label, probabilities, draws).
+# 2026-10-15 (Marcus's band copy): the frame is "..., <label>." -- the label continues the sentence
+# and carries its own second one -- and the count prints with a thousands separator ("17,000").
 APP_RIBBON_NOTE <- if (isTRUE(APP_RIBBONS$ok)) with(APP_RIBBONS$provenance, sprintf(
-  "Shaded: the %g–%g%% range of %d model runs — a %s.",
-  100 * probs[1], 100 * probs[length(probs)], n_ok, label)) else
+  "Shaded: the %g–%g%% range of %s model runs, %s.",
+  100 * probs[1], 100 * probs[length(probs)], formatC(n_ok, format = "d", big.mark = ","), label)) else
   if (isTRUE(APP_RIBBONS$held)) NULL else       # held: silent -- card 6 (the bands card) says why there is no band
   sprintf("No uncertainty band is drawn: %s.", APP_RIBBONS$why)
 # ⚠ THE TEMPERATURE BAND IS NOT DRAWN (RULED 2026-10-10, Marcus: "Omit it on
 # temperature"). The draws vary the CARBON CYCLE's fitted parameters only; the
 # climate module (fitted to FaIR) and the non-CO2 forcing are fixed, so
 # temperature moves only through the CO2 it is handed. The shipped band is
-# 0.02-0.10 degC wide at 2100-2150 (notes/ship_copy_facts_2026-10-09.md, D),
-# about 3 px at the app's scale: a razor-thin band reads as "the warming is
+# 0.020-0.085 degC wide at 2100-2150 and at most 0.085 anywhere in 1750-2150
+# (hilda31w; notes/ship_copy_facts_2026-10-14_hilda31w.md, D), about 3 px at the app's scale: a razor-thin band reads as "the warming is
 # known this precisely". So the band is drawn on APP_RIBBON_YVARS only. The
 # artifact still carries the GMST bands (ccx_ribbons_problems() checks every
 # APP_FUTURE_YVARS); the app just does not draw them.
 APP_RIBBON_YVARS <- "co2_ppm"
 # The temperature view's sentence in place of the band's label: in words, its
-# spread comes only through CO2 and is not shown. MARCUS'S WORDING, PENDING: NULL
-# until it lands, and test-futures-ribbons.R blocks a lift while it is NULL.
-APP_RIBBON_NOTE_TEMP <- NULL
+# spread comes only through CO2 and is not shown. Marcus's wording (2026-10-15).
+# "less than 0.1 °C" is pinned against the shipped band's widest GMST cell by test-futures-ribbons.R.
+APP_RIBBON_NOTE_TEMP <- paste(
+  "No uncertainty band is drawn for temperature. The runs vary only the carbon-cycle",
+  "parameters, which change the warming by less than 0.1 \u00b0C. How strongly the climate",
+  "responds to CO\u2082 is held fixed, so a band would understate the uncertainty in future warming.")
 app_ribbon_note <- function(yvar)
   if (isTRUE(APP_RIBBONS$ok) && !yvar %in% APP_RIBBON_YVARS) APP_RIBBON_NOTE_TEMP else APP_RIBBON_NOTE
 #' The ribbons for the selected scenarios and y-variable, in plot_future()'s

@@ -754,41 +754,39 @@ RV_CARDS <- list(
   # stable public references: retire into RV_RETIRED_IDS (a hole, never reused) and
   # never renumber again -- a comment that leads with "card N" must not land on a
   # different question.
-  # B7 (Marcus 2026-10-01, "Laplace first, MCMC as the check" -- then "Hold the bands"):
-  # a Laplace band WAS built (calibration/build_futures_ribbons.R, 1000 draws) and FAILED
-  # its own check: scored on the objective, the draws sat a median 25 log-units below
-  # the Gaussian, importance ESS 8 / 1000, the posterior strongly non-Gaussian along the
-  # fertilisation ridge (calibration/diag_ribbons_linearity.R, diag_laplace_axes.R). So
-  # the card's approved text is TRUE again and is kept; the one added sentence (drafted
-  # for Marcus's wording) records that the worry it states was MEASURED.
-  # ⚠ 10-02 (CHANGELOG s-u): the MCMC check has since RUN, so three sentences below are out of date
-  # ("too wide", "individual standard errors", "a real sampler is planned"). The facts, for
-  # Marcus to word, are in notes/card6_facts_2026-10-02.md.
+  # B7 (Marcus 2026-10-01, "Laplace first, MCMC as the check" -- then "Hold the bands"): the card said there
+  # were no bands, and that the Laplace band had FAILED its check. 2026-10-15: the hilda31w MCMC band ships,
+  # and this is Marcus's copy for it (drafted on "Draft all four for me to edit"; his one edit deleted the
+  # Laplace sentences; notes/band_copy_drafts_2026-10-15.md). Every number below is pinned against its
+  # artifact by test-futures-ribbons.R ("issue 6's typed numbers"): change them together.
   list(id = 6, key = "bands", class = "gap",
-       title = "There are no uncertainty bands, anywhere",
-       plain = paste("Every line in this app is a single best fit. There is no",
-                     "posterior, so there are no ribbons, and no number here",
-                     "comes with a calibrated uncertainty."),
-       detail = paste("The parameters were located by dispersed multistart",
-                      "optimisation, and the curvature at the optimum is",
-                      "well-behaved enough to quote individual standard errors --",
-                      "but a Gaussian approximation at a mode is not a posterior,",
-                      "and at this model's conditioning the widest directions",
-                      "would be exactly the ones that approximation handles worst.",
-                      "Drawing a band from it would put a number on the chart that",
-                      "reads as calibrated uncertainty and is not.",
-                      "That has since been measured: a Gaussian band was built and",
-                      "run through the full model, and along the direction that",
-                      "trades the strength of CO\u2082 fertilisation against its",
-                      "shape the real fit falls away far faster than the Gaussian",
-                      "assumes, so the band would have been too wide. Running a real",
-                      "sampler is planned for the final model, not this beta: the",
-                      "compute is affordable, but no sampler has yet converged on",
-                      "this posterior, and that is a research problem rather than",
-                      "a queue wait."),
-       ask = paste("Would you want the posterior before you trusted any of this,",
-                   "or is a single best fit acceptable for a teaching tool that",
-                   "says so on every tab?")),
+       title = "The uncertainty band covers only the carbon-cycle parameters",
+       plain = paste("Each line in this app is a single best fit. On the Futures tab,",
+                     "the CO\u2082 view also shades how much the projection changes",
+                     "when the carbon-cycle parameters vary within their plausible",
+                     "range. The band leaves out other sources of uncertainty, so",
+                     "the full range is likely wider."),
+       detail = paste("The band comes from a Markov chain Monte Carlo sampler: four",
+                      "chains of 200,000 steps each, from which 17,000 parameter sets",
+                      "were run through the full model. It varies the 31 fitted",
+                      "carbon-cycle parameters. Fourteen other parameters are held at",
+                      "fixed values, and the climate response (fitted to FaIR), the",
+                      "non-CO\u2082 forcing and the model's structure are not varied.",
+                      "Temperature therefore changes only through CO\u2082, by less than",
+                      "0.1 \u00b0C, and no band is drawn for it.",
+                      "The sampler has not fully converged. Three parameters that set",
+                      "how far plant growth and respiration lag behind the seasons can",
+                      "compensate for one another, and one chain sampled a different",
+                      "combination of them for part of its run. This has less effect",
+                      "on the projections: bands computed from each chain separately",
+                      "agree to within about 5 ppm, at most about a fifth of the",
+                      "band's width.",
+                      "The depth of the ocean's mixed layer is cut off at about 75 m",
+                      "by a limit in the model's time-stepping, so its sampled range",
+                      "may be narrower than the data allow."),
+       ask = paste("Does a band that covers only the carbon-cycle parameters help",
+                   "you read the projections, or would you want the climate response",
+                   "included before relying on it?")),
   list(id = 7, key = "shims", class = "design",
        title = "Some parameters stand in for mechanisms, and some constants are unsourced",
        # 2026-10-15 review (Marcus: "Apply all"): three of the seven stand-ins are HELD at 0 at hilda31w, so

@@ -2,6 +2,23 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-15 (e) — **THE BAND IS LIFTED with Marcus's copy. `APP_RIBBONS_HOLD` is NULL; the Futures tab's CO₂ view draws the hilda31w MCMC band, and the temperature view says in words why it has none.** Marcus asked "Draft all four for me to edit"; the drafts are `notes/band_copy_drafts_2026-10-15.md` (`2514038`). His one edit: delete the two Laplace sentences from issue 6 ("A faster method, which treats the fit as a bell curve …"). The other three pieces went in as drafted.
+
+- **The four pieces:**
+  - the caption: "Shaded: the 5–95% range of 17,000 model runs, each with a different plausible set of the fitted carbon-cycle parameters. The climate response, the non-CO₂ forcing and the model's structure are held fixed, so the full uncertainty is likely wider." The template frame ("— a <label>.") is gone, and the count now prints with a thousands separator;
+  - issue 6: new title ("The uncertainty band covers only the carbon-cycle parameters"), plain, detail and ask; class "gap" kept;
+  - the parameter panel: "not yet a posterior — no uncertainty ranges are shown" replaced by two sentences on the band; the last sentence is unchanged;
+  - `APP_RIBBON_NOTE_TEMP`: worded.
+- **The label is in the artifact:** `promote_futures_ribbons.R --label=…` gives `label_ruled = TRUE`. `data/futures_ribbons.rds` md5 is now `799e76c3aec3b0da340dc668df14d0ac`. Bands are `identical()` to the landed source. **Byte-identical on a second run from a clean tree.** A first comparison differed only in the provenance stamp ("+dirty", because the first run had already written `data/`); a field-by-field check confirmed that, and the clean rerun matched byte for byte.
+- **Issue 6's typed numbers are pinned** (`test-futures-ribbons.R`, "issue 6's typed numbers"). Each number is read from the TEXT and compared with its artifact:
+  - exact: four chains, 200,000 steps, 17,000 sets (0 failed), 31 fitted, Fourteen held, and the three lag names, which are the top three R-hats;
+  - ordering: "less than 0.1 °C" against the widest GMST cell in 1750–2150, 0.0847 °C. The same check covers the temperature sentence;
+  - rounded to the typed precision: "about 5 ppm" (4.763), "about a fifth" (1/0.2076 → 5) and "about 75 m" (75.02, the substep cap at the mode; P8 alone 75.14).
+  - The by-chain read is tied to the shipped band (42 cells, ≤ 6e-13). The h_ml wall read is tied by the canonical's md5.
+  - **Mutation-tested:** 17 mutations of the text and of each artifact, each caught by name.
+- **README and DESIGN banners:** they said the band was "not yet displayed" / "held". Now they say what is drawn.
+- **Checked:** `test-futures-ribbons` 87 / 0 (was 65 / 0); 30 app-facing test files 1454 / 0. In the browser (`ccx-app`, 7788, 1280 px), the caption, the band on High, the temperature sentence, issue 6 and the panel render as above, neither old phrase appears anywhere on the page, and the server log has no errors.
+
 ## 2026-10-15 (d) — **Pre-public review of the whole app text, the repo documents and the model comments, APPLIED.** Four read-only reviewers (teaching tabs, Known issues + parameter table, model code, public docs) reported ~110 findings. Marcus ruled, verbatim: "Apply all (Recommended)" for the factual fixes (with copy-test pins following the changed sentences), "Apply all (Recommended)" for the cleanups, "Facts-only README + banners (Recommended)", and "Trim to a public version (Recommended)" for CLAUDE.md. The 34 app-facing test files read 1809 / 0.
 
 - **Box diagram** (Marcus's own requests, `0d694df`):
