@@ -16,9 +16,10 @@
 
 CARB_COEFS_FILE <- file.path("data", "carbonate_coefs.rds")
 # THE TABLES, ONE PER REFERENCE SALINITY (2026-10-12). 34.7 is the uncited legacy value every
-# registered mode ran on; 34.760 is GLODAPv2.2023's 0-100 m cos-lat-weighted surface salinity
-# (citation rulings row 30, "Compute from GLODAP, adopt (Recommended)"), read by label
-# hilda_csl3v0kaidgbemwtc through the structure field `carb_salinity`. Each file is built by
+# mode registered before hilda31w ran on; 34.760 is GLODAPv2.2023's 0-100 m cos-lat-weighted
+# surface salinity (citation rulings row 30, "Compute from GLODAP, adopt (Recommended)"), read by
+# label hilda_csl3v0kaidgbemwtc through the structure field `carb_salinity` -- the canonical
+# hilda31w runs on it. Each file is built by
 # data-raw/build_carbonate_tables.R <salinity>; the loader checks the file's own salinity.
 CARB_SALINITY_LEGACY    <- 34.7
 CARB_COEFS_BY_SALINITY  <- c("34.7" = "carbonate_coefs.rds", "34.76" = "carbonate_coefs_s34760.rds")
@@ -41,7 +42,8 @@ carb_coefs <- function(file = ccx_path(CARB_COEFS_FILE)) {
 }
 
 #' The carbonate table for a reference salinity (NULL = the legacy 34.7, the SAME object
-#' carb_coefs() returns, so every registered mode is bit-exact). An unbuilt salinity STOPS.
+#' carb_coefs() returns, so every mode registered before hilda31w is bit-exact). An unbuilt
+#' salinity STOPS.
 ccx_carb_coefs_for <- function(salinity = NULL) {
   if (is.null(salinity)) return(carb_coefs())
   hit <- names(CARB_COEFS_BY_SALINITY)[abs(as.numeric(names(CARB_COEFS_BY_SALINITY)) - salinity) < 1e-9]

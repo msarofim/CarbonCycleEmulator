@@ -66,6 +66,18 @@ CCX_ARTIFICIAL_SINK_MODE  <- local({
 })
 
 FORC_FOSS_NH_SHARE <- 0.9201 # fossil CO2 emitted in the NH. MEASURED (Marcus,
+                             # 2026-08-15, review item 5) by the EDGAR v4.3.2
+                             # country aggregation in
+                             # data-raw/extract_emission_seasonality.py --
+                             # Crippa et al. 2020, Sci Data 7:121. Supersedes a
+                             # 0.95 that had carried a "PROVISIONAL" comment
+                             # since it was written. It moves the modelled
+                             # 2015-24 MLO-SPO gradient 5.03 -> 4.67 ppm toward
+                             # the observed 3.74, the new gradient term prefers
+                             # it by +95 log-units, and the rest of the
+                             # objective is essentially indifferent (-1.5) --
+                             # a bias correction, the same shape as 5b and 5c.
+                             # 0.95 is recoverable by setting this constant.
 
 # ---- OBSERVED SST (HadSST4) and its forward scaling (2026-08-18) -----
 # Historical hemispheric SST anomalies are PRESCRIBED from HadSST.4.2.0.0
@@ -85,18 +97,7 @@ FORC_SST_PRE1850_MEAN <- TRUE   # FALSE = the pre-09-16 d single-year-1850 hold 
 CCX_SST_RATIO_NH <- 0.819
 CCX_SST_RATIO_SH <- 0.762
 CCX_SST_SPLICE_YR <- 10
-                             # 2026-08-15, review item 5) by the EDGAR v4.3.2
-                             # country aggregation in
-                             # data-raw/extract_emission_seasonality.py --
-                             # Crippa et al. 2020, Sci Data 7:121. Supersedes a
-                             # 0.95 that had carried a "PROVISIONAL" comment
-                             # since it was written. It moves the modelled
-                             # 2015-24 MLO-SPO gradient 5.03 -> 4.67 ppm toward
-                             # the observed 3.74, the new gradient term prefers
-                             # it by +95 log-units, and the rest of the
-                             # objective is essentially indifferent (-1.5) --
-                             # a bias correction, the same shape as 5b and 5c.
-                             # 0.95 is recoverable by setting this constant.
+
 # TIME-VARYING LAND-USE HEMISPHERIC SHARE (2026-08-15, review item 5b). TRUE
 # uses the OSCAR-sourced per-year series in data/forcing_luc_nh_share.rds; FALSE
 # falls back to the constant below and reproduces every result produced before
@@ -221,7 +222,7 @@ CCX_AOD_MODE_CODES <- c(legacy = 0L, anomaly = 1L)
 FORC_AOD_BG_WIN    <- c(1850, 1852)
 # THE NUCLEAR-INDUSTRY 14C NH SHARE (2026-10-12; citation rulings row 20; label
 # hilda_csl3v0kaidgbemwtc, field `nuc_share_ts`). "constant" = FORC_NUC_NH_SHARE (0.95), every
-# registered mode: the table's `nuc_share_NH` column carries that constant (the aux scalar's own
+# mode registered before hilda31w (which runs "per_year"): the table's `nuc_share_NH` column carries that constant (the aux scalar's own
 # value; a hand-built table without the column reaches both cores as NaN = the same scalar). "per_year" = the share of the 22-country files' OWN rows, year by year
 # (data/forcing_nuc_nh_share.rds, data-raw/build_nuc_nh_share.R), held flat within a year and
 # HELD at the nearest year outside the files (the source is zero there; the 14C tag still needs a
@@ -509,58 +510,6 @@ ccx_scenario_emissions <- function(scenario) {
   hit
 }
 
-# ---------------------------------------------------------------------
-#' Assemble the full monthly forcing table
-#'
-#' @param scenario "historical", or a scenario key in CCX_SCENARIO_EMIS_FILES
-#'   (the SSP names in data/ssp_emissions.rds, the van Vuuren keys vvVL..vvH in
-#'   data/vv_emissions.rds)
-#' @param years    integer range c(first, last)
-#' @param prod_c14 cosmogenic 14C production (mol/yr) -- from ccx_spinup()
-#' @param bomb_total_kmol total bomb 14C production, 1945-1980
-#' @param emissions optional data.frame(year, fossil_GtC, luc_GtC) REPLACING the
-#'   scenario's emissions entirely. This is how the app's stylised pathways
-#'   ("linear to zero by 2060", "+2 %/yr") and its pulse experiments are built:
-#'   the caller assembles the annual series and everything downstream --
-#'   hemispheric split, monthly interpolation, annual-total conservation -- is
-#'   applied identically to a custom path and to an SSP. `scenario` still names
-#'   the run for labelling and still selects the non-CO2 climate background.
-#'   ⚠ ITS `luc_GtC` IS MULTIPLIED BY `luc_scale` like any other land-use series
-#'   (code review 2026-10-12 sec.5): a 100 GtC LAND-USE pulse placed in this column
-#'   arrives as 100 x luc_scale (91.4 GtC at hilda29e). No caller does this -- the
-#'   app's pulses are fossil -- so it is documented, not changed; divide a land-use
-#'   perturbation by `luc_scale`, or put it in `fossil_GtC`, to keep its size.
-#' @param sink_rate,sink_mode the artificial mid-century sink (2026-08-23c).
-#'   ARGUMENTS, not just env constants, so a diagnostic can build all three arms
-#'   in ONE process -- CCX_ARTIFICIAL_SINK_{RATE,MODE} are resolved when this
-#'   file is sourced, so driving the arms by Sys.setenv would require re-sourcing
-#'   and would silently test the OFF state if anyone forgot. The constants remain
-#'   the defaults, so an env-driven refit is unchanged.
-#'   NOTE the "luc" arm subtracts from the land-use series AFTER `luc_scale` has
-#'   been applied to it, so the reduction is an absolute 2.5 GtC/yr in the
-#'   MODEL's own flux and the three arms are magnitude-matched. That is why
-#'   ccx_scaled_forcing() and ccx_make_logpost(), which apply `luc_scale` as a
-#'   column MULTIPLY on an already-built base, refuse to run that arm: an affine
-#'   column is not linear in `luc_scale` and the multiply would rescale the
-#'   perturbation along with the flux.
-#' @param luc_scale multiplier on the land-use emission series (added 2026-08-14).
-#'   E_LUC is the least certain input in the table -- GCB 2025 states +/-0.7
-#'   GtC/yr on it (LIK_GCB_LUC_SD), and GCB's own 1850-2018 total is 34 % above
-#'   OSCAR v3.1's for the identical period (DATA.md sec.3a). Prescribing it exact
-#'   forced that uncertainty onto `beta`, which absorbed ~30 ppm of it. This is
-#'   the knob that lets it be a calibrated quantity instead; see
-#'   CCX_PARAM_TABLE$luc_scale for the prior and its receipts.
-#'   Applied to the ANNUAL series before interpolation, so the monthly flux, the
-#'   in-window cumulative AND the pre-window `luc_pre` all scale together --
-#'   which is what makes the equivalent post-hoc column rescale used inside
-#'   ccx_make_logpost() exact (gated by test-luc-scale.R).
-#' @param enso_index which ENSO index the `enso` column carries: "demean" (the
-#'   shipped RULING A index, default), "detrend" or "relsst_lp" -- see
-#'   CCX_ENSO_INDEX_CODES. Stamped as attr "enso_index". Callers running a
-#'   parameter set should pass `ccx_enso_index_of(params)`.
-#' @param aod_mode "legacy" (default) or "anomaly" -- see CCX_AOD_MODE_CODES.
-#'   Stamped as attr "aod_mode"; pass `ccx_aod_mode_of(params)`.
-#' @return data.frame, one row per month, with everything ccx_deriv() needs
 #' Which ENSO index a parameter list names (CCX_ENSO_INDEX_CODES; absent = "demean")
 ccx_enso_index_of <- function(p) {
   v <- p$enso_index
@@ -632,6 +581,67 @@ ccx_with_emis_method <- function(method, expr) {
   force(expr)
 }
 
+# ---------------------------------------------------------------------
+#' Assemble the full monthly forcing table
+#'
+#' @param scenario "historical", or a scenario key in CCX_SCENARIO_EMIS_FILES
+#'   (the SSP names in data/ssp_emissions.rds, the van Vuuren keys vvVL..vvH in
+#'   data/vv_emissions.rds)
+#' @param years    integer range c(first, last)
+#' @param prod_c14 cosmogenic 14C production (mol/yr) -- from ccx_spinup()
+#' @param bomb_total_kmol total bomb 14C production, 1945-1980
+#' @param emissions optional data.frame(year, fossil_GtC, luc_GtC) REPLACING the
+#'   scenario's emissions entirely. This is how the app's stylised pathways
+#'   ("linear to zero by 2060", "+2 %/yr") and its pulse experiments are built:
+#'   the caller assembles the annual series and everything downstream --
+#'   hemispheric split, monthly interpolation, annual-total conservation -- is
+#'   applied identically to a custom path and to an SSP. `scenario` still names
+#'   the run for labelling and still selects the non-CO2 climate background.
+#'   ⚠ ITS `luc_GtC` IS MULTIPLIED BY `luc_scale` like any other land-use series
+#'   (code review 2026-10-12 sec.5): a 100 GtC LAND-USE pulse placed in this column
+#'   arrives as 100 x luc_scale (94.2 GtC at the canonical hilda31w; 91.4 at
+#'   hilda29e). No caller does this -- the
+#'   app's pulses are fossil -- so it is documented, not changed; divide a land-use
+#'   perturbation by `luc_scale`, or put it in `fossil_GtC`, to keep its size.
+#' @param sink_rate,sink_mode the artificial mid-century sink (2026-08-23c).
+#'   ARGUMENTS, not just env constants, so a diagnostic can build all three arms
+#'   in ONE process -- CCX_ARTIFICIAL_SINK_{RATE,MODE} are resolved when this
+#'   file is sourced, so driving the arms by Sys.setenv would require re-sourcing
+#'   and would silently test the OFF state if anyone forgot. The constants remain
+#'   the defaults, so an env-driven refit is unchanged.
+#'   NOTE the "luc" arm subtracts from the land-use series AFTER `luc_scale` has
+#'   been applied to it, so the reduction is an absolute 2.5 GtC/yr in the
+#'   MODEL's own flux and the three arms are magnitude-matched. That is why
+#'   ccx_scaled_forcing() and ccx_make_logpost(), which apply `luc_scale` as a
+#'   column MULTIPLY on an already-built base, refuse to run that arm: an affine
+#'   column is not linear in `luc_scale` and the multiply would rescale the
+#'   perturbation along with the flux.
+#' @param luc_scale multiplier on the land-use emission series (added 2026-08-14).
+#'   E_LUC is the least certain input in the table -- GCB 2025 states +/-0.7
+#'   GtC/yr on it (LIK_GCB_LUC_SD), and GCB's own 1850-2018 total is 34 % above
+#'   OSCAR v3.1's for the identical period (DATA.md sec.3a). Prescribing it exact
+#'   forced that uncertainty onto `beta`, which absorbed ~30 ppm of it. This is
+#'   the knob that lets it be a calibrated quantity instead; see
+#'   CCX_PARAM_TABLE$luc_scale for the prior and its receipts.
+#'   Applied to the ANNUAL series before interpolation, so the monthly flux, the
+#'   in-window cumulative AND the pre-window `luc_pre` all scale together --
+#'   which is what makes the equivalent post-hoc column rescale used inside
+#'   ccx_make_logpost() exact (gated by test-luc-scale.R).
+#' @param enso_index which ENSO index the `enso` column carries: "demean" (the
+#'   shipped RULING A index, default), "detrend" or "relsst_lp" -- see
+#'   CCX_ENSO_INDEX_CODES. Stamped as attr "enso_index". Callers running a
+#'   parameter set should pass `ccx_enso_index_of(params)`.
+#' @param aod_mode "legacy" (default) or "anomaly" -- see CCX_AOD_MODE_CODES.
+#'   Stamped as attr "aod_mode"; pass `ccx_aod_mode_of(params)`.
+#' @param emis_method "constant" (piecewise-constant within the year; the default,
+#'   CCX_EMIS_METHOD_DEFAULT since 2026-10-01) or "spline" (the pre-flip natural
+#'   spline) -- how annual emissions are interpolated to months; see
+#'   CCX_EMIS_METHOD_DEFAULT in R/constants.R.
+#' @param nuc_share "constant" (default: FORC_NUC_NH_SHARE every year) or "per_year"
+#'   (the nuclear-industry 14C NH share year by year) -- see CCX_NUC_SHARE_CODES.
+#'   Stamped as attr "nuc_share"; callers running a parameter set should pass
+#'   `ccx_nuc_share_of(params)` (the canonical hilda31w runs "per_year").
+#' @return data.frame, one row per month, with everything ccx_deriv() needs
 ccx_build_forcing <- function(scenario = "historical",
                               years = c(1750, 2024),
                               prod_c14 = NA_real_,
@@ -735,9 +745,11 @@ ccx_build_forcing <- function(scenario = "historical",
   # every month of a year within a whisker of its annual mean. Real fossil
   # emissions peak in NH January (heating) and real land-use fire peaks in the
   # dry season of whichever hemisphere is burning. The model's ONE free NEP
-  # amplitude absorbed the difference -- seas_amp_NH is the objective's most
-  # sharply curved parameter, and it fits to 19.66 GtC/yr against a default
-  # of 12.
+  # amplitude absorbed the difference -- seas_amp_NH was then the objective's
+  # most sharply curved parameter, and it fit to 19.66 GtC/yr against a default
+  # of 12. (That knob was RETIRED 2026-08-18, when the seasonal NEP sine gave way
+  # to the insolation + Q10 drivers; seas_amp_NH survives only on the
+  # seas_drivers = 0 escape-hatch path -- see CCX_SEAS_PHI_EFF in R/model.R.)
   #
   # Weights are hemispheric monthly climatologies from GFED4.1s (fire) and
   # EDGAR v4.3.2 (fossil); see data-raw/build_emission_seasonality.R for the
@@ -1172,7 +1184,6 @@ ccx_aod_forcing <- function(t, col, aod_mode = "legacy") {
     v[post] <- (a[[col]][which.max(a$t)] - bg) * exp(-(t[post] - max(a$t)) / ccx_aod_efold_yr())
   v
 }
-#' Which AOD mode a parameter list names (absent = "legacy")
 # ---- N DEPOSITION (D2 (a), Marcus 2026-09-30) ------------------------------
 # data/forcing_ndep.rds, built by data-raw/build_ndep_forcing.R: one ANNUAL series
 # per scenario, columns scenario / year / ndep_NH / ndep_SH, in Tg N/yr of
@@ -1219,6 +1230,7 @@ ccx_ndep_check <- function(ndep_ret, F) {
   invisible(TRUE)
 }
 
+#' Which AOD mode a parameter list names (absent = "legacy")
 ccx_aod_mode_of <- function(p) {
   v <- p$aod_mode
   if (is.null(v)) return("legacy")
@@ -1333,10 +1345,12 @@ ccx_fill_prod_c14 <- function(F, spin) {
 #'
 #' @param substeps RK4 substeps per month, or "auto" to pick the smallest count
 #'   that keeps the explicit diffusion term stable (see ccx_substeps_for()).
-#'   "auto" resolves to CCX_SUBSTEPS_MIN = 4 at every ordinary parameter value.
-#'   ⚠ (code review 2026-10-12) Not under the seasonal mixed layer: 4 at the
-#'   canonical's h_ml (64.63), 5 / 6 / 9 / 13 at h_ml 68 / 70 / 72 / 73 -- see
-#'   the stability section of R/model.R. This R path has no NA-retry.
+#'   Without the seasonal mixed layer "auto" resolves to CCX_SUBSTEPS_MIN = 4
+#'   at every ordinary parameter value. ⚠ Under the seasonal mixed layer it
+#'   depends on h_ml: 6 at the canonical hilda31w (h_ml 69.54); with hilda31w's
+#'   other values 4 / 5 / 10 / 15 at h_ml 64.63 / 68 / 72 / 73 (4 at the
+#'   then-canonical hilda29e, code review 2026-10-12) -- see the stability
+#'   section of R/model.R. This R path has no NA-retry.
 #' @param flux_method "snapshot" (default) or "rk4"; see the comment in the body.
 #' @return list(state = final state, out = data.frame of monthly diagnostics)
 ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE, edge_fn = NULL,
@@ -1354,7 +1368,7 @@ ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE, edge_fn = NULL,
   y <- spin$y; aux <- spin$aux; grid <- spin$grid; p <- spin$params
   # THE FOUR FORCING GUARDS (2026-10-14 o, Marcus: "Land them, with a test"): the forcing's
   # ENSO index, AOD mode, nuclear 14C share and N deposition must be the ones the parameters
-  # name, derived exactly as ccx_cpp_prepare() derives them for ccx_run_prepared(). Until then
+  # name, derived exactly as ccx_run_prepare() derives them for ccx_run_prepared(). Until then
   # this core checked none, so a default-built forcing under the canonical's params ran on the
   # DEFAULT variants with no error (CHANGELOG 2026-10-14 n). Gate: test-run-r-guards.R.
   ccx_enso_index_check(p, F); ccx_aod_mode_check(p, F); ccx_nuc_share_check(p, F)

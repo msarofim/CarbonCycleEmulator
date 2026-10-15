@@ -8,7 +8,7 @@
 #
 #     tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = ...)
 #
-# Outside a git checkout -- a frozen bundle under ~/ccx_frozen/ -- git exits
+# Outside a git checkout -- e.g. a frozen copy of the repo run from elsewhere -- git exits
 # 128 and system() / system2() only WARN, so the handler never fires and the
 # value is character(0). Measured 2026-10-01 on every consumer shape the drivers
 # used: a cat(sprintf()) line VANISHES; a say()/xt() line prints blank; an rds

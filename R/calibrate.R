@@ -439,7 +439,8 @@ CCX_PARAM_TABLE <- list(
   # 09-16 c review named it): lognormal, median 175.4 m, log-sd 0.422 -- the
   # Holte HS annual MEAN 115 m and MAX 268 m as its 16 / 84 % points, COMPUTED
   # by data-raw/build_h_hs_prior.R and read lazily through ccx_h_hs_prior().
-  # The canonical's 393 m sits at z +1.91 (it was FLAT-prior free); re-centre
+  # The canonical's 393 m on 2026-09-16 sat at z +1.91 (it was FLAT-prior free);
+  # the canonical hilda31w's 293.5 m sits at z +1.22 (2026-10-15). Re-centre
   # on the MEAN when option B (the HS seasonal cycle) is adopted, as h_ml's
   # was on 09-09w. Every stored logpost moves by this prior's value at its
   # h_hs minus the flat density's; the likelihood is untouched.
@@ -575,9 +576,10 @@ CCX_PARAM_TABLE <- list(
   # Nino3.4 modulation of equatorial upwelling in Sv PER INDEX UNIT, whole band,
   # split equally; the limb's floor is w0_l2 = 27 Sv (Meinen, McPhaden & Johnson
   # 2001 through obs_eq_cell.rds$w0_prior), a structure constant. Reaches the
-  # model only under a structure with k_l2 > 0 ("hilda_cl2"); INERT (k_l2 = 0)
-  # under every registered file's structure, so it is in CCX_PARAM_ABSENT_OK and
-  # PINNED in any array without the limb. Box [0, 60] = 2.4x the observed bracket's
+  # model only under a structure with k_l2 > 0 ("hilda_cl2" / "hilda_cl3" and
+  # descendants: the canonical hilda31w runs k_l2 = 3 with w_enso_l2 HELD (pinned)
+  # at 16.79); INERT (k_l2 = 0) under the structures without the limb, so it is in
+  # CCX_PARAM_ABSENT_OK and PINNED in any array without the limb. Box [0, 60] = 2.4x the observed bracket's
   # top (14-25 Sv/index, the 1997-99 swing) and 1.9x the unrefitted need at
   # hilda30h (32.2); FLAT by ruling R3 (the 09-14 b gamma_eq precedent: the
   # bracket is the VERDICT, not the prior). Init = the bracket's geometric centre.
@@ -614,8 +616,9 @@ CCX_PARAM_TABLE <- list(
   # The preindustrial surface-to-bottom DIC gradient the pump holds, umol/kg.
   # ⚠ (code review 2026-10-12) EXACTLY that only in the pure LS column. Under the
   # HILDA HS conduit (tau_q > 0) the SPUN-UP bottom-box-minus-mixed-layer DIC at
-  # the canonical hilda29e is 372.6 (NH) / 363.0 (SH) umol/kg against its fitted
-  # pump_grad 314.7; with tau_q = 0 it is 315.4 / 315.6 (review-measured). So
+  # hilda29e (the canonical until 2026-10-13) is 372.6 (NH) / 363.0 (SH) umol/kg
+  # against its fitted pump_grad 314.7; with tau_q = 0 it is 315.4 / 315.6
+  # (review-measured; not re-measured at hilda31w, pump_grad 330.7). So
   # under the conduit `pump_grad` is the SOLVED FIELD's magnitude knob, not the
   # model's realised gradient (see ccx_pump_export() in R/model.R).
   # Everything else about the pump stays structural: the export SHAPE is GLODAP's
@@ -718,7 +721,7 @@ CCX_PARAM_TABLE <- list(
   # ERSSTv5). The land widths are DERIVED -- the lognormal whose +/-1 sigma spans
   # the measured area-weighted-to-boreal bracket, so the width is the weighting
   # ambiguity itself. The ocean width is a stated JUDGEMENT
-  # (SST_SEAS_AMP_LOGSD), because no bracket for it exists.
+  # (SST_SEAS_LOGSD), because no bracket for it exists.
   #
   # THE RECOLLECTIONS WERE CLOSE TO RIGHT: 12 vs an observed 11.4, 2.0 vs 2.24,
   # 1.2 vs 1.75. The re-anchoring is therefore NOT a large move in the priors --
@@ -996,8 +999,9 @@ CCX_PARAM_TABLE <- list(
   # 4 ppm off its own 0.6 ppm fit. The prior admits a representation constant
   # and resists a structural error wearing its clothes -- the grad_off_co2 idiom.
   # ⚠ SUPERSEDED AS A DESCRIPTION OF THE CANONICAL (code review 2026-10-12; the
-  # paragraph above is kept as history): `hilda29e` fits rep_dC = +4.21 ppm, the
-  # OPPOSITE sign to the -4.19 above, and its CO2 level rows fit at rms z 0.53
+  # paragraph above is kept as history): `hilda29e` fit rep_dC = +4.21 ppm and
+  # the canonical since 2026-10-13, `hilda31w`, fits +4.24 -- the OPPOSITE sign to
+  # the -4.19 above; at hilda29e its CO2 level rows fit at rms z 0.53
   # (review-measured) -- the level stream did not reject it. See the matching
   # note in R/likelihood.R's rep_dC block.
   #
@@ -1024,7 +1028,9 @@ CCX_PARAM_TABLE <- list(
   # defaults, -0.549 at the MAP mode; calibration/diag_gradient_terms.R part 3)
   # sit near 1 sd, while absorbing the whole 1.29 ppm recent miss would cost
   # 2.6 sd. That is the intended dial: the prior admits a representation
-  # constant and resists a model error wearing its clothes.
+  # constant and resists a model error wearing its clothes. ⚠ The canonical
+  # hilda31w fits grad_off_co2 = +0.248 ppm -- the OPPOSITE sign to the measured
+  # intercepts and to the station-latitude argument (verified 2026-10-15).
   #
   # grad_off_d13c, sd 0.15 permil -- DELIBERATELY LOOSER IN RELATIVE TERMS, and
   # not for the same reason. The CO2 offset is 19 % of its gradient, which the
@@ -1312,7 +1318,8 @@ CCX_PARAM_ABSENT_OK <- c("w_eq", "gamma_eq",
                          # option O1 arm THC (2026-09-15 d): likewise "martin"-only
                          "w_thc",
                          # the layer-2 Nino3.4 limb (2026-09-17 k): reaches the model only
-                         # under k_l2 > 0 ("hilda_cl2"); every registered file has k_l2 = 0
+                         # under k_l2 > 0 ("hilda_cl2"/"hilda_cl3"...; the canonical hilda31w
+                         # runs k_l2 = 3, w_enso_l2 pinned at 16.79); k_l2 = 0 elsewhere
                          "w_enso_l2")
 # ⚠ The GATED names (2026-09-30, CCX_PARAM_GATED) are NOT listed here: this set is
 # static and every name on it must be fitted (test-param-absent-ok.R), which a gated
@@ -1665,7 +1672,9 @@ ccx_migrate_par_set <- function(p) {
     filled <- c(filled, nm)
   }
   # 2026-09-17 k: w_enso_l2 entered the table (36 -> 37). Absent = 0 = OFF, and
-  # under every registered file's structure (k_l2 = 0) the limb is absent anyway.
+  # under a structure with k_l2 = 0 the limb is absent anyway. (A file whose
+  # structure HAS the limb -- the canonical hilda31w, k_l2 = 3 -- carries
+  # w_enso_l2 among its pins, 16.79, so it is not absent there.)
   if ("w_enso_l2" %in% absent) { p[["w_enso_l2"]] <- 0; filled <- c(filled, "w_enso_l2") }
   # 2026-09-30: the GATED names (CCX_PARAM_GATED) are in the table only under a
   # structure that opens the gate. Every file fitted under any other structure HELD
@@ -1892,20 +1901,6 @@ ccx_prior_z <- function(name, x, table = CCX_PARAM_TABLE, p = NULL) {
   else         -stats::qnorm(max(hi, .Machine$double.xmin))
 }
 
-# ---- posterior -------------------------------------------------------
-#' Build a closure that evaluates the log-posterior on the unconstrained scale.
-#'
-#' The forcing table is assembled ONCE and reused; only c14_cosmo is refreshed
-#' per draw, because natural 14C production is solved by the spinup and so
-#' depends on the parameters.
-#' @param base_params the parameter list the fitted parameters are written INTO.
-#'   Defaults to `ccx_default_params()`, which is the only thing any caller
-#'   wanted until 2026-08-16e. It exists so a STRUCTURAL choice that is not a
-#'   fitted parameter -- `pump_mode` "N" vs "D" is the case it was added for
-#'   (Marcus deferred that choice to the refit; see DESIGN sec.5.2f) -- can be
-#'   varied between two otherwise-identical objectives. Fitted parameters still
-#'   overwrite their entries, so passing a list that sets one of them has no
-#'   effect: this is for structure, not for pinning parameters.
 # ---------------------------------------------------------------------
 # CANONICAL MODE / FORCING RECONSTRUCTION (promoted 2026-08-22)
 #
@@ -2011,16 +2006,6 @@ ccx_load_mode <- function(arm = CCX_MODE_CANONICAL, base = NULL) {
        err = err, hml_bound = md$hml_bound, md = md, file = f)
 }
 
-#' A forcing with `luc_scale`/`bomb_total` applied, AND its matching annual E_LUC
-#'
-#' Returns `list(F = , eluc = )`. Take BOTH from here and pass `eluc` straight to
-#' `ccx_loglik(luc = )`. Do NOT re-scale the returned `eluc`: it is already the
-#' model's own scaled land-use flux, which is exactly what the `gcb_land_sink`
-#' term's gross reconstruction wants.
-#'
-#' @param sp spinup, used only for `prod_c14`; pass NULL to leave c14_cosmo alone
-#' @param base an already-built base forcing at luc_scale 1 / bomb_total ref, to
-#'   avoid rebuilding it per draw. Built here when NULL.
 # THE COLUMN-MULTIPLY PATHS CANNOT CARRY THE "luc" SINK ARM (2026-08-23c).
 # Both ccx_scaled_forcing() and ccx_make_logpost() apply `luc_scale` by
 # multiplying an already-built base forcing's LUC columns, which is exact ONLY
@@ -2106,6 +2091,16 @@ ccx_load_mode <- function(arm = CCX_MODE_CANONICAL, base = NULL) {
     eluc_tbl = eluc_base, affine = TRUE)
 }
 
+#' A forcing with `luc_scale`/`bomb_total` applied, AND its matching annual E_LUC
+#'
+#' Returns `list(F = , eluc = )`. Take BOTH from here and pass `eluc` straight to
+#' `ccx_loglik(luc = )`. Do NOT re-scale the returned `eluc`: it is already the
+#' model's own scaled land-use flux, which is exactly what the `gcb_land_sink`
+#' term's gross reconstruction wants.
+#'
+#' @param sp spinup, used only for `prod_c14`; pass NULL to leave c14_cosmo alone
+#' @param base an already-built base forcing at luc_scale 1 / bomb_total ref, to
+#'   avoid rebuilding it per draw. Built here when NULL.
 ccx_scaled_forcing <- function(sp = NULL, years = c(1750, 2024), luc_scale = 1,
                                bomb_total = CCX_BOMB_REF, scenario = "historical",
                                base = NULL) {
@@ -2395,24 +2390,6 @@ ccx_struct_hilda_c <- function() {
   stopifnot(!anyDuplicated(names(blk)))
   blk
 }
-#' @param seas_ml the SEASONAL MIXED LAYER switch (round 6), the SECOND axis of
-#'   the objective label beside `struct` (2026-09-10). ⛔ WHY IT IS HERE AND NOT
-#'   LEFT TO `ccx_default_params()`: `seas_ml` is a BASE parameter, not a fitted
-#'   name, so it is invisible to `u`, absent from a mode file's `par_mode`, and
-#'   silently takes its default (0 = OFF) in any driver that builds from
-#'   `ccx_default_params()`. That is exactly what happened to the 2026-09-10
-#'   refit (jobs 17318015 + 17325832): nobody specified it, the default carried,
-#'   and both rounds fitted the shipped model with the mechanism OFF -- so the
-#'   result is a new baseline and NOT the round-6 test it was launched as
-#'   ⇒ [[ccx_refit_ran_at_seas_ml_0]], [[default_off_hides_the_bug]].
-#'   Routing it through the SAME function as `struct` means every consumer that
-#'   already builds its base list here (the driver, make_port_targets.R, the
-#'   promoter, `ccx_mode_base()`) carries it without a second call to forget.
-#'   It reaches the model as `p$seas_ml` and the label as `attr(, "seas_ml")`,
-#'   which the driver RECORDS in every start file and the port gate VALIDATES
-#'   against `port_targets.csv` -- recorded AND read, the `CCX_MS_STRUCT` pattern.
-#'   Accepts 0/1 (numeric or the env var's "0"/"1"); anything else is an error
-#'   by name, never a coercion.
 ccx_parse_seas_ml <- function(seas_ml) {
   v <- as.character(seas_ml)
   if (length(v) != 1L || is.na(v) || !grepl("^[01]$", v))
@@ -2420,14 +2397,12 @@ ccx_parse_seas_ml <- function(seas_ml) {
          paste(seas_ml, collapse = ","), "' (CCX_MS_SEAS_ML if it came from the environment).")
   as.integer(v)
 }
-#' The structure labels the objective knows, and each one's DECLARED block --
-#' ONE dispatch (2026-09-14f), read by ccx_apply_structure(), the array driver's
-#' banner and the tests, so no consumer keeps its own list.
 #' THE "hilda_cl2" / "hilda_cl3" STRUCTURES (2026-09-17 k / l): hilda_c + the
 #' Nino3.4 return LIMB (review avenue 1; notes/prereg_2026-09-17k_l2_enso_limb_refit.md).
 #' Two structure constants, never fitted: k_l2 = the RETURN LAYER the limb
-#' exchanges the mixed layer with -- 2 (117-190 m at the canonical's grid;
-#' ruling R2 as preregistered) or 3 (190-292 m; the s7 amendment, RULED 09-17 l
+#' exchanges the mixed layer with -- 2 (117-190 m at the 09-17 canonical's grid,
+#' 121-194 m on hilda31w's; ruling R2 as preregistered) or 3 (190-292 m then,
+#' 194-295 m on hilda31w's; the s7 amendment, RULED 09-17 l
 #' after the unrefitted probe: at k = 2 the floor clips a third of the response
 #' and the observed slope needs 37 Sv/index, above Meinen's 14-25; at k = 3 it
 #' needs 19.3, inside) -- and w0_l2 = the Meinen 2001 mean upwelling from
@@ -2531,7 +2506,7 @@ ccx_struct_hilda_csl3v0kai <- function() {
 #' 09-30 l). The likelihood reads LIK_IMB_TREATMENT / LIK_IMB_WITH_CEMENT at call time,
 #' so the logpost REFUSES a draw where those globals disagree with the label: a label
 #' has to mean one objective. ⚠ The NAME was suggested by the 09-30c handoff and is
-#' Marcus's call.
+#' the author's call.
 ccx_struct_hilda_csl3v0kaidgb <- function() {
   blk <- ccx_struct_hilda_csl3v0kai()
   blk[[CCX_GATE_FLAG]] <- 1L
@@ -2547,7 +2522,7 @@ ccx_struct_hilda_csl3v0kaidgb <- function() {
 #' SECOND gate (CCX_GATE_FLAG_ENSO_LAG) on top of kaidgb's, and the fitted lag does the
 #' rest. Under every other label the lag is held at 0, so kaidgb -- the lag-0 CONTROL arm
 #' of the #15 refit (ruled 10-02, D2) -- and every registered file stay bit-exact.
-#' ⚠ The NAME is mine and is Marcus's call, as kaidgb's was.
+#' ⚠ The NAME was proposed in a working session and is the author's call, as kaidgb's was.
 ccx_struct_hilda_csl3v0kaidgbe <- function() {
   blk <- ccx_struct_hilda_csl3v0kaidgb()
   blk[[CCX_GATE_FLAG_ENSO_LAG]] <- 1L
@@ -2560,7 +2535,7 @@ ccx_struct_hilda_csl3v0kaidgbe <- function() {
 #' it (R/model.R ccx_mix_on() / ccx_mix_g_series()). The three constants are STRUCTURAL (Marcus:
 #' "Obs x law, fixed"), from R/constants.R. Every other label leaves them absent = OFF, so every
 #' registered file stays bit-exact. The gates are kaidgbe's, untouched: m opens nothing.
-#' ⚠ The NAME (m = mixing) is mine and is Marcus's call, as kaidgb's and kaidgbe's were.
+#' ⚠ The NAME (m = mixing) was proposed in a working session and is the author's call, as kaidgb's and kaidgbe's were.
 ccx_struct_hilda_csl3v0kaidgbem <- function() {
   blk <- ccx_struct_hilda_csl3v0kaidgbe()
   blk$mix_strat_s   <- ccx_const("MIX_STRAT_S")
@@ -2639,6 +2614,9 @@ ccx_struct_hilda_csl3v0kaidgbemwtc <- function() {
   stopifnot(!anyDuplicated(names(blk)))
   blk
 }
+#' The structure labels the objective knows, and each one's DECLARED block --
+#' ONE dispatch (2026-09-14f), read by ccx_apply_structure(), the array driver's
+#' banner and the tests, so no consumer keeps its own list.
 CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", names(CCX_L2_RETURN_LAYERS), "hilda_cs", "hilda_csl3v0", "hilda_csl3v0k", "hilda_csl3v0ka", "hilda_csl3v0kan", "hilda_csl3v0kai", "hilda_csl3v0kaidgb", "hilda_csl3v0kaidgbe", "hilda_csl3v0kaidgbem", "hilda_csl3v0kaidgbemw", "hilda_csl3v0kaidgbemwt", "hilda_csl3v0kaidgbemwtc")
 ccx_struct_block <- function(struct) {
   if (identical(struct, "")) return(list())        # the column: nothing declared
@@ -2912,6 +2890,24 @@ ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_
   }
   res
 }
+#' @param seas_ml the SEASONAL MIXED LAYER switch (round 6), the SECOND axis of
+#'   the objective label beside `struct` (2026-09-10). ⛔ WHY IT IS HERE AND NOT
+#'   LEFT TO `ccx_default_params()`: `seas_ml` is a BASE parameter, not a fitted
+#'   name, so it is invisible to `u`, absent from a mode file's `par_mode`, and
+#'   silently takes its default (0 = OFF) in any driver that builds from
+#'   `ccx_default_params()`. That is exactly what happened to the 2026-09-10
+#'   refit (jobs 17318015 + 17325832): nobody specified it, the default carried,
+#'   and both rounds fitted the shipped model with the mechanism OFF -- so the
+#'   result is a new baseline and NOT the round-6 test it was launched as
+#'   ⇒ [[ccx_refit_ran_at_seas_ml_0]], [[default_off_hides_the_bug]].
+#'   Routing it through the SAME function as `struct` means every consumer that
+#'   already builds its base list here (the driver, make_port_targets.R, the
+#'   promoter, `ccx_mode_base()`) carries it without a second call to forget.
+#'   It reaches the model as `p$seas_ml` and the label as `attr(, "seas_ml")`,
+#'   which the driver RECORDS in every start file and the port gate VALIDATES
+#'   against `port_targets.csv` -- recorded AND read, the `CCX_MS_STRUCT` pattern.
+#'   Accepts 0/1 (numeric or the env var's "0"/"1"); anything else is an error
+#'   by name, never a coercion.
 ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", ""),
                                 seas_ml = Sys.getenv("CCX_MS_SEAS_ML", "0"),
                                 pump_field = Sys.getenv("CCX_MS_PUMP_FIELD", "solved")) {
@@ -2943,6 +2939,20 @@ ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", ""),
   structure(p, struct = struct, seas_ml = seas_ml, pump_field = pump_field)
 }
 
+# ---- posterior -------------------------------------------------------
+#' Build a closure that evaluates the log-posterior on the unconstrained scale.
+#'
+#' The forcing table is assembled ONCE and reused; only c14_cosmo is refreshed
+#' per draw, because natural 14C production is solved by the spinup and so
+#' depends on the parameters.
+#' @param base_params the parameter list the fitted parameters are written INTO.
+#'   Defaults to `ccx_default_params()`, which is the only thing any caller
+#'   wanted until 2026-08-16e. It exists so a STRUCTURAL choice that is not a
+#'   fitted parameter -- `pump_mode` "N" vs "D" is the case it was added for
+#'   (Marcus deferred that choice to the refit; see DESIGN sec.5.2f) -- can be
+#'   varied between two otherwise-identical objectives. Fitted parameters still
+#'   overwrite their entries, so passing a list that sets one of them has no
+#'   effect: this is for structure, not for pinning parameters.
 #' @param by_stream FALSE (default) returns the bare scalar the sampler expects.
 #'   TRUE returns that SAME scalar with the per-stream breakdown attached as
 #'   `attr(, "streams")`, taken from THE OBJECTIVE'S OWN `ccx_loglik()` call.
@@ -3269,7 +3279,7 @@ ccx_run_mcmc <- function(n_iter = 5000, n_chains = 4, seed = 2026,
   if (is.null(base_params)) {
     base_params <- ccx_mode_base(md)
     # pump_mode is NOT part of ccx_apply_structure(); every consumer sets it
-    # from the file by name (the precedent at ccx_mode_overlay_params).
+    # from the file by name (the precedent at ccx_mode_run_params(), R/paths.R).
     if (!is.null(md$pump_mode)) base_params$pump_mode <- md$pump_mode
   }
   if (!identical(ccx_spinup_label(spinup_fn), ccx_mode_spinup(md)))

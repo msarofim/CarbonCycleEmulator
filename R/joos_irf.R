@@ -19,13 +19,10 @@ JOOS_PULSE     <- 100          # GtC, Joos's standard impulse
 JOOS_PPM_PER   <- 2.123        # GtC per ppm, the conversion Joos states
 
 # ---------------------------------------------------------------------
-# A background held CONSTANT by diagnosed compatible emissions.
-#
-# At each month the atmospheric carbon tendency is evaluated with zero
-# emissions, and the emission is set to exactly cancel it. That is Joos's run 1
-# ("compatible emissions are diagnosed") done online rather than by iteration,
-# and it uses ccx_deriv() itself so the controller cannot disagree with the
-# model it is controlling.
+# A background held CONSTANT by diagnosed compatible emissions -- Joos's run 1
+# ("compatible emissions are diagnosed"). The emission path is found by least
+# squares on a relaxation basis (below), NOT by an online controller: that was
+# tried first and abandoned as too slow (method [1] below).
 # ---------------------------------------------------------------------
 # Diagnosed compatible emissions, found by LEAST SQUARES ON A RELAXATION BASIS.
 #
@@ -35,7 +32,7 @@ JOOS_PPM_PER   <- 2.123        # GtC per ppm, the conversion Joos states
 #      emissions and set the emission to cancel the atmospheric tendency
 #      exactly. Correct, and Joos's run 1 done literally, but it needs
 #      ccx_deriv() inside the stepping loop: ~60k pure-R derivative evaluations
-#      per run, minutes each, and there are eight runs here.
+#      per run, minutes each, and a protocol call needs several runs.
 #  [2] A NEWTON ITERATION on the monthly drift, e <- e - 12*d(CO2)*GtC_PER_PPM,
 #      on the fast C++ path. IT DIVERGES -- to 2e34 ppm in 40 iterations. The
 #      reason is worth recording because the step LOOKS exact: an emission added
@@ -47,13 +44,16 @@ JOOS_PPM_PER   <- 2.123        # GtC per ppm, the conversion Joos states
 # so the emission path is expanded on a basis of relaxation exponentials, each
 # basis function is run once (cheap, C++), and the coefficients are solved by
 # least squares against the target. Three passes handle the residual
-# non-linearity. Nine basis functions, eight runs, ~0.3 s.
+# non-linearity. Nine basis functions (a constant + the eight JOOS_HOLD_TAUS),
+# thirteen fast runs per call (1 zero-emission + 9 basis + JOOS_HOLD_PASS = 3
+# passes), ~0.3 s when written.
 #
 # A POLYNOMIAL BASIS WAS ALSO TRIED AND MUST NOT BE REINSTATED: adding t, t^2,
 # t^3 alongside the exponentials makes the design matrix ill-conditioned and the
 # passes diverge (562 -> 2364 -> 37221 ppm).
 #
-# The background is held to ~1 ppm in ~386, i.e. 0.26 %. That is not exact and
+# The background is held to ~1 ppm in ~386, i.e. 0.26 % (as measured when this
+# was written, 2026-08; ccx_hold_forcing() reports the realised value). That is not exact and
 # the realised deviation is REPORTED rather than hidden; it perturbs the Revelle
 # factor by ~0.3 %, far below anything the IRF comparison resolves.
 JOOS_HOLD_TAUS <- c(2, 5, 10, 25, 50, 100, 200, 500)   # yr, relaxation basis
@@ -199,7 +199,7 @@ joos_irf <- function(t) JOOS_T5$a0 + colSums(outer(JOOS_T5$a, t, function(a, tt)
 # long lifetime should be an emergent behavior."
 #
 # WHY. Joos et al. 2013 is ANOTHER MODEL -- a multi-model mean, the last-resort
-# class in the source hierarchy (~/.claude/CLAUDE.md: observation, then law, then
+# class in the source hierarchy (the author's notes: observation, then law, then
 # another model). Every other gate in this project now rests on an observation or
 # a law; this one cannot, because NO OBSERVATION CONSTRAINS A CO2 PERTURBATION
 # LIFETIME. The bomb-14C record measures tracer transport, not the perturbation:
@@ -214,7 +214,7 @@ joos_irf <- function(t) JOOS_T5$a0 + colSums(outer(JOOS_T5$a, t, function(a, tt)
 #     with "inside / BELOW / ABOVE" -- calibration/diag_joos_irf.R sections 3, 3b.
 #   * NOTHING IS SCORED, GATED, OR CHASED IN A REFIT on this axis.
 #   * ⚠ AND THE PRE-REGISTERED CLAIM P5 IS NO LONGER "FALSIFIED". IRF(100) = 0.276
-#     against Joos's band is now a REPORTED DIFFERENCE -- a statement about where
+#     (the mode of 2026-09-04) against Joos's band is now a REPORTED DIFFERENCE -- a statement about where
 #     the model's emergent lifetime sits, not a failed test. Every record that
 #     says "P5 FALSIFIED" predates this ruling.
 #   * The DISCRIMINATION the tail statistic provides is kept and is still
@@ -236,7 +236,7 @@ JOOS_PD100_100 <- c(45, 62)
 # THE TAIL TEST (gate 12b, added 2026-08-25 at Marcus's direction)
 #
 # WHY IT HAD TO EXIST. Gate 12 tested the time-integrated IRF at TH 20/50/100
-# only, and calibration/../notes/lit_2026-08-25_co2_lifetime_confusion.R showed
+# only, and notes/lit_2026-08-25_co2_lifetime_confusion.md showed
 # that test CANNOT DO ITS JOB: the two published single-exponential carbon-cycle
 # models in current circulation both PASS it at all three horizons --
 #
@@ -396,7 +396,8 @@ ccx_pulse_ref_state <- function(spin, F_hist) {
   sp$pd_hist <- list(year = sort(unique(floor(F_hist$t + 1e-9))),
                      # ⚠ (documented 2026-10-12, code review) `co2_end` is the LAST OUTPUT ROW, i.e.
                      # the instantaneous state at t = 2010.958 -- the OPENING state of December 2010,
-                     # before that month's step (392.86 ppm at the canonical). The CO2 that
+                     # before that month's step (392.86 ppm at hilda29e, the canonical until
+                     # 2026-10-13). The CO2 that
                      # ccx_hold_forcing() then holds is the end-of-history state, 393.62 ppm: the free
                      # background's climate is computed for a CO2 0.76 ppm below the one held.
                      co2 = ccx_pd_annual(r$out$t, co2), co2_end = co2[length(co2)],
@@ -427,7 +428,8 @@ ccx_pulse_set_climate <- function(F, g, hist = NULL) {
 #' Free with a history: the module's response to the held CO2 (`co2_held`, default the state's
 #' own CO2 at the end of the history -- what ccx_hold_forcing() then holds) and the non-CO2 ERF held
 #' at its last historical value. ⚠ (2026-10-12, code review) Not quite: the default, `pd_hist$co2_end`,
-#' is the Dec-2010 OPENING state (392.86 ppm at the canonical), while ccx_hold_forcing() holds the
+#' is the Dec-2010 OPENING state (392.86 ppm at hilda29e, the canonical until 2026-10-13), while
+#' ccx_hold_forcing() holds the
 #' end-of-history state (393.62) -- 0.76 ppm apart; see ccx_pulse_ref_state(). Free with NO history (a preindustrial background): the forcing
 #' anomaly is zero, so the background stays at GMST 0 -- only the pulse warms.
 #' `coupled = TRUE` is for a background whose CO2 is NOT held (diag_joos_irf.R's "decaying" rows):

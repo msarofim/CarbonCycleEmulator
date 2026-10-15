@@ -9,8 +9,8 @@
 # ⚠ THAT IS THE BASE COLUMN ONLY (ccx_default_params()). The count depends on the
 # STRUCTURE: the HILDA high-latitude boxes (hs, hd), the equatorial cell (eq), the
 # tropical box (tr) and the inert soil pool each append boxes per hemisphere -- see
-# ccx_box_names(). The canonical hilda29e (hs + inert) has 19 per hemisphere, 38
-# boxes, 114 states (measured 2026-10-12; noted by the code review).
+# ccx_box_names(). The canonical hilda31w (hs + inert) has 19 per hemisphere, 38
+# boxes, 114 states (measured 2026-10-15; hilda29e had the same, 2026-10-12).
 #
 # LAND STRUCTURE. Four pools, not two, because two CANNOT hold the observed
 # carbon stock and the observed bomb-14C inventory at the same time. Naegler &
@@ -137,11 +137,12 @@ CCX_LUC_CLEARED_MAX    <- 0.9
 
 #' WHERE the land-use debit comes from: the share taken out of the WOOD pool.
 #'
-#' 1 = wood alone, which is Marcus' 2026-08-12 call and the shipped behaviour --
-#' deforestation removes standing woody biomass, and the emitted carbon should
+#' 1 = wood alone, the 2026-08-12 call (superseded 2026-08-13, see DECIDED below)
+#' -- deforestation removes standing woody biomass, and the emitted carbon should
 #' carry that pool's lagged 14C. 0 = split PRO RATA across all four land pools
 #' by their preindustrial equilibrium shares, which is the split that leaves
-#' every pool exactly at its new (cleared) equilibrium.
+#' every pool exactly at its new (cleared) equilibrium. 0 is the DEFAULT
+#' (CCX_F_LUC_WOOD_DEFAULT below) and what the canonical mode runs.
 #'
 #' The two differ because scaling npp0 by (1 - c) lowers every pool's
 #' equilibrium pro rata while a wood-only debit lands entirely on a 37-yr pool:
@@ -273,15 +274,19 @@ CCX_SEAS_PHI_EFF <- c(NH = 75, SH = -30)   # deg; SHAPE latitude, not a centroid
 # so the 3.5 ALREADY places the zero-lag NH peak at mid-July and LAG is measured
 # from there, not from the solstice.
 #
-# CCX_SEAS_T_LAG = 2.0 therefore puts the NH peak in mid-SEPTEMBER, which is later
-# than NH land AIR temperature -- and that is correct, because this term multiplies
-# SOIL respiration (the tau_soil_fast/slow fluxes below), not air temperature.
+# ⚠ SINCE 2026-10-12 THIS LAG IS FITTED (`seas_T_lag`, see ccx_seas_t_lag() below), and
+# CCX_SEAS_T_LAG = 2.0 is only the value an ABSENT field resolves to (every mode
+# registered before hilda31w). The canonical hilda31w FITS seas_T_lag = 0.276 months,
+# i.e. an NH peak only ~1 week past mid-July. The 2026-08-20 profile below was taken at
+# the arm-N mode, under a different structure; it is history, not a constraint on the fit.
+#
+# HISTORICAL (2026-08-20): CCX_SEAS_T_LAG = 2.0 puts the NH peak in mid-SEPTEMBER, later
+# than NH land AIR temperature -- argued correct because this term multiplies SOIL
+# respiration (the tau_soil_fast/slow fluxes below), not air temperature.
 # MEASURED 2026-08-20, calibration/diag_seas_lag_profile.R: profiled at the arm-N
 # mode, the seasonal rows give -19466 / -10841 / -4764 / -1411 / -521 / -1507 / -3650
-# at LAG = 0.0 / 0.5 / 1.0 / 1.5 / 2.0 / 2.5 / 3.0. A clean interior optimum at 2.0,
-# 18,944 log-units above the mid-July peak an air-temperature reading would want.
-# An earlier comment here claimed "seasonal land T peak after Jun"; that was the
-# air-temperature reading and it is wrong. DO NOT "correct" the 2.0 to match it.
+# at LAG = 0.0 / 0.5 / 1.0 / 1.5 / 2.0 / 2.5 / 3.0. A clean interior optimum at 2.0
+# THERE, 18,944 log-units above the mid-July peak an air-temperature reading would want.
 CCX_SEAS_T_LAG   <- 2.0                    # months past the mid-July zero-lag peak
 # MEASURED 2026-08-20g and CHANGED FROM 2.5. Unlike CCX_SEAS_T_LAG above, this
 # one IS directly checkable against observation: sst_seas_amp modulates SST
@@ -308,8 +313,9 @@ CCX_SST_SEAS_LAG <- 1.32                   # months past the mid-July zero-lag p
 
 # ---- THE LS ALKALINITY AND THE CARBONATE TABLE (2026-10-12; label hilda_csl3v0kaidgbemwtc) ----
 # `alk_surface` (mol/kg) and `carb_salinity` are structure fields: GLODAPv2.2023's 2303.4 umol/kg
-# and 34.760 (data/obs_glodap_surface_alk_sal.rds; citation rulings rows 3 + 30). ABSENT = the
-# registry's ALK_SURFACE (2300) and the S 34.7 table, every registered mode.
+# and 34.760 (data/obs_glodap_surface_alk_sal.rds; citation rulings rows 3 + 30), which the
+# canonical hilda31w carries. ABSENT = the registry's ALK_SURFACE (2300) and the S 34.7 table,
+# every mode registered before hilda31w.
 ccx_alk_surface <- function(p) {
   v <- p[["alk_surface"]]
   if (is.null(v)) return(ccx_const("ALK_SURFACE"))
@@ -319,11 +325,13 @@ ccx_alk_surface <- function(p) {
 }
 #' The pump's organic-carbon 13C fractionation (2026-10-12; citation rulings row 1): label ...wtc
 #' sets -22 permil (Claret, Sonnerup & Quay 2021, relative to SURFACE DIC); absent = the registry's
-#' PUMP_EPS13_ORG (-20), every registered mode. Carried on aux so BOTH cores read one value.
+#' PUMP_EPS13_ORG (-20), every mode registered before hilda31w (which carries -22). Carried on
+#' aux so BOTH cores read one value.
 ccx_aux_pump_eps13_org <- function(aux)
   if (is.null(aux$pump_eps13_org)) ccx_const("PUMP_EPS13_ORG") else aux$pump_eps13_org
 #' THE COLUMN DEPTH (2026-10-12; citation rulings row 5): label ...wtc sets 3682.2 m (Charette &
-#' Smith 2010 Table 2); absent = the registry's OCEAN_DEPTH (3700), every registered mode. The grid
+#' Smith 2010 Table 2), which hilda31w carries; absent = the registry's OCEAN_DEPTH (3700), every
+#' mode registered before hilda31w. The grid
 #' is built from it, and the GLODAP targets are keyed by it (R/likelihood.R ccx_glodap_file()).
 ccx_ocean_depth <- function(p) {
   v <- p[["ocean_depth"]]
@@ -344,10 +352,12 @@ ccx_aux_carb <- function(aux) if (is.null(aux$carb_cc)) carb_coefs() else aux$ca
 # (the seas_lag_p / gamma_diff rule: one opinion about what absence means, in one place).
 #   * `seas_T_lag` -- the respiration lag -- is FITTED under the label (citation rulings row 16,
 #     "Fit it in the refit (Recommended)", prior U[0, 6] months on a logit box: respiration cannot
-#     lead its driver, and a lag past half a cycle aliases). ABSENT = CCX_SEAS_T_LAG (2.0).
+#     lead its driver, and a lag past half a cycle aliases); hilda31w fits 0.276 months.
+#     ABSENT = CCX_SEAS_T_LAG (2.0), every mode registered before hilda31w.
 #   * `sst_seas_lag_NH` / `_SH` -- READ PER HEMISPHERE from data/obs_seasonal_clim.rds by the
-#     label's structure block (row 17, "Per-hemisphere, read from data (Recommended)").
-#     ABSENT = CCX_SST_SEAS_LAG (1.32) for BOTH hemispheres, every registered mode.
+#     label's structure block (row 17, "Per-hemisphere, read from data (Recommended)");
+#     hilda31w carries 1.325 (NH) / 1.536 (SH).
+#     ABSENT = CCX_SST_SEAS_LAG (1.32) for BOTH hemispheres, every mode registered before hilda31w.
 ccx_seas_t_lag <- function(p) {
   v <- p[["seas_T_lag"]]
   if (is.null(v)) return(CCX_SEAS_T_LAG)
@@ -355,7 +365,8 @@ ccx_seas_t_lag <- function(p) {
   v
 }
 #' The NH share of bomb-14C delivery a parameter list runs (absent = FORC_BOMB_NH_SHARE, every
-#' registered mode). FITTED under label hilda_csl3v0kaidgbemwtc (citation rulings row 19). The one
+#' mode registered before hilda31w). FITTED under label hilda_csl3v0kaidgbemwtc (citation rulings
+#' row 19; hilda31w fits 0.842). The one
 #' place absence is decided: the spinup's aux and ccx_migrate_par_set() both ask it (2026-10-12).
 ccx_bomb_share_nh <- function(p) {
   v <- p[["bomb_share_NH"]]
@@ -656,7 +667,8 @@ ccx_set_enso <- function(p, src) {
 # WHERE IT IS COMPUTED. Once per RUN, in R (ccx_land_enso()), from the forcing table's
 # `enso` column, and handed to BOTH cores as one more series: the R runner puts it in
 # the point forcing as `land_enso`, the C++ runner passes it as a vector. The C++ never
-# sees L, so the interpolation has ONE implementation, and N_FORCING stays 19.
+# sees L, so the interpolation has ONE implementation, and N_FORCING did not grow for it
+# (19 then; 20 since nuc_share_NH was added 2026-10-12 -- src/ccx_core.cpp).
 # ⚠ The NAME `land_enso` is deliberate: a field spelled `enso_*` would be returned by
 # `forc$enso` on a forcing that lacked `enso` ([[dollar_partial_matches_on_lists]]).
 #
@@ -850,7 +862,7 @@ ccx_tau_ex_rate <- function(p, t) {
 
 #' The HS box's share of its hemisphere's SST anomaly (DESIGN §3.4a T; the H1 diagnostic, Marcus 2026-10-05)
 #'
-#' ONE resolution, used by the R core and by ccx_cpp_params() for the C++ twin, so the two cannot disagree
+#' ONE resolution, used by the R core and by ccx_cpp_par() for the C++ twin, so the two cannot disagree
 #' about what absence means. ABSENT = 1 = the shipped model, bit for bit (x * 1 is exact in IEEE arithmetic).
 #' A base parameter: NOT fitted and in no label. 0 holds the HS box at its climatological SST while the
 #' low-latitude boxes warm.
@@ -865,7 +877,7 @@ ccx_hs_sst_frac <- function(p) {
 
 #' Unit-mean normalisers for the two driver shapes, on a 720-POINT midpoint
 #' grid. BOTH cores must use exactly this definition (the C++ core precomputes
-#' it in unpack_par) or bit-parity breaks.
+#' it in unpack_par) or roundoff parity breaks.
 #'
 #' WHY 720 AND NOT 12 (measured 2026-08-18, /tmp-scratch drift decomposition,
 #' numbers preserved in the CHANGELOG entry): the insolation shape has KINKS at
@@ -982,7 +994,7 @@ CCX_FERT_FORM_DEFAULT <- CCX_FERT_MM
 # Fractional NPP enhancement per unit stratospheric AOD. Named here and used by
 # BOTH ccx_default_params() and ccx_cpp_par(), the same way CCX_FERT_FORM_DEFAULT
 # is, so R and C++ cannot disagree about what a parameter list without the field
-# means -- the divergence the bit-parity rule exists to prevent.
+# means -- the divergence the roundoff-parity rule exists to prevent.
 #
 # ⚠ 0.25 IS AN ADOPTION, NOT A DEFAULT-PRESERVING VALUE. Everything fitted before
 # 2026-08-29 was fitted at 0 and is NON-COMPARABLE with anything fitted after.
@@ -1045,8 +1057,8 @@ ccx_fert_factor <- function(chi, p, chi0 = ccx_const("CO2_PI_PPM")) {
   # chi = chi0 - fert_k, ~106 ppm at the provisional default, which no scenario
   # reaches but a sampler or an app slider could. ⚠ STALE NUMBER (code review
   # 2026-10-12): 106 ppm is chi0 - 171. At today's default fert_k = 120 the pole
-  # is 276.88 - 120 = 156.9 ppm; at the canonical hilda29e's fitted fert_k (669)
-  # it sits at negative CO2 and cannot be reached. Below the pole NPP would flip
+  # is 276.88 - 120 = 156.9 ppm; at the canonical hilda31w's fitted fert_k (601;
+  # hilda29e's was 669) it sits at negative CO2 and cannot be reached. Below the pole NPP would flip
   # sign, so the factor is floored at 0 as well -- NPP cannot be negative, and
   # a hard floor fails visibly where an unguarded pole fails as a fitted value.
   # (The log path is left EXACTLY as it was, pole and all, so this commit cannot
@@ -1487,13 +1499,15 @@ ccx_seas_ml_shapes <- function(p, co) {
 #'
 #' Layer 1 absorbs the whole seasonal excursion, so the design is only valid
 #' while the winter mixed layer stays INSIDE layer 1. It does at the canonical
-#' `hilda29e` (fitted h_ml 64.63 m; deepest winter mixed layer, the SH's, 109.07
-#' m; layer-1 base 116.70 m -- 7.6 m of margin; measured 2026-10-12), but
+#' `hilda31w` (fitted h_ml 69.54 m; deepest winter mixed layer, the SH's, 117.36
+#' m; layer-1 base 121.29 m -- 3.9 m of margin; measured 2026-10-15), but
 #' max/mean of the climatology is ~1.69 (SH f_max 1.6876) while layer 1's base
-#' grows only ~0.99 x h_ml + a constant, so the two cross at h_ml ~= 75.5 m.
-#' ⚠ (code review 2026-10-12) Until then this read "fitted h_ml 49.15 m, ML max
-#' 82.7 m, layer-1 base 101.4 m -- 27 m of margin", an earlier canonical's
-#' numbers; the margin at the canonical is now under a quarter of that.
+#' grows only ~0.99 x h_ml + a constant, so the two cross at h_ml ~= 75.14 m
+#' on hilda31w's column (~75.5 m on hilda29e's).
+#' HISTORY: at the previous canonical `hilda29e` (h_ml 64.63 m) it was ML max
+#' 109.07 m against a layer-1 base of 116.70 m -- 7.6 m of margin (2026-10-12);
+#' before that (code review 2026-10-12) this read "fitted h_ml 49.15 m, ML max
+#' 82.7 m, layer-1 base 101.4 m -- 27 m of margin", an earlier canonical's.
 #'
 #' ⛔ THIS IS NOT HYPOTHETICAL: `ent26`'s h_ml was 134.15 m. A refit that walks
 #' h_ml up would silently read carbon out of a layer the mixed layer has already
@@ -1681,8 +1695,8 @@ ccx_default_params <- function() {
     k_w       = 1500,     # m/yr, gas transfer velocity
     # ⚠ (code review 2026-10-12) does NOT track the cited prior centre, 1446
     # (R/constants.R KW_PRIOR_CENTRE = CCX_PARAM_TABLE$k_w's init). k_w is FITTED
-    # on every registered mode (the canonical hilda29e: 1870), so this default
-    # reaches only uncalibrated runs. Whether to move it is Marcus's call
+    # on every registered mode (hilda29e: 1870; the canonical hilda31w: 1835), so
+    # this default reaches only uncalibrated runs. Whether to move it is the author's call
     # (CHANGELOG 2026-10-12 (s)); the value is deliberately unchanged here.
     h_ml      = 75,       # m, mixed-layer depth
     # OVERTURNING, m/yr. 0 = the pure-diffusion ocean, reproduced EXACTLY (no
@@ -1981,7 +1995,7 @@ ccx_default_params <- function() {
                           #   export, data/obs_pump_export_prior.rds (median 9.08).
     # ---- THE MODE-WATER VENTILATION LOOP (option E, 2026-09-14 h; E2, E3) --
     # The mixed layer subducts a volume flux W_E into interior layers
-    # k_e1..k_e2 (the ventilated thermocline, 65-292 m at the canonical grid)
+    # k_e1..k_e2 (the ventilated thermocline, 70-295 m on hilda31w's grid)
     # with thickness weights, and the same layers return the same volume to
     # the mixed layer (the subtropical cells' upwelling). ONE limb carries the
     # mean AND the Nino3.4 modulation, the cell's floor form:
@@ -2021,9 +2035,11 @@ ccx_default_params <- function() {
     # enso = 0, so the periodic spinup is untouched. Each tracer moves on its own
     # gradient, F = dV x (c_k - c_ml) on the two boxes' true per-volume
     # concentrations (the interior-diffusion idiom; bulk, alpha = 1, no 14C
-    # fractionation). STRUCTURAL SWITCH: k_l2 = 0 (every registered structure)
-    # = the limb ABSENT and w_enso_l2 INERT (the w_vent-under-"solved" contract);
-    # the "hilda_cl2" / "hilda_cl3" labels set k_l2 = 2 / 3 (CCX_L2_RETURN_LAYERS,
+    # fractionation). STRUCTURAL SWITCH: k_l2 = 0 (this default; the structures
+    # without the limb) = the limb ABSENT and w_enso_l2 INERT (the w_vent-under-
+    # "solved" contract). The canonical hilda31w's structure (hilda_csl3...) runs
+    # k_l2 = 3 with w_enso_l2 held at 16.79.
+    # The "hilda_cl2" / "hilda_cl3" labels set k_l2 = 2 / 3 (CCX_L2_RETURN_LAYERS,
     # R/calibrate.R; k = 3 is the array's, ruled 09-17 l), w0_l2 = 27 Sv (Meinen
     # 2001 through obs_eq_cell.rds). notes/prereg_2026-09-17k_l2_enso_limb_refit.md §2, §7.
     w_enso_l2 = 0,        # Sv per Nino3.4 unit, whole band, split equally (R5)
@@ -2136,9 +2152,10 @@ ccx_default_params <- function() {
                           # numbers computed before this date are at kz 4000.
                           # ⚠ IT DOES NOT TRACK (code review 2026-10-12): the
                           # table's init is 5683.5, not 5000. kz is FITTED on
-                          # every registered mode (the canonical hilda29e: 14151),
-                          # so this default reaches only uncalibrated runs. Whether
-                          # to move it is Marcus's call (CHANGELOG 2026-10-12 (s));
+                          # every registered mode (hilda29e: 14151; the canonical
+                          # hilda31w: 13790), so this default reaches only
+                          # uncalibrated runs. Whether to move it is the author's
+                          # call (CHANGELOG 2026-10-12 (s));
                           # the value is deliberately unchanged here.
     # DEPTH-DEPENDENT K (2026-09-06b, prereg
     # notes/prereg_2026-09-06b_kz_profile_with_conduit.md). At interface k,
@@ -2165,8 +2182,9 @@ ccx_default_params <- function() {
     # ⚠ (code review 2026-10-12) 1.3 is the STATION-pair SF6 basis that the
     # 2026-10-02 ruling REJECTED for this model (R/constants.R TAU_EX_PRIOR_CENTRE:
     # the mass basis, prior centre 0.8 = CCX_PARAM_TABLE$tau_ex's init). tau_ex is
-    # FITTED on every registered mode (the canonical hilda29e: 0.893), so this
-    # default reaches only uncalibrated runs. Whether to move it is Marcus's call
+    # FITTED on every registered mode (hilda29e: 0.893; the canonical hilda31w:
+    # 0.943), so this default reaches only uncalibrated runs. Whether to move it is
+    # the author's call
     # (CHANGELOG 2026-10-12 (s)); the value is deliberately unchanged here.
     # SEASONAL MODULATION OF THE EXCHANGE, added 2026-08-31 as a DIAGNOSTIC.
     # ⚠ DEFAULT 0 = OFF = the model bit for bit. NOT adopted, NOT fitted, and
@@ -2188,7 +2206,9 @@ ccx_default_params <- function() {
                           #   `alpha_photo_eps` (permil) is ABSENT here on purpose: absent = the
                           #   ledger's ALPHA_PHOTO_EPS (ccx_prepare()); `hilda_c` sets it
                           #   (15.6, CCX_ALPHA_PHOTO_EPS_BIOSPHERE in R/calibrate.R --
-                          #   what every adopted mode, the canonical included, runs).
+                          #   what adopted modes through hilda29e run); the canonical
+                          #   hilda31w's label (hilda_csl3...wtc) sets 16.2
+                          #   (ALPHA_PHOTO_EPS_STILL2003, R/constants.R).
     sst_scale = 0.8,      # SST anomaly per unit GMST anomaly
     npp_frac_NH = 0.60,   # NH share of global NPP
     # THE SINE'S KNOBS, live only at seas_drivers = 0 (the escape hatch; see
@@ -2213,9 +2233,11 @@ ccx_default_params <- function() {
     # exercised at an explicit non-zero value in tests/testthat/test-seas-ml.R.
     seas_ml      = 0,
     # THE NH CYCLE OF THE SEASONAL MIXED LAYER (2026-09-19 l; ruling 1's test). 1 = the
-    # NH mixed layer follows its Holte climatology like the SH (every registered file);
-    # 0 = the NH shape is FLATTENED to its annual mean (f = 1, dh/dt = 0: no NH
-    # entrainment) while the SH cycle runs -- the "hilda_cs" label (ccx_struct_hilda_cs).
+    # NH mixed layer follows its Holte climatology like the SH (this default; the files
+    # registered before the "hilda_cs" label); 0 = the NH shape is FLATTENED to its
+    # annual mean (f = 1, dh/dt = 0: no NH entrainment) while the SH cycle runs -- the
+    # "hilda_cs" label (ccx_struct_hilda_cs) and its descendants, the canonical hilda31w
+    # included (it runs ml_nh_cycle = 0).
     # Mean-preserving by construction (the flat set's a0 is the same 1), so the
     # annual-mean grid, kz_int and the periodic spinup's geometry are untouched.
     # ⛔ NOT NAMED `seas_ml_*` (2026-09-19 m): R's `$` PARTIAL-MATCHES, so on a pre-round-6
@@ -2237,7 +2259,8 @@ ccx_default_params <- function() {
     seas_lag_p_NH = CCX_SEAS_LAG_P_DEFAULT,  # months, NPP phenology lag
     seas_lag_p_SH = CCX_SEAS_LAG_P_DEFAULT,  # behind insolation
     # DIAGNOSTIC CHANNEL SWITCH (2026-08-20f). Scales the seasonal NEP term and
-    # NOTHING else. 1 = the shipped model, bit for bit. 0 turns that one channel
+    # NOTHING else. 1 = the model as of 2026-08-20f, bit for bit (the shipped values
+    # are now 0.4969 / 0.5027 NH / SH -- see MEASURED 2026-08-20r below). 0 turns that one channel
     # off while leaving the annual carbon budget untouched, because the term is
     # zero-annual-mean by construction (the / nrm$n normaliser is what makes it
     # so). NOT in CCX_PARAM_TABLE and never fitted -- it is the missing third
@@ -2332,8 +2355,9 @@ ccx_default_params <- function() {
     # (ENT_SEAS_AMP_SH_INBAND x ENT_SEAS_BAND_AREA_FRAC) had ALREADY drifted from
     # a typed copy once -- 30 -> 29.68 and 11.07 -> 10.9524 -- which is the
     # incident that produced the "DERIVED must mean COMPUTED" rule.
-    # ⚠ (2026-10-12) The canonical `hilda29e` does not fit it at all: it PINS
-    # ent_seas_amp_SH = 0 (its pins list), so the channel is OFF at the canonical.
+    # ⚠ (2026-10-12) `hilda29e` did not fit it at all: it PINS ent_seas_amp_SH = 0
+    # (its pins list), and so does the canonical since 2026-10-13, `hilda31w`
+    # (verified 2026-10-15), so the channel is OFF at the canonical.
     # ⚠ It is the PRIOR CENTRE, not the fitted 19.0291: `ccx_default_params()` is
     # the UNCALIBRATED reference vector (`sst_seas_amp_SH` is 1.2 here against a
     # fitted 1.85), and putting a fitted number in it would make the gates'
@@ -2349,7 +2373,7 @@ ccx_default_params <- function() {
     # straight into add_flux -- died with "argument is of length zero" on default
     # parameters, while ccx_cpp_par() silently substituted 0. That is an R-vs-C++
     # divergence about what ccx_default_params() MEANS, which is precisely what
-    # the bit-parity rule exists to prevent, and it cost three debugging cycles
+    # the roundoff-parity rule exists to prevent, and it cost three debugging cycles
     # (handoff 2026-08-13c sec.7 records the first). 0 is the behaviour-preserving
     # value: it is what every ccx_run_fast() call on default parameters has been
     # using all along. Setting it to the table's 0.5 would silently change every
@@ -2386,8 +2410,9 @@ ccx_default_params <- function() {
     # CCX_NPP_TSENS_DEFAULT.
     npp_tsens = CCX_NPP_TSENS_DEFAULT,
     # THE CITATION BATCH'S TWO GATED NAMES (2026-10-12; CCX_PARAM_GATED_WTC, opened by label
-    # hilda_csl3v0kaidgbemwtc). Slots at the LEGACY values -- the numbers every registered mode ran
-    # (FORC_BOMB_NH_SHARE 0.90; CCX_SEAS_T_LAG 2.0 months) -- so the overlay can carry a fitted
+    # hilda_csl3v0kaidgbemwtc). Slots at the LEGACY values -- the numbers every mode registered
+    # before hilda31w ran (FORC_BOMB_NH_SHARE 0.90; CCX_SEAS_T_LAG 2.0 months; hilda31w fits
+    # 0.842 and 0.276 months) -- so the overlay can carry a fitted
     # value (it copies a gated name only where the base has a slot) and a holding label runs exactly
     # what it ran before. The ndep_ret / lag_enso_land idiom.
     bomb_share_NH = FORC_BOMB_NH_SHARE,
@@ -2747,15 +2772,19 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # WHY THE DENOMINATOR IS `land0` AND NOT `veg0`: see the aux note. It is
     # what makes the debit permanent in TOTAL rather than by a quarter.
     #
-    # WHAT THIS DOES *NOT* CLAIM. The debit still comes out of wood alone
-    # (Marcus 2026-08-12: deforestation removes standing woody biomass, and the
-    # emitted carbon should carry that pool's lagged 14C), while the
-    # equilibrium falls across all four pools pro rata. So wood is left BELOW
-    # its new equilibrium and the soils ABOVE theirs, and the internal
-    # redistribution that follows is a real deforestation legacy -- fast
-    # regrowth against slow passive-soil drainage -- not an artefact. It nets
-    # to zero in total carbon by construction; its TIMING is a model claim and
-    # is what test-luc-permanence.R measures rather than assumes.
+    # WHERE THE DEBIT COMES FROM is `f_luc_wood` (see CCX_F_LUC_WOOD_DEFAULT).
+    # The default and the canonical mode run f_luc_wood = 0: the debit is taken
+    # PRO RATA across all four pools, the same split by which the equilibrium
+    # falls, so every pool lands exactly at its new (cleared) equilibrium.
+    # HISTORICAL (2026-08-12, superseded 2026-08-13): the debit came out of wood
+    # alone (f_luc_wood = 1: deforestation removes standing woody biomass, and
+    # the emitted carbon should carry that pool's lagged 14C) while the
+    # equilibrium fell across all four pools pro rata. Under that setting -- still
+    # reachable -- wood is left BELOW its new equilibrium and the soils ABOVE
+    # theirs, and the internal redistribution that follows re-releases part of the
+    # debit on soil timescales. It nets to zero in total carbon by construction;
+    # its TIMING is a model claim and is what test-luc-permanence.R measures
+    # rather than assumes.
     # ABSENCE = CCX_F_LUC_PERM_DEFAULT, the C++ side's resolver (R/cpp.R). Until
     # 2026-09-16 (c) an absent f_luc_perm made `NULL * x` numeric(0) and
     # min(numeric(0), 0.9) = 0.9 -- the R core silently ran 90 % of the land
@@ -2868,8 +2897,9 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # 1.025 -- 3.2 %. Weak because q10 rides GLOBAL mean temperature where the
     # physics is TROPICAL LAND temperature and moisture.
     # ⚠ STALE NUMBERS (code review 2026-10-12): q10 = 1.136 is an earlier mode's.
-    # The canonical hilda29e fits q10 = 1.0919 (measured 2026-10-12), which
-    # makes the respiration response SMALLER still (ln q10 0.088 vs 0.128); the
+    # hilda29e (the canonical until 2026-10-13) fit q10 = 1.0919 (ln q10 0.088,
+    # a SMALLER response than 0.128); the canonical hilda31w fits q10 = 1.1532
+    # (ln q10 0.143), a response ~12 % LARGER than the old mode's. The
     # 0.054 % / 0.032 GtC/yr / 1.025 / 3.2 % chain was computed at the old mode
     # and is stale; not re-measured.
     # ⚠ FIRE -- the third limb of the observed 2015-16 attribution -- is
@@ -3270,8 +3300,8 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
         # GtC/yr). The field does NOT sum to zero: it nets +12.3 GtC/yr into
         # the interior, balanced in steady state by upward diffusion.
         # ⚠ STALE NUMBERS (code review 2026-10-12): 9.58 / 12.3 / 0.039 are an
-        # earlier mode's. At the canonical hilda29e (solved field, measured
-        # 2026-10-12) the LS field nets +60.84 GtC/yr into the interior (NH
+        # earlier mode's. At hilda29e (the canonical until 2026-10-13; solved
+        # field, measured 2026-10-12) the LS field nets +60.84 GtC/yr into the interior (NH
         # 26.12, SH 34.72), with 2 of 10 layers negative in each hemisphere
         # carrying 0.0022 of 60.85 GtC/yr gross (~0.004 %).
         # The add_flux guard fires here, correctly: on a negative layer this sends carbon
@@ -3282,8 +3312,9 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
         # obvious what the reverse limb should be -- a negative S[k] is an
         # artifact of the divergence construction rather than a named process,
         # and PUMP_EPS13_ORG is itself flagged "provisional, recollected, NEEDS
-        # a cited source" in constants.R. Priced in
-        # calibration/diag_pump_signed_alpha.R; Marcus's call.
+        # a cited source" in constants.R (since cited: -22 permil under label
+        # hilda_csl3v0kaidgbemwtc). Priced by a diagnostic that is not in the
+        # repository; the author's call.
         if (aux$tr_on == 1L) {
           # THE TROPICAL BOX CARRIES ITS AREA SHARE OF THE EXPORT (2026-09-14f,
           # choice D2, prereg 09-14f §1 amendment). The field S[k] is sized on
@@ -3771,7 +3802,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # The C++ block is the twin.
     # ⭐ RECORDED in the flux trace since 2026-10-12 (pre-beta code review), the
     # way add_diffusion() records: it had been left out ("not in the flux trace"),
-    # so at the canonical the trace's per-box sums missed dy by up to 1.9 GtC/yr in
+    # so at the canonical then (hilda29e) the trace's per-box sums missed dy by up to 1.9 GtC/yr in
     # an ENSO month and "surface ocean to deep" missed 0.28 GtC/yr in 2024 --
     # against fluxes.R's contract that the trace sums to dy EXACTLY. Recording
     # only: dy is untouched, and `record` is FALSE on every calibration path.
@@ -3840,21 +3871,21 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # 13C and 14C ratios, so the prescribed `d13c_bio` is no longer needed:
     # clearing a forest does not fractionate, hence alpha13 = 1 (the default).
     #
-    # ⚠ STALE DEFAULT (noted 2026-10-06): the default has been f_luc_wood = 0, PRO RATA, since
-    # 2026-08-13 (CCX_F_LUC_WOOD_DEFAULT, cited there). The paragraph below describes f_luc_wood = 1.
-    # IT COMES OUT OF WOOD (Marcus 2026-08-12) at the default f_luc_wood = 1.
-    # Deforestation removes standing woody biomass, so that is the pool that
-    # should pay -- and it is the pool whose 14C ratio the emitted carbon should
-    # carry, which is more lagged than the leaf pool's. Debiting leaf, or
-    # debiting both pro rata, would let the fast pool absorb clearing it does
-    # not physically suffer.
+    # THE DEFAULT AND THE CANONICAL MODE: f_luc_wood = 0, PRO RATA, since
+    # 2026-08-13 (CCX_F_LUC_WOOD_DEFAULT, cited there). The debit is split over
+    # the four pools by ccx_luc_pool_shares(), which is the split that leaves
+    # every pool at its new cleared equilibrium and so makes the debit permanent
+    # on the pools' own timescales rather than only in total. The cost: the
+    # emitted carbon carries a stock-weighted mixture dominated by the slow soil,
+    # not wood's lagged 14C. Handoff 13h sec.2.1b; measured in
+    # calibration/diag_luc_prorata.R.
     #
-    # AT f_luc_wood < 1 the remainder is split PRO RATA over the four pools by
-    # ccx_luc_pool_shares(), which is the split that leaves every pool at its
-    # new cleared equilibrium and so makes the debit permanent on the pools'
-    # own timescales rather than only in total. It costs the 14C argument above:
-    # the emitted carbon then carries a stock-weighted mixture dominated by the
-    # slow soil. Handoff 13h sec.2.1b; measured in calibration/diag_luc_prorata.R.
+    # AT f_luc_wood = 1 (the 2026-08-12 behaviour, superseded; still reachable)
+    # IT COMES OUT OF WOOD alone. Deforestation removes standing woody biomass,
+    # so on that argument wood is the pool that should pay -- and it is the pool
+    # whose 14C ratio the emitted carbon should carry, which is more lagged than
+    # the leaf pool's. Between 0 and 1 the f-weighted part comes from wood and
+    # the remainder pro rata.
     #
     # NOTE: historical e_luc is strictly positive. Should a scenario ever supply a
     # negative (net-regrowth) value, add_flux swaps the source correctly but the
@@ -3937,6 +3968,8 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     (forc$c14_bomb * (1 - aux$bomb_share_NH) + forc$c14_nuclear * (1 - nsh) +
        forc$c14_cosmo * 0.5) * c14_to_state
 
+  # decay constant from the 5700-yr class half-life (R/constants.R), NOT the Libby
+  # 5568 yr age convention
   dy[, "C14"] <- dy[, "C14"] - ccx_const("LAMBDA_C14") * y[, "C14"]
 
   if (record) attr(dy, "fluxes") <- list(channels = .fx, boxnet = .net, edges = .edges,
@@ -4067,7 +4100,7 @@ ccx_pump_export <- function(p, aux, grid, kz_override = NULL) {
   # split is 0.431 / 0.569 against the model's 0.429 / 0.571 -- the per-area
   # export is the same number in both hemispheres). The export horizon is the
   # ML base (Nowicki's euphotic depth averages 67.6 m; h_ml 65.2 at the
-  # canonical); below it the flux follows Martin, F(z) = (z / h_ml)^-MARTIN_B,
+  # canonical of 2026-09-14, 69.5 at hilda31w); below it the flux follows Martin, F(z) = (z / h_ml)^-MARTIN_B,
   # so layer k remineralises F(z_{k-1}) - F(z_k) of the export and the BOTTOM
   # layer also takes what would cross the seafloor (3.1 % at 3700 / 65 m):
   # the budget closes without a sediment box, sum(S) = E exactly. NULL at
@@ -4101,9 +4134,10 @@ ccx_pump_export <- function(p, aux, grid, kz_override = NULL) {
   # with the target the likelihood scores.
   # ⚠ (code review 2026-10-12) "Exactly" holds for the diffusive LS column the
   # field is solved against, NOT for the spun-up model under the HILDA HS
-  # conduit: at the canonical hilda29e the realised bottom-minus-ML DIC is 372.6
-  # (NH) / 363.0 (SH) umol/kg against pump_grad 314.7, and 315.4 / 315.6 with
-  # tau_q = 0 (review-measured): switching the conduit off removes the excess.
+  # conduit: at hilda29e (the canonical until 2026-10-13) the realised
+  # bottom-minus-ML DIC is 372.6 (NH) / 363.0 (SH) umol/kg against pump_grad
+  # 314.7, and 315.4 / 315.6 with tau_q = 0 (review-measured): switching the
+  # conduit off removes the excess. (Not re-measured at hilda31w, pump_grad 330.7.)
   span <- shape[length(shape)] - shape[1]
   if (!is.finite(span) || span <= 0) return(NULL)
   prof <- (shape - shape[1]) / span * p$pump_grad
@@ -4613,9 +4647,11 @@ ccx_prepare <- function(p, grid = ccx_grid_of(p)) {
     dz_mid = (grid$dz[-length(grid$dz)] + grid$dz[-1]) / 2,
     # the terrestrial photosynthetic 13C discrimination, permil -> alpha. A BASE
     # PARAMETER since 2026-09-14 h (the constants batch, ruled): absent = the
-    # ledger's ALPHA_PHOTO_EPS (18, the C3-only value every registered file ran
-    # at -- bit-exact), and the `hilda_c` structure block sets the biosphere-
-    # wide 15.6 (Marcus 09-14 h) without moving the ledger until a refit adopts.
+    # ledger's ALPHA_PHOTO_EPS (18, the C3-only value the files registered before
+    # 09-14 h ran at -- bit-exact), the `hilda_c` structure block sets the biosphere-
+    # wide 15.6 (Marcus 09-14 h) without moving the ledger, and label
+    # hilda_csl3v0kaidgbemwtc -- the canonical hilda31w -- sets 16.2
+    # (ALPHA_PHOTO_EPS_STILL2003).
     alpha_photo = 1 - (if (is.null(p$alpha_photo_eps)) ccx_const("ALPHA_PHOTO_EPS") else p$alpha_photo_eps) / 1000,
     # AIR-SEA 13C FRACTIONATION -- TEMPERATURE-DEPENDENT SINCE 2026-09-02.
     #
@@ -4674,7 +4710,8 @@ ccx_prepare <- function(p, grid = ccx_grid_of(p)) {
     # sat here until 2026-09-12; pointed at the constants so the two cannot
     # drift apart)
     # the bomb share is FITTED under label hilda_csl3v0kaidgbemwtc (2026-10-12; prior U[0.77, 0.98],
-    # citation rulings row 19); absent = FORC_BOMB_NH_SHARE, every registered mode. The nuclear
+    # citation rulings row 19; hilda31w fits 0.842); absent = FORC_BOMB_NH_SHARE, every mode
+    # registered before hilda31w. The nuclear
     # scalar is the fallback of the forcing's per-year column (R/forcing.R, `nuc_share`).
     bomb_share_NH = ccx_bomb_share_nh(p),
     nuc_share_NH  = FORC_NUC_NH_SHARE,
@@ -4690,9 +4727,11 @@ ccx_prepare <- function(p, grid = ccx_grid_of(p)) {
     hs_frac     = f_hs,
     a_ls        = a_ls,
     a_hs        = a_hs,
-    # HS is as thick as the low-latitude mixed layer (choice C2): HILDA uses
-    # 75 m for BOTH surface boxes, ours is a fitted 134 m, and giving HS its own
-    # depth would add a parameter to a structural test. HD is everything below.
+    # HS THICKNESS: `h_hs` above -- the low-latitude mixed layer when p$h_hs is
+    # 0 (choice C2 of the 2026-09-05 build, when h_ml was a fitted 134 m and
+    # HILDA's 75 m for BOTH surface boxes was the comparison), or its own value
+    # when positive. The canonical hilda31w FITS its own: h_hs ~ 293.5 m against
+    # h_ml ~ 69.5 m. HD is everything below.
     h_hs        = h_hs,
     hs_mass_kg  = lapply(a_hs, function(A) A * h_hs * ccx_const("RHO_SEAWATER")),
     dz_hd       = sum(grid$dz) - h_hs,
@@ -4927,15 +4966,18 @@ ccx_pump_export_hs <- function(p, aux, grid) {
 #   h_ml 200, substeps 4 : empirical 178,231  vs analytic 177,409  (1.005)
 #
 # So the fix is to CHOOSE the substep count from the criterion instead of
-# hard-coding 4 and hoping. At every ordinary parameter value the answer is
-# still 4 -- kz has to exceed ~155,000 m2/yr (+6.2 sigma on its prior) before
-# the count moves -- so no existing result changes. See test-stability.R.
-# ⚠ (code review 2026-10-12) TRUE FOR THE ASEASONAL COLUMN, NOT UNDER THE
-# SEASONAL MIXED LAYER. With seas_ml on, the bound is taken at BOTH extremes of
-# the cycle (ccx_substeps_for()), and at the canonical's other values the count
-# measured 2026-10-12 is 4 at h_ml 65 (the canonical, 64.63), then 5 / 6 / 9 / 13
-# at h_ml 68 / 70 / 72 / 73, climbing steeply toward the P8 bound (h_ml ~ 75.5):
-# 61 at 75 (the review recorded 22 there; the count is near-singular that close).
+# hard-coding 4 and hoping. For the ASEASONAL column the answer at every
+# ordinary parameter value is CCX_SUBSTEPS_MIN = 4 -- kz has to exceed
+# ~155,000 m2/yr (+6.2 sigma on its prior) before the count moves. See
+# test-stability.R.
+# ⚠ UNDER THE SEASONAL MIXED LAYER THE COUNT DEPENDS ON h_ml. With seas_ml on,
+# the bound is taken at BOTH extremes of the cycle (ccx_substeps_for()), and the
+# canonical hilda31w (h_ml 69.54) runs at 6 substeps. Measured 2026-10-12 at the
+# then-canonical hilda29e's other values: 4 at h_ml 65 (hilda29e itself, 64.63),
+# then 5 / 6 / 9 / 13 at h_ml 68 / 70 / 72 / 73, climbing steeply toward the P8
+# bound (h_ml ~ 75.5): 61 at 75 (the review recorded 22 there; the count is
+# near-singular that close). With hilda31w's other values: 4 / 5 / 6 / 10 / 15
+# at h_ml 64.63 / 68 / 70 / 72 / 73.
 #
 # AIR-SEA IS NOT COVERED BY THIS CRITERION, deliberately. Gas exchange can
 # dominate the Jacobian at low kz (measured up to 15x the diffusion eigenvalue
@@ -5152,7 +5194,8 @@ ccx_substeps_for <- function(p, grid = ccx_grid_of(p), dt = 1 / 12) {
   # read 426/yr where the integrator's own Jacobian is 730/yr, RK4 ran at z = 4.06
   # against its 2.785 limit for ~10 days around the SH winter peak every year, and
   # the objective there was integrator artefact (+273.2; 2x the count converges it).
-  # No registered mode moves (all at CCX_SUBSTEPS_MIN, z <= 1.19).
+  # No mode registered at the time moved (all at CCX_SUBSTEPS_MIN, z <= 1.19).
+  # The canonical adopted since, hilda31w (h_ml 69.54), resolves to 6.
   .grids <- list(grid)
   if (ccx_seas_ml_ls_on(p)) {
     .sh <- ccx_mld_shape("ls")
@@ -5197,7 +5240,7 @@ ccx_substeps_for <- function(p, grid = ccx_grid_of(p), dt = 1 / 12) {
   # (C) PAST THE CAP IT STOPS (2026-10-04, the same ruling). The clamp that stood
   # here ran a count its own bound called unstable, silently. Under (A) the need
   # grows like 1/(layer-1 thickness) towards the P8 wall and passes
-  # CCX_SUBSTEPS_MAX only within ~7 cm of it at the canonical's values; the
+  # CCX_SUBSTEPS_MAX only within ~7 cm of it at hilda29e's values (2026-10-04); the
   # objective reads the stop as -Inf, as it reads the guard's. Still a backstop
   # against a pathological draw hanging -- it now refuses instead of clamping.
   if (need > CCX_SUBSTEPS_MAX)

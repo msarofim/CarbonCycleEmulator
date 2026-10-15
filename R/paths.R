@@ -695,7 +695,8 @@ ccx_mode_file <- function(mode = CCX_MODE_CANONICAL) {
 # REFIT, not of the model, so `R/calibrate.R` is deliberately left alone — but
 # that means the SAME `u_mode` decodes to a DIFFERENT `h_ml` depending on which
 # band is in force, and `ccx_unc_to_par()` is a pure function of the SHIPPED
-# table and cannot know. At the canonical mode:
+# table and cannot know. At the canonical mode of the time (2026-08; the numbers
+# are that mode's, not hilda31w's):
 #
 #     ccx_unc_to_par(md$u_mode)$h_ml   85.7292 m   <- shipped [30, 200]
 #     md$par_mode[["h_ml"]]            96.4737 m   <- what the refit FOUND
@@ -804,7 +805,8 @@ ccx_mode_base <- function(md) {
 #' unread names + the limb's, under hilda_c / solved) is a FREE arm of the reduced
 #' space: nothing the objective sees is held, its likelihood is the free arm's, and
 #' CCX_MODE_PINNED says FALSE for it (hilda31pe: seven inert pins, the shim fitted).
-#' The then-canonical hilda30e (at 2026-09-19 m; the canonical is hilda29e since 2026-10-08 e)
+#' The then-canonical hilda30e (at 2026-09-19 m; the canonical was hilda29e from 2026-10-08 e and is
+#' hilda31w since 2026-10-13)
 #' holds the shim, which the model reads -- PINNED. test-mode-file
 #' compares this to CCX_MODE_PINNED; a consumer still APPLIES a file's pins to encode it.
 ccx_mode_pinned <- function(md) {

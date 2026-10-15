@@ -155,10 +155,12 @@ LIK_D13C_REP_ERR   <- 0.05           # permil
 # Tying the two species together means absorbing the d13C bias costs 4.2 sd on
 # the prior AND is rejected by the CO2 level stream, which sees the same knob.
 # ⚠ SUPERSEDED AS A DESCRIPTION OF THE CANONICAL (code review 2026-10-12; the
-# arm-N reasoning above is kept as history): the canonical `hilda29e` fits
-# rep_dC = +4.21 ppm -- the OPPOSITE sign to the -4.19 this paragraph says
-# absorbing the d13C bias would need -- and its CO2 level rows still fit at rms
-# z 0.53 (review-measured), so the level stream did not reject a ~4 ppm offset.
+# arm-N reasoning above is kept as history): `hilda29e` (the canonical until
+# 2026-10-13) fit rep_dC = +4.21 ppm, and the canonical since, `hilda31w`, fits
+# +4.24 (verified 2026-10-15) -- the OPPOSITE sign to the -4.19 this paragraph
+# says absorbing the d13C bias would need. At hilda29e the CO2 level rows still
+# fit at rms z 0.53 (review-measured), so the level stream did not reject a
+# ~4 ppm offset.
 # What rep_dC is absorbing at the canonical has not been re-diagnosed here.
 #
 # ABSENCE CONTRACT, same as `deep` and the gradient offsets: a NULL `rep_dC`
@@ -221,11 +223,15 @@ LIK_ICE_DISCREPANCY_INFLATE <- as.numeric(Sys.getenv("CCX_ICE_DISCREPANCY", "1")
 #
 # THE REASON THIS TERM CARRIES AN OFFSET PARAMETER. A two-box model's
 # NH-box-minus-SH-box is NOT the quantity MLO minus SPO measures. MLO sits at
-# 19.5 N, south of the northern mid-latitude source region, so the station
-# gradient MUST come out smaller than the box gradient. Regressing
-# obs ~ a + b*model over the paired years (calibration/diag_gradient_terms.R
-# part 3) measures a = -0.39 (defaults) / -0.55 (MAP mode) ppm, stable across
-# both and rejected from zero at 95 %, with the sign the physics predicts.
+# 19.5 N, south of the northern mid-latitude source region, so on that argument
+# the station gradient should come out smaller than the box gradient (a < 0).
+# Regressing obs ~ a + b*model over the paired years (calibration/
+# diag_gradient_terms.R part 3) measured a = -0.39 (defaults) / -0.55 (the MAP
+# mode of 2026-08-15) ppm, stable across both and rejected from zero at 95 %,
+# with that sign. ⚠ THE CANONICAL hilda31w FITS THE OPPOSITE SIGN:
+# grad_off_co2 = +0.248 ppm (verified 2026-10-15) -- the fitted offset is not
+# behaving as the station-latitude representation constant this paragraph
+# argues for, and should not be quoted as one.
 # Scoring the LEVEL against a fixed zero offset would force the model to absorb
 # that representation constant into tau_ex and the hemispheric shares -- which
 # is the "bound the observable, not the parameter" failure this project keeps
@@ -801,7 +807,7 @@ LIK_IAV_TREND_DF   <- 5L                                # the refit read's s. 6 
 LIK_IAV_SPAN_END   <- 2024L                             # the objective's last scored year
 # n_eff: MEASURED, not asserted. Bretherton et al. 1999, J. Climate 12:1990, eq. 31,
 # n (1 - r1(x) r1(y)) / (1 + r1(x) r1(y)), with r1 the lag-1 autocorrelations of the two detrended
-# series, at the canonical hilda33p over the 540 months of LIK_IAV_WIN (calibration/
+# series, at hilda33p (the canonical on 2026-10-06) over the 540 months of LIK_IAV_WIN (calibration/
 # diag_iav_cut_preview.R @54d85e5, outputs/diagnostics/iav_cut_preview_20261006_hilda33p.rds $n_eff[["m"]]).
 # It sets the module's weight against the slope row, so it is held FIXED (a draw-dependent n_eff would
 # make the module's optimum move with its own autocorrelation). The annual estimator's was 44.8.
@@ -930,7 +936,7 @@ LIK_USE_EXCESS_C14 <- TRUE
 # DEFAULT IS THE WIDE ONE. The span between the two published reconstructions is
 # method spread, not measurement noise, and adopting one of them as if the other
 # did not exist would put leverage on a choice of paper rather than on data.
-# FLAGGED FOR MARCUS -- see CHANGELOG 2026-08-11.
+# FLAGGED FOR THE AUTHOR -- see CHANGELOG 2026-08-11.
 #
 # THE "~130 LOG-UNITS" THAT USED TO BE ASSERTED HERE DOES NOT REPRODUCE, and it
 # had no receipt anywhere in the repo. Measured 2026-08-14 at the current
@@ -954,7 +960,7 @@ LIK_EXCESS_C14_TARGET <- "table4_obs_range"
 # a multiplicative factor per year to the CENTRE only (the half-widths stay:
 # the correction is a bias, and the method spread the wide set carries already
 # exceeds it). Moves the 1995 target 51.4 -> 55.5 kmol, the 1975 one 48.6 ->
-# 50.1; at the canonical the row's z falls from +3.9 to ~+3.4. The 09-15 (f)
+# 50.1; at the canonical of 2026-09-16 the row's z fell from +3.9 to ~+3.4. The 09-15 (f)
 # O6 read recorded this as "not applied"; applied here by ruling ("the most
 # defensible choice", Marcus 09-16 d). Set both to 1 to reproduce pre-09-16 d.
 LIK_EXCESS_C14_UPTAKE_CORR <- c(`1975` = 1.03, `1995` = 1.08)
@@ -1596,6 +1602,8 @@ ccx_ocean_sigma_rep_table <- local({
 #'   leave its own prior support, so an out-of-range value is a caller bug, and
 #'   extrapolating a monotone Hermite spline past its data would be worse than
 #'   holding the endpoint.
+#' @param depth the column depth whose GLODAP products are read (default the legacy
+#'   CCX_GLODAP_DEPTH_LEGACY; 3682.2 m under label hilda_csl3v0kaidgbemwtc).
 ccx_ocean_sigma_eff <- function(row, h_ml, depth = CCX_GLODAP_DEPTH_LEGACY) {
   sr <- ccx_ocean_sigma_rep_table(depth)
   tg <- ccx_ocean_gradient_target(depth)
@@ -1664,18 +1672,21 @@ ccx_steady_profile_from_source <- function(S, p, aux, grid, hemi) {
 
 #' The MODEL's deep-minus-surface ALKALINITY gradient, umol/kg.
 #'
-#' RETURNS EXACTLY 0 TODAY, FOR EVERY PARAMETER, AND THAT IS A MODEL PREDICTION
-#' RATHER THAN A PLACEHOLDER. `ALK_SURFACE` enters the mixed-layer carbonate
-#' solve and nowhere else (ccx_dic_for_pco2(), pco2_from_dic(), the
-#' revelle_factor() diagnostic); the interior has no alkalinity and no carbonate
-#' chemistry. With no carbonate pump there is no mechanism that could separate
-#' the two layers, so the model says zero and the observation says +78.6 -- a
-#' 4.09 sigma miss the pump (task 9) exists to close.
+#' LIVE: the row has leverage whenever the run carries a pump. ccx_ocean_grad_scored()
+#' reads the export fields off `spin$aux$pump` (every pump-carrying mode, the
+#' canonical hilda31w included), and the profile below follows from them.
+#' Without a pump (`pump = NULL`) it returns EXACTLY 0 for every parameter -- a
+#' model prediction rather than a placeholder: `ALK_SURFACE` enters the
+#' mixed-layer carbonate solve and nowhere else (ccx_dic_for_pco2(),
+#' pco2_from_dic(), the revelle_factor() diagnostic), so with no carbonate pump
+#' nothing separates the two layers. HISTORY: written before the pump shipped
+#' (task 9), when the model said zero against the observed +78.6 -- a 4.09 sigma
+#' miss the pump existed to close.
 #'
 #' @param spin the spinup.
 #' @param pump OPTIONAL list(S_org = , S_carb = ), the per-limb export fields per
-#'   hemisphere as dg_export_field() returns them. When the pump ships, pass it
-#'   here and the term becomes live with no other change: alkalinity rides the
+#'   hemisphere as dg_export_field() returns them (ccx_ocean_grad_scored() builds
+#'   it from spin$aux$pump). With it the term is live: alkalinity rides the
 #'   carbonate limb at +2 per mole (CaCO3 dissolution) and the organic limb at
 #'   -(N:C) per mole (nitrate release), and the profile follows from the same
 #'   diffusion operator the DIC gradient uses.
@@ -1881,7 +1892,8 @@ ccx_model_ocean_gradient <- function(out, aux, grid, epoch) {
 #'
 #' @param spin the spinup, for aux/grid/params.
 #' @param pump OPTIONAL pump export fields, forwarded to
-#'   ccx_model_ocean_alk_gradient(). NULL until task 9.
+#'   ccx_model_ocean_alk_gradient(). NULL (the default) = read them off
+#'   spin$aux$pump, as the body does; an explicit list overrides (the tests).
 ccx_ocean_grad_scored <- function(out, spin, pump = NULL) {
   depth <- ccx_glodap_depth_key(ccx_grid_depth(spin$grid))   # THIS column's targets (2026-10-12)
   tg <- ccx_ocean_gradient_target(depth)
@@ -2182,7 +2194,7 @@ ccx_prepare_obs <- function() {
   # the v2 table (2026-10-12, data-raw/build_intcal20_d14c.R): the shipped year / d14c / err
   # REPRODUCED from the published intcal20.14c (gated there, exact), plus `sd_d14c` -- column 5, the
   # D14C sigma in permil. The legacy row reads `err` exactly as before; data/obs_d14c_intcal20.rds
-  # stays as the record (test-intcal-v2.R holds the two to identical columns).
+  # stays as the record (test-wtc-label.R's "IntCal v2" test holds the two to identical columns).
   ic20 <- tryCatch(as.data.frame(readRDS(ccx_path("data", "obs_d14c_intcal20_v2.rds"))),
                    error = function(e) NULL)
   exc  <- tryCatch(readRDS(ccx_path("data", "obs_excess_c14.rds")),
@@ -2707,8 +2719,10 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   # tau_ex without anything saying so.
   #
   # THE TWO OFFSETS DO NOT MEAN THE SAME THING, and the code should not pretend
-  # they do. For CO2 the fractional offset is 0.45/2.43 = 19 % of the gradient,
-  # which is what a station-below-the-source-region argument predicts. Applying
+  # they do. For CO2 the fractional offset was 0.45/2.43 = 19 % of the gradient
+  # (2026-08 measurement), which is what a station-below-the-source-region
+  # argument predicts. ⚠ The canonical hilda31w fits grad_off_co2 = +0.248 ppm,
+  # the OPPOSITE sign to that argument (verified 2026-10-15). Applying
   # that same fraction to d13C predicts 0.013 permil; the measured d13C offset
   # is 0.10, EIGHT TIMES larger. So `grad_off_d13c` is absorbing the known
   # STRUCTURAL d13C misfit (the Suess overshoot, project note
@@ -2887,16 +2901,17 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   # stops being true must be visible rather than inferred.
   #
   # THE ALKALINITY ROW (third scalar, added 2026-08-16b) IS DIFFERENT IN KIND
-  # AND MUST NOT BE READ AS THE OTHER TWO. DIC and d13C are STATE VARIABLES, so
-  # their gradients are computed quantities that already move (transient
-  # leverage <= 0.09 sigma). The model carries NO ALKALINITY at all -- it enters
-  # the mixed-layer carbonate solve and nowhere else -- so its gradient is
-  # EXACTLY 0 until a carbonate pump exists, and this term is a hard constant of
-  # -8.38 log-units with LITERALLY zero leverage. It is shipped anyway, on
-  # Marcus' instruction (2026-08-16b) and for the same reason the DIC row was
-  # shipped before the pump: the constraint has to be in the objective for the
-  # pump to be scored against it. Do NOT quote it as evidence about anything
-  # until ccx_model_ocean_alk_gradient() is given a pump.
+  # FROM THE OTHER TWO. DIC and d13C are STATE VARIABLES, so their gradients are
+  # computed quantities. The model carries NO ALKALINITY state -- it enters the
+  # mixed-layer carbonate solve and nowhere else -- so its gradient is a steady
+  # function of the pump's export fields alone (ccx_model_ocean_alk_gradient()).
+  # The row is LIVE: ccx_ocean_grad_scored() reads the pump off spin$aux$pump,
+  # so under every pump-carrying mode (the canonical hilda31w included) it has
+  # leverage. HISTORY: added before the pump shipped, on the author's instruction
+  # (2026-08-16b), when the gradient was EXACTLY 0 and the term a hard constant
+  # of -8.38 log-units with zero leverage -- shipped then for the same reason the
+  # DIC row was: the constraint had to be in the objective for the pump to be
+  # scored against it. It is still exactly 0 for a run with no pump.
   if (LIK_USE_OCEAN_GRAD && !is.null(ocean_grad)) {
     tg <- ccx_ocean_gradient_target(odep)
     # ⚠ LOUD, NOT SILENTLY SKIPPABLE. Since option 5 was adopted these rows are

@@ -355,7 +355,7 @@ ccx_spinup <- function(p = ccx_default_params(),
     # w_up and w_out are WITHIN-column, where uniformity holds. The conveyor
     # couples the two columns, and they sit at DIFFERENT concentrations (SST 18
     # vs 16 degC -> DIC 2.03786 vs 2.05570 mol/m3). So the block below is only a
-    # starting guess and ccx_ocean_c12_steady() finishes the job -- see its
+    # starting guess and ccx_c12_steady_conveyor() finishes the job -- see its
     # header for the measured consequence of skipping it (-0.915 permil of
     # spurious d13C drift).
     dic <- ccx_dic_for_pco2(chi0, ccx_aux_alk(aux), aux$sst[[h]], cc = ccx_aux_carb(aux))
@@ -561,7 +561,8 @@ ccx_stock_readout <- function(y, aux) {
 ccx_report_spinup <- function(s) {
   # ⚠ LABEL CAVEAT (code review 2026-10-12; label left unchanged). The depth
   # ranges "1314-3700" / "2627-3700" are the layer edges at h_ml = 75 m; the real
-  # edges move with h_ml (the canonical's is 64.63), so read them as nominal.
+  # edges move with h_ml (hilda29e's was 64.63; the canonical hilda31w's is 69.54),
+  # and the column depth is 3682.2 m under label ...wtc, so read them as nominal.
   # (The review's other caveat -- a PERIODIC spinup's d13C / D14C rows were the
   # START-OF-YEAR instant -- is FIXED: since 2026-10-12 they are the orbit's annual
   # means, the convention its CO2 row and its pins are stated on.)

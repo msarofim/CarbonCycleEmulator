@@ -80,6 +80,10 @@ static const int C = 0, C13 = 1, C14 = 2;
 // disagreement in the column count is caught by ccx_cpp_forcing()'s name check;
 // a disagreement in the ceiling is NOT caught by anything, so if one moves the
 // other must move in the same commit.
+// N_FORCING HISTORY (the trailing note below runs newest-first and is fused on its first line):
+// 20 = +nuc_share_NH (2026-10-12, label ...wtc); 19 = +ndep_NH, +ndep_SH (2026-09-30, D2 (a));
+// earlier: +sst_anom_NH/_SH (2026-08-18), +sink_ocean (2026-08-23c), +aod_NH/_SH (2026-08-29).
+// Every addition was appended LAST.
 static const int N_FORCING = 20;   // +nuc_share_NH (2026-10-12, label ...wtc), LAST; was 19:   // +ndep_NH, +ndep_SH (2026-09-30, D2 (a)), LAST;
                                    // "off" value 0 = no anthropogenic deposition.
                                    // +sst_anom_NH, +sst_anom_SH (2026-08-18),
@@ -279,9 +283,10 @@ struct Par {
   // "converted land" block in ccx_deriv() (R/model.R) for the mechanism and
   // CCX_F_LUC_PERM_DEFAULT for why 1 rather than 0 is the default.
   double f_luc_perm;
-  // WHERE the land-use debit comes from (2026-08-13). 1 = wood alone, the
-  // shipped behaviour; below 1 the remainder is split pro rata across the four
-  // land pools by their preindustrial equilibrium shares. Must reproduce
+  // WHERE the land-use debit comes from (2026-08-13). 1 = wood alone (the
+  // pre-2026-08-13 behaviour); below 1 the remainder is split pro rata across the
+  // four land pools by their preindustrial equilibrium shares. The default and the
+  // canonical mode run 0 = fully pro rata (CCX_F_LUC_WOOD_DEFAULT). Must reproduce
   // ccx_luc_pool_shares() in R/model.R exactly -- the weights are derived from
   // the same six land parameters in both, deliberately, so neither side can
   // carry a stale vector.
@@ -333,8 +338,10 @@ struct Par {
   // CCX_ENT_SEAS_PEAK_MO in R/model.R for the measurement and the physics.
   double ent_seas_amp_SH;
   // DIAGNOSTIC CHANNEL SWITCH (2026-08-20f), not a fitted parameter and not in
-  // CCX_PARAM_TABLE. Scales the seasonal NEP term only. 1 = the shipped model,
-  // bit for bit; 0 = that channel off with the ANNUAL BUDGET UNTOUCHED, because
+  // CCX_PARAM_TABLE. Scales the seasonal NEP term only. 1 = the model as of
+  // 2026-08-20f, bit for bit (since 2026-08-20r the shipped values are the
+  // measured SEAS_NPP_AMP_NH / _SH, 0.4969 / 0.5027 -- R/constants.R);
+  // 0 = that channel off with the ANNUAL BUDGET UNTOUCHED, because
   // the term it multiplies is zero-annual-mean by construction. It exists
   // because the other two seasonal channels can already be switched exactly by
   // parameters (seas_T_amp = 0, sst_seas_amp = 0) and this one could not --
@@ -350,18 +357,16 @@ struct Par {
 // discipline as SV_TO_M3YR below). (The seasonal-T lag was a twin here too until
 // 2026-10-12; it is now a run input -- see below.)
 static const double SEAS_PHI_EFF[2] = { 75.0, -30.0 };
-// Twins of CCX_SEAS_T_LAG / CCX_SST_SEAS_LAG -- see the long note at those
-// constants in R/model.R before touching either. In short: the 3.5 in
-// (3.5 + LAG)/12 already places the zero-lag NH peak at mid-July, SEAS_T_LAG
-// scales SOIL respiration rather than air temperature so its mid-September peak
-// is correct (measured: a clean interior optimum, 18,944 log-units above LAG = 0),
-// SST_SEAS_LAG is no longer unidentified: it is measured from ERSSTv5's own
-// NH seasonal peak month, because sst_seas_amp modulates SST itself.
-// ⚠ NO LONGER COMPILE-TIME CONSTANTS (2026-10-12; label hilda_csl3v0kaidgbemwtc): the
-// respiration lag is FITTED (`seas_T_lag`) and the seasonal-SST lag is PER HEMISPHERE
-// (`sst_seas_lag_NH` / `_SH`). Both arrive in the parameter list, RESOLVED by ccx_cpp_par()
-// through ccx_seas_t_lag() / ccx_sst_seas_lag() -- the functions the R core calls -- so absence
-// (2.0 / 1.32 for both, every registered mode) has ONE definition. Read into Par below.
+// THE TWO SEASONAL LAGS (respiration `seas_T_lag`, seasonal-SST `sst_seas_lag_NH/_SH`):
+// no compile-time twins remain here since 2026-10-12 (label hilda_csl3v0kaidgbemwtc) --
+// see the notes at CCX_SEAS_T_LAG / CCX_SST_SEAS_LAG in R/model.R. The 3.5 in
+// (3.5 + LAG)/12 places the zero-lag NH peak at mid-July. The respiration lag is
+// FITTED (the canonical hilda31w: 0.276 months; CCX_SEAS_T_LAG = 2.0, a mid-September
+// peak, is only the absent-field default) and the seasonal-SST lag is PER HEMISPHERE,
+// read from ERSSTv5 (hilda31w: 1.325 NH / 1.536 SH). Both arrive in the parameter list,
+// RESOLVED by ccx_cpp_par() through ccx_seas_t_lag() / ccx_sst_seas_lag() -- the functions
+// the R core calls -- so absence (2.0 / 1.32 for both, every mode registered before
+// hilda31w) has ONE definition. Read into Par below.
 // Twin of CCX_ENT_SEAS_PEAK_MO in R/model.R -- MUST track it. The month at
 // which the Southern-Ocean entrainment channel's surface-DIC anomaly peaks,
 // MEASURED from the ocean-area-weighted 40-90 S pCO2 first harmonic. NOT a lag
@@ -1143,8 +1148,10 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
 
     // prescribed emissions -- see R/model.R for the reasoning. Fossil carbon is
     // external to the modelled system; land-use change is not, so it is a
-    // TRANSFER out of the WOOD box (which carries wood's own 13C/14C ratios)
-    // rather than an external source that created 14C ex nihilo.
+    // TRANSFER out of the land pools (each carrying its own 13C/14C ratios)
+    // rather than an external source that created 14C ex nihilo. The default and
+    // the canonical mode run f_luc_wood = 0: PRO RATA over the four pools.
+    // f_luc_wood = 1 (the pre-2026-08-13 behaviour) takes it from WOOD alone.
     add_source(iatm, f[hi], d13c_foss, -1000.0);
     if (P.f_luc_wood >= 1.0) {
       add_flux(iwod, iatm, f[2 + hi], 1.0);
@@ -1208,6 +1215,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
                       + f[8] * 0.5) * c14_to_state;
   dy[IX(NPH, C14)] += (f[6] * (1.0 - A.bomb_share_NH) + f[7] * (1.0 - nsh)
                       + f[8] * 0.5) * c14_to_state;
+  // decay constant from the 5700-yr class half-life (R/constants.R), NOT the Libby 5568 yr age convention
   for (int i = 0; i < NB; ++i) dy[IX(i, C14)] -= A.lambda * y[IX(i, C14)];
 }
 

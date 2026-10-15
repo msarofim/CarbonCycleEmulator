@@ -362,8 +362,9 @@ ccx_cpp_par <- function(p) {
   # existed reaches the core as the model it was built for -- the same
   # principle as seas_drivers and sst_obs below.
   if (is.null(p$ent_seas_amp_SH)) p$ent_seas_amp_SH <- 0
-  # ABSENCE = 1 = the shipped model: a parameter list written before 2026-08-20f
-  # reaches the core as the model it was built for.
+  # ABSENCE = 1 = the model before 2026-08-20f: a parameter list written before
+  # then reaches the core as the model it was built for. (Default lists carry the
+  # measured SEAS_NPP_AMP_NH / _SH, 0.4969 / 0.5027, since 2026-08-20r.)
   if (is.null(p$seas_npp_amp_NH)) p$seas_npp_amp_NH <- 1
   if (is.null(p$seas_npp_amp_SH)) p$seas_npp_amp_SH <- 1
   # Observed-SST switch: ABSENCE = the legacy sst_scale * gmst path, so a
@@ -431,7 +432,6 @@ ccx_cpp_par <- function(p) {
       "ndep_ret", "npp_tsens")]
 }
 
-#' Forcing table -> the matrix the C++ expects, in its column order
 # Column ORDER is the contract with src/ccx_core.cpp, which indexes f[] by
 # position. Adding, removing or reordering a name here requires the same edit
 # there; a mismatch is silent garbage, not an error, so both sides state the
@@ -471,6 +471,7 @@ CCX_FORCING_COLS <- c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH",
                       # reaches C++ as NaN, which the core reads as the aux scalar.
                       "nuc_share_NH")
 
+#' Forcing table -> the matrix the C++ expects, in its column order
 ccx_cpp_forcing <- function(F) {
   miss <- setdiff(CCX_FORCING_COLS, names(F))
   if (length(miss))
@@ -483,12 +484,14 @@ ccx_cpp_forcing <- function(F) {
 #'
 #' @param substeps RK4 substeps per month, or "auto" (default) for the smallest
 #'   count that keeps the explicit diffusion term stable -- see the stability
-#'   section of R/model.R. "auto" resolves to 4 at every ordinary parameter
-#'   value, so this default does not change any existing result.
-#'   ⚠ (code review 2026-10-12) Not under the seasonal mixed layer: there it
-#'   is 4 at the canonical's h_ml (64.63) but 5 / 6 / 9 / 13 at h_ml 68 / 70 /
-#'   72 / 73 and more toward the P8 bound -- see the stability section of
-#'   R/model.R. A retried run is -Inf in the objective since 2026-09-16 (d).
+#'   section of R/model.R. Without the seasonal mixed layer "auto" resolves to
+#'   CCX_SUBSTEPS_MIN = 4 at every ordinary parameter value.
+#'   ⚠ Under the seasonal mixed layer it depends on h_ml: at the canonical
+#'   hilda31w (h_ml 69.54) it is 6; with hilda31w's other values it is 4 / 5 /
+#'   10 / 15 at h_ml 64.63 / 68 / 72 / 73, and more toward the P8 bound (code
+#'   review 2026-10-12 read 4 at the then-canonical hilda29e's h_ml 64.63) --
+#'   see the stability section of R/model.R. A retried run is -Inf in the
+#'   objective since 2026-09-16 (d).
 #' @param retry_na if the run still produces NAs (the air-sea corner, which the
 #'   diffusion criterion deliberately does not cover), double the substep count
 #'   and try again, up to CCX_SUBSTEPS_MAX. A NA that survives that is a real
@@ -585,7 +588,7 @@ ccx_run_prepared <- function(y, prep, F, retry_na = TRUE, enso_hist = NULL, tdee
          # ⚠ THE COUNT THE CALLER ASKED FOR (2026-09-16 d). A retry below runs
          # the transient at a HIGHER count than the spinup that produced `y`,
          # and the fixed point of the 4-step map is NOT on the 64-step orbit:
-         # measured at the canonical, a transient-only refinement manufactures
+         # measured at the canonical of 2026-09-16, a transient-only refinement manufactures
          # -3.0 log-units at h_ml 65.2 and -13.5 at 71.0 while the like-for-like
          # integrator error is <= 0.15 (review 09-16 c, finding 3). So a
          # retried result is a DIFFERENT NUMBER, not a more accurate one; the

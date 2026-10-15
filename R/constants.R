@@ -304,12 +304,14 @@ CCX_CONSTANTS <- list(
   # ⚠ SUPERSEDED IN PRACTICE (code review 2026-10-12, text-only fix): 18 is now
   # only the ABSENT-FIELD DEFAULT -- ccx_prepare() reads this ledger value when
   # `p$alpha_photo_eps` is NULL (ccx_default_params() and the plain "hilda"
-  # block leave it absent). Every adopted mode since 09-14 h, the canonical
-  # `hilda29e` included, runs 15.6 permil: the `hilda_c` structure block sets
-  # `alpha_photo_eps` = CCX_ALPHA_PHOTO_EPS_BIOSPHERE (R/calibrate.R,
-  # ccx_struct_hilda_c(); the ruled mid-bracket, cited there). Measured
-  # 2026-10-12: the canonical's run parameters carry alpha_photo_eps 15.6. The
-  # `source` string below says so (its "IN USE: 18" was corrected 2026-10-12).
+  # block leave it absent). Adopted modes from 09-14 h to hilda29e (the
+  # canonical until 2026-10-13) run 15.6 permil: the `hilda_c` structure block
+  # sets `alpha_photo_eps` = CCX_ALPHA_PHOTO_EPS_BIOSPHERE (R/calibrate.R,
+  # ccx_struct_hilda_c(); the ruled mid-bracket, cited there). The canonical
+  # since 2026-10-13, hilda31w (label hilda_csl3v0kaidgbemwtc), runs 16.2 =
+  # ALPHA_PHOTO_EPS_STILL2003 (verified from its run parameters 2026-10-15).
+  # The `source` string below records both (its "IN USE: 18" was corrected
+  # 2026-10-12; its "the canonical hilda29e" predates the 10-13 adoption).
   ALPHA_PHOTO_EPS = list(
     value = 18, units = "permil",
     status = "provisional",
@@ -478,6 +480,8 @@ CCX_CONSTANTS <- list(
                    "it would be 0.19) and Wanninkhof (2014) L&O Methods",
                    "12:351, doi:10.4319/lom.2014.12.351, abstract, +-20 % (0.198); 0.2. Replaces 0.4,",
                    "2.1x the literature's width, which had no recorded reason.")),
+  # ⚠ (2026-10-15) The `source` string's last sentence predates the 2026-10-13 adoption: the
+  # canonical is now hilda31w, which fits tau_ex 0.943 yr (hilda29e's 0.893 is history).
   TAU_EX_PRIOR_CENTRE = list(
     value = 0.8, units = "yr",
     status = "cited",
@@ -791,7 +795,7 @@ CCX_CONSTANTS <- list(
   # span". It is NOT -- nothing clamps the SST, and at the canonical it
   # EXTRAPOLATES at both ends: the NH low-latitude SST is above 21 degC in 85 %
   # of months, and every HS-box evaluation sits at 1.6-3.3 degC (measured by the
-  # review). The line's slope is (-0.81 - -0.95) / 16 = 0.00875 permil/K, so
+  # review at hilda29e, the canonical until 2026-10-13). The line's slope is (-0.81 - -0.95) / 16 = 0.00875 permil/K, so
   # each degree beyond an end moves eps_k by under 0.01 permil.
   ALPHA_AS_KIN_5 = list(
     value = -0.95, units = "permil",
@@ -1153,7 +1157,8 @@ CCX_CONSTANTS <- list(
   # ---- THE CITED VALUES OF LABEL hilda_csl3v0kaidgbemwtc (2026-10-12) ----------------------
   # notes/citation_rulings_2026-10-12.md; routed by label ("New label (a) (Recommended)"), so each
   # LEGACY entry above (ALK_SURFACE, OCEAN_DEPTH, ALPHA_PHOTO_EPS, PUMP_EPS13_ORG) stays as the
-  # ABSENT-FIELD DEFAULT every registered mode runs, and the label's structure block reads these.
+  # ABSENT-FIELD DEFAULT (what every mode registered before hilda31w runs), and the label's
+  # structure block -- which the canonical hilda31w carries -- reads these.
   # The data-derived ones are tied to their products by tests/testthat/test-wtc-label.R.
   ALK_SURFACE_GLODAP = list(
     value = 2303.4e-6, units = "mol/kg",

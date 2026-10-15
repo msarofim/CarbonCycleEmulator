@@ -7,10 +7,12 @@
 #
 #   [1] The central pedagogical quantity was not computable from model output.
 #       The "CO2 only lasts 5 years" argument IS an argument about gross fluxes
-#       -- turnover time tau_turn = M_atm / F_gross_out is ~4 yr, while the
+#       -- turnover time tau_turn = M_atm / F_gross_out is ~5 yr, while the
 #       ADJUSTMENT time of a mass perturbation is decades to centuries (measured
-#       in calibration/diag_pedagogy.R: 4.32 yr against 26 % of a pulse still
-#       airborne at 100 yr). Without a flux trace the model could demonstrate
+#       in calibration/diag_pedagogy.R, read off THIS trace: tau_turn 4.69 yr at
+#       1750, 5.32 by 2024, against 26 % of a pulse still airborne at 100 yr; the
+#       4.32 yr first quoted here, from a one-month label slope, was withdrawn by
+#       that script -- the January seasonal drawdown biases the slope fast). Without a flux trace the model could demonstrate
 #       the second but could not print the first, and the whole point is that
 #       one model produces BOTH numbers.
 #   [2] The app's box diagram had six unlabelled arrows. An unlabelled arrow
@@ -28,9 +30,11 @@
 # at each call site. A flux added to the model in future is therefore captured
 # automatically rather than silently dropped. Explicit labels exist only where
 # one endpoint PAIR carries two physically distinct processes that must not be
-# merged: seasonal NEP against GPP (both atm->leaf), the land-use transfer
-# against autotrophic respiration (both wood->atm), and the ENSO anomaly against
-# heterotrophic respiration (both soil->atm).
+# merged: seasonal NEP against GPP (both atm->leaf) and the land-use transfer
+# against respiration (land pool->atm; under the default pro-rata debit it
+# leaves all four pools, so it shares endpoints with both Ra and Rh). (The
+# ENSO anomaly against heterotrophic respiration, both soil->atm, was a third
+# until the `enso` channel was RETIRED 2026-09-02 -- see CCX_FLUX_CHANNELS.)
 # =====================================================================
 
 # Channel -> what it is, in the app's words. Labels derive from this table:
