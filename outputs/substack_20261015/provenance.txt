@@ -1,0 +1,8 @@
+driver: outputs/substack_20261015/make_figures.R @ cd7a68bc
+mode: hilda31w (the app's canonical); app release: BETA v1.0 CarboTope
+pulse: 100 GtC in 2050 on vvM (pulse-lab default), runs 1750-2300, emissions interp constant
+FaIR: FaIR 2.2.4 (calib 1.6.0), 841-configuration mean (5–95% shaded)
+keeling window: 2009-2024
+hero values at 2300.5: extra CO2 41.2%, tagged atoms 6.0%
+size: 1456 px wide at 200 dpi; hero 1456x762
+deterministic: no RNG

@@ -2,6 +2,22 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-15 (p) — **Substack figures and the hero image, made from the app** (Marcus: "Can you provide nicely formatted figures as replacements for the screenshots I made, and also select a good hero figure?"). `outputs/substack_20261015/`: `make_figures.R`, four PNGs and `provenance.txt` (driver @ `cd7a68b`, mode `hilda31w`).
+
+- **Figures 1–3** are the app's own plots, drawn by the app's functions on the same runs the app makes, at 1456 px wide (2× the ~728 px Substack column):
+  - Keeling 2009–2024, both stations;
+  - share of a 100 GtC pulse (2050, Medium background) still in the air, with the tagged atoms and FaIR's 5–95 % band;
+  - the pulse's warming against FaIR's.
+
+  The app's footer caption is replaced by "Source: CarboTope (beta v1.0)."
+- **Hero:** Figure 2's two CarboTope lines alone, direct-labeled, 1456×762 (1.91:1). The extra CO₂ is 41 % at 2300 against 6 % of the pulse's carbon atoms: the residence-vs-perturbation distinction the post argues.
+- **Re-rendered from a clean tree:** byte-identical to the first render, and the stamp is clean.
+- **Palette** (dataviz `validate_palette.py`):
+  - The Keeling red/blue pair passes every check.
+  - The pulse figures' near-black atoms line (`PAL[["obs"]]`, #22313f) fails the lightness-band and chroma checks: it reads as ink, not a series hue. Separation passes with margin (CVD ΔE 24.8, normal 36.3), and both figures carry secondary encoding (legend plus dashed FaIR; direct labels on the hero).
+  - The obvious swap to the app's blue was REJECTED, measured: it falls to ΔE 1.6 against FaIR's purple under deuteranopia.
+- **Also:** the pulse-lab legend now reads "The pulse's carbon atoms (tagged)" ("own" cut; Marcus's style notes name this phrase), and the Essenhigh comment PDF is in `app/www/` for the post's link (`cd7a68b`). `plot-text-fits` + `app-us-spelling` read 114 / 0.
+
 ## 2026-10-15 (o) — **README: "not for citation" cut** (Marcus: "Yes, cut it from the README"), to match the app (l). It now reads "Teaching software, not peer-reviewed."
 
 ## 2026-10-15 (n) — **The app-text review APPLIED in full** (Marcus, verbatim: "Apply all the app text suggestions"). This covers the three items that were his until now: issue 7's "slightly", issue 4's class gloss, and the start-up note.
