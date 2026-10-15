@@ -92,7 +92,8 @@ AC_CHECKS <- list(
   c("U3/R4 affiliation dropped",         "NYU Marron Institute\"", "APP_AUTHOR       <- \"Marcus C. Sarofim\""),
   c("U4 isotope sentence",               "which is what lets the isotope tab work", "All exchanges include all three carbon"),
   c("U5 'No ocean circulation' gone",    "No ocean circulation", "meet only in the atmosphere"),
-  c("U6 goal first",                     NA, "able to duplicate observed hemispheric, seasonal"),
+  # re-pinned 2026-10-15 (Marcus 2026-10-15: "Apply all the app text suggestions"): "duplicate" -> "reproduce most" (issues 2-3 are hemispheric misses)
+  c("U6 goal first",                     NA, "able to reproduce most observed hemispheric, seasonal"),
   c("O2 banner shortened",               NA, "provenance_detail"),
   # C2 (09-22 r): the chart measured the claim next to it and falsified it --
   # ENSO off removes 23 % of the scatter, not the wobble. See
@@ -100,7 +101,7 @@ AC_CHECKS <- list(
   # 2026-10-03 (h): at hilda34g ENSO off removes 40 % (calibration/diag_app_wobble_shares.R; 28 % at
   # hilda33d), and the blurb says "about 40 %" (Marcus: "\"about 40 %\" (Recommended)"; this re-pin:
   # "Approve all (Recommended)").
-  c("C2 wobble claim corrected",         "switch it off and the wobbles go", "about 40 % of the wobble")
+  c("C2 wobble claim corrected",         "switch it off and the wobbles go", "about 40% of the wobble")   # "40 %" -> "40%", 10-15
 )
 
 # THE 2026-10-01 RULINGS (Marcus, review notes/review_2026-10-01c_open_decisions.md: "1) Retire card 6.

@@ -85,7 +85,8 @@ function(input, output, session) {
     # deposition has been a prescribed input since hilda33d (data/forcing_ndep.rds,
     # the NOx + NH3 emissions proxy); the list omitted it. The same driver is a
     # row of the "What drives the model" table (output$h_drivers).
-    sprintf(paste("The model produces %.0f ppm in %d, rising to %.0f ppm today;",
+    # Marcus 2026-10-15 ("Apply all the app text suggestions"): the quantity and the year are named ("today" read against What-if's 425)
+    sprintf(paste("At Mauna Loa, the model produces %.0f ppm in %d, rising to %.0f ppm in %d;",
                   "the measured value is about %.0f ppm. The model's inputs are",
                   # Marcus 2026-10-02 (carbotopecomment): "volcanic aerosol light diffusion",
                   # and the "what it is never told ... the next tab" sentence deleted.
@@ -95,7 +96,7 @@ function(input, output, session) {
                   # Marcus 2026-10-11 (CarboTopecomments.10.11.26): "it only adjusts", verbatim.
                   "not an abstract regression: it only adjusts quantities that",
                   "stand for physical things."),
-            kn$start, kn$start_year, kn$now, kn$obs_now)
+            kn$start, kn$start_year, kn$now, kn$now_year, kn$obs_now)
   })
 
   # ---- 2. Where does it go -------------------------------------------
@@ -127,11 +128,10 @@ function(input, output, session) {
     sprintf(paste("Of the %s of carbon emitted since 1750, %s is still in the",
                   "air, %s was taken up by the land sink (while land clearing released %s",
                   "from it) and %s is in the ocean — %s, %s and",
-                  "%s of the total. The three add back to %s."),
+                  "%s of the total."),   # "The three add back to ..." cut, Marcus 2026-10-15 ("Apply all the app text suggestions")
             fmt_gtc(d$emitted), fmt_gtc(d$atmosphere), fmt_gtc(d$land), fmt_gtc(d$cum_luc),
             fmt_gtc(d$ocean), fmt_pct(d$atmosphere / d$emitted),
-            fmt_pct(d$land / d$emitted), fmt_pct(d$ocean / d$emitted),
-            fmt_gtc(s))
+            fmt_pct(d$land / d$emitted), fmt_pct(d$ocean / d$emitted))
   })
 
   # W2 (Marcus 2026-09-22), COMPUTED. He asked for a note that deforestation
@@ -242,10 +242,10 @@ function(input, output, session) {
                  # unexplained" while printing the remainder (0.007 GtC/yr at hilda31w).
                  sprintf(paste("Taking the whole gap apart accounts for almost all of it. Against",
                                "the measured budget this model's land sink runs about %s GtC",
-                               "a year high over %d\u2013%d, and that is almost exactly the budget's own",
+                               "a year high over %d\u2013%d, and that is almost exactly the budget's",
                                "leftover carbon (%s), plus a cement sink this model does not",
                                "have (%s), less the fitted land-use scaling (%s) \u2014 with the",
-                               "model's own growth and ocean differences adding %+.2f and %+.2f.",
+                               "model's growth and ocean differences adding %+.2f and %+.2f.",
                                "The terms leave a remainder of %.3f GtC a year,",
                                "about %.0f%% of the gap they account for."),
                          a(z$d_land), z$window[1], z$window[2],
@@ -271,11 +271,12 @@ function(input, output, session) {
     # every decade.
     above   <- sum(s$model > s$obs)
     exceeds <- sum(s$obs + s$imbal > s$model)
-    sprintf(paste("The model's land sink sits inside the band in %d of the %d decades on",
-                  "this chart. The model takes up more carbon than the GCB estimate%s.",
+    # Marcus 2026-10-15 ("Apply all the app text suggestions"): the "sits inside the band in N of M decades" sentence cut -- while the
+    # model is above GCB in every decade it states the third sentence again.
+    sprintf(paste("The model takes up more carbon than the GCB estimate%s.",
                   "When the budget imbalance is added to the GCB estimate, it exceeds the",
                   "model estimate in %d out of %d decades on this chart."),
-            inb, n, if (above == n) "" else sprintf(" in %d of them", above), exceeds, n)
+            if (above == n) "" else sprintf(" in %d of %d decades", above, n), exceeds, n)
   })
 
   # ---- REGROWTH TIER 1 (Marcus 2026-09-24) --------------------------
@@ -452,7 +453,7 @@ function(input, output, session) {
         tags$li(tags$strong(paste0(CCX_MECHANISMS[[n]]$label, ": ")), cv), off, cav))
     else
       paste(cav, collapse = " ")
-    div(class = "caveat", tags$strong("Worth knowing: "), body)
+    div(class = "caveat", body)   # "Worth knowing:" label cut, Marcus 2026-10-15 ("Apply all the app text suggestions")
   })
 
   # C2 (Marcus 2026-09-22). The growth-rate panel, with observations (C1) --
@@ -718,12 +719,13 @@ function(input, output, session) {
     sprintf(paste("δ¹³C has fallen %.2f‰ since 1850 as fossil and land-use carbon (both originally",
                   "from plants) diluted the air — the fingerprint that the extra CO₂ is fossil and",
                   "land-use carbon. Δ¹⁴C tells",
-                  "a different story: weapons testing nearly %s it by %d, and",
+                  "a different story: weapons testing %s by %d, and",
                   # Marcus 2026-10-02 (carbotopecomment), his wording
                   "the rate at which it declines provides information about the",
                   "speed of carbon exchange between pools."),
             d13c_drop,
-            if (o$d14c_NH[ip] > 500) "doubled" else "spiked",
+            # Marcus 2026-10-15 ("Apply all the app text suggestions"): what nearly doubled is the air's carbon-14, not Δ¹⁴C (≈0 -> +900‰)
+            if (o$d14c_NH[ip] > 500) "nearly doubled the air's carbon-14" else "sent it spiking",
             floor(o$t[ip]))
   })
 
@@ -937,10 +939,10 @@ function(input, output, session) {
       # 2026-10-15 review: one ticked scenario printed "span 620 to 620 ppm"
       if (length(future_runs()) == 1L)
         return(sprintf(paste("By %d this scenario reaches %.0f ppm and %.1f °C.",
-                             "A scenario is a choice, not a forecast."),
+                             "A scenario is a choice about future emissions."),
                        sp$year, sp$co2[1], sp$gmst[1]))
       sprintf(paste("By %d these scenarios span %.0f to %.0f ppm and %.1f to",
-                    "%.1f °C. The spread is a choice, not a forecast."),
+                    "%.1f °C. The spread comes from choices about future emissions."),
               sp$year, sp$co2[1], sp$co2[2], sp$gmst[1], sp$gmst[2])
     }
   })
@@ -996,7 +998,8 @@ function(input, output, session) {
                       "warming still at %d, %d years after release."),
                 pr$gtc, at(y100), per1000, fmt_pct(keep), yend, yend - pr$year)),
       # Marcus 2026-10-11 (CarboTopecomments.10.11.26), his two "Change"s, verbatim.
-      p("Two things are worth separating here. The first is that the warming",
+      # Marcus 2026-10-15 ("Apply all the app text suggestions"): "Two things are worth separating here. The first is that" cut (no second)
+      p("The warming",
         "barely decays: a pulse of carbon emissions keeps warming the world for as",
         "long as this model runs, so on any human timescale the temperature",
         "resulting from a tonne of CO₂ is permanent."),
@@ -1158,8 +1161,7 @@ function(input, output, session) {
     }, character(1))
     pump_top <- names(which.max(MC[, "Biological pump"]))
     tagList(
-      p(tags$strong("The ocean's Δ¹⁴C is a ventilation measurement, not an uptake",
-                    "measurement. "),
+      p(tags$strong("The ocean's Δ¹⁴C is mainly a ventilation measurement. "),
         sprintf(paste("%.0f%% of the ocean's Δ¹⁴C sensitivity is to the mixed",
                       "layer and the vertical mixing below it."),
                 sh("Δ¹⁴C in the ocean", "Mixed layer & vertical mixing")),
@@ -1180,10 +1182,10 @@ function(input, output, session) {
         " The pump is necessary for matching these bottle data, even though it",
         " turns out that the pump has little influence on the rest of the",
         " system."),
-      p(tags$strong("The seasonal cycle is two constraints in tension, not one. "),
-        sprintf(paste("The seasonal CO₂ cycle and the seasonal δ¹³C cycle account",
-                      "for %.0f%% and %.0f%% of their own rows, so between them they",
-                      "own the seasonal machinery — and they disagree about it:"),
+      p(tags$strong("The seasonal cycle is two constraints in tension. "),
+        sprintf(paste("The seasonal CO₂ cycle and the seasonal δ¹³C cycle take %.0f%% and",
+                      "%.0f%% of their sensitivity from the seasonal-cycle parameters, and they",
+                      "disagree about them:"),
                 sh("CO₂ seasonal cycle", "Seasonal cycle"),
                 sh("δ¹³C seasonal cycle", "Seasonal cycle")),
         # 2026-10-15 review: "seasonal parameters (seas_lag_p_NH, ..., q10)" -- q10 is land uptake, and code names
@@ -1220,7 +1222,7 @@ function(input, output, session) {
         sprintf(paste(" But the two numbers that set it (the maximum boost CO₂",
                       "fertilization can give, beta_max, and the CO₂ level needed for",
                       "half that boost, fert_k) are only constrained as a combination: on",
-                      "their own each is about %.0fx tighter than the fit leaves the",
+                      "their own each is about %.0f\u00d7 tighter than the fit leaves the",
                       "pair jointly."),
                 max(APP_CMAP$sd_ratio[c("beta_max", "fert_k")]))),
         # 2026-10-01 (Marcus, review 10-01c A3): " CO2 fertilization is this
@@ -1292,7 +1294,7 @@ function(input, output, session) {
     withProgress(message = label, value = NULL, f())
   })
   output$rv_repdc     <- rv_render("rv_repdc", rv_plot_repdc,     "Comparing the model with Mauna Loa")
-  output$rv_gradient  <- rv_render("rv_gradient", rv_plot_gradient,  "Measuring the north-south gradients")
+  output$rv_gradient  <- rv_render("rv_gradient", rv_plot_gradient,  "Measuring the north\u2013south gradients")
   output$rv_diseq     <- rv_render("rv_diseq", rv_plot_diseq,     "Measuring the ocean's isotopic disequilibrium")
   output$rv_variance  <- rv_render("rv_variance", rv_plot_variance,  "Measuring the year-to-year variability")
   output$rv_enso      <- rv_render("rv_enso", rv_plot_enso,      "Running the model with its ENSO mechanisms off")
@@ -1405,7 +1407,7 @@ function(input, output, session) {
                  "IntCal20 tree-ring \u0394\u00b9\u2074C",
                  "Ocean bomb-\u00b9\u2074C inventory (Naegler & Levin 2006)", "Global Carbon Budget 2025",
                  "GLODAPv2.2023 ocean bottles"),
-      Covers = c("1958\u2013present", "1975\u2013present", "1752\u20131957", "1752\u20131976", "1977\u20132024",
+      Covers = c("1958\u20132024", "1975\u20132024", "1752\u20131957", "1752\u20131976", "1977\u20132024",
                  "1941\u20132019", "1750\u20131940", "1975 and 1995", "1959\u20132024", "depth climatology"),
       `Used for` = c("CO\u2082 level and seasonal cycle", "Southern CO\u2082 level and seasonal cycle",
                      "CO\u2082 before the station record", "\u03b4\u00b9\u00b3C before the station record",

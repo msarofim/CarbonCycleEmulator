@@ -2,6 +2,39 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-15 (n) — **The app-text review APPLIED in full** (Marcus, verbatim: "Apply all the app text suggestions"). This covers the three items that were his until now: issue 7's "slightly", issue 4's class gloss, and the start-up note.
+
+- **Facts and consistency:**
+  - Issue 7: "about 1,850" → "about 1,840", matching the parameter table (1835.4).
+  - "The same export in the cold box" → "Biological-pump export in the cold high-latitude box". The row had lost its referent.
+  - Keeling now names its quantity and year: "At Mauna Loa, … in 2024", read against What-if's global 425.
+  - Isotopes: "nearly doubled the air's carbon-14". Δ¹⁴C went from about 0 to +900 ‰; the ¹⁴C/C ratio is what nearly doubled.
+  - The pulse lab's "Two things are worth separating here. The first is that" is cut; no second followed.
+  - Where: "The three add back to …" is cut, and so is the "sits inside the band in N of M decades" sentence. That one restated Marcus's third sentence while the model is above GCB in every decade.
+  - The regrowth source note gains its missing noun ("estimate from its three bookkeeping models").
+  - The parameter-table intro now says the El Niño settings are fitted separately, then held, and that a value held at 0 is a mechanism switched off.
+  - "duplicate" → "reproduce most".
+  - The Under-the-hood "Teaching software" bullet and `APP_STAGE_NOTE` are retired, because the banner says both on every tab.
+- **His three items:**
+  - Issue 7: "slightly" is cut (+6.21 log-likelihood).
+  - The structural class gloss drops the two-oceans clause. Issue 4, a variance shortfall, carries the same gloss; issues 2 and 3 state the two-oceans limit in their own text.
+  - `APP_WARMUP_NOTE`: "three minutes" → "allow up to a minute". ⚠ Not measured on shinyapps.io: the Mac bundle starts in 6–8 s, and a fresh container also compiles the C++ core. Re-time after the first deploy.
+- **Minor:**
+  - "north–south" (en dash) throughout, and "10%" / "15%" / "40%" without a space.
+  - Issue 1's measured δ¹³C offsets print a true minus (`rv_signed()`; sprintf prints a hyphen).
+  - "51x" → "51×"; "1958–present" / "1975–present" → "–2024"; "on sixty-six years" → "over".
+  - Issue 1's `rep_dC` loses its backticks.
+- **Marcus's cut list:**
+  - The What-if "Worth knowing:" label, and "worth knowing" in issues 1 and 3.
+  - "own" in "the budget's own", "the model's own growth", "their own rows" and "the repo's own".
+  - ", not X" in "ventilation measurement, not an uptake measurement" (→ "mainly a ventilation measurement"), "two constraints in tension, not one", "a choice, not a forecast" (→ "choices about future emissions") and "not of skill" (→ "reflects a difference in inputs").
+  - Issue 4's "IS"; the FaIR note's ⚠; "the only honest way to ask".
+- **Pins followed the sentences:**
+  - `test-app-review-copy` (U6, C2);
+  - `test-luc-regrowth-panel`, re-pinned on an ASCII fragment because the source carries `\u` escapes;
+  - `test-review-card-numbers`: card 7 is now "about 1,840", still within one sd (|1835.4 − 1840| ≪ 52.5).
+- **Checked:** the 35 app-facing test files read 1688 / 0. In the browser, every new string renders across all 11 tabs (Pulse lab run, the Scenarios takeaway and the FaIR note checked), every removed string is gone, "not peer-reviewed" appears once (the banner), and there are no output or server errors.
+
 ## 2026-10-15 (m) — **One British form missed by (f): issue 1's "Re-centring" → "Re-centering".** The lint matched `centre[sd]?` and not "centring". The full re-read of the app text for Marcus's review found it. A broader scan of every app string literal found no other one. The lint now carries `centring`, and its mutation test includes it. It fails on the real file with the British form restored (checked), and passes with the fix: 9 / 0.
 
 ## 2026-10-15 (l) — **Marcus's `Carbotopecomments10.15.26b.docx` APPLIED (13 items).** Read as plain text: a list of edits, no Word comments.

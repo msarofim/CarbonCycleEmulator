@@ -206,7 +206,7 @@ CCX_MECHANISMS <- list(
     blurb = paste("ENSO moves carbon in and out of tropical land, and in and",
                   "out of the surface ocean, year by year. It is the largest",
                   "driver of the variability in annual growth rate — switch it",
-                  "off and about 40 % of the wobble goes with it."),
+                  "off and about 40% of the wobble goes with it."),
     # ⛔ THE TEMPERATURE HALF KEEPS RUNNING, and this caveat may not be
     # shortened to "El Nino off". Marcus 2026-09-25: "it does not flatten the
     # ENSO temperature effect, so that still exists." `apply` below zeroes the

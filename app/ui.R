@@ -51,8 +51,9 @@ provenance_banner <- function() {
 provenance_detail <- function() {
   tagList(
     p(sprintf("Parameters: %s (%s).", app_params$source, app_params$status),
-      " ", app_params$detail),
-    p(APP_STAGE_NOTE))
+      " ", app_params$detail))
+  # The stage note ("Beta. Teaching software -- not peer-reviewed.") went 2026-10-15 (Marcus: "Apply all the app
+  # text suggestions"): the banner on every tab already says both.
 }
 
 # Shown once, at the top of the first tab: the only place a first-time visitor
@@ -498,8 +499,7 @@ navbarPage(
                         APP_PULSE_YEAR_DEFAULT, step = APP_PULSE_YEAR_RANGE[3], sep = ""),
             actionButton("p_go", "Release the pulse", class = "btn-primary btn-sm"),
             helpText("Runs the model twice — with and without the pulse — and",
-                     "takes the difference. That is the only honest way to ask",
-                     "what one extra tonne does.")
+                     "takes the difference. The difference is what the extra carbon does.")
           )
         ),
         # F4 (Marcus 2026-09-22). The radio used to live INSIDE the Scenarios
@@ -688,7 +688,7 @@ navbarPage(
         12, class = "col-lg-7",
         h4("What this model is"),
         # U6 (Marcus 2026-09-22): the GOAL before the structure, his wording.
-        p("A carbon-cycle model able to duplicate observed hemispheric, seasonal",
+        p("A carbon-cycle model able to reproduce most observed hemispheric, seasonal",   # Marcus 2026-10-15 ("Apply all the app text suggestions"): "duplicate"
           "and isotopic patterns, integrated into a pedagogical framework."),
         # U4 (Marcus 2026-09-22): "It carries all three carbon isotopes" became
         # "All exchanges include all three isotopes"; the trailing clause cut.
@@ -709,7 +709,11 @@ navbarPage(
         p("These are the numbers the calibration fits, and the few it holds at a",
           "stated value. Everything else — ocean",
           "area, the mass of the atmosphere, carbonate chemistry constants — is",
-          "fixed from measurements and cited in the repository."),
+          "fixed from measurements and cited in the repository.",
+          # Marcus 2026-10-15 ("Apply all the app text suggestions"): the El Niño rows say "held" -- they were fitted in a separate step
+          # (app_cmap_module_note); and the held-at-0 rows are mechanisms switched off
+          "The El Niño settings are fitted in a separate step and then held. A value held",
+          "at 0 is a mechanism that is in the code but switched off."),
         tableOutput("h_params")
       ),
       column(
@@ -754,8 +758,9 @@ navbarPage(
                         # 2026-10-02: reworded to match Marcus's fertilization caveat
                         "its own, but a lack of nitrogen never limits the",
                         "response to CO₂ fertilization.")),
-          # Marcus 2026-10-15 (comments 10.15.26b): the "Two boxes of atmosphere" bullet deleted; "not for citation" cut
-          tags$li("Teaching software. Not peer-reviewed.")
+          # Marcus 2026-10-15 (comments 10.15.26b): the "Two boxes of atmosphere" bullet deleted. The "Teaching
+          # software" bullet went the same day ("Apply all the app text suggestions"): the banner says it on every tab.
+          NULL
         ),
         h4("Which numbers this app is running on"),
         provenance_detail(),

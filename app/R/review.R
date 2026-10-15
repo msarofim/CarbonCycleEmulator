@@ -42,9 +42,10 @@ RV_CLASS_GLOSS <- c(
   # ocean circulation", which is false at hilda29l. The limitation that is real
   # is the INTERHEMISPHERIC one: the two oceans never touch.
   # 2026-10-15 review: " -- " -> " — " in reader-visible strings (mechanical cleanup, approved).
-  structural = paste("a consequence of the model's shape — each hemisphere has",
-                     "its own ocean, and they exchange carbon only through the",
-                     "air. Closing it means a different model, not a better fit."),
+  # Marcus 2026-10-15 ("Apply all the app text suggestions"): the two-oceans clause left the CLASS gloss, which issue 4
+  # (a variance shortfall) also carries; issues 2 and 3 say it in their own text.
+  structural = paste("a consequence of the model's shape. Closing it means a different model,",
+                     "not a better fit."),
   # `accounting` ("the fit prefers a simpler version ...") went with the old card 6, its
   # only user, when that card was retired (2026-10-01).
   # Marcus 2026-10-15: "Shims are model corrections that are not based on physical mechanisms." -- put in
@@ -101,7 +102,7 @@ RV_FAIR_BAND_FMT   <- "%s, 5\u201395 %% of configurations"   # legend: label, th
 RV_SHIM_SOURCE <- "the whole-model review of 2026-09-16"
 RV_SHIMS <- list(
   rep_dC          = "converts the model's hemispheric box to a station reading",
-  grad_off_d13c   = "absorbs the north-south \u03b4\u00b9\u00b3C offset the model cannot produce",
+  grad_off_d13c   = "absorbs the north\u2013south \u03b4\u00b9\u00b3C offset the model cannot produce",
   sst_seas_amp_NH = "a seasonal sea-surface temperature the fit chooses instead of the observed one",
   sst_seas_amp_SH = "the same, southern hemisphere",
   ent_seas_amp_SH = "a seasonal entrainment amplitude standing in for a seasonal mixed layer",
@@ -169,6 +170,8 @@ RV_REP_OBS_MEAN <- (RV_REP_OBS_NH + RV_REP_OBS_SH) / 2
 # sites by data-raw/build_hemispheric_flask_means.R on Marcus's ruling -- all
 # sites, latitude-band-area weighted, gaps dropped -- and CO₂ is built the same
 # way from the same sites so the two can be compared without comparing networks.
+# A signed number with a true minus (U+2212), as the typed ones beside it (−35‰): sprintf prints a hyphen.
+rv_signed <- function(fmt, x) sub("-", "\u2212", sprintf(fmt, x), fixed = TRUE)
 RV_REP_OBS_D13C_NH <- -0.092  # permil, hemispheric mean minus MLO, 1989-2014
 RV_REP_OBS_D13C_SH <- -0.011  # permil, hemispheric mean minus SPO
 # ⛔ THE ASYMMETRY IS THE POINT: measured, the δ¹³C offset is ~8x larger in the
@@ -510,11 +513,11 @@ RV_CARDS <- list(
                       "mean includes continental boundary-layer air Mauna Loa never",
                       "samples, carrying extra CO₂ that is isotopically light, so",
                       "the likelihood converts box to station through one",
-                      "parameter, `rep_dC`, applied to CO₂ and δ¹³C together by mass",
+                      "parameter, rep_dC, applied to CO₂ and δ¹³C together by mass",
                       "balance. Tying the two species is deliberate: a free δ¹³C",
                       "offset would have absorbed the Suess overshoot and reported",
                       # 2026-10-15 review: " -- " -> " — " throughout the card strings below (mechanical cleanup).
-                      "a good fit. The prior is N(0, 1 ppm) — the repo's own",
+                      "a good fit. The prior is N(0, 1 ppm) — the repository's",
                       "station-vs-box scale, itself larger than the 0.39-0.59 ppm",
                       "RMS between co-located instruments at Mauna Loa. The fitted",
                       "value sits well outside that prior, which is the flag.",
@@ -533,7 +536,7 @@ RV_CARDS <- list(
                                     "month, gives %+.2f ppm in the north and %+.2f ppm in",
                                     "the south — positive in every year of the record. So",
                                     "the model's sign is the physically expected one, and",
-                                    "its north-south ordering is right too. What is not",
+                                    "its north\u2013south ordering is right too. What is not",
                                     "right is the size, and the chart above shows the gap:",
                                     # 2026-10-15 review: the measured line is DOTTED (and is the two
                                     # stations' mean; its label now says so), so "the lower" -> "the lower dotted line"
@@ -547,8 +550,8 @@ RV_CARDS <- list(
                                     "mass balance \u2014 and that side had never been checked",
                                     "against an observation at all. Built from the flask",
                                     # 2026-10-15 review: "permil" -> "\u2030" (the tab's own unit sign)
-                                    "network, the measured \u03b4\u00b9\u00b3C offset is %+.3f\u2030 in",
-                                    "the north and %+.3f\u2030 in the south. The model's is the",
+                                    "network, the measured \u03b4\u00b9\u00b3C offset is %s in",
+                                    "the north and %s in the south. The model's is the",
                                     "same in both hemispheres, because it is one",
                                     "common-mode number. Worse, the carbon signature that",
                                     "would reconcile the measured CO\u2082 and \u03b4\u00b9\u00b3C offsets",
@@ -556,8 +559,8 @@ RV_CARDS <- list(
                                     "south, where the model assumes a single \u221226.5\u2030 \u2014 so no",
                                     "one value describes both. The tie itself, not just its",
                                     "size, is doing work it cannot support."),
-                              RV_REP_OBS_D13C_NH, RV_REP_OBS_D13C_SH),
-                      sprintf(paste("\n\nSource: %s. One asymmetry worth knowing: that",
+                              rv_signed("%+.3f\u2030", RV_REP_OBS_D13C_NH), rv_signed("%+.3f\u2030", RV_REP_OBS_D13C_SH)),
+                      sprintf(paste("\n\nSource: %s. One asymmetry: that",
                                     "reference excludes Mauna Loa, so the northern",
                                     "comparison is independent, but it includes the South",
                                     "Pole, so the southern one is partly circular."),
@@ -566,14 +569,14 @@ RV_CARDS <- list(
                    "actually measured. Is a stand-in of that size acceptable in a",
                    "teaching model — and if not, what do you suggest as possible ways to address this offset?")),
   list(id = 2, key = "gradient", class = "structural",
-       title = "The north-south δ¹³C gradient is twice the observed one",
+       title = "The north–south δ¹³C gradient is twice the observed one",
        # 2026-10-15 review (Marcus: "Apply all"): "close to right" / "is right" -> "about 10 % low" / "nearly
        # right". Measured at hilda31w (rv_gradients()): CO2 2.18 vs 2.43 +/- 0.059 ppm = 0.90x (z -4.3, 1962-2023);
        # d13C 1.97x (1980-2023). Card 2's caption prints both ratios live.
        plain = paste("Between Mauna Loa and the South Pole, the model's δ¹³C",
                      "difference is about twice what is measured — as a nearly",
                      "constant offset, not a drift. The CO₂ gradient between the",
-                     "same two stations is about 10 % low — far closer than the isotopic one."),
+                     "same two stations is about 10% low — far closer than the isotopic one."),
        detail = paste("Closing it needs a persistent north-minus-south isotopic",
                       "flux the model has no carrier for. Each hemisphere has its",
                       "own ocean and they exchange only through the air, so",
@@ -585,10 +588,10 @@ RV_CARDS <- list(
                       "isotopic loading of it is."),
        # 2026-10-15 review: "2x" -> "2×"; "whose CO₂ gradient and both Suess trends are right" -> the 10 % qualifier
        ask = paste("Is a 2× hemispheric isotope gradient a deal-breaker for a",
-                   "model whose CO₂ gradient is within about 10 % and whose Suess trends are right?",
+                   "model whose CO₂ gradient is within about 10% and whose Suess trends are right?",
                    "What mechanism might help close it?")),
   list(id = 3, key = "diseq", class = "structural",
-       title = "The ocean's north-south isotopic disequilibrium is too symmetric",
+       title = "The ocean's north–south isotopic disequilibrium is too symmetric",
        # 2026-10-15 review (Marcus: "Apply all"): "disequilibrium" defined at first use; GLODAP expanded once.
        plain = paste("The measured air-sea δ¹³C disequilibrium (how far surface seawater's δ¹³C",
                      "sits from balance with the air above it) is much larger in",
@@ -603,9 +606,9 @@ RV_CARDS <- list(
                       "second, independent observation (GLODAP ocean bottle samples",
                       "from the surface, rather than atmospheric stations). The miss",
                       "is on both sides: the north is too small and the south too",
-                      "large, the south by more. There is a related quantitative tension",
-                      "worth knowing: the ocean bottles and the atmospheric δ¹³C",
-                      "decline disagree by about 15 % on how fast the air and sea",
+                      "large, the south by more. There is a related quantitative tension:",
+                      "the ocean bottles and the atmospheric δ¹³C",
+                      "decline disagree by about 15% on how fast the air and sea",
                       "exchange isotopes — the surface bottles want it slower, the",
                       "atmospheric δ¹³C decline holds it where",
                       "it is — so a fix that satisfies one moves away from the",
@@ -667,7 +670,7 @@ RV_CARDS <- list(
                       # 2026-10-15 review: RE-MEASURED at hilda31w (gate run, gamma_diff 0.25 -> 0, annual mean of
                       # the two hemispheric boxes): largest 0.99 ppm, in 1993. "about one and a half" -> "about one".
                       "and the interesting part is that it is not all for want of",
-                      "a mechanism: the volcanic path IS here and running —",
+                      "a mechanism: the volcanic path is here and running —",
                       "stratospheric aerosol scatters sunlight, the model's plants",
                       "use that diffuse light better, and switching the path off",
                       "moves CO₂ by about one part per million in",
@@ -701,7 +704,7 @@ RV_CARDS <- list(
                       # The ask's "is not El Ni\u00f1o" -> "is not clearly El Ni\u00f1o" to match.
                       "and the measured growth shows no usable association with the",
                       "ENSO index, with volcanic aerosol, or with the decade:",
-                      "on sixty-six years none of the three reaches significance,",
+                      "over sixty-six years none of the three reaches significance,",
                       "and the decade averages all sit well inside one year's",
                       "scatter. The single largest overshoot is 1991 \u2014 the model",
                       "does not draw down as much carbon after Pinatubo as the",
@@ -830,8 +833,8 @@ RV_CARDS <- list(
                       # whether "slightly" still fits +6.2 is Marcus's wording call.
                       "One fitted value is a compromise between two sources rather",
                       "than a measurement: the air-sea gas transfer speed comes out at",
-                      "about 1,850 m per year, against the literature's 1,446 (Naegler",
-                      "2009). The data slightly prefer the literature value; what holds",
+                      "about 1,840 m per year, against the literature's 1,446 (Naegler",   # Marcus 2026-10-15 ("Apply all the app text suggestions"): 1,840 = the table
+                      "2009). The data prefer the literature value; what holds",   # Marcus 2026-10-15 ("Apply all the app text suggestions"): "slightly" cut (+6.21 log-lik)
                       "it higher is the stated prior on how much gas exchange the cold",
                       "high-latitude box gets, and the two cannot both hold."),
        ask = paste("Which of these would you want carried by a real mechanism",

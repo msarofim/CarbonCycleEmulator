@@ -96,8 +96,7 @@ APP_RELEASE_MODE <- "hilda31w"   # Marcus 2026-10-15: "Beta v1.0 is fine, becaus
 # "frozen at this version" was dropped 2026-10-01: stale since the 09-30
 # unfreeze, and a freeze verdict is Marcus's (the B8 assessment record).
 # Marcus 2026-10-15 (comments 10.15.26b): "What is under review is how much ..." and "not for citation" deleted.
-APP_STAGE_NOTE   <- paste("Beta.",
-                          "Teaching software — not peer-reviewed.")
+# APP_STAGE_NOTE retired 2026-10-15: the banner says "BETA" and "not peer-reviewed" on every tab.
 # ⚠ STARTUP IS SLOW AND THE USER MUST BE TOLD BEFORE THEY WAIT. Measured on an
 # M4: 73 s idle, 116 s at load ~2.5 (2026-09-22), 2.8 min under load (four Julia
 # jobs). DEPLOY.md's older "~20 s" was a warm-cache number. shinyapps.io
@@ -110,8 +109,11 @@ APP_STAGE_NOTE   <- paste("Beta.",
 # to the takeaway text and the first rendered plot (measured 2026-09-22). So the
 # note below is about the PROCESS, not the page, and "three minutes" is kept as
 # an upper bound that covers the contended case rather than the best one.
+# Marcus 2026-10-15 ("Apply all the app text suggestions"): "three minutes" -> "a minute". Measured 6-8 s cold start for the
+# deploy bundle on the Mac (CHANGELOG 2026-10-15 a); shinyapps.io is NOT measured -- a fresh container also
+# compiles the C++ core. ⚠ Re-time after the first deploy.
 APP_WARMUP_NOTE  <- paste("First load compiles the model and runs a 1750 spin-up:",
-                          "allow up to three minutes. After that every panel is a",
+                          "allow up to a minute. After that every panel is a",
                           "live model run, not a stored picture.")
 
 # ⛔ BOTH URLS ARE PLACEHOLDERS UNTIL SET, AND THE APP SAYS SO ON SCREEN.
@@ -798,8 +800,8 @@ APP_LUC_SPLIT_OBS <- if (is.null(APP_LUC_SPLIT)) NULL else APP_LUC_SPLIT$obs_win
 # observed window and the fitted land-use scale left the sentence with it; both are still on the
 # chart's own axis and in its legend respectively.
 APP_LUC_SPLIT_NOTE <- if (is.null(APP_LUC_SPLIT)) NULL else paste(
-  "The split of the land-use input into deforestation and forest regrowth is based on the",
-  "\u201cforest regrowth (total)\u201d and three bookkeeping models from the Global Carbon Budget.")
+  "The split of the land-use input into deforestation and forest regrowth is based on the",   # Marcus 2026-10-15 ("Apply all the app text suggestions"): missing noun
+  "Global Carbon Budget\u2019s \u201cforest regrowth (total)\u201d estimate from its three bookkeeping models.")
 
 # ---------------------------------------------------------------------
 # ONE PAST FOR EVERY TAB (2026-09-22, Marcus's ruling: splice + caption).
@@ -1026,9 +1028,9 @@ APP_FAIR_NOTE <- paste(
   "For CO\u2082, the solid line is this model's output, whereas the dashed lines are",
   "standard FaIR 2.2.4 (calib 1.6.0, 841-configuration ensemble mean). This is",
   "the same for temperature, but this model's CO\u2082/temperature relationship is",
-  "fitted to FaIR, so they are not independent. \u26a0 Through %d they are not",
+  "fitted to FaIR, so they are not independent. Through %d they are not",
   "like-for-like: this model's runs are spliced onto the observed carbon budget and",
-  "FaIR's are not, so a historical gap there is a difference of inputs, not of skill.")
+  "FaIR's are not, so a historical gap there reflects a difference in inputs.")
 
 #' FaIR's own trajectories for the scenarios being shown, as plot_future() wants
 #'

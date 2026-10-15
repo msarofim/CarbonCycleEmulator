@@ -91,7 +91,8 @@ test_that("3. the panel says the split is ASSERTED, not measured", {
   # Re-pinned 2026-10-02 (b), approved by Marcus: his own wording for the page caveat
   # (carbotopecomments.10.2.26) drops "asserted ... does not measure"; the chart's CAPTION above still
   # carries that claim, and the page copy must still NAME the source of the split.
-  expect_true(has(.lrp_global, "bookkeeping models from the Global Carbon Budget"))
+  # re-pinned 2026-10-15 (Marcus 2026-10-15: "Apply all the app text suggestions"): the sentence gained its missing noun ("estimate from its")
+  expect_true(has(.lrp_global, "estimate from its three bookkeeping models"))   # the source text carries \u escapes for the quotes
 })
 
 test_that("4. the plot function exists and names its three series", {

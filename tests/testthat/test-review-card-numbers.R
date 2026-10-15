@@ -91,7 +91,8 @@ test_that("card 4's 'a little <word> the range' is where the limb strength the c
                     rcn_card4_detail(), fixed = TRUE))
 })
 
-test_that("card 7's k_w line: '1,446' IS the prior's centre, and 'about 1,850' is within one sd of the fit", {
+# 2026-10-15 (Marcus 2026-10-15: "Apply all the app text suggestions"): "about 1,850" -> "about 1,840", the parameter table's rounding of 1835.4.
+test_that("card 7's k_w line: '1,446' IS the prior's centre, and 'about 1,840' is within one sd of the fit", {
   rv <- rcn_review_text()
   expect_identical(ccx_const("KW_PRIOR_CENTRE"), 1446)
   expect_true(grepl(sprintf("against the literature's %s", format(ccx_const("KW_PRIOR_CENTRE"), big.mark = ",")),
@@ -100,8 +101,8 @@ test_that("card 7's k_w line: '1,446' IS the prior's centre, and 'about 1,850' i
   run <- ccx_overlay_par(ccx_mode_base(md), md$par_mode)
   sd_nat <- rcn_sd_nat(md, "k_w", CCX_PARAM_TABLE$k_w)
   expect_gt(sd_nat, 0)
-  expect_lt(abs(run$k_w - 1850), sd_nat)
-  expect_true(grepl("about 1,850 m per year", rv, fixed = TRUE))
+  expect_lt(abs(run$k_w - 1840), sd_nat)
+  expect_true(grepl("about 1,840 m per year", rv, fixed = TRUE))
 })
 
 test_that("MUTATION: the one-sd rule FAILS a typed number the fit has left behind", {

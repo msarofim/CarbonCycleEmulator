@@ -61,7 +61,7 @@ APP_PARAM_META <- list(
   # ---- the biological pump ---------------------------------------------
   pump_export   = list(desc = "Biological pump: carbon sinking out of the surface ocean",
                        unit = "GtC/yr"),
-  pump_hs_gcm2  = list(desc = "The same export in the cold high-latitude box, per unit area",
+  pump_hs_gcm2  = list(desc = "Biological-pump export in the cold high-latitude box, per unit area",
                        unit = "gC/m²/yr"),
   pump_grad     = list(desc = "Preindustrial deep-minus-surface carbon gradient the pump holds up",
                        unit = "µmol/kg"),
@@ -112,9 +112,9 @@ APP_PARAM_META <- list(
   # 2026-10-15 review: "card 1" -> "issue 1" (the tab labels them "Issue N")
   rep_dC        = list(desc = "Station-versus-box CO₂ offset (see Known issues, issue 1)",
                        unit = "ppm"),
-  grad_off_co2  = list(desc = "Station-versus-box offset on the north-south CO₂ gradient",
+  grad_off_co2  = list(desc = "Station-versus-box offset on the north–south CO₂ gradient",
                        unit = "ppm"),
-  grad_off_d13c = list(desc = "Station-versus-box offset on the north-south δ¹³C gradient",
+  grad_off_d13c = list(desc = "Station-versus-box offset on the north–south δ¹³C gradient",
                        unit = "‰"),
 
   # ---- the GATED names (2026-10-01): fitted only under a structure that opens the gate
