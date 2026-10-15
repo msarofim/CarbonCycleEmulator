@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-15 (s) — **Handoff `notes/handoff_2026-10-15b_release_tagged.md`** (Marcus: "Yes, write the handoff note"). It supersedes the morning's `handoff_2026-10-15_prepublic_review.md`, which now points to it. Next: Substack post 1 formatting (when his draft is final), the deploy, `APP_FEEDBACK_URL`, and the repo-public decisions.
+
 ## 2026-10-15 (r) — **TAGGED `v1.0-beta-hilda31w`** (Marcus, verbatim: "Yes, tag it."). An annotated tag on `16bd431`, pushed: CarboTope BETA v1.0, the first public release. Suite @ `e1c9d10` 8166 / 0 / 1 (q); after it, only one legend string, the Substack figures, the Essenhigh PDF and docs. ⚠ Not in the tag: `APP_FEEDBACK_URL`, which is set after the Substack post, followed by a redeploy. The earlier `v1.0-hilda29l` (09-22) was an internal freeze.
 
 ## 2026-10-15 (q) — **Full suite @ `e1c9d10` (frozen, LINKED, launch guard on): 8166 passed, 0 failed, 1 skipped (the standing `l2-enso-limb` skip), 20.1 min.** Log: `outputs/diagnostics/suite_20261015_e1c9d10.log`, committed in `0cbc67d`. No "No nuclear" line.

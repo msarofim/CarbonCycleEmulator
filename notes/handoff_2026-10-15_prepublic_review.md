@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-15: pre-public review applied; going public this afternoon
 
+> **SUPERSEDED by `notes/handoff_2026-10-15b_release_tagged.md`** (2026-10-15 evening: tagged `v1.0-beta-hilda31w`).
+
 **Supersedes** `notes/handoff_2026-10-14c_nuclear_source_promoted.md`. Written on Marcus's request ("Write handoff and
 then show me the uncertainty band text for review"), 2026-10-15 ~11:10.
 
