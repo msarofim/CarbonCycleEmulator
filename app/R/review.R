@@ -650,7 +650,7 @@ RV_CARDS <- list(
                               rv_enso_l2_phrase(RV_ENSO_L2_VS_OBS)),
                       "observed for equatorial transport variability (the",
                       "numbers are under the second chart, in sverdrups, Sv: a",
-                      "million cubic metres of water per second). It replaced a pair of",
+                      "million cubic meters of water per second). It replaced a pair of",
                       "fitted coefficients that had been overturning a",
                       "wrong-signed solubility response, which is why the",
                       "mechanism was adopted even though it costs fit. On its own",

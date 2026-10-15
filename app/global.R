@@ -255,7 +255,7 @@ app_params <- local({
   # deleted "about 27 ppm high" string had -- a label stating a computed quantity
   # that stopped being computed.
   detail <- paste("Hand-set starting values, not fitted to anything. CO₂",
-                  "fertilisation is set to the pair that passes the pulse-response",
+                  "fertilization is set to the pair that passes the pulse-response",
                   "gate (Joos et al. 2013) while matching the historical CO₂",
                   "record, with every other parameter at its starting value — so",
                   "the CO₂ curve is close but not calibrated. Compare it against",

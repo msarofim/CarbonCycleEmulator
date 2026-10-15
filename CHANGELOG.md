@@ -2,6 +2,25 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-15 (f) — **The app's reader-facing text is in U.S. spelling** (Marcus: "Update spelling in the app to be U.S. spelling"). **Twelve strings changed in seven files, and a lint now keeps it that way:** `test-app-us-spelling.R` reads every string literal through R's parser.
+
+- **Changed** (display strings only):
+  - "fertilisation" → "fertilization" ×9: `R/mechanisms.R` (the What-if switch's label and caveat ×2), `app/R/params_meta.R` ×2, `app/global.R`, `app/server.R` ×2, `app/ui.R`;
+  - "colours" → "colors" (`server.R`); "grey band" → "gray band" (`plots.R`); "cubic metres" → "cubic meters" (`review.R`); "centred mean" → "centered mean" (`plots.R`).
+- **Kept as they are:**
+  - the mechanism key `fertilisation` (code: `ccx_apply_mechanisms()`, tests);
+  - ggplot's `"colour"` aesthetic and R's colour names (`grey20` …);
+  - "Met Office Hadley Centre" (a proper name);
+  - comments.
+  - The data artifacts' provenance notes and field names (`centre_m`, "digitised" …): the app renders none of them (checked).
+  - `R/constants.R` notes: the app shows only the provisional constants' names.
+- **Pins followed the sentences:** `test-app-review-copy.R` (the B5 required caveat, the A3/B5 forbidden label, the mutation's text) and `test-plot-text-fits.R` (its copy of the imbalance subtitle).
+- **The lint** (`getParseData()` STR_CONST plus `getParseText()`; comments and identifiers are never read):
+  - It found "centred", which my first regex scan had missed.
+  - It failed twice while being written, both times in the test itself. `srcfile = NULL` dropped the parse data, and the `nrow > 1000` guard caught it (8 strings read). Then `getParseData()` abbreviated long strings to "[N chars …]".
+  - Mutation-tested: four British forms in one string are caught; a comment, an identifier, the allowlist and the U.S. plural "analyses" are not.
+- **Checked:** 33 app-facing test files 1619 / 0. In the browser (all tabs visited), the rendered page has 13 "fertilization" and no British form except "Met Office Hadley Centre", and the server log has no errors.
+
 ## 2026-10-15 (e) — **THE BAND IS LIFTED with Marcus's copy. `APP_RIBBONS_HOLD` is NULL; the Futures tab's CO₂ view draws the hilda31w MCMC band, and the temperature view says in words why it has none.** Marcus asked "Draft all four for me to edit"; the drafts are `notes/band_copy_drafts_2026-10-15.md` (`2514038`). His one edit: delete the two Laplace sentences from issue 6 ("A faster method, which treats the fit as a bell curve …"). The other three pieces went in as drafted.
 
 - **The four pieces:**

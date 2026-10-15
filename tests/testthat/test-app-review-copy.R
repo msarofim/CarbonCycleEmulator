@@ -115,7 +115,7 @@ AC_CHECKS_1001 <- list(
   # RE-PINNED 2026-10-11 (Marcus: "Re-pin both (Recommended)"): his 10-11 paragraph replaced the
   # horizon sentence and carries its claim ("about 1.4 degC per 1000 GtC from any time period ...").
   c("A2 pulse box: one figure",           "NOT in when you look", "per 1000 GtC from any"),
-  c("A3/B5 '(the land sink)' label gone", "CO₂ fertilisation (the land sink)", NA),
+  c("A3/B5 '(the land sink)' label gone", "CO₂ fertilization (the land sink)", NA),   # U.S. spelling since 10-15
   c("A3/B5 'IS the land sink' gone",      "IS the land sink", NA),
   c("A3 'single cause' gone",            "sink has a single cause", NA),
   c("A3 'only long-term' gone",          "only long-term land-uptake term", NA),
@@ -128,7 +128,7 @@ AC_CHECKS_1001 <- list(
   c("A7 N deposition in the table",       NA, "Nitrogen deposition on land"),
   c("B2 release name",                    "v1.0-hilda29l", "APP_RELEASE_NAME"),
   c("B4 ndep_ret named gross",            "Carbon stored per unit of nitrogen", "Gross carbon uptake per unit of nitrogen"),
-  c("B5 CO2 fertilisation only",          "the land stops taking up carbon", "This switches off CO₂ fertilisation only")
+  c("B5 CO2 fertilisation only",          "the land stops taking up carbon", "This switches off CO₂ fertilization only")
 )
 
 # THE 2026-10-06 RULINGS (Marcus, after the hilda33p adoption; handoff 10-06 §4.1): "Caveat sentence
@@ -243,7 +243,7 @@ test_that("MUTATION: the 10-06 list fires when the old intro returns or the cave
 })
 
 test_that("MUTATION: the 10-01 list fires when the deleted fertilisation sentence returns", {
-  mutated <- paste(.ac_src, '  caveat = paste("In this model CO₂ fertilisation IS the land sink")', sep = "\n")
+  mutated <- paste(.ac_src, '  caveat = paste("In this model CO₂ fertilization IS the land sink")', sep = "\n")
   expect_true(any(grepl("IS the land sink", ac_audit(mutated, AC_CHECKS_1001), fixed = TRUE)))
 })
 

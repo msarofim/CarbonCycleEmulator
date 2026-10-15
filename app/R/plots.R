@@ -645,7 +645,7 @@ IMB_DECADE_MIN_N <- 10L   # a LEADING bin shorter than this is dropped; see app_
 IMB_BAND_SHORT <- paste("The band is an extreme attribution \u2014 all of the budget's unplaced",
                         "carbon assigned to land \u2014 not an uncertainty range.")
 # Marcus 2026-10-02 (carbotopecomment), his two sentences (British "grey", as the app).
-IMB_BAND_NOTE <- paste("The grey band represents the GCB estimate plus the budget imbalance.",
+IMB_BAND_NOTE <- paste("The gray band represents the GCB estimate plus the budget imbalance.",
                        "Note that the budget imbalance could also be attributed to the ocean",
                        "or to an error in emissions estimates.")
 
@@ -727,7 +727,7 @@ plot_land_sink_imbalance <- function(out, gcb, F, smooth_yr = APP_LUC_SMOOTH_YR)
     guides(colour = guide_legend(order = 1), fill = guide_legend(order = 2, nrow = 2)) +
     labs(x = LAB_YEAR, y = LAB_IMB_Y,
          subtitle = app_subtitle(sprintf(
-           paste("%d-yr centred mean, so each bold line stops %d yr short at both ends",
+           paste("%d-yr centered mean, so each bold line stops %d yr short at both ends",
                  "\u2014 the thin annual line does not, and the recent years are on it.",
                  "Land-use emissions are outside this sink, as GCB reports it."),
            smooth_yr, lost)),

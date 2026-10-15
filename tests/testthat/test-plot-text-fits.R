@@ -114,7 +114,7 @@ test_that("2. every subtitle fits, including the one that clipped", {
   skip_if_no_plots(); skip_if(is.null(.pt_env), "plots.R did not load")
   e <- .pt_env
   subs <- c(
-    sprintf(paste("%d-yr centred mean, so each bold line stops %d yr short at both ends",
+    sprintf(paste("%d-yr centered mean, so each bold line stops %d yr short at both ends",
                   "— the thin annual line does not, and the recent years are on it.",
                   "Land-use emissions are OUTSIDE this sink, as GCB reports it."), 11L, 5L),
     sprintf("Shaded: before %d, the split itself is back-extended, not observed", 1959L))

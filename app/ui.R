@@ -703,7 +703,7 @@ navbarPage(
                         "limitation: nitrogen deposition adds a small sink of",
                         # 2026-10-02: reworded to match Marcus's fertilisation caveat
                         "its own, but a lack of nitrogen never limits the",
-                        "response to CO₂ fertilisation.")),
+                        "response to CO₂ fertilization.")),
           tags$li(paste("Two boxes of atmosphere. Nothing about where in a",
                         "hemisphere anything happens.")),
           tags$li("Teaching software. Not peer-reviewed, not for citation.")

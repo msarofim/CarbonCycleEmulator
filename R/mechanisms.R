@@ -103,16 +103,16 @@ CCX_MECHANISMS <- list(
     # land-uptake mechanism". All three were false at hilda33d: with this switch
     # on, N-deposition retention still holds ~30 GtC on land by 2024. The
     # BEHAVIOUR is unchanged (beta / beta_max only; `ndep_ret` stays live).
-    label = "CO₂ fertilisation",
+    label = "CO₂ fertilization",
     blurb = paste("Plants grow faster when there is more CO₂ in the air, and",
                   "that extra growth pulls carbon into the land. Switch it off",
                   "and plants no longer respond to the rising CO₂."),
-    caveat = paste("This switches off CO₂ fertilisation only. Nitrogen",
+    caveat = paste("This switches off CO₂ fertilization only. Nitrogen",
                    "deposition, from fuel burning and farming, is a separate",
                    "and smaller land sink in this model, and it stays on here",
-                   # Marcus 2026-10-02 (carbotopecomment): his wording, in the app's CO₂ / -isation style
+                   # Marcus 2026-10-02 (carbotopecomment): his wording; U.S. spelling since 2026-10-15 (Marcus)
                    "— even though, in the real world, lack of sufficient nitrogen",
-                   "can also limit the response to CO₂ fertilisation."),
+                   "can also limit the response to CO₂ fertilization."),
     # MUST ZERO WHICHEVER PARAMETER IS LIVE. This read `p$beta <- 0` until
     # 2026-08-14, and the flip to CCX_FERT_MM turned it into a NO-OP -- the
     # switch moved CO2 at 2100 by exactly 0.00 ppm while still rendering as an

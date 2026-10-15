@@ -184,7 +184,7 @@ function(input, output, session) {
     # clause rather than printing NA. "Carbon fertilization" is written in the app's own term.
     lead <- paste("Land-use change (agriculture, deforestation, and so forth) has been a net",
                   "source to the atmosphere for the whole record. However, over time the",
-                  "natural land sink has been growing due to CO₂ fertilisation")
+                  "natural land sink has been growing due to CO₂ fertilization")
     see <- sprintf("see “%s” below", APP_IMBALANCE_HEADING)
     when <- if (!is.na(obs) && !is.na(mod))
       sprintf(paste(", and so the total land contribution switched from a net source to a",
@@ -1065,7 +1065,7 @@ function(input, output, session) {
           # printed on the chart and asserted verbatim by test-constraint-map-panel.R.
           local({
             tot <- rowSums(APP_CMAP$MC)
-            sprintf(paste(" Read the row totals, not just the colours: the strongest row",
+            sprintf(paste(" Read the row totals, not just the colors: the strongest row",
                           "here is worth %s log-units and the weakest %s, so a bright",
                           "cell in a weak row is a large share of very little."),
                     fmt_cmap_total(max(tot)), fmt_cmap_total(min(tot)))
@@ -1209,7 +1209,7 @@ function(input, output, session) {
                 sh("CO₂ level", "Land uptake"), sh("Measured land & ocean sinks", "Land uptake")),
         # Marcus 2026-10-02: name the two numbers; the descriptions are params_meta.R's own
         sprintf(paste(" But the two numbers that set it (the maximum boost CO₂",
-                      "fertilisation can give, beta_max, and the CO₂ level needed for",
+                      "fertilization can give, beta_max, and the CO₂ level needed for",
                       "half that boost, fert_k) are only constrained as a combination: on",
                       "their own each is about %.0fx tighter than the fit leaves the",
                       "pair jointly."),
