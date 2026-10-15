@@ -72,3 +72,25 @@ test_that("a list without the saturating form's names STOPS in both cores, not o
   expect_identical(x[["fert_form"]], CCX_FERT_LOG)
   expect_true(is.finite(x[["beta_max"]]) && is.finite(x[["fert_k"]]))
 })
+
+test_that("the D3 ocean share is read EXACTLY: the stick-breaking coordinate does not stand in for it", {
+  # ccx_loglik() read `err$imb_share_ocean`, and `$` partial-matches: an `err` carrying the
+  # PARAMETER pair (imb_share_land, imb_share_ocean_rest) scored the rest coordinate as the ocean
+  # SHARE, where the pair check exists to refuse a half-built allocation.
+  skip_if_no_cpp()
+  obs <- ccx_prepare_obs()
+  sp  <- ccx_spinup(ccx_default_params())
+  F   <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = sp$prod_c14)
+  out <- ccx_run_fast(sp, F)$out
+  eluc <- ccx_forcing_eluc_annual(F)
+  err <- list(sigma_d14c = 5)
+  par_pair <- list(imb_share_land = 0.4, imb_share_ocean_rest = 0.5)
+  expect_error(ccx_loglik(out, obs, c(err, par_pair), luc = eluc), "PAIR")
+  # the share itself, beside the coordinate, is the one scored: the same rows as the share alone
+  sh <- ccx_imb_shares(par_pair)
+  alone <- ccx_loglik(out, obs, c(err, imb_share_land = sh[["land"]], imb_share_ocean = sh[["ocean"]]),
+                      luc = eluc, by_stream = TRUE)
+  both  <- ccx_loglik(out, obs, c(err, imb_share_land = sh[["land"]], imb_share_ocean = sh[["ocean"]],
+                                  imb_share_ocean_rest = 0.5), luc = eluc, by_stream = TRUE)
+  expect_identical(both, alone)
+})
