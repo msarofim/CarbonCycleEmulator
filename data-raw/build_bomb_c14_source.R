@@ -72,7 +72,7 @@ BOMB_TOTAL_REF_KMOL <- 102      # Naegler & Levin (2006) central, 1945-1980.
                                 # Only sets the pre/post-1963 SPLIT; the model
                                 # rescales the unit-integral shape by the
                                 # calibrated bomb_total.
-# The judgement calls are environment-overridable so they can be measured:
+# The judgment calls are environment-overridable so they can be measured:
 #   CCX_BOMB_DROP_FIRST=0 CCX_BOMB_PREBOMB=-25 Rscript data-raw/build_bomb_c14_source.R
 BOMB_T2_DROP_FIRST  <- as.logical(as.integer(Sys.getenv("CCX_BOMB_DROP_FIRST", "1")))
                                 # Tans p.133 calls the 12/62-2/63 inventory
@@ -105,7 +105,7 @@ BOMB_T2_HIGH_BIAS   <- as.numeric(Sys.getenv("CCX_BOMB_T2_BIAS", "1.0"))
                                 #  2. gate 5's newly-ruled TROUGH flips PASS ->
                                 #     FAIL (z -1.80 -> -2.55); a SOFT flip.
                                 #  3. ⭐ THE COST IS NOT WHERE THE FORCING MOVED.
-                                #     Localised per year, 54 % of it (-49.9, of
+                                #     Localized per year, 54 % of it (-49.9, of
                                 #     which the SH is -45.4) falls AFTER 1970 --
                                 #     OUTSIDE the bomb window, at sigma ~7 permil
                                 #     not 25, in the years Graven and Hua AGREE
@@ -158,7 +158,7 @@ BOMB_SHAPE_FLOOR    <- 1e-6     # relative floor so a rescaled interval whose
                                 # concentration-implied shape is entirely
                                 # non-positive still receives its total
 BOMB_SHAPE_SMOOTH_M <- as.integer(Sys.getenv("CCX_BOMB_SMOOTH", "5"))
-                                # centred moving average, months, applied to the
+                                # centered moving average, months, applied to the
                                 # concentration-implied shape BEFORE the interval
                                 # rescale (which still enforces exact totals).
                                 # Observed atmospheric D14C carries a seasonal
@@ -302,7 +302,7 @@ if (BOMB_SHAPE_SMOOTH_M > 1) {
 # the 14 quarter-on-quarter releases are 7, 48, 29, 17, 30, 42, 13, 0, 14, 5, 7,
 # -2, 15, 3 -- the small ones are rounding, not physics. The 0 comes from "170"
 # being reported twice in succession, and it produced three months of EXACTLY
-# zero delivery whose notch pinned the modelled NH peak at 1964.625 in every run
+# zero delivery whose notch pinned the modeled NH peak at 1964.625 in every run
 # of a k_w / kz / h_ml / tau_ex sweep spanning 2-4x. Annual sums (1963: 101,
 # 1964: 85, 1965: 24 units) sit far above that noise floor. So we do not in
 # practice have sub-annual EMISSION data, and the concentration record supplies
@@ -331,7 +331,7 @@ for (k in seq_along(tot)) {
     tot[k] <- rb - ra
   }
 }
-# normalise the pre-1963 block so it sums exactly to the budget-closed total
+# normalize the pre-1963 block so it sums exactly to the budget-closed total
 ipre <- which(brk[-1] <= t0)
 tot[ipre] <- tot[ipre] * D_pre / sum(tot[ipre])
 # tail: whatever the Table 2 series has not yet released, decaying at tau_tail

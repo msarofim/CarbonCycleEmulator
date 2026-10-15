@@ -41,7 +41,7 @@
 #       refit either confirms that or shows the gain reallocated.
 #     * where each arm puts `pump_grad`, and whether the POSTERIOR is moved from
 #       the PRIOR (the prior mildly double-counts GLODAP by construction, so a
-#       `pump_grad` that just sits at its prior centre is not "constrained").
+#       `pump_grad` that just sits at its prior center is not "constrained").
 #     * whether `kz` still pins at the re-bisected bracket's top, which is the
 #       standing question sec.5.2h left open.
 #     * the physical-plausibility screen both arms already print.
@@ -125,7 +125,7 @@ ARM_HML_INIT   <- 100      # m; the pump's own h_ml (DESIGN sec.5.2f, handoff 15
 # of the parameter set it was fitted under, so a warm start across a set change
 # goes through ccx_migrate_par_set() at the site below (2026-08-31).
 ARM_WARM       <- TRUE
-ARM_CYCLES     <- 6         # NM-then-polish cycles; 1 reproduces the old behaviour
+ARM_CYCLES     <- 6         # NM-then-polish cycles; 1 reproduces the old behavior
 ARM_CYCLE_TOL  <- 0.5       # stop when a whole cycle gains less than this
 # ---- SMOKE-TEST OVERRIDES (added 2026-08-22) ------------------------
 # This run costs hours, so it must be provable end-to-end for pennies first, and
@@ -172,7 +172,7 @@ cat(sprintf("pump default %.6f umol/kg = PUMP_GRAD_OBS\n",
 # h_ml IS **UNBOUNDED** FOR THIS REFIT -- Marcus 2026-08-28, option 5 adopted
 # =====================================================================
 # ⚠ THIS INVERTS THE 2026-08-16g DECISION. From 16g to 08-28 this driver pinned
-# h_ml to LIK_OCEAN_GRAD_HML_OK_RETIRED = [85, 120] and renormalised its prior over that
+# h_ml to LIK_OCEAN_GRAD_HML_OK_RETIRED = [85, 120] and renormalized its prior over that
 # support, because outside the band all three ocean-gradient rows SKIPPED and an
 # unbounded refit would have scored a DIFFERENT objective from the one the pump
 # was introduced to be tested against.
@@ -181,7 +181,7 @@ cat(sprintf("pump default %.6f umol/kg = PUMP_GRAD_OBS\n",
 # (R/likelihood.R, LIK_USE_OCEAN_GRAD's block), so the reason for the bound has
 # been removed rather than worked around, and h_ml refits over its OWN SHIPPED
 # SUPPORT [30, 200] with its OWN prior. No override, and therefore no +1.58
-# renormalisation constant to carry.
+# renormalization constant to carry.
 #
 # WHY THE BOUND COULD NOT SIMPLY BE KEPT AS CONSERVATISM. It was measured to be
 # LOAD-BEARING, and to be bearing a FREE LUNCH rather than physics: outside the
@@ -257,15 +257,15 @@ for (.h in c(.hml_now$lo + 1, .hml_now$init, .hml_now$hi - 1)) {
 # COMPARABLE to an unpinned one -- read parameters and per-stream logL, not
 # evidence.
 ARM_PIN_SD <- 1e-4
-# GENERALISED 2026-08-25. `CCX_PIN_LUC_SCALE` still works and is unchanged, so
+# GENERALIZED 2026-08-25. `CCX_PIN_LUC_SCALE` still works and is unchanged, so
 # every existing run reproduces; `CCX_PIN_PARAMS="name=value,name=value"` pins
-# any subset. The generalisation exists because P3 of prereg 08-24c fired --
+# any subset. The generalization exists because P3 of prereg 08-24c fired --
 # `sigma_d14c` moved +1.671 sd in the pinned `luc` arm, past its own falsifier --
 # and the only test that can settle whether that bought the `rep_dC` move is a
 # refit with `sigma_d14c` HELD. `rep_dC` and `sigma_d14c` share no likelihood
 # term (measured: the 1-D rep_dC argmax is bit-identical across sigma 2 -> 60
 # while the peak moves 200 log-units), so a fixed-state test has NO POWER and
-# only a re-optimisation can answer it.
+# only a re-optimization can answer it.
 ARM_PINS <- local({
   out <- list()
   v <- Sys.getenv("CCX_PIN_LUC_SCALE", NA_character_)
@@ -300,7 +300,7 @@ ARM_PIN <- ARM_PINS$luc_scale
 # WHAT A PIN ACTUALLY IS. ccx_make_logpost() adds `s$prior(x) + .log_jac(u, s)`
 # (R/calibrate.R:874), i.e. priors are densities in the NATURAL parameter and
 # the Jacobian is applied separately. So a near-delta that is sharp in the
-# UNCONSTRAINED coordinate -- which is the coordinate the optimiser moves in,
+# UNCONSTRAINED coordinate -- which is the coordinate the optimizer moves in,
 # and therefore the one a pin must bind in -- is
 #
 #     prior(x) = dnorm(u(x), u0, PIN_SD) - log_jac(u(x))
@@ -340,7 +340,7 @@ for (.nm in names(ARM_PINS)) {
     u0 <- .u0; sdv <- ARM_PIN_SD; sp <- .spec
     function(x) {
       # suppressWarnings: qlogis() warns and returns NaN outside [lo, hi], which
-      # is the CORRECT answer here (-Inf prior) but would spam every optimiser
+      # is the CORRECT answer here (-Inf prior) but would spam every optimizer
       # step that proposes outside the support. The NaN is caught, not ignored.
       u <- suppressWarnings(.to_unc(x, sp))
       if (!all(is.finite(u))) return(-Inf)
@@ -369,7 +369,7 @@ for (.nm in names(ARM_PINS)) {
               CCX_PARAM_TABLE[[.nm]]$prior(.bump)))
   stopifnot(abs(.back - .val) < .tol)
   # ...and the prior must actually be SHARP: a step of ARM_PIN_BUMP_U in the
-  # coordinate the optimiser moves in must be rejected hard, or the "pin" is a
+  # coordinate the optimizer moves in must be rejected hard, or the "pin" is a
   # suggestion. The floor is DERIVED, not hand-picked: the near-delta is a
   # normal of sd ARM_PIN_SD in u, so the drop is ARM_PIN_BUMP_U^2 / (2 sd^2)
   # up to the Jacobian, and the gate demands at least half of that.
@@ -408,7 +408,7 @@ rm(.hml_now, .u_h, .F_h, .h, .sp_h, .Fh, .og_h)
 # (memory gate_bound_matches_its_claim).
 #
 # ⚠ THE LAPLACE EVIDENCE OF A WIDENED RUN IS NOT COMPARABLE to an unwidened
-# one -- a uniform prior over a wider support has a different normalising
+# one -- a uniform prior over a wider support has a different normalizing
 # constant, so the log-posterior shifts by a constant no arm comparison can see.
 # Read PARAMETERS and per-stream logL, exactly as the pin block says for pins.
 ARM_WIDENS <- local({
@@ -748,7 +748,7 @@ arm_fit <- function(mode) {
     r <- ccx_run_fast(sp, F)
     # NOTE: sigma_d13c retired 2026-08-18 and rep_dC added in its place -- this
     # list must track CCX_PARAM_NAMES or the per-stream decomposition silently
-    # describes a DIFFERENT objective from the one that was optimised.
+    # describes a DIFFERENT objective from the one that was optimized.
     ccx_loglik(r$out, ccx_prepare_obs(),
                list(sigma_d14c = pm$sigma_d14c, rep_dC = pm$rep_dC,
                     grad_off_co2 = pm$grad_off_co2, grad_off_d13c = pm$grad_off_d13c),
@@ -781,7 +781,7 @@ arm_fit <- function(mode) {
   # faith.
   #
   # KINK PROXIMITY. ARM_HESS_EPS is a step on the unconstrained scale; what
-  # matters is how far that reaches in METRES, which depends on where in the
+  # matters is how far that reaches in METERS, which depends on where in the
   # logit band the mode sits. Converted rather than assumed.
   h_mode <- pm$h_ml
   # h_ml's OWN step now, not the global scalar -- and this matters here more than

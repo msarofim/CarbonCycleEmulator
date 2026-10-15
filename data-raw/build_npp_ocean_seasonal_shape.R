@@ -5,12 +5,12 @@
 #   -> data/obs_npp_ocean_seasonal_shape.rds
 #
 # WHY. The O5 prior (data/obs_export_seasonal_shape_cmip6.rds) is a MODEL
-# product. NPP from ocean colour is the observational-algorithm quantity
+# product. NPP from ocean color is the observational-algorithm quantity
 # nearest to export; the export/NPP ratio rises with NPP and falls with
 # temperature (Laws 2011), so export is MORE seasonal than NPP -- this product
 # is a LOWER BOUND on the export's seasonal amplitude, and a direct check on
 # its PHASE. Same bands and estimator as the CMIP6 product (LS = |lat| < 57.14,
-# HS = the rest, per hemisphere; first harmonic at month centres; the model's
+# HS = the rest, per hemisphere; first harmonic at month centers; the model's
 # lag convention). Window 2003-2014 (MODIS full years, ending with CMIP6's).
 # Files: cbpm.yyyyddd.hdf.gz, mg C m-2 d-1, HDF4, fill -9999, global 1/6 deg
 # equirectangular (90N..90S, -180..180). Read with terra; area = cos(lat).

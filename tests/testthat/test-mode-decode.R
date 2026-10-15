@@ -84,7 +84,7 @@ test_that("the CANONICAL mode decodes cleanly UNDER ITS RECORDED BAND; band-blin
   # floor then moved 30 -> 42.5 m (CCX_HML_FLOOR_M) and every file fitted before
   # it records the OLD band -- so the band-blind decode of the canonical's
   # u_mode is now wrong by ~15 % in h_ml, exactly the trap this file exists to
-  # kill, and the invariant is the stronger one: the recorded band is honoured
+  # kill, and the invariant is the stronger one: the recorded band is honored
   # (ccx_mode_params(), ccx_adopt_mode_band()) and the band-blind check ERRORS
   # rather than passing quietly. A future refit ON the shipped band records it
   # and takes the first branch.

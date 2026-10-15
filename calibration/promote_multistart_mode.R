@@ -276,7 +276,7 @@ pri <- lp0 - sum(st)
 # residual was only PRINTED, so a missing stream could hide in it -- and the
 # three profile rows did, for two adoptions.
 # ⚠ AT THE STRUCTURE THE OBJECTIVE READ (2026-09-17). ccx_make_logpost() evaluates
-# every prior at `base_params` + the draw, because u_hs's Sv-to-m/yr centre
+# every prior at `base_params` + the draw, because u_hs's Sv-to-m/yr center
 # converts at the LIVE hs_frac (09-16 d). A bare `s$prior(x)` here converts at the
 # built 0.16, and under `hilda_c` (0.128) this gate then FAILED a correct point
 # by 0.27 -- the first hilda_c promotion, 09-17 (h). Same list, same dispatch.

@@ -6,9 +6,9 @@
 # a measurement, not yet a likelihood. This file does the two things that turn
 # it into one, and they are DIFFERENT THINGS that Marcus' request can mean:
 #
-#   OPTION 1 -- A POINT sigma. Summarise the admissible estimators to one n_eff
+#   OPTION 1 -- A POINT sigma. Summarize the admissible estimators to one n_eff
 #     and keep the Gaussian term. Simple; the MCMC is unchanged in form.
-#   OPTION 2 -- MARGINALISE over the sigma uncertainty. If sigma is only known
+#   OPTION 2 -- MARGINALIZE over the sigma uncertainty. If sigma is only known
 #     to a factor, integrating it out is the honest thing, and for a
 #     scaled-inverse-chi-squared prior on sigma^2 the single-observation
 #     marginal has a closed form: STUDENT-t. One line in the likelihood.
@@ -21,7 +21,7 @@
 # works. Part 3. NEITHER IS APPLIED HERE. `LIK_D14C_DEEP_NEFF` is Marcus'.
 #
 # ---------------------------------------------------------------------
-# THE ADMISSIBLE SET IS THE JUDGEMENT CALL IN THIS FILE, SO IT IS EXPLICIT.
+# THE ADMISSIBLE SET IS THE JUDGMENT CALL IN THIS FILE, SO IT IS EXPLICIT.
 # A median over all seven estimators would be arithmetic dressed as a decision:
 # two of them are known-invalid and would drag it. Included/excluded, with the
 # reason attached to each, in OC_ADMIT below. Change the set and the answer

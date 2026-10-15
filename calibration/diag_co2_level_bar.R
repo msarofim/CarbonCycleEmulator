@@ -2,7 +2,7 @@
 # WHERE THE BAR ON THE MODEL'S FITTED CO2 LEVEL OFFSET COMES FROM
 #
 # test-likelihood.R "a CO2 level bias is expensive" fits a uniform CO2 shift
-# b0 -- the offset that maximises the likelihood -- and guarded |b0| < 3, a
+# b0 -- the offset that maximizes the likelihood -- and guarded |b0| < 3, a
 # round number. It tripped at 3.017 when gamma_diff was adopted at 0.25.
 #
 # Marcus's ruling (2026-08-30): re-derive the bar from an OBSERVATION rather

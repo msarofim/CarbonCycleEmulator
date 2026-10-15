@@ -12,12 +12,12 @@
 # ⛔⛔ P12 AS ORIGINALLY WRITTEN -- "refitting must drive the compensator
 # toward ZERO" -- IS NOT TESTABLE BY A REFIT, and this had to be caught
 # before measuring rather than after:
-#   * `ent_seas_amp_SH` is `tr = "log"` with a LOGNORMAL prior centred
+#   * `ent_seas_amp_SH` is `tr = "log"` with a LOGNORMAL prior centered
 #     10.95 (R/calibrate.R). Under a log transform the value 0 is
 #     UNREPRESENTABLE in the encoded space, and `dlnorm(0) = 0` gives it
 #     PRIOR PROBABILITY ZERO -- the prior ASSERTS the mechanism is present
 #     ([[runnable_is_not_encodable]]). A refit therefore CANNOT reach zero
-#     and its logpost can never favour it.
+#     and its logpost can never favor it.
 #   ⭐ BUT ZERO IS REPRESENTABLE IN THE MODEL: `R/model.R` skips the shim
 #     entirely at `ent_seas_amp_SH == 0`. So a LIKELIHOOD PROFILE can visit
 #     the off state even though a refit cannot -- which makes the profile

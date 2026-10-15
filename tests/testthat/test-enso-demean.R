@@ -7,7 +7,7 @@
 #
 #   1. INTENT     -- the built column's mean over FORC_ENSO_DEMEAN_WIN is zero.
 #                    That is what "demean" MEANS, so the bound is numerical
-#                    tolerance, not a judgement call.
+#                    tolerance, not a judgment call.
 #   2. IDENTITY   -- with FORC_ENSO_DEMEAN = FALSE the column is BIT-identical
 #                    to the pre-adoption one, and with it TRUE it differs from
 #                    that by a CONSTANT. An identity claim gets an exact bound
@@ -20,7 +20,7 @@
 #                    on the span it was scored over.
 #
 # ⚠ NOTHING HERE ASSERTS THE ADOPTION WAS RIGHT. That is the bake-off's job and
-# it re-optimised four gammas per candidate to do it. These are contract tests.
+# it re-optimized four gammas per candidate to do it. These are contract tests.
 # =====================================================================
 
 edm_enso <- function(yrs, demean) {
@@ -173,7 +173,7 @@ edm_price <- function(md, spinups = c("periodic", "aseasonal")) {
 # ⚠ The prior leg is TRANSCRIBED rather than imported, deliberately, as in
 # test-ent-seas-fitted.R: an independent copy is what makes this a check.
 # `ccx_make_logpost()`'s own prior leg is these three lines.
-# 2026-09-17 (h): the priors that READ THE STRUCTURE (u_hs's Sv-to-m/yr centre at the live hs_frac,
+# 2026-09-17 (h): the priors that READ THE STRUCTURE (u_hs's Sv-to-m/yr center at the live hs_frac,
 # 09-16 d) are evaluated on the base + the draw, exactly as ccx_make_logpost() does; the bare
 # `s$prior(x)` form converted at the built 0.16 and missed a correct hilda_c point by 0.27.
 edm_logprior <- function(u, bp) { names(u) <- CCX_PARAM_NAMES; pv <- ccx_unc_to_par(u)

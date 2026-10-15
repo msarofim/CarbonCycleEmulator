@@ -17,7 +17,7 @@
 # round-6 DIC gradient is 226 vs target 233 (the objective read 385). The d13C
 # half (+0.33 on the gradient) is the DEEP box (DIC -73, d13C +0.37): the refit
 # reshuffled the deep to cancel a surface row reading 157 low. Round 6 was
-# FITTED against the artefact; the P7 verdict is not a property of the mechanism.
+# FITTED against the artifact; the P7 verdict is not a property of the mechanism.
 # Same construction: dg_gateG (calibration/lib_design_gates.R, Dec-31 state /
 # mean mass) and ccx_model_hs_surface (hs_mass_kg annual mean).
 # Usage: Rscript calibration/diag_seasonal_box_observable_artefact.R

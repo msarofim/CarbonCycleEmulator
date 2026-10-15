@@ -14,10 +14,10 @@
 #     k-hat < min(1 - 1 / log10(S), 0.7) for S draws (0.667 at S = 1000). The tail fit is Zhang & Stephens'
 #     (2009, Technometrics 51:316) profile-posterior estimator with the weakly informative prior toward 0.5,
 #     as in the {loo} package's gpdfit(), re-implemented because {loo} is not installed here. It is
-#     VALIDATED against simulated generalised-Pareto tails of known shape in tests/testthat/test-importance.R.
+#     VALIDATED against simulated generalized-Pareto tails of known shape in tests/testthat/test-importance.R.
 # =====================================================================
 
-#' Generalised Pareto fit to exceedances (Zhang & Stephens 2009, as {loo}::gpdfit)
+#' Generalized Pareto fit to exceedances (Zhang & Stephens 2009, as {loo}::gpdfit)
 #' @param x positive exceedances
 #' @param wip shrink k toward 0.5 by the weakly informative prior (loo's default)
 #' @return list(k, sigma)
@@ -44,7 +44,7 @@ ccx_gpdfit <- function(x, wip = TRUE, min_grid_pts = 30L) {
 
 #' Importance-weight diagnostics from LOG weights (any additive constant)
 #' @param lw log importance weights, log p(theta) - log q(theta); non-finite = a failed draw (weight 0)
-#' @return list(S, n_failed, ess, ess_frac, max_w, k_hat, k_ok_below, k_ok, w = normalised weights)
+#' @return list(S, n_failed, ess, ess_frac, max_w, k_hat, k_ok_below, k_ok, w = normalized weights)
 ccx_is_diagnostics <- function(lw) {
   S <- length(lw); ok <- is.finite(lw)
   k_lim <- min(1 - 1 / log10(S), 0.7)

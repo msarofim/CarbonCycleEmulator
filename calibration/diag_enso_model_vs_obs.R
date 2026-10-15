@@ -105,7 +105,7 @@ for (mn in names(EM_MODES))
   cat(sprintf("  %-12s %13.0f%% %13.0f%%\n", mn,
               100 * res[[paste(mn,"land")]]$slope  / OBS$land$slope,
               100 * res[[paste(mn,"ocean")]]$slope / OBS$ocean$slope))
-# ---- is the ocean result an artefact of the detrending order? ---------
+# ---- is the ocean result an artifact of the detrending order? ---------
 cat(sprintf("\n%s\nDETRENDING SENSITIVITY of the OCEAN slope (the result that matters)\n%s\n",
             strrep("-", 78), strrep("-", 78)))
 cat(sprintf("  %-12s %10s %10s %10s\n", "", "deg 1", "deg 2", "deg 3"))

@@ -67,7 +67,7 @@ AC_CHECKS <- list(
   c("W4/C3 airborne fraction reworded",  "the single most useful summary", "should not be"),
   c("C4 dated clause gone",              "since 2026-09-01", NA),
   c("C4 ENSO blurb",                     NA, "out of the surface ocean, year by year"),
-  # ⚠ C5 SUPERSEDED IN PART 2026-10-01 by Marcus's A3 ("Delete the fertilisation sentence where it
+  # ⚠ C5 SUPERSEDED IN PART 2026-10-01 by Marcus's A3 ("Delete the fertilization sentence where it
   # appears"): the whole "no separate land sink switch" box went, and with it the seasonal sentence this
   # used to require. The absent side still ratchets.
   c("C5 'exactly one reason' gone",      "for exactly one", NA),
@@ -104,7 +104,7 @@ AC_CHECKS <- list(
 )
 
 # THE 2026-10-01 RULINGS (Marcus, review notes/review_2026-10-01c_open_decisions.md: "1) Retire card 6.
-# 2) Say about 1.4 dC per 1000 GtC. 3) Delete the fertilisation sentence where it appears. 4) Fix Card 4
+# 2) Say about 1.4 dC per 1000 GtC. 3) Delete the fertilization sentence where it appears. 4) Fix Card 4
 # and 5, and the land pools, and add N deposition as a driver. 5) update the version to BETA v1.0
 # CarboTope. ... 8) If it is a gross rate, then name it that. 9) Reword: it should be specifically about CO2
 # fertilization, with nitrogen effects a different arm"). Kept apart from the 09-22 list so each round

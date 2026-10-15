@@ -105,7 +105,7 @@ test_that("a land-use pulse is not given back to the land", {
   # seas_drivers = 0, and the reason is MEASURED, not assumed (2026-08-18
   # drift decomposition; numbers in the CHANGELOG entry). The driver seasonal
   # cycle drifts a zero-emission control +0.43 ppm over 275 yr: +0.33 is the
-  # fertilisation RECTIFIER (the seasonal CO2 swing modulates NPP and the
+  # fertilization RECTIFIER (the seasonal CO2 swing modulates NPP and the
   # product has nonzero annual mean -- real physics, amplitude-dependent, so it
   # shrinks when the refit brings the uncalibrated 5 ppm default cycle to the
   # observed 3) and +0.10 is the integrator's quadrature over the polar-night

@@ -7,8 +7,8 @@
 #
 # ⭐ THE CLAIM IS A CAUSALITY VIOLATION, not a disagreement about physics.
 # Atmospheric CO2 in 2049 cannot depend on emissions released in 2050. Any
-# non-zero difference there is an implementation artefact by definition, so
-# this needs no model-derived threshold and no tuning judgement: the bound is
+# non-zero difference there is an implementation artifact by definition, so
+# this needs no model-derived threshold and no tuning judgment: the bound is
 # ZERO, and it comes from a law (~/.claude/CLAUDE.md, "thresholds come from an
 # observation or a physical law first").
 #
@@ -18,7 +18,7 @@
 # additive per-year correction so each year's 12 months average to its annual
 # value. The correction fixes the annual MEAN. It does nothing about the
 # spline's AMPLITUDE -- and a natural spline is a GLOBAL interpolant, so moving
-# one knot rings through its neighbours with alternating sign, decaying by
+# one knot rings through its neighbors with alternating sign, decaying by
 # roughly a factor of 4 per year.
 #
 # A one-year pulse is the sharpest possible knot move. The comment at
@@ -151,7 +151,7 @@ cat(sprintf("    ⭐ as a share of the pulse: %.1f%% of one pulse-ppm (%.1f ppm)
 #    SAME EXPERIMENT -- a spread release genuinely differs from an
 #    instantaneous one for about a decade. It is a valid control only at the
 #    long horizons, where the two must converge if the difference between them
-#    is a release-shape effect and not an artefact.
+#    is a release-shape effect and not an artifact.
 # ---------------------------------------------------------------------
 cat(sprintf("\n[4] Control: the same %d GtC spread over %d years (same interpolator)\n",
             PR_GTC, PR_SPREAD))
@@ -171,7 +171,7 @@ for (h in c(PR_H1, PR_H2)) {
 # ---------------------------------------------------------------------
 # 5. The early decade. ⛔ READ THE CAVEAT BEFORE READING THE NUMBERS: at
 #    short horizons the control is NOT a control. It spreads the same carbon
-#    over PR_SPREAD years CENTRED on the pulse year, so at the pulse year
+#    over PR_SPREAD years CENTERED on the pulse year, so at the pulse year
 #    itself only about half of it has been released -- the two columns below
 #    differ mostly because they are different experiments, and only the
 #    long-horizon rows in [4] are a like-for-like comparison. This block is
@@ -179,9 +179,9 @@ for (h in c(PR_H1, PR_H2)) {
 #    agreement is real and not an accident of one horizon.
 #
 #    ⚠ The shipped curve rising from ~45 % at the pulse year to ~97 % a year
-#    later is NOT the artefact and must not be reported as one: `co2_ppm` is an
+#    later is NOT the artifact and must not be reported as one: `co2_ppm` is an
 #    ANNUAL MEAN, so a release spread across the twelve months of PR_YEAR is
-#    half-counted in that year's mean by construction. The artefact is in [3],
+#    half-counted in that year's mean by construction. The artifact is in [3],
 #    and only in [3].
 # ---------------------------------------------------------------------
 cat("\n[5] Shipped vs control by horizon -- see the caveat in the source:\n")

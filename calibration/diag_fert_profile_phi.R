@@ -6,7 +6,7 @@
 # ccx_pulse_ref_state), NOT here. Kept unconverted as the record of what it printed: do not quote its
 # IRFs or partitions as the canonical's.
 # =====================================================================
-# diag_fert_profile_phi.R -- the fertilisation-shape profile under both land
+# diag_fert_profile_phi.R -- the fertilization-shape profile under both land
 # structures: hilda_csl3 (phi 0.5, shipped) and hilda_csl3v0 (phi 0, 2026-09-28).
 # At each fert_k, beta_max is RE-FITTED (1-D) and the other 27 free parameters
 # are FROZEN at hilda29l. Prints logpost, the PD100 IRF@100 (ccx_irf_pd) and the

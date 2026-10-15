@@ -48,7 +48,7 @@ GI_PREFIX_CHAN <- 4.16    # diag_seas_channel_decomp.R, "air-sea SH off"
 # A first-order box lags its sinusoidal forcing by arctan(omega*tau), which is
 # bounded above by a QUARTER CYCLE. This is the LAW the bracket rests on.
 GI_LAG_MAX_MO  <- 3.0
-# PART B masks. The equatorial-Pacific longitudes are a JUDGEMENT, declared in
+# PART B masks. The equatorial-Pacific longitudes are a JUDGMENT, declared in
 # the prereg before the result; sec.B1b reports the sensitivity to widening it.
 GI_TROPIC_LAT  <- c(-20, 20)
 GI_EQP_LAT     <- c(-5, 5)
@@ -284,7 +284,7 @@ g <- obs$gcb
 # ⚠ `forcing_enso.rds` IS MONTHLY (948 rows) AND GCB IS ANNUAL. Merging the two
 # on `year` alone silently replicates each GCB row twelve times: n goes 66 -> 792,
 # every residual is counted a dozen times and the slope's t-statistic inflates by
-# ~sqrt(12). Annualise FIRST, and gate n against the year count.
+# ~sqrt(12). Annualize FIRST, and gate n against the year count.
 en <- as.data.frame(readRDS(ccx_path("data", "forcing_enso.rds")))
 en_ann <- stats::aggregate(nino34_anom ~ year, data = en, FUN = mean, na.rm = TRUE)
 mg <- merge(g[, c("year", "ocean_sink")], en_ann, by = "year")
@@ -342,8 +342,8 @@ cat("  annual ocean uptake on the SAME index with the SAME year term.\n\n")
 # Model ocean uptake, sign +ve = uptake, to match GCB ocean_sink -- THE
 # SCORECARD'S ESTIMATOR, dg_annual_sinks(): the ocean stock differenced Jan 1 ->
 # Jan 1, i.e. the CALENDAR-YEAR sink GCB reports. ⛔ Until 2026-09-12 (review
-# A9) this differenced ANNUAL-MEAN stocks -- an increment centred at y - 0.5 and
-# labelled y, half a year early against the index -- and read the solubility-
+# A9) this differenced ANNUAL-MEAN stocks -- an increment centered at y - 0.5 and
+# labeled y, half a year early against the index -- and read the solubility-
 # only r at ent26 as -0.432 where the calendar-year estimator reads -0.52. The
 # two ENSO estimators differed in NOTHING else (assessment option N, resolved).
 mod_sink <- function(v) {

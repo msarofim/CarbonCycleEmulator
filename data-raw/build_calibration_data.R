@@ -507,7 +507,7 @@ for (nm in names(nl_targets)) {
 #     cell (level-to-level differences have sd EXACTLY 0). Their method builds
 #     the <200 m field by combining the 200 m estimate with coral/sclerosponge
 #     surface records, so the shallow horizontal pattern is inherited, not
-#     measured. USE THE GLOBAL MEAN; the NH/SH split above 200 m is an artefact
+#     measured. USE THE GLOBAL MEAN; the NH/SH split above 200 m is an artifact
 #     of the construction and must not be used to score a hemispheric gradient.
 #
 # [b] Quay et al. 2003's global mean SURFACE rate, which is a genuinely

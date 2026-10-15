@@ -7,7 +7,7 @@
 #     value, CCX_REPRO_TOL. Promote's GATE 5 (the decomposition) joined it by a second ruling the same day
 #     ("Raise to CCX_REPRO_TOL (Recommended)"; CHANGELOG 2026-10-13 e).
 #   * "Most-stable step (Recommended)": a direction with no 2 % plateau takes the interior grid step whose curvature
-#     disagrees least with its neighbours, instead of the fixed 3e-4 in u.
+#     disagrees least with its neighbors, instead of the fixed 3e-4 in u.
 # =====================================================================
 
 .root_rt <- normalizePath(file.path(testthat::test_path(), "..", ".."))

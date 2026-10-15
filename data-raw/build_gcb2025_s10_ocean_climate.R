@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # =====================================================================
-# build_gcb2025_s10_ocean_climate.R -- the GOBM ensemble's ocean-sink CLIMATE EFFECT, 1959-2024, DIGITISED from
+# build_gcb2025_s10_ocean_climate.R -- the GOBM ensemble's ocean-sink CLIMATE EFFECT, 1959-2024, DIGITIZED from
 # GCB 2025's Supplement Fig. S10 (global panel, the solid red "A-C, clim" ensemble-mean line). 2026-10-06.
 #
 # WHY. Marcus 2026-10-06: "Do the H2 diagnostic and test." The test (CHANGELOG 10-04 p: "the time shape against
@@ -13,16 +13,16 @@
 # 93a7e289fb61849d31a0163ddbec8f45 -- the file calibration/diag_ocean_climate_gobm.R's protocol table was read
 # from (OC_SUPP_MD5). This script NEVER downloads: an absent or different file is a stop.
 # THE FIGURE: one embedded 720 x 504 JPEG on PDF page 70 (printed p. 69). Four panels; the GLOBAL panel is the
-# top-left. Units GtC/yr, uptake POSITIVE; red = A - C (the climate effect), blue = C - B, grey = sim A; solid =
+# top-left. Units GtC/yr, uptake POSITIVE; red = A - C (the climate effect), blue = C - B, gray = sim A; solid =
 # the ensemble mean, dotted = the individual GOBMs.
 #
 # METHOD (base R; poppler's `pdfimages` writes the image as PPM, which base R reads):
-#   1. CALIBRATION from the panel's own light-grey gridlines, DETECTED (a row or column of the panel interior
-#      that is mostly gridline grey): y majors at 3 / 2 / 1 GtC/yr, x gridlines at 1960 / 1970 / 2010 / 2020 (the
+#   1. CALIBRATION from the panel's own light-gray gridlines, DETECTED (a row or column of the panel interior
+#      that is mostly gridline gray): y majors at 3 / 2 / 1 GtC/yr, x gridlines at 1960 / 1970 / 2010 / 2020 (the
 #      others are crossed by the data lines and not detected). A straight-line fit through each set; the
 #      residuals are printed and gated at half a pixel.
 #   2. THE LINE: the solid mean line is DARK red, ~(150, 20, 20) after JPEG; the dotted per-model lines are pink
-#      (G and B above ~0x80) and are excluded by colour, not position. Per pixel column, the redness-weighted mean
+#      (G and B above ~0x80) and are excluded by color, not position. Per pixel column, the redness-weighted mean
 #      row of the line's pixels.
 #   3. ANNUAL VALUES at each year's x (ggplot joins annual points), linearly between pixel columns.
 #   4. THE GATE: the 2015-24 mean must reproduce GCB's -0.20 within S10_VALID_TOL (one pixel, 1/39 GtC/yr, plus
@@ -45,7 +45,7 @@ S10_Y_MAJORS  <- c(`3` = 102, `2` = 141, `1` = 180)    # expected gridline rows 
 S10_X_LINES   <- c(`1960` = 81, `1970` = 125, `2010` = 299, `2020` = 343)
 S10_GRID_TOL  <- 1                                     # px: a detected gridline must sit within 1 px of its row/col
 S10_FIT_TOL   <- 0.5                                   # px: the calibration fit's largest residual
-S10_RED       <- c(r_min = 100, gb_max = 80, contrast = 60)   # the solid line's colour (dotted lines are pink)
+S10_RED       <- c(r_min = 100, gb_max = 80, contrast = 60)   # the solid line's color (dotted lines are pink)
 S10_YEARS     <- 1959:2024
 S10_VALID     <- c(mean = -0.20, from = 2015, to = 2024)      # GCB 2025 p. 3242 (OC_GCB in diag_ocean_climate_gobm.R)
 S10_VALID_TOL <- 1 / 39 + 0.005                        # one pixel + the published value's rounding

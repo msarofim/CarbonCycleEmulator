@@ -29,7 +29,7 @@
 #     The ml result is window-insensitive: 0.153-0.160 over every plausible
 #     Quay window (part 3). The atmospheric result reproduces against Scripps
 #     flask as well as Law Dome (+14 to +25%, part 3b), so it is not an
-#     ice-core smoothing artefact.
+#     ice-core smoothing artifact.
 #
 #     THE MODEL'S OCEAN TAKES UP 13C AT THE OBSERVED RATE. The d13C misfit is
 #     not the ocean failing to absorb the depleted signal.
@@ -95,7 +95,7 @@ suppressWarnings(suppressMessages(library(data.table)))
 # ---- labels derive from constants (project rule) --------------------
 DOS_YEARS      <- c(1750, 2024)
 DOS_BOMB_REF   <- 102
-DOS_QUAY_WIN   <- c(1970, 1993)   # centre window: GEOSECS era vs WOCE era
+DOS_QUAY_WIN   <- c(1970, 1993)   # center window: GEOSECS era vs WOCE era
 DOS_QUAY_WINS  <- list(c(1970, 1993), c(1970, 1995), c(1972, 1993),
                        c(1975, 1995), c(1970, 1990), c(1975, 1993))
 DOS_EIDE_END   <- 1995            # nominal GLODAPv1.1 reference year
@@ -198,7 +198,7 @@ for (nm in names(CASES)) {
               100 * ((v0["atm"] - v1["atm"]) / (ld(1750) - ld(1993)) - 1)))
 }
 
-# ---- PART 3: is the ml result an artefact of the window, or of Law Dome?
+# ---- PART 3: is the ml result an artifact of the window, or of Law Dome?
 cat("\n== PART 3: robustness -- window choice, and the atmospheric product ==\n")
 cs <- CASES[["DEFAULT PARAMS"]]
 cat(sprintf("%-12s %10s %10s %10s\n", "window", "ml model", "atm model", "atm LawDome"))

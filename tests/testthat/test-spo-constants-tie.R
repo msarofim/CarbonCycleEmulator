@@ -10,7 +10,7 @@
 # registered, and this is the gate that keeps the copies honest.
 #
 # ⛔ THE COPIES ARE NOT CONVERTED IN BULK, AND DELIBERATELY SO. Several of these
-# files are PRE-REGISTERED artefacts whose scored gates may not move under a
+# files are PRE-REGISTERED artifacts whose scored gates may not move under a
 # refactor (`diag_admissible_2x2_land_ocean.R` is the explicit case; its stored
 # arms are re-scored by `diag_2x2_repriced_at_enso25.R` sec.1). So this follows
 # Marcus's Ruling B idiom for the bare-overlay lint: CONVERT ON TOUCH, and let a

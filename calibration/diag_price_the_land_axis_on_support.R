@@ -10,10 +10,10 @@
 #
 # WHY THIS EXISTS. `diag_price_the_gates.R` PART 2 reports that gate 7 closes
 # at beta_max = 0.35 for -232 log-units, and handoff 2026-08-31 s.8.3 puts that
-# number to Marcus as a judgement call. THE NUMBER IS MEASURED OFF-SUPPORT.
+# number to Marcus as a judgment call. THE NUMBER IS MEASURED OFF-SUPPORT.
 #
-# That frontier re-optimises `kz`, `fert_k` and `q10` as `exp(u)` -- an
-# UNBOUNDED log parameterisation. But `kz` is a LOGIT parameter on a hard
+# That frontier re-optimizes `kz`, `fert_k` and `q10` as `exp(u)` -- an
+# UNBOUNDED log parameterization. But `kz` is a LOGIT parameter on a hard
 # support [3942.5, 6528]. Every row of the published land axis except the
 # anchor sits above the top of it:
 #
@@ -41,10 +41,10 @@
 #
 # ⚠ THE OCEAN AXIS IS NOT DAMAGED BY THIS. It also leaves the support (kz 3000
 # and below are under lo = 3942.5), but it leaves it in the direction that
-# makes the optimiser's job EASIER and still got worse on every gate. "kz is
-# not the lever" survives; only the favourable price on the land axis does not.
+# makes the optimizer's job EASIER and still got worse on every gate. "kz is
+# not the lever" survives; only the favorable price on the land axis does not.
 #
-# WHAT THIS SCRIPT DOES. The same land axis, with every re-optimised parameter
+# WHAT THIS SCRIPT DOES. The same land axis, with every re-optimized parameter
 # moving in ITS OWN transform, so the search cannot leave the support -- plus a
 # gate that refuses to report any point that does. Reports both the likelihood
 # price (comparable with the published table) and the POSTERIOR price, which is
@@ -59,7 +59,7 @@ ccx_load_cpp()
 PG_MODE   <- file.path("calibration", "output", "refit_20260830_gamma_diff_remap",
                        "from90", "mode_fit_pumpN.rds")
 PG_KZ     <- c(6400, 5000, 4000, 3000, 2000, 1200, 800, 500)
-PG_FREE   <- c("beta_max", "fert_k", "q10")   # re-optimised at every kz
+PG_FREE   <- c("beta_max", "fert_k", "q10")   # re-optimized at every kz
 PG_WIN    <- c(2015, 2023)                    # gate 7 window, GCB decade
 PG_MAXIT  <- 400
 PG_OUT    <- "outputs/diagnostics/price_the_gates.rds"
@@ -104,7 +104,7 @@ base <- ccx_set_enso(base, p0)
 # one the mode was fitted under, which read -1748.09 at the mode's own kz where
 # the objective reads -1494.87. That is 253 log-units of pure construction
 # artifact, the same trap as [[match_incumbents_optim]] wearing a new hat: a
-# re-optimised challenger scored on a truncated likelihood. Replicated exactly
+# re-optimized challenger scored on a truncated likelihood. Replicated exactly
 # from R/calibrate.R:918-931 and :943-945 instead.
 err <- list(sigma_d14c = p0$sigma_d14c, rep_dC = p0$rep_dC,
             grad_off_co2 = p0$grad_off_co2, grad_off_d13c = p0$grad_off_d13c)
@@ -127,7 +127,7 @@ sinks_of <- function(r) {
 # joos_build_forcing() lives in diag_joos_irf.R, not R/, so it is replicated
 # here EXACTLY. ⚠ AND SO IS ITS ARM HANDLING: that script sets JOOS_LUC_SCALE
 # and JOOS_BOMB_TOTAL from the ARM'S OWN FITTED VALUES (diag_joos_irf.R:159-160),
-# not from the 1 / 102 literals it initialises them to for the "defaults" arm.
+# not from the 1 / 102 literals it initializes them to for the "defaults" arm.
 # Using the literals here would score this frontier's IRF on a different
 # background from the gate 12 numbers it is meant to be compared against.
 # JOOS_HORIZON also lives in diag_joos_irf.R rather than R/. Matched exactly:
@@ -192,7 +192,7 @@ cat("GATE PASSED: prices below are on the objective.\n\n")
 # =====================================================================
 # Every label, filename and threshold below derives from these.
 LA_BETA      <- c(0.5552, 0.50, 0.45, 0.40, 0.35, 0.30)
-LA_FREE      <- c("kz", "fert_k", "q10")   # re-optimised at every beta_max
+LA_FREE      <- c("kz", "fert_k", "q10")   # re-optimized at every beta_max
 LA_MAXIT     <- 400                        # matches PG_MAXIT
 LA_OUT       <- "outputs/diagnostics/price_the_land_axis_on_support.rds"
 LA_AXIS      <- "LAND AXIS (beta_max forced down; kz/fert_k/q10 re-optimised)"
@@ -243,7 +243,7 @@ logprior_of <- function(moved) {
 rows <- list()
 for (bm in LA_BETA) {
   pb <- base; pb$beta_max <- bm
-  # ⚠ OPTIMISE IN EACH PARAMETER'S OWN TRANSFORM, not in log. This is the whole
+  # ⚠ OPTIMIZE IN EACH PARAMETER'S OWN TRANSFORM, not in log. This is the whole
   # correction: .from_unc() maps the real line onto the parameter's support, so
   # a logit parameter physically cannot be proposed outside its bracket.
   u0  <- vapply(LA_FREE, function(n) .to_unc(base[[n]], CCX_PARAM_TABLE[[n]]), numeric(1))

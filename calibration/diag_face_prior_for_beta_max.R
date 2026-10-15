@@ -11,7 +11,7 @@
 # luc, 08-24c), i.e. ~91 % of the way to the implausibility bound.
 #
 # THE MAPPING, AND WHY FACE IS THE RIGHT INSTRUMENT. The historical record
-# constrains the INTEGRAL of the fertilisation response over 277 -> ~420 ppm.
+# constrains the INTEGRAL of the fertilization response over 277 -> ~420 ppm.
 # FACE measures a RATIO between two CO2 levels, one of them above anything the
 # historical record reaches. Under the Michaelis-Menten form
 #     enh(chi) = beta_max * d / (K + d),      d = chi - chi0
@@ -26,7 +26,7 @@
 #
 #   Norby et al. 2005 PNAS       +23 %   4 YOUNG temperate tree plantations
 #   Norby & Zak 2011 AREES               FACE setpoints "typically 550-580 ppm"
-#   Norby et al. 2025 New Phyt   +21.8 % normalised to +41 % CO2 enrichment,
+#   Norby et al. 2025 New Phyt   +21.8 % normalized to +41 % CO2 enrichment,
 #     doi 10.1111/nph.70162              now INCLUDING two mature-forest sites
 #
 #   ...and the two MATURE sites -- the ones that look like the standing
@@ -50,7 +50,7 @@
 for (f in list.files("R", pattern = "[.]R$", full.names = TRUE)) source(f)
 
 FACE_CHI0    <- 276.88          # model preindustrial, R/model.R
-FACE_ENRICH  <- 0.41            # Norby 2025 normalising enrichment
+FACE_ENRICH  <- 0.41            # Norby 2025 normalizing enrichment
 FACE_AMBIENT <- c(376, 400)     # Norby-2005-era and recent ambient, ppm
 FACE_TARGETS <- list("Norby 2025 synthesis (plantation-weighted)" = 0.218,
                      "Norby 2005 (4 young plantations)"           = 0.23,

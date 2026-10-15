@@ -1,5 +1,5 @@
 # =====================================================================
-# Gate: the CO2-fertilisation FORM (2026-08-14, review item 7).
+# Gate: the CO2-fertilization FORM (2026-08-14, review item 7).
 #
 # Two forms now exist and one switch selects between them, which creates three
 # distinct ways to break the model silently. This file guards all three:

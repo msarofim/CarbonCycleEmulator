@@ -3,7 +3,7 @@
 # isotope differences between Mauna Loa/SPO and hemispheric averages,
 # particularly hemispheric SURFACE averages?"
 #
-# The d13C analogue of diag_rep_dc_mbl_zonal.R, and it asks a sharper question
+# The d13C analog of diag_rep_dc_mbl_zonal.R, and it asks a sharper question
 # than the CO2 one could. `rep_dC` is ONE parameter tied across species by mass
 # balance (R/likelihood.R, LIK_REP_SOURCE_D13C): the d13C station offset is not
 # fitted, it is DERIVED from the CO2 one as

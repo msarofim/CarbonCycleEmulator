@@ -5,7 +5,7 @@
 # THE PROPOSAL. Add an ENSO flux anomaly to the air-sea exchange in each
 # hemisphere, mirroring the land term the model already has
 # (`R/model.R:1256`, `gamma_enso * forc$enso * aux$enso_share[[h]]`,
-# soil_fast -> atm). Since a two-box model has no tropics, a PARAMETERISED
+# soil_fast -> atm). Since a two-box model has no tropics, a PARAMETERIZED
 # anomaly is arguably the honest representation of a process the structure
 # cannot resolve -- which is exactly the argument the land term already rests on.
 #

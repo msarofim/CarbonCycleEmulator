@@ -11,7 +11,7 @@
 # ([[runnable_is_not_undrivable]]).
 #
 # ⛔ RUN THE PREFLIGHT BATCH FIRST AND READ IT (~2 min/task, exits 0 without
-# optimising):
+# optimizing):
 #     CCX_MS_PREFLIGHT=1 sbatch --array=0-5,25,45 --time=00:15:00 \
 #       calibration/torch/multistart.sbatch
 # Ids 0/1/2 are the cold init, the 08-30 incumbent and the 08-31e new basin;
@@ -22,7 +22,7 @@
 # the batch covers the draw path as well as the warm one.
 # EVERY task carries a PORT GATE against logposts measured on the Mac and
 # shipped in calibration/torch/port_targets.csv. If it fails, every start in the
-# survey would be optimising a different objective. Do not scale past it.
+# survey would be optimizing a different objective. Do not scale past it.
 #
 # THEN the survey, THROTTLED -- %10 caps how many run at once:
 #     sbatch --array=0-45%10 calibration/torch/multistart.sbatch
@@ -60,7 +60,7 @@
 #   * a restart begun at the limit and actually taking k x p ends at
 #     300 + (k - 1.5)p; reaching the 360 cap needs k = 2.06, i.e. a TWOFOLD
 #     overrun of a measured projection. The worst contention ever measured on
-#     this model is 1.61x, so the cap is not reachable on any observed behaviour.
+#     this model is 1.61x, so the cap is not reachable on any observed behavior.
 #   * passes available inside the budget: 300/108 = 2.8 at the worst rate and
 #     300/59.4 = 5.0 at the best, which is what CCX_MS_RESTARTS = 3 wants.
 #
@@ -92,7 +92,7 @@
 # in, so steady state and not startup. Neither node was oversubscribed by SLURM
 # (cs608 128/128 alloc, load 101; gr105 98/128, load 78), so it is NOT core
 # contention; cgroup CPU share reserved for GPU jobs is the likely mechanism,
-# which is INFERRED and NOT verified. Array 17316364 was cancelled and
+# which is INFERRED and NOT verified. Array 17316364 was canceled and
 # resubmitted here ⇒ [[eta_in_days_is_not_a_slow_run]] ("read the meter at ~5 min
 # and requeue rather than wait").
 #
@@ -123,7 +123,7 @@
 
 set -euo pipefail
 # ⚠ THE #SBATCH DIRECTIVES ABOVE MUST BE LITERAL -- SLURM parses them before any
-# shell runs, so --output cannot be a variable. The BODY is parameterised so
+# shell runs, so --output cannot be a variable. The BODY is parameterized so
 # this exact file can be dry-run off Torch: an untestable script is an unverified
 # one, and everything below except `module load` was smoke-tested locally on
 # 2026-09-01 by setting CCX_PROJ to an extracted copy of the bundle.
@@ -325,7 +325,7 @@ PIN_LABEL=""; if [ -n "$CCX_MS_PIN" ]; then PIN_LABEL="_pin_$(echo "$CCX_MS_PIN"
 # the C' directory predates the struct axis in the name (multistart_20260913_cprime_seasml1_pin_..._sd1.0452).
 # ... and the pump field since 2026-09-14 (h) (`_martin`; absent = solved, the older directories).
 # 2026-09-16 (f): the date/arc prefix is CCX_MS_TAG (default = today's date), not a typed
-# "20260913_eqcell" -- that string named the cell array and would have labelled the
+# "20260913_eqcell" -- that string named the cell array and would have labeled the
 # hygiene-batch refit as it. A round-2 RESUME must pass the round-1 tag (or CCX_MS_OUTDIR)
 # so it lands in the same directory; the driver refuses a checkpoint from another set anyway.
 export CCX_MS_TAG="${CCX_MS_TAG:-$(date +%Y%m%d)}"
@@ -382,7 +382,7 @@ if [ -n "${CCX_MS_CLOCK:-}" ] && [ "$CCX_MS_CLOCK" != "wall" ]; then
   exit 1
 fi
 export CCX_MS_CLOCK=wall
-# THE BUDGET: CCX_MS_WALL_MIN is its pre-10-05 name, still honoured; only ONE name reaches the driver.
+# THE BUDGET: CCX_MS_WALL_MIN is its pre-10-05 name, still honored; only ONE name reaches the driver.
 if [ -n "${CCX_MS_BUDGET_MIN:-}" ] && [ -n "${CCX_MS_WALL_MIN:-}" ] && [ "$CCX_MS_BUDGET_MIN" != "$CCX_MS_WALL_MIN" ]; then
   echo "FATAL: CCX_MS_BUDGET_MIN=$CCX_MS_BUDGET_MIN and its pre-10-05 name CCX_MS_WALL_MIN=$CCX_MS_WALL_MIN differ. Set one." >&2
   exit 1

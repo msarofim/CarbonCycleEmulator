@@ -17,7 +17,7 @@
 #      declares that state rejected rather than fatal -- which is right, and is
 #      also exactly the shape of a guard that can never fire. So the margin has
 #      to be a NUMBER, not an assumption. ⚠ The bound below is the
-#      PREINDUSTRIAL gross limb, which is CONSERVATIVE against fertilisation
+#      PREINDUSTRIAL gross limb, which is CONSERVATIVE against fertilization
 #      (modern npp is higher) and NOT conservative against land clearing -- the
 #      cleared fraction is reported alongside so the reader can see both.
 #
@@ -126,7 +126,7 @@ cat("    respiration loop is off by default and adds no headroom here.\n")
 # atmospheric anomaly exactly (this one does: the old flux and the new
 # modulation put the same carbon into the same atmosphere) can only pay in the
 # streams, and which streams pay is the whole diagnosis. A bare total invites
-# exactly the rationalisation the "implausible result = bug" rule forbids.
+# exactly the rationalization the "implausible result = bug" rule forbids.
 cat("\n=== 2. THE PRICE: the same 25-par vector through both structures ===\n")
 u0 <- ccx_par_to_unc(pm)
 stopifnot(all(is.finite(u0)))
@@ -221,7 +221,7 @@ if (identical(EG_ROLE, "pre")) {
 # =====================================================================
 # The two structures put the SAME net carbon into the SAME atmosphere at every
 # instant, so a large price is not self-evidently explicable and must not be
-# rationalised. It is explicable, and the explanation is a number:
+# rationalized. It is explicable, and the explanation is a number:
 #
 #   THE ENSO INDEX IS NOT ZERO-MEAN. Its mean over the record is a SUSTAINED
 #   anomaly, and the two structures load that mean onto pools with residence

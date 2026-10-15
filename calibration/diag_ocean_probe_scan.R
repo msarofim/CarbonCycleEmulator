@@ -6,7 +6,7 @@
 # or artificially injected atmospheric carbon into the oceans should be able to
 # take the tension off of that decade."
 #
-# THAT IS A LEVERAGE QUESTION AND ONLY A RE-OPTIMISATION ANSWERS IT. A residual
+# THAT IS A LEVERAGE QUESTION AND ONLY A RE-OPTIMIZATION ANSWERS IT. A residual
 # is the OUTCOME of a fit, so a good in-window residual is the SYMPTOM of the
 # distortion, not evidence against it -- the mistake made and recorded on
 # 2026-08-23 (handoff 23c sec.5.2). Hence four refits, not four model runs.
@@ -17,11 +17,11 @@
 # and `rep_dC`, which is why `luc_scale` routed around it twice. The ocean
 # probe retains 3.3 % by 2024, so it isolates the decade. It is also
 # isotopically near-silent, so `sigma_d14c` does not inflate absorbing an
-# artefact of the instrument and contaminate the very leverage read we want.
+# artifact of the instrument and contaminate the very leverage read we want.
 #
 # ITS IMPLAUSIBLE MAGNITUDE IS NOT A DEFECT. As a physical ocean sink 9.4 GtC/yr
 # is absurd (today's whole global ocean sink is ~3). As a PROBE it is
-# prescribed, unfitted, carries no free parameter and is labelled artificial --
+# prescribed, unfitted, carries no free parameter and is labeled artificial --
 # it asks a counterfactual, not a mechanism.
 #
 # EVERY VERDICT BELOW IS AGAINST A PREDICTION WRITTEN BEFORE LAUNCH:

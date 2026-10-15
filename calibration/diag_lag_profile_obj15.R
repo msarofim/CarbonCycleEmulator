@@ -2,13 +2,13 @@
 # diag_lag_profile_obj15.R -- D3: HOW OBJECTIVE #15 IDENTIFIES THE LAND ENSO LAG, before the refit.
 #
 # The 10-02h handoff (sec. 2, D3): "After W1-W3, profile the NEW objective over L in a committed
-# script, with the ENSO amplitude re-optimised." Two readings disagreed before #15 existed: a
+# script, with the ENSO amplitude re-optimized." Two readings disagreed before #15 existed: a
 # conditional probe by the audit (not reproduced) had the rows preferring 2-3 months, through the
 # GCB land sink and the seasonal-coefficient rows; the growth rate's own timing says 5 (10-02 x:
 # observed growth peaks 5 months after Nino 3.4, r 0.50). This measures it on #15.
 #
 # THE PROFILE IS CONDITIONAL: at each lag L the two LAND ENSO amplitudes (gamma_enso_land_NH/SH;
-# the ocean pair is PINNED at 0 in hilda33d) are re-optimised on the full #15 LOGPOST, and every
+# the ocean pair is PINNED at 0 in hilda33d) are re-optimized on the full #15 LOGPOST, and every
 # other name stays at hilda33d's restamped mode. The joint answer is the refit's (D5); this says
 # what the rows want and which rows want it.
 #   P1 the profile: logpost, likelihood and every stream at each L, the amplitudes' optimum.
@@ -16,7 +16,7 @@
 #      under the lag label kaidgbe, whose lag prior (flat on (0, 12)) adds its logit Jacobian to
 #      the logpost and nothing to the likelihood -- so COMPARE ON LIKELIHOOD.
 #   P2 the rows: each stream's move from L = 0 at the likelihood's best L, largest first.
-#   P3 the timing the profile buys: the model's monthly growth (centred 12-month difference of
+#   P3 the timing the profile buys: the model's monthly growth (centered 12-month difference of
 #      global CO2, spline-detrended, 1980-2024) against Nino 3.4 -- the lag of peak correlation
 #      at each L, beside the OBSERVED peak from NOAA's MBL global record (10-02 x's estimator).
 # No RNG. Run from the repo root:  Rscript calibration/diag_lag_profile_obj15.R

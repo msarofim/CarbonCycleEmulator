@@ -84,7 +84,7 @@ test_that("ccx_prior_z matches the analytic z for the two OBSERVATION lognormals
     stats::qnorm((F(x) - F(lo)) / (F(hi) - F(lo))) }
   # The box is READ from the table (2026-09-16 b: the floor moved 30 -> CCX_HML_FLOOR_M = 42.5, the
   # prior's 16 % point, so the truncation now clips ~16 % below and the truncated z differs from
-  # the plain one by ~0.2 sd at the centre -- larger, and still asserted rather than tolerated).
+  # the plain one by ~0.2 sd at the center -- larger, and still asserted rather than tolerated).
   bx <- CCX_PARAM_TABLE$h_ml; expect_identical(bx$lo, CCX_HML_FLOOR_M)
   for (x in c(45, 59.7, 83.9, 118, 134.15))
     expect_equal(ccx_prior_z("h_ml", x), z_trunc(x, log(hp$centre_m), hp$log_sd, bx$lo, bx$hi), tolerance = 2e-3, info = sprintf("h_ml at %g", x))

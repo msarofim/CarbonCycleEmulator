@@ -356,7 +356,7 @@ test_that("the canonical wins among FREE arms re-scored on today's objective, or
   # them rewards the canonical for agreeing with a target it chose (+18.54 vs the control on 26 rows, against
   # +4.68 on the 24 like-for-like ones). ccx_comparable_rows() drops LIK_IMB_ROWS exactly when the arms' D2/D3
   # gate states DIFFER (detected from the files' structures), and keeps every common row when they agree;
-  # both behaviours are mutation-checked in test_that("the comparable-row rule ...") below.
+  # both behaviors are mutation-checked in test_that("the comparable-row rule ...") below.
   arm_structs <- c(vapply(free, function(a) ccx_mode_struct(readRDS(ccx_mode_file(a))), ""),
                    ccx_mode_struct(md_c))
   common <- ccx_comparable_rows(c(lapply(rescored, function(r) names(lik(r))), list(names(lik(sc_c)))),

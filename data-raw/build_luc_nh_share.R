@@ -41,16 +41,16 @@
 # are POLITICAL aggregates, not hemispheres, and nothing in this repo resolves
 # them to latitude. Three of the eleven straddle the equator and one more
 # (Oceania) sits almost entirely south of it. The fractions below are geographic
-# judgements, so they are carried as a BRACKET and every year is reported
+# judgments, so they are carried as a BRACKET and every year is reported
 # lo/central/hi. THE CONCLUSION TO TRUST IS THE ONE THAT SURVIVES THE WHOLE
 # BRACKET -- and the direction does: pre-1950 even the LOW bracket is >= 0.60,
 # post-1990 even the HIGH bracket is <= 0.53. The two ends do not overlap under
-# any admissible judgement, which is what makes "a constant cannot represent
+# any admissible judgment, which is what makes "a constant cannot represent
 # this" a measurement rather than a preference.
 #
 # The bracket table is IDENTICAL to calibration/diag_emission_split_and_season.R
 # (part 1), deliberately: this file promotes that diagnostic's measurement to a
-# data product without re-deciding it. If the judgements are ever revised they
+# data product without re-deciding it. If the judgments are ever revised they
 # must be revised in both, and the test suite compares this product against a
 # recomputation from the same table.
 # =====================================================================
@@ -135,7 +135,7 @@ cat(sprintf("[2] %d of %d years have no well-defined share (|E_luc| ~ 0 or ratio
             n_bad, nrow(ce),
             if (n_bad) sprintf(": %s", paste(ce$year[is.na(ce$share)], collapse = ", ")) else ""))
 
-# Fill any such year by linear interpolation in time between defined neighbours,
+# Fill any such year by linear interpolation in time between defined neighbors,
 # holding at the ends. Stated rather than silent; it is a gap rule on a
 # well-behaved monotone-ish series, not a fabrication of missing data.
 fill <- function(d) {

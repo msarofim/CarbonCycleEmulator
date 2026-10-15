@@ -25,7 +25,7 @@ ccx_load_cpp()
 DQ_SIGMAS   <- list(sigma_co2 = 1.5, sigma_d13c = 0.1, sigma_d14c = 5)
 DQ_SIG_NOTE <- "prior medians (1.5 ppm / 0.1 permil / 5 permil)"
 DQ_Q10_GRID <- c(0.169, 0.3, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0)
-DQ_Q10_REF  <- 2.0          # reference row; the prior median and physical centre
+DQ_Q10_REF  <- 2.0          # reference row; the prior median and physical center
 DQ_YEARS    <- c(1750, 2024)
 DQ_BOMB_REF <- 102          # kmol, the reference the bomb column is built at
 DQ_STREAMS  <- c("co2_level_MLO", "co2_level_SPO", "d13c_level_MLO",

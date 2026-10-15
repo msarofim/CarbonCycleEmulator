@@ -17,7 +17,7 @@
 # NPP shape (2026-08-27; build_cmip6_npp_seasonal_shape.py): process models, no
 # satellite in the chain, open, and -- uniquely among the candidates -- the
 # QUANTITY ITSELF (sinking POC flux), not an NPP proxy with a seasonal e-ratio
-# on top. 21 models carry epc100 Omon historical in the Pangeo catalogue.
+# on top. 21 models carry epc100 Omon historical in the Pangeo catalog.
 # ⚠ WHAT THIS IS NOT. These are MODELS, not observations; the product may NOT
 # be described as an observational constraint (the 08-27 acceptance is the
 # provenance). The satellite NPP climatology (Oregon State) is the
@@ -40,7 +40,7 @@
 # models themselves.
 #
 # THE ESTIMATOR mirrors the model's factor: the first harmonic of the
-# 1995-2014 monthly climatology at month CENTRES, amp_rel = |harmonic| / mean,
+# 1995-2014 monthly climatology at month CENTERS, amp_rel = |harmonic| / mean,
 # peak month (decimal, from 1 Jan), and the model's own lag convention:
 #   NH peaks at 6.5 + lag  (mid-July at lag 0)  ->  lag = peak - 6.5
 #   SH peaks at 0.5 + lag  (mid-January)        ->  lag = peak - 0.5 (mod 12, in [-6, 6))

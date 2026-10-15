@@ -12,16 +12,16 @@
 #   CCX: the like-for-like emulation of GCB's protocol (sim A - C, CO2 prescribed), the mean over GCB's ten GOBM
 #        protocols, at hilda33p: outputs/diagnostics/ocean_climate_gobm_20261005_obj16.rds `series` (its mode md5
 #        is checked against the canonical's file). The ten protocols' spread is shown beside it.
-#   GCB: Fig. S10's global ensemble mean, digitised and gated (data/gcb2025_s10_ocean_climate_global.rds, from
+#   GCB: Fig. S10's global ensemble mean, digitized and gated (data/gcb2025_s10_ocean_climate_global.rds, from
 #        data-raw/build_gcb2025_s10_ocean_climate.R: 2015-24 reproduces GCB's stated -0.20 within one pixel).
 # THE METRICS (none was recorded with the test; each is stated here before it is read):
 #   M1 decade means, each with its uncertainty: GCB's stated 1 sigma (0.05, the GOBM spread over 2015-24, applied
-#      to every decade -- an assumption, stated) and the digitisation's one pixel (0.026); CCX's protocol range.
-#   M2 EMERGENCE: the first year after which the 11-yr centred mean stays below H2_EMERGE (half of GCB's 2015-24
+#      to every decade -- an assumption, stated) and the digitization's one pixel (0.026); CCX's protocol range.
+#   M2 EMERGENCE: the first year after which the 11-yr centered mean stays below H2_EMERGE (half of GCB's 2015-24
 #      value), with the threshold moved +-20 % as its own sensitivity.
 #   M3 THE H2 SIGNATURE: each series regressed on the global SST anomaly (HadSST4, the model's own forcing, mean
 #      of the two hemispheres, relative to 1959-68). H2 predicts a LARGER per-K response in CCX, with the gap
-#      growing with the warming; a constant offset would instead point to an emulation artefact, and a gap that
+#      growing with the warming; a constant offset would instead point to an emulation artifact, and a gap that
 #      opens only after ~2000 to the wind term CCX lacks. OLS se (the residuals are autocorrelated, so the se is a
 #      floor), and the same fit on decade means as a robustness check.
 #   M4 SHAPE: the correlation of the year-to-year anomalies (each series minus its 11-yr running mean).
@@ -40,9 +40,9 @@ H2_SST_RDS  <- file.path("data", "forcing_sst.rds")
 H2_YEARS    <- 1959:2024
 H2_BASE     <- 1959:1968                      # the SST anomaly's reference: the record's first decade
 H2_GCB_SD   <- 0.05                           # GCB 2025 p. 3242: 1 sigma over the 10 GOBMs, 2015-24
-H2_PX       <- 1 / 39                         # the digitisation's pixel, GtC/yr
+H2_PX       <- 1 / 39                         # the digitization's pixel, GtC/yr
 H2_EMERGE   <- -0.10                          # half of GCB's stated 2015-24 value
-H2_RUN      <- 11L                            # the running mean's width, years (an odd, centred window)
+H2_RUN      <- 11L                            # the running mean's width, years (an odd, centered window)
 H2_DECADES  <- list(`1960s` = 1960:1969, `1970s` = 1970:1979, `1980s` = 1980:1989, `1990s` = 1990:1999,
                     `2000s` = 2000:2009, `2010-14` = 2010:2014, `2015-24` = 2015:2024)
 H2_OUT      <- file.path("outputs", "diagnostics", sprintf("h2_time_shape_%s_%s", format(Sys.Date(), "%Y%m%d"), CCX_MODE_CANONICAL))

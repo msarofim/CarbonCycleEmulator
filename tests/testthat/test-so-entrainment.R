@@ -20,7 +20,7 @@ ent_p <- local({ p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso
 # ⛔ THE OFF-STATE IS NAMED, NOT INHERITED (2026-09-04). Until the `ent26`
 # adoption `ccx_default_params()$ent_seas_amp_SH` was 0, so `ent_p` WAS the
 # off-state and every "channel off" baseline in this file got it for free. The
-# adoption flipped that default to the derived prior centre and FIFTEEN
+# adoption flipped that default to the derived prior center and FIFTEEN
 # assertions here failed at once -- none of them because the model changed: the
 # identity they guard (absent == zero) was measured intact, bit for bit, in both
 # cores and all five columns.
@@ -201,7 +201,7 @@ test_that("the entrainment channel is CONSERVATIVE, and rectifies no more than
 
   # (2) RECTIFICATION. The driver is zero-mean; the response is not, because
   # carbonate chemistry is nonlinear in DIC. That is ACCEPTED AS PHYSICS -- the
-  # same call already made for the seasonal SST term and the fertilisation
+  # same call already made for the seasonal SST term and the fertilization
   # rectifier -- so this BOUNDS it rather than denying it, against the SST
   # term's own rectification measured in the same run. Both are second order in
   # their driver amplitude through the same nonlinearity, which is why that is

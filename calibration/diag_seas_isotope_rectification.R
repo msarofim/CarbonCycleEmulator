@@ -38,7 +38,7 @@
 #
 # The two corrections coincide to first order, because the leaf pool sits at
 # r_atm * alpha anyway; they differ only by the leaf's own Suess disequilibrium
-# (~1 permil today). WHICH ONE TO ADOPT IS A MODELLING CHOICE AND IS MARCUS'S.
+# (~1 permil today). WHICH ONE TO ADOPT IS A MODELING CHOICE AND IS MARCUS'S.
 # This file implements the first (matching the Ra limb twelve lines above) to
 # MEASURE the size of the effect, and changes nothing in R/ or src/.
 #

@@ -13,10 +13,10 @@
 #   base_pulse  base + the same pulse (the pulse lab's own experiment)
 # METRICS (global = mean of the two hemispheric boxes; GtC per ppm from R/constants.R):
 #   excess remaining  (C(T1) - C_PI) / (C(T0) - C_PI); T0 = 1 Jan ZP_ZERO_YEAR, T1 = T0 + h. C at an instant is
-#                     the 12-month mean CENTRED on it (the seasonal cycle cancels); C_PI = the 1750 annual mean
+#                     the 12-month mean CENTERED on it (the seasonal cycle cancels); C_PI = the 1750 annual mean
 #                     of the base run (the spinup's periodic state).
 #   pulse remaining   annual mean of d(global CO2) over year ZP_PULSE_YEAR + h, divided by the pulse in ppm
-#                     (centred h years after the release-year midpoint, as FaIR's annual mean)
+#                     (centered h years after the release-year midpoint, as FaIR's annual mean)
 # GATES: G1 a zeroing that starts after the run reproduces base bit-identically; G3 every arm equals base before
 # T0 to ZP_CAUSAL_TOL_PPM (see its note); G4 the emissions tables differ from base exactly where intended. No RNG. Run from the repo root:
 #   Rscript calibration/diag_zec_vs_pulse.R
@@ -68,7 +68,7 @@ emis_for <- function(bg, zero_year = NULL, pulse = 0) {
 run <- function(bg, em) app_run_coupled(APP_SPIN, bg, yrs, bg, emissions = em, interp_method = APP_PULSE_EMIS_METHOD,
                                         tol = ZP_TOL)$out
 glob <- function(o) (o$co2_NH + o$co2_SH) / 2
-centred <- function(o, T) mean(glob(o)[o$t >= T - 0.5 & o$t < T + 0.5])     # 12 months centred on T
+centred <- function(o, T) mean(glob(o)[o$t >= T - 0.5 & o$t < T + 0.5])     # 12 months centered on T
 annual  <- function(o, Y) mean(glob(o)[o$t >= Y & o$t < Y + 1])
 
 rows <- list()

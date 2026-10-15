@@ -181,7 +181,7 @@ cat(sprintf("\nGATE 4: peak Delta14C(NH)  DEFAULTS %.0f  PAR-ONLY %.0f  FULL %.0
 # ---- GATE 5: DO THE APP'S OWN TABS AGREE WITH EACH OTHER? ------------
 # Tab 1 (Keeling) runs scenario "historical" -> data/forcing_emissions_historical.rds,
 # the GCB 2025 budget. Tab 5 (Futures) runs ccx_run_coupled() on an SSP ->
-# data/ssp_emissions.rds, whose historical segment is the SSP/LUH2 harmonisation.
+# data/ssp_emissions.rds, whose historical segment is the SSP/LUH2 harmonization.
 # They are DIFFERENT INVENTORIES over the same years, and the app draws both as
 # "the model". This is independent of every parameter above -- it is an
 # emissions-data question -- but it lands on the same CO2 axis a visitor reads,

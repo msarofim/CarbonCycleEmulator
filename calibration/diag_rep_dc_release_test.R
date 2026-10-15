@@ -148,12 +148,12 @@ rt_logpost_for <- function(arm) {
     # ⛔⛔ AN INFEASIBLE POINT IS NOT A MISSING STREAM, AND CONFLATING THE TWO
     # KILLED BOTH DROP ARMS ON THE 09-23 RUN (8 of 16 jobs; ~65 min in, after
     # every gate had passed). `ccx_make_logpost()` returns a BARE -Inf with NO
-    # `streams` attribute whenever the optimiser proposes a vector the spinup
+    # `streams` attribute whenever the optimizer proposes a vector the spinup
     # cannot take -- measured: `k_w`, `h_ml` or `tau_ex` at +60 in unconstrained
     # space all do it, while `kz` at +60 stays finite. With `s` NULL,
     # `setdiff(drop, names(s))` reports EVERY dropped name as absent and the
     # guard below stopped the run.
-    #   infeasible  -> return -Inf, which is what the optimiser is asking for.
+    #   infeasible  -> return -Inf, which is what the optimizer is asking for.
     #   misconfigured -> stop, but only where the question is meaningful: at a
     #                    FEASIBLE point with a streams list that really lacks
     #                    the name (a renamed row would otherwise drop nothing,
@@ -282,11 +282,11 @@ rt_gates <- function() {
                         "so it has no power to show the arm is blind to it")
     if (!ok_blind) stop("GATE DROP: arm ", a, " still responds to the block it claims to drop")
   }
-  # ---- GATE INFEASIBLE: the arms must SURVIVE what the optimiser will do ----
+  # ---- GATE INFEASIBLE: the arms must SURVIVE what the optimizer will do ----
   # ⛔ THE GATE ABOVE ONLY EVER EVALUATES AT u0, WHICH IS FEASIBLE BY
   # CONSTRUCTION -- so it could not see the defect that actually stopped the
-  # 09-23 drop arms 65 minutes into their optimisations. A gate that only tests
-  # the point you already know works has no power over the points the optimiser
+  # 09-23 drop arms 65 minutes into their optimizations. A gate that only tests
+  # the point you already know works has no power over the points the optimizer
   # will invent. [[no_power_null]]
   cat("\n=== GATE INFEASIBLE (an arm must return -Inf, not error, off-support) ===\n")
   for (nm in RT_INFEAS_NAMES) {

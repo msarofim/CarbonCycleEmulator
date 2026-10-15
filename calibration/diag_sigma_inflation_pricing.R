@@ -13,7 +13,7 @@
 #   LOWER(h) = lp_shipped(h) - rows_shipped(h) + rows_inflated(h)   [stored vector]
 #   UPPER(h) = lp_shipped(h) - rows_shipped(h) + ceiling(h)         [density peak]
 #
-# Re-optimising the five free parameters with the rows ON can only RAISE the
+# Re-optimizing the five free parameters with the rows ON can only RAISE the
 # objective above its value at the stored vector, and can never raise a row above
 # its own density peak. So the value sec.6's refit would report lies in
 # [LOWER, UPPER] at every h, and if max UPPER(out) < max LOWER(in) the argmax is

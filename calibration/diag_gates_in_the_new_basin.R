@@ -18,10 +18,10 @@
 #                    `CCX_MODE_CANONICAL`: the canonical file predates three of
 #                    the four stacked objective changes and reproduces its own
 #                    stored logpost only to -42.99, which would misprice the gap
-#                    by 38. A 21-parameter ancestor, MIGRATED and labelled.
+#                    by 38. A 21-parameter ancestor, MIGRATED and labeled.
 #   * new basin   -- the 08-31e polished mode, CONVERGED at -1496.01. 22
 #                    parameters, recorded under the SHIPPED bands, so it carries
-#                    no reparameterisation constant at all.
+#                    no reparameterization constant at all.
 #   * defaults    -- because every DESIGN sec.6 status line quotes a defaults
 #                    value, and it is the only fixed point across both basins.
 #
@@ -124,7 +124,7 @@ nb_gate_roundtrip <- function(lab, p) {
 # this script needs, and the 09-01 `kz` re-bisection made it false for every file
 # on disk, so the gate would have blocked the very re-pricing it guards. The
 # MATCHED comparison below evaluates both `par_mode`s under the ONE live table,
-# so any reparameterisation constant cancels between them whatever the files
+# so any reparameterization constant cancels between them whatever the files
 # record. What the recorded bands actually affect is the meaning of each file's
 # OWN stored logpost, which is reported and gated on by nothing.
 # [[gate_bound_matches_its_claim]].

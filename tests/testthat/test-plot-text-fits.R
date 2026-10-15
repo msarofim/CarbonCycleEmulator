@@ -69,7 +69,7 @@ test_that("0. the size every budget is MEASURED at is the size that RENDERS", {
   # `theme_ccx()` is called BARE at all 31 call sites, so its signature default
   # is the only number that renders. It used to be a literal 13, with a SECOND
   # copy named CCX_BASE_SIZE beside the budgets; tests 3 and 3b measure axis
-  # labels at that copy. Moving the signature alone desynchronised them.
+  # labels at that copy. Moving the signature alone desynchronized them.
   # \u26a0 MEASURED, and not the way the audit note put it: moving CCX_BASE_SIZE
   # alone moved NOTHING (theme_ccx() is complete, so its explicit element sizes
   # win over whatever it is added to). The exposure was the other direction.

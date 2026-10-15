@@ -5,7 +5,7 @@
 #   Arm A -- raw: every other name at the canonical vector (the pump re-solves:
 #            export scales with kz).
 #   Arm B -- LAND-COMPENSATED: at each kz the three land names of the 08-31
-#            recipe (beta_max, fert_k, q10) re-optimised on the full logpost,
+#            recipe (beta_max, fert_k, q10) re-optimized on the full logpost,
 #            every other name held. GATE PK-2g: at kz x 1 the optimum must
 #            reproduce the stored logpost (no improvement on the mode).
 #   PK-3  -- the kz_deep_frac scan, arm A only, at the canonical kz.
@@ -23,7 +23,7 @@ ccx_load_cpp(); source(ccx_path("calibration", "lib_design_gates.R"))
 KS_ARM    <- CCX_MODE_CANONICAL
 KS_KZ_FAC <- c(0.35, 0.5, 0.7, 1, 1.4)            # kz multipliers (log-spaced about 1)
 KS_F_GRID <- c(NA, 0.03, 0.06, 0.089, 0.15)       # kz_deep_frac; NA = the canonical's own (0.0117); 0.089 = the E mode's
-KS_LAND   <- c("beta_max", "fert_k", "q10")       # the 08-31 recipe's re-optimised names (arm B)
+KS_LAND   <- c("beta_max", "fert_k", "q10")       # the 08-31 recipe's re-optimized names (arm B)
 KS_SURF   <- c("kz_deep_frac", "h_ml", "k_w", "bomb_total", "sigma_d14c")   # arm C (amendment A3): + these, at KS_C_FAC only
 KS_C_FAC  <- c(0.5, 0.7, 1)
 KS_C_NM_MAXIT <- 1500; KS_C_BFGS_MAXIT <- 100
@@ -74,7 +74,7 @@ diag_of <- function(pm) {
     d13c_atm = mean(out$d13c_NH[yr == KS_ATM_D13C_YEAR]), ocean = d13(ocean), land = d13(land))
 }
 
-# ---- arm B: re-optimise the land three at a held vector ----------------
+# ---- arm B: re-optimize the land three at a held vector ----------------
 reopt <- function(pm, idx = iland, nm_maxit = KS_NM_MAXIT, bfgs_maxit = KS_BFGS_MAXIT) {
   u <- u_of(pm); f <- function(z) { uu <- u; uu[idx] <- z; x <- -as.numeric(lp(uu)); if (!is.finite(x)) 1e10 else x }
   o1 <- stats::optim(u[idx], f, method = "Nelder-Mead", control = list(maxit = nm_maxit, reltol = 1e-10))

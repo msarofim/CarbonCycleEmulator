@@ -110,7 +110,7 @@ test_that("P0e THE FIELD: sum(S) = E_h exactly, Martin below the ML base, the se
   for (h in HEMIS) {
     S <- aux$pump[[h]]$org + aux$pump[[h]]$carb
     expect_equal(sum(S), 9.08 * aux$a_ls[[h]] / a_tot, tolerance = 1e-12)
-    expect_true(all(S > 0))                                         # a remineralisation field, never a divergence
+    expect_true(all(S > 0))                                         # a remineralization field, never a divergence
     zi <- cumsum(g$dz); Fz <- (zi / zi[1])^(-ccx_const("MARTIN_B"))
     expect_equal(S[1] / sum(S), 1 - Fz[2], tolerance = 1e-12)      # layer 1 takes 1 - F(z_1)
     expect_equal(S[g$nl] / sum(S), Fz[g$nl] , tolerance = 1e-12)   # the bottom layer takes F(z_{nl-1}) - F(z_nl) + F(z_nl)

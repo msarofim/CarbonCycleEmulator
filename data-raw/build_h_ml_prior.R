@@ -15,16 +15,16 @@
 # [30, 200] stays as the box (the transform's support); this prior replaces the
 # flat density inside it.
 #
-# ⭐⭐ RE-CENTRED ON THE ANNUAL MEAN, 2026-09-09w (ruled by Marcus). ROUND 6
+# ⭐⭐ RE-CENTERED ON THE ANNUAL MEAN, 2026-09-09w (ruled by Marcus). ROUND 6
 # BUILT THE SEASONAL MIXED LAYER, so the ambiguity this prior existed to encode
 # is DISCHARGED: with `h_ml` modulated by the Holte MLD cycle, the constant is
 # the annual MEAN and no longer has to stand in for the maximum as well.
-# Keeping the geometric-mean centre after that would be a prior compensating for
+# Keeping the geometric-mean center after that would be a prior compensating for
 # a mechanism the model now has.
 #
 # ⛔ AND IT WAS COSTING STARTS. P8's stopping condition is 76.146 m; under the
-# old centre 61.3 % of the prior lay past it -- ITS MEDIAN 83.94 INCLUDED -- so
-# roughly 3 multistart starts in 5 died at the guard. Re-centring drops that
+# old center 61.3 % of the prior lay past it -- ITS MEDIAN 83.94 INCLUDED -- so
+# roughly 3 multistart starts in 5 died at the guard. Re-centering drops that
 # exposure to 23.8 %.
 #
 # ⚠⚠ THE WIDTH IS DELIBERATELY UNCHANGED, AND THAT IS A FLAGGED CHOICE, NOT A
@@ -39,11 +39,11 @@
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 HP_MLD <- readRDS(ccx_path("data", "obs_mld.rds"))
 h_mean <- HP_MLD$ls$mean_dt$value; h_max <- HP_MLD$ls$max_dt$value
-# CENTRE = the LS annual MEAN, read from the product (not the geometric mean of
+# CENTER = the LS annual MEAN, read from the product (not the geometric mean of
 # the two readings, which was the pre-09-09w ambiguity encoding, kept below for
 # provenance). WIDTH unchanged -- see the flagged choice above.
 centre <- h_mean; log_sd <- log(h_max / h_mean) / 2
-centre_ambiguity <- sqrt(h_mean * h_max)   # the RETIRED centre, 83.94 m
+centre_ambiguity <- sqrt(h_mean * h_max)   # the RETIRED center, 83.94 m
 out <- list(centre_m = centre, log_sd = log_sd,
             centre_basis = "LS annual MEAN (round 6 discharged the mean-vs-max ambiguity, 2026-09-09w)",
             centre_retired_m = centre_ambiguity,

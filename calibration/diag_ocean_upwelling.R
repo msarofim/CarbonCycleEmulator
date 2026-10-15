@@ -26,10 +26,10 @@
 # CCX_PARAM_TABLE's [3830, 6200] bracket was bisected on that column. With a
 # second ventilation pathway present, kz must fall. Part 2 holds the deep age
 # fixed by bisecting kz for every w_up, so the d13C comparison is like-for-like
-# and no part of the answer is bought by re-ageing the deep ocean.
+# and no part of the answer is bought by re-aging the deep ocean.
 #
 # WHAT WOULD MAKE THIS WORTH ADOPTING: the d13C bias closing at w_up in the
-# physical range with k_w AT ITS PRIOR CENTRE, at no cost in CO2, Delta14C or the
+# physical range with k_w AT ITS PRIOR CENTER, at no cost in CO2, Delta14C or the
 # sink partition. Anything less and the mechanism is a second knob, not a fix.
 #
 # PHYSICAL RANGE, and it is a recollection needing a citation before it becomes
@@ -67,7 +67,7 @@
 #    and why the outcrop version is the better-behaved one there (at 4 m/yr:
 #    -108 permil both-hemispheres, -135 SH-only, against -100 for classic UD).
 #    This is what makes the negative result GENERAL rather than one failed
-#    parameterisation: no reversal or rerouting of a closed vertical loop can
+#    parameterization: no reversal or rerouting of a closed vertical loop can
 #    change what the atmosphere sees. Only something that changes the MIXED
 #    LAYER'S OWN budget can -- a second surface box, or the air-sea flux itself.
 #
@@ -250,7 +250,7 @@ for (w in DU_W_GRID) {
 # working corner at all it is at LOW kz -- upwelling can only deliver old water
 # if the top interior layer is not diffusively slaved to the mixed layer -- and
 # that corner is off the contour. This prints the surface so the answer is not
-# an artefact of which slice was taken. Cells are d13C bias / deep D14C.
+# an artifact of which slice was taken. Cells are d13C bias / deep D14C.
 cat("\n== PART 3: d13C bias (permil) and deep-ocean D14C (permil) over the surface ==\n")
 cat("   the current model is the w_up = 0, kz = 5000 cell\n")
 cat(sprintf("   deep D14C inside the observed %g/%g bracket is marked *\n",

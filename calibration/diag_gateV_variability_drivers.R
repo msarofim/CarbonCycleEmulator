@@ -17,7 +17,7 @@
 # ⚠ THE TEMPERATURE KNOCKOUT SMOOTHS, IT DOES NOT HOLD. `ccx_hold_climate()`
 # freezes GMST at one value, which removes the TREND as well and would compare
 # two different climates. What gate V is about is the VARIABILITY, so the
-# temperature channels are replaced by their own G4V_SMOOTH_YR centred means --
+# temperature channels are replaced by their own G4V_SMOOTH_YR centered means --
 # same trend, no interannual wiggle. Both TEMPERATURE columns are treated: `gmst`
 # (the land/feedback path) and `sst_anom_NH/SH` (the ocean solubility path).
 # ⚠ AOD IS NOT A TEMPERATURE CHANNEL HERE. The model has exactly one AOD pathway,
@@ -30,7 +30,7 @@ ccx_load_cpp(); source(ccx_path("calibration", "lib_design_gates.R"))
 
 # ---- labels derive from named constants (project rule) --------------
 G4V_ARM        <- CCX_MODE_CANONICAL
-G4V_SMOOTH_YR  <- 11        # yr, the centred mean that defines "not interannual"
+G4V_SMOOTH_YR  <- 11        # yr, the centered mean that defines "not interannual"
 G4V_T_COLS     <- c("gmst", "sst_anom_NH", "sst_anom_SH")
 G4V_ENSO_PARS  <- c("gamma_enso_land_NH", "gamma_enso_land_SH",
                     "gamma_enso_ocn_NH",  "gamma_enso_ocn_SH")
@@ -43,7 +43,7 @@ dir.create(G4V_OUT, showWarnings = FALSE, recursive = TRUE)
 
 sep <- function(s) cat(sprintf("\n%s\n%s\n%s\n", strrep("=", 74), s, strrep("=", 74)))
 
-# 11-yr centred moving average on a MONTHLY column, ends held (rule = 2 in spirit)
+# 11-yr centered moving average on a MONTHLY column, ends held (rule = 2 in spirit)
 g4v_smooth <- function(x, n_mo) {
   k <- rep(1 / n_mo, n_mo)
   y <- stats::filter(x, k, sides = 2)

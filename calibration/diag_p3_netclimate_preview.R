@@ -8,13 +8,13 @@
 # (ESSD 18:3211 s. 3.7.2; lit note G3). It constrains the greening term AND q10 together, which is why q10 is freed
 # here: the 10-04 (i) analytic P3 held q10 at the canonical's 1.06 (prior z -2.54).
 #
-# AT hilda34g's own lag, the 8-name land block + q10 are re-optimised on [the #15 logpost + the row], every other
+# AT hilda34g's own lag, the 8-name land block + q10 are re-optimized on [the #15 logpost + the row], every other
 # name held. The row is computed from each evaluation's own model vector by br_net_climate() (two more historical
 # runs per evaluation). Cells:
 #   ID   the 9-name block, NO row: a slope check at the mode (the frame's identity gate)
 #   R1   the row, q10 FREE, from the mode: what P3 does
 #   RH   the row with q10 HELD at the canonical's (the 8-name block): the analytic 10-04 (i) P3 (+0.0066), checked
-#   Q    the row with q10 HELD at P3_Q10_PROFILE (the land block re-optimised): what matching GCB's net climate effect
+#   Q    the row with q10 HELD at P3_Q10_PROFILE (the land block re-optimized): what matching GCB's net climate effect
 #        would cost the record. (A literature START at q10 1.4 was smoked first: it sits ~100 whitened units out, at
 #        -4347 on the #15 likelihood with the rest held -- a profile answers the same question for far less.)
 # ⚠ Every cell computes the row from ALL NINE names (the q10 the objective is using), never from the 8-name block.

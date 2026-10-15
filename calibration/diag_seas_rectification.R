@@ -11,9 +11,9 @@
 #
 #   A. ONE LATITUDE, AS IS.  n(t) = I(phi,t) / mean I.  "The hemisphere behaves
 #      like one patch of land at phi, and its productivity tracks the sun angle
-#      there." The residual is accepted as the cost of a one-patch idealisation.
+#      there." The residual is accepted as the cost of a one-patch idealization.
 #
-#   B. RECTIFICATION.  Plants do not photosynthesise in proportion to light --
+#   B. RECTIFICATION.  Plants do not photosynthesize in proportion to light --
 #      below some level (frozen soil, no leaves) they do nothing at all, and the
 #      growing season SWITCHES ON. That off-switch is why phi = 75 ever worked:
 #      polar night supplies one for free. Making it explicit SEPARATES where the
@@ -165,13 +165,13 @@ cat("\nA form that leaves ~100 % of the residual has bought nothing the shape ca
 cat("Each of B1, B2, C adds exactly ONE parameter, so they are directly comparable.\n")
 # ---------------------------------------------------------------------
 # IS FORM C's LATITUDE ACTUALLY DETERMINED? -- the question that decides
-# whether "phi = 75 with the amplitude halved" is a finding or an artefact
+# whether "phi = 75 with the amplitude halved" is a finding or an artifact
 # ---------------------------------------------------------------------
 # C adds a free amplitude, so it MUST beat A; the useful question is whether the
-# residual is sharply minimised at one phi or nearly flat across a wide range.
+# residual is sharply minimized at one phi or nearly flat across a wide range.
 # If it is flat, (phi = 50, A ~ 1.2) is as good as (phi = 75, A ~ 0.5) and the
 # less exotic one wins on every other ground. This profiles C's residual with A
-# re-optimised at EVERY phi, which is the only fair way to read it.
+# re-optimized at EVERY phi, which is the only fair way to read it.
 cat("\n=== FORM C: residual vs phi, with A re-optimised at each phi ===\n")
 for (nm in names(ss$fits)) {
   x <- ss$fits[[nm]]; sgn <- if (x$hemisphere == "NH") 1 else -1

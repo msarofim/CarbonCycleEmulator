@@ -33,7 +33,7 @@
 # ⛔ AND IT IS READ FROM A SETTLED TRANSIENT, NEVER FROM THE SPINUP STATE:
 # the spinup is aseasonal, so at a midwinter step its mixed layer is 1.68x
 # its mean mass while its carbon is still the annual-mean value, and pCO2
-# reads ~138 uatm instead of ~280. That is an initialisation transient, not
+# reads ~138 uatm instead of ~280. That is an initialization transient, not
 # the model's seasonal cycle.
 #
 # Usage:  Rscript calibration/diag_p1c_dpco2_comparison.R

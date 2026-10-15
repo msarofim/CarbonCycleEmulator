@@ -16,7 +16,7 @@
 #            named rows, the MLO-SPO d14C (2001-2007) and the d13C gradient
 #            residual, the SH cold box's d13C, the spinup residual.
 #   Stage 2  ARM C: per k the best RAW W (selection by raw dlik, stated) and
-#            W = 0, re-optimised over {beta_max, fert_k, q10, kz_deep_frac,
+#            W = 0, re-optimized over {beta_max, fert_k, q10, kz_deep_frac,
 #            h_ml, k_w, bomb_total, sigma_d14c} (the PK-2 machinery).
 #   The reject rule (prereg §4) is evaluated and printed; nothing adopted.
 # Usage: Rscript calibration/diag_gthc_martin_probe.R      (GP_SMOKE=1 for a 3-point smoke)
@@ -26,7 +26,7 @@ ccx_load_cpp(); source(ccx_path("calibration", "lib_design_gates.R"))
 GP_ARM     <- CCX_MODE_CANONICAL
 GP_EXPORT  <- ccx_pump_export_prior()$centre_gtc          # 9.08, Nowicki's LS median -- READ, not typed
 GP_W       <- c(0, 5, 10, 15, 20, 30)                      # Sv, ONE global volume
-GP_K       <- c(10L, 8L)                                   # the SH return layer: the bottom; the CDW analogue (1.3-1.9 km)
+GP_K       <- c(10L, 8L)                                   # the SH return layer: the bottom; the CDW analog (1.3-1.9 km)
 GP_LAND    <- c("beta_max", "fert_k", "q10")
 GP_SURF    <- c("kz_deep_frac", "h_ml", "k_w", "bomb_total", "sigma_d14c")
 GP_ARMC    <- c(GP_LAND, GP_SURF)

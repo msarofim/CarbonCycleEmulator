@@ -13,7 +13,7 @@
 #
 # THE SPLICE (the FaIRtoFrEDI "zenodo" variant, the NCC publication basis): own
 # history up to the seam, then the published Zenodo v1.1.1 series VERBATIM, no
-# harmonisation. In CCX "own history" is GCB through its last year, applied at
+# harmonization. In CCX "own history" is GCB through its last year, applied at
 # run time by app_splice_history() (APP_SPLICE_YEAR = the last GCB year). So
 # this file stores the Zenodo series UNMODIFIED, like ssp_emissions.rds, and the
 # seam lives in exactly one place.
@@ -28,7 +28,7 @@
 #   emissions: Zenodo 10.5281/zenodo.20713982 v1.1.1 (2026-06-16), file
 #     data/fair-inputs/emissions_1750-2500.csv in chrisroadmap/cmip7-scenariomip-1.1.1.zip.
 #     ⚠ NOT the DOI printed in van Vuuren et al. 2026 (GMD 19:2627), which resolves to the
-#     stylised v1.0. Taken from FaIRtoFrEDI's PINNED copy (pinned 2026-09-28T14:37Z,
+#     stylized v1.0. Taken from FaIRtoFrEDI's PINNED copy (pinned 2026-09-28T14:37Z,
 #     scripts/pin_inputs.py); the sha256 below is checked, so a different file is an error.
 #   forcing: data-raw/downloads/fair_v160_vv/ from FaIRtoFrEDI/scripts/run_fair_vv_for_ccx.py
 #     (FaIR 2.2.4, calib 1.6.0 prod, 841 configs, ensemble mean); checked against its MANIFEST.

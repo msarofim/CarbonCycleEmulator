@@ -18,7 +18,7 @@
 # script cannot absorb an unpriced drift: a delta that does not match the
 # CHANGELOG's number is refused. The gate is on the STREAMS, not the logpost,
 # because a stored logpost also carries every PRIOR move since the file was
-# fitted (the quarantined hilda31 sits -0.811 behind on the 09-09w re-centring,
+# fitted (the quarantined hilda31 sits -0.811 behind on the 09-09w re-centering,
 # which its streams never saw) -- the same reason edm_crosscheck() pins the
 # streams ([[compare_gaps_not_absolute_logposts]]). The logpost move is printed
 # with that decomposition. The previous streams/logpost go into

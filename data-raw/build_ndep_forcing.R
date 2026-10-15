@@ -30,7 +30,7 @@
 # (DG_YEARS, ruled 2026-09-12; Marcus 2026-10-01: "use the future van Vuuren scenarios for
 # 2025"). In 2025 the seven span -2.85 % .. +1.51 % about that mean (50.886 Tg N/yr on land,
 # 0.25 % below 2024's 51.016).
-# ⚠ SSP SEAM (ruled 2026-09-30, "SSPs ratio-harmonised to the CMIP7 history,
+# ⚠ SSP SEAM (ruled 2026-09-30, "SSPs ratio-harmonized to the CMIP7 history,
 # converging by 2050"): CMIP6's history sits 8.4 Tg N/yr ABOVE CMIP7's at 2014
 # (C, 2026-09-30). Per species, the SSP series after 2023 is multiplied by a ratio
 # that equals CMIP7(2023) / SSP(2023) at 2023 and relaxes LINEARLY to 1 at
@@ -73,7 +73,7 @@ vv <- fread(path.expand(NDEP_VV_PINNED_SRC), header = TRUE)
 rc <- fread(NDEP_RCMIP_FILE, header = TRUE)
 years_out <- NDEP_BASE_YEAR:NDEP_END_YEAR
 
-# van Vuuren: columns "1750.5", ... are annual means labelled at mid-year
+# van Vuuren: columns "1750.5", ... are annual means labeled at mid-year
 vv_series <- function(marker, species) {
   r <- vv[scenario == marker & variable == species & region == "World"]
   if (nrow(r) != 1L) stop("vV: expected one row for ", marker, "/", species, ", got ", nrow(r))
@@ -111,7 +111,7 @@ hist_nox[i_ext] <- apply(hist_of$NOx[i_ext, , drop = FALSE], 1, mean)
 hist_nh3[i_ext] <- apply(hist_of$NH3[i_ext, , drop = FALSE], 1, mean)
 keep_h <- years_out <= NDEP_HIST_RUN_END
 emit[["historical"]] <- dN(hist_nox, hist_nh3)[keep_h]
-# SSPs: CMIP7 history to 2023, then the RCMIP scenario ratio-harmonised to it, ratio -> 1 by 2050
+# SSPs: CMIP7 history to 2023, then the RCMIP scenario ratio-harmonized to it, ratio -> 1 by 2050
 harm <- function(ssp_v, hist_v) {
   i0 <- which(years_out == NDEP_HIST_LAST)
   r0 <- hist_v[i0] / ssp_v[i0]

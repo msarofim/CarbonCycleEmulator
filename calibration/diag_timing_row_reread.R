@@ -8,18 +8,18 @@
 # outputs/diagnostics/obj16_preview_20261004.log): L* 2.75 months (monthly estimator) / 2.90 (annual) at 1x the
 # measured n_eff, against the fitted 2.644. hilda33p is the canonical since 10-06 (a); this re-reads the same
 # quantity there, by the same method:
-#   - at lags L = 1, 2, 3, 4, 5, 6, 8 months the land block is RE-OPTIMISED (lib_block_reopt.R br_cell, the
+#   - at lags L = 1, 2, 3, 4, 5, 6, 8 months the land block is RE-OPTIMIZED (lib_block_reopt.R br_cell, the
 #     10-04 machinery, its own tolerances); the mode's own lag is the identity cell (0 rounds);
-#   - at each L: the existing rows' likelihood, the refit read's s. 6 timing statistics (monthly, centred
+#   - at each L: the existing rows' likelihood, the refit read's s. 6 timing statistics (monthly, centered
 #     12-month growth, 1980-2024 against NOAA MBL), the ANNUAL detrended correlation (the app's estimator),
 #     and the futures (SSP5-8.5 unspliced, vvH spliced, CO2 in 2300);
 #   - the candidate row is -(w/2) log(1 - r^2), w a multiple of the measured n_eff (Bretherton et al. 1999,
-#     J. Climate 12:1990, eq. 31); L* maximises [the profile + the row] on a natural spline through the cells.
+#     J. Climate 12:1990, eq. 31); L* maximizes [the profile + the row] on a natural spline through the cells.
 # DIFFERENCES FROM 10-04, each forced by the canonical, none a choice:
 #   - the block is SEVEN names: npp_tsens is PINNED at 0 in hilda33p (objective #16, P4), so it is held;
 #   - no L = 0 cell: the lag-0 label of #16's structure does not exist (the stratification feedback's label
 #     opens the lag gate); the profile's optimum and every L* sit in [2.6, 5.3], inside the grid.
-# ⛔ A CONDITIONAL preview, as 10-04's was: the block is optimised WITHOUT the row. ADOPTS NOTHING; moves no
+# ⛔ A CONDITIONAL preview, as 10-04's was: the block is optimized WITHOUT the row. ADOPTS NOTHING; moves no
 # stored value; changes no objective. No RNG.
 # Usage: Rscript calibration/diag_timing_row_reread.R   (CCX_TR_WORKERS=<n>, default 4; CCX_TR_SMOKE=1)
 # =====================================================================
@@ -34,7 +34,7 @@ TR_SMOKE    <- identical(Sys.getenv("CCX_TR_SMOKE", ""), "1")
 TR_WORKERS  <- as.integer(Sys.getenv("CCX_TR_WORKERS", "4"))
 TR_MODE     <- CCX_MODE_CANONICAL
 TR_BLOCK    <- c("beta_max", "fert_k", "gamma_enso_land_NH", "gamma_enso_land_SH", "luc_scale", "imb_share_land", "ndep_ret")
-TR_LAGS     <- c(1, 2, 3, 4, 5, 6, 8)                  # months, re-optimised here
+TR_LAGS     <- c(1, 2, 3, 4, 5, 6, 8)                  # months, re-optimized here
 TR_W_MULT   <- c(1, 2, 5, 10)                          # the row's weight in multiples of the MEASURED n_eff
 TR_LAG_OBS  <- 5                                       # the record's growth peak after Nino 3.4 (10-02 x; 10-06 g)
 TR_REC_1004 <- c(monthly = 2.75, annual = 2.90, L_fit = 2.644)   # 10-04 (i) at hilda34g, for the comparison line

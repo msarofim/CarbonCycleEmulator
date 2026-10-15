@@ -4,7 +4,7 @@
 # "Laplace first, MCMC as the check").
 #
 # WHAT. N draws from a multivariate normal in the UNCONSTRAINED (u) space,
-# centred on the canonical's stored mode, with the covariance the mode file
+# centered on the canonical's stored mode, with the covariance the mode file
 # stores (the inverse negative Hessian, calibration/recompute_hessian.R). Each
 # draw is decoded through the file's own transforms and bands, gets the file's
 # NINE HELD values added back, and is run through the FULL NONLINEAR model --
@@ -101,7 +101,7 @@ invisible(ccx_apply_pins(RB_PINS))
 ccx_require_param_set(md, RB_DRIVER)
 invisible(ccx_adopt_mode_band(md))             # the file's h_ml / kz bands, before any decode
 ccx_check_mode_decode(md)                      # GATE: u_mode decodes to the file's own par_mode
-u0 <- ccx_par_to_unc(md$par_mode)              # the Hessian's centre (recompute_hessian.R), not u_mode
+u0 <- ccx_par_to_unc(md$par_mode)              # the Hessian's center (recompute_hessian.R), not u_mode
 fs <- ccx_mode_fit_stats(md)
 Sig <- fs$cov
 stopifnot(isTRUE(fs$pd), identical(names(u0), md$param_names),

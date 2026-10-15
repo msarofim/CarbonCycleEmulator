@@ -437,7 +437,7 @@ test_that("the deep ocean is where GLODAP puts it -- the OBSERVABLE kz stands in
   # target is READ from ccx_deep_d14c_target() rather than retyped -- retyping is
   # exactly how the "-150 to -200" recollection outlived its own evidence
   # ([[derived_must_mean_computed]]).
-  # Harmonised with GATE 5/7/Q/G/S's DG_*_NSD, named here rather than typed twice.
+  # Harmonized with GATE 5/7/Q/G/S's DG_*_NSD, named here rather than typed twice.
   CCX_DEEP_D14C_NSD <- 2
   skip_if_no_cpp()
   tg <- ccx_deep_d14c_target()
@@ -496,10 +496,10 @@ test_that("rho is gone and the parameter vector is self-consistent", {
   # DESIGN sec.6's hard gates. See CCX_PARAM_TABLE$luc_scale and
   # calibration/diag_luc_scale.R.
   #
-  # 17 -> 18 on 2026-08-14 (later): the fertilisation FORM changed. `beta` LEFT
+  # 17 -> 18 on 2026-08-14 (later): the fertilization FORM changed. `beta` LEFT
   # the table and `beta_max` + `fert_k` entered it, so the count moved by one
-  # while the fertilisation block moved from one parameter to two. This is NOT a
-  # reparameterisation -- as fert_k -> Inf, MM goes LINEAR, not logarithmic, so
+  # while the fertilization block moved from one parameter to two. This is NOT a
+  # reparameterization -- as fert_k -> Inf, MM goes LINEAR, not logarithmic, so
   # no substitution carries a `beta` posterior across and any pre-flip posterior
   # in calibration/output/ belongs to a DIFFERENT MODEL. The assertions below
   # guard exactly that, because splicing one in is the plausible mistake.
@@ -523,7 +523,7 @@ test_that("rho is gone and the parameter vector is self-consistent", {
   #
   # 20 -> 19 on 2026-08-15 (review item 6b, Marcus): `sigma_co2` RETIRED. The
   # CO2 level sd is now LIK_CO2_REP_ERR alone -- the half of the old quadrature
-  # that has a receipt (co-located MLO programmes disagree 0.39-0.59 ppm RMS).
+  # that has a receipt (co-located MLO programs disagree 0.39-0.59 ppm RMS).
   # RECORDED, NOT MERELY BUMPED, and the reason matters because it is NOT the
   # one the handoffs gave: the "boundary-pinned / unidentified / bad
   # conditioning" case was measured and failed on all three counts
@@ -533,7 +533,7 @@ test_that("rho is gone and the parameter vector is self-consistent", {
   # the two points measured. The weight change from fixing it is 1.05x, which
   # is asserted separately so this ledger cannot absorb a re-weighting.
   # 19 -> 20 on 2026-08-16d (Marcus): `pump_grad` FITTED, the biological pump's
-  # magnitude. Its prior is centred on the OBSERVED gradient (`PUMP_GRAD_OBS`),
+  # magnitude. Its prior is centered on the OBSERVED gradient (`PUMP_GRAD_OBS`),
   # not on the 274.5 the four-row objective prefers, because that optimum is
   # conditional on a `kz` the refit will move. Fitted rather than fixed because
   # the profile and the degeneracy check both cleared it: rho(pump_grad, kz) =
@@ -589,16 +589,16 @@ test_that("rho is gone and the parameter vector is self-consistent", {
                tolerance = 1e-12)
   expect_false("sigma_co2" %in% CCX_PARAM_NAMES)
   expect_true(all(c("grad_off_co2", "grad_off_d13c") %in% CCX_PARAM_NAMES))
-  # both are shrinkage priors CENTRED AT ZERO -- centring them on the measured
+  # both are shrinkage priors CENTERED AT ZERO -- centering them on the measured
   # offsets would tell the model the answer and then credit it for agreeing
-  # npp_frac_NH's centre is a CONSTANT and its `init` is a literal, because
+  # npp_frac_NH's center is a CONSTANT and its `init` is a literal, because
   # R/calibrate.R sources before R/constants.R. That is exactly the drift risk
   # this file exists to close: if the anchor is ever re-derived (a new NPP
   # product, a materially different luc_scale) and the literal is not, the
   # prior's mode and its starting point would disagree silently.
   expect_equal(CCX_PARAM_TABLE$npp_frac_NH$init,
                ccx_const("NPP_FRAC_NH_ANCHOR_1750"), tolerance = 1e-12)
-  # ...and the prior really is centred there, not merely started there.
+  # ...and the prior really is centered there, not merely started there.
   a <- ccx_const("NPP_FRAC_NH_ANCHOR_1750")
   expect_gt(CCX_PARAM_TABLE$npp_frac_NH$prior(a),
             CCX_PARAM_TABLE$npp_frac_NH$prior(a + 0.01))
@@ -606,7 +606,7 @@ test_that("rho is gone and the parameter vector is self-consistent", {
             CCX_PARAM_TABLE$npp_frac_NH$prior(a - 0.01))
   # The anchor is NOT the observation -- it is the observation walked back to
   # 1750 through hemispheric clearing, so it must sit ABOVE the modern share.
-  # An equality here would mean someone centred the prior on the wrong quantity.
+  # An equality here would mean someone centered the prior on the wrong quantity.
   expect_gt(a, ccx_const("NPP_FRAC_NH_OBS"))
   expect_lt(a - ccx_const("NPP_FRAC_NH_OBS"), 0.05)
   expect_equal(CCX_PARAM_TABLE$grad_off_co2$init,  0)
@@ -646,7 +646,7 @@ test_that("rho is gone and the parameter vector is self-consistent", {
   # re-bisection moved `kz$hi` to 8109.9, and the reason it failed is that it was
   # never a test of the model.
   #
-  # ⭐ THE RULING, AND IT GENERALISES: "the only tests that matter are the ones
+  # ⭐ THE RULING, AND IT GENERALIZES: "the only tests that matter are the ones
   # against observations or physics." `kz` is NOT directly observed. The
   # deep-ocean Delta14C IS. This line bounded the SUPPORT OF A LATENT PARAMETER
   # and justified itself by naming an observation -- "the range that keeps
@@ -669,7 +669,7 @@ test_that("rho is gone and the parameter vector is self-consistent", {
   # where the bottom box is set by K_deep = kz_deep_frac * kz and the conduit,
   # not by `kz` alone. The three assertions that stood here --
   #   lo >= 3500; hi < 10686 (the 17-parameter runaway); init = the arithmetic
-  #   centre --
+  #   center --
   # were all statements about a column in which `kz` alone set the deep. On
   # the structure at f = 0.05, kz = 10686 puts the bottom box at ~+0.9 sigma:
   # the deep row does not reject the runaway through `kz` alone any more, it
@@ -678,7 +678,7 @@ test_that("rho is gone and the parameter vector is self-consistent", {
   # is that the SHIPPED box IS the k = 3 sigma bisection on the structure
   # (calibration/diag_kz_bracket_hilda36.R -- a product this table did not
   # write, [[gate_reads_its_own_output]]), and that init is its GEOMETRIC
-  # centre (the arithmetic centre of a 24x box is 2.3x the working arm).
+  # center (the arithmetic center of a 24x box is 2.3x the working arm).
   # =================================================================
   bis <- tryCatch(readRDS(ccx_path("outputs", "diagnostics", "kz_bracket_hilda36_20260906.rds")),
                   error = function(e) NULL)
@@ -702,7 +702,7 @@ test_that("rho is gone and the parameter vector is self-consistent", {
 test_that("the ocean excess-14C term is PRESENT in the standard pipeline", {
   skip_if_no_cpp()
   # The term skips itself if the run does not start at the spinup year, which is
-  # the right behaviour but also a silent way to lose a constraint. This asserts
+  # the right behavior but also a silent way to lose a constraint. This asserts
   # that under the configuration the calibration actually uses, it is scored.
   f <- lik_fixture()
   parts <- ccx_loglik(f$out, f$obs, f$err, by_stream = TRUE)
@@ -754,7 +754,7 @@ test_that("the shared method error is rank one, not per-year quadrature", {
   expect_gt(e$Sigma[1, 2], 0)
   expect_equal(e$Sigma[1, 2], e$rep[1] * e$rep[2], tolerance = 1e-12)
   expect_equal(diag(e$Sigma), e$half_width^2 + e$rep^2, tolerance = 1e-12)
-  # a correlated pair penalises a COMMON offset less than an opposing one
+  # a correlated pair penalizes a COMMON offset less than an opposing one
   quad <- function(r) drop(crossprod(r, e$prec %*% r))
   expect_lt(quad(c(10, 10)), quad(c(10, -10)))
 })
@@ -825,7 +825,7 @@ test_that("the term HOLDS kz at the chosen sigma -- decision 1's whole basis", {
   # a 3-sigma box to the bisection's own tolerance (0.5 m2/yr on kz), and not narrower than 2.9
   expect_lt((hi - lo) / 2, 3 * tg$sd * (1 + 1e-3))
   expect_gt((hi - lo) / 2, 2.9 * tg$sd)
-  expect_lt(abs(0.5 * (hi + lo) - tg$target), 0.05 * tg$sd)   # centred on the target
+  expect_lt(abs(0.5 * (hi + lo) - tg$target), 0.05 * tg$sd)   # centered on the target
 })
 
 test_that("the deep term is absent without `deep`, Gaussian with it", {
@@ -839,7 +839,7 @@ test_that("the deep term is absent without `deep`, Gaussian with it", {
   with_deep <- function(v) ccx_loglik(f$out, f$obs, f$err, deep = v, by_stream = TRUE)
   parts <- with_deep(tg$target)
   expect_true("d14c_deep_ocean" %in% names(parts))
-  # at the target the term is the Gaussian normalisation alone
+  # at the target the term is the Gaussian normalization alone
   expect_equal(unname(parts[["d14c_deep_ocean"]]),
                stats::dnorm(0, 0, tg$sd, log = TRUE), tolerance = 1e-10)
   # quadratic: a 2-sigma miss costs 4x a 1-sigma miss
@@ -913,7 +913,7 @@ test_that("the retired h_ml gate is GONE: the rows are scored at every h_ml", {
     expect_equal(unname(r$g$h_ml), h, tolerance = 1e-9)
   }
   # sigma_eff is never below sigma_obs, and is LARGER outside the retired band
-  # than at its centre -- that is the whole content of "representation error".
+  # than at its center -- that is the whole content of "representation error".
   tg <- ccx_ocean_gradient_target()
   se <- function(h) vapply(c("dic", "d13c", "alk"), ccx_ocean_sigma_eff,
                            numeric(1), h_ml = h)

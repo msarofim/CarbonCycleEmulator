@@ -157,7 +157,7 @@ test_that("the ocean gains exactly what the atmosphere loses", {
   expect_equal(max(abs(dd[other, ])), 0)
 
   # SPLIT ON OCEAN AREA, not on the fossil share -- the split is the difference
-  # between an ocean uptake and a relabelled emission.
+  # between an ocean uptake and a relabeled emission.
   sh_NH <- s$aux$asx$NH / (s$aux$asx$NH + s$aux$asx$SH)
   expect_equal(dd[ml[["NH"]], "C"], SINK_TEST_RATE * sh_NH, tolerance = 1e-12)
   expect_false(isTRUE(all.equal(sh_NH, FORC_FOSS_NH_SHARE, tolerance = 1e-3)))

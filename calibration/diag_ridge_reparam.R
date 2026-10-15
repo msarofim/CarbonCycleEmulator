@@ -34,7 +34,7 @@
 #     same code. GATE 2 below asserts the two arms DIFFER.
 #
 # THE OBJECTIVE STAYS BIT-IDENTICAL AND ONLY THE SEARCH COORDINATES CHANGE.
-# Reparametrising by editing CCX_PARAM_TABLE would change the PRIOR (a different
+# Reparametrizing by editing CCX_PARAM_TABLE would change the PRIOR (a different
 # transform carries a different Jacobian), so a "faster" result could just be an
 # easier problem. Nothing here touches CCX_PARAM_TABLE, R/ or src/; instead
 #     lp2(v) = lp(u_of_v(v))
@@ -67,7 +67,7 @@ RR_TAG      <- Sys.getenv("CCX_RR_TAG", "")   # separates one campaign's files f
 # ⚠ THIS LADDER IS A SET OF ABSOLUTE logpost LEVELS, AND WIDENING THE BAND MOVES
 # THEM. Written under h_ml ~ U[85, 120]; on the shipped support the SAME vector
 # scores lower by exactly log(170/35) = 1.5805 -- the whole shift is h_ml's
-# uniform prior being renormalised over a 4.857x wider support, nothing physical.
+# uniform prior being renormalized over a 4.857x wider support, nothing physical.
 # (That constant is the same -1.5805 the 08-28 handoff reports as "the bounded
 # refit's narrowed-prior constant, exactly".) Leaving the ladder as typed would
 # compare post-adoption logposts against pre-adoption thresholds and silently
@@ -120,7 +120,7 @@ u_of_v <- function(v) {
 # difference would be step scale rather than geometry. RR_OFFSET translates the
 # enh coordinate so that at the start it equals the beta_max coordinate
 # NUMERICALLY. A translation cannot change the geometry -- it only makes the two
-# optimisers see identical starting vectors, so the initial simplex is identical
+# optimizers see identical starting vectors, so the initial simplex is identical
 # in every slot and what remains is decorrelation alone.
 RR_OFFSET <- 0     # set per start in worker mode
 v_of_u <- function(u) {

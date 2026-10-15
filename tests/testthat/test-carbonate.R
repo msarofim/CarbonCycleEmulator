@@ -48,7 +48,7 @@ test_that("Revelle factor matches seacarb and rises with DIC", {
 
   ours <- revelle_factor(dic_vals, alk, T)
 
-  # seacarb reference: centred difference on its own full solver
+  # seacarb reference: centered difference on its own full solver
   step <- dic_vals * 1e-4
   p1 <- carb(flag = 15, var1 = alk, var2 = dic_vals - step, S = 34.7, T = T, P = 0,
              k1k2 = "l", kf = "pf", pHscale = "T", b = "u74")$pCO2

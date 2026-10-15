@@ -15,7 +15,7 @@ set -euo pipefail
 # any variable of that name. This script never READ $PROJ after the source, so
 # it had no live bug; it is renamed because the same shape in multistart.sbatch
 # wrote a whole survey round into another project's tree on 2026-09-01, and a
-# convention that holds in one file and not its neighbour is not a convention.
+# convention that holds in one file and not its neighbor is not a convention.
 CCX_PROJ_DIR=/scratch/ms17839/CarbonCycleEmulator
 readonly CCX_PROJ_DIR
 cd "$CCX_PROJ_DIR"

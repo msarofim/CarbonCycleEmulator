@@ -1,6 +1,6 @@
 # =====================================================================
 # diag_luc_arm_ridge_confound.R -- IS THE `luc` ARM'S rep_dC RESULT CONFOUNDED
-#                                  WITH THE FERTILISATION RIDGE?  (2026-08-25)
+#                                  WITH THE FERTILIZATION RIDGE?  (2026-08-25)
 #
 # 08-24c's headline: the `luc` arm -- a persistent mid-century sink carrying
 # ocean-scale isotopes -- moved `rep_dC` by -5.014 sd, which was read as support
@@ -20,7 +20,7 @@
 # in the arm and it is in the direction that controls rep_dC.
 #
 # THE DECOMPOSITION. Three cells, all with the sink OFF, all other coordinates
-# at the REFERENCE mode, rep_dC conditionally optimised in each (exact: it
+# at the REFERENCE mode, rep_dC conditionally optimized in each (exact: it
 # enters only the station terms, additively):
 #
 #   A  reference mode                      -- rep_dC = 5.566, by construction

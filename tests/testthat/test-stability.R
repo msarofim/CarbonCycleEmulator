@@ -113,7 +113,7 @@ test_that("the auto substep count is accurate, not merely stable", {
 # (B) the K profile re-evaluated on the moved grid. Together these under-read the
 # stiffness the integrator meets: at the #15 wave's start 017 (h_ml 74.44) 426/yr
 # against 730/yr. RK4 ran at z = 4.06 against its 2.785 limit for ~10 days a
-# year, and the objective there was integrator artefact (+273.2; CHANGELOG
+# year, and the objective there was integrator artifact (+273.2; CHANGELOG
 # 10-03 j and 10-04 a, calibration/diag_seasml_substep_controller.R). Each test
 # below holds the fix with a MUTATION: `ss_pre_20261004()` puts the old bound back
 # and must fail. The thresholds are this file's own accuracy bar (the test above)

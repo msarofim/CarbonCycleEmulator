@@ -169,12 +169,12 @@ for (i in seq_along(o)) {
               r$minutes, clk[j], r$kind))
 }
 
-# ---- the verdict's BOUND, READ FROM THE OPTIMISER THAT PRODUCED THESE --
+# ---- the verdict's BOUND, READ FROM THE OPTIMIZER THAT PRODUCED THESE --
 # ⛔ THIS USED TO BE A HARDCODED 1e-8, AND 1e-8 IS THE WRONG KIND OF BOUND HERE.
 # 1e-8 is right for the PORT GATE, whose claim is an EVALUATION IDENTITY: one
 # fixed point, two machines, agree to floating point or the port is broken. The
-# verdict's claim is different -- it compares two OPTIMISER OUTPUTS, and no
-# optimiser promises its output to 1e-8. So on 2026-09-01 it printed
+# verdict's claim is different -- it compares two OPTIMIZER OUTPUTS, and no
+# optimizer promises its output to 1e-8. So on 2026-09-01 it printed
 #   "4 dispersed starts did NOT reach the best re-converged known basin"
 # for a difference of -0.0000 (about 1e-6): a FALSE VERDICT, in the one line a
 # reader takes away, from a bound that did not match its claim
@@ -182,7 +182,7 @@ for (i in seq_along(o)) {
 # that memory.
 # ⇒ The bound is the driver's OWN convergence criterion, `MS_CYCLE_TOL`: a start
 # is declared CONVERGED when a whole cycle gains less than this, so two finals
-# closer than it are, BY THIS OPTIMISER'S OWN STANDARD, not distinguishable.
+# closer than it are, BY THIS OPTIMIZER'S OWN STANDARD, not distinguishable.
 # It is READ from the start files [[recorded_but_never_restored]], PRINTED with
 # the verdict, and disagreement across files is a hard error rather than a
 # quietly-picked winner.

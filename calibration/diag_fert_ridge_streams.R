@@ -1,8 +1,8 @@
 # =====================================================================
 # diag_fert_ridge_streams.R -- WHICH LIKELIHOOD STREAM REJECTS A STRONGLY
-#                              SATURATING FERTILISATION?  (2026-08-25)
+#                              SATURATING FERTILIZATION?  (2026-08-25)
 #
-# diag_fert_ridge_gates.R found that travelling along the (beta_max, fert_k)
+# diag_fert_ridge_gates.R found that traveling along the (beta_max, fert_k)
 # ridge to STRONG saturation, at fixed present-day NPP enhancement, fixes three
 # structural gates at once:
 #
@@ -23,7 +23,7 @@
 #       case the model has a real internal contradiction to report;
 #   (b) a stream is over-weighted or mis-specified, in which case the objective
 #       is wrong and the gates are right;
-#   (c) the cost is an artefact of freezing 19 other parameters, in which case
+#   (c) the cost is an artifact of freezing 19 other parameters, in which case
 #       only a refit settles it (memory ccx_seas_q10_ridge: beta_max/fert_k
 #       absorbed 85 % of exactly this kind of frozen cost for q10 -- but here
 #       those two are the ones being MOVED, so that particular absorber is

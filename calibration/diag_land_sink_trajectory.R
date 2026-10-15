@@ -11,7 +11,7 @@
 # CO2 paths differ; the windows are printed for orientation, not as a gate.
 #
 # Hypotheses: H1 the design cannot flip (no permafrost, etc.); H2 it can, but
-# the FIT's weak q10 (~1.10) and strong fertilisation keep it a sink.
+# the FIT's weak q10 (~1.10) and strong fertilization keep it a sink.
 #   B1  the land trajectory at the stored v0k mode and the fixed-stock tau-500
 #       control (what the model does now);
 #   B2  the control with q10 forced to LS_Q10 (FROZEN: nothing else moves);
@@ -23,11 +23,11 @@
 #       <= 2 can overcome (a flip needs q10^(dT/10) > NPP/NPP0). LS_FERT is the
 #       09-28 (c) literature-band point (1.34, 580; notes/lit_2026-09-28_co2_
 #       fert_saturation.md), a HYPOTHESIS from mostly-GPP evidence.
-#   B4  the fertilisation-profile rows ((beta_max, fert_k) pinned in the 09-28 c
+#   B4  the fertilization-profile rows ((beta_max, fert_k) pinned in the 09-28 c
 #       band, 9 names REBALANCED incl. q10; diag_fert_profile.R), if
 #       LS_FERT_PROFILE exists (added 2026-09-30).
 # If B2 at q10 2.0 does not flip by 2300, H1 holds for this structure AT THE
-# FITTED FERTILISATION; B2f says whether it holds at the literature's. B3 says
+# FITTED FERTILIZATION; B2f says whether it holds at the literature's. B3 says
 # what the record charges for the q10 that would.
 # NET land flux = d(land_C)/dt (land_C includes the LUC debit, R/model.R ~1174),
 # i.e. NBP-like. Also reported: E_LUC-free "natural" flux is NOT separated here.
@@ -59,7 +59,7 @@ LS_FREE   <- c("beta_max", "fert_k", "luc_scale", "q10", "seas_T_amp_NH", "seas_
 LS_SCEN   <- c("ssp585", "vvH", "vvL")
 LS_SPLICE <- c(ssp585 = FALSE, vvH = TRUE, vvL = TRUE)
 LS_END    <- 2300L
-LS_RUNMEAN <- 11L                               # yr; centred running mean for the onset test
+LS_RUNMEAN <- 11L                               # yr; centered running mean for the onset test
 LS_ONSET_FROM <- 2030L
 LS_WINDOWS <- list(c(2015L, 2100L), c(2100L, 2200L), c(2200L, 2300L))   # Koven 2022's reporting windows
 LS_ID_V0K <- 1388.3; LS_ID_TOL_V0K <- 0.05; LS_ID_TOL_CTRL <- 1e-6

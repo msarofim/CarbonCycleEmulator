@@ -1,7 +1,7 @@
 # =====================================================================
 # plots.R -- one ggplot theme and one palette for the whole app.
 #
-# Every colour and label here is a named constant. Changing what a series MEANS
+# Every color and label here is a named constant. Changing what a series MEANS
 # without changing its label is the recurring bug this guards against.
 # =====================================================================
 
@@ -426,7 +426,7 @@ plot_seasonal <- function(out, obs, window = c(2000, 2024)) {
 # GATE 7 already scores against (`dg_annual_sinks()` adds `eluc` back the same
 # way): the LAND SINK is the residual terrestrial uptake EXCLUDING land-use
 # emissions, so land-use carbon appears once, on the emitted side. The three
-# terms then sum to TOTAL emissions, which is the budget a reader recognises.
+# terms then sum to TOTAL emissions, which is the budget a reader recognizes.
 #
 # ⚠ `land_gross` keeps the raw pool change, because the two are different
 # quantities and a caller that wants the actual land stock must not silently
@@ -595,7 +595,7 @@ NOTE_LUC_SPLIT <- paste("The split into clearing and regrowth is asserted from t
 #' the drawn data does.
 plot_luc_gross_split <- function(split, window) {
   # Marcus 2026-10-02 (carbotopecomment): "Delete the pre-1959 part of the chart" -- the chart
-  # starts where the bookkeeping split is OBSERVED, so the back-extended years (and the grey
+  # starts where the bookkeeping split is OBSERVED, so the back-extended years (and the gray
   # "assumed" shading below, which only drew for them) never appear.
   window[1] <- max(window[1], split$obs_window[1])
   h <- split$historical
@@ -644,7 +644,7 @@ LAB_IMB_Y     <- "Residual land sink (GtC per year)"
 IMB_DECADE_MIN_N <- 10L   # a LEADING bin shorter than this is dropped; see app_imbalance_decades()
 IMB_BAND_SHORT <- paste("The band is an extreme attribution \u2014 all of the budget's unplaced",
                         "carbon assigned to land \u2014 not an uncertainty range.")
-# Marcus 2026-10-02 (carbotopecomment), his two sentences (British "grey", as the app).
+# Marcus 2026-10-02 (carbotopecomment), his two sentences ("gray" since the app went to U.S. spelling, 2026-10-15).
 IMB_BAND_NOTE <- paste("The gray band represents the GCB estimate plus the budget imbalance.",
                        "Note that the budget imbalance could also be attributed to the ocean",
                        "or to an error in emissions estimates.")
@@ -669,7 +669,7 @@ IMB_BAND_NOTE <- paste("The gray band represents the GCB estimate plus the budge
 #'     3.2-3.4e-14, CHANGELOG 09-24 (i) lines 715/718) -- a different statement
 #'     about a different equation. THIS decomposition's closure is that table's
 #'     `num` column, -0.006 GtC/yr, about 2 % of the +0.32 it explains. Quoting
-#'     the neighbouring identity's exactness for this one overstated it by 12
+#'     the neighboring identity's exactness for this one overstated it by 12
 #'     orders of magnitude.
 #' ⇒ app_imbalance_identity() below COMPUTES all of it, and the panel's prose
 #' prints what it returns, so neither error can recur by retyping.
@@ -821,7 +821,7 @@ app_imbalance_decades <- function(out, gcb, F) {
   # 1959, so a plain decade bin makes a "1950s" row out of ONE year, whose mean is
   # that year and whose containment verdict is noise. The trailing bin is kept
   # because the current partial decade is the interesting one -- it is the record's
-  # only real excursion -- and it is labelled by its actual span, not "2020s".
+  # only real excursion -- and it is labeled by its actual span, not "2020s".
   # This is the binning CHANGELOG 2026-09-24 (k) used; it is made explicit here.
   if (nrow(s) > 1L && s$n[1] < IMB_DECADE_MIN_N) s <- s[-1L, , drop = FALSE]
   s$lo   <- pmin(s$obs, s$obs + s$imbal)
@@ -862,10 +862,10 @@ NOTE_CMAP <- NULL   # set from APP_CMAP_NOTE at call time; see plot_constraint_m
 #' near zero = it would not.
 #'
 #' ⛔⛔ A SHARE OF A SMALL ROW IS NOT A FINDING, which is why this draws the
-#' MAGNITUDE and prints each row's total beside it rather than normalising rows to
+#' MAGNITUDE and prints each row's total beside it rather than normalizing rows to
 #' 100 %. `CO2 ice core` is 31.6 % "held by" the seasonal cycle and the whole row
 #' is worth ~11 log-units against `CO2 level`'s ~340; a row-share heatmap would
-#' have drawn those two the same colour.
+#' have drawn those two the same color.
 #'
 #' ⚠ SEQUENTIAL SINGLE HUE, deliberately. A magnitude with a meaningful zero and
 #' no meaningful midpoint takes a sequential ramp, and a single-hue ramp needs no
@@ -1114,10 +1114,10 @@ plot_growth_rate <- function(base, alt = NULL, obs = NULL, yr_range = c(1960, 20
 # about the climate rather than about the archive.
 #
 # \u26d4 NO SECOND Y-AXIS AND NO RESCALING. The four drivers carry four different
-# units and this panel draws exactly one of them at a time, labelled with its
+# units and this panel draws exactly one of them at a time, labeled with its
 # own. Overlaying them on a shared axis -- the obvious "show all three at once"
 # reading of the comment -- would put GtC/yr, degrees C and a dimensionless
-# optical depth on one scale, where the only honest normalisation is z-scores
+# optical depth on one scale, where the only honest normalization is z-scores
 # and those hide the thing the panel exists to show (a driver going to zero).
 DRIVER_KEPT_NOTE <- paste("This switch leaves the driver alone \u2014 the two lines are",
                           "identical. What it removes is the model's response to it.")
@@ -1156,7 +1156,7 @@ plot_driver <- function(drv, yr_range, label = "Mechanism off") {
 #' \u26d4 EXTRACTED 2026-09-24 (F2) BECAUSE IT WAS WRITTEN THREE TIMES -- here,
 #' in `output$c_growth_note` (app/server.R) and in the F3 diagnostic. The
 #' residual numbers F2 adds must be measured against EXACTLY the series the
-#' panel draws, and three hand-copies of an annualisation is how that stops
+#' panel draws, and three hand-copies of an annualization is how that stops
 #' being true without anything failing. One definition, used by both.
 #'
 #' Partial first/last years are dropped (`n == 12`): a year with 7 months in it
@@ -1174,7 +1174,7 @@ app_annual_growth <- function(o) {
 #'
 #' \u26d4\u26d4 IT IS NOT GCB's `atm_growth`, AND THAT IS THE WHOLE POINT. GCB's
 #' number is NOAA's published `co2_gr_gl`, a JAN-TO-JAN difference of the
-#' deseasonalised global series; `app_annual_growth()` differences ANNUAL MEANS.
+#' deseasonalized global series; `app_annual_growth()` differences ANNUAL MEANS.
 #' Comparing them is not like-for-like, and it is not a small effect: on NOAA's
 #' own two products of the same global CO2 the annual difference has sd 0.389
 #' ppm/yr and max 0.950. It does not bias the model's RMS (0.397 either way) --
@@ -1307,7 +1307,7 @@ plot_pulse_partition <- function(base, pulse, pulse_gtc, pulse_year,
   # ⭐ THE TAGGED PANEL (Marcus 2026-10-12, "Side by side in pulse lab"): the SAME pulse, its own
   # atoms tagged with 14C (R/c14_tag.R), on the same axes, so the two answers sit side by side.
   # Its closure is CONSERVATION of the tag with decay undone (~1e-9 from first principles), so it
-  # is a check and not a normalisation, exactly as the left panel's.
+  # is a check and not a normalization, exactly as the left panel's.
   resid_tag <- NA_real_
   if (!is.null(tag)) {
     tp <- ccx_tag_partition(tag$out, pulse, tag$tag)
@@ -1455,9 +1455,9 @@ plot_d14c <- function(out, obs, yr_range) {
 #' ⭐ WHY A FaIR LINE BELONGS HERE. This emulator's climate module is FITTED to
 #' FaIR (841-config ensemble mean), so FaIR is the thing it is trying to
 #' reproduce. Showing it makes the emulation error visible instead of asserted.
-#' ⛔ AND WHY IT IS DASHED AND SHARES THE SCENARIO'S COLOUR: the reader must be
+#' ⛔ AND WHY IT IS DASHED AND SHARES THE SCENARIO'S COLOR: the reader must be
 #' able to pair each emulator line with its reference at a glance and must never
-#' mistake one for the other. A separate colour per FaIR line would double the
+#' mistake one for the other. A separate color per FaIR line would double the
 #' legend and break the pairing; a solid line would make them interchangeable.
 #' ⚠ THE TWO ARE NOT LIKE-FOR-LIKE BEFORE 2024: the emulator's runs are SPLICED
 #' onto the observed carbon budget (app_splice_history) and FaIR's are not, so a
@@ -1484,7 +1484,7 @@ plot_future <- function(runs, yvar, ylab, view = NULL, fair = NULL, bands = NULL
   fair <- crop(fair)
   bands <- crop(bands)
   # ⚠ ONE LEVEL SET FOR LINE AND BAND: each band must wear its own scenario's hue,
-  # so `who` is a factor with the lines' levels in both frames and the colour and
+  # so `who` is a factor with the lines' levels in both frames and the color and
   # fill scales are ONE scale (aesthetics = both). A band whose label matched no
   # line would otherwise train a hue of its own and repaint the survivors.
   lev <- unique(d$who)
@@ -1589,12 +1589,12 @@ plot_pulse_decay <- function(base_cl, pulse_cl, pulse_year, pulse_gtc, tag = NUL
 #' 2026-09-24: the pre-pulse difference is NOT zero, and the clip is hiding a
 #' real defect rather than a definitional one. `ccx_annual_to_monthly()`
 #' interpolates annual emissions with a NATURAL SPLINE, which is global, so a
-#' one-year pulse rings backwards through its neighbours -- up to 3.06 ppm of
+#' one-year pulse rings backwards through its neighbors -- up to 3.06 ppm of
 #' CO2 and 0.003 degC appear in the 26 years BEFORE the release, alternating in
-#' sign. That is acausal and it is an artefact of the interpolator.
+#' sign. That is acausal and it is an artifact of the interpolator.
 #' ⛔ The clip is kept because drawing it would invite the reader to interpret
 #' ringing as physics, but it is NOT a fix and must not be described as one.
-#' calibration/diag_pulse_spline_ringing.R measures both the artefact and its
+#' calibration/diag_pulse_spline_ringing.R measures both the artifact and its
 #' consequence: the answers the tab actually quotes move by 0.05 percentage
 #' points at +100 yr, so the numbers stand and the defect is presentational.
 #' The fix is Marcus's call -- it lives either in the model's forcing path or
@@ -1638,7 +1638,7 @@ plot_pulse_warming <- function(base_cl, pulse_cl, pulse_year, pulse_gtc, fair = 
 
 
 #' The box diagram ("Under the hood"). ARROWS CARRY THEIR FLUXES (2026-08-13):
-#' unlabelled arrows were the single biggest pedagogical gap in the app -- the
+#' unlabeled arrows were the single biggest pedagogical gap in the app -- the
 #' entire "CO2 only lasts 5 years" lesson is that photosynthesis and air-sea
 #' exchange are ~70 and ~95 GtC/yr while emissions are ~11 and the net imbalance
 #' ~5, and an arrow without a number cannot say that. Numbers come from the
@@ -1673,7 +1673,7 @@ fmt_gtc <- function(x) sprintf("%s GtC", format(round(x), big.mark = ","))
 # widths -- the wrap is computed from the size, and the size is what annotate()
 # is handed, so the measured thing and the drawn thing cannot disagree.
 # 2026-10-15 (Marcus: "Make the text a little bigger"): every diagram size up ~12 %, and the panel 330 -> 440 px.
-DIAGRAM_NOTE_SIZE      <- 3.45  # ggplot `size` (mm) of the grey footnote
+DIAGRAM_NOTE_SIZE      <- 3.45  # ggplot `size` (mm) of the gray footnote
 DIAGRAM_NOTE_SIZE_BOLD <- 3.6   # ...and of the bold one beneath it
 DIAGRAM_ARROW_SIZE     <- 3.25  # the flux labels on the arrows (was 2.9)
 DIAGRAM_BOX_SIZE       <- 3.8   # the box names (was 3.4)
@@ -1733,7 +1733,7 @@ plot_box_diagram <- function(fx, stock, p, n_layers = 10L, scale = 1) {
   # air). It leaves BOTH land pools (pro rata, ccx_luc_pool_shares()), so it is ONE arrow rising from between the
   # two land boxes, and the footnote says which pools it comes out of.
   # 2026-10-15 LAYOUT (Marcus: legibility). Every label is anchored at `pos` along its own arrow (0 = tail,
-  # 1 = head) and pushed off it by hj / vj, so a label can be slid away from a neighbour without moving the arrow.
+  # 1 = head) and pushed off it by hj / vj, so a label can be slid away from a neighbor without moving the arrow.
   arrows_df <- rbind(data.frame(
     x    = c(1.75, 1,   3,   2.62, 4.95, 2.0, 2.0),
     xend = c(1,    3,   2.25, 4.55, 2.62, 2.0, 2.0),

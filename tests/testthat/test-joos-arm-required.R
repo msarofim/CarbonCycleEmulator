@@ -4,7 +4,7 @@
 # ⛔ WHY. Until 2026-09-27 a bare run silently meant "defaults" -- the
 # UNCALIBRATED table, pulse AF@100 0.445 against the shipped model's 0.307 --
 # while JOOS_SRC named the truth 180 lines above the verdict. The 08-31f fix
-# made an UNRECOGNISED argument an error and left the ABSENT one silent, though
+# made an UNRECOGNIZED argument an error and left the ABSENT one silent, though
 # its own comment already said "absence must ASSERT".
 #
 # ⚠ Text-level, on purpose: running the driver takes minutes, and what must not

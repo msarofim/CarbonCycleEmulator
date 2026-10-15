@@ -28,7 +28,7 @@
 #     mutation-tests itself. ⚠ The first version of this driver varied SST alone on a zero-coefficient
 #     guard that could not see the L2 limb; the CO2-effect control's wrong-signed sink exposed it.
 #   - GMST, AOD and N deposition stay HISTORICAL in both, and the land (which also reads ENSO) is
-#     neutralised by the prescribed CO2 below: a CO2 difference cannot reach the ocean.
+#     neutralized by the prescribed CO2 below: a CO2 difference cannot reach the ocean.
 #   - A_p: the protocol's pre-transient climate from the run start (1750) to t_r, historical after.
 #     C_p: the protocol's normal year from 1750 on. Both leave the periodic spinup at the same instant,
 #     so the step onto the normal year is common to both and cancels in A - C (CHECK 2).
@@ -66,7 +66,7 @@
 #   emissions, the ocean leaves the orbit at 2.4e-3 GtC/yr, 11x the gate's tolerance.
 #   ⭐ RULED (Marcus 2026-10-05: "Held + spun-up lag, both shown"):
 #   - THE HEADLINE holds GMST in C, because a GOBM's climate-held run has no climate-driven stratification change.
-#   - T_deep is INITIALISED at each run's own pre-transient GMST (the spec's mean): an ocean spun up under its
+#   - T_deep is INITIALIZED at each run's own pre-transient GMST (the spec's mean): an ocean spun up under its
 #     normal year, as the GOBMs are. The naive hold (T_deep from 0 at 1750) differed by 0.0003 GtC/yr at FESOM.
 #   - The GMST-HISTORICAL TWIN is printed beside every protocol and in the ensemble. There the feedback acts alike
 #     in A and C, so it measures SST + ENSO in a weakened ocean: the definition every OFF mode's number has.
@@ -410,7 +410,7 @@ k <- OC_SERIES_YRS >= OC_WIN[1] & OC_SERIES_YRS <= OC_WIN[2]
 cat(sprintf("  %d-%d: %+.4f | %+.4f%s (the window's annual means; the table's rate uses year-boundary interpolation)\n", OC_WIN[1], OC_WIN[2],
             mean(ens_ser[k]), mean(ens_sers[k]), if (OC_MIX) sprintf(" | %+.4f", mean(ens_serh[k])) else ""))
 
-# ---- CHECKS 1-4: is a 2x gap an implementation artefact? ------------------------------------------------
+# ---- CHECKS 1-4: is a 2x gap an implementation artifact? ------------------------------------------------
 cat("\n=== CHECK 1. CHEMISTRY: d ln pCO2 / dT at fixed DIC and ALK (Takahashi 1993's 0.0423 /K) ===\n")
 CHEM <- t(vapply(OC_CHEM_T, function(T) { p0 <- pco2_from_dic(OC_CHEM_DIC_ALK[["dic"]], OC_CHEM_DIC_ALK[["alk"]], T)
   p1 <- pco2_from_dic(OC_CHEM_DIC_ALK[["dic"]], OC_CHEM_DIC_ALK[["alk"]], T + 1); c(T = T, pco2 = p0, dlnp_dT = log(p1 / p0)) }, numeric(3)))

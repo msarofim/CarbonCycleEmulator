@@ -384,7 +384,7 @@ CCX_MODE_PINNED <- c(hilda31w = TRUE, hilda29e = TRUE, hilda33p = TRUE, hilda34g
 # 2026-09-17 (h): the shim pin + the six names INERT under hilda_c / the solved
 # field. They are pinned so that the fitted set is the canonical's 30 (the
 # driver refuses a free w_eq/gamma_eq without the cell); their values are the
-# table's off-state / prior centres and move nothing in the model.
+# table's off-state / prior centers and move nothing in the model.
 # 2026-09-19 (j): + the layer-2 limb's `w_enso_l2` at 0 -- absent under hilda_c
 # (k_l2 = 0), pinned so the ENSO-seeded starts and the encoder never see a free
 # name the structure does not read (the 09-17 l seed defect). Eight pins, 30 free.
@@ -1082,7 +1082,7 @@ ccx_check_mode_decode <- function(md = CCX_MODE_CANONICAL, tol = 1e-8) {
   # a PINNED file (2026-09-13) carries the build's set MINUS its pins, and every
   # name it does carry is in the table, so it decodes on its own names
   # ... and a file lacking only CCX_PARAM_ABSENT_OK names (2026-09-13i) decodes
-  # on the names it carries; ccx_unc_to_par() honours a partial named u.
+  # on the names it carries; ccx_unc_to_par() honors a partial named u.
   if (!ccx_mode_carries_build(md))
     stop("this mode file was fitted on a DIFFERENT parameter set (",
          length(.nm), " names vs this build's ", length(CCX_PARAM_NAMES),

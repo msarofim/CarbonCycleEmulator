@@ -43,7 +43,7 @@
 # repair as the disease, and the tempting response (narrow the pattern until it
 # goes quiet) would have narrowed it past the case it exists to catch.
 # \u26a0 QUOTE-AWARE, not a bare sub("#.*"): a `#` inside a string is content, and
-# app/ui.R carries hex colours ("#C4315F"). Cut at a `#` only where an EVEN number
+# app/ui.R carries hex colors ("#C4315F"). Cut at a `#` only where an EVEN number
 # of double quotes precedes it, i.e. where it is not inside a string literal.
 # ⛔ THE STRIPPER MOVED to helper-code-lines.R on 2026-09-25, when a third gate
 # needed it. It was defined here and byte-alike in test-imbalance-panel.R; one

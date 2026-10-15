@@ -1,11 +1,11 @@
 # =====================================================================
 # diag_hygiene_refit_read.R -- THE HYGIENE-BATCH REFIT READ (the Mac wave of
 # 2026-09-16 22:31 -> 09-17 09:19; 24 starts, 23 CONVERGED + 1 out of time;
-# collector: 3 basins, the top two 0.45 log-units apart, inside the optimiser's
+# collector: 3 basins, the top two 0.45 log-units apart, inside the optimizer's
 # 0.5 convergence bound). Reads, in the order handoff_2026-09-16f §2.5 asks:
 #   gcb_land_sink and what paid (beta_max / q10 / fert_k / the CO2-level rows);
 #   kz under the every-box D14C rows; h_hs under its Holte prior; u_hs at the
-#   converted centre; gates 7 / H / GL / Q (+ S); sst_seas_amp_SH's z.
+#   converted center; gates 7 / H / GL / Q (+ S); sst_seas_amp_SH's z.
 # Arms, each scored LIKE-FOR-LIKE under its own structure + spinup:
 #   canonical  hilda30c, restamped under objective #12, on ITS OWN struct (hilda);
 #              section 0 proves it reproduces its stored streams before it is read
@@ -29,7 +29,7 @@ HR_B1 <- 20L; HR_B1_TWIN <- 1L; HR_B2 <- 2L; HR_B3 <- 23L
 HR_OUT  <- ccx_path("outputs", "diagnostics", sprintf("hygiene_refit_read_%s", format(Sys.Date(), "%Y%m%d")))
 HR_REPRO_TOL <- 1e-3
 HR_SST_SH_OBS <- 1.746     # the obs SH SST seasonal amplitude the shim stood in for (INDEX_ccx: 1.288 +- 0.188 fitted, 2.4 sigma off)
-HR_UHS_CENTRE <- 27.3      # m/yr, the u_hs prior centre converted at the LIVE hs_frac (handoff 09-16 f)
+HR_UHS_CENTRE <- 27.3      # m/yr, the u_hs prior center converted at the LIVE hs_frac (handoff 09-16 f)
 HR_GROUPS <- list(co2_level = "^co2_level_|^co2_icecore", co2_seasonal = "^co2_seasonal_", d13c_level = "^d13c_level_", d13c_seasonal = "^d13c_seasonal_",
                   gradients = "gradient", bomb_d14c = "^d14c_(NH|SH)$", d14c_profile = "^d14c_profile_", excess_c14 = "excess", gcb_sinks = "^gcb_", ocean_deep = "^ocean_grad_", hs_surface = "^hs_surf_")
 HR_NAMES <- c("beta_max", "fert_k", "q10", "kz", "kz_deep_frac", "h_hs", "u_hs", "h_ml", "sst_seas_amp_NH", "sst_seas_amp_SH", "pump_hs_gcm2", "pump_grad",

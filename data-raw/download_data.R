@@ -251,7 +251,7 @@ fetch("gcb_hist",
 
 # THE GCB 2025 SUPPLEMENT (2026-10-06, Marcus: "Do the H2 diagnostic and test"). Its Fig. S10 (PDF page 70)
 # is the GOBM ensemble's ocean-sink CLIMATE effect (sim A - C), 1959-2024 -- the only published time series
-# of it; data-raw/build_gcb2025_s10_ocean_climate.R digitises the global panel. It is also the file the
+# of it; data-raw/build_gcb2025_s10_ocean_climate.R digitizes the global panel. It is also the file the
 # like-for-like ocean diagnostic's protocol table was read from (calibration/diag_ocean_climate_gobm.R
 # OC_SUPP_MD5 = 93a7e289fb61849d31a0163ddbec8f45, md5 of THIS file). CC-BY 4.0.
 fetch("gcb2025_supplement",
@@ -368,7 +368,7 @@ fetch("nino34_cpc_v5",
 # want of a measurement: 1991-2020 is densely observed, which is where two ERSST
 # versions should agree BEST. This file is that measurement -- v6 through the
 # SAME extraction the v5 grid goes through.
-# ⭐ IT ANSWERS A SECOND QUESTION AT THE SAME TIME. A centred 30-yr ONI base for
+# ⭐ IT ANSWERS A SECOND QUESTION AT THE SAME TIME. A centered 30-yr ONI base for
 # 1948 needs SST from 1933; nina34.data starts in 1948, so the rolling base
 # clips its 6 earliest scored blocks -- exactly where the mean-state offset is
 # largest -- and `roll`'s price is only a LOWER bound. v6 reaches 1850.

@@ -4,7 +4,7 @@
 # tested by tests/testthat/test-ms-deadline.R.
 #
 # WHY. The 10-04 (a) substep fix makes evaluations near the P8 h_ml wall 25-75x dearer, and the driver sizes
-# each optimiser step BEFORE it starts: `optim()` cannot be interrupted from inside, so a step that drifts to
+# each optimizer step BEFORE it starts: `optim()` cannot be interrupted from inside, so a step that drifts to
 # the wall overruns its projection unseen (the k_w price arm's start 7: one restart 250 min for 6,002 evals,
 # 7.6x; memory ccx_substep_fix_slows_nearwall_starts). On the Mac that costs one restart; under a hard SLURM
 # wall it kills the task with the restart's progress unwritten.
@@ -14,10 +14,10 @@
 # tracked best as the step's result. Nelder-Mead's best vertex and BFGS's iterates and gradient probes are all
 # evaluated points, so nothing better than the tracked best is lost -- only the simplex's or the quasi-Newton
 # matrix's state is.
-# ⭐ BEHAVIOUR-PRESERVING WHEN NO DEADLINE IS REACHED: the wrapper returns the same values in the same order, so
+# ⭐ BEHAVIOR-PRESERVING WHEN NO DEADLINE IS REACHED: the wrapper returns the same values in the same order, so
 #   `optim()` takes the identical path (test-ms-deadline D2 asserts identical()).
-# ⚠ The two SIZING helpers below are deliberate behaviour changes, ruled with option A (proposal §3): a restart's
-#   minutes are normalised by the evaluations it actually made, and the polish is sized from the observed rate.
+# ⚠ The two SIZING helpers below are deliberate behavior changes, ruled with option A (proposal §3): a restart's
+#   minutes are normalized by the evaluations it actually made, and the polish is sized from the observed rate.
 #
 # ⭐ THE BUDGET'S CLOCK (CHANGELOG 2026-10-05 o; Marcus, D1 "CPU on Mac, wall on Torch (Recommended)", D2 "Keep
 # 300 CPU-min (Recommended)"). Every budget reading and every deadline goes through ms_clock(), and nothing else
@@ -75,7 +75,7 @@ ms_clock_mix_note <- function(clocks, ids) {
 ms_deadline_condition <- function(msg = "the optimiser step's deadline has passed")
   structure(class = c("ms_deadline", "error", "condition"), list(message = msg, call = NULL))
 
-#' The mutable state of the CURRENT optimiser step: the clock its deadlines are read on, its deadline (seconds
+#' The mutable state of the CURRENT optimizer step: the clock its deadlines are read on, its deadline (seconds
 #' on that clock; Inf = none) and the best point evaluated in it. One environment, shared by the wrapper and
 #' ms_run_step(). The driver derives its budget origin and every deadline from `$clock`, so they cannot disagree.
 ms_step_state <- function(clock = "wall") {
@@ -93,13 +93,13 @@ ms_check_deadline <- function(state) {
   invisible(NULL)
 }
 
-#' Called by the objective wrapper AFTER it evaluates (val = the minimised value)
+#' Called by the objective wrapper AFTER it evaluates (val = the minimized value)
 ms_track_best <- function(state, u, val) {
   if (val < state$best_val) { state$best_val <- val; state$best_u <- u }
   invisible(NULL)
 }
 
-#' One optimiser step under a deadline. `val0` is the minimised value at u0, returned only when the deadline
+#' One optimizer step under a deadline. `val0` is the minimized value at u0, returned only when the deadline
 #' passed before the step evaluated anything. Any OTHER error propagates unchanged.
 #' Returns optim()'s list plus `deadline` (TRUE = stopped at it; then only par, value and deadline are set).
 ms_run_step <- function(state, u0, val0, fn, method, control, deadline) {
@@ -124,17 +124,17 @@ ms_run_step <- function(state, u0, val0, fn, method, control, deadline) {
 #' line search on "no change" (`10 + X[i] == 10 + b[i]` for all i) and returns that `b`, NEVER EVALUATED, beside
 #' Fmin = f(X), ~1e-16 away (20 / 20 seeded synthetic runs, outputs/diagnostics/obj18_vmmin_synthetic.log). On an
 #' objective with a ~1e-6..1e-5 numerical floor that is a floor-sized lie: #18's id 13 was stopped DEAD on it
-#' (CHANGELOG 2026-10-08 a). Re-evaluating keeps the optimiser's PATH untouched (it already returned `par`) and makes
+#' (CHANGELOG 2026-10-08 a). Re-evaluating keeps the optimizer's PATH untouched (it already returned `par`) and makes
 #' (par, value) a pair by construction, so the end-of-run identity check can be EXACT. One evaluation per step.
 #' @param step ms_run_step()'s result (par, value)
-#' @param fn the objective the step minimised (the driver's neg_lp: counted, penalty-mapped, deadline-free outside a step)
+#' @param fn the objective the step minimized (the driver's neg_lp: counted, penalty-mapped, deadline-free outside a step)
 #' @return list(par, value = fn(par), claimed = step$value, gap = value - claimed)
 ms_kept_pair <- function(step, fn) {
   v <- fn(step$par)
   list(par = step$par, value = v, claimed = step$value, gap = v - step$value)
 }
 
-#' A restart's minutes NORMALISED to a full `maxit_full` restart, by the evaluations it actually made (not the
+#' A restart's minutes NORMALIZED to a full `maxit_full` restart, by the evaluations it actually made (not the
 #' planned maxit: a Nelder-Mead step that stops early on reltol, or at the deadline, made fewer). NULL when it
 #' made none, so the caller appends nothing.
 ms_restart_minutes <- function(minutes, maxit_full, evals) {
@@ -154,13 +154,13 @@ ms_polish_maxit <- function(left_min, n_par, sec_per_eval, restart_min, maxit_fu
 
 #' The restarts' OBSERVED seconds per evaluation, on the budget's clock: the slowest restart (what the polish and
 #' maxit_for_budget() size on, so the printed rate IS the sizing rate) and the fastest. `restart_min` holds
-#' ms_restart_minutes() values, i.e. minutes NORMALISED to a full `maxit_full` restart, so one restart's rate is
-#' 60 x restart_min / maxit_full and the normalisation cancels. NULL when no restart ran.
+#' ms_restart_minutes() values, i.e. minutes NORMALIZED to a full `maxit_full` restart, so one restart's rate is
+#' 60 x restart_min / maxit_full and the normalization cancels. NULL when no restart ran.
 #' ⚠ REPLACES (2026-10-06, Marcus: "Fix eval-rate line (Recommended)") the driver's end-of-run
-#'   60 x sum(restart_min) / n_eval, which divided NORMALISED minutes by an eval count that includes the polish's
+#'   60 x sum(restart_min) / n_eval, which divided NORMALIZED minutes by an eval count that includes the polish's
 #'   and the start's. It was wrong in BOTH directions: 0.0333 s/eval printed against a true 0.2935 (10-05 q smoke
 #'   T1: one 202-eval restart at maxit 200 in a 1763-eval task; the driver had measured 0.2945 before it), and
-#'   32.8 against 1.149 (T3's wall arm: one 210-eval restart normalised to maxit 6000). test-ms-deadline D9.
+#'   32.8 against 1.149 (T3's wall arm: one 210-eval restart normalized to maxit 6000). test-ms-deadline D9.
 ms_eval_rate_sec <- function(restart_min, maxit_full) {
   if (!length(restart_min) || !(max(restart_min) > 0)) return(NULL)
   c(slowest = 60 * max(restart_min) / maxit_full, fastest = 60 * min(restart_min) / maxit_full)

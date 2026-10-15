@@ -122,7 +122,7 @@ APP_PARAM_META <- list(
   # drafted 2026-10-01 for Marcus's review (app text is his).
   # ndep_ret: Marcus 2026-10-01 (review 10-01c B4): "If it is a gross rate, then
   # name it that." It is: the flux ndep_ret x deposition enters soil_slow and
-  # part of it is respired back, so the fitted 10.19 is GROSS while the realised
+  # part of it is respired back, so the fitted 10.19 is GROSS while the realized
   # NET is ~7.0 kg C/kg N (1990-2023). The draft's "stored" read as net.
   ndep_ret             = list(desc = "Gross carbon uptake per unit of nitrogen deposited on land",
                               unit = "kg C per kg N"),

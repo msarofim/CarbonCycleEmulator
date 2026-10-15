@@ -13,8 +13,8 @@
 #      Reports corr, that threshold, and the least-squares amplitude a* (a* < 0.5 => adding x at
 #      full strength RAISES the RMS even though x is "right" in part).
 #   T2 TIMING. (a) Shift the index the model reads by k months (k > 0 = the model responds LATER)
-#      and re-run. (b) Monthly cross-correlation of observed and modelled growth with Nino 3.4,
-#      on a centred 12-month difference that is identical for both.
+#      and re-run. (b) Monthly cross-correlation of observed and modeled growth with Nino 3.4,
+#      on a centered 12-month difference that is identical for both.
 #   T3 LAND vs OCEAN. The land term alone (the pre-10-02 switch: gamma_enso_* = 0, the ocean still
 #      reading the index) against the ocean's ENSO channels (the rest of the index-zeroed effect).
 #   T4 AMPLITUDE. The index scaled by s.
@@ -39,7 +39,7 @@ SCALES     <- c(0, 0.5, 1, 1.5, 2, 3)                                 # multipli
 LAGS       <- -6:18            # months; > 0 = the index LEADS the growth rate
 TREND_DF   <- 5L               # natural-spline df removing the multi-decadal trend in T2(b)
 BOOT_N     <- 2000L            # T5 resamples
-BOOT_BLOCK <- 3L               # years per block (ENSO's ~3-7 yr quasi-period keeps neighbours dependent)
+BOOT_BLOCK <- 3L               # years per block (ENSO's ~3-7 yr quasi-period keeps neighbors dependent)
 SEED       <- 20261002L        # T5 only; set IMMEDIATELY before the bootstrap's sample.int calls
 OBS_WEEKLY <- file.path("data-raw", "downloads", "mbl_zonal_co2_GL.txt")
 # the date AND the mode the app loaded (2026-10-03): the 10-02 run's stem was a typed date, so a re-run
@@ -78,7 +78,7 @@ full    <- run_F(F0)
 off_app <- app_run_mechanisms("enso")$out            # the app's switch, exactly as the readout runs it
 r_app   <- app_growth_residuals(APP_HIST$out, off_app, APP_OBS_GROWTH, WIN)
 f_full  <- fit(full); f_off <- fit(off_app)
-# GATES: this script must be measuring the readout's numbers, not a neighbour of them.
+# GATES: this script must be measuring the readout's numbers, not a neighbor of them.
 d_full <- max(abs(f_full$g - fit(APP_HIST$out)$g))
 stopifnot(d_full < 1e-6,
           abs(f_full$rms - r_app$full$rms) < 1e-6, abs(f_off$rms - r_app$alt$rms) < 1e-6)

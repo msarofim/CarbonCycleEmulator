@@ -43,7 +43,7 @@ test_that("the name ships OFF (k_l2 = 0), the label sets the two constants from 
   s <- CCX_PARAM_TABLE$w_enso_l2
   expect_identical(s$tr, "logit"); expect_identical(c(s$lo, s$hi), c(0, 60))
   expect_identical(s$prior(5), s$prior(55)); expect_identical(s$prior(61), -Inf)   # FLAT (ruling R3)
-  expect_equal(s$init, sqrt(14 * 25), tolerance = 1e-2)                          # the bracket's geometric centre
+  expect_equal(s$init, sqrt(14 * 25), tolerance = 1e-2)                          # the bracket's geometric center
   expect_true("w_enso_l2" %in% CCX_PARAM_NAMES); expect_true("w_enso_l2" %in% CCX_PARAM_ABSENT_OK)
   expect_identical(which(CCX_PARAM_NAMES == "w_enso_l2"), which(CCX_PARAM_NAMES == "w_thc") + 1L)   # appended after w_thc
   expect_true("hilda_cl2" %in% CCX_STRUCT_LABELS)

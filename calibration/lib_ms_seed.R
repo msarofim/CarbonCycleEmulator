@@ -14,8 +14,8 @@
 # ⭐ SO THE FIX IS TWO RULES, AND NEITHER IS A LIST OF PINNED CASES:
 #   (1) A SEED TARGETS ONLY NAMES IN THE FITTED SET (`free`), and whether it SEEDED is read off the ENCODED vector:
 #       a slot whose encoded start is identical() to its reference's is UNSEEDABLE under this arm. The driver then
-#       runs that id as a DISPERSED DRAW, labelled UNSEEDABLE with the reason (RULED: "an unseedable seeded slot
-#       becomes a dispersed draw, labelled as such"). The label names what LANDED and what was DROPPED, and it is
+#       runs that id as a DISPERSED DRAW, labeled UNSEEDABLE with the reason (RULED: "an unseedable seeded slot
+#       becomes a dispersed draw, labeled as such"). The label names what LANDED and what was DROPPED, and it is
 #       built in the same branch that moves the value, never typed beside it.
 #   (2) NO TWO STARTS OF AN ARRAY ARE ONE VECTOR. Every task -- the preflight included -- compares its own start
 #       with every FIXED start that needs no draw and STOPS on an identical() one, naming both ids. Two dispersed

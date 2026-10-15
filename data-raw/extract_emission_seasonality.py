@@ -180,7 +180,7 @@ def extract_fossil(hemi_map):
 
 
 # ---------------------------------------------------------------------
-# Country -> hemisphere. A GEOGRAPHIC JUDGEMENT, so it is explicit and
+# Country -> hemisphere. A GEOGRAPHIC JUDGMENT, so it is explicit and
 # auditable rather than buried in a lookup nobody reads. Only countries with a
 # meaningful SOUTHERN share are listed; everything else defaults to NH, and the
 # unmapped mass is printed above so the default cannot hide a large emitter.

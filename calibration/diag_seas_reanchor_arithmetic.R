@@ -6,7 +6,7 @@ CCX_PARAM_TABLE$h_ml$lo <- md$hml_bound[1]; CCX_PARAM_TABLE$h_ml$hi <- md$hml_bo
 CCX_PARAM_TABLE$h_ml$prior <- local({b<-md$hml_bound; function(x) dunif(x,b[1],b[2],log=TRUE)})
 
 # DAMPING as sec.2 proposes it, applied to BOTH land amplitude priors -- the
-# bracket ends scale, so the lognormal's centre scales and its WIDTH does not.
+# bracket ends scale, so the lognormal's center scales and its WIDTH does not.
 DAMP <- md$par_mode$seas_T_amp_NH * log(md$par_mode$q10) / log(2.0) /
         ccx_const("SEAS_T_AMP_NH_OBS_LO")
 mk <- function(damp) {

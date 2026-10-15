@@ -70,9 +70,9 @@ MC_OVERDISP   <- 2                                      # start = u0 + MC_OVERDI
 # posterior has no mass there, so a start past the wall is redrawn from the SAME stream, up to MC_START_MAX_DRAWS, and the
 # count is recorded. A chain whose first draw is finite starts exactly as before (hilda29e's chains are unchanged).
 MC_START_MAX_DRAWS <- 50L
-MC_EPS        <- 1e-8                                   # Haario's regulariser, u-space units^2
+MC_EPS        <- 1e-8                                   # Haario's regularizer, u-space units^2
 MC_LP_TOL     <- CCX_REPRO_TOL                          # the mode reproduces its stored logpost. RULED (Marcus 2026-10-13: "Use CCX_REPRO_TOL (Recommended)"; CHANGELOG 2026-10-13 o); was 1e-5, measured diff 0
-# A copy that is not a checkout cannot stamp itself, so its commit is SUPPLIED, and labelled as
+# A copy that is not a checkout cannot stamp itself, so its commit is SUPPLIED, and labeled as
 # supplied: on Torch the copy is make_bundle.sh's tar of the working tree, not a git archive.
 MC_COMMIT <- if (nzchar(mc_arg("commit", ""))) paste(mc_arg("commit", ""), "(supplied by --commit: the running copy is not a checkout)") else
   ccx_git_stamp()

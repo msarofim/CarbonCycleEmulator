@@ -15,7 +15,7 @@
 #     whether that estimator reproduces gate 9's decadal table. If it does, the
 #     term is nearly free; if it does not, the term needs its own estimator.
 #  2. THE OBSERVATIONAL ERROR ON THE GRADIENT, measured from the two independent
-#     programmes in the repo rather than assumed. This is a FLOOR on the sigma.
+#     programs in the repo rather than assumed. This is a FLOOR on the sigma.
 #  3. WHETHER THE MODEL'S MISS IS AN OFFSET OR A SCALING. A two-box model's
 #     NH-box minus SH-box is NOT the same quantity as MLO minus SPO -- MLO at
 #     19.5 N is not the northern hemisphere's mean. If the miss is a constant
@@ -102,7 +102,7 @@ cat("refuses to call that a year, so the term never sees it.\n")
 
 # ---------------------------------------------------------------------
 sep("PART 2. THE OBSERVATIONAL ERROR ON THE GRADIENT -- MEASURED, NOT ASSUMED")
-# Two independent programmes measure these sites. Their disagreement about the
+# Two independent programs measure these sites. Their disagreement about the
 # GRADIENT is a floor on any sigma the term can be given: no model can be asked
 # to reproduce a quantity more precisely than the observations define it.
 #
@@ -224,7 +224,7 @@ if (mode_ok) {
   # produced on 2026-08-15 under the CONSTANT land-use share; running its
   # parameters through the time-varying forcing gives a hybrid that is neither
   # the fitted model nor a refitted one. Both are reported so the reader can see
-  # which part of the mode's gradient behaviour is its parameters and which is
+  # which part of the mode's gradient behavior is its parameters and which is
   # the input change it was never fitted against.
   cat("\nat the MAP MODE, on the 5b (time-varying-share) forcing")
   cat("  -- NOTE: the mode was FITTED under the constant share; see below\n")

@@ -3,10 +3,10 @@
 #                            BUDGET ERROR.  (2026-08-25)
 #
 # handoff_2026-08-25 sec.5 nominated GCB's own `imbalance` column as the
-# successor programme for `rep_dC`: it integrates to 37.8 ppm over 1850-2024,
+# successor program for `rep_dC`: it integrates to 37.8 ppm over 1850-2024,
 # 56 % of it lands before 1959, and it is scored NOWHERE. Section 6 then made
 # G1 the FIRST step, because the whole shape has a competing generator that
-# costs nothing to test and, if true, shrinks the programme by more than half.
+# costs nothing to test and, if true, shrinks the program by more than half.
 #
 # THE COMPETING GENERATOR IS IN GCB'S OWN HEADER. The historical sheet states
 # that the methods before 1959 differ from the 1959-onwards budget, and that
@@ -38,7 +38,7 @@
 #
 #  T2 PRICE THE STEP AS A CUMULATIVE. A step is only interesting if it moves
 #     the 44.66 GtC. Two arithmetics are reported: the naive constant-offset
-#     one (upper bound, and labelled as such) and T3's backcast.
+#     one (upper bound, and labeled as such) and T3's backcast.
 #
 #  T3 BACKCAST THE POST-SEAM OCEAN SINK INTO THE PRE-SEAM ERA. A constant
 #     offset is the wrong counterfactual -- a diagnostic model at a lower CO2
@@ -64,7 +64,7 @@
 #     the 1940s decadal atm_growth is 0.334 -- i.e. the pre-1959 imbalance peak
 #     sits exactly on the 1940s CO2 plateau the 08-23/08-24 arc spent six
 #     refits on. Report what fraction of the pre-1959 cumulative lives in that
-#     window, so the successor programme cannot silently re-inherit the arc
+#     window, so the successor program cannot silently re-inherit the arc
 #     that was just de-ranked.
 #
 # Usage:  Rscript calibration/diag_gcb_seam_1959.R

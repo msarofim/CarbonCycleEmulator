@@ -32,7 +32,7 @@ for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 SP_SRC       <- ccx_path("outputs", "diagnostics", "so_pco2_amplitude_20260909.rds")
 SP_OUT       <- ccx_path("data", "obs_so_pco2_seas_amp.rds")
 SP_BAND      <- "SO 40-90S"                 # GATE S's own band label
-SP_HEMI      <- "SH all (0-90S)"            # the cancelling row, kept as a warning
+SP_HEMI      <- "SH all (0-90S)"            # the canceling row, kept as a warning
 SP_ESTIMATOR <- "magnitude of mean harmonic vector, area-weighted, month centres"
 SP_PRODUCER  <- "calibration/diag_so_pco2_amplitude.R"
 

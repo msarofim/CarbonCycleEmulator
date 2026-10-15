@@ -45,7 +45,7 @@ PL_Q5_RSPO    <- 0.05                      # r_SPO improves by <= 5 % without re
 PL_THETA_NEED <- 164.8                     # 29c, at the CMIP6 gross
 PL_OBS_TOTAL <- 1.168; PL_OBS_LAND <- 0.683; PL_OBS_OCEAN <- 0.522
 PL_A_SHIP  <- ccx_const("SEAS_NPP_AMP_SH")
-PL_A_CMIP6 <- 0.94                         # ⚠ DIAGNOSTIC ONLY (Marcus authorisation 1)
+PL_A_CMIP6 <- 0.94                         # ⚠ DIAGNOSTIC ONLY (Marcus authorization 1)
 PL_SEAS_ROWS <- c("co2_seasonal_MLO", "co2_seasonal_SPO",
                   "d13c_seasonal_MLO", "d13c_seasonal_SPO")
 PL_NH_ROWS   <- c("co2_seasonal_MLO", "d13c_seasonal_MLO")

@@ -58,7 +58,7 @@ for (a in KS_ARMS) { Ta <- T[T$arm == a & T$kzx == 1 & is.finite(T$lik), ]; kb <
   cat(sprintf("  %s: export crosses the literature %.1f GtC/yr at kz_deep_frac ~ %s; the unrefitted likelihood peaks at frac %g (%+.1f vs canonical); there step1 %+.1f (canonical %+.1f), deep d13C %+.2f (obs +0.47), below 1000 m %.2f GtC/yr\n", a, KS_EXPORT_LIT,
               if (any(Ta$export >= KS_EXPORT_LIT) && any(Ta$export < KS_EXPORT_LIT)) sprintf("%.3f", stats::approx(Ta$export, Ta$frac, xout = KS_EXPORT_LIT, ties = "ordered")$y) else if (all(Ta$export >= KS_EXPORT_LIT)) "below the scan (every arm exports more)" else "above the scan",
               Ta$frac[kb], Ta$lik[kb] - base[["lik"]], Ta$step1[kb], base[["step1"]], Ta$deep_d13c[kb], Ta$below1000[kb])) }
-# THE ARITHMETIC (computed, not typed): how much remineralised carbon a DIFFUSIVE deep can return.
+# THE ARITHMETIC (computed, not typed): how much remineralized carbon a DIFFUSIVE deep can return.
 # Martin puts ~14 % of the export below 1000 m; Nowicki's 10.2 GtC/yr over the LS area's share gives the
 # flux that must come back up through K(1000 m). The observed deep DIC excess below 1000 m (GLODAP shape:
 # (1 - shape(1000)) x pump_grad) over the remaining depth is the gradient available to carry it.

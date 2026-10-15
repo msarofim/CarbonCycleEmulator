@@ -4,7 +4,7 @@
 # Restore gate 5's sub-checks"; audit notes/audit_2026-10-02_design_vs_build.md B6, B7, C4, C5).
 #   GATE 7  the target is GCB + the arm's OWN D3 shares x I(t), as the objective scores it; an arm
 #           with no shares gets bare GCB, unchanged.
-#   P7      the OFF arm is the SAME fitted vector with the seasonal mixed layer relabelled off,
+#   P7      the OFF arm is the SAME fitted vector with the seasonal mixed layer relabeled off,
 #           not another file.
 # (Gates 5, 6, 11 and gate D's ledger row follow, each with its own block.)
 # Each block is mutation-tested (CHANGELOG 10-02).

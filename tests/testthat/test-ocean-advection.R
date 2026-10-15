@@ -30,7 +30,7 @@
 W_TEST <- 4          # m/yr, the classical upwelling-diffusion value
 YRS    <- c(1900, 1960)
 
-# memoised on (w, years, grad) (review B4, 2026-09-12): run_w(0) and run_w(W_TEST)
+# memoized on (w, years, grad) (review B4, 2026-09-12): run_w(0) and run_w(W_TEST)
 # were each made four times
 adv_memo <- new.env()
 run_w <- function(w, years = YRS, grad = NULL) {
@@ -172,7 +172,7 @@ test_that("with NO interior source, reversing the circulation ties EVERY column"
   # This is held as a test because it is the load-bearing reason the mechanism
   # was not adopted: it makes the negative result GENERAL (no rerouting of a
   # closed vertical loop can change what the atmosphere sees) rather than a
-  # property of one parameterisation. If this pump-OFF arm ever breaks, either
+  # property of one parameterization. If this pump-OFF arm ever breaks, either
   # the operator symmetry is gone or something ELSE has started coupling the
   # interior to the atmosphere -- both worth knowing about immediately.
   up  <- run_w(W_TEST, grad = 0)
@@ -245,7 +245,7 @@ test_that("with the pump ON, TOTAL CARBON is still invariant and the ISOTOPES ar
   # 1. TOTAL CARBON OUTSIDE THE INTERIOR IS STILL EXACTLY INVARIANT. Measured
   #    <= 1.8e-12 at the default, and at every pump_grad from 0 to 466.2 -- it
   #    does not scale with the pump at all, which is the signature of a constant
-  #    source cancelling rather than of a small one.
+  #    source canceling rather than of a small one.
   for (cc in ADV_TIED_12C)
     expect_lt(max(abs(out$run$out[[cc]] - up$run$out[[cc]])), 1e-8)
 

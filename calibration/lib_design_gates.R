@@ -139,7 +139,7 @@ DG_G7_LAND_SD  <- LIK_GCB_LAND_SD * LIK_LAND_SINK_INFLATE   # 0.5 x 1.0 = 0.50 s
                                                              # it was 0.5 x 3.0 = 1.50 when the line was written
 DG_G7_OCEAN_SD <- LIK_GCB_OCEAN_SD                          # 0.40, uninflated
 DG_G7_NSD <- 2      # how many of the OBJECTIVE's sigma gate 7 allows.
-                    # ⭐ 1 -> 2 on 2026-09-02 (Marcus), harmonising with GATE Q's
+                    # ⭐ 1 -> 2 on 2026-09-02 (Marcus), harmonizing with GATE Q's
                     # DG_Q_NSD and DG_G5_NSD: all three are distributional claims
                     # against a stated sigma and there was no reason for this one
                     # to be twice as strict. The 09-02 ledger recorded the
@@ -148,12 +148,12 @@ DG_G7_NSD <- 2      # how many of the OBJECTIVE's sigma gate 7 allows.
                     # was a BARE LITERAL 1 duplicated in the verdict line of BOTH
                     # callers (diag_design_gates_at_mode.R, diag_gates_in_the_new_
                     # basin.R) while this file's own header claims "one kernel, two
-                    # callers". The KERNEL was centralised in 08-31f; the VERDICT was
+                    # callers". The KERNEL was centralized in 08-31f; the VERDICT was
                     # not, so the one number that decides pass/fail could move in one
                     # caller and not the other -- the caption-sync class this file
                     # exists to kill, one level up. [[gate_bound_matches_its_claim]]
                     # (was a bare literal 1 duplicated into both callers' verdict
-                    # lines; the VERDICT itself is now centralised too, below.)
+                    # lines; the VERDICT itself is now centralized too, below.)
 
 DG_GCB_PUB_WIN  <- c(2015, 2024)     # the window GCB's published means are over
 DG_GCB_PUB_LAND <- 2.36; DG_GCB_PUB_OCEAN <- 3.22
@@ -174,7 +174,7 @@ DG_GtC_PER_PPM <- ccx_const("GtC_PER_PPM")
 #                 no threshold at all. [[gate_bound_matches_its_claim]]
 #   SCORED?       whether the LIKELIHOOD already scores this quantity. A gate on
 #                 a scored stream is a RESTATEMENT, not an out-of-sample test:
-#                 it can only tell you the optimiser did its job.
+#                 it can only tell you the optimizer did its job.
 #   POWER         what a PASS is actually worth, given the three above.
 #                 [[no_power_null]] -- a test whose null is structurally
 #                 guaranteed reports "no effect" identically to one that looked.
@@ -686,7 +686,7 @@ DG_LEDGER <- list(
 #' the scorecard had compared TWO DIFFERENT MODELS instead -- the seas_ml-0 control file (arm B)
 #' against the canonical (arm C), which differ in structure, objective and parameter count -- so its
 #' "P7 PASS" was not the mixed layer's own effect. This builds the OFF arm from the SAME fitted vector:
-#' the file's own structure relabelled seas_ml = 0, its fitted values and pins put back, its own
+#' the file's own structure relabeled seas_ml = 0, its fitted values and pins put back, its own
 #' spinup, and both read through ccx_ocean_grad_scored().
 #' @param v a dg_vector() of a seas_ml = 1 file
 #' @return list(off, on, v_off): the two gradient lists dg_gateP7_verdict() takes, and the OFF vector
@@ -696,7 +696,7 @@ dg_gateP7_same_vector <- function(v) {
          "; P7 tests the seasonal mixed layer, so its ON arm must be the file itself (seas_ml 1).")
   v0 <- v
   v0$p <- ccx_apply_structure(v$p, ccx_mode_struct(v$md), seas_ml = "0", pump_field = ccx_mode_pump_field(v$md))
-  v0$p <- ccx_overlay_par(v0$p, v$pm)                       # the fitted values back over the relabelled base
+  v0$p <- ccx_overlay_par(v0$p, v$pm)                       # the fitted values back over the relabeled base
   for (n in names(ccx_mode_pins(v$md))) v0$p[[n]] <- ccx_mode_pins(v$md)[[n]]
   stopifnot(identical(v0$p$seas_ml, 0L) || identical(v0$p$seas_ml, 0))
   g <- function(vv) { r <- dg_run(vv); ccx_ocean_grad_scored(r$out, r$sp) }
@@ -885,7 +885,7 @@ DG_Q_NSD  <- 2      # how many observational sigma the gate allows. A DISTRIBUTI
 
 dg_gateQ <- function(r, v, do = dg_gateD_obs()) {
   o <- r$out; aux <- r$sp$aux
-  # the 12 month-centre rows of calendar year DG_Q_YEAR, on the model's own grid
+  # the 12 month-center rows of calendar year DG_Q_YEAR, on the model's own grid
   tt <- ccx_epoch_year_samples(DG_Q_YEAR + 0.5)
   j  <- vapply(tt, function(t1) which.min(abs(o$t - t1)), integer(1))
   if (max(abs(o$t[j] - tt)) > 1e-6)
@@ -1001,7 +1001,7 @@ dg_gateQ_area_weights <- function(do = dg_gateD_obs(), have = NULL) {
 # its 12 monthly rows (as gate Q, ruled 09-12).
 # BOUND: |z| <= DG_D_NSD on the observation's own bootstrap se of the
 # asymmetry. The model side is deterministic and contributes no error term.
-DG_D_NSD <- 2                  # harmonised with DG_Q_NSD across the family
+DG_D_NSD <- 2                  # harmonized with DG_Q_NSD across the family
 DG_D_OBS_FILE <- ccx_path("data", "obs_hemi_diseq.rds")
 
 dg_gateD_obs <- function(file = DG_D_OBS_FILE) {
@@ -1149,7 +1149,7 @@ local({
 
 # ---- GATE 5: bomb curve, hemispheric aggregate ----------------------
 # One estimator, applied to model and observations alike: parabolic refinement
-# of the peak on the monthly series (the raw argmax is quantised to the sampling
+# of the peak on the monthly series (the raw argmax is quantized to the sampling
 # interval, which for the observations is 1/12 yr -- big enough to move the
 # NH->SH lag by a tenth of its value), then a log-linear fit of the post-peak
 # decline over Delta14C > DG_EFOLD_FLOOR.
@@ -1274,12 +1274,12 @@ dg_gate7 <- function(r) {
   list(ocean = mean(a$ocean[k]), land = mean(a$land[k]))
 }
 
-# ---- GATE 7 VERDICT, centralised 2026-09-02 -------------------------
+# ---- GATE 7 VERDICT, centralized 2026-09-02 -------------------------
 #' The gate-7 z-scores and pass/fail, in ONE place
 #'
 #' ⭐ WHY THIS FUNCTION EXISTS. Until 2026-09-02 the z-scores and the verdict were
 #' computed INLINE in both callers, while this file's header claimed "one kernel,
-#' two callers". The kernel was centralised on 08-31f; the verdict was not, so the
+#' two callers". The kernel was centralized on 08-31f; the verdict was not, so the
 #' one number that decides pass/fail could move in one caller and not the other.
 #' That is the caption-sync bug class, one level up.
 #'
@@ -1385,9 +1385,9 @@ dg_gate4_verdict <- function(g4) stop(DG_G4_RETIRED, call. = FALSE)
 # scoped and BOTH DECLINED: `diag_aerosol_solar_diffuse_scope.R`.
 DG_V_WIN <- DG_AF_WIN     # 1959-2024: where GCB's annual budget exists
 DG_V_DF  <- 3             # dof of the smooth AF(t) the anomaly is taken about
-DG_V_NSD <- 2             # harmonised with DG_Q_NSD / DG_G5_NSD / DG_G7_NSD / DG_GD_NSD
+DG_V_NSD <- 2             # harmonized with DG_Q_NSD / DG_G5_NSD / DG_G7_NSD / DG_GD_NSD
                           # (GATE S left the family 2026-09-04h: its bound is an
-                          #  INTERVAL from a law, so it has no sigma to harmonise.)
+                          #  INTERVAL from a law, so it has no sigma to harmonize.)
 DG_V_CLAIM <- paste("|sd(model interannual growth anomaly) - sd(observed)| <=",
                     "DG_V_NSD x the OBSERVED sd's own sampling error")
 
@@ -1450,12 +1450,12 @@ dg_gateV_verdict <- function(gv, ov) {
 # because it needs no sigma at all: the bomb source was NORTHERN, so the SH peak
 # must come AFTER the NH peak and the NH peak must be HIGHER. Those are orderings
 # and are bounded as orderings.
-DG_G5_NSD <- 2      # harmonised with DG_Q_NSD and DG_G7_NSD, 2026-09-02
+DG_G5_NSD <- 2      # harmonized with DG_Q_NSD and DG_G7_NSD, 2026-09-02
 
 #' Leave-one-zone-out spread of the observed gate-5 quantities
 #'
 #' Same estimator as dg_obs_gate5(), re-run with each contributing zone dropped
-#' (weights renormalised over the survivors). Returns the sd across those
+#' (weights renormalized over the survivors). Returns the sd across those
 #' re-runs for each quantity, plus the number of draws behind it.
 dg_obs_gate5_spread <- function() {
   w  <- ccx_zone_weights()
@@ -1564,7 +1564,7 @@ dg_gcb_target <- function(win, shares = NULL) {
 #
 # WHY IT EXISTS. The 09-02 ledger found NOT ONE law-derived gate in the set and
 # named this as the most valuable candidate that could be built: gate 12a reports
-# an ocean-CAPACITY defect it cannot LOCALISE, and nothing in the repo tests the
+# an ocean-CAPACITY defect it cannot LOCALIZE, and nothing in the repo tests the
 # ocean's absolute DIC against an observation.
 #
 # ⛔ AND THE FIRST DESIGN -- "the whole-column inventory" -- IS PARTLY CIRCULAR,
@@ -1613,7 +1613,7 @@ dg_gcb_target <- function(win, shares = NULL) {
 # that weakens a gate. Said out loud rather than silently exploited, and the
 # report walks z across a range of n_eff so the reader can see the sensitivity.
 # =====================================================================
-DG_GD_NSD  <- 2                      # harmonised with DG_Q_NSD / DG_G5_NSD / DG_G7_NSD
+DG_GD_NSD  <- 2                      # harmonized with DG_Q_NSD / DG_G5_NSD / DG_G7_NSD
 DG_GD_NEFF <- LIK_D14C_DEEP_NEFF     # the ruled convention, not a new number
 DG_GD_NEFF_WALK <- c(5, 20, 100, 500)   # sensitivity, printed not chosen
 
@@ -1646,7 +1646,7 @@ dg_gateG_obs <- function(grid) {
 #'   the short run's exactly (diff 0.0 at all three arms, 09-12). ⚠ The short
 #'   run to the epoch year is STILL made when `r` is given: `inv`, `inv_1750`
 #'   and `uptake` are END-OF-RUN INSTANT states (the state matrix at t = yr + 1)
-#'   and the output holds only month-centred rows, so the long run cannot
+#'   and the output holds only month-centered rows, so the long run cannot
 #'   supply them; an annual-mean inventory would be a DIFFERENT estimator, and
 #'   this item's contract is bit-identity. What `r` saves is the spinup.
 dg_gateG <- function(v, obs, r = NULL) {
@@ -1673,7 +1673,7 @@ dg_gateG <- function(v, obs, r = NULL) {
   # there is the same construction the epoch read retired.
   ml <- function(y, h) y[aux$idx[[h]]$ml, "C"] * aux$mol_per_GtC /
           (ccx_column_area(aux, h) * grid$dz[1] * rho) * 1e6
-  ml_ann <- function(h) ccx_box_annual_conc(out, aux, grid, "ml", yr + 0.5, hemis = h)[["dic"]]   # the EPOCH year's 12 month-centres, on the output grid (= the short run's final year)
+  ml_ann <- function(h) ccx_box_annual_conc(out, aux, grid, "ml", yr + 0.5, hemis = h)[["dic"]]   # the EPOCH year's 12 month-centers, on the output grid (= the short run's final year)
   # AREA-WEIGHTED, because the observation is a global volume-weighted mean and
   # the two hemispheres differ by ~15 umol/kg (the model's solubility pump).
   aw <- function(nh, sh) (nh * aux$a_oc$NH + sh * aux$a_oc$SH) / (aux$a_oc$NH + aux$a_oc$SH)
@@ -1703,7 +1703,7 @@ dg_gateG_verdict <- function(g, obs, n_eff = DG_GD_NEFF) {
 
 # ---- per-stream logL at a vector, for provenance and for pricing ----
 # The LIKELIHOOD is recomputed, not the posterior: a refit's h_ml band
-# renormalises the PRIOR and is not reconstructible from ccx_default_params()
+# renormalizes the PRIOR and is not reconstructible from ccx_default_params()
 # (memory ccx_hml_band_provenance), so a logpost comparison would indict the
 # product for a property of the producer. par_mode is band-safe.
 #' @param obs the obs bundle. The default re-reads it (cached); a caller that
@@ -1789,7 +1789,7 @@ dg_gate11_verdict <- function(g11) {
 # record, "a fertilization signature the model must produce". Restored from
 # calibration/diag_design_gates_unscored.R onto the arm's OWN vector, structure and spinup (that
 # driver built the model from defaults with the aseasonal spinup and could not score a canonical).
-# ESTIMATOR, identical on both sides (the 08-28 'route B'): a centred 12-month moving average as
+# ESTIMATOR, identical on both sides (the 08-28 'route B'): a centered 12-month moving average as
 # the trend, the series minus it as the seasonal, the decade's monthly climatology, peak minus
 # trough. The observation is Scripps MLO (obs$co2), the model its NH box (co2_NH): a constant
 # station-vs-box factor cancels in the RATIO, which is the claim.
@@ -1799,7 +1799,7 @@ dg_gate11_verdict <- function(g11) {
 # which the observation itself clears by only 0.6 pp ([[threshold_from_obs_or_law]]). The seed and
 # the resample count are recorded in the returned list ([[seed_recorded_in_the_artifact]]).
 DG_G6_DECADES <- list("1960s" = c(1960L, 1969L), "2010s" = c(2010L, 2019L))   # the growth's two ends
-DG_G6_NSD  <- 2L        # harmonised with DG_Q_NSD across the family
+DG_G6_NSD  <- 2L        # harmonized with DG_Q_NSD across the family
 DG_G6_BOOT <- 2000L     # bootstrap resamples
 DG_G6_SEED <- 20261002L # set IMMEDIATELY before the resampling, and recorded
 dg_g6_seasonal <- function(t, x) {
@@ -1900,7 +1900,7 @@ dg_gate6_verdict <- function(g6, o6) {
 # offset would feed the compensator back in and the gate could never fail
 # ([[gate_reads_its_own_output]]).
 # =====================================================================
-DG_H_NSD <- 2      # harmonised with DG_Q_NSD / DG_G5_NSD / DG_G7_NSD / DG_GD_NSD
+DG_H_NSD <- 2      # harmonized with DG_Q_NSD / DG_G5_NSD / DG_G7_NSD / DG_GD_NSD
 
 #' n_eff of a series from its DETRENDED lag-1 autocorrelation
 #' @param x the series; @param t its time coordinate

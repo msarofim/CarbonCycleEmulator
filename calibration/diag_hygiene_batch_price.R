@@ -6,7 +6,7 @@
 # and the CHANGELOG a per-item receipt. Items (each has a reproduction switch):
 #   D14C   the deep / slab D14C rows read EVERY box in their window (HD too)     LIK_D14C_EVERY_BOX
 #   GCB    the land-sink sigma at GCB's stated 0.5, no x3 multiplier            LIK_LAND_SINK_INFLATE
-#   EXC    Naegler 2009's net-CO2-uptake correction on the excess-14C centres    LIK_EXCESS_C14_UPTAKE_CORR
+#   EXC    Naegler 2009's net-CO2-uptake correction on the excess-14C centers    LIK_EXCESS_C14_UPTAKE_CORR
 #   SST    the pre-1850 SST anomaly at the product's 1850-1900 mean, not 1850   FORC_SST_PRE1850_MEAN
 # plus the PRIOR-only item (no likelihood move): h_hs under its Holte prior.
 # Usage: Rscript calibration/diag_hygiene_batch_price.R

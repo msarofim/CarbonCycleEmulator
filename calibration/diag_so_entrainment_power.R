@@ -6,7 +6,7 @@
 # THIS IS A POWER MEASUREMENT, AND IT IS SCORED BEFORE ANY VERDICT.
 #
 # WHY IT COMES FIRST. The CO2 seasonal rows are ALREADY MATCHED -- the mode
-# reproduces the observed SH seasonal CO2 to ~1 %, by two errors cancelling --
+# reproduces the observed SH seasonal CO2 to ~1 %, by two errors canceling --
 # so they are structurally incapable of rejecting a partition error
 # ([[no_power_null]], [[seas_right_observable_wrong_drivers]]). A test whose
 # null is guaranteed reports "no effect" in exactly the same words as a test
@@ -25,16 +25,16 @@
 #     the same base-minus-off definition diag_seas_channel_decomp.R uses;
 #   - the peak month of the model's TOTAL ocean channel, which is what P3 is
 #     about -- adding amplitude in the season the model already had would be a
-#     reparametrisation of sst_seas_amp_SH, not a fix;
+#     reparametrization of sst_seas_amp_SH, not a fix;
 #   - the four scored seasonal streams, so the COST is visible next to the
 #     capability. A channel that can reach 0.70 ppm only by destroying the
 #     rows is not a usable instrument either.
 #
-# ⚠ THIS SCRIPT DOES NOT RE-OPTIMISE. Every neighbour is frozen at the mode,
+# ⚠ THIS SCRIPT DOES NOT RE-OPTIMIZE. Every neighbor is frozen at the mode,
 # and seas_T_amp x q10 is an EXACT ridge ([[ccx_seas_q10_ridge]]) while
 # beta_max/fert_k absorb 85 % of a frozen cost -- so the Dlogpost column below
 # OVERSTATES every cost. Read SHAPE AND DIRECTION from it, not magnitude.
-# P2's re-optimisation is a separate step and this is not it.
+# P2's re-optimization is a separate step and this is not it.
 #
 # Usage:  Rscript calibration/diag_so_entrainment_power.R
 # =====================================================================
@@ -50,7 +50,7 @@ EP_WINDOW    <- LIK_SEAS_WINDOW
 # it. Those are different answers and a grid stopping at 30 could not tell them
 # apart.
 EP_AMPS      <- c(0, 5, 10, 20, 30, 50, 80)
-EP_PHYSICAL  <- c(5, 30)          # the pre-check's band, for labelling only
+EP_PHYSICAL  <- c(5, 30)          # the pre-check's band, for labeling only
 # P1's falsifier, from the observed antiphase gap above. NOT tuned.
 EP_POWER_PPM <- 0.70
 # Where the model and the observations sit today (diag_seas_signature_inversion.R,

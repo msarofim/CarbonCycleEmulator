@@ -7,7 +7,7 @@
 # divided the INSTANT box carbon at the observation's epoch by the ANNUAL-MEAN
 # box mass -- exact for a time-constant box, 157 umol/kg LOW for the seasonal
 # mixed layer at the GLODAP epoch (early November, f 0.885 / 0.919). Round 6
-# was fitted against that row and its P7 "302 -> 385" was the artefact.
+# was fitted against that row and its P7 "302 -> 385" was the artifact.
 #
 # MUTATION-TESTED BY CONSTRUCTION: the synthetic box below has a CONSTANT
 # concentration and a SEASONAL mass, so any read that uses the mean mass, or
@@ -28,11 +28,11 @@
   if (seasonal) aux$mld_hs_coef <- lapply(h_m, ccx_mld_fourier)
   c_ml <- 2000; c_deep <- 2233; c_hs <- 2160
   # CADENCE (2026-09-12). The reader now takes the model's OWN ROWS nearest each
-  # month-centre (ruled: "read the actual model rows"), so the exact case is the
-  # MONTHLY grid at the month-centres -- the model's own cadence, where the
+  # month-center (ruled: "read the actual model rows"), so the exact case is the
+  # MONTHLY grid at the month-centers -- the model's own cadence, where the
   # Fourier shape is mean-preserving over exactly those 12 samples. A DAILY
   # grid is kept as the second case: its nearest rows sit up to half a day off
-  # the centres, so a concentration that CYCLES reads back its constant only to
+  # the centers, so a concentration that CYCLES reads back its constant only to
   # ~2e-5 relative (0.04 umol/kg on 2160) -- a property of the sub-monthly
   # grid, not of the reader, and asserted at that looser tolerance.
   cadence <- match.arg(cadence)
@@ -64,7 +64,7 @@ test_that("a SEASONAL box with a constant concentration reads back that constant
   hs <- ccx_model_hs_surface(z$out, z$aux, 2002.5, 2002.5)
   expect_equal(hs$dic, z$c_hs, tolerance = 1e-9, scale = 1)
   expect_equal(hs$d13c, 0, tolerance = 1e-9)
-  # and on a DAILY grid the nearest rows are within half a day of the centres:
+  # and on a DAILY grid the nearest rows are within half a day of the centers:
   # a cycling concentration reads back to ~2e-5 relative, never worse
   zd <- .sbo_synth(TRUE, cadence = "daily")
   gd <- ccx_model_ocean_gradient(zd$out, zd$aux, zd$grid, list(surf = 1999.836, deep = 2002.369))

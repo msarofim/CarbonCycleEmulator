@@ -243,8 +243,8 @@ test_that("the arity check REJECTS a helper left at the bottom of server.R", {
 # The card used to name the SHIMS in prose while the table under it listed the
 # PINS, and presented the two as one list -- Marcus asked how they related and
 # the honest answer was that they are different things. They are now two
-# labelled tables with the overlap computed. RV_SHIMS is the one part that
-# CANNOT be derived (whether a fitted name is a stand-in is a judgement, taken
+# labeled tables with the overlap computed. RV_SHIMS is the one part that
+# CANNOT be derived (whether a fitted name is a stand-in is a judgment, taken
 # from the 2026-09-16 whole-model review), so it is the part that can go stale
 # the way the parameter label table did -- hence a gate, mutation-tested.
 # =====================================================================

@@ -33,7 +33,7 @@
 # biosphere ran 51-58 % long and the troposphere 40-44 % short at both years;
 # the four-pool land (R/model.R) leaves the biosphere at +0 % / +10 %.
 #
-# AND THE RESIDUAL "DELIVERY ERROR" WAS A FRAMING ARTEFACT (2026-08-12, later).
+# AND THE RESIDUAL "DELIVERY ERROR" WAS A FRAMING ARTIFACT (2026-08-12, later).
 # What appeared to survive -- a ~6-7 % SUM excess -- came from scoring a
 # whole-atmosphere box against N&L's TROPOSPHERE alone. Under the mass-
 # consistent framing (see PART_STRAT_TROP_MASS below) the budget CLOSES to

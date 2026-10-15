@@ -2,8 +2,8 @@
 # diag_d13c_midcentury.R -- WHAT KIND OF CARBON IS THE MID-CENTURY SWING?
 #
 # handoff 21d sec.10a leaves ONE open question: whether the mid-century CO2
-# feature is real atmosphere or an enclosure artefact common to the whole Law
-# Dome site. TEST 1 ruled out core-SPECIFIC artefacts; it cannot rule out a
+# feature is real atmosphere or an enclosure artifact common to the whole Law
+# Dome site. TEST 1 ruled out core-SPECIFIC artifacts; it cannot rule out a
 # shared firn process, and there is no independent core on disk.
 #
 # THE DISCRIMINATOR IS ALREADY ON DISK AND IS NOT IN THE OBJECTIVE.
@@ -22,14 +22,14 @@
 #   ocean sink anomaly         air-sea equilibrium ~ -2 permil, and isotopic
 #                              equilibration is ~10x slower than chemical
 #                              -> CO2 moves with ALMOST NO d13C signature
-#   firn / sampling artefact   firn diffusion is near species-INDEPENDENT, so a
-#                              smoothing or sampling artefact PRESERVES the
+#   firn / sampling artifact   firn diffusion is near species-INDEPENDENT, so a
+#                              smoothing or sampling artifact PRESERVES the
 #                              atmosphere's own ratio -> the residual ratio is
-#                              UNCHANGED from its neighbouring windows
+#                              UNCHANGED from its neighboring windows
 #
 # So the statistic is the RATIO of the d13C residual to the CO2 residual, window
 # by window, from the SAME core set -- and the mid-century window is compared to
-# its own neighbours rather than to an absolute expectation, which cancels any
+# its own neighbors rather than to an absolute expectation, which cancels any
 # constant model bias in either species.
 #
 # PRE-REGISTERED, because with 3-14 samples per decade a free choice of window
@@ -38,7 +38,7 @@
 #   - The test window is 1940-1960 (where GATE 1 of diag_swing_estimator.R puts
 #     the raw growth-rate minimum); the reference windows are those either side.
 #   - The verdict is read off the SIGN and MAGNITUDE of the ratio change, and
-#     "no significant change" is a REAL RESULT that closes sec.12c's programme.
+#     "no significant change" is a REAL RESULT that closes sec.12c's program.
 #
 # Usage:  Rscript calibration/diag_d13c_midcentury.R
 # =====================================================================
@@ -129,7 +129,7 @@ for (w in DM_WINDOWS) {
               w[1], w[2], sum(kc), rc, sum(ki), ri, se, ri / rc))
 }
 
-# ---- GATE 2: is the test window's ratio different from its neighbours? -
+# ---- GATE 2: is the test window's ratio different from its neighbors? -
 tw <- rows$lo == DM_TEST_WIN[1] & rows$hi == DM_TEST_WIN[2]
 nb <- !tw
 cat(sprintf("\nGATE 2 -- test window %d-%d vs its neighbours\n", DM_TEST_WIN[1], DM_TEST_WIN[2]))
@@ -168,7 +168,7 @@ if (any(tw)) {
 # ---- GATE 4: THE EXCURSION TEST (the sound version of GATE 2) ---------
 # GATE 2's ratio is UNSTABLE by construction: the CO2 residual passes through
 # zero inside the test window (-0.77 ppm), so dividing by it inflates the ratio
-# and the "+5.70 sd" there is an artefact of the denominator, NOT evidence.
+# and the "+5.70 sd" there is an artifact of the denominator, NOT evidence.
 # Do NOT quote GATE 2's departure.
 #
 # The sound statistic does not divide. The CO2 residual CHANGES by a large

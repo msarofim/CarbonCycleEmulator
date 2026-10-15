@@ -12,7 +12,7 @@
 # exists as the after-the-fact remedy, and its own header records why the
 # question is not academic -- at MODE_HESS_EPS = 1e-3 a step in log(kz) cost
 # 49,000 log-units and returned a second derivative of -4.9e10 against a true
-# -41.3, i.e. nine orders of magnitude of pure step-size artefact.
+# -41.3, i.e. nine orders of magnitude of pure step-size artifact.
 #
 # THREE THINGS HAVE CHANGED SINCE 3e-4 WAS LAST EXERCISED, and each moves the
 # usable window in a DIFFERENT direction, which is why the answer is measured
@@ -32,7 +32,7 @@
 #     logit coordinate over a support 4.9x narrower than the shipped [30, 200].
 #     The unconstrained scale is therefore a DIFFERENT scale, and a step size is
 #     a statement about a scale. This script applies the SAME override so it is
-#     validating the step on the objective the refit will actually optimise.
+#     validating the step on the objective the refit will actually optimize.
 #
 # WHAT IT DOES NOT AND CANNOT DO. There is no mode on the post-2026-08-18 model
 # -- that is what the refit is for -- so this cannot sweep at the point where

@@ -15,7 +15,7 @@
 # would say the 30 ppm is NOT an input error and the review's sec.3 is wrong.
 #
 # PROFILED THROUGH ccx_make_logpost() DELIBERATELY, not through a hand-built
-# likelihood: that is the actual objective the MCMC will optimise, priors and
+# likelihood: that is the actual objective the MCMC will optimize, priors and
 # Jacobians included, so a slice cannot flatter itself by omitting a term.
 #
 # WHAT IT IS NOT. A 2-D slice at fixed everything-else is not a refit; its
@@ -28,13 +28,13 @@
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-# ---- PINNED TO THE LOG FERTILISATION FORM (2026-08-14) --------------
+# ---- PINNED TO THE LOG FERTILIZATION FORM (2026-08-14) --------------
 # This diagnostic was written against NPP = NPP0(1 + beta ln(chi/chi0)) and
 # every number in its header is a LOG-FORM number. On 2026-08-14 the default
 # flipped to CCX_FERT_MM, under which `beta` is INERT -- so without this pin the
 # file would still run, still print a beta column, and silently report the same
 # MM answer for every beta. (That is not hypothetical: it happened to
-# diag_fert_pulse_gates.R and to the app's fertilisation switch on the day of
+# diag_fert_pulse_gates.R and to the app's fertilization switch on the day of
 # the flip, and identical rows are what caught both.)
 #
 # The pin makes this file reproduce its recorded numbers exactly. It does NOT
@@ -59,7 +59,7 @@ BL_REVELLE_MAX_BETA <- 0.53             # handoff 13i sec.A1: the Pulse Lab less
 # garnish -- the FIRST run of this file (sigma_d13c pinned at the table init
 # 0.10) put the argmax at beta 0.70 and REFUTED the pre-registered prediction.
 # The refutation turned out to be conditional: d13C at sigma 0.10 contributes
-# ~740 log-units in favour of high beta across 0.50 -> 0.75, which is far more
+# ~740 log-units in favor of high beta across 0.50 -> 0.75, which is far more
 # than the luc_scale prior can resist -- and d13C is the ONE stream carrying a
 # known unclosed ~0.53 permil structural misfit, so sigma 0.10 is asserting
 # that misfit is measurement noise. The three values below are the ones

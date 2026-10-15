@@ -31,7 +31,7 @@
 # So:
 #     dT  =  [ carbon cycle: GtC -> dCO2 ]  x  [ ERF law ]  x  [ thermal IRF ]
 #             ^^^^ CCX's OWN                   ^^^^^^^^ both FITTED TO FaIR
-# A CCX-vs-FaIR disagreement in dT therefore localises to the CARBON CYCLE, and
+# A CCX-vs-FaIR disagreement in dT therefore localizes to the CARBON CYCLE, and
 # the way to show that is to compare dCO2 FIRST and dT second -- swap the driver
 # before blaming a module. This script does the CCX half and prints dCO2
 # alongside dT at every horizon so the FaIR half can be differenced against it.
@@ -256,7 +256,7 @@ say("   ⚠ NOT LIKE-FOR-LIKE: a marginal pulse response on a scenario is not TC
 say("     The ratio is a flag for a decomposition, not a verdict.\n")
 # ---------------------------------------------------------------------
 # ⭐⭐ AGAINST STANDARD FaIR -- THE TIGHTEST TEST AVAILABLE, and the one that
-# LOCALISES the difference.
+# LOCALIZES the difference.
 #
 # ⛔ THIS IS NOT AN INDEPENDENT VALIDATION, and must not be reported as one.
 # CCX's climate module IS FaIR's 841-config ensemble mean: the ERF law is fitted

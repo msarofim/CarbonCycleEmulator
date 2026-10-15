@@ -1,7 +1,7 @@
 # =====================================================================
 # build_fert_k_prior.R -- the SHAPE prior on fert_k (2026-09-28, Marcus).
 #
-# WHY. The historical CO2 record cannot identify the SHAPE of CO2 fertilisation:
+# WHY. The historical CO2 record cannot identify the SHAPE of CO2 fertilization:
 # beta_max and fert_k correlate at 0.997, and every fit so far lands at
 # fert_k 825-940 ppm, which is LOG-LIKE over 1x-4x preindustrial. Marcus ruled
 # (2026-09-28): take the shape from Varney 2024, Walker 2021 and physiology,

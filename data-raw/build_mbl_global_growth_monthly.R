@@ -5,7 +5,7 @@
 # WHY. Marcus 2026-10-06: "What about having a 12-month smoothed CO2 growth that is used only for
 # calibrating the ENSO and volcanic aerosol parameters?" Ruled: "Monthly (Recommended)" (the
 # estimator) and "Build: land + ocean module (Recommended)". The module (R/likelihood.R,
-# ccx_iav_module_loglik()) scores the model's centred 12-month growth against THIS series, both
+# ccx_iav_module_loglik()) scores the model's centered 12-month growth against THIS series, both
 # detrended over LIK_IAV_WIN. Until today the series was rebuilt inline by every diagnostic that
 # used it (calibration/lib_block_reopt.R br_obs_growth()); an objective's target is a versioned
 # product instead (Hard rule 3).
@@ -19,7 +19,7 @@
 # timing diagnostic and the 10-06 preview read it):
 #   - month means of the reference's value column (V5), grouped by its OWN year and month columns
 #     (V1, V2) -- not the decimal date; the two agree on the year for every row (checked below);
-#   - the CENTRED 12-month difference g[t] = co2[t + 6] - co2[t - 6] (R/likelihood.R ccx_cen12()),
+#   - the CENTERED 12-month difference g[t] = co2[t + 6] - co2[t - 6] (R/likelihood.R ccx_cen12()),
 #     NA within six months of either end. It removes the annual cycle; the module's spline removes
 #     the trend.
 # ⚠ Months carry 3-5 weekly samples (mostly 4; 48/yr do not divide evenly), and the record's last
@@ -41,7 +41,7 @@ suppressWarnings(suppressMessages({ library(tools) }))
 MGM_SRC <- "data-raw/downloads/mbl_zonal_co2_GL.txt"
 MGM_KEY <- "mbl_zonal_gl"
 MGM_OUT <- "data/mbl_global_growth_monthly.rds"
-MGM_HALF <- 6L                 # the centred difference reaches this many months each side
+MGM_HALF <- 6L                 # the centered difference reaches this many months each side
 
 man <- utils::read.csv("data-raw/downloads/MANIFEST.csv", stringsAsFactors = FALSE)
 row <- man[man$key == MGM_KEY, ]

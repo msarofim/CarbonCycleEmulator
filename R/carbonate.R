@@ -24,7 +24,7 @@ CARB_COEFS_FILE <- file.path("data", "carbonate_coefs.rds")
 CARB_SALINITY_LEGACY    <- 34.7
 CARB_COEFS_BY_SALINITY  <- c("34.7" = "carbonate_coefs.rds", "34.76" = "carbonate_coefs_s34760.rds")
 
-#' Load the fitted carbonate constants (memoised PER FILE)
+#' Load the fitted carbonate constants (memoized PER FILE)
 #' @return list with coefs (K0,K1,K2,Kb), poly_degree, salinity, boron_total
 #' ⚠ Until 2026-10-12 the memo held the FIRST file read and ignored `file` thereafter -- harmless
 #' while there was one table, wrong with two. It is now keyed by path.
@@ -61,7 +61,7 @@ ccx_carb_coefs_for <- function(salinity = NULL) {
 
 #' Evaluate a fitted ln-K polynomial
 #'
-#' Coefficients are fitted in the CENTRED, SCALED variable x = (T - t_centre)/t_scale
+#' Coefficients are fitted in the CENTERED, SCALED variable x = (T - t_centre)/t_scale
 #' (see data-raw/build_carbonate_tables.R) — evaluating them against raw T would
 #' silently return garbage, so the scaling is always applied here.
 #' @param co numeric coefficient vector (intercept first)
@@ -97,7 +97,7 @@ carb_constants <- function(T, cc = carb_coefs()) {
 #'   A h^2 + K1 (A - DIC) h + K1 K2 (A - 2 DIC) = 0
 #' Step 2 refines with Newton iterations on the residual
 #'   TA(h) - TA_target,  TA(h) = HCO3 + 2 CO3 + B(OH)4 + OH - [H+]
-#' which folds in borate and water self-ionisation.
+#' which folds in borate and water self-ionization.
 #'
 #' The OH- term is only ~0.25 % of total alkalinity but pCO2 amplifies an
 #' alkalinity error by roughly the Revelle factor, so dropping it costs
@@ -153,13 +153,13 @@ pco2_from_dic <- function(dic, alk, T, k = carb_constants(T), iter = 6L) {
   co2 / k$K0 * 1e6                                          # -> microatm
 }
 
-#' Revelle (buffer) factor, computed as an emergent centred derivative
+#' Revelle (buffer) factor, computed as an emergent centered derivative
 #'
 #'   R = (dpCO2 / pCO2) / (dDIC / DIC)
 #'
 #' Reported by the app rather than prescribed: it rises as the ocean takes
 #' up carbon, which is exactly the saturation story the pulse tab tells.
-#' @param rel_step relative DIC perturbation for the centred difference
+#' @param rel_step relative DIC perturbation for the centered difference
 revelle_factor <- function(dic, alk, T, rel_step = 1e-4, cc = carb_coefs()) {
   k  <- carb_constants(T, cc)
   d  <- dic * rel_step

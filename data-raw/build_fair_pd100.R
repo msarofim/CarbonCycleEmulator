@@ -3,7 +3,7 @@
 #
 # RULED (Marcus 2026-10-11, "Run FaIR on Joos's PD100 (Recommended)"): 100 GtC in 2015 on a
 # constant-2010 background, climate free as in Joos, the 841-config mean, imported with
-# provenance and labelled FaIR 2.2.4 (calib 1.6.0). Same day: the run ends in 2320 (a PD100
+# provenance and labeled FaIR 2.2.4 (calib 1.6.0). Same day: the run ends in 2320 (a PD100
 # exception to the 2300 end year -- nothing after 2010 reads scenario data); the IRF's time
 # axis is mid-release, t = timebound - 2015.5 (FaIR releases the pulse uniformly over 2015).
 #
@@ -13,7 +13,7 @@
 # in the provenance and in run_fair_pd100_for_ccx.log beside it.
 #
 # THIS SCRIPT REFUSES a file whose PROTOCOL is not card 5's: the reference year, pulse year,
-# pulse size and GtC-per-ppm normalisation in the provenance must equal R/joos_irf.R's
+# pulse size and GtC-per-ppm normalization in the provenance must equal R/joos_irf.R's
 # JOOS_* constants, which CarboTope's own PD100 uses. A FaIR line run on another protocol
 # would plot without complaint and compare two different experiments.
 #

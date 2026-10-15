@@ -6,7 +6,7 @@
 # THE ARM (CHANGELOG 10-04 g; Marcus: "Canonical incumbent, Mac"): the canonical's objective and label
 # (hilda_csl3v0kaidgbe, objective #15) with its 9 pins PLUS k_w held at Naegler 2009's 1446 m/yr
 # (KW_PRIOR_CENTRE), 33 free, 24 dispersed starts; promoted (GATES 1-5) and its Hessian recomputed. It is the
-# PROFILE price of the literature value: every other name re-optimised at fixed k_w.
+# PROFILE price of the literature value: every other name re-optimized at fixed k_w.
 #
 # WHAT IT READS:
 #   0. each vector reproduces its stored logpost: the canonical (hilda34g), the arm's promoted mode (basin 1),

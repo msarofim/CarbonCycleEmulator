@@ -25,7 +25,7 @@
 #       licenses THAT comparison only -- the standing trap
 #       [[iso_deep_control_licenses_one_comparison]]: a control licenses only
 #       the comparison it was built for. Kept because the contrast is
-#       interesting, labelled because it is not the answer.
+#       interesting, labeled because it is not the answer.
 #
 # ⚠ LIKE-FOR-LIKE: every share is recomputed on the SHARED names and the
 # shared streams. A pin share over 29 names is not comparable to one over 32 --
@@ -40,7 +40,7 @@
 # ⭐ WHY A CROSS-ARM COMPARISON IS MEANINGFUL AT ALL: the step is one
 # CONDITIONAL Hessian sd, an equal-difficulty step by construction (predicted
 # quadratic drop 0.5 log-units for EVERY name, at EVERY arm). Leverage is
-# therefore already normalised per name per arm.
+# therefore already normalized per name per arm.
 #
 # Usage:  Rscript calibration/diag_constraint_map_arms.R
 # =====================================================================

@@ -71,9 +71,9 @@ b <- b[is.finite(b$d13c_atm), ]
 # ---- [3] the disequilibrium per bottle ---------------------------------
 eps_dicg <- function(T) ccx_const("ALPHA_AS_ZHANG_A") * T * ccx_const("ALPHA_AS_FCO3") + ccx_const("ALPHA_AS_ZHANG_B") * T + ccx_const("ALPHA_AS_ZHANG_C")
 b$D <- b$c13 - eps_dicg(b$temp) - b$d13c_atm
-b$band <- floor(b$lat / HD_BAND) * HD_BAND + HD_BAND / 2          # band centre
+b$band <- floor(b$lat / HD_BAND) * HD_BAND + HD_BAND / 2          # band center
 b$cluster <- paste(b$year, b$band, floor(((b$lon + 180) %% 360) / HD_LON_CELL))
-b$region <- ifelse(abs(b$band) > HD_LAT_HI, "hs", "ml")             # by BAND CENTRE: the 55-deg split is a band edge, so a band is wholly one region
+b$region <- ifelse(abs(b$band) > HD_LAT_HI, "hs", "ml")             # by BAND CENTER: the 55-deg split is a band edge, so a band is wholly one region
 cat(sprintf("bottles: %d (flag %d, <= %d m, >= %d, T finite); clusters %d; years %d-%d (median %d)\n",
             nrow(b), HD_FLAG_OK, HD_SURF_M, HD_YEAR_MIN, length(unique(b$cluster)), min(b$year), max(b$year), as.integer(stats::median(b$year))))
 

@@ -92,7 +92,7 @@ cat(sprintf("  -> NOT bounded. Every phi is stable, including phi*f = %.2f.\n",
 # THE SIGN FLIPPED WITH THE FOUR-POOL LAND, and the reason matters more than the
 # verdict. Under the two-pool land, raising phi grew the vegetation pool and drew
 # CO2 DOWN monotonically (413.7 -> 322.2 ppm across this grid): the capacity term
-# was mostly amplifying CO2 fertilisation, more veg -> more NPP -> more veg, and
+# was mostly amplifying CO2 fertilization, more veg -> more NPP -> more veg, and
 # that positive loop is what over-drained the pulse and broke the Joos airborne
 # fraction. Under the four-pool land it goes the OTHER way -- because LUC debits
 # WOOD, and wood is most of the vegetation, so a higher phi makes clearing cost

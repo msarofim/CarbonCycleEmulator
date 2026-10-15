@@ -5,12 +5,12 @@
 # The modern-NPP row was DECORATIVE at sigma 7.76: arm B1 moved modern NPP
 # -0.01 GtC/yr (npp_row_power_20260929). So the record, not the row, sets it.
 # This asks WHICH streams: scan NPP_GLOBAL_PI by NS_SCALES (in-process constant
-# override, the audit screen's route, reset after), re-optimise NS_FREE at
+# override, the audit screen's route, reset after), re-optimize NS_FREE at
 # each, and report modern NPP and every stream's change vs the unscaled point.
 # If the payer is the SEASONAL CO2 amplitude, the model's NPP is a quantity
 # tied to the seasonal parameters (a phi-like coupling) rather than one
 # comparable to observed NPP; if it is the CO2 LEVEL / sinks, it is the
-# fertilisation integral.
+# fertilization integral.
 # Structure: arm A ("hilda_csl3v0ka") at the v0k basin-1 vector -- the baseline
 # the NPP arms compare against. No npp_modern row is scored here.
 # ⚠ A SCREEN: Nelder-Mead on NS_FREE (not all 29), so costs are UPPER BOUNDS.

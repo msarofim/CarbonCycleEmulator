@@ -28,7 +28,7 @@
 #      (b) a CONDITIONAL profile toward 1446 (every other name held): what each row pays.
 #      (c) THE RIDGE (Laplace): which names move with k_w when it moves, and the marginal cost of
 #          1446 = 0.5 z^2 on the MARGINAL sd. ⚠ Linear; (b) overstates and (c) approximates the
-#          profile likelihood, which only a re-optimisation at fixed k_w could measure.
+#          profile likelihood, which only a re-optimization at fixed k_w could measure.
 #   6. THE TIMING the lag buys: the model's monthly growth against Nino 3.4, D3's P3 estimator
 #      verbatim (observed: growth peaks 5 months after the index, 10-02 x).
 #   7. THE FUTURES the app would show: van Vuuren L / M / H CO2 at 2100 and 2300 (history spliced
@@ -232,10 +232,10 @@ if (!is.null(W$lag) && sprintf("%03d", RD_STUCK_ID) %in% names(W$lag)) {
   cat(sprintf("    its gains, step by step: %s\n", paste(sprintf("%s %+.2f", lab, g17), collapse = ", ")))
   cat(sprintf("    furthest coordinates from the mode (marginal sds): %s\n", paste(sprintf("%s %+.1f", names(d17), d17)[1:RD_TOP_N], collapse = ", ")))
   cat(sprintf("    rows it loses most: %s\n", paste(sprintf("%s %+.2f", names(dr), dr)[1:8], collapse = ", ")))
-  # IS IT A BASIN? Two cheap tests on the objective itself (no optimiser):
+  # IS IT A BASIN? Two cheap tests on the objective itself (no optimizer):
   #  (1) the STRAIGHT LINE to the mode: a dip below the start (past RD_LINE_TOL) is a barrier on that
   #      line -- consistent with a separate basin (a curved path could still avoid it); a monotone
-  #      rise says the point is on the main basin's slope and the optimiser was merely slow;
+  #      rise says the point is on the main basin's slope and the optimizer was merely slow;
   #  (2) SMOOTHNESS at the point: a step of RD_GRAD_FRAC conditional sds along each name, both ways. On a
   #      smooth surface the two moves nearly cancel (d_up + d_dn = -RD_GRAD_FRAC^2 at the mode's own curvature);
   #      |d_up + d_dn| > RD_SMOOTH_TOL flags a NON-SMOOTH direction -- a regime edge or a numerical singularity,

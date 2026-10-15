@@ -82,7 +82,7 @@ case "$CCX_MS_OUTDIR" in
 esac
 
 export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1
-# THE BUDGET AND ITS CLOCK (2026-10-05 o). CCX_MS_WALL_MIN is the budget's pre-10-05 name: still honoured,
+# THE BUDGET AND ITS CLOCK (2026-10-05 o). CCX_MS_WALL_MIN is the budget's pre-10-05 name: still honored,
 # but only ONE name reaches the driver, and two that differ are refused here rather than by 24 tasks.
 if [ -n "${CCX_MS_BUDGET_MIN:-}" ] && [ -n "${CCX_MS_WALL_MIN:-}" ] && [ "$CCX_MS_BUDGET_MIN" != "$CCX_MS_WALL_MIN" ]; then
   echo "FATAL: CCX_MS_BUDGET_MIN=$CCX_MS_BUDGET_MIN and its pre-10-05 name CCX_MS_WALL_MIN=$CCX_MS_WALL_MIN differ. Set one." >&2

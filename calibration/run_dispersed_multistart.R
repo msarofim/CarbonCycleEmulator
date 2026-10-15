@@ -31,7 +31,7 @@
 #         ocean +0.326 each), which the objective conditionally RESISTS
 # ⛔ IDS 3-5 SEED ONLY WHAT THE ARM FITS (2026-10-07 m, calibration/lib_ms_seed.R). A
 # slot whose seed moves no fitted name is UNSEEDABLE under that arm and runs its
-# id's DISPERSED DRAW, labelled UNSEEDABLE, start_class "dispersed"; and no task
+# id's DISPERSED DRAW, labeled UNSEEDABLE, start_class "dispersed"; and no task
 # starts from a vector identical() to another fixed start's (the duplicate refusal).
 # ⚠ THE TARGETS COME FROM FILES THIS SCRIPT DID NOT WRITE ([[gate_reads_its_own_output]]):
 # they are read out of the two mode files, not restated as literals here, and a
@@ -40,7 +40,7 @@
 #
 # ⛔ RE-CUT 2026-09-01k FOR THE 25-PARAMETER MODEL, AND IDS 3-5 ARE THE RE-CUT.
 # Ids 1 and 2 USED to be "warm starts at points ALREADY converged on the Mac, so
-# on any machine they must return -1548.01 / -1496.01 to within the optimiser's
+# on any machine they must return -1548.01 / -1496.01 to within the optimizer's
 # own noise". THAT IS NO LONGER TRUE and the sentence had to go: after the ENSO
 # split both files are MIGRATED 21-parameter vectors carrying an ocean pair of
 # EXACTLY 0, and 0 is not where the objective wants it. Measured on the shipped
@@ -226,7 +226,7 @@ MS_DISPERSED_FROM <- 6L        # every id at or above this one is a random draw
 # +0.20 -> +0.03, -0.10 -> -5.45 (2026-09-01, shipped table, matched harness;
 # reproduces diag_enso_objective_leverage.R's +1.91 at +0.10).
 # ⚠ A START POINT DOES NOT HAVE TO BE RIGHT -- it has to be somewhere the
-# optimiser would not otherwise go. The precision of this number is irrelevant;
+# optimizer would not otherwise go. The precision of this number is irrelevant;
 # its SIGN and ORDER are the point.
 MS_ENSO_OCN_OPT <- 0.10
 # THE OBSERVATION-IMPLIED PARTITION, which is a DIFFERENT claim from the one
@@ -268,10 +268,10 @@ MS_TARGETS    <- "calibration/torch/port_targets.csv"
 #       POINT, which is measured, not assumed (2026-09-15; MS_PORT_FLOOR_* below).
 #       This is what actually catches a bad port -- a different BLAS, a
 #       different libm, a half-copied data file.
-#   (b) the FINAL value is the result of an OPTIMISATION from that point, so the
+#   (b) the FINAL value is the result of an OPTIMIZATION from that point, so the
 #       only claim available is an ORDERING: it may not come back WORSE than
 #       where it started. No invented threshold ([[threshold_from_obs_or_law]]).
-# The old single 1.0-log-unit bound was neither: it compared an optimised value
+# The old single 1.0-log-unit bound was neither: it compared an optimized value
 # against the mode file's STORED logpost, 85 % of which the incumbent's known
 # -0.85 objective-drift offset spent before the port was even considered.
 MS_EVAL_TOL   <- 1e-8         # relative, on a pure evaluation identity -- the FLOOR of gate (a)'s bound
@@ -571,7 +571,7 @@ if (length(.ms_inert_free))
 # WITHOUT the cell (2026-09-16 f): `w_eq` / `gamma_eq` do not reach the model
 # when eq_frac = 0, so a free pair is a likelihood-flat direction held only by
 # its prior -- the E array (hilda_c, 09-15) fitted them free and they sat at
-# the prior's centre (27.13 Sv, 1.00) for 32 wasted dimensions of Hessian.
+# the prior's center (27.13 Sv, 1.00) for 32 wasted dimensions of Hessian.
 if (!ccx_eq_on(bp)) {
   .ms_cell_free <- intersect(c("w_eq", "gamma_eq"), CCX_PARAM_NAMES)
   if (length(.ms_cell_free))
@@ -629,7 +629,7 @@ neg_lp <- function(u) {
 # (the ocean pair; else the limb's w_enso_l2 at an edge of Meinen's per-index bracket, the product obs_eq_cell.rds,
 # "hi" = 25 for the incumbent side and the obs slot, "lo" = 14 for the new-basin side; plus the land pair for the obs
 # slot), and asks the ENCODER whether anything moved. A slot that moved nothing is UNSEEDABLE and runs this id's own
-# dispersed draw, labelled so (RULED: "an unseedable seeded slot becomes a dispersed draw, labelled as such").
+# dispersed draw, labeled so (RULED: "an unseedable seeded slot becomes a dispersed draw, labelled as such").
 .ms_limb_on    <- ccx_l2_on(bp)                       # bp = the run's own base (structure applied above)
 MS_L2_SEED_SV <- ccx_eq_cell_obs()$w0_prior$interannual$per_index_sv   # c(14, 25) Sv per index, Meinen 2001
 MS_FIXED_IDS  <- seq.int(0L, MS_DISPERSED_FROM - 1L)  # the ids that are not random draws by NUMBER
@@ -711,7 +711,7 @@ ms_start <- function(id) {
 
 # ---- PREFLIGHT: prove the whole array is launchable WITHOUT launching it ----
 # ⭐ `CCX_MS_PREFLIGHT=1` runs everything up to and including the port gate and
-# the start draw, prints one line, and EXITS 0 without optimising. Looping it
+# the start draw, prints one line, and EXITS 0 without optimizing. Looping it
 # over every id in the array validates the entire submission in ~2 s per task
 # instead of discovering a bad one after 3 h x 40 of fairshare.
 #
@@ -736,7 +736,7 @@ cat(sprintf("infeasible-step penalty: log-post %.4g (= max(%.0e, %d x |start|));
 # ⭐ THE FIXED REFERENCE POINT'S VALUE, CAPTURED BEFORE ANY RESUME CAN MOVE IT.
 # ⛔ THE BUG THIS KILLS (found 2026-09-01 by re-submitting reference id 1):
 # PORT GATE (a) used to read whatever the run STARTED FROM, which after a
-# checkpoint resume is the OPTIMISER'S progress, not the reference point. So
+# checkpoint resume is the OPTIMIZER'S progress, not the reference point. So
 # re-submitting an array to continue it -- the workflow the README recommends,
 # and the whole reason tasks checkpoint -- made a reference task abort with
 # "this machine does not reproduce the objective ... STOP AND DIAGNOSE", a
@@ -746,7 +746,7 @@ MS_REF_LP <- -best
 trace <- data.frame(cycle = 0L, restart = 0L, logpost = -best, evals = 0L)
 cyc0 <- 1L
 MS_RESUMED <- FALSE
-# THE KEPT PAIR'S RECORD (2026-10-08 c): per optimiser step, f(kept par) - the value the optimiser CLAIMED for it
+# THE KEPT PAIR'S RECORD (2026-10-08 c): per optimizer step, f(kept par) - the value the optimizer CLAIMED for it
 # (ms_kept_pair(), calibration/lib_ms_deadline.R). Non-zero = optim() returned a point it never evaluated.
 claim_gaps <- numeric(0)
 if (file.exists(MS_CKPT)) {
@@ -790,14 +790,14 @@ if (file.exists(MS_CKPT)) {
          "CCX_MS_OUTDIR for a new objective; do not mix them in one directory.")
   u <- ck$u; best <- ck$best; trace <- ck$trace; cyc0 <- ck$cycle + 1L
   MS_RESUMED <- TRUE
-  # RE-PAIRED (2026-10-08 c): a checkpoint written before the kept-pair fix stored the optimiser's CLAIM as `best`
+  # RE-PAIRED (2026-10-08 c): a checkpoint written before the kept-pair fix stored the optimizer's CLAIM as `best`
   .kp <- ms_kept_pair(list(par = u, value = best), neg_lp); best <- .kp$value
   claim_gaps <- c(if (is.null(ck$claim_gaps)) numeric(0) else ck$claim_gaps, .kp$gap)
   cat(sprintf("RESUMED from checkpoint at cycle %d, log-post %.4f\n", ck$cycle, -best))
 }
 # TWO NUMBERS, SAID SEPARATELY. Printing one line for both is how the gate came
 # to conflate them: on a resumed run the old line claimed the DRAW landed where
-# the OPTIMISER had got to.
+# the OPTIMIZER had got to.
 cat(sprintf("start point: %s (%d draw%s), log-post there = %.4f\n",
             st$kind, st$draws, if (st$draws == 1L) "" else "s", MS_REF_LP))
 if (MS_RESUMED)
@@ -822,7 +822,7 @@ local({
   # FIXED point and a seed is a start -- so it evaluates the NEW-BASIN reference point
   # -- one extra objective call, well under a second -- and checks that. The
   # reason is fairshare, not elegance: without it, an array submitted without
-  # its gate batch (or after the table moved) would spend 40 x 3.5 h optimising
+  # its gate batch (or after the table moved) would spend 40 x 3.5 h optimizing
   # a different objective and only the collector would ever notice. With it, a
   # broken port kills every task in about two seconds.
   if (is.na(nm)) nm <- "new_basin"
@@ -847,7 +847,7 @@ local({
     stop("port targets were recorded on a ", r$n_par[1], "-parameter build; ",
          "this build fits ", length(CCX_PARAM_NAMES), ". The target is stale.")
   # ⭐ THE TARGET MUST HAVE BEEN MEASURED UNDER THIS TABLE. A widened or
-  # re-centred bracket shifts every logpost by a reparameterisation constant, so
+  # re-centered bracket shifts every logpost by a reparameterization constant, so
   # a target from another table fails gate (a) for a reason that has nothing to
   # do with the port -- and would be read as a bad port. The 09-01 `kz`
   # re-bisection is exactly that event. Older CSVs carry no bracket columns;
@@ -1091,7 +1091,7 @@ for (cyc in seq(cyc0, MS_CYCLES)) {
     # the restart's deadline leaves the polish its reserved slice, as maxit_for_budget() does
     fit <- ms_run_step(MS_STEP, u, best, neg_lp, "Nelder-Mead", list(maxit = mx, reltol = 1e-12),
                        deadline = t0 + 60 * (MS_BUDGET_MIN - polish_reserve_min()))
-    # NORMALISED to a FULL restart, because a shortened one is not comparable and
+    # NORMALIZED to a FULL restart, because a shortened one is not comparable and
     # feeding it back raw would make the projection shrink every cycle -- by the
     # evaluations it ACTUALLY made (option A, proposal §3), not the planned maxit.
     restart_min <- c(restart_min, ms_restart_minutes((ms_now() - .r0) / 60, MS_MAXIT, n_eval - .n0))
@@ -1103,7 +1103,7 @@ for (cyc in seq(cyc0, MS_CYCLES)) {
     }
     # ⛔ THE KEPT PAIR (2026-10-08 c): `best` is f(the kept u), evaluated, never optim()'s claim for it -- the two differ
     # by the objective's noise floor when optim() returns a point it never evaluated (memory
-    # objective_noise_floor_optimum_on_spike; CHANGELOG 2026-10-08 a/c). The optimiser's path is unchanged.
+    # objective_noise_floor_optimum_on_spike; CHANGELOG 2026-10-08 a/c). The optimizer's path is unchanged.
     .kp <- ms_kept_pair(fit, neg_lp); claim_gaps <- c(claim_gaps, .kp$gap)
     gain <- best - .kp$value; u <- .kp$par; best <- .kp$value
     cat(sprintf("[%03d] cycle %d restart %2d: log-post = %12.4f (gain %10.4f) evals %d  %.1f %s\n",
@@ -1213,7 +1213,7 @@ if (out_of_time)
 names(u) <- CCX_PARAM_NAMES
 pm <- ccx_unc_to_par(u)
 # THE STAMP READS THE STRUCTURE THE FIT READ (2026-09-17). The objective
-# evaluates every prior at `bp` + the draw (u_hs's Sv-to-m/yr centre converts at
+# evaluates every prior at `bp` + the draw (u_hs's Sv-to-m/yr center converts at
 # the LIVE hs_frac, 2026-09-16 d); this stamp passed no list, so ccx_prior_z()
 # fell back to the built 0.16 and every hilda_c start file recorded u_hs at
 # z +0.16 where the objective had scored it at -0.75. The fit was right (the
@@ -1224,7 +1224,7 @@ zs <- vapply(CCX_PARAM_NAMES,
              function(n) tryCatch(ccx_prior_z(n, pm[[n]], p = p_stamp), error = function(e) NA_real_),
              numeric(1))
 # DEAD-TASK CHECK (2026-09-10): the point this task reports must be a point OF
-# THE OBJECTIVE -- finite under lp_fun itself, and equal to what the optimiser
+# THE OBJECTIVE -- finite under lp_fun itself, and equal to what the optimizer
 # says. A best on the penalty plateau is not a result; before this check it was
 # written as converged = TRUE and exited 0 (ids 9/12/23 of 17343694). RECORDED
 # in the file (so the collector can refuse it) AND fatal below (so SLURM says FAILED).
@@ -1268,11 +1268,11 @@ res <- list(id = MS_ID, kind = st$kind, u_mode = u, par_mode = pm, logpost = -be
             # promote_multistart_mode.R applies them before GATE 1; ccx_mode_base() carries them.
             pins = MS_PINS,
             # RECORDED **AND** READ by collect_dispersed_multistart.R's VERDICT.
-            # ⛔ THE BOUND ON "did this start reach that one" IS THIS OPTIMISER'S
+            # ⛔ THE BOUND ON "did this start reach that one" IS THIS OPTIMIZER'S
             # OWN CONVERGENCE TOLERANCE, and the only file that knows it is the
             # one that ran it. Before 2026-09-01e the collector hardcoded 1e-8 --
             # the right bound for the EVALUATION identity of the port gate and
-            # the wrong one for comparing two optimiser OUTPUTS -- and printed
+            # the wrong one for comparing two optimizer OUTPUTS -- and printed
             # "4 dispersed starts did NOT reach the best re-converged known
             # basin" for a difference of -0.0000 [[gate_bound_matches_its_claim]].
             restart_tol = MS_TOL, cycle_tol = MS_CYCLE_TOL,
@@ -1318,7 +1318,7 @@ cat(sprintf("\n[%03d] FINAL log-post %.4f  (%s, %d restart%s, %d evals, %.1f %s%
 # the compile and the checkpoint writes are not per-eval costs, and a task with
 # NO restart has no rate at all rather than a large one.
 # ⚠ FIXED 2026-10-06 (Marcus: "Fix eval-rate line (Recommended)"): this printed
-# 60 x sum(restart_min) / n_eval, NORMALISED minutes over ALL evals (the polish's
+# 60 x sum(restart_min) / n_eval, NORMALIZED minutes over ALL evals (the polish's
 # too), wrong both ways -- 0.0333 for a true 0.2935, 32.8 for a true 1.149 (CHANGELOG
 # 10-06 d). ms_eval_rate_sec() is the slowest restart's rate, the one the polish
 # and maxit_for_budget() size on.
@@ -1348,7 +1348,7 @@ if (dead_unpaired)
        "f(the kept u) since 2026-10-08 c, so this is a BOOKKEEPING DEFECT in the driver, not a property of the point. ",
        "The start file is written for the post-mortem; do NOT collect it as a basin until the defect is found.")
 # ---- PORT GATE (b): an ORDERING, which is the only claim available about an
-# OPTIMISED value. A maximiser that returns less than it was handed is broken,
+# OPTIMIZED value. A maximizer that returns less than it was handed is broken,
 # and that is true of every start, not only the reference ones -- so this one
 # runs unconditionally.
 if (-best < MS_START_LP - MS_EVAL_TOL * abs(MS_START_LP))

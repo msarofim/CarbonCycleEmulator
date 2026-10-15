@@ -4,7 +4,7 @@
 # WHAT THIS MEASURES AND WHY IT IS OWED. `diag_app_params.R`'s gate 5 found a
 # 13.1 ppm step at 2024 between the Keeling tab (scenario "historical" = the GCB
 # budget) and the Futures tab (an SSP, whose historical segment is the SSP/LUH2
-# harmonisation) -- two inventories over the same years, both drawn as "the
+# harmonization) -- two inventories over the same years, both drawn as "the
 # model". That was measured 2026-08-21 at a pre-`hilda29l` parameter vector and
 # before the periodic-spinup fix (09-21 i), so the NUMBER is stale even though
 # the mechanism is parameter-independent. `notes/plan_2026-09-22_product_beta_
@@ -33,10 +33,10 @@
 XT_DATE       <- format(Sys.Date(), "%Y%m%d")
 XT_HIST_TAB   <- "The Keeling Curve"        # tab 1: scenario "historical"
 XT_FUT_TAB    <- "Futures"                  # tab 5: an SSP over APP_FUTURE_YEARS
-# ⚠ The stylised pathway is a PILL INSIDE the Futures tab ("Build your own"),
+# ⚠ The stylized pathway is a PILL INSIDE the Futures tab ("Build your own"),
 # not the "What if...?" tab, which is the MECHANISM tab and runs the historical
 # scenario over 1750-2024 -- i.e. on the GCB budget, with no step.
-XT_WHATIF_TAB <- "Futures > Build own"      # the stylised, hybrid inventory
+XT_WHATIF_TAB <- "Futures > Build own"      # the stylized, hybrid inventory
 XT_SCEN       <- "ssp245"                   # the Futures tab's default scenario
 XT_READ_YEAR  <- 2024                       # the year the app's takeaway reads
 XT_END_YEAR   <- 2100                       # what the step costs at the far end
@@ -142,7 +142,7 @@ xt_unspliced <- function(scenario, emissions = NULL) {
 }
 xt_read <- function(r, year) r$climate$co2_ppm[r$climate$year == year]
 
-# The stylised table, exactly as server.R builds it for the Build-your-own pill.
+# The stylized table, exactly as server.R builds it for the Build-your-own pill.
 xt_sty_em <- app_stylised_emissions("scenario", APP_FUTURE_YEARS,
                                     background = XT_SCEN)
 

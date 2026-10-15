@@ -9,12 +9,12 @@
 # set (LIK_EXCESS_C14_TARGET) and HOW LARGE the shared method error
 # (LIK_EXCESS_C14_REP_FRAC).
 #
-# METHOD. profile_bomb_total.R already re-optimised every other parameter at
+# METHOD. profile_bomb_total.R already re-optimized every other parameter at
 # each fixed bomb_total, under both target sets. Two facts from that run make
 # this cheap and safe:
-#   * the modelled ocean excess is a function of bomb_total essentially alone
+#   * the modeled ocean excess is a function of bomb_total essentially alone
 #     (52.7/64.4 vs 52.7/64.7 kmol at bt = 102 under the two target sets), so
-#     the term can be re-scored on the stored excesses without re-optimising;
+#     the term can be re-scored on the stored excesses without re-optimizing;
 #   * the profile's own logpost minus its own excess term gives what the REST of
 #     the likelihood prefers, which is the bar the constraint has to clear.
 #

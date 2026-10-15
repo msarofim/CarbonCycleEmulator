@@ -9,7 +9,7 @@
 # shape a unit-mean peak-to-peak of 2.80, which on ~28 GtC/yr of NH NPP is a
 # ~78 GtC/yr seasonal swing -- and the channel budget
 # (diag_seas_channel_decomp.R) found NEP and respiration each about 2x the net
-# and 6.6 months antiphase, cancelling. An over-driven NEP channel is exactly
+# and 6.6 months antiphase, canceling. An over-driven NEP channel is exactly
 # what would force an over-large respiration channel to cancel it, and 48 K of
 # seasonal land temperature is what that cancellation costs.
 #
@@ -25,7 +25,7 @@
 # model's own premise, taken locally -- and the hemisphere's aggregate shape is
 #     N_agg(t) = sum_i w_i * insol(phi_i, t) / mean_t insol(phi_i, .)   / sum_i w_i
 # with w_i the cell's ANNUAL NPP. phi_eff is then the latitude whose own
-# normalised shape best matches N_agg. Because insolation is strongly nonlinear
+# normalized shape best matches N_agg. Because insolation is strongly nonlinear
 # in latitude (polar night rectifies the shape), that is NOT the same number as
 # the NPP-weighted mean latitude, and both are reported so the difference is
 # visible rather than assumed away.

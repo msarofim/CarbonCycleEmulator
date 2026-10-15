@@ -232,7 +232,7 @@ ccx_cpp_par <- function(p) {
   # (2026-09-09t). Until today the C++ gated it on `aux$mld_coef`'s PRESENCE
   # while R gated on ccx_seas_ml_on(p) -- two gates for one mechanism. Because
   # ccx_spinup() builds `aux` from the un-zeroed `p` and only THEN sets
-  # seas_drivers = 0, the zeroing was honoured by R and IGNORED by C++: every
+  # seas_drivers = 0, the zeroing was honored by R and IGNORED by C++: every
   # equilibrium solve runs through the C++ path, so the "aseasonal"
   # preindustrial equilibrium was the one that balances a spurious entrainment
   # limb frozen at the spinup epoch (-1940.2 GtC of ocean carbon at hilda31).
@@ -240,11 +240,11 @@ ccx_cpp_par <- function(p) {
   # computed by the function the R core itself calls, so the two cores cannot
   # hold a second opinion about whether the mechanism is on.
   p$seas_ml_on <- as.integer(ccx_seas_ml_on(p))
-  # Volcanic diffuse-light fertilisation, added 2026-08-29 and ADOPTED at 0.25
+  # Volcanic diffuse-light fertilization, added 2026-08-29 and ADOPTED at 0.25
   # the same day. Defaults to the SAME named constant ccx_default_params() uses,
   # so a hand-built parameter list cannot reach the core with a different
   # mechanism strength than the R path would have given it.
-  # ⚠ This is no longer the behaviour-preserving fallback it was when the value
+  # ⚠ This is no longer the behavior-preserving fallback it was when the value
   # was 0: a pre-2026-08-29 parameter list now reaches the core with the
   # mechanism ON. That is the adoption, and it is why every vector fitted before
   # the adoption is non-comparable.
@@ -265,7 +265,7 @@ ccx_cpp_par <- function(p) {
   # HILDA high-latitude boxes, added 2026-09-05. Defaulted here as well as in
   # ccx_default_params() so a parameter list built before that date cannot reach
   # the core with a missing name (which would THROW -- see the correction above).
-  # The behaviour-preserving values are the OFF ones: hs_frac = 0 (in the aux,
+  # The behavior-preserving values are the OFF ones: hs_frac = 0 (in the aux,
   # via ccx_hs_on()) means the boxes are absent, and these two are then inert.
   if (is.null(p$u_hs))  p$u_hs  <- 0
   if (is.null(p$tau_q)) p$tau_q <- 0
@@ -293,7 +293,7 @@ ccx_cpp_par <- function(p) {
   if (is.null(p$q_attach_from)) p$q_attach_from <- 1
   if (is.null(p$npp_veg_frac)) p$npp_veg_frac <- 0
   if (is.null(p$ra_ratio)) p$ra_ratio <- 0
-  # Fertilisation form, added 2026-08-14. Defaults to the SAME named constant
+  # Fertilization form, added 2026-08-14. Defaults to the SAME named constant
   # ccx_default_params() uses -- and that constant is the LOG form, so a
   # parameter list built before today reaches the core as the model it was
   # written for. beta_max / fert_k are inert under FERT_LOG but must still be
@@ -307,14 +307,14 @@ ccx_cpp_par <- function(p) {
   # parameter list built before that date must reach the core as the
   # pure-diffusion model it was written for, not as garbage.
   # Land-use permanence, added 2026-08-13. UNLIKE the switches above this does
-  # NOT default to the old behaviour: a parameter list built before the fix is a
+  # NOT default to the old behavior: a parameter list built before the fix is a
   # list built against a bug (land-use carbon with an airborne fraction of 0.002
   # at 100 years), so it defaults to the SAME named constant ccx_default_params()
   # uses. If the two ever disagree, the C++ core silently runs a different model
   # from the R one -- which is exactly what gamma_enso did.
   if (is.null(p$f_luc_perm)) p$f_luc_perm <- CCX_F_LUC_PERM_DEFAULT
   # WHERE the debit comes from. Like f_luc_perm, this does NOT default to the
-  # old behaviour: wood-only (= 1) was the incumbent when the switch was added
+  # old behavior: wood-only (= 1) was the incumbent when the switch was added
   # (b3108d7), but ea7c70b ADOPTED pro rata and flipped the constant to 0, so a
   # pre-ea7c70b parameter list must reach the core as the pro-rata model that
   # ships today. Read the default off CCX_F_LUC_WOOD_DEFAULT, never off this
@@ -399,7 +399,7 @@ ccx_cpp_par <- function(p) {
   # EXCHANGING passive share under the name `litter_slow_frac` and never sees
   # `soil_inert_frac`. Same rule as gamma_enso / seas_ml_on above -- one
   # resolution, so the two cores cannot disagree -- and the C++ source is
-  # untouched. Its only other use, aux$land0, is marshalled from the R aux.
+  # untouched. Its only other use, aux$land0, is marshaled from the R aux.
   # After the land-structure check, so a list missing litter_slow_frac fails
   # there by name. Absent or 0 passes litter_slow_frac through unchanged (bit-exact).
   p$litter_slow_frac <- ccx_litter_slow_eff(p)
@@ -495,7 +495,7 @@ ccx_cpp_forcing <- function(F) {
 #' @param retry_na if the run still produces NAs (the air-sea corner, which the
 #'   diffusion criterion deliberately does not cover), double the substep count
 #'   and try again, up to CCX_SUBSTEPS_MAX. A NA that survives that is a real
-#'   model failure, not an integrator artefact -- which is the whole point: a
+#'   model failure, not an integrator artifact -- which is the whole point: a
 #'   caller's `anyNA` -> -Inf guard must not double as a prior bound.
 ccx_run_fast <- function(spin, F, substeps = "auto", retry_na = TRUE) {
   if (!inherits(F, "ccx_cpp_forcing")) F <- ccx_fill_prod_c14(F, spin)   # finding 6 (09-16 d); see R/forcing.R
@@ -505,14 +505,14 @@ ccx_run_fast <- function(spin, F, substeps = "auto", retry_na = TRUE) {
                    enso_hist = spin$enso_hist, tdeep0 = spin$tdeep0)
 }
 
-#' The MARSHALLED arguments of `ccx_run_fast()`, built ONCE for many runs
+#' The MARSHALED arguments of `ccx_run_fast()`, built ONCE for many runs
 #'
 #' `ccx_periodic_spinup()` calls the one-year map ~260-300 times per objective
 #' evaluation with the SAME `params`/`aux`/`grid` and a different `y`, and each
 #' call re-ran `ccx_cpp_par()`, `ccx_cpp_aux()` and the substep resolution
 #' (an eigenvalue bound) -- 23 % of every evaluation (review 2026-09-12, B1).
 #' This marshals once; `ccx_run_prepared()` runs from it. `ccx_run_fast()` is
-#' now the one-shot composition of the two, so there is ONE marshalling path
+#' now the one-shot composition of the two, so there is ONE marshaling path
 #' and the numbers that reach the core are the same bytes either way.
 #'
 #' ⚠ A prepared object is bound to the `params`/`aux`/`grid` it was built from.
@@ -542,7 +542,7 @@ ccx_run_prepare <- function(spin, substeps = "auto") {
        mix_p = if (ccx_mix_on(spin$params)) spin$params[c("mix_strat_s", "mix_strat_q", "mix_strat_tau")] else NULL)
 }
 
-#' A forcing table marshalled ONCE for many `ccx_run_prepared()` calls
+#' A forcing table marshaled ONCE for many `ccx_run_prepared()` calls
 ccx_cpp_forcing_prep <- function(F) {
   structure(list(mat = ccx_cpp_forcing(F), t = F$t), class = "ccx_cpp_forcing",
             enso_index = attr(F, "enso_index"), aod_mode = attr(F, "aod_mode"),
@@ -628,10 +628,10 @@ ccx_out_na_guard_cols <- function(out, p) {
   cols
 }
 
-#' The MARSHALLED `p`/`aux` of `ccx_deriv_fast()`, built ONCE for many calls
+#' The MARSHALED `p`/`aux` of `ccx_deriv_fast()`, built ONCE for many calls
 #'
 #' `ccx_spinup()` makes ~190 single-derivative calls per solve on ONE
-#' `(p0, aux, grid)` and each re-marshalled both lists -- about half of the
+#' `(p0, aux, grid)` and each re-marshaled both lists -- about half of the
 #' spinup's wall time (review 2026-09-12, B2). Same binding caveat as
 #' `ccx_run_prepare()`: it is tied to the pair it was built from.
 ccx_deriv_prepare <- function(p, aux, grid) {
@@ -646,7 +646,7 @@ ccx_deriv_prepare <- function(p, aux, grid) {
 #'   `ccx_cpp_forcing_vec()` builds from one (the spinup flattens its three
 #'   constant forcings once).
 #' @param prep an optional `ccx_deriv_prepare(p, aux, grid)`; when given, `p`,
-#'   `grid` and `aux` are not re-marshalled (they must be the same objects).
+#'   `grid` and `aux` are not re-marshaled (they must be the same objects).
 ccx_deriv_fast <- function(y, t, p, forc, grid, aux, prep = NULL) {
   ccx_load_cpp()
   f <- if (is.numeric(forc)) forc else ccx_cpp_forcing_vec(forc)

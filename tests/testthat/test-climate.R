@@ -125,7 +125,7 @@ test_that("the carbon-climate feedback is actually engaged", {
 
 test_that("caller-supplied emissions override the scenario, conserving totals", {
   skip_if_no_cpp()
-  # The path the app's stylised scenarios and pulses take.
+  # The path the app's stylized scenarios and pulses take.
   yrs <- 1750:2100
   em <- data.frame(year = yrs,
                    fossil_GtC = ifelse(yrs < 2000, 0, 5),

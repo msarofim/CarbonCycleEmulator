@@ -5,7 +5,7 @@
 # Three interior D14C levels (1500-2000, 2000-2627, 2627-bottom m) at ~13 permil
 # each cannot distinguish an abyss filled from below (bottom YOUNGER than the
 # layer above it -- the conduit's mid-depth minimum) from a column with a sharp
-# K(z) and a deep mixed layer (monotone ageing). But the three means are built
+# K(z) and a deep mixed layer (monotone aging). But the three means are built
 # from the SAME 5x10 deg columns at different depths, so their sampling errors
 # are strongly correlated and the CONTRASTS (B - deep, A - B) are known far
 # better than the levels. This measures the joint covariance of the three means

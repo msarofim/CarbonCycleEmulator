@@ -1,5 +1,5 @@
 # =====================================================================
-# test-volcanic-diffuse.R -- volcanic diffuse-light fertilisation (2026-08-29)
+# test-volcanic-diffuse.R -- volcanic diffuse-light fertilization (2026-08-29)
 #
 # ⚠ THE THIRD TEST IS THE ONE THAT MATTERS AND IT EXISTS BECAUSE THE BUG
 # HAPPENED. `src/ccx_core.cpp` carries `N_FORCING`, a hardcoded row width, and
@@ -35,7 +35,7 @@ test_that("gamma_diff defaults to the ADOPTED value, and absence means the same"
   skip_if_no_cpp()
   # THE OLD SECOND HALF, RETAINED BUT RE-AIMED. It used to assert that an
   # explicit default and an ABSENT gamma_diff give bit-identical runs, and
-  # called that "0 is behaviour-preserving". The behaviour-preservation claim
+  # called that "0 is behaviour-preserving". The behavior-preservation claim
   # is gone with the adoption; the AGREEMENT claim is not, and is now the
   # thing worth pinning -- an old parameter list must reach the model as the
   # adopted mechanism, not silently as the old one.

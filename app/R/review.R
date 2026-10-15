@@ -15,7 +15,7 @@
 # WHAT IS EXPENSIVE. Cards 2, 3, 4 and 5 each need a model run that the app does
 # not already have (a gate run to 2025, a knockout run, a 1000-year pulse pair).
 # (2026-10-15 review: card 2 added -- rv_gradients() reads the same gate run as card 3.)
-# Each is memoised in RV_CACHE and computed on FIRST VIEW, not at startup --
+# Each is memoized in RV_CACHE and computed on FIRST VIEW, not at startup --
 # startup is already the app's worst number (APP_WARMUP_NOTE) and nobody should
 # pay for a tab they never open. (The old card 6, the one that spun up a second mode,
 # was RETIRED 2026-10-01; see the ledger.)
@@ -85,8 +85,8 @@ RV_FAIR_BAND_FMT   <- "%s, 5\u201395 %% of configurations"   # legend: label, th
 # ⚠ THIS IS A DIFFERENT LIST FROM THE PINS, and conflating them is the bug N12
 # caught. A PIN is generated -- it is a property of the mode file the app is
 # running, and rv_stand_ins() reads it off that file. A STAND-IN is a
-# JUDGEMENT: that a fitted name absorbs a discrepancy rather than representing
-# a process. Nothing in the parameter table records that judgement, so it is
+# JUDGMENT: that a fitted name absorbs a discrepancy rather than representing
+# a process. Nothing in the parameter table records that judgment, so it is
 # written here, with its source, rather than derived.
 #
 # SOURCE: the whole-model review of 2026-09-16 (d),
@@ -186,7 +186,7 @@ RV_REP_OBS_D13C_SH <- -0.011  # permil, hemispheric mean minus SPO
 # ---------------------------------------------------------------------
 RV_CACHE <- new.env(parent = emptyenv())
 
-#' Memoise one expensive review computation under `key`
+#' Memoize one expensive review computation under `key`
 #'
 #' Errors are cached too, as a `rv_failed` object, so a kernel that cannot run
 #' is reported once and does not re-throw on every re-render.
@@ -437,7 +437,7 @@ rv_pulse <- function() rv_memo("pulse", function() {
 # control beat the canonical on AIC. At hilda33d the canonical wins on the 24
 # rows the two objectives share (+4.68 log-units, dAIC -5.35), so the premise
 # had turned, and its caption printed "dAIC ... in the simpler version's
-# favour" whatever the sign. Its run (rv_control) and its panel
+# favor" whatever the sign. Its run (rv_control) and its panel
 # (rv_plot_control) went with it. The AIC comparison itself is still gated, in
 # tests/testthat/test-mode-file.R.
 # ---------------------------------------------------------------------
@@ -800,7 +800,7 @@ RV_CARDS <- list(
        # N11 + N12 (Marcus 2026-09-22): the "most that naming buys" clause is
        # cut, and the bigger fix -- the prose named the SHIMS while the table
        # below listed the PINS, and the card presented them as one list. They
-       # are two different things; both are now shown, labelled, with the
+       # are two different things; both are now shown, labeled, with the
        # overlap COMPUTED rather than described (rv_stand_ins()).
        # Marcus 2026-10-02 (carbotopecomment): "rather than quietly absorbed" and "and it is
        # worth keeping them apart" deleted; "parameter", not "name".
@@ -818,7 +818,7 @@ RV_CARDS <- list(
                       # 2026-10-06 (Marcus: "Add a line about k_w to the known issues tab"): wording
                       # DRAFTED for his review. The record: the k_w = 1446 price arm (CHANGELOG 10-05 a)
                       # fits 2.75 BETTER on likelihood; its -20 posterior price is ONE prior,
-                      # hs_asx_frac's judgement width (kept, 10-05 e). test-review-card-numbers.R ties
+                      # hs_asx_frac's judgment width (kept, 10-05 e). test-review-card-numbers.R ties
                       # "1,446" to KW_PRIOR_CENTRE and "about 1,850" to the canonical's fitted k_w.
                       # 2026-10-13 (g): "about 1,900" -> "about 1,850" (Marcus: "about 1,850"): hilda31w's k_w is
                       # 1835.4 (sd 52.5); 1,900 was 1.23 sd off. The next sentence's claim (the data prefer 1,446)

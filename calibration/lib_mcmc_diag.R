@@ -2,10 +2,10 @@
 # lib_mcmc_diag.R -- convergence diagnostics for the MCMC check's chains
 # (calibration/run_mcmc_check.R), read by calibration/read_mcmc_check.R.
 #
-# Rank-normalised split-R-hat, bulk-ESS and tail-ESS as DEFINED by Vehtari,
+# Rank-normalized split-R-hat, bulk-ESS and tail-ESS as DEFINED by Vehtari,
 # Gelman, Simpson, Carpenter & Buerkner (2021), "Rank-normalization, folding, and
 # localization: an improved R-hat for assessing convergence of MCMC", Bayesian
-# Analysis 16(2):667-718, doi:10.1214/20-BA1221: split-R-hat on rank-normalised
+# Analysis 16(2):667-718, doi:10.1214/20-BA1221: split-R-hat on rank-normalized
 # draws (Sec. 4.1, eq. 14), its folded version for the tails, the multi-chain
 # autocorrelation (eq. 10) and Geyer's initial monotone sequence (Sec. 3.2).
 #
@@ -30,7 +30,7 @@ mcd_split <- function(x) {
   cbind(x[seq_len(h), , drop = FALSE], x[(n - h + 1L):n, , drop = FALSE])
 }
 
-# Rank-normalise the POOLED draws, keeping the iterations x chains shape (eq. 14).
+# Rank-normalize the POOLED draws, keeping the iterations x chains shape (eq. 14).
 mcd_z <- function(x) {
   r <- rank(x, ties.method = "average")
   matrix(stats::qnorm((r - MCD_RANK_OFFSET) / (length(r) - 2 * MCD_RANK_OFFSET + 1)),
@@ -45,7 +45,7 @@ mcd_rhat_basic <- function(x) {
   sqrt(((n - 1) / n * W + B / n) / W)
 }
 
-# Rank-normalised split-R-hat: the larger of the bulk version and the FOLDED one,
+# Rank-normalized split-R-hat: the larger of the bulk version and the FOLDED one,
 # |x - median|, which sees chains that agree in location but not in scale.
 mcd_rhat <- function(x) {
   x <- as.matrix(x)
@@ -106,7 +106,7 @@ mcd_ess_basic <- function(x) {
   S / max(tau, 1 / log10(S))
 }
 
-# Bulk-ESS: the ESS of the rank-normalised split chains.
+# Bulk-ESS: the ESS of the rank-normalized split chains.
 mcd_ess_bulk <- function(x) mcd_ess_basic(mcd_z(mcd_split(as.matrix(x))))
 
 # Tail-ESS: the smaller ESS of the two tail-quantile indicators.

@@ -1,7 +1,7 @@
 # =====================================================================
 # T-L (handoff 2026-09-08g §1): COMPARISON L (a gate until the 09-08h ruling) -- the LAND share of a 100 GtC pulse at
 # 100 and 1000 yr against Joos et al. 2013's multi-model split, at the
-# canonical hilda31, with its mutation arm (land CO2 fertilisation OFF).
+# canonical hilda31, with its mutation arm (land CO2 fertilization OFF).
 #
 # PRE-REGISTERED: the canonical FAILS (land > 30 % at 1000 yr).
 # FALSIFIED IF: it passes -- then option H's reading is wrong.
@@ -22,7 +22,7 @@ TL_OUT <- ccx_path("outputs", "diagnostics", sprintf("tl_land_share_gate_%s.rds"
 v <- dg_vector(CCX_MODE_CANONICAL)
 arm_of <- function(a) switch(a,
   canonical = v,
-  land_off  = { w <- v; w$p$beta_max <- 0; w },         # no CO2 fertilisation: the land cannot take up the pulse
+  land_off  = { w <- v; w$p$beta_max <- 0; w },         # no CO2 fertilization: the land cannot take up the pulse
   column_control = dg_vector(CCX_MODE_COLUMN_CONTROL))
 cat(sprintf("GATE L at %s: Joos 2013 1000-yr split land %g +/- %g, ocean %g +/- %g, air %g +/- %g %% (%s); bound |z_land| <= %g -> [%g, %g] %%\n",
             CCX_MODE_CANONICAL, DG_L_JOOS$land[["mean"]], DG_L_JOOS$land[["sd"]], DG_L_JOOS$ocean[["mean"]], DG_L_JOOS$ocean[["sd"]], DG_L_JOOS$air[["mean"]], DG_L_JOOS$air[["sd"]], DG_L_JOOS$src, DG_L_NSD,

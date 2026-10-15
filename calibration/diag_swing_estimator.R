@@ -3,7 +3,7 @@
 #
 # handoff 21d sec.10 TEST 2 reported an ice-derived CO2 growth rate that
 # "nearly halves in the 1950s (0.376 -> 0.207) and then jumps to 0.523", and
-# read that localised pause as the crossover of the ~9 ppm level swing. That
+# read that localized pause as the crossover of the ~9 ppm level swing. That
 # table set the next session's priority (sec.12c: go after the LUC time
 # profile).
 #
@@ -15,7 +15,7 @@
 # FOUR GATES:
 #   GATE 1 -- the same decadal growth rates from a raw within-decade OLS on the
 #             samples, with no smoother anywhere. If the decade of the minimum
-#             or its depth moves, TEST 2's localisation is the estimator.
+#             or its depth moves, TEST 2's localization is the estimator.
 #   GATE 2 -- the noise floor. Over the ice/SPO overlap, the same estimator on
 #             both products. SPO is a flask record with no firn and no gas age,
 #             so ice-minus-SPO on the SAME estimator is this record's own

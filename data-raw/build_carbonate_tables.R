@@ -50,7 +50,7 @@ K1K2_FORM     <- "l"         # Lueker et al. (2000)
 KF_FORM       <- "pf"        # Perez & Fraga (1987)
 PH_SCALE      <- "T"         # total scale
 BORON_FORM    <- "u74"       # Uppstrom (1974) boron:salinity
-# Fits are done in a CENTRED, SCALED temperature x = (T - T0)/Ts. Fitting in raw
+# Fits are done in a CENTERED, SCALED temperature x = (T - T0)/Ts. Fitting in raw
 # T is badly conditioned once T^5 reaches ~5e7, which showed up as a Kw fit 1000x
 # worse than the other constants. Scaling fixes it; the scaling is stored with
 # the coefficients so evaluation stays consistent.

@@ -9,7 +9,7 @@
 # only fittable lever on the 0.821 ppm of SPO's seasonal land component that
 # arrives FROM THE NH. That is a good hypothesis. It is also one whose null is
 # at risk of being STRUCTURALLY GUARANTEED: if the interhemispheric-gradient
-# rows pin `tau_ex` to a few per cent, then "we freed tau_ex and P3 still
+# rows pin `tau_ex` to a few percent, then "we freed tau_ex and P3 still
 # failed" reports exactly what "we did not free it" reports, and neither is
 # evidence about the physics. [[no_power_null]]
 #
@@ -34,8 +34,8 @@
 # not settle. THAT is what is new here, and it needs three things 27e's script
 # says it does not have:
 #   * 27e is FROZEN in the other 20 parameters and its header calls every cost
-#     an OVERSTATEMENT. Here the gradient OFFSETS re-optimise at every node,
-#     and diag_tau_ex_conditional_power.R re-optimises the whole 27h slice.
+#     an OVERSTATEMENT. Here the gradient OFFSETS re-optimize at every node,
+#     and diag_tau_ex_conditional_power.R re-optimizes the whole 27h slice.
 #   * 27e reads the d13C-per-ppm RATIO. The size question needs the SPO
 #     component AMPLITUDES, which sec.3 differences at every node.
 #   * 27e names the frozen `grad_off_co2` as a caveat. It is removed here.
@@ -45,11 +45,11 @@
 #   IS      a POWER measurement, run to make the wider slice's pre-registered
 #           thresholds DERIVABLE from a measured exchange rate instead of
 #           guessed. [[derive_gate_from_the_thing]]
-#   IS NOT  the test itself. It re-optimises NOTHING but the two gradient
+#   IS NOT  the test itself. It re-optimizes NOTHING but the two gradient
 #           OFFSETS, so it cannot and does not score the 27h hypothesis. The
 #           refit is a separate, separately pre-registered run.
 #
-# THE OFFSETS ARE RE-OPTIMISED AT EVERY GRID POINT, AND THAT IS NOT OPTIONAL.
+# THE OFFSETS ARE RE-OPTIMIZED AT EVERY GRID POINT, AND THAT IS NOT OPTIONAL.
 # `grad_off_co2` / `grad_off_d13c` are the nuisance parameters that exist
 # precisely to absorb the station-latitude representation constant
 # (R/calibrate.R, the "interhemispheric-gradient offsets" block). Profiling
@@ -85,11 +85,11 @@ TP_YEARS     <- c(1750, 2024)
 # cannot answer the question it was built to answer.
 TP_MULT      <- c(0.50, 0.63, 0.79, 1.00, 1.03, 1.06, 1.09, 1.12, 1.19,
                   1.26, 1.59, 2.00, 2.52, 3.17, 4.00)
-# The nuisance offsets re-optimised at each grid point, and nothing else.
+# The nuisance offsets re-optimized at each grid point, and nothing else.
 TP_NUISANCE  <- c("grad_off_co2", "grad_off_d13c")
 TP_NUIS_MAXIT <- 400
 # Streams printed in the cost decomposition. The gradient pair is the
-# hypothesised binding constraint; the rest are the rows that could plausibly
+# hypothesized binding constraint; the rest are the rows that could plausibly
 # object to an interhemispheric-transport move.
 TP_COST_ROWS <- c("co2_gradient", "d13c_gradient", "co2_level_MLO",
                   "co2_level_SPO", "d13c_level_MLO", "d13c_level_SPO",

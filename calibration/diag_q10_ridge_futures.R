@@ -9,11 +9,11 @@
 # coupling-by-side-effect that made phi a problem.
 #
 # THE TEST (the unfitted screen's protocol, applied to a FITTED coordinate).
-# Fix q10 at each value in Q10_VALUES and re-optimise the coordinates that can
+# Fix q10 at each value in Q10_VALUES and re-optimize the coordinates that can
 # compensate: its seasonal ridge partners seas_T_amp_NH/SH, and the net-sink
 # setters beta_max, fert_k, kz. Report the log-post cost (an UPPER BOUND on a
 # full refit's) and CO2 at 2100 / 2300 under vvH and vvL, GCB spliced.
-# ⚠ q10 = 2 sits at the prior's centre, so part of any cost is the
+# ⚠ q10 = 2 sits at the prior's center, so part of any cost is the
 # likelihood and part is NOT paid (the prior improves); both are printed.
 #
 # USAGE: Rscript calibration/diag_q10_ridge_futures.R   (~5 min)
@@ -81,7 +81,7 @@ R <- as.data.frame(do.call(rbind, lapply(rows, function(r) as.numeric(unlist(r))
 names(R) <- names(unlist(rows[[1]]))
 # DECOMPOSITION (sign check): q10 = 2 with EVERYTHING else at the mode. Higher q10
 # means a stronger respiration feedback, so on its own it must RAISE future CO2;
-# a lower CO2 in the re-optimised row then has to come from the compensators.
+# a lower CO2 in the re-optimized row then has to come from the compensators.
 dec <- futures(u_at_q10(md$u_mode, 2)) - f0
 cat("\n=== q10 FIXED, ridge partners + sinks RE-OPTIMISED ===\n")
 print(R, digits = 4, row.names = FALSE)

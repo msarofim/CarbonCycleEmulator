@@ -4,7 +4,7 @@
 # Marcus, 2026-09-22 (review N3/K3): "should the prior be zero? I wouldn't be
 # surprised if there is supposed to be a station/hemisphere offset."  This
 # script measures the offset that actually exists and puts it next to the one
-# the canonical fits. It settles nothing on its own -- R2 (the prior centre) is
+# the canonical fits. It settles nothing on its own -- R2 (the prior center) is
 # an OBJECTIVE change and therefore Marcus's ruling -- but it replaces an
 # argument with a number.
 #
@@ -48,7 +48,7 @@
 #      ⚠ And it cuts the other way too: R/model.R gives each hemisphere ONE
 #      well-mixed troposphere and no stratosphere at all, so what the box
 #      physically IS may be closer to a tropospheric mean than its own unit
-#      conversion claims. That is a modelling question, not a measurement, and
+#      conversion claims. That is a modeling question, not a measurement, and
 #      it is NOT resolved here.
 #
 # Run: Rscript calibration/diag_rep_dc_mbl_zonal.R

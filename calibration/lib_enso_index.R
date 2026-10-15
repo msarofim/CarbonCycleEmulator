@@ -20,7 +20,7 @@
 # =====================================================================
 
 EIX_CLIM_BASE <- c(1991, 2020)   # = ENSO_CLIM_BASE in build_calibration_data.R
-EIX_ROLL_LEN  <- 30              # ONI centred base-period length, years
+EIX_ROLL_LEN  <- 30              # ONI centered base-period length, years
 EIX_ROLL_STEP <- 5               # ONI base-period refresh interval, years
 EIX_BOX_N34   <- list(lat = c(-5, 5), lon = c(190, 240))   # 5S-5N, 170W-120W
 EIX_BOX_TROP  <- list(lat = c(-20, 20), lon = NULL)        # 20S-20N, all lons
@@ -74,8 +74,8 @@ eix_fixed_base <- function(a, base = EIX_CLIM_BASE) {
   data.frame(year = a$year, month = a$month,
              value = a$value - as.numeric(cl[as.character(a$month)]))
 }
-# ONI-style centred base refreshed every EIX_ROLL_STEP years. A block without a
-# full centred window has its window SHIFTED to the nearest full one; `n_clip`
+# ONI-style centered base refreshed every EIX_ROLL_STEP years. A block without a
+# full centered window has its window SHIFTED to the nearest full one; `n_clip`
 # counts those, restricted to blocks intersecting `win`, and is RETURNED so a
 # caller can report the defect rather than inherit it silently.
 eix_roll_base <- function(a, win) {
@@ -145,7 +145,7 @@ eix_detrend <- function(d, win, allow_extrap = FALSE) {
 # `lowpass = TRUE` subtracts only the LOW-FREQUENCY tropical mean, which carries
 # the forced trend but not the 2-7 yr ENSO band: sd 0.866 (1 % lost) and +4.0
 # log-units recovered. That is the version to use if this route is used at all.
-EIX_LF_YEARS <- 21          # centred low-pass, well above the ENSO band
+EIX_LF_YEARS <- 21          # centered low-pass, well above the ENSO band
 eix_relative_sst <- function(lowpass = FALSE) {
   a <- eix_fixed_base(eix_ersst_box(EIX_BOX_N34))
   t <- eix_fixed_base(eix_ersst_box(EIX_BOX_TROP))

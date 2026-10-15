@@ -2,6 +2,30 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-15 (g) — **Code comments in U.S. spelling** (Marcus: "Convert the code comments to U.S. spelling too"). **1,466 words in 420 tracked files** (411 R, 4 Python, 4 shell, 1 C++). **Only comment text changed, proved per file by checks independent of the converter.**
+
+- **What changed:** 167 British forms, each mapped explicitly and case-preserved (CENTRE → CENTER, Labelled → Labeled):
+  - -ise / -isation → -ize / -ization;
+  - -our → -or;
+  - centre / metre → center / meter;
+  - doubled-l forms (modelled, labelled, cancelled …);
+  - artefact, judgement, ageing, programme, licence (noun), defence, analogue, catalogue, grey, per cent, sceptic.
+  - The largest: center 160, fertilization 127, optimized 114, centered 101, optimizer 88, labeled 75, artifact 66.
+- **Left as they were:**
+  - words that are already U.S. (noise, precise, otherwise, called, contour …);
+  - every identifier, file name and path (`test-fertilisation.R`, `kw_prior_centre`, `app_stylised_emissions`), backticked code, and `[[memory slugs]]`;
+  - text in double quotes inside a comment (mostly Marcus's rulings quoted verbatim, old app copy, code strings): 17 occurrences;
+  - `test-app-us-spelling.R`, whose comments name the British forms on purpose;
+  - the run records under `outputs/` and `calibration/output/`, which are frozen copies of what ran;
+  - docs (README, DESIGN, CHANGELOG, `notes/`), which are not code comments.
+- **Checks** (scratch scripts, session-only):
+  - R: `parse(keep.source = FALSE)` before and after, `identical()` in 411 / 411. Mutation: a one-character change in a string literal is caught.
+  - Python: `ast.dump()` identical in 4 / 4.
+  - Shell: every changed line differs only after its `#`, 4 / 4.
+  - C++: clang's preprocessor output, with comments stripped and `#include`s dropped, is identical. ⚠ The first C++ check was VACUOUS: Apple's `g++` is clang and rejects `-fpreprocessed`, so both sides were empty and "identical". Caught by mutation testing. The clang check catches a one-operator flip and ignores a comment-only edit. A first mutation (renaming `CCX_`) was itself bad, since it renamed a macro at its definition and its uses alike.
+  - Word level: every changed word in `git diff --word-diff` is a planned British → U.S. pair.
+- **One comment fixed by hand:** `app/R/plots.R` said the band note's "grey" was "British, as the app", which (f) made stale.
+
 ## 2026-10-15 (f) — **The app's reader-facing text is in U.S. spelling** (Marcus: "Update spelling in the app to be U.S. spelling"). **Twelve strings changed in seven files, and a lint now keeps it that way:** `test-app-us-spelling.R` reads every string literal through R's parser.
 
 - **Changed** (display strings only):

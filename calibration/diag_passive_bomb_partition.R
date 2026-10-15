@@ -16,7 +16,7 @@
 # ⚠ YARDSTICKS: the LAND row of N&L 2006 Table 4 is THEIR MODEL -- the data file
 # says "NO observational estimate exists". Only the TROPOSPHERE (N&L OBS) and
 # the OCEAN (Peacock + Key, the objective's own row) are observations. The land
-# comparison is model-vs-model and is labelled so.
+# comparison is model-vs-model and is labeled so.
 # Rows are read at N&L's citable input (BP_NL_TOTAL, so the partition is
 # compared at a common input) and at each row's FITTED bomb_total.
 # GATE (physical law): 14C is a passive tracer on a carbon state the bomb does

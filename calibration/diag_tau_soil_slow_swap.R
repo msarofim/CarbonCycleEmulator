@@ -4,7 +4,7 @@
 #
 # At the rebalanced 1000/1500-yr rows, ssp585 2300 is 32-40 ppm below the 500-yr
 # control and the land takes up 98-133 GtC more. Two candidates: (1) the
-# rebalanced fert_k (868 -> 984/1003) saturates fertilisation later; (2) the
+# rebalanced fert_k (868 -> 984/1003) saturates fertilization later; (2) the
 # longer passive residence RETAINS extra litter. This walks the control vector
 # to each row ONE COMPONENT AT A TIME and attributes the futures change:
 #   tau  : tau_soil_slow (the pool itself)

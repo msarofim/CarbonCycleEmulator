@@ -46,14 +46,14 @@ QA_SCORED_MIN_DEPTH <- 1500  # bomb addition <= 4.5 permil below this
 QA_GEOSECS_LS <- c(-40, 20)  # HILDA Table 2, attributed to GEOSECS
 # The attachment arms. 1 = every layer = HILDA's depth-independent q = the
 # 09-05 structure. NL is the BOTTOM BOX ONLY -- the declared arm, the boxed
-# analogue of 09-04k2's ML<->bottom conduit, chosen with NO free boundary.
+# analog of 09-04k2's ML<->bottom conduit, chosen with NO free boundary.
 QA_ATTACH_ARMS <- c(1, 10)
 QA_ATTACH_REF  <- 1          # the arm every delta below is measured AGAINST
 QA_ATTACH_TEST <- 10
 # tau_q scan. The pre-check says the bottom-attached arm needs ~2.7x MORE
 # exchange (= shorter tau_q) because HD is a 2.69x weaker ventilation source
 # than the mixed layer. HILDA's own prior is 538 +/- 510, so 28 is its floor;
-# anything below 28 is OUTSIDE HILDA's prior and must be labelled so.
+# anything below 28 is OUTSIDE HILDA's prior and must be labeled so.
 QA_TAU_Q_SCAN  <- c(28, 100, 200, 538, 1048)
 QA_TAU_Q_PRIOR <- c(28, 1048)   # HILDA 538 +/- 510
 
@@ -226,7 +226,7 @@ cat("  the BOTTOM -- a deliberate departure from HILDA. It is NOT HILDA's model.
 
 # ---- THE DECOMPOSITION P1's FAILURE FORCED (NOT PRE-REGISTERED) -------
 # P1 predicted bottom attachment would RELIEVE kz and it does the OPPOSITE:
-# ageing the column so strongly that the iso-deep control has to RAISE kz to
+# aging the column so strongly that the iso-deep control has to RAISE kz to
 # bring the deep back to target. So the pre-registered mechanism is refuted,
 # and the question becomes whether the P2 gain is attributable to the
 # attachment at all. This separates them: hold kz FIXED and vary only the

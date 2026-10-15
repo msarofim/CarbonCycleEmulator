@@ -18,7 +18,7 @@
 #      u_mode with the driver's controls (maxit shortened to DD_MECH_MAXIT), recording EVERY evaluated point: is the
 #      returned par among them, and is the returned value f(returned par)?
 #   4. HISTORY: the objective at id 10's u_mode cold, then after evaluating OTHER points first (id 13's u_mode, a
-#      nudged neighbour, id 0's u_mode). Unequal values = the objective carries state from one call to the next.
+#      nudged neighbor, id 0's u_mode). Unequal values = the objective carries state from one call to the next.
 # Usage: Rscript calibration/diag_obj18_dead13.R
 # OUTPUTS: outputs/diagnostics/obj18_dead13_<date>.{log,rds}. No RNG is used.
 # ⛔ ADOPTS NOTHING, and changes no gate.

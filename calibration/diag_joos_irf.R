@@ -153,7 +153,7 @@ JOOS_MARKS     <- c(20, 50, 100, 300)
 # October are distinguishable in their own output.
 JOOS_ARM_CANONICAL <- "canonical"
 JOOS_ARM_NAMES <- c("defaults", JOOS_ARM_CANONICAL, names(CCX_MODE_FILES))
-# ⛔ AN UNRECOGNISED ARGUMENT IS AN ERROR, NOT A DEFAULT (2026-08-31f). This
+# ⛔ AN UNRECOGNIZED ARGUMENT IS AN ERROR, NOT A DEFAULT (2026-08-31f). This
 # read `if (a[1] %in% JOOS_ARM_NAMES) a[1] else "defaults"`, so a typo -- or a
 # perfectly good PATH to a mode file, which `ccx_mode_file()` has accepted since
 # 08-27 -- ran the UNCALIBRATED defaults and reported gate 12 as if that were
@@ -163,7 +163,7 @@ JOOS_ARM_NAMES <- c("defaults", JOOS_ARM_CANONICAL, names(CCX_MODE_FILES))
 # ⛔⛔ ABSENCE IS AN ERROR (2026-09-27, Marcus). This returned JOOS_ARM_DEFAULT =
 # "defaults", the UNCALIBRATED table -- so a bare run reported a model nobody
 # ships (pulse AF@100 0.445 against the canonical's 0.307), with JOOS_SRC naming
-# the truth 180 lines above the verdict. The 08-31f fix made an UNRECOGNISED
+# the truth 180 lines above the verdict. The 08-31f fix made an UNRECOGNIZED
 # argument an error and left the ABSENT one silent; its own comment already said
 # "absence must ASSERT". This is that sentence applied to the case it missed.
 #

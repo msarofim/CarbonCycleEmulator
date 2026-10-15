@@ -125,7 +125,7 @@ APP_FEEDBACK_URL <- "SET-BEFORE-DEPLOY"
 # Marcus 2026-10-15: the repository goes PUBLIC before the app is deployed (his posting plan, step 1),
 # so this is its GitHub address. It 404s for anyone else until that switch is made.
 APP_REPO_URL     <- "https://github.com/msarofim/CarbonCycleEmulator"
-# Marcus 2026-10-15: his wording ("Substack" capitalised).
+# Marcus 2026-10-15: his wording ("Substack" capitalized).
 APP_FEEDBACK_HOW <- paste("Comments are public on Substack. Be specific about what",
                           "issue your comment addresses (use the issue number if",
                           "appropriate). If your comment leads to a change in the",
@@ -169,7 +169,7 @@ APP_SCENARIO_SRC <- paste(
 # the land AS A WHOLE, once growth elsewhere outweighs what clearing releases.
 # That crossing is what the note reports, and it is computed at render time from
 # the running model and from GCB, on this window.
-APP_LUC_SMOOTH_YR <- 11   # centred years; the land-sink series is noisy enough
+APP_LUC_SMOOTH_YR <- 11   # centered years; the land-sink series is noisy enough
                           # that a single year's sign is meaningless
 
 # ⛔ THE PULSE LAB RUNS ON CAUSAL INTERPOLATION, AND THE REST OF THE APP DOES NOT.
@@ -177,7 +177,7 @@ APP_LUC_SMOOTH_YR <- 11   # centred years; the land-sink series is noisy enough
 # one-year pulse rings BACKWARDS: a 2050 pulse moved CO2 across the 26 years
 # before it ([[ccx_pulse_spline_ringing]]). The pulse lab is the one tab whose
 # whole claim is a DIFFERENCE between two runs, so an acausal pre-pulse
-# difference is not a rounding artefact there -- it is the tab being wrong about
+# difference is not a rounding artifact there -- it is the tab being wrong about
 # what it is showing. "constant" is exactly conserving and shape-preserving.
 # ⚠ WHY NOT EVERYWHERE: the default is the frozen forcing path and every stored
 # logpost was produced under it (objective #13). Changing it globally is the
@@ -248,9 +248,9 @@ app_params <- local({
   # moved the model underneath it. A label that states a computed quantity has to
   # be computed, or it decays into a confident falsehood. The direction and size
   # of the residual is exactly what the app's own CO2 panel shows the user.
-  # RE-WRITTEN 2026-08-14 with the flip to the saturating fertilisation form.
+  # RE-WRITTEN 2026-08-14 with the flip to the saturating fertilization form.
   # The old text described β as "set to the 1-D posterior optimum", which is now
-  # false twice over: β is not the live fertilisation parameter, and the live
+  # false twice over: β is not the live fertilization parameter, and the live
   # pair was set by DESIGN gate 12 rather than by any posterior. Same failure the
   # deleted "about 27 ppm high" string had -- a label stating a computed quantity
   # that stopped being computed.
@@ -277,7 +277,7 @@ app_params <- local({
   # likelihood applied when it compared the model BOX to the Mauna Loa STATION,
   # so a panel that draws the raw box against station data is not drawing the
   # comparison the fit was scored on. plot_keeling() now draws both, and needs
-  # the value. Defaults to the no-offset behaviour (zero = absent, the
+  # the value. Defaults to the no-offset behavior (zero = absent, the
   # likelihood's own absence contract).
   rep_dC <- 0
   # the GATED names the mode fits on top of the table, and the D3 imbalance shares (2026-10-01):
@@ -420,14 +420,14 @@ app_build_forcing <- function(scenario, years, ...) {
 
 #' ccx_run_coupled() with THIS APP'S fitted forcing parameters applied
 #'
-#' Same argument as app_build_forcing(): the futures, stylised and pulse tabs
+#' Same argument as app_build_forcing(): the futures, stylized and pulse tabs
 #' all go through ccx_run_coupled(), which builds its own forcing internally, so
 #' without this they would silently run the calibrated PARAMETERS against an
 #' UNCALIBRATED forcing -- and disagree with the historical tab drawn two tabs
 #' to the left.
 #'
 #' IT ALSO SPLICES THE PAST (2026-09-22, Marcus's ruling). Every scenario the app
-#' runs carries the SSP/LUH2 harmonisation over the HISTORICAL period, which is a
+#' runs carries the SSP/LUH2 harmonization over the HISTORICAL period, which is a
 #' different land-use inventory from the GCB budget the Keeling tab draws and the
 #' model was fitted on -- 91.4 GtC less of it, so the futures tab sat 12.05 ppm
 #' below the historical tab at 2024 and the "What if..." tab 13.58 ppm below, with
@@ -489,7 +489,7 @@ APP_GCB <- as.data.frame(readRDS(file.path(CCX_ROOT, "data", "gcb_budget.rds"))$
 
 # ---- THE OBSERVED GROWTH RATE, ON THE MODEL'S OWN ESTIMATOR (2026-09-26) ----
 # \u26d4\u26d4 DELIBERATELY NOT APP_GCB$atm_growth. That is NOAA's published
-# `co2_gr_gl`, a JAN-TO-JAN difference of the deseasonalised global series, while
+# `co2_gr_gl`, a JAN-TO-JAN difference of the deseasonalized global series, while
 # app_annual_growth() differences ANNUAL MEANS -- two estimators of one quantity,
 # differing by sd 0.389 ppm/yr (max 0.950) on NOAA's own products. The panel's own
 # caption claimed "annual means differenced" while half its data was not.
@@ -520,7 +520,7 @@ APP_RIBBONS_FILE <- file.path(CCX_ROOT, "data", "futures_ribbons.rds")
 # check (Marcus 2026-10-02: "Stop here; keep holding (Recommended)"; CHANGELOG 10-02 s-u).
 # - The Laplace band was built and FAILED its own check: scored on the objective, the 1000
 #   draws sat a median 25 log-units below the Gaussian (importance ESS 8 / 1000), the
-#   posterior strongly non-Gaussian along the fertilisation ridge.
+#   posterior strongly non-Gaussian along the fertilization ridge.
 # - The MCMC check (calibration/run_mcmc_check.R, Torch stage 1) measured the band at about
 #   HALF the Laplace width (CO2 0.41x, GMST 0.58x), but did NOT converge on that ridge
 #   (beta_max R-hat 1.21); no stage 2 was run.
@@ -580,7 +580,7 @@ APP_RIBBON_NOTE_TEMP <- paste(
 app_ribbon_note <- function(yvar)
   if (isTRUE(APP_RIBBONS$ok) && !yvar %in% APP_RIBBON_YVARS) APP_RIBBON_NOTE_TEMP else APP_RIBBON_NOTE
 #' The ribbons for the selected scenarios and y-variable, in plot_future()'s
-#' `bands` shape, labelled with the DISPLAY names the runs carry; NULL if none
+#' `bands` shape, labeled with the DISPLAY names the runs carry; NULL if none
 #' (always NULL off APP_RIBBON_YVARS).
 app_future_bands <- function(scen_ids, yvar) {
   if (!isTRUE(APP_RIBBONS$ok) || !length(scen_ids) || !yvar %in% APP_RIBBON_YVARS) return(NULL)
@@ -638,7 +638,7 @@ takeaway <- function(...) div(class = "takeaway", ...)
 # used to interpolate ONE switch's label now has to name between zero and seven.
 # ⛔ TWO functions, not one, because the two jobs have opposite constraints:
 # a sentence wants every name spelled out, and a LEGEND KEY must stay short --
-# "Without: CO2 fertilisation (the land sink), El Niño / La Niña and volcanic
+# "Without: CO2 fertilization (the land sink), El Niño / La Niña and volcanic
 # haze (the diffuse-light effect)" is 100+ characters into a legend that
 # app_text_px() has to fit, which is the clipping class this app has already
 # been bitten by twice ([[subtitles_clip_too]]).
@@ -656,7 +656,7 @@ app_mech_inline <- function(lb) {
 }
 
 #' The labels of a set of mechanism switches, as an English list for use INSIDE a
-#' sentence; `sentence_start = TRUE` capitalises its first letter only.
+#' sentence; `sentence_start = TRUE` capitalizes its first letter only.
 app_mech_list <- function(off, sentence_start = FALSE) {
   if (!length(off)) return("")
   lb <- app_mech_inline(vapply(off, function(n) CCX_MECHANISMS[[n]]$label, character(1),
@@ -811,7 +811,7 @@ APP_SPLICE_YEAR <- max(APP_EMIS_HIST$year)
 # ONE end year: the run, the sliders and the splice all read the same file (APP_HIST_YEARS above).
 stopifnot(APP_HIST_YEARS[2] == APP_SPLICE_YEAR)
 # Marcus 2026-10-11 (CarboTopecomments.10.11.26): the second sentence -- the scenarios were
-# harmonised a couple of years earlier, so the handover steps total emissions by at most
+# harmonized a couple of years earlier, so the handover steps total emissions by at most
 # APP_SPLICE_STEP (0.5 GtC/yr) -- was DELETED "as extraneous detail", and the step's
 # computation with it (it fed nothing else).
 APP_SPLICE_NOTE <- sprintf(paste(
@@ -830,7 +830,7 @@ APP_SPLICE_NOTE <- sprintf(paste(
 #' have diverged from the observed record by as much as 2.5 GtC/yr in either
 #' direction (measured at 2024: ssp119 -2.48, ssp585 +1.82 GtC/yr of fossil).
 #'
-#' @param em an emissions table a caller built (the stylised and pulse tabs), or
+#' @param em an emissions table a caller built (the stylized and pulse tabs), or
 #'   NULL for "the scenario's own", which is then read here so that path gets
 #'   spliced too.
 #' @param scenario the SSP whose future is wanted. "historical" is returned
@@ -891,7 +891,7 @@ app_fair_pulse_why <- function(bg, year, gtc) {
     return(sprintf(APP_FAIR_PULSE_OFFGRID_FMT[["other"]], g, min(yrs), max(yrs), diff(yrs[1:2])))
   NULL
 }
-#' FaIR's answer for the pulse the user ran (its rows, labelled), or NULL off the grid
+#' FaIR's answer for the pulse the user ran (its rows, labeled), or NULL off the grid
 app_fair_pulse <- function(bg, year, gtc) {
   if (!is.null(app_fair_pulse_why(bg, year, gtc))) return(NULL)
   pv <- attr(APP_FAIR_PULSE, "provenance")
@@ -1011,7 +1011,7 @@ app_cmap_holder_phrase <- function(row, lost_share, lost_max = APP_CMAP_TIE_LOST
 # ⛔ ONLY WHERE FaIR WAS ACTUALLY RUN. `APP_FAIR` covers the seven van Vuuren markers (and the five SSPs, off the menu). It does
 # NOT cover a user-built pathway, and there is no honest way to draw one: FaIR
 # was never run on it. So the toggle is offered in the SCENARIOS mode and the
-# PULSE LAB and withheld from "Build your own" -- a greyed-out control the reader
+# PULSE LAB and withheld from "Build your own" -- a grayed-out control the reader
 # can reason about beats a line that silently means something else.
 APP_FAIR_LAB  <- "standard FaIR (dashed)"
 # Marcus 2026-10-02 (carbotopecomment): his two sentences replace "the gap between a solid line
@@ -1047,7 +1047,7 @@ APP_FAIR_NOTE <- paste(
 #' straight in matched nothing, returned NULL, and drew no FaIR line at all --
 #' which on screen is indistinguishable from "FaIR agrees perfectly". The
 #' returned `who` therefore carries the LABEL, because `plot_future()` maps
-#' colour by `who` and the dashed line must inherit its solid partner's colour.
+#' color by `who` and the dashed line must inherit its solid partner's color.
 app_fair_overlay <- function(scenarios, yvar) {
   if (is.null(APP_FAIR) || !length(scenarios)) return(NULL)
   ids <- unname(scenarios)
@@ -1098,7 +1098,7 @@ app_run_mechanisms <- function(off = character(), years = APP_HIST_YEARS,
 # the wording around them is Marcus's and is not touched.
 #
 # ⛔ A YEAR IS ADDRESSED BY ITS MONTHS, NEVER BY ITS DISTANCE TO AN INTEGER. Run times are month
-# CENTRES (y + (m - 0.5) / 12), so December of y - 1 and January of y are EXACTLY equidistant from y,
+# CENTERS (y + (m - 0.5) / 12), so December of y - 1 and January of y are EXACTLY equidistant from y,
 # and `which.min(abs(t - y))` returned the December: the Keeling takeaway printed "in 1957" for 1958,
 # and "since 1850" read December 1849.
 app_year_mask <- function(t, year) {
@@ -1150,11 +1150,11 @@ app_keeling_numbers <- function(out, obs_mlo, rep_dC, start_year = 1958) {
 TAIL_DT_FLAT  <- 0.05   # degC
 TAIL_ERF_FLAT <- 0.05   # W/m2
 
-#' Build an annual emissions table for a stylised pathway
+#' Build an annual emissions table for a stylized pathway
 #'
 #' Historical emissions up to the last observed year, then the chosen shape.
 #' Land-use emissions follow the background scenario throughout, because the
-#' stylised controls describe fossil-fuel policy and pretending they govern
+#' stylized controls describe fossil-fuel policy and pretending they govern
 #' deforestation too would overstate what the user is choosing.
 app_stylised_emissions <- function(kind, years, to_zero_year = 2060,
                                    rate_pct = 0, background = APP_SCENARIO_BG) {
@@ -1217,7 +1217,7 @@ app_stylised_emissions <- function(kind, years, to_zero_year = 2060,
 # by construction. `test-pulse-linearity.R` re-reads the driver's own CSV and
 # fails if these drift from it, so the constant cannot rot silently.
 APP_PULSE_LIN_SIZES   <- c(10, 500)   # GtC, the range the claim covers
-APP_PULSE_LIN_SPREAD  <- 2.1          # per cent of the mean, across that range (hilda29e 2.3; hilda33p 2.5; hilda34g 2.7; hilda33d 2.5; hilda29l 4.2)
+APP_PULSE_LIN_SPREAD  <- 2.1          # percent of the mean, across that range (hilda29e 2.3; hilda33p 2.5; hilda34g 2.7; hilda33d 2.5; hilda29l 4.2)
 APP_PULSE_LIN_HORIZON <- 100L         # years after release
 APP_PULSE_LIN_SRC     <- "calibration/diag_pulse_vs_tcre.R, 2026-10-13 (vvM background, hilda31w)"
 # THE HORIZON DEPENDENCE (100 GtC). At hilda29l the per-1000 figure FELL with
@@ -1258,7 +1258,7 @@ app_stylised_tail_clause <- function(kind, rate_pct, emissions, e0, climate = NU
   # Only FOSSIL emissions reach zero on `to_zero`: `app_stylised_emissions()`
   # always takes land use from the background scenario, so the pathway's total
   # CO2 emissions never reach zero and "emissions stop" overstated what the run
-  # did. The slider the user moved is already labelled "Fossil emissions after
+  # did. The slider the user moved is already labeled "Fossil emissions after
   # today", so the sentence now matches the control that produced it.
   #
   # ⭐ 2026-10-02 (Marcus, carbotopecomment + "Say it keeps rising (Recommended)"). His CO2

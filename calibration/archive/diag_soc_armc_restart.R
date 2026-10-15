@@ -4,7 +4,7 @@
 # commit (CHANGELOG 09-21 f: the loop refuted as a class, the scans refuted, the window parked). Its outputs are in
 # outputs/diagnostics/ under the names in its header. To re-run: `git checkout 206e3f0` (a worktree), not this tree.
 # Sourced from calibration/ at the time; the relative paths below assume the repo root as cwd.
-# Restart test: arm C at W = 0 STARTED FROM the W 5 (8,10) optimum -- is the +33.5 a window effect or an optimiser basin?
+# Restart test: arm C at W = 0 STARTED FROM the W 5 (8,10) optimum -- is the +33.5 a window effect or an optimizer basin?
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f); ccx_load_cpp()
 x <- readRDS("outputs/diagnostics/soc_martin_probe_20260921.rds")
 md <- readRDS(ccx_mode_file()); pins <- ccx_mode_pins(md); rm <- ccx_apply_pins(pins)

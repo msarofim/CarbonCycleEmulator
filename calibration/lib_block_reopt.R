@@ -1,5 +1,5 @@
 # =====================================================================
-# lib_block_reopt.R -- re-optimise a BLOCK of fitted names at a fixed vector, and read what the
+# lib_block_reopt.R -- re-optimize a BLOCK of fitted names at a fixed vector, and read what the
 # optimum implies (2026-10-04). The machinery of calibration/diag_greening_lag_swap.R (CHANGELOG
 # 10-04 e), lifted so the objective-#16 previews (10-04 h) use the SAME code. That driver keeps its
 # own copies, verbatim at its commit, so its recorded outputs stay reproducible.
@@ -35,8 +35,8 @@ br_u_of_par <- function(md, nm) vapply(nm, function(n) .to_unc(md$par_mode[[n]],
 #' log-likelihood term ADDED to the objective (a candidate row priced before it is built). NULL = the
 #' objective alone, exactly as before.
 #' `drop` (2026-10-06, the interannual-cut preview): stream names LEFT OUT of the objective the block is
-#' optimised on. The returned `logpost`/`streams` stay the FULL objective's; `obj` is the optimised value.
-#' Checked against the objective's own stream names before any optimisation (inside f() a bad name would
+#' optimized on. The returned `logpost`/`streams` stay the FULL objective's; `obj` is the optimized value.
+#' Checked against the objective's own stream names before any optimization (inside f() a bad name would
 #' be swallowed by the tryCatch as -Inf on every evaluation). NULL = exactly as before.
 #' `base_over` (2026-10-06, same preview): a named list overriding NON-fitted base parameters of the
 #' objective (e.g. `gamma_diff`, held at 0.25 by the canonical). A fitted or unknown name STOPS.
@@ -142,7 +142,7 @@ br_futures <- function(v, sp) {
 #' 1901-20 climate held), over `win`: the model's mean land-carbon gain with the GMST column as observed,
 #' minus with GMST HELD at its `clim` mean from clim[1] on. E_LUC is prescribed and identical in both, so
 #' it cancels from S_LAND = d(land_C)/dt + E_LUC. ⚠ CO2 is INTERACTIVE here and prescribed in TRENDY: the two
-#' runs' CO2 differs and feeds back on fertilisation. MEASURED (calibration/diag_net_climate_co2_feedback.R,
+#' runs' CO2 differs and feeds back on fertilization. MEASURED (calibration/diag_net_climate_co2_feedback.R,
 #' 2026-10-04): at hilda34g the warm run has 1.26 ppm LESS CO2 (its land gains with warming), a -0.023 GtC/yr
 #' bias (like-for-like +0.141 vs +0.118 here); at q10 1.4, +0.009. Small against GCB's sigma 0.7; not corrected.
 #' GMST also drives the ocean's T terms; only the LAND sink is read.

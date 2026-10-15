@@ -94,7 +94,7 @@ for (v in TF_ROWS) {
   b <- bp; for (n in names(ov)) b[[n]] <- ov[[n]]; pr <- ccx_unc_to_par(u); p <- ccx_overlay_par(b, pr)
   f <- futures(p, pr$bomb_total, pr$luc_scale)
   rows[[as.character(v)]] <- data.frame(tau_soil_slow = v, litter_slow_frac = b$litter_slow_frac, d_logpost_profile = x$opt - prof[[which(pv == 500)]]$opt,
-    profile_conv = conv[which(pv == v)],   # 1 = the profile optimiser hit maxit
+    profile_conv = conv[which(pv == v)],   # 1 = the profile optimizer hit maxit
     t(f), t(unlist(pr[TF_FREE])), check.names = FALSE)
 }
 R <- do.call(rbind, rows); rownames(R) <- NULL

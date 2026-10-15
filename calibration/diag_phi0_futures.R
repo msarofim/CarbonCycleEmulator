@@ -8,7 +8,7 @@
 # within 2.4, every scorecard gate within noise: whole_model_scorecard_20260929_
 # hilda29l_vs_phi0.log). The record pins the land's NET CO2 sensitivity; phi
 # changes HOW that sensitivity is built (a 2x vegetation-capacity loop on a weak
-# fertilisation vs no loop on a strong one), so the arms can only part company
+# fertilization vs no loop on a strong one), so the arms can only part company
 # where CO2 leaves the historical range or where the loop's 20-yr build-up and
 # the instant response separate in time. Emissions-driven SSPs test both.
 #

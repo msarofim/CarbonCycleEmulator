@@ -2,9 +2,9 @@
 # diag_npp_row_power.R -- does the modern-NPP row (arm B1, "hilda_csl3v0kan")
 # have the POWER to move anything, before it goes to Torch?
 # WHY: at sigma 7.76 the row prices the model's 70.0 at only ~1.6 log units
-# below its centre (56.06), while the audit screen priced NPP0 x0.8 at ~-297
+# below its center (56.06), while the audit screen priced NPP0 x0.8 at ~-297
 # through the seasonal record. [[no_power_null]]: measure the power first.
-# PROTOCOL: at the v0k basin-1 vector, re-optimise PW_FREE under arm A and under
+# PROTOCOL: at the v0k basin-1 vector, re-optimize PW_FREE under arm A and under
 # arm B1 (same start, same budget) and compare modern NPP, the free names, and
 # the row. A B1-minus-A shift in NPP of << sigma says the row is decorative at
 # this width. A SCREEN, Nelder-Mead; nothing registered.

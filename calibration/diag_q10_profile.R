@@ -3,11 +3,11 @@
 # (CHANGELOG 09-29 v; Marcus 2026-09-29: "run all the cheap measurements")
 #
 # The sink -> source question (handoff item 5 / Koven 2022): the model's soil
-# respiration is C/tau * q10^(dT/10) against saturating fertilisation, so it
+# respiration is C/tau * q10^(dT/10) against saturating fertilization, so it
 # CAN flip in principle. Whether it does by 2300 may be a property of the FIT
 # (q10 ~1.10 in the 09-29 rows; the package default is 2.0) rather than of the
 # design. This prices q10 on the record: q10 is FIXED at each QP_VALUES entry
-# and the other 10 of the 11 rebalanced names are re-optimised (NM, QP_MAXIT)
+# and the other 10 of the 11 rebalanced names are re-optimized (NM, QP_MAXIT)
 # from the CONTROL -- the fixed-stock tau-500 rebalanced vector
 # (tau_soil_slow_profile_fixedstock_20260929.rds, value 500).
 # Reported: d_logpost AND d_loglik vs the control (q10 carries a prior, so a

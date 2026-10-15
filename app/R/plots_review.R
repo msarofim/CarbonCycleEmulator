@@ -361,7 +361,7 @@ rv_plot_partition <- function() rv_guard(rv_pulse(), function(x) {
 # CARD 6 -- RETIRED 2026-10-01 (Marcus: "Retire card 6"). Its panel,
 # rv_plot_control(), drew the canonical's and the seas_ml-0 control's northern
 # seasonal cycles and captioned the AIC difference "in the simpler version's
-# favour" whatever its sign. See the note in review.R; id 6 is the bands card since the renumbering.
+# favor" whatever its sign. See the note in review.R; id 6 is the bands card since the renumbering.
 # ---------------------------------------------------------------------
 
 # ---------------------------------------------------------------------
@@ -370,7 +370,7 @@ rv_plot_partition <- function() rv_guard(rv_pulse(), function(x) {
 # Both series are GCB's "A - C" (each ocean model's climate as observed minus its own "normal year", CO2
 # prescribed): for this model, the mean over the ten GOBM protocols it emulates. Read from the card's product
 # (rv_ocean_climate()); every number in the captions is the product's. Annual values thin, an RV_OCLIM_RUN-year
-# centred mean thick (the H2 driver's own window, so the line the eye follows is the one the emergence is read on).
+# centered mean thick (the H2 driver's own window, so the line the eye follows is the one the emergence is read on).
 # ---------------------------------------------------------------------
 rv_plot_oclim <- function() rv_guard(rv_ocean_climate(), function(x) {
   s <- x$shape; e <- x$effect

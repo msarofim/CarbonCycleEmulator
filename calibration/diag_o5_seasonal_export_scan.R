@@ -13,7 +13,7 @@
 #            bomb and profile rows, the SPO harmonic, the PI layer 2/6 - ML,
 #            the 1995 bomb excess, the annual-mean export (P0b in situ).
 #   Stage 2  ARM C at the best grid point AND at martin amp 0 (its baseline),
-#            re-optimised over the PK-2 names.
+#            re-optimized over the PK-2 names.
 #   The decision rule (prereg §4) is evaluated and printed; nothing adopted.
 # Usage: Rscript calibration/diag_o5_seasonal_export_scan.R      (O5_SMOKE=1 for a smoke)
 # =====================================================================

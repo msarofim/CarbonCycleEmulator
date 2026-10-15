@@ -6,7 +6,7 @@
 # 38.35 N against a shipped CCX_SEAS_PHI_EFF["NH"] of 75, but it had to bound
 # its own answer: MOD17A3HGF is an ANNUAL product, so it gives the SPATIAL
 # distribution of NPP and says nothing about the seasonal cycle. It therefore
-# tests the AGGREGATION under the model's premise ("NPP follows normalised
+# tests the AGGREGATION under the model's premise ("NPP follows normalized
 # insolation") and cannot test the premise itself. If real NH productivity is
 # strongly RECTIFIED -- a growing season that switches on and off, which boreal
 # vegetation is -- then a poleward phi_eff is a legitimate emulation of

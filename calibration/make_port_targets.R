@@ -159,7 +159,7 @@ tg$pump_field <- attr(bp, "pump_field")       # "solved" / "martin" (2026-09-14 
 tg$pins      <- ccx_pin_label(PT_PINS)        # "" = free arm; READ by the driver's port gate (2026-09-13)
 # ⭐ THE TABLE THESE TARGETS WERE MEASURED UNDER, recorded so a consumer can
 # REFUSE a stale target instead of silently comparing across two tables. A
-# widened bracket shifts every logpost by a reparameterisation constant, so a
+# widened bracket shifts every logpost by a reparameterization constant, so a
 # target measured under one table and checked under another fails for a reason
 # that has nothing to do with the port. [[recorded_but_never_restored]] --
 # recorded AND read, this time, by run_dispersed_multistart.R.

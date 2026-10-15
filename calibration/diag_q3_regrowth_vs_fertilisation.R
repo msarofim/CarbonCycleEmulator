@@ -1,14 +1,14 @@
 # =====================================================================
-# Q3 + Q1 -- IS ONE FERTILISATION TERM DOING THE WORK OF TWO?
+# Q3 + Q1 -- IS ONE FERTILIZATION TERM DOING THE WORK OF TWO?
 # (Marcus app review #7b/#15, ruled "worth pursuing" 2026-09-24.)
 #
-# TODAY: CCX has no separate land-uptake process. CO2 fertilisation IS the land
+# TODAY: CCX has no separate land-uptake process. CO2 fertilization IS the land
 # sink (R/mechanisms.R's `fertilisation` caveat says so outright). Forest
 # regrowth on abandoned farmland is not represented.
 #
 # ⭐⭐ THE HYPOTHESIS, AND WHY IT IS A PREDICTION RATHER THAN A HOPE. If ONE
-# term must cover BOTH fertilisation and regrowth, it has to be tuned strong
-# enough for both. Fertilisation tracks CO2, which rose smoothly; regrowth was
+# term must cover BOTH fertilization and regrowth, it has to be tuned strong
+# enough for both. Fertilization tracks CO2, which rose smoothly; regrowth was
 # SMALL EARLY and grew later. So a single term tuned to the whole record is
 # TOO STRONG EARLY -- and the sink appears TOO SOON.
 #   ⇒ prediction 1: the model's land turns from net SOURCE to net SINK EARLIER
@@ -35,7 +35,7 @@
 # hand-rolled sink, and its 2015-2023 mean must reproduce the gate before any
 # arm below is read ([[ccx_diag_must_use_mode_base]]).
 # ⚠ A SINGLE YEAR'S SIGN IS MEANINGLESS on a series this noisy, so every
-# crossing is taken on an 11-year CENTRED mean -- the app's own APP_LUC_SMOOTH_YR
+# crossing is taken on an 11-year CENTERED mean -- the app's own APP_LUC_SMOOTH_YR
 # convention, named here so the two cannot drift apart.
 # =====================================================================
 
@@ -45,7 +45,7 @@ suppressWarnings(suppressMessages({
 ccx_load_cpp()
 source(file.path("calibration", "lib_design_gates.R"))
 
-Q3_SMOOTH_YR <- 11L          # centred; matches the app's APP_LUC_SMOOTH_YR
+Q3_SMOOTH_YR <- 11L          # centered; matches the app's APP_LUC_SMOOTH_YR
 Q3_DECADES   <- seq(1960, 2020, by = 10)
 
 # ---- the mode, built the way app/global.R builds it -----------------

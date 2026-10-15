@@ -11,7 +11,7 @@
 # PROTOCOL. For each unfitted parameter at the canonical (hilda29l), each
 # perturbation (x0.5, x2; fractions capped below 1):
 #   (1) FROZEN cost: logpost with all 29 fitted coordinates at the mode.
-#   (2) REBALANCED cost: re-optimise the three coordinates that set the NET
+#   (2) REBALANCED cost: re-optimize the three coordinates that set the NET
 #       sinks -- beta_max, fert_k (land) and kz (ocean) -- Nelder-Mead from the
 #       mode, SCR_NM_MAXIT iterations. A full refit could only do BETTER, so this
 #       is an UPPER BOUND on what the record charges; the phi precedent (frozen

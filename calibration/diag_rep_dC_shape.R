@@ -142,7 +142,7 @@ for (w in list(c(1958, 1980), c(1980, 2000), c(2000, 2025))) {
               mean(my - spo_y[yy]), "SPO"))
 }
 # Are the two observational products mutually consistent where they overlap?
-# If they are not, the swing below is an obs artefact and nothing more.
+# If they are not, the swing below is an obs artifact and nothing more.
 kv <- ice$year >= 1957 & ice$year <= 1996
 dv <- data.frame(ice = ice$CO2ppm[kv], spo = spo_y[as.character(ice$year[kv])])
 dv <- dv[stats::complete.cases(dv), ]

@@ -8,7 +8,7 @@
 # IT REPORTS; IT DOES NOT RULE. Whether the chains have converged, how much more to
 # discard, and whether a band ships are Marcus's calls (handoff 10-01e, step 7).
 # The reference thresholds printed beside the numbers are Vehtari et al. (2021)'s
-# recommendations, labelled as theirs: R-hat < 1.01, bulk- and tail-ESS > 100 per
+# recommendations, labeled as theirs: R-hat < 1.01, bulk- and tail-ESS > 100 per
 # chain. The diagnostics are calibration/lib_mcmc_diag.R (tests/testthat/test-mcmc-diag.R).
 #
 # PARTIAL CHAINS (the staged plan, 10-01 q: stage 1 stops every chain by wall time,

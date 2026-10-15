@@ -192,7 +192,7 @@ ccx_climate_scenarios <- function() {
 #' @param scenario  emissions scenario name, passed to ccx_build_forcing()
 #' @param years     c(first, last)
 #' @param nonco2_scenario background scenario supplying prescribed non-CO2
-#'   forcing. Defaults to `scenario` itself; for a stylised or pulse experiment
+#'   forcing. Defaults to `scenario` itself; for a stylized or pulse experiment
 #'   the caller picks which SSP's non-CO2 world it happens in, and that choice
 #'   is a real assumption the app has to surface, not a default to bury.
 #' @param gmst_obs  observed GMST to use where it exists (IGCC, per the standing
@@ -202,10 +202,10 @@ ccx_climate_scenarios <- function() {
 #'   join is therefore continuous in the multi-year mean, NOT year to year: the
 #'   annual series can step at the seam (measured by the 2026-10-12 code review:
 #'   -0.121 K from 2024 to 2025 on vvM, because 2024 was a warm year). Set NULL to run the
-#'   modelled climate over the whole period, which is what the validation test
+#'   modeled climate over the whole period, which is what the validation test
 #'   in test-climate.R does.
 #' @param emissions optional data.frame(year, fossil_GtC, luc_GtC) overriding the
-#'   scenario's emissions entirely -- the app's stylised pathways and pulses.
+#'   scenario's emissions entirely -- the app's stylized pathways and pulses.
 #' @param bomb_total_kmol,luc_scale forcing parameters, passed straight through
 #'   to ccx_build_forcing(). Added 2026-08-21. BOTH ARE FITTED PARAMETERS
 #'   (CCX_PARAM_TABLE), and before this existed a caller running at a calibrated
@@ -284,7 +284,7 @@ ccx_run_coupled <- function(spin, scenario = "ssp245", years = c(1750, 2100),
     tnew   <- ccx_temperature_from_erf(erf, yrs, mod)
 
     if (!is.null(obs_g) && nrow(obs_g)) {
-      # Splice: observations where they exist, modelled climate after, joined on
+      # Splice: observations where they exist, modeled climate after, joined on
       # the last 11 years of overlap (the literal `last - 10` below) so the two
       # paths' 11-YEAR MEANS agree. Baselining the splice to a single year would
       # import that year's noise as a permanent offset (standing rule: never

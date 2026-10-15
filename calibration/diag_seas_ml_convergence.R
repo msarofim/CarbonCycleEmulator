@@ -15,7 +15,7 @@
 # (2) ANNUAL-MEAN RECTIFICATION. Unlike the retired pCO2-side shim, option A
 #     moves REAL CARBON seasonally, so it rectifies onto the annual-mean state.
 #     The design ACCEPTS that class of rectification as physics (seasonal SST,
-#     the fertilisation rectifier) -- but the prereg owes a MEASUREMENT that it
+#     the fertilization rectifier) -- but the prereg owes a MEASUREMENT that it
 #     SETTLES rather than drifting, since that is the whole argument for not
 #     building a periodic spinup.
 #

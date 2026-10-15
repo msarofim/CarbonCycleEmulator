@@ -59,7 +59,7 @@ if (!file.exists(BES_FIRE_CSV) || !file.exists(BES_FOSS_CSV))
   stop("run data-raw/extract_emission_seasonality.py first (needs the ",
        "gitignored GFED hdf5 files and the EDGAR xlsx; see MANIFEST.csv)")
 
-# ---- climatological monthly weight, normalised to mean 1 ------------
+# ---- climatological monthly weight, normalized to mean 1 ------------
 # Mean 1 rather than sum 1 so that a weight of exactly 1 in every month is the
 # no-seasonality case and the damping formula above is a clean interpolation.
 bes_weight <- function(d, col, years) {

@@ -82,7 +82,7 @@ wstats <- function(x, m) {
 region <- function(lo, hi, strict) L >= lo & L < hi & (if (strict) nmon == MLD_STRICT_N else nmon >= 1L)
 one_region <- function(lo, hi, strict) lapply(FIELDS, wstats, m = region(lo, hi, strict))
 
-# THE SEASONAL SHAPE (added 2026-09-08d, options_2026-09-08d_seasonal_h_ml.md; generalised to a
+# THE SEASONAL SHAPE (added 2026-09-08d, options_2026-09-08d_seasonal_h_ml.md; generalized to a
 # latitude WINDOW 2026-09-11 for option B, the LS call bit-identical): per hemisphere, the area-weighted
 # monthly threshold MLD over the 12-month cells in [lo, hi), and the PER-CELL entrainment fraction
 # f = (h_m - h_min)/h_m averaged the same way -- the dilution-honest driver for a derived entrainment

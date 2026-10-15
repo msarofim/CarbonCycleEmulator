@@ -7,11 +7,11 @@
 # rep_dC +3.60, sst_seas_amp_NH -2.95, q10 -2.64, npp_frac_NH -2.28.
 #
 # ⚠ BUT A z-RANKING IS THE WRONG INSTRUMENT HERE, AND THE PROJECT ALREADY
-# KNOWS IT. `SST_SEAS_LOGSD` = 0.25 is a JUDGEMENT width, labelled as one at
-# R/calibrate.R:23 ("A JUDGEMENT, not a measurement ... Nothing measures that
+# KNOWS IT. `SST_SEAS_LOGSD` = 0.25 is a JUDGMENT width, labeled as one at
+# R/calibrate.R:23 ("A JUDGMENT, not a measurement ... Nothing measures that
 # gap today"); `NPP_FRAC_NH_SD` = 0.04 carries the same label. `seas_T_amp_*`
 # instead get `ccx_bracket_lnorm()`, whose width IS a measured ambiguity. So a
-# -4.71 on a judgement width and a -4.71 on a measured bracket are NOT the same
+# -4.71 on a judgment width and a -4.71 on a measured bracket are NOT the same
 # statement, and sorting the two together ranks an invented width above a
 # measured one. (2026-08-27 stated this as "PRICE IT ON THE RATIO, NOT THE z";
 # this file is that rule made runnable.)
@@ -22,8 +22,8 @@
 # is the caption-sync bug waiting to happen.
 #
 # THREE-VALUED, DELIBERATELY: BRACKET (width is a measured ambiguity),
-# JUDGEMENT (width is a chosen number the code LABELS as chosen), UNLABELLED
-# (everything else). ⚠ UNLABELLED means "the code does not say", NOT "measured".
+# JUDGMENT (width is a chosen number the code LABELS as chosen), UNLABELED
+# (everything else). ⚠ UNLABELED means "the code does not say", NOT "measured".
 # Collapsing it into either of the other two would be asserting something the
 # source does not.
 #
@@ -47,7 +47,7 @@ for (f in list.files("R", pattern = "[.]R$", full.names = TRUE)) source(f)
 # ⛔ THE REPRESENTATIVES ARE THE BEST **CONVERGED** MEMBER OF EACH CLUSTER, not
 # the best member. Three of the ten starts are `out_of_time` (ids 3, 7, 8) and
 # ids 3 and 7 are the two best logposts overall -- ranking a screen off a point
-# the optimiser had not finished moving would report where the clock stopped.
+# the optimizer had not finished moving would report where the clock stopped.
 PS_DIR   <- "calibration/output/multistart_20260901_enso25"
 PS_REPS  <- c("A: cluster 1 (cold init)"          = "start_000.rds",
               "B: cluster 2 (obs-implied partition)" = "start_005.rds")
@@ -63,10 +63,10 @@ PS_REPS  <- c("A: cluster 1 (cold init)"          = "start_000.rds",
 # ⚠ THE PARAMETER COUNT AND THE MECHANISM SIGNATURE ARE **READ FROM THE FILE**,
 # never written into the label. `refit_20260831_seas_lag_split/` sounds like the
 # post-split refit and is NOT: it holds a 21-parameter vector with the SCALAR
-# `seas_lag_p`. I labelled it "22-par, post-lag-split" from its directory name
+# `seas_lag_p`. I labeled it "22-par, post-lag-split" from its directory name
 # and the table said otherwise -- which is the whole reason a label may not
 # assert what a file can be asked. Each row below prints n and its lag/ENSO
-# field names, so a mislabelled directory cannot mislead the reader either.
+# field names, so a mislabeled directory cannot mislead the reader either.
 # Names are SHORT because they are also the attribution table's column heads.
 # ⚠ `from90` goes through ccx_mode_file(), NOT a literal. It was a literal here
 # when this landed (`900f90b`) and test-mode-file.R's hardcoded-path lint has
@@ -87,9 +87,9 @@ PS_TOPN     <- 12          # rows printed in the ranked tables
 PS_ZTOL     <- 1e-3        # recompute-vs-stored agreement, in sd units
 
 # ---- prior provenance, DERIVED from the closure ----------------------
-# Matched against the two constants R/calibrate.R itself labels as judgements
+# Matched against the two constants R/calibrate.R itself labels as judgments
 # and the bracket helper. Named here so a rename breaks this loudly instead of
-# silently reclassifying every row as UNLABELLED.
+# silently reclassifying every row as UNLABELED.
 PS_BRACKET_FN  <- "ccx_bracket_lnorm"
 PS_JUDGEMENT_K <- c("SST_SEAS_LOGSD", "NPP_FRAC_NH_SD")
 
@@ -106,10 +106,10 @@ ps_provenance <- function(nm, table = CCX_PARAM_TABLE) {
   c(kind = "UNLABELLED", stem = NA)
 }
 
-# ---- the prior's own centre, on the NATURAL scale --------------------
+# ---- the prior's own center, on the NATURAL scale --------------------
 # Found by inverting ccx_prior_z rather than by parsing the closure for a
 # location argument: the ratio must be against the number the prior ACTUALLY
-# centres on, and a dlnorm(log(m), s) / dnorm(mu, s) / bracket_lnorm all put it
+# centers on, and a dlnorm(log(m), s) / dnorm(mu, s) / bracket_lnorm all put it
 # in a different argument slot. One numeric contract covers all three.
 ps_prior_centre <- function(nm, x_hint) {
   f <- function(v) tryCatch(ccx_prior_z(nm, v), error = function(e) NA_real_)
@@ -185,15 +185,15 @@ for (k in head(ord, PS_TOPN)) {
               Z[[2]][k] - Z[[1]][k], prov[[n]]))
 }
 
-# ---- THE FOUNDED TABLE: fitted vs the prior's OWN centre ---------------
+# ---- THE FOUNDED TABLE: fitted vs the prior's OWN center ---------------
 cat(sprintf("\n%s\nPRICED ON THE RATIO -- fitted against what the prior centres on\n%s\n",
             strrep("=", 78), strrep("=", 78)))
 cat("  This is the founded comparison for a JUDGEMENT width, where the z is\n")
 cat("  partly a statement about a number someone chose.\n\n")
-# ⛔ A RATIO AGAINST A PRIOR CENTRED ON ZERO IS NOT A NUMBER. `rep_dC` and the
-# four `gamma_enso_*` are LOCATION parameters centred at 0; dividing by that
-# centre produced 1e13-scale garbage that looked like a result. Ratios are
-# reported ONLY for a multiplicative (positive-scale) prior; a zero-centred one
+# ⛔ A RATIO AGAINST A PRIOR CENTERED ON ZERO IS NOT A NUMBER. `rep_dC` and the
+# four `gamma_enso_*` are LOCATION parameters centered at 0; dividing by that
+# center produced 1e13-scale garbage that looked like a result. Ratios are
+# reported ONLY for a multiplicative (positive-scale) prior; a zero-centered one
 # gets its OFFSET in natural units, which is the statement that means something
 # there. [[gate_bound_matches_its_claim]] -- the STATISTIC has to match the kind
 # of parameter too, not only the bound.

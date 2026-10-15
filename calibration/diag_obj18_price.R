@@ -13,9 +13,9 @@
 #   REF        #18 minus the index (the shipped index, the low-pass ocean row) at P0 = the emulation's REF;
 #   B1         #18 at P0, nothing refitted (the index switch alone) = the emulation's B1, -12.342383;
 #   B1s        #18 at S18, nothing refitted (B1 + the module's move: the redesign's resistance);
-#   B2 / B2s   ... + the five land names re-optimised (beta_max, fert_k, luc_scale, imb_share_land, ndep_ret:
+#   B2 / B2s   ... + the five land names re-optimized (beta_max, fert_k, luc_scale, imb_share_land, ndep_ret:
 #              diag_obj17_price.R's block and method, whitened by B's stored Hessian block);
-#   B2f / B2fs ... with beta_max HELD at B's value and the other four re-optimised: the index's effect at a FIXED
+#   B2f / B2fs ... with beta_max HELD at B's value and the other four re-optimized: the index's effect at a FIXED
 #              position on the beta_max / fert_k ridge (diag_iav_redesign_ridge.R's cell at B's beta_max).
 # FUTURES: CO2 in 2300 (SSP5-8.5; vvH spliced on the historical emissions; br_futures()) at hilda33p, B and every cell,
 # read against the ridge's MEASURED 1-sigma width (iav_redesign_ridge_read_20261007_wide.rds, natural space): a futures
@@ -110,7 +110,7 @@ with_label <- function(label, mod, FUN, strip = NULL) {
   FUN(ev)
 }
 score <- function(mod, over = NULL, label = O18_LABEL, strip = NULL) with_label(label, mod, function(ev) ev(over), strip)
-#' Re-optimise `block` (natural `held` names fixed) at basin B's vector under #18 with the module at `mod`: whitened by B's
+#' Re-optimize `block` (natural `held` names fixed) at basin B's vector under #18 with the module at `mod`: whitened by B's
 #' stored Hessian block, BFGS + Nelder-Mead rounds until every whitened slope < O18_MODE_TOL (diag_obj17_price.R's B2
 #' method; the emulation's reopt() and the ridge's profile_cell(), line for line, on the built objective).
 reopt <- function(mod, block, held = NULL, what) {

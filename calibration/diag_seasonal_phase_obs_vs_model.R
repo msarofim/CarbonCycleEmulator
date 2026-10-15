@@ -1,5 +1,5 @@
 # =====================================================================
-# diag_seasonal_phase_obs_vs_model.R -- IS THE MODELLED SEASONAL CYCLE
+# diag_seasonal_phase_obs_vs_model.R -- IS THE MODELED SEASONAL CYCLE
 # OUT OF PHASE WITH THE OBSERVED ONE THE LIKELIHOOD SCORES?
 #
 # THE QUESTION, from handoff 2026-08-20 section 3a. Every seasonal DRIVER peaks
@@ -10,7 +10,7 @@
 #
 # But "the drivers are late" is not the same claim as "the OBSERVABLE is late".
 # The rows score `ccx_year_harmonic()`'s sin/cos coefficients on CO2 and d13C at
-# MLO and SPO, and a driver phase error can be cancelled downstream (by the
+# MLO and SPO, and a driver phase error can be canceled downstream (by the
 # respiration counter-cycle, by air-sea exchange, by the fitted `seas_lag_p`).
 # This script measures the thing the likelihood actually sees.
 #
@@ -50,7 +50,7 @@ PHASE_WINDOW    <- LIK_SEAS_WINDOW          # the window the likelihood scores
 PHASE_YEARS     <- c(1750, 2024)
 PHASE_MONTHS    <- c("Jan","Feb","Mar","Apr","May","Jun",
                      "Jul","Aug","Sep","Oct","Nov","Dec")
-# `sst_seas_amp_{NH,SH}` cases: the refit's answer, the prior centre (physical),
+# `sst_seas_amp_{NH,SH}` cases: the refit's answer, the prior center (physical),
 # and off. Named here so every label below derives from this one list.
 PHASE_SST_CASES <- list(
   `fitted (refit's answer)` = NULL,          # NULL = leave the mode's own value
@@ -216,7 +216,7 @@ cat("\nDone.\n")
 # `seas_T_amp_NH` = 48 K with `q10` = 1.26 is the fit buying respiration swing
 # it cannot get physically, and the question is whether ANY physical pair
 # reaches the observed amplitude. Ladder over (q10, seas_T_amp_NH), everything
-# else frozen at the mode; the realised swing is what only the PRODUCT sets.
+# else frozen at the mode; the realized swing is what only the PRODUCT sets.
 sep("TEST 4 -- CAN A PHYSICAL (q10, seas_T_amp_NH) REACH THE OBSERVED AMPLITUDE?")
 PHASE_Q10_LADDER <- list(
   `mode (q10 1.26, A 48.07 K)`   = c(NA, NA),          # NA = keep the mode's own
@@ -232,7 +232,7 @@ cat(sprintf("%-30s %8s %8s %10s %10s\n", "case", "swing", "MLO p2p", "phase mo",
 for (k in names(PHASE_Q10_LADDER)) {
   v <- PHASE_Q10_LADDER[[k]]; p <- p_mode
   if (!is.na(v[1])) { p$q10 <- v[1]; p$seas_T_amp_NH <- v[2] }
-  # realised peak-to-trough respiration factor, the only thing the product sets
+  # realized peak-to-trough respiration factor, the only thing the product sets
   mo <- (seq_len(12) - 0.5) / 12
   rf <- p$q10^(p$seas_T_amp_NH * sin(2 * pi * (mo - (3.5 + CCX_SEAS_T_LAG) / 12)) / 10)
   r  <- summarise_stream(obs$co2_seas$MLO, run_stats(p)$co2_seas$MLO)

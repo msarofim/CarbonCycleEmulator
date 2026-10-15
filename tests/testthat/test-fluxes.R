@@ -255,7 +255,7 @@ test_that("gross fluxes dwarf the net, which is the point of the trace", {
 test_that("an unclassified flux fails loudly rather than being absorbed", {
   # The classifier is keyed on reservoir type, so a future flux between a new
   # pair is captured automatically -- but a genuinely unknown pair must error,
-  # not land in a neighbouring channel.
+  # not land in a neighboring channel.
   cls <- c("atm", "veg", "mystery")
   expect_null(ccx_flux_channel(2L, 3L, NULL, cls, 1L))
 })

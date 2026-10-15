@@ -1,25 +1,25 @@
 # =====================================================================
-# diag_rep_dC_prior.R -- IS `rep_dC`'s PRIOR MIS-CENTRED? Measured, and the
-# answer is no: the CENTRE is nearly irrelevant, the SCALE has no receipt for
+# diag_rep_dC_prior.R -- IS `rep_dC`'s PRIOR MIS-CENTERED? Measured, and the
+# answer is no: the CENTER is nearly irrelevant, the SCALE has no receipt for
 # the quantity it constrains, and neither is the actual defect.
 #
 # THE CLAIM UNDER TEST. The 2026-08-22 expert panel, item 12: "`rep_dC`'s
-# N(0, 1.0) prior is mis-CENTRED: both stations must read below their box means,
+# N(0, 1.0) prior is mis-CENTERED: both stations must read below their box means,
 # so the physical expectation is positive, not zero." The physics is right. The
-# implied remedy -- re-centre and the +5.57 sigma flag goes away -- is not, and
-# acting on it would have HIDDEN a real blocker behind a relabelled diagnostic.
+# implied remedy -- re-center and the +5.57 sigma flag goes away -- is not, and
+# acting on it would have HIDDEN a real blocker behind a relabeled diagnostic.
 # That is the failure mode memory `prior_z_grid_scale` already recorded once:
 # a flag list that mis-ranks the work.
 #
 # WHAT THE THREE MEASUREMENTS BELOW ESTABLISH.
 #
-#   1. THE PRIOR CENTRE IS NEARLY INERT. Profiling `rep_dC` with its two
-#      strongly-correlated partners re-optimised (`k_w` -0.78, `bomb_total`
+#   1. THE PRIOR CENTER IS NEARLY INERT. Profiling `rep_dC` with its two
+#      strongly-correlated partners re-optimized (`k_w` -0.78, `bomb_total`
 #      -0.73) puts the LIKELIHOOD-only optimum at 5.62 ppm with curvature
 #      sd 0.097 ppm. The data are ~10x tighter than the 1.0 ppm prior, so
-#      re-centring the prior anywhere in [0, 3] ppm moves the posterior by
+#      re-centering the prior anywhere in [0, 3] ppm moves the posterior by
 #      <= 0.03 ppm. It changes `prior_z` (5.57 -> 3.59 at mu = 2) and nothing
-#      else. A prior centre that only moves the DIAGNOSTIC is not a fix.
+#      else. A prior center that only moves the DIAGNOSTIC is not a fix.
 #
 #   2. THE PRIOR SD HAS NO RECEIPT FOR THIS QUANTITY. `LIK_CO2_REP_ERR` = 1.0
 #      ppm serves as both the CO2-level stream sd and this prior's sd. Its
@@ -44,7 +44,7 @@
 # offset while the ice era cannot, and comparing the two eras isolates it.
 #
 # Usage:  Rscript calibration/diag_rep_dC_prior.R
-# Runtime ~4 min (part 1 re-optimises at each grid point).
+# Runtime ~4 min (part 1 re-optimizes at each grid point).
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
@@ -52,7 +52,7 @@ ccx_load_cpp()
 RP_ARM      <- "N"
 RP_GRID     <- seq(5.0, 6.4, by = 0.2)      # around the mode, for the curvature fit
 RP_PARTNERS <- c("k_w", "bomb_total")       # the two |cor| > 0.7 partners
-RP_MU_TRIAL <- c(0, 0.5, 1, 2, 3)           # candidate prior centres to price
+RP_MU_TRIAL <- c(0, 0.5, 1, 2, 3)           # candidate prior centers to price
 RP_FLASK_ERAS <- list(c(1958,1970), c(1970,1985), c(1985,2000), c(2000,2012), c(2012,2024))
 RP_ICE_ERAS   <- list(c(1850,1900), c(1900,1940), c(1940,1958))
 
@@ -67,7 +67,7 @@ cat(sprintf("\n=== 0. THE PARAMETER ===\n  fitted rep_dC = %.3f ppm; prior N(0, 
 cat(sprintf("  posterior sd (from the per-direction Hessian) = %.3f ppm\n",
             M$md$sd_unc[["rep_dC"]]))
 
-# ---- 1. is the CENTRE the operative knob? ---------------------------
+# ---- 1. is the CENTER the operative knob? ---------------------------
 CCX_PARAM_TABLE$h_ml$lo <- M$md$hml_bound[1]; CCX_PARAM_TABLE$h_ml$hi <- M$md$hml_bound[2]
 lp <- ccx_make_logpost(); u0 <- unlist(ccx_par_to_unc(M$md$par_mode))
 prior_rep <- function(x) stats::dnorm(x, 0, LIK_CO2_REP_ERR, log = TRUE)

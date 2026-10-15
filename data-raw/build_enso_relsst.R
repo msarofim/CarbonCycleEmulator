@@ -9,7 +9,7 @@
 # each, then pick one for Torch. `detrend` (a linear fit) needs no data;
 # THIS is the other one, the OBSERVATIONAL detrend:
 #
-#   index = Nino 3.4 anomaly  -  21-yr centred low-pass of the 20S-20N mean anomaly
+#   index = Nino 3.4 anomaly  -  21-yr centered low-pass of the 20S-20N mean anomaly
 #
 # both from the SAME product (ERSST v6 grid) on the SAME fixed base
 # (EIX_CLIM_BASE 1991-2020). The tropical mean IS the forced warming, measured
@@ -22,7 +22,7 @@
 # amplitude). The v6 grid's own Nino 3.4 is compared against nina34.data below
 # as a receipt, since this index REPLACES that product's Nino 3.4 by the grid's.
 #
-# ⚠ END EFFECT. The centred 21-yr mean is a partial window in the last 10 yr
+# ⚠ END EFFECT. The centered 21-yr mean is a partial window in the last 10 yr
 # of the grid (and the first 10, which are outside the ENSO-active span and
 # unused). `partial` in the output flags those months.
 #

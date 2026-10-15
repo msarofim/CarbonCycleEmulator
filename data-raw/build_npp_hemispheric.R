@@ -24,7 +24,7 @@
 # `npp_frac_NH` is a PREINDUSTRIAL (1750) split. They are not the same quantity:
 # two centuries of hemispherically asymmetric land clearing sit between them,
 # and the model already represents that -- it scales npp0_h by (1 - cleared_h),
-# which walks the realised share from 0.4662 to 0.4466 over 1750-2024. So the
+# which walks the realized share from 0.4662 to 0.4466 over 1750-2024. So the
 # modern observation constrains the model's MODERN share, and the 1750 parameter
 # only through that. The comparison must be made at the model's modern state,
 # never against the raw parameter. Stated here because getting it backwards

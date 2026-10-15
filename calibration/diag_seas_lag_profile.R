@@ -17,7 +17,7 @@
 # the model source.)
 #
 # THE SLICE IS BIASED TOWARD THE INCUMBENT, and that has to be said before the
-# numbers: the mode was FITTED at (2.0, 2.5) and no challenger is re-optimised,
+# numbers: the mode was FITTED at (2.0, 2.5) and no challenger is re-optimized,
 # which is exactly the `match_incumbents_optim` trap -- a fitted incumbent
 # against a grid challenger bought 309 log-units of pure artifact last time.
 # So a challenger that LOSES here proves little. A challenger that WINS, or a

@@ -4,7 +4,7 @@
 # This is the single place where acquired data (data/*.rds, written by
 # data-raw/build_calibration_data.R) becomes model input. Every choice made
 # here -- hemispheric splits, interpolation, gap handling, unit conversion --
-# is a modelling decision, so each is stated inline rather than buried.
+# is a modeling decision, so each is stated inline rather than buried.
 #
 # See DATA.md for the provenance of every input and a summary of this pipeline.
 #
@@ -52,7 +52,7 @@ CCX_ARTIFICIAL_SINK_RATE <- as.numeric(Sys.getenv("CCX_SINK_RATE", "0"))
 #           real UPTAKE rather than a negative emission: carbon stays in the
 #           system, ocean inventory and excess-14C stay meaningful, and the
 #           mixed layer can give some of it back. It is the arm both the 14C
-#           result and the published d13C deconvolution favour.
+#           result and the published d13C deconvolution favor.
 #
 # "foss" is the default so that every result produced before 2026-08-23c
 # reproduces bit for bit. At rate 0 all three modes are the untouched model.
@@ -71,7 +71,7 @@ FORC_FOSS_NH_SHARE <- 0.9201 # fossil CO2 emitted in the NH. MEASURED (Marcus,
                              # data-raw/extract_emission_seasonality.py --
                              # Crippa et al. 2020, Sci Data 7:121. Supersedes a
                              # 0.95 that had carried a "PROVISIONAL" comment
-                             # since it was written. It moves the modelled
+                             # since it was written. It moves the modeled
                              # 2015-24 MLO-SPO gradient 5.03 -> 4.67 ppm toward
                              # the observed 3.74, the new gradient term prefers
                              # it by +95 log-units, and the rest of the
@@ -425,7 +425,7 @@ ccx_nuclear_c14_sum_files <- function(dir) {
 #' a production series into this slot delivers the 1961-62 tests to the
 #' troposphere about a year early -- see the superseded shape below.
 #'
-#' The stored series is normalised to unit integral, so `total_kmol` alone sets
+#' The stored series is normalized to unit integral, so `total_kmol` alone sets
 #' the magnitude and the calibrated bomb_total (Naegler & Levin 2006 prior)
 #' continues to carry it.
 ccx_bomb_c14_monthly <- function(total_kmol = 102) {
@@ -460,10 +460,10 @@ ccx_bomb_c14_annual <- function(total_kmol = 102, years = 1945:1980) {
 #' Annex C holds the annual atmospheric test yields, but only as a PDF table
 #' with no machine-readable release found.
 #'
-#' Until that is digitised, the shape below is a documented placeholder built
+#' Until that is digitized, the shape below is a documented placeholder built
 #' from the qualitative test history (peak testing 1961-62, with 1954, 1958 and
 #' 1961-62 the most active years; total atmospheric yield ~440 Mt). It is
-#' NORMALISED to unit integral, so `total_kmol` alone sets the magnitude and the
+#' NORMALIZED to unit integral, so `total_kmol` alone sets the magnitude and the
 #' placeholder cannot silently set the amplitude. Do not report bomb-era 14C
 #' results on this shape.
 ccx_bomb_c14_annual_SUPERSEDED <- function(total_kmol = 102, years = 1945:1980) {
@@ -591,12 +591,12 @@ ccx_with_emis_method <- function(method, expr) {
 #' @param prod_c14 cosmogenic 14C production (mol/yr) -- from ccx_spinup()
 #' @param bomb_total_kmol total bomb 14C production, 1945-1980
 #' @param emissions optional data.frame(year, fossil_GtC, luc_GtC) REPLACING the
-#'   scenario's emissions entirely. This is how the app's stylised pathways
+#'   scenario's emissions entirely. This is how the app's stylized pathways
 #'   ("linear to zero by 2060", "+2 %/yr") and its pulse experiments are built:
 #'   the caller assembles the annual series and everything downstream --
 #'   hemispheric split, monthly interpolation, annual-total conservation -- is
 #'   applied identically to a custom path and to an SSP. `scenario` still names
-#'   the run for labelling and still selects the non-CO2 climate background.
+#'   the run for labeling and still selects the non-CO2 climate background.
 #'   ⚠ ITS `luc_GtC` IS MULTIPLIED BY `luc_scale` like any other land-use series
 #'   (code review 2026-10-12 sec.5): a 100 GtC LAND-USE pulse placed in this column
 #'   arrives as 100 x luc_scale (94.2 GtC at the canonical hilda31w; 91.4 at
@@ -679,7 +679,7 @@ ccx_build_forcing <- function(scenario = "historical",
   }
   # NA GUARD (2026-08-13). ccx_annual_to_monthly() strips NAs and then
   # approx(rule = 2) holds the nearest value flat across the gap. That is the
-  # right behaviour for a short trailing gap and a SILENT FABRICATION for a long
+  # right behavior for a short trailing gap and a SILENT FABRICATION for a long
   # leading one: GCB supplies no LUC before 1850, and the flat hold invented
   # 74.1 GtC across 1750-1849 -- 23 % of the model's land-use carbon -- with no
   # warning anywhere. The gap is now filled from a source at build time
@@ -801,9 +801,9 @@ ccx_build_forcing <- function(scenario = "historical",
   # (mean |resid| 2.22 ppm against 3.14 elsewhere) and the whole point is that
   # it may fit well BECAUSE the parameters were bent to it.
   #
-  # NOT the withdrawn sec.12c programme: that fitted a free E_LUC SHAPE to the
+  # NOT the withdrawn sec.12c program: that fitted a free E_LUC SHAPE to the
   # swing and would have reported it as a mechanism. This is prescribed,
-  # unfitted, externally sized and labelled artificial.
+  # unfitted, externally sized and labeled artificial.
   #
   # THE MODE SELECTS THE ISOTOPIC SIGNATURE, and that is the entire point --
   # see CCX_ARTIFICIAL_SINK_MODE at the top of this file for the three arms and
@@ -866,12 +866,12 @@ ccx_build_forcing <- function(scenario = "historical",
   #
   # A caller-supplied `emissions` table that itself starts at the window start
   # cannot express pre-window clearing, and nothing here can invent it -- that
-  # is a property of the input, and the idealised-pulse diagnostics rely on it
+  # is a property of the input, and the idealized-pulse diagnostics rely on it
   # (they supply a zero-emission record and get a cleared fraction of zero).
   e_pre    <- e$year < min(yrs)
   luc_pre  <- if (any(e_pre)) sum(e$luc_GtC[e_pre], na.rm = TRUE) else 0
   cum_luc  <- luc_pre + cumsum(luc) / 12          # GtC/yr on a monthly grid
-  # PER HEMISPHERE, integrating the SEASONALISED flux rather than splitting the
+  # PER HEMISPHERE, integrating the SEASONALIZED flux rather than splitting the
   # global cumulative. The two agree exactly at every year BOUNDARY (seasonality
   # conserves annual totals) but differ WITHIN a year, and the converted-land
   # term reads cum_luc every month -- so splitting the global series would hand
@@ -918,7 +918,7 @@ ccx_build_forcing <- function(scenario = "historical",
   # split: -24.0 permil in 1850 (essentially pure coal) to -28.3 by 2024 as gas
   # displaced coal and cement (limestone, ~0 permil) entered the total. It
   # replaces a single -28 applied to the whole industrial period, which made the
-  # modelled Suess decline ~30 % too steep -- see calibration/diag_d13c_suess.R.
+  # modeled Suess decline ~30 % too steep -- see calibration/diag_d13c_suess.R.
   #
   # Only the historical table carries the column. SSPs and caller-supplied
   # pathways do not: the future fuel mix is a scenario property nobody has
@@ -1006,7 +1006,7 @@ ccx_build_forcing <- function(scenario = "historical",
   c14_nuc <- if (nrow(nuc)) ccx_annual_to_monthly(nuc$year, nuc$mol_per_yr, yrs,
                                                  method = "constant") else rep(0, n)
   # Compare INTEGER years. Using decimal t here silently dropped the FINAL year
-  # of every source record: month-centred t for year Y runs Y.04..Y.96, all of
+  # of every source record: month-centered t for year Y runs Y.04..Y.96, all of
   # which satisfy t > Y. That cost 0.28 % of the prescribed bomb total.
   if (nrow(nuc)) c14_nuc[yv < min(nuc$year) | yv > max(nuc$year)] <- 0
 
@@ -1430,7 +1430,7 @@ ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE, edge_fn = NULL,
   for (i in seq_len(n)) {
     if (!is.null(ystore)) ystore[[i]] <- y
     # ⚠ INSTANTS, NOT MONTHLY MEANS (documented 2026-10-12, code review). Each row is
-    # the state at the instant F$t[i] (the month-centre label), before this month's
+    # the state at the instant F$t[i] (the month-center label), before this month's
     # step. The station observations the likelihood compares these with are monthly
     # MEANS; see the note above .ccx_month_design in R/likelihood.R for what that
     # does to the seasonal rows (first harmonic x sinc(pi/12) = 0.98862).

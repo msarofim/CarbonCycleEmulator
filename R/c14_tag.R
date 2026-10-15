@@ -26,7 +26,7 @@
 #
 # ⚠ WHICH ATOMS. The tag is the carbon by which THIS run's emissions exceed `tag_base`'s,
 # month by month and hemisphere by hemisphere (the forcing DIFFERENCE, so whatever the
-# seasonalisation and interpolation do to the pulse, the tag does exactly the same).
+# seasonalization and interpolation do to the pulse, the tag does exactly the same).
 # It is injected through the core's two existing 14C source columns, c14_bomb and
 # c14_nuclear, whose NH shares differ (legacy: FORC_BOMB_NH_SHARE 0.90, FORC_NUC_NH_SHARE 0.95):
 # a 2x2 solve per month puts EXACTLY the pulse's NH and SH amounts into each hemisphere.
@@ -68,7 +68,7 @@ ccx_c14_tag_rates <- function(F, F_base, aux) {
   nuclear <- (sb * d_SH - (1 - sb) * d_NH) / (sb - sn) * k
   # untagged months carry nothing -- and with the two shares free to meet there, 0/0 would be NaN
   bomb[!tagged] <- 0; nuclear[!tagged] <- 0
-  # F$t is MID-MONTH (ccx_build_forcing: year + (m - 0.5)/12), so a month's injection is centred ON F$t
+  # F$t is MID-MONTH (ccx_build_forcing: year + (m - 0.5)/12), so a month's injection is centered ON F$t
   dt <- diff(F$t[1:2])
   w  <- d_NH + d_SH
   gtc <- sum(w) * dt
@@ -90,10 +90,10 @@ ccx_c14_tag_apply <- function(F, rates) {
 #' @return data.frame(t, air, land, ocean, total), each a FRACTION of the tagged GtC. The
 #'   decay is undone at the injection-weighted mean time s_mid; for a one-year release the
 #'   residual of that undo is ~ lambda^2 var(s) / 2 ~ 1e-9, so `total` is a CONSERVATION
-#'   check, not a normalisation.
+#'   check, not a normalization.
 ccx_tag_partition <- function(tagged, untagged, tag) {
   stopifnot(is.finite(tag$gtc), tag$gtc != 0)
-  # each `$out` row is the month's OPENING state (ccx_run: recorded before the step), labelled with
+  # each `$out` row is the month's OPENING state (ccx_run: recorded before the step), labeled with
   # the mid-month t, so the state's own time is t - dt/2
   undo <- exp(ccx_const("LAMBDA_C14") * (tagged$t - tag$dt / 2 - tag$s_mid))
   f <- function(col) (tagged[[col]] - untagged[[col]]) * undo / tag$gtc

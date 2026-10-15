@@ -19,14 +19,14 @@
 #       views are differences of the SAME pair of runs and the functions are
 #       near-copies, so a copy-paste leaves a plot that renders perfectly and
 #       is simply the wrong quantity under a temperature axis.
-#   (c) THE KNOWN PRE-PULSE ARTEFACT GROWING. ⭐ This gate's first draft
+#   (c) THE KNOWN PRE-PULSE ARTIFACT GROWING. ⭐ This gate's first draft
 #       asserted the pre-pulse difference was ZERO -- as causality requires --
 #       and it FAILED, which is how the spline-ringing defect was found
 #       (calibration/diag_pulse_spline_ringing.R, CHANGELOG 09-24 (d)).
 #       `ccx_annual_to_monthly()` uses a natural spline, which is a GLOBAL
 #       interpolant, so a one-year pulse rings backwards into the years before
 #       it. The bound below is therefore a RATCHET on a measured defect, not a
-#       physical tolerance: it is what the artefact is TODAY, so a change that
+#       physical tolerance: it is what the artifact is TODAY, so a change that
 #       makes it worse is caught, and a fix that removes it makes this test
 #       fail LOUDLY and demands the ratchet come down with it.
 #   (d) THE TAKEAWAY'S COMPARISON CLAUSE VANISHING. The pulse-lab sentence

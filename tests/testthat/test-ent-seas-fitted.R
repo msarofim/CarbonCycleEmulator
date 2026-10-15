@@ -8,7 +8,7 @@
 # in for. It is now fitted: 25 -> 26 parameters.
 #
 # WHAT THIS FILE GUARDS, and none of it is the logpost:
-#   * the prior CENTRE is DERIVED and stays tied to its own arithmetic;
+#   * the prior CENTER is DERIVED and stays tied to its own arithmetic;
 #   * the prior WIDTH still encodes the claim it was chosen to encode;
 #   * the migration fills what the ancestor RAN, and says so;
 #   * and the resulting vector REFUSES to encode, by name -- because a log space
@@ -19,7 +19,7 @@ test_that("ent_seas_amp_SH is fitted, and its init is TIED to the derived consta
   expect_true("ent_seas_amp_SH" %in% CCX_PARAM_NAMES)
   expect_identical(length(CCX_PARAM_NAMES), 38L)   # + the layer-2 limb w_enso_l2 (2026-09-17 k)   # 36 + w_thc (O1 arm THC, 2026-09-15 d); 33 + option D+E's three (2026-09-14 h)   # 26 -> 28 on 2026-09-06d (kz_deep_frac, hs_asx_frac); 29 on 09-07 (h_hs); 30 on 09-07e (pump_hs_gcm2); 31 on 09-08d (u_hs); 33 on 09-13i (w_eq, gamma_eq: the equatorial cell)
   # THE DRIFT THIS CLOSES. `init` is a literal because CCX_PARAM_TABLE is built
-  # before ccx_const() exists, so the prior's CENTRE and its STARTING POINT are
+  # before ccx_const() exists, so the prior's CENTER and its STARTING POINT are
   # written in two places. Same guard as pump_grad and npp_frac_NH carry.
   # ⚠ The tolerance is the TYPED PRECISION, not a chosen number: `init` carries
   # six decimals, so half a unit in the last of them is the most agreement a
@@ -32,7 +32,7 @@ test_that("ent_seas_amp_SH is fitted, and its init is TIED to the derived consta
 test_that("the derived centre is the IN-BAND value diluted onto the SH box", {
   # ⛔ THE TWO SCALES MUST NOT COLLAPSE INTO ONE. 30 umol/kg is the anomaly
   # WITHIN the 40-90 S band; the PARAMETER perturbs the whole SH mixed layer, so
-  # the prior centre is that number times the band's ocean-area weight. The
+  # the prior center is that number times the band's ocean-area weight. The
   # recorded plausibility band "far outside ~5-30" mixes them, which is exactly
   # why both are registered and why this ties the arithmetic.
   expect_equal(ccx_const("ENT_SEAS_AMP_SH_DERIV"),
@@ -41,9 +41,9 @@ test_that("the derived centre is the IN-BAND value diluted onto the SH box", {
   expect_lt(ccx_const("ENT_SEAS_AMP_SH_DERIV"), ccx_const("ENT_SEAS_AMP_SH_INBAND"))
   # ⛔ AND BOTH MUST BE **COMPUTED**, NOT TYPED. Until 2026-09-03 the in-band
   # entry carried `value = 30` with its arithmetic only in the prose `source` --
-  # labelled "derived" while being an independent copy, which is the LAMBDA_C14
+  # labeled "derived" while being an independent copy, which is the LAMBDA_C14
   # bug this file's own header warns about. Recomputing moved it 30 -> 29.68 and
-  # the centre 11.07 -> 10.95. Re-deriving the chain here is what keeps a future
+  # the center 11.07 -> 10.95. Re-deriving the chain here is what keeps a future
   # edit to any input from leaving these two behind.
   # ⚠ THE COEFFICIENT IS REFERENCED, THE REST IS TRANSCRIBED, AND THAT SPLIT IS
   # DELIBERATE. `SST_PCO2_SENSITIVITY` is a REGISTERED constant, so the chain
@@ -93,14 +93,14 @@ test_that("the derived centre is the IN-BAND value diluted onto the SH box", {
 
 test_that("the prior is CENTRED on the derived value and its WIDTH is a geometric ceiling", {
   a  <- ccx_const("ENT_SEAS_AMP_SH_DERIV")
-  # ⛔ CENTRED IN THE **UNCONSTRAINED** COORDINATE, WHICH IS WHERE THE CLAIM
+  # ⛔ CENTERED IN THE **UNCONSTRAINED** COORDINATE, WHICH IS WHERE THE CLAIM
   # LIVES -- and asserting it on the natural-scale DENSITY would be wrong, not
   # merely awkward. A lognormal density peaks at exp(mu - sigma^2), BELOW its
   # median exp(mu), so `pr(a) > pr(a/1.2)` is FALSE here by 0.10 log-units even
-  # though the prior is centred exactly on `a`. That is [[prior_z_grid_scale]]'s
+  # though the prior is centered exactly on `a`. That is [[prior_z_grid_scale]]'s
   # lesson in miniature: integrate in the coordinate the parameter is sampled in.
   expect_equal(ccx_prior_z("ent_seas_amp_SH", a), 0, tolerance = 1e-8)
-  # symmetric about the centre IN LOG SPACE, which is what "centred" means for
+  # symmetric about the center IN LOG SPACE, which is what "centred" means for
   # this transform -- a ratio up and the same ratio down are equal and opposite
   for (k in c(1.2, 2, 3)) {
     expect_equal(ccx_prior_z("ent_seas_amp_SH", a * k),
@@ -111,8 +111,8 @@ test_that("the prior is CENTRED on the derived value and its WIDTH is a geometri
   # ⭐ THE WIDTH IS DERIVED FROM A GEOMETRIC CEILING, AND THIS TIES IT THERE.
   # The parameter is the in-band anomaly DILUTED onto the SH box, so the box
   # mean cannot exceed the in-band amplitude; it reaches it only if every SH
-  # ocean square metre behaves like the observed 40-90 S band. That no-dilution
-  # limit is log(1/area fraction) above the centre, and reading it as DG-family
+  # ocean square meter behaves like the observed 40-90 S band. That no-dilution
+  # limit is log(1/area fraction) above the center, and reading it as DG-family
   # 2 sigma fixes the width. ⛔ The width must NOT be read off the recorded
   # "5-30" band instead: that band's lower endpoint has no derivation anywhere,
   # and a width resting on an unsourced number is a chosen one in disguise.
@@ -156,7 +156,7 @@ test_that("the migrated ancestor REFUSES to encode, by name and with the value",
   mig  <- ccx_migrate_par_set(anc)
   # ⭐ THE POINT. `tr = "log"` has no 0, so the ancestor's OFF state is not a
   # point of this build's fitted space. Before 2026-09-03 this returned -Inf
-  # SILENTLY and handed a non-finite start vector to an optimiser three frames
+  # SILENTLY and handed a non-finite start vector to an optimizer three frames
   # away; it now refuses and names the coordinate.
   err <- tryCatch(ccx_par_to_unc(mig), error = conditionMessage)
   expect_type(err, "character")
@@ -185,7 +185,7 @@ test_that("the DEFAULT is the derived prior centre, now that the refit is adopte
   # defaults-arm run (the gates' whole "defaults" column) would exercise a model
   # the calibrated one does not have ([[default_off_hides_the_bug]]).
   #
-  # ⛔ THE DEFAULT IS THE PRIOR CENTRE, NOT THE FITTED 19.0291. The two are
+  # ⛔ THE DEFAULT IS THE PRIOR CENTER, NOT THE FITTED 19.0291. The two are
   # different statements and conflating them is what this file is about:
   # `ccx_default_params()` is the UNCALIBRATED reference (its `sst_seas_amp_SH`
   # is 1.2 against a fitted 1.85), so a fitted number here would make the gates'

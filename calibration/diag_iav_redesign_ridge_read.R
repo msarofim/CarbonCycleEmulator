@@ -1,12 +1,12 @@
 #!/usr/bin/env Rscript
 # =====================================================================
 # diag_iav_redesign_ridge_read.R -- HOW WIDE IS THE beta_max RIDGE IN THE FUTURES? (CHANGELOG 2026-10-07 e)
-# Reads calibration/diag_iav_redesign_ridge.R's profiles (beta_max held, the other four land names re-optimised, under #17 as
+# Reads calibration/diag_iav_redesign_ridge.R's profiles (beta_max held, the other four land names re-optimized, under #17 as
 # landed and under the redesign) and, per objective:
 #   SPACE     the profile is read in NATURAL space -- likelihood + prior, the five varying names' logit/log Jacobians REMOVED
 #             (the density of beta_max in its own units; memory basin_rank_by_logit_jacobian) -- and, beside it, as the
-#             objective's u-space logpost (Jacobians in), which the optimiser maximises. beta_max's logit Jacobian alone moves
-#             ~0.5 over 1.6-2.45, the size of the 1-sigma drop. The followers were optimised on the u-space objective;
+#             objective's u-space logpost (Jacobians in), which the optimizer maximizes. beta_max's logit Jacobian alone moves
+#             ~0.5 over 1.6-2.45, the size of the 1-sigma drop. The followers were optimized on the u-space objective;
 #   MEASURED  the profile's 1-sigma interval, where a natural spline through the profiled points crosses a logpost drop of
 #             1/2 on each side (fit_iav_module.R's rng() reading). A crossing at the grid's edge is a BOUND, said so;
 #   QUADRATIC a quadratic in beta_max fitted to the profile: its optimum and 1-sigma width (drop 1/2). Printed beside the

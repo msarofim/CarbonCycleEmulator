@@ -5,7 +5,7 @@
 # ⛔⛔ WHY THIS FILE EXISTS (2026-09-26). The app's growth panel compared a
 # model growth computed as a DIFFERENCE OF ANNUAL MEANS (app_annual_growth())
 # against GCB's `atm_growth`, which is NOAA's published `co2_gr_gl` and is a
-# JAN-TO-JAN difference of the deseasonalised global series. Two different
+# JAN-TO-JAN difference of the deseasonalized global series. Two different
 # estimators of the same quantity -- the standing like-for-like rule
 # (~/.claude/CLAUDE.md), violated in a shipped panel.
 #
@@ -23,7 +23,7 @@
 # gcb_*_sink rows and GATE 4's dg_af_annual_model() do -- would match GCB's
 # convention, but it RE-INJECTS the model's seasonal-cycle error into an annual
 # growth rate: RMS 0.397 -> 0.491, worst year 2024 at -1.600 (an end-
-# extrapolation artefact, [[app_sink_half_year_offset]]). app_annual_growth()'s
+# extrapolation artifact, [[app_sink_half_year_offset]]). app_annual_growth()'s
 # own header already warned of exactly this. So the MODEL side is left alone
 # and the OBSERVATION is put on the model's estimator. (Marcus's call, 09-26.)
 #

@@ -1,10 +1,10 @@
 # =====================================================================
 # diag_fert_ridge_repdc.R -- DOES `rep_dC` ABSORB THE COST OF A STRONGLY
-#                            SATURATING FERTILISATION -- AND DOES IT FALL?
+#                            SATURATING FERTILIZATION -- AND DOES IT FALL?
 #                            (2026-08-25)
 #
 # diag_fert_ridge_streams.R located the 8657 log-units that a strongly
-# saturating fertilisation costs, and the answer is unambiguous:
+# saturating fertilization costs, and the answer is unambiguous:
 #
 #   co2_level_MLO  -4144.2      93 % of the total, in TWO streams
 #   co2_level_SPO  -3894.6
@@ -18,13 +18,13 @@
 # the project since 2026-08-21.
 #
 # IT IS FROZEN IN THAT SCAN. So the 8657 is measured with the one parameter that
-# could absorb it held at a value chosen for a DIFFERENT fertilisation shape.
+# could absorb it held at a value chosen for a DIFFERENT fertilization shape.
 # This file frees it, and the question is not only how much cost comes back but
 # WHICH WAY rep_dC MOVES:
 #
 #   * if the saturating cell wants a SMALLER rep_dC, then gate 4's fix and the
 #     rep_dC blocker are ONE problem, and the whole 08-23 -> 08-25 arc has been
-#     hunting a mid-century mechanism for something the fertilisation SHAPE
+#     hunting a mid-century mechanism for something the fertilization SHAPE
 #     explains;
 #   * if it wants a LARGER one, the two are in conflict and the gate-4 fix makes
 #     the blocker worse;

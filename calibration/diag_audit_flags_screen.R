@@ -6,7 +6,7 @@
 # PROTOCOL (unchanged from the 09-29 screen). At the canonical (hilda29l, read
 # only through ccx_mode_file()):
 #   (1) FROZEN cost: the perturbation with all 29 fitted coordinates at the mode.
-#   (2) REBALANCED cost: re-optimise beta_max + fert_k + kz (Nelder-Mead from the
+#   (2) REBALANCED cost: re-optimize beta_max + fert_k + kz (Nelder-Mead from the
 #       mode, AF_NM_MAXIT). An UPPER BOUND on what a full refit would charge.
 #       Reported as d_logpost AND split into d_loglik / d_logprior, because a
 #       row that FIXES a fitted coordinate changes the prior+Jacobian as well
@@ -33,7 +33,7 @@
 #   F5 rep_dC (FITTED, +3.5 sd): pinned at 0 and at 1 sd with the protocol's
 #      rebalance and with a WIDE rebalance (+ its top |cor| Hessian partners);
 #      the Hessian correlation row; and a probe of whether its optimum MOVES
-#      with the (unfitted) land residence times -- 1-D re-optimisation of
+#      with the (unfitted) land residence times -- 1-D re-optimization of
 #      rep_dC under each residence-time perturbation, against ocean controls.
 #
 # IDENTITY CHECKS: every perturbation route is also run at ZERO perturbation
@@ -235,7 +235,7 @@ AF_COMP_WIDE <- c(AF_COMP, head(setdiff(names(rep_cor), AF_COMP), AF_WIDE_NPARTN
 S <- list()
 add <- function(...) S[[length(S) + 1]] <<- list(...)
 # identity rows (zero perturbation through each route); the first also runs
-# the rebalance, to measure the optimiser's own floor from the mode
+# the rebalance, to measure the optimizer's own floor from the mode
 add(flag = "ID", label = "identity: NPP route x1 (+rebalance floor)", param = AF_NPP_NAME, base = NPP_BASE,
     value = NPP_BASE, setup = function() set_npp(NPP_BASE), teardown = reset_npp,
     comp = AF_COMP, maxit = AF_NM_MAXIT)

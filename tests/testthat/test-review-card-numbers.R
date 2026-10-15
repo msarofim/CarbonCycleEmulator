@@ -7,7 +7,7 @@
 #   card 4 (carbotopecomments.10.2.26, his wording): the land's ENSO response "is defined to occur 2.5
 #     months after the index" -- the canonical FITS it (hilda33p 2.606 +/- 0.407 months);
 #   card 7 ("Add a line about k_w to the known issues tab"): the gas transfer speed "comes out at about
-#     1,900 m per year, against the literature's 1,446" -- hilda33p 1894.7 +/- 53.7; the prior centre.
+#     1,900 m per year, against the literature's 1,446" -- hilda33p 1894.7 +/- 53.7; the prior center.
 #     2026-10-13 (g): "about 1,850" (Marcus) -- hilda31w 1835.4 +/- 52.5.
 # THE TOLERANCE IS EACH FIT'S OWN POSTERIOR SD (the Laplace marginal on the natural scale, by the delta
 # method through the parameter's transform), never a hand-picked band: a refit that moves the value more

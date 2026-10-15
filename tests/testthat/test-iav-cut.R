@@ -203,7 +203,7 @@ test_that("IC8 THE DATA: the monthly product reproduces its estimator; its check
   # the window is covered, with g defined over every month of it
   w <- m[m$year >= LIK_IAV_WIN[1] & m$year <= LIK_IAV_WIN[2], ]
   expect_identical(nrow(w), 12L * (LIK_IAV_WIN[2] - LIK_IAV_WIN[1] + 1L)); expect_true(all(is.finite(w$g)))
-  # ccx_cen12 is CENTRED: x[t + 6] - x[t - 6]; NA within six months of either end
+  # ccx_cen12 is CENTERED: x[t + 6] - x[t - 6]; NA within six months of either end
   x <- (1:30)^2; g <- ccx_cen12(x)
   expect_identical(g[7], x[13] - x[1]); expect_identical(g[24], x[30] - x[18])
   expect_true(all(is.na(g[c(1:6, 25:30)]))); expect_true(all(is.finite(g[7:24])))

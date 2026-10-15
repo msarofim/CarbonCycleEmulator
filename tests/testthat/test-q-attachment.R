@@ -5,7 +5,7 @@
 # that way. It FAILED, for a diagnosed reason: HD sits near -109 permil and the
 # interior crosses -109 at ~1000 m, so a SINGLE-ENDMEMBER bulk exchange matches
 # its endmember at exactly ONE depth and fights the profile on both sides of
-# it. `q_attach_from` is the departure Marcus authorised on 2026-09-05 ("we
+# it. `q_attach_from` is the departure Marcus authorized on 2026-09-05 ("we
 # don't need to stay true to HILDA, but we should stay true to the conceptual
 # way that the simplified model's ocean works"): in a pure-diffusion column the
 # interior is reached by mixing from above, and deep water formation fills the
@@ -16,9 +16,9 @@
 #     BIT. A parameter list written before today must not silently change model.
 #   * the switch is MUTATION-TESTED. A subsetting knob that is read but not
 #     acted on reports "no effect" identically to one that was measured.
-#   * `tau_q` is NOT renormalised over the subset, so a smaller set means LESS
+#   * `tau_q` is NOT renormalized over the subset, so a smaller set means LESS
 #     total exchange. That is a deliberate design choice and is pinned here,
-#     because renormalising would smuggle a rate change in with a geometry one.
+#     because renormalizing would smuggle a rate change in with a geometry one.
 #   * conservation survives subsetting -- each layer's two limbs are
 #     volume-symmetric ON THEIR OWN, so dropping layers drops matched pairs.
 #   * both cores agree at a SUBSET, not only at the default.
@@ -79,7 +79,7 @@ test_that("HD is set by kz, NOT by the attachment -- the like-for-like guard", {
   # attachment. At MATCHED kz the attachment moves HD by only ~1-3 permil and
   # its SIGN is not even robust across bases (it reverses between ent26 and
   # ccx_default_params()), while kz alone moves it ~9. The iso-deep control
-  # equalises the DEEP AGE, so it licenses comparing the intermediate PROFILE
+  # equalizes the DEEP AGE, so it licenses comparing the intermediate PROFILE
   # across arms -- and nothing else. Any quantity the control does not pin
   # must be compared at MATCHED kz.
   hd <- function(k, kz) { p <- qa_par(k); p$kz <- kz
@@ -90,7 +90,7 @@ test_that("HD is set by kz, NOT by the attachment -- the like-for-like guard", {
 })
 
 test_that("tau_q keeps its PER-LAYER meaning: a smaller set exchanges LESS", {
-  # If tau_q were renormalised over the subset, total HD<->interior exchange
+  # If tau_q were renormalized over the subset, total HD<->interior exchange
   # would be invariant to the attachment and the deep box would barely move.
   # It is not, and this pins that -- the deep is what the weaker total exchange
   # shows up in, at fixed kz.

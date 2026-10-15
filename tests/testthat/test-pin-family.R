@@ -14,7 +14,7 @@
 #     prior(x) = dnorm(u(x), u0, PIN_SD) - log_jac(u(x))
 # so that ccx_make_logpost()'s `prior(x) + log_jac(u)` (R/calibrate.R:874) sums
 # to exactly dnorm(u, u0, PIN_SD) -- a normal near-delta in the coordinate the
-# OPTIMISER MOVES IN, which is the coordinate a pin has to bind in.
+# OPTIMIZER MOVES IN, which is the coordinate a pin has to bind in.
 #
 # The driver builds this inline. It is rebuilt here rather than sourced, because
 # sourcing run_modefind_pump_arms.R would launch a refit; the identity in test 1
@@ -47,7 +47,7 @@ test_that("on a log parameter the general form IS the old lognormal", {
 })
 
 test_that("the pin sums with the Jacobian to a plain normal in u, in every family", {
-  # This is the property the pin is FOR. If it holds, the optimiser sees an
+  # This is the property the pin is FOR. If it holds, the optimizer sees an
   # isotropic near-delta whatever the parameter's natural scale.
   cases <- list(list(nm = "fert_k", val = 90),        # logit
                 list(nm = "beta_max", val = 0.34),    # logit
@@ -96,7 +96,7 @@ test_that("a logit pin refuses the bounds, where the transform is infinite", {
   expect_identical(pr(s$lo), -Inf)
   expect_identical(pr(s$hi + 1), -Inf)
   # and it does so SILENTLY -- qlogis()'s NaN warning would otherwise fire on
-  # every out-of-support proposal the optimiser makes.
+  # every out-of-support proposal the optimizer makes.
   expect_silent(pr(s$hi + 1))
 })
 

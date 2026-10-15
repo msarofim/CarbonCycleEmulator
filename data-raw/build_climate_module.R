@@ -60,7 +60,7 @@
 for (f in list.files("R", pattern = "\\.R$", full.names = TRUE)) source(f)
 
 CLIM_SSPS      <- c("ssp119", "ssp126", "ssp245", "ssp370", "ssp585")
-# ⚠ A 1.4.5 RESULT KEEPS ITS LABEL and is never relabelled 1.6.0 (standing
+# ⚠ A 1.4.5 RESULT KEEPS ITS LABEL and is never relabeled 1.6.0 (standing
 # rule). Both the directory and the provenance string derive from the tag, so
 # a rebuilt module cannot claim a calibration it was not built from.
 CLIM_ARGS      <- commandArgs(trailingOnly = TRUE)
@@ -137,7 +137,7 @@ cat(sprintf("          cross-scenario spread at matched CO2: max %.4f W/m2 at %d
 # ---------------------------------------------------------------------
 # Discrete recursion, the standard form:
 #   S_i(t) = S_i(t-1) exp(-1/d_i) + q_i F(t) (1 - exp(-1/d_i));  T = sum_i S_i
-# Fitted on log(d) and log(q) so the optimiser is unconstrained and the
+# Fitted on log(d) and log(q) so the optimizer is unconstrained and the
 # timescales cannot cross zero or reorder into a degenerate solution.
 irf_temp <- function(erf, q, d) {
   n <- length(erf); S <- numeric(length(q)); T <- numeric(n)

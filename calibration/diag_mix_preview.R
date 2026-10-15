@@ -13,7 +13,7 @@
 #              spliced on the historical emissions (br_futures()'s convention); CO2, GMST and ocean
 #              uptake at 2100 / 2300.
 #   C  POWER   the record's opinion of s at hilda34g: the likelihood at s x {0, 1/2, 1, 2, 4}, every
-#              name held, and with kz re-optimised (1-D) -- how much of the cost kz alone buys back.
+#              name held, and with kz re-optimized (1-D) -- how much of the cost kz alone buys back.
 #   D  BENCH   the ocean's climate effect over 2015-24 (warm vs climate held at its 1901-20 mean from
 #              1901, GMST AND SST held), OFF vs ON, against GCB 2025's -0.20 +/- 0.05 GtC/yr.
 # ⛔ A PREVIEW: no objective changes, no mode file written, nothing adopted. No RNG.

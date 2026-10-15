@@ -3,13 +3,13 @@
 # D1 a deadline stops a slowing step within an evaluation or two and returns the best EVALUATED point;
 # D2 with no deadline the step is identical() to plain optim() (Nelder-Mead AND BFGS);
 # D3 a deadline before the first evaluation returns the start; D4 any OTHER error propagates;
-# D5 the polish is sized at the OBSERVED rate; D6 a restart's minutes are normalised by the evals it made;
+# D5 the polish is sized at the OBSERVED rate; D6 a restart's minutes are normalized by the evals it made;
 # D7 the driver routes BOTH its steps through the stepper and records the stops; D8 val0 is forced before the
 # deadline is set. Mutations M1-M7 (CHANGELOG 10-05) are each caught by their own test.
-# D9 (2026-10-06) the end-of-run eval rate is the restarts' own rate, not normalised minutes over every eval.
+# D9 (2026-10-06) the end-of-run eval rate is the restarts' own rate, not normalized minutes over every eval.
 source(file.path(.root, "calibration", "lib_ms_deadline.R"))
 
-# a smooth bowl, minimised; `slow_after` evaluations in, each one sleeps (the near-wall slowdown, scripted)
+# a smooth bowl, minimized; `slow_after` evaluations in, each one sleeps (the near-wall slowdown, scripted)
 make_obj <- function(slow_after = Inf, nap = 0.02) {
   env <- new.env(); env$n <- 0L; env$vals <- numeric(0); env$us <- list()
   st <- ms_step_state()
@@ -100,7 +100,7 @@ test_that("D9: the eval rate is the restarts' OWN rate, independent of the norma
   # The 10-05 (q) smokes (outputs/diagnostics/cpuclock_smoke_20261005/), INVERTED from what the replaced line
   # printed, so the inputs are the runs' own numbers, not round ones:
   #   T1      one restart, 202 evals at maxit 200, in a 1763-eval task (the polish's evals too): printed 0.0333.
-  #   T3 wall one restart, 210 evals normalised to maxit 6000, the whole task: printed 32.8228.
+  #   T3 wall one restart, 210 evals normalized to maxit 6000, the whole task: printed 32.8228.
   m1 <- 0.0333 * 1763 / 60 * 202 / 200;     t1 <- ms_restart_minutes(m1, 200, 202)    # 0.988 min (log: "1.0 min")
   m3 <- 32.8228 * 210 / 60 * 210 / 6000;    t3 <- ms_restart_minutes(m3, 6000, 210)   # 4.021 min (log: "4.0 min")
   old <- function(rm, n_eval) 60 * sum(rm) / n_eval           # the REPLACED expression
@@ -111,7 +111,7 @@ test_that("D9: the eval rate is the restarts' OWN rate, independent of the norma
   # 0.2807-0.3755). The helper's 0.2935 sits inside that range; the replaced line's 0.0333 is 9x below it.
   expect_true(r1 >= 0.2807 && r1 <= 0.3755)
   expect_false(old(t1, 1763) >= 0.2807)
-  # the normalisation CANCELS: the same restart reads the same rate whatever maxit it is normalised to
+  # the normalization CANCELS: the same restart reads the same rate whatever maxit it is normalized to
   for (M in c(50, 200, 6000))
     expect_equal(ms_eval_rate_sec(ms_restart_minutes(2.5, M, 300), M)[["slowest"]], 60 * 2.5 / 300)
   # two restarts: the slowest is what the polish sizes on, the fastest is reported beside it

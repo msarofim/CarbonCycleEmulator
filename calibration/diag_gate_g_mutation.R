@@ -74,7 +74,7 @@ cat(sprintf("\n  ALK_SURFACE restored to %.6g -- checked, not assumed.\n",
             ccx_const("ALK_SURFACE")))
 
 # ---- what the carbonate system says the response SHOULD be ----------
-# QUANTITATIVE PRE-CHECK, not a post-hoc rationalisation. At fixed pCO2 the
+# QUANTITATIVE PRE-CHECK, not a post-hoc rationalization. At fixed pCO2 the
 # mixed layer re-equilibrates, and to first order dDIC/DIC = (dALK/ALK) x R,
 # where R is the ratio the carbonate system sets. Measuring R and stating it is
 # what turns "the gate responds" into "the gate responds by the right amount".

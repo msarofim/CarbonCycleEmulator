@@ -170,7 +170,7 @@ test_that("frozen Revelle does what it claims, and only that", {
   skip_if_no_cpp()
   # seas_drivers = 0: the 1850-agreement gate below rests on "the buffer has
   # barely moved, so the ONLY difference between the arms is buffer
-  # stretching". The frozen branch pins pco2_ml to the linearised-DIC form with
+  # stretching". The frozen branch pins pco2_ml to the linearized-DIC form with
   # NO temperature dependence, so under the driver model the seasonal SST cycle
   # drives a seasonal pCO2 cycle on the LIVE arm only, and the rectification
   # difference alone accumulates 0.38 ppm by 1850 -- nothing to do with what
@@ -406,7 +406,7 @@ test_that("the seasonal mixed layer agrees between the cores at seas_ml = 1", {
 test_that("seas_ml = 1 is a DIFFERENT trajectory from seas_ml = 0 in BOTH cores", {
   skip_if_no_cpp()
   # ⛔ Without this, the test above would pass for the wrong reason if the C++
-  # marshalling silently sent seas_ml = 0: both cores would run the aseasonal
+  # marshaling silently sent seas_ml = 0: both cores would run the aseasonal
   # model and agree perfectly. This is the mutation that catches that.
   p0 <- pf$p; p0$seas_drivers <- 1; p0$seas_ml <- 0
   p1 <- p0; p1$seas_ml <- 1
@@ -443,7 +443,7 @@ test_that("the two hemispheres are in ANTIPHASE in the C++ core, not swapped", {
 # different objects: R on `ccx_seas_ml_on(p)` (which requires seas_drivers > 0),
 # C++ on `as.integer(!is.null(aux$mld_coef))` -- a function of `aux` ALONE.
 # `ccx_spinup()` builds `aux` from the un-zeroed `p` and only THEN sets
-# seas_drivers = 0, so the zeroing was honoured by R and IGNORED by C++, and
+# seas_drivers = 0, so the zeroing was honored by R and IGNORED by C++, and
 # every equilibrium solve runs through the C++ path. The "aseasonal"
 # preindustrial equilibrium came back carrying 1940.2 GtC less ocean carbon,
 # and P10/P11/P12/P1c were all produced on top of it.

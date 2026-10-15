@@ -37,7 +37,7 @@ GR_GATE9_TOL <- 0.03            # ppm; the measured worst decade is 0.02
 
 gr_obs <- local({ o <- NULL; function() { if (is.null(o)) o <<- ccx_prepare_obs(); o } })
 
-# memoised on the parameter list, like gr_obs (review B4, 2026-09-12): the default
+# memoized on the parameter list, like gr_obs (review B4, 2026-09-12): the default
 # run was made five times
 gr_memo <- new.env()
 gr_run <- function(p = ccx_default_params()) {

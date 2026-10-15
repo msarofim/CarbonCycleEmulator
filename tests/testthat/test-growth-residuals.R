@@ -9,7 +9,7 @@
 #       against 66 observed ones -- the exact bug the scatter sentence beside
 #       it already had and fixed. A merge() on year hides it: the answer is
 #       still a number, just of a different window than the one printed.
-#   (b) THE ANNUALISATION DRIFTING FROM THE CHART'S. The residual must be
+#   (b) THE ANNUALIZATION DRIFTING FROM THE CHART'S. The residual must be
 #       measured against EXACTLY the series plot_growth_rate() draws. That is
 #       why app_annual_growth() was extracted from three hand-copies; this
 #       asserts the chart and the number still share it.
@@ -68,7 +68,7 @@ test_that("(b) the chart and the number share one annualisation", {
   PAL <- get("PAL", envir = .gr_env)
   d <- ggplot2::ggplot_build(pg(.gr_base, NULL, .gr_obs, c(1980, 2024)))$data[[1]]
   # ⚠ layer 1 holds BOTH drawn series (model and observed) -- 130 rows, not 65.
-  # Select the MODEL one by its palette colour rather than by position, which
+  # Select the MODEL one by its palette color rather than by position, which
   # would silently follow a reordering of the legend.
   d <- d[d$colour == PAL[["model"]], ]
   mine <- ann(.gr_base)
@@ -126,7 +126,7 @@ test_that("a counterfactual arm is reported separately and can differ", {
 # ⛔⛔ THE BUG THIS BLOCK EXISTS FOR. Until 2026-09-26 the panel compared a
 # model growth computed as a DIFFERENCE OF ANNUAL MEANS against GCB's
 # `atm_growth` -- NOAA's published `co2_gr_gl`, differenced JAN-TO-JAN off the
-# deseasonalised series. Two estimators of one quantity. The chart's own caption
+# deseasonalized series. Two estimators of one quantity. The chart's own caption
 # said "annual means differenced" while half its data was not.
 #
 # ⚠ IT DOES NOT SHOW UP IN AN RMS: 0.397 ppm/yr on either pairing. It shows up

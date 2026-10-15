@@ -52,7 +52,7 @@ test_that("the names ship OFF and are structural; no name prefixes another; the 
   }
   co <- ccx_export_hs_seas_shape()
   for (h in HEMIS) {
-    expect_lt(abs(mean(co[[h]]$f_month) - 1), 1e-12)               # renormalised to mean 1
+    expect_lt(abs(mean(co[[h]]$f_month) - 1), 1e-12)               # renormalized to mean 1
     expect_gt(co[[h]]$f_min, 0)                                     # the export never reverses at amp 1
     expect_gt(co[[h]]$f_max, 2.5)                                   # a RECTIFIED bloom, not a sine
   }
@@ -105,7 +105,7 @@ test_that("P0b ANNUAL MEAN and P0e SHAPE: the factor's continuous mean is 1; the
     expect_lt(abs(mean(vapply(fine, function(t) ccx_mld_eval(co[[h]], t - lag / 12)$f, numeric(1))) - 1), 1e-12)
   p1 <- phs_par(amp = 1); p0 <- phs_par(amp = 0); sp <- phs_spinup(p1)
   ratio <- sapply(tt12, function(t) hs_pump_d(sp, p1, t) / hs_pump_d(sp, p0, t))
-  for (h in HEMIS) expect_lt(max(abs(ratio[h, ] - co[[h]]$f_month)), 1e-9)   # exact at the month centres
+  for (h in HEMIS) expect_lt(max(abs(ratio[h, ] - co[[h]]$f_month)), 1e-9)   # exact at the month centers
   for (h in HEMIS) expect_lt(abs(mean(ratio[h, ]) - 1), 1e-9)                 # zero-mean anomaly
   expect_equal(which.max(ratio["SH", ]), 1L); expect_lt(ratio["SH", 7], 0.05)  # January bloom, July ~0
   expect_equal(which.max(ratio["NH", ]), 6L); expect_lt(ratio["NH", 1], 0.05)

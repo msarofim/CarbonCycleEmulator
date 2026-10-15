@@ -59,7 +59,7 @@ test_that("the pump delivers EXACTLY the gradient it was asked for", {
   # THE CONTRACT ON `pump_grad`: it is the model's preindustrial
   # bottom-box-minus-mixed-layer DIC gradient in umol/kg, directly comparable
   # with the target the likelihood scores. It is NOT "roughly the observed
-  # shape scaled" -- the shape is re-normalised on each grid's own layers,
+  # shape scaled" -- the shape is re-normalized on each grid's own layers,
   # because a model layer averages several observed bins and the bottom layer's
   # mean shape is 1.011, not 1. Without that step a pump_grad of 233.1 lands at
   # 235.7, and the h_ml dependence would be invisible.

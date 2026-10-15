@@ -3,13 +3,13 @@
 # THE SINK THE LITERATURE MEASURES? (2026-09-30 l)
 #
 # ⛔ A RECORD, NOT A LIVE DRIVER. It answered NO (0.37-0.70 kg C/kg N at the prior
-# centre, gate 0.6-8.7; ndep_form_efficiency_20260930.log), and Marcus ruled the
+# center, gate 0.6-8.7; ndep_form_efficiency_20260930.log), and Marcus ruled the
 # RETENTION FLUX the same day (CHANGELOG 09-30 m). `gamma_ndep` was then REMOVED from
 # both cores, so re-running this at a later commit would set a field nothing reads and
 # report ZERO effect -- the silent-gate shape. Run it only at 74896c5.
 #
 # The D2 (a) smoke (alignment_screen_smoke_d2) read 0.40 kg C per kg N at the gamma
-# prior centre, below the pre-registered gate 0.6-8.7 (P-D2-2). Hypothesis, stated
+# prior center, below the pre-registered gate 0.6-8.7 (P-D2-2). Hypothesis, stated
 # before this run: the multiplier NPP x (1 + gamma ndep) makes the sink track the
 # RATE OF CHANGE of deposition (pools relax to a new equilibrium), while the
 # literature's kg C/kg N is a STEADY ratio of sink RATE to deposition RATE (N
@@ -18,7 +18,7 @@
 # 1950-1980) and small after ~1990, whatever gamma is.
 #
 # WHAT: the alignment control (as diag_imb_alloc_preview.R builds it), run with
-# gamma_ndep = k x the prior centre for k in {0, 1, 5}; residual land sink, NPP and
+# gamma_ndep = k x the prior center for k in {0, 1, 5}; residual land sink, NPP and
 # land deposition by window. Sink per N = (sink(k) - sink(0)) / deposition.
 # No fit, no RNG. USAGE: Rscript calibration/diag_ndep_form_efficiency.R
 # =====================================================================
@@ -34,7 +34,7 @@ NF_CTRL_PROFILE <- ccx_path("outputs", "diagnostics", "tau_soil_slow_profile_fix
 NF_CTRL_VALUE <- 500; NF_FEX_PROXY <- 0.8053
 NF_FREE11 <- c("beta_max", "fert_k", "luc_scale", "q10", "seas_T_amp_NH", "seas_T_amp_SH",
                "seas_lag_p_NH", "seas_lag_p_SH", "npp_frac_NH", "kz", "rep_dC")
-NF_K      <- c(0, 1, 5)                                   # multiples of the prior centre
+NF_K      <- c(0, 1, 5)                                   # multiples of the prior center
 NF_WIN    <- list(c(1950L, 1979L), c(1980L, 1999L), c(2000L, 2023L), c(1990L, 2023L))
 NF_GATE   <- c(0.6, 8.7)                                  # kg C/kg N, land mean (lit note sec. 2a(iv))
 NF_CENTRE <- ccx_const("GAMMA_NDEP_PRIOR_R") * 1e-3 / ccx_const("NPP_GLOBAL_PI")

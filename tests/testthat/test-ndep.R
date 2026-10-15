@@ -24,7 +24,7 @@
 # =====================================================================
 
 NDEP_TEST_LOUD <- c(NH = 40, SH = 8)       # Tg N/yr, ~ the modern order, NH-heavy (synthetic)
-NDEP_TEST_RET  <- c(0, 3.9, 8.7)           # kg C/kg N: off, the prior centre, the literature ceiling
+NDEP_TEST_RET  <- c(0, 3.9, 8.7)           # kg C/kg N: off, the prior center, the literature ceiling
 
 .nd_forcing <- function(sp, years = c(1900, 1980)) {
   F <- suppressWarnings(ccx_build_forcing("historical", years, prod_c14 = sp$prod_c14))

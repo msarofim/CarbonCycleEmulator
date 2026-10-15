@@ -8,7 +8,7 @@
 # incidental: it is the load-bearing reason the advection mechanism was NOT
 # adopted, because it makes the negative result GENERAL -- "no rerouting of a
 # closed vertical loop can change what the atmosphere sees" -- rather than a
-# property of one parameterisation. So the failure is either (a) the pump
+# property of one parameterization. So the failure is either (a) the pump
 # genuinely invalidating a generality that was always conditional, or (b) a bug.
 # Re-expressing the test until it passes would discard the distinction, which is
 # exactly the move that hides regressions.

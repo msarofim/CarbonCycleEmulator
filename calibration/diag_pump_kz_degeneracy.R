@@ -232,7 +232,7 @@ d <- data.frame(g = vapply(res, `[[`, numeric(1), "grad"),
                 k = vapply(res, `[[`, numeric(1), "kz"),
                 y = tot)
 d <- d[d$g > 0, ]
-# CENTRE AND SCALE, or the quadratic is fitted on columns 25 orders apart in
+# CENTER AND SCALE, or the quadratic is fitted on columns 25 orders apart in
 # magnitude and the Hessian is numerical noise dressed as a result.
 gs <- sd(d$g); ks <- sd(d$k)
 d$gc <- (d$g - mean(d$g)) / gs; d$kc <- (d$k - mean(d$k)) / ks

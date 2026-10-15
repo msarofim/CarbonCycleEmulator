@@ -1,5 +1,5 @@
 # =====================================================================
-# build_cmip6_npp_seasonal_shape.py -- THE OBSERVED-ANALOGUE SEASONAL SHAPE OF
+# build_cmip6_npp_seasonal_shape.py -- THE OBSERVED-ANALOG SEASONAL SHAPE OF
 #   NH/SH TERRESTRIAL NPP, FROM A PROCESS-MODEL ENSEMBLE
 #   -> data/obs_npp_seasonal_shape_cmip6.rds  (via .npz + an R converter)
 #
@@ -118,7 +118,7 @@ for m in models:
             hemi[h] = tot * 1e-12 * 86400 * 365.25                  # PgC/yr
         # ⚠ GATE: NPP IS A STRICTLY POSITIVE FLUX. SAM0-UNICON returns it with
         # the opposite sign (-29.0/-19.7 PgC/yr), which would pass silently into a
-        # unit-mean normalisation and invert that model's whole seasonal shape.
+        # unit-mean normalization and invert that model's whole seasonal shape.
         # Rejected here, LOUDLY, rather than filtered downstream.
         if hemi["NH"].mean() <= 0 or hemi["SH"].mean() <= 0:
             print(f"  {m:20s} REJECT: non-positive NPP "
