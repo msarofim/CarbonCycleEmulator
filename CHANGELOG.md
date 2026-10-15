@@ -34,6 +34,7 @@ Project log: what was done, what was tried and abandoned, and why.
   - "Measured as dots, model as lines (Recommended)": the growth-rate chart.
 - **Verified in the browser at 1280 px:** every tab draws with no output error, and each new string renders. (In the hidden pane the plots report "figure margins too large": `innerWidth` was 0, so that was the pane, not the app.)
 - His `.docx` stays untracked, like the 09-26, 10-02 and 10-11 ones.
+- **Full suite @ `5adf02c` (frozen, linked): 8094 passed, 0 FAILED, 1 skipped (the standing `l2-enso-limb` skip), 19.8 min.** The first fully green suite since the hilda31w adoption: app-version went green in (a), and card 4's two by-design reds in (b). Log: `outputs/diagnostics/suite_20261015_5adf02c.log`. The suite worktree is removed.
 
 ## 2026-10-15 (a) — **Pre-public deployment checks. The release is cut on `hilda31w` as BETA v1.0** (Marcus, verbatim: "Beta v1.0 is fine, because this is the first public version"). **`app/DEPLOY.md` is fixed:** it named a mode file two adoptions old, so a bundle built from it would have run on uncalibrated defaults. **The ship list is now a script, `app/make_deploy_bundle.sh`, and a bundle built by it RUNS:** every tab, the pulse lab, build-your-own and all nine card plots, with a clean log. **Cold start is 6–8 s to serving, not 73 s.**
 
