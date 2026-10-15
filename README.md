@@ -35,7 +35,7 @@ Teaching software, not peer-reviewed, not for citation.
 - **Uncertainty bands:** a CO₂ band built from those draws is in `data/futures_ribbons.rds`
   and is not yet displayed. The app shows FaIR 5–95 % ranges on Known issue 5 and in the
   pulse lab.
-- **Tests:** full suite 8,094 passed, 0 failed, 1 skipped (commit `5adf02c`, 2026-10-15).
+- **Tests:** full suite 8,095 passed, 0 failed, 1 skipped (commit `6278482`, 2026-10-15).
 - **Git tag `v1.0-hilda29l`** (2026-09-22) is an earlier internal freeze, not the app's
   BETA v1.0.
 

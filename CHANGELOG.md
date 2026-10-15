@@ -51,6 +51,7 @@ Project log: what was done, what was tried and abandoned, and why.
   - `ccx_enso_efold_yr()`'s k == 1 branch.
   
   These are behavior changes, so they wait for Marcus.
+- **Full suite @ `6278482` (frozen, linked): 8095 passed, 0 FAILED, 1 skipped, 19.8 min.** Log: `outputs/diagnostics/suite_20261015_6278482.log`. The README's test line now cites it. The suite worktree is removed. A follow-up card proposes fixing the six dormant bugs.
 
 ## 2026-10-15 (c) — **Schwartz's "second order" claim CHECKED against FaIR and CarboTope: it does not hold. If CO₂ emissions stop in 2030, about 71 % (FaIR) / 66 % (CarboTope) of the 2030 excess is still in the air in 2130, against about 37 % / 36 % of a 100 GtC pulse released into the same world: 1.9× / 1.8×, and the ratio grows with the horizon (≈1.6–1.7× at +20 yr, ≈2.0× at +270).** Record: `outputs/diagnostics/zec_vs_pulse_20261015/` (README, CSVs, gates).
 
