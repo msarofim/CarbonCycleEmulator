@@ -125,4 +125,4 @@ from a fresh clone:
 Rscript data-raw/download_data.R && Rscript data-raw/build_carbonate_tables.R && Rscript data-raw/build_calibration_data.R && Rscript tests/run_tests.R
 ```
 
-**Author:** Marcus C. Sarofim (NYU Marron Institute)
+**Author:** Marcus C. Sarofim
