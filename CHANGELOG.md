@@ -2,6 +2,43 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-15 (a) — **Pre-public deployment checks. The release is cut on `hilda31w` as BETA v1.0** (Marcus, verbatim: "Beta v1.0 is fine, because this is the first public version"). **`app/DEPLOY.md` is fixed:** it named a mode file two adoptions old, so a bundle built from it would have run on uncalibrated defaults. **The ship list is now a script, `app/make_deploy_bundle.sh`, and a bundle built by it RUNS:** every tab, the pulse lab, build-your-own and all nine card plots, with a clean log. **Cold start is 6–8 s to serving, not 73 s.**
+
+Marcus's posting plan (verbatim): "1) make github public. 2) post substack with the CarboTope link. 3) Push CarboTope with the Substack link."
+
+- **Release** (`556f4a4`):
+  - `APP_RELEASE_MODE` is `"hilda31w"`, so `test-app-version.R` is green (4 / 0).
+  - `APP_REPO_URL` is `https://github.com/msarofim/CarbonCycleEmulator` (plan step 1). `test-review-cards.R` 48 / 0.
+  - `APP_FEEDBACK_URL` waits for the Substack post.
+- **The bundle:**
+  - `make_deploy_bundle.sh` builds from a commit with `git archive`, so only tracked files ship. It resolves the mode file through `ccx_mode_file()` at that commit and adds the root `app.R` (`shiny::shinyAppDir("app")`) that shinyapps.io needs, because the app lives in `app/`.
+  - Verified: byte-identical (`diff -r`) to the bundle tested by hand. It refuses an existing output directory, and a commit with no `R/` fails loudly without leaving a partial bundle.
+  - The first draft died silently, because sourcing `R/` reads `data/` and `pipefail` ended the script inside a command substitution. It now prints the R error.
+- **Bundle run from `556f4a4`** (4.1 MB, 108 files; `shiny::runApp(<bundle>)` on :7791):
+  - all tabs drew every plot with 0 output errors, including "Run it", "Release the pulse" (4.0 s) and all nine Known-issues card plots;
+  - the provenance line read "posterior mode (single best fit) … 31 parameters … 14 further values held";
+  - the server log was clean, and the R process held 204 MB after that full session.
+- **Start-up, cold process:** 8.1 s and 6.0 s to serving at load 2.8–3.0 on the M4, and 0.78 s to the first plot. The C++ compile alone takes 2.0 s.
+  - The documented 73 s / 148 s predate 10-12's one-year flux trace (the full R-path trace was ~110 s).
+  - ⚠ `APP_WARMUP_NOTE` still says "up to three minutes". That is Marcus's copy; re-word it after timing on shinyapps.io, whose CPU is not guaranteed.
+- **Hosting limits** (Posit's applications guide): Free and Starter run 1 worker process and 1 instance, so every visitor shares one R process. The default instance has 1024 MB, bundles are limited to 1 GB, and the idle timeout is 15 min. Free has 25 active hours a month (Posit support article, seen through a search summary only). Prices were not verified.
+- **`rsconnect` is not installed.** The deploy needs Marcus's token. It has never been deployed: the URL 404'd on 10-11.
+- **Pre-public repo scan** (a read-only subagent; key claims spot-checked):
+  - Clean: no secrets in any of 1562 commits, and no blob over 10 MB (packed size 102 MiB).
+  - For Marcus to decide:
+    - one commit, `3abbb3a` (GitHub's web merge of PR #1), carries `msarofim@gmail.com`; every other commit uses the noreply address;
+    - the three tracked review `.docx` files (09-22, 09-24, 09-25);
+    - the never-submitted 2011 Essenhigh comment, `app/www/sarofim_essenhigh_comment_2011.doc`, which is served publicly once deployed and linked from nothing;
+    - `CLAUDE.md` and the memory-store references;
+    - the NYU NetID in 354 tracked files;
+    - "NYU Marron Institute" in `LICENSE` and `README.md`, against ruling R4 for public, non-professional output;
+    - an MIT `LICENSE` with no note that `data/` stays under its upstream terms;
+    - the redistributed Scripps raw CSVs and the Tans 1981 and Naegler & Levin 2006 transcriptions, whose licences are not recorded;
+    - the stale branch `origin/claude/recursing-hermann-a2f965`.
+- **Answered, no change:**
+  - `retried` and `converged` are numerical health flags, so they have no pedagogical use.
+  - The flux-trace default does not reach the app: the box diagram passes `flux_method = "rk4"` explicitly.
+
 ## 2026-10-14 (o) — **RULED (Marcus, verbatim): "Land them, with a test (Recommended)". The pure-R `ccx_run()` now runs the same four forcing guards as `ccx_run_prepared()`: ENSO index, AOD mode, nuclear ¹⁴C share, N deposition. Gate: `test-run-r-guards.R`, 6 tests and 9 expectations, mutation-tested 5 ways.** Also ruled: the seven scripts are "Fix on touch (Recommended)", and the two scratch worktrees "Remove both (Recommended)".
 
 - **The code** is the four lines measured in (n), with a permanent comment (`R/forcing.R`, top of `ccx_run()`). Each value is derived from `spin$params` exactly as `ccx_cpp_prepare()` derives it.
