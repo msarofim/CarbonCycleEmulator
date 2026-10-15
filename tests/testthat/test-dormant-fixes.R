@@ -103,3 +103,31 @@ test_that("ccx_unc_to_par() decodes an UNNAMED vector as the live fitted set, an
   expect_error(ccx_unc_to_par(unname(u)[-1]), "UNNAMED")
   expect_error(ccx_unc_to_par(c(unname(u), 0)), "UNNAMED")
 })
+
+test_that("the IntCal row scores only the years inside the run, as the ice-core rows do", {
+  # The window started at a typed 1750, and `interp()` reads approx(rule = 2): a run starting in
+  # 1850 scored IntCal's 1750-1849 rows against its own first row (191 rows where 91 are in the run;
+  # -644.57 against -305.22 at the default parameters, measured). A 1750 start is unchanged.
+  skip_if_no_cpp()
+  obs <- ccx_prepare_obs()
+  sp  <- ccx_spinup(ccx_default_params())
+  ic_end <- min(obs$d14_nh_ann$year)
+  hand <- function(out, from) {
+    ic  <- obs$intcal[obs$intcal$year >= from & obs$intcal$year < ic_end, ]
+    mod <- stats::approx(out$t, out$d14c_NH, xout = ic$year + 0.5, rule = 2)$y
+    sum(stats::dnorm(ic$d14c, mod, sqrt(ic$err^2 + LIK_D14C_REP_OTHER^2), log = TRUE))
+  }
+  row <- function(y0) {
+    F <- suppressWarnings(ccx_build_forcing("historical", c(y0, 2024), prod_c14 = sp$prod_c14))
+    out <- ccx_run_fast(sp, F)$out
+    st <- suppressWarnings(ccx_loglik(out, obs, list(sigma_d14c = 5), luc = ccx_forcing_eluc_annual(F),
+                                      by_stream = TRUE))
+    list(out = out, ll = st[["d14c_intcal"]])
+  }
+  expect_lt(min(obs$intcal$year), 1750)                  # the record reaches before the canonical's start
+  r0 <- row(1750)
+  expect_identical(r0$ll, hand(r0$out, 1750))           # the canonical's start: the same rows, bit for bit
+  r1 <- row(1850)
+  expect_identical(r1$ll, hand(r1$out, 1850))           # a later start: its own years only
+  expect_gt(abs(hand(r1$out, 1750) - r1$ll), 100)       # POWER: the pre-fix window is far off
+})
