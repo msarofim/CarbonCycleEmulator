@@ -78,7 +78,7 @@ review_card <- function(id, plot_id = NULL, plot_height = "330px",
   c_ <- rv_card(id)
   url <- rv_card_url(id)
   div(class = "card-issue",
-      # "Issue N" (2026-10-15): Marcus's new comment text asks for "the issue number", so the number is labelled.
+      # "Issue N" (2026-10-15): Marcus's new comment text asks for "the issue number", so the number is labeled.
       h4(sprintf("Issue %d: %s", c_$id, c_$title)),
       div(class = "card-class",
           tags$strong(toupper(c_$class)), " \u2014 ", RV_CLASS_GLOSS[[c_$class]]),
@@ -341,11 +341,11 @@ navbarPage(
           "input to the model."),
         uiOutput("c_driver_ui")
         # ⛔ DELETED 2026-10-01 (Marcus, review 10-01c A3: "Delete the
-        # fertilisation sentence where it appears"): the info box "Why there is
+        # fertilization sentence where it appears"): the info box "Why there is
         # no separate 'no land sink' switch". Its whole argument was that the
         # land's long-term uptake "has one cause: plants grow faster when CO₂ is
         # higher" -- false since hilda33d, where N-deposition retention is a
-        # second long-term land sink (30 GtC on land by 2024 with fertilisation
+        # second long-term land sink (30 GtC on land by 2024 with fertilization
         # off). Its seasonal-cycle paragraph continued that argument and went
         # with it.
       )
@@ -476,7 +476,7 @@ navbarPage(
         # run on the pulse lab's own pulse (data/fair_pulse_grid.rds), so the box is offered there again.
         conditionalPanel(
           "input.f_mode != 'Build your own'",
-          checkboxInput("f_fair", app_fair_check_label("Scenarios"), value = FALSE),   # relabelled per pill (server.R)
+          checkboxInput("f_fair", app_fair_check_label("Scenarios"), value = FALSE),   # relabeled per pill (server.R)
           # 2026-10-02: matched to Marcus's FaIR note -- the dashed CO2 line is NOT what this
           # model "is trying to reproduce"; only its CO2 -> temperature step is fitted to FaIR.
           helpText(class = "small",
@@ -563,7 +563,7 @@ navbarPage(
         review_card(8, "rv_oclim", "380px", "rv_oclim_stake", "280px"),
         div(class = "card-issue",
             h4("The stand-ins and the provisional constants, listed"),
-            # N12 (Marcus 2026-09-22): two lists, labelled, because they are
+            # N12 (Marcus 2026-09-22): two lists, labeled, because they are
             # two different things -- see card 7's detail (card 8 before the 10-01 renumbering).
             h5("Stand-ins: parameters that absorb a discrepancy (some switched off)"),   # 2026-10-15 review: 3 of 7 are held at 0
             tableOutput("rv_standins"),
@@ -701,9 +701,9 @@ navbarPage(
           tags$li(paste("Four land pools standing in for every ecosystem on",
                         "Earth. No fire, no permafrost, and no nutrient",
                         "limitation: nitrogen deposition adds a small sink of",
-                        # 2026-10-02: reworded to match Marcus's fertilisation caveat
+                        # 2026-10-02: reworded to match Marcus's fertilization caveat
                         "its own, but a lack of nitrogen never limits the",
-                        "response to CO₂ fertilisation.")),
+                        "response to CO₂ fertilization.")),
           tags$li(paste("Two boxes of atmosphere. Nothing about where in a",
                         "hemisphere anything happens.")),
           tags$li("Teaching software. Not peer-reviewed, not for citation.")

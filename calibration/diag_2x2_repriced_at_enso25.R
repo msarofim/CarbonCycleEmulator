@@ -78,13 +78,13 @@ RP_WALK_MIN <- 0.005      # ppm of SH-land limb move below which a step is not
                           # step is in the saved rds and the sum is over ALL.
 
 # ⚠ AN IDENTITY, SO AN EXACT BOUND. Same parameter vector, same model, same
-# estimator ⇒ the same limb, to floating point. This is NOT an optimiser
-# comparison and must not borrow an optimiser's tolerance.
+# estimator ⇒ the same limb, to floating point. This is NOT an optimizer
+# comparison and must not borrow an optimizer's tolerance.
 # [[gate_bound_matches_its_claim]]
 RP_REPRO_TOL <- 1e-8                    # relative
 
 # ⭐ THE ONE MECHANISM THE MODEL GAINED AFTER 27q RAN. Volcanic diffuse-light
-# fertilisation was IMPLEMENTED `328cdb8` (2026-08-29) and its coefficient
+# fertilization was IMPLEMENTED `328cdb8` (2026-08-29) and its coefficient
 # ADOPTED at 0.25 in `a2298dc` the same day; 27q ran 2026-08-28 and therefore
 # ran at 0. So GATE R below is EXPECTED to fail on today's model, and the
 # question is not whether it fails but whether ONE named change accounts for

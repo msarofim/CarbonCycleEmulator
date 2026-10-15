@@ -17,7 +17,7 @@
 #   MOD17-monthly ~ MOD17-8day   =>  the window is innocent, the difference is
 #                                    the PRODUCT, and the CMIP6 answer stands.
 #   MOD17-monthly ~ CMIP6        =>  the window did it, and the "non-MODIS
-#                                    product disagrees" reading is an artefact.
+#                                    product disagrees" reading is an artifact.
 #
 # Usage:  Rscript calibration/diag_mod17_monthly_control.R
 # =====================================================================

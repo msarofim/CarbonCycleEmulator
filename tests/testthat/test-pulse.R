@@ -58,7 +58,7 @@ test_that("the pulse response flips sign and scales", {
   expect_lt(dn$d_ppm[i], 0)
   # near-antisymmetric: the residual IS the carbon cycle's nonlinearity, so it
   # must be small but must NOT be zero -- exact antisymmetry would mean the
-  # Revelle and fertilisation nonlinearities had been lost somewhere.
+  # Revelle and fertilization nonlinearities had been lost somewhere.
   asym <- abs(up$d_ppm[i] + dn$d_ppm[i]) / up$d_ppm[i]
   expect_lt(asym, 0.10)
   expect_gt(asym, 1e-4)
@@ -213,7 +213,7 @@ test_that("the PD100 pulse is RELEASED at t = 0, not read five years late", {
   expect_silent(joos_release_check(o))
   expect_lt(abs(o$irf[1] - 1), JOOS_IRF0_TOL)
   # MUTATION TEST: the old construction -- first row 5 yr after release, clock
-  # relabelled to 0 -- must be REJECTED, or this gate cannot fail.
+  # relabeled to 0 -- must be REJECTED, or this gate cannot fail.
   k <- which(o$t >= 5)
   shifted <- list(t = o$t[k] - 5, irf = o$irf[k])
   expect_error(joos_release_check(shifted), "Is the clock shifted")

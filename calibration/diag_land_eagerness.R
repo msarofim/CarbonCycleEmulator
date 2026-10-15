@@ -206,7 +206,7 @@ cat("   can carry.)\n")
 # +25 ppm), because the carbon the land stops taking goes into the air. But a
 # knob that moves uptake FROM the land TO the ocean fixes all three at once --
 # ocean up, CO2 down, and land down TWICE (directly, and again because lower CO2
-# means less fertilisation).
+# means less fertilization).
 #
 # WANTED, and registered before the numbers: d(land) < 0 AND d(ocean) > 0 AND
 # d(CO2) < 0. A lever that does all three is a partition lever and is what the

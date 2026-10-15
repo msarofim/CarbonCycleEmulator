@@ -5,7 +5,7 @@
 # WHY. O5's arm C (diag_o5_seasonal_export_scan.R, 09-15 g) put h_ml on its
 # box floor (32.0 m; the Holte prior's ~3rd percentile) at martin amp 1 lag 0
 # and read -125.7 like-for-like vs the canonical. The seasonal export's DIC
-# anomaly on a thinner reservoir is a larger pCO2 signal, so the optimiser used
+# anomaly on a thinner reservoir is a larger pCO2 signal, so the optimizer used
 # h_ml as the amplitude knob the capped pump_seas_amp could not be. This
 # re-runs the same arm C with h_ml PINNED -- at the canonical's 65.2 m (the
 # like-for-like number) and at the prior's 16 % point 42.5 m (the bound the

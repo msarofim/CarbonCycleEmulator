@@ -74,9 +74,9 @@ test_that("(5) the label reproduces the session knock-out at the canonical's poi
   # 2026-09-20 (o): the canonical is now hilda30s, ITSELF on hilda_cs; the knock-out was measured at
   # hilda30e's point (hilda_c, both cycles), which is the quarantined file by path
   obs <- ccx_prepare_obs(); v <- dg_vector(ccx_path(CCX_MODE_HILDA30E_QUARANTINED))   # by ABSOLUTE path (testthat runs from tests/testthat)
-  # hilda30e's OWN point, re-labelled hilda_cs: the same numbers, the NH cycle flat
+  # hilda30e's OWN point, re-labeled hilda_cs: the same numbers, the NH cycle flat
   v$p <- ccx_apply_structure(v$p, "hilda_cs", seas_ml = "1", pump_field = ccx_mode_pump_field(v$md))
-  v$p <- ccx_overlay_par(v$p, v$pm)                                   # the fitted values back over the re-labelled base (the lint-enforced idiom)
+  v$p <- ccx_overlay_par(v$p, v$pm)                                   # the fitted values back over the re-labeled base (the lint-enforced idiom)
   for (n in names(ccx_mode_pins(v$md))) v$p[[n]] <- ccx_mode_pins(v$md)[[n]]
   # ⚠ UNDER THE RECORD'S OWN INTERPOLATION (2026-10-01): the 09-19 knock-out was measured under
   # "spline", before the 10-01 (k) flip to "constant" (review 10-01c B6). Re-supplied, not re-pinned:

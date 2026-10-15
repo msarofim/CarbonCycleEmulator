@@ -7,7 +7,7 @@
 #       an UNEVALUATED par in most seeded starts, and its `value` is not f(par) in some; ms_kept_pair() returns
 #       f(par) exactly, every time, and the claim gap beside it.
 #   KP2 THE PATH IS UNCHANGED: re-evaluating after optim() returns cannot move the point optim() returned.
-#   KP3 THE WIRING (code lines): both optimiser steps go through ms_kept_pair(); the polish is accepted on the kept value;
+#   KP3 THE WIRING (code lines): both optimizer steps go through ms_kept_pair(); the polish is accepted on the kept value;
 #       a resumed checkpoint is re-paired; the DEAD gate has two branches and the identity branch is EXACT; the start
 #       file records the branch, the claim gaps and the pairing.
 # =====================================================================
@@ -53,7 +53,7 @@ test_that("KP3: the driver keeps PAIRS at both steps and on resume, and its DEAD
   expect_equal(sum(grepl("ms_kept_pair(fit, neg_lp)", drv, fixed = TRUE)), 1L)
   expect_equal(sum(grepl("ms_kept_pair(pc, neg_lp)", drv, fixed = TRUE)), 1L)
   expect_equal(sum(grepl("ms_kept_pair(list(par = u, value = best), neg_lp)", drv, fixed = TRUE)), 1L)
-  # no `best` is ever taken from an optimiser's claim, and the polish is not accepted on one
+  # no `best` is ever taken from an optimizer's claim, and the polish is not accepted on one
   expect_false(grepl("best <- fit$value", code, fixed = TRUE))
   expect_false(grepl("best <- pc$value", code, fixed = TRUE))
   expect_false(grepl("pc$value < best", code, fixed = TRUE))

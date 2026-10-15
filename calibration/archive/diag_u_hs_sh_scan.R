@@ -17,7 +17,7 @@
 #            named rows, the MLO-SPO d14C (2001-2007) and the d13C gradient
 #            residual, the SH cold box's d13C, the spinup residual.
 #   Stage 2  ARM C: per k the best RAW W (selection by raw dlik, stated) and
-#            W = 0, re-optimised over {beta_max, fert_k, q10, kz_deep_frac,
+#            W = 0, re-optimized over {beta_max, fert_k, q10, kz_deep_frac,
 #            h_ml, k_w, bomb_total, sigma_d14c} (the PK-2 machinery).
 #   The reject rule (prereg §4) is evaluated and printed; nothing adopted.
 # Usage: Rscript calibration/diag_gthc_martin_probe.R      (GP_SMOKE=1 for a 3-point smoke)
@@ -31,7 +31,7 @@ GP_FAC     <- c(1, 2, 4, 8, 16)                            # the factor's values
 GP_WHICH   <- Sys.getenv("US_WHICH", "u_hs")                # "u_hs" (the HS <-> HD exchange) or "tau_q" (the HD <-> interior exchange), SH only
 GP_FACNAME <- switch(GP_WHICH, tau_q = "tau_q_fac_SH", pump_hs = "pump_hs_fac_SH", "u_hs_fac_SH")
 if (GP_WHICH == "pump_hs") GP_FAC <- c(1, 0.5, 0.25, 0.1, 0)     # the SO is HNLC: the SH export DOWN
-GP_K       <- c(10L, 8L)                                   # the SH return layer: the bottom; the CDW analogue (1.3-1.9 km)
+GP_K       <- c(10L, 8L)                                   # the SH return layer: the bottom; the CDW analog (1.3-1.9 km)
 GP_LAND    <- c("beta_max", "fert_k", "q10")
 GP_SURF    <- c("kz_deep_frac", "h_ml", "k_w", "bomb_total", "sigma_d14c")
 GP_ARMC    <- c(GP_LAND, GP_SURF)

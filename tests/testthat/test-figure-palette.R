@@ -1,5 +1,5 @@
 # =====================================================================
-# Gate: the accessibility receipts recorded next to a figure's colours must be
+# Gate: the accessibility receipts recorded next to a figure's colors must be
 # REPRODUCIBLE, and by a named tool (2026-09-25).
 #
 # ⛔⛔ THE INCIDENT THIS EXISTS FOR. CHANGELOG 2026-09-24 (k) re-stepped
@@ -11,10 +11,10 @@
 # of the two was wrong, nothing could arbitrate, and the figure had been shipping
 # on a number that could not be reproduced. ⇒ [[palette_check_unreproduced]]
 #
-# So the receipt is no longer a comment. The colours and their scores are both
+# So the receipt is no longer a comment. The colors and their scores are both
 # NAMED CONSTANTS in the figure script, and this test parses them out and re-runs
 # the checker against them. Two failure modes, both silent otherwise:
-#   1. A colour is changed and the recorded scores are not — the caption-sync bug
+#   1. A color is changed and the recorded scores are not — the caption-sync bug
 #      class, applied to an accessibility claim.
 #   2. A pair drifts below the target and nothing says so, because a figure that
 #      is hard to read for one reader in twelve still looks fine to the author.
@@ -85,9 +85,9 @@ test_that("2. the pair clears the target under the committed checker", {
 
 test_that("3. the checker is self-consistent, so it is not obviously the broken one", {
   skip_if_no_tool()
-  # a colour against itself is zero under every vision type, and neutrals are
+  # a color against itself is zero under every vision type, and neutrals are
   # INVARIANT under all three dichromacies -- a projection with the wrong plane
-  # moves greys, so this is the structural check that the simulation is sane
+  # moves grays, so this is the structural check that the simulation is sane
   for (h in c("#808080", "#333333")) {
     got <- fp_scores(h, h)
     expect_equal(unname(got), rep(0, 4), tolerance = FP_TOL)

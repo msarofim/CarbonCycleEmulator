@@ -49,7 +49,7 @@ AK_SUBSET   <- ccx_path("data-raw", "downloads", "glodap_talk_subset.csv")
 AK_FLAG_OK  <- PUMP_FLAG_OK          # GLODAP: 2 = acceptable measurement
 AK_DLAT <- PUMP_DLAT; AK_DLON <- PUMP_DLON; AK_DZ <- PUMP_DZ
 # Redfield-type alkalinity bookkeeping. CaCO3 dissolution adds 2 mol ALK per mol
-# C; soft-tissue remineralisation RELEASES nitrate and so REMOVES ~1 mol ALK per
+# C; soft-tissue remineralization RELEASES nitrate and so REMOVES ~1 mol ALK per
 # mol N, i.e. ~N:C per mol C. Both are standard; the N:C is the Anderson-Sarmiento
 # stoichiometry this file takes as a recollected working value, NOT a fitted one.
 AK_ALK_PER_CARB <- 2.0

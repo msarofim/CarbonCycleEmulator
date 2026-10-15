@@ -4,7 +4,7 @@
 # and the defaults.
 #
 # PRE-REGISTERED: FAIL at the canonical. FALSIFIED IF: PASS -- then the
-# 1.97x is a level artefact of the offset itself.
+# 1.97x is a level artifact of the offset itself.
 # The gate is dg_gateGL_verdict() in lib_design_gates.R (ledger id "GL"),
 # kernel mutation-tested in test-gate-bounds.R. Nothing is adopted.
 # Usage: Rscript calibration/diag_tg_gradient_level_gate.R

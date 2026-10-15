@@ -143,12 +143,12 @@ ps_year_forcing <- function(prod_c14, year0 = 1750, quiet = NULL) {
 #'
 #' `ccx_run_fast()` reads only `$y`, `$params`, `$aux`, `$grid` off its first
 #' argument, so a shim is the whole wrapper -- no second copy of the runner,
-#' which is what the marshalling gate exists to protect.
+#' which is what the marshaling gate exists to protect.
 #'
 #' With `prep` (a `ccx_run_prepare()` of the SAME `p`/`aux`/`grid`) the call
 #' goes through `ccx_run_prepared()`: the same core entry point, the same
 #' NA-retry, the same marshal gate (taken once, when `prep` was built), without
-#' re-marshalling `p`/`aux` and re-resolving the substep count on every one of
+#' re-marshaling `p`/`aux` and re-resolving the substep count on every one of
 #' the ~300 one-year calls a solve makes (review 2026-09-12, B1). `F` may be a
 #' forcing table or a `ccx_cpp_forcing_prep()` of one.
 ps_phi <- function(y, p, aux, grid, F, prep = NULL) {
@@ -197,7 +197,7 @@ ccx_periodic_spinup <- function(p = ccx_default_params(),
   c_atm_target <- chi0 * aux$gtc_per_ppm_hemi * length(atm)
   prod  <- sp0$prod_c14
 
-  # Marshalled ONCE for the whole solve (review B1): one `p`, one `aux`, one
+  # Marshaled ONCE for the whole solve (review B1): one `p`, one `aux`, one
   # substep count, one marshal-gate verdict, for every one-year call below.
   # The quiet year is built from disk ONCE and copied for the three
   # productions the solve needs (see ps_year_forcing).

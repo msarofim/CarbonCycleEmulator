@@ -118,7 +118,7 @@ test_that("1. the app's land sink IS the gate's, not a second implementation", {
   # (-0.2079), -d_grow +0.05 -> +0.058 (0.0583), -d_ocn +0.002 -> -0.029 (-0.0290: the ocean sink now sits
   # 0.03 GtC/yr ABOVE GCB's raw column). imbal 0.540 / cement 0.088 unchanged within tolerance. MEASURED
   # (Marcus 2026-10-03: "Approve all (Recommended)").
-  # 2026-10-06 (a): the canonical is hilda33p (objective #16; the refit's stronger fertilisation and larger LUC
+  # 2026-10-06 (a): the canonical is hilda33p (objective #16; the refit's stronger fertilization and larger LUC
   # scale). d_land +0.443 -> +0.482 (0.4824), d_luc -0.208 -> -0.169 (-0.1690); imbal 0.540, cement 0.088,
   # -d_grow +0.059, -d_ocn -0.029 and the decade table (5 in band, last miss 0.930) unchanged within tolerance.
   # MEASURED (Marcus 2026-10-06: "Approve all (Recommended)").

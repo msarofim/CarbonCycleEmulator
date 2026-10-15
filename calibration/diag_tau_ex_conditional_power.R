@@ -12,7 +12,7 @@
 # [[profile_beats_optimum]]
 #
 # THE CHECK. Fix `tau_ex` at each of a few multiples of its mode value and
-# re-optimise THE ENTIRE 27h SLICE around it -- the six 27g seasonal parameters
+# re-optimize THE ENTIRE 27h SLICE around it -- the six 27g seasonal parameters
 # plus the two gradient offsets, eight free. The cost that survives THAT is the
 # conditional cost, and it is the number the decision actually rests on.
 #

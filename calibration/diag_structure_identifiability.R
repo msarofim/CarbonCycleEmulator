@@ -47,7 +47,7 @@ cat(sprintf("\n=== STRUCTURE IDENTIFIABILITY -- mode %s, arm: %s ===\n", CCX_MOD
 cat(sprintf("  centre: %s\n", paste(sprintf("%s %.4g", names(centre), centre), collapse = ", ")))
 cat(sprintf("  step %g (log); mutation %g; support if marginal sd < %g\n", SI_STEP, SI_MUT, SI_SD_SUPPORT))
 
-# ---- evaluation, memoised on the log-offset vector ---------------------
+# ---- evaluation, memoized on the log-offset vector ---------------------
 cache <- new.env()
 ll_at <- function(theta) {
   key <- paste(sprintf("%s=%.6f", names(theta), theta), collapse = ";")

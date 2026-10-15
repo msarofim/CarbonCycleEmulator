@@ -66,7 +66,7 @@
 # nuisance structure to be removed -- it is exactly why more bottles in the
 # Atlantic do not tell you the global mean. A detrended variant is reported
 # because it answers the different question "what is the ESS of the residual
-# field", and labelling which is which is the point.
+# field", and labeling which is which is the point.
 #
 # THIS FILE CHANGES NOTHING. It reports. `LIK_D14C_DEEP_NEFF` is Marcus'.
 #
@@ -195,7 +195,7 @@ n_kish <- sum(w)^2 / sum(w^2)
 # THE NEGATIVE TAIL DOES REAL WORK IN THAT DOUBLE SUM, so measure how much
 # rather than leave it implicit: the same calculation with rho floored at 0.
 # If the two answers are far apart, the estimate rests on the anticorrelation
-# being a real feature of the ocean and not an artefact of nonstationarity.
+# being a real feature of the ocean and not an artifact of nonstationarity.
 Rf <- pmax(R, 0); diag(Rf) <- 1
 Sf <- sum(w * (Rf %*% w))
 n_corr_floor <- sum(w)^2 / Sf
@@ -225,7 +225,7 @@ cat("   field with large deterministic structure is exactly where it stops being
 cat("   well posed. This is the residual ambiguity the measurement does NOT\n")
 cat("   remove, and part 6 shows it straddles the decision.\n")
 # The same thing on the DETRENDED field, which answers a DIFFERENT question and
-# is labelled as such: the ESS of the residual after the basin-scale structure
+# is labeled as such: the ESS of the residual after the basin-scale structure
 # is removed. Larger by construction; it is NOT the estimand.
 fit  <- stats::lm(v ~ poly(lat, 2) + sin(lon * rad) + cos(lon * rad), data = cell,
                   weights = w)

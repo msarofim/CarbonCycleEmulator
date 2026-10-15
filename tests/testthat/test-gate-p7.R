@@ -71,9 +71,9 @@ test_that("GATE P7 has POWER: the round-6 seas_ml = 1 mode FAILS it against hild
   expect_gt(v$ratio_d13c, 1.5)                         # 2.0x on 2026-09-11
   # RE-PINNED 2026-09-11 (5) to the ANNUAL-MEAN read ([[seasonal_box_observable_artefact]]).
   # The 09-11 (2) record (-0.309 -> +0.018, DIC 302 -> 385) was the instant-over-mean-mass
-  # artefact. Under the corrected observable the round-6 DIC gradient is AT the target
+  # artifact. Under the corrected observable the round-6 DIC gradient is AT the target
   # (226 vs 233) and only the d13C half fails -- and that half is the UNREFIT mode's deep
-  # box, moved by the fit to cancel the artefact, not a property of the mechanism. This
+  # box, moved by the fit to cancel the artifact, not a property of the mechanism. This
   # pins the RECORD at that mode; it is re-pinned again when round 6 is refit.
   # RE-PINNED 2026-09-12 (rulings 4+5): the reader takes the model's own rows and
   # the periodic spinup pins annual means; -0.300/+0.031/300/227 -> the values below.
@@ -98,6 +98,6 @@ test_that("THE VERDICT ON THE RECORD (2026-09-11 (7)): the round-6b mode -- the 
   expect_lt(v$ratio_d13c, 0.25)                        # 0.17x on 2026-09-11 (7)
   expect_equal(v$d13c_on, -0.330, tolerance = 2e-3, scale = 1)   # TOWARD the target (-0.861), from -0.301 (re-pinned 09-12; was -0.327 / 304)
   expect_equal(v$dic_on,  306,    tolerance = 1,    scale = 1)
-  # the same gate, same read, still FAILS the artefact-fitted 09-10 mode (the test above):
+  # the same gate, same read, still FAILS the artifact-fitted 09-10 mode (the test above):
   # that is the gate's power, and this is its verdict on the mechanism.
 })

@@ -15,7 +15,7 @@
 # ⚠ STATUS: an ATTRIBUTION, NOT A PROPOSAL. Every knock-out below changes ONE
 # parameter from JOOS_REF_YEAR onward with every other coordinate FROZEN at the
 # mode. A refit would move the others -- e.g. with the vegetation loop off the
-# optimiser would likely raise beta_max to recover the historical land sink --
+# optimizer would likely raise beta_max to recover the historical land sink --
 # so no row here predicts where a refit lands ([[sens_scan_achievable]]). What
 # the table establishes is WHICH mechanism carries the gap, not what fixing it
 # would cost.
@@ -23,7 +23,7 @@
 # THE PROTOCOL is Joos PD100, identical to diag_joos_irf.R: historical run to
 # 2010, CO2 held by diagnosed emissions, 100 GtC released at 2015 through
 # ccx_irf_pd()'s construction. Each knock-out RE-DIAGNOSES its own held
-# background, and the realised hold deviation is printed per row.
+# background, and the realized hold deviation is printed per row.
 #
 # THE BENCHMARK FOR THE SPLIT is Joos et al. 2013 sec.4.3 ("Response in ocean
 # and land carbon"), multi-model mean +/- 2 sd, PD100, ACP 13:2793, pp.2806-2807
@@ -31,7 +31,7 @@
 #   ocean 20 +/- 7 GtC by yr 20, 33 +/- 12 by 100, 59 +/- 12 by 1000
 #   land  19 +/- 16 GtC by yr 20, 23 +/- 20 by 100, 16 +/- 14 by 1000
 # ⛔ CORRECTED 2026-10-12: this said "sec.3.2" (that is the Bern3D-LPJ model description, p.2799)
-# and "+/- 1 sd". Sec. 4.3 states no convention, but its +/- are the half-widths of Fig. 3's grey
+# and "+/- 1 sd". Sec. 4.3 states no convention, but its +/- are the half-widths of Fig. 3's gray
 # band, whose legend reads "multi-model mean +/- 2σ" (p.2806; caption "As Fig. 1", whose band is
 # the "±two standard deviation range"). Measured from the figure's vector paths: ocean 6.8 / 12.0
 # / 12.4, land 16.2 / ~22 / 14.1 GtC at 20 / 100 / ~1000 yr. So these are +/- 2 sd; one sd is

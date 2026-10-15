@@ -26,12 +26,12 @@
 #   1. GEOMETRY, measured not asserted: the peak MONTH of every seasonal driver.
 #      A mis-phased ocean term shows here and nowhere else.
 #   2. WHAT THE OCEAN TERM BUYS at the mode: amplitudes at the fitted value, at
-#      the prior centre, and at zero. If the ocean term moves the amplitude the
+#      the prior center, and at zero. If the ocean term moves the amplitude the
 #      WRONG way at the mode, that is the bug; if it moves it the right way and
 #      the fit still zeroed it, that is degeneracy.
 #   3. ISO-OBSERVABLE PROFILE of `sst_seas_amp_NH` with everything else frozen
 #      (the match_incumbents_optim discipline: a challenger evaluated on a slice
-#      the incumbent is not re-optimised over).
+#      the incumbent is not re-optimized over).
 #
 #
 # ---------------------------------------------------------------------

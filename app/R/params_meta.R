@@ -34,7 +34,7 @@ APP_PARAM_META <- list(
   # ---- land -----------------------------------------------------------
   # 2026-10-15 review: units for beta_max (R/model.R: NPP = NPP0 (1 + beta_max dchi/(K + dchi)), so beta_max is
   # the fractional NPP boost at infinite CO2) and q10 (the factor respiration grows by per 10 °C), both "—" before
-  beta_max      = list(desc = "CO₂ fertilisation, maximum boost",
+  beta_max      = list(desc = "CO₂ fertilization, maximum boost",
                        unit = "fraction of preindustrial growth"),
   fert_k        = list(desc = "CO₂ needed for half that boost",
                        unit = "ppm above preindustrial"),
@@ -122,7 +122,7 @@ APP_PARAM_META <- list(
   # drafted 2026-10-01 for Marcus's review (app text is his).
   # ndep_ret: Marcus 2026-10-01 (review 10-01c B4): "If it is a gross rate, then
   # name it that." It is: the flux ndep_ret x deposition enters soil_slow and
-  # part of it is respired back, so the fitted 10.19 is GROSS while the realised
+  # part of it is respired back, so the fitted 10.19 is GROSS while the realized
   # NET is ~7.0 kg C/kg N (1990-2023). The draft's "stored" read as net.
   ndep_ret             = list(desc = "Gross carbon uptake per unit of nitrogen deposited on land",
                               unit = "kg C per kg N"),
@@ -148,7 +148,7 @@ APP_PARAM_META <- list(
   # pre-retirement posterior still renders prose instead of NA. Any name here
   # must ALSO be in APP_PARAM_META_RETIRED, or the gate rejects the table --
   # which is what stops a live name quietly becoming a dead one.
-  beta          = list(desc = "CO₂ fertilisation strength (log form, retired 2026-08-14)",
+  beta          = list(desc = "CO₂ fertilization strength (log form, retired 2026-08-14)",
                        unit = "—"),
   sigma_co2     = list(desc = "CO₂ mismatch allowance (retired 2026-08-15)", unit = "ppm"),
   sigma_d13c    = list(desc = "δ¹³C mismatch allowance (retired 2026-08-18)", unit = "‰"),

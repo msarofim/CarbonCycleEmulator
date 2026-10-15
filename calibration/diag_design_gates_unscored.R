@@ -68,7 +68,7 @@ sep <- function(s) cat(sprintf("\n\n=== %s ===\n", s))
 obs <- ccx_prepare_obs()
 
 # --- the estimator, applied IDENTICALLY to obs and model ---------------
-# 12-month centred moving average as the trend, series minus trend as the
+# 12-month centered moving average as the trend, series minus trend as the
 # seasonal, monthly climatology within the decade, peak minus trough. Using MY
 # OWN detrend on BOTH sides rather than Scripps' `co2_deseas` on one of them.
 ptt_by_decade <- function(t, x, decades) {
@@ -133,7 +133,7 @@ o_scr <- vapply(DGU_G6_DECADES, function(d) {
   k <- tA >= d[1] & tA < d[2] + 1
   if (sum(k) < 24) return(NA_real_)
   cl <- tapply(rA[k], moA[k], mean); max(cl) - min(cl) }, 0)
-# ROUTE B -- the 12-month centred MA, applied IDENTICALLY to obs and model.
+# ROUTE B -- the 12-month centered MA, applied IDENTICALLY to obs and model.
 o_ptt <- ptt_by_decade(mlo$decimal_date, mlo$co2_ppm, DGU_G6_DECADES)
 cat("  TWO OBSERVED ROUTES. A reproduces DESIGN; B is the like-for-like one.\n\n")
 cat(sprintf("  %-14s", "decade")); for (d in names(DGU_G6_DECADES)) cat(sprintf(" %7s", d))
@@ -197,7 +197,7 @@ cat(sprintf("\n  GATE: growth >= %.0f %% across the record, PRODUCED not prescri
 # already been asked for -- the "SCORED?" column of DG_LEDGER turned into a
 # decision [[ccx_gate4_no_power]].
 #
-#   GATE 8 (d13C SUESS ENDPOINTS) took the modelled minus preindustrial d13C
+#   GATE 8 (d13C SUESS ENDPOINTS) took the modeled minus preindustrial d13C
 #   decline at MLO 2024 and SPO 2024 against Scripps/Law Dome. Those exact
 #   station-years are inside `d13c_level_MLO` and `d13c_level_SPO`, which score
 #   EVERY year of the same records; differencing two of them and re-checking the
@@ -208,7 +208,7 @@ cat(sprintf("\n  GATE: growth >= %.0f %% across the record, PRODUCED not prescri
 #   header said the target AND the sigma came from `ccx_deep_d14c_target()`, "the
 #   LIKELIHOOD's own accessor, so this gate cannot drift from the stream that
 #   scores it". A gate deliberately tied to the stream it checks CANNOT FAIL
-#   INDEPENDENTLY of the optimiser -- it reports that the fit ran. The
+#   INDEPENDENTLY of the optimizer -- it reports that the fit ran. The
 #   observation itself is not lost: `d14c_deep_ocean` scores it, and
 #   `test-likelihood.R` bounds `kz` THROUGH it (2026-09-04, the ruling that
 #   replaced the kz bracket with the observable).

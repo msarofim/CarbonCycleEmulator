@@ -10,12 +10,12 @@
 #      carbon. (Note the MONTHLY global total is NOT invariant and must not be
 #      asserted to be: 5c already redistributes NH and SH into different months,
 #      so moving mass between hemispheres moves it between months too. That is
-#      5c's behaviour, not this change's, and test 1c pins the distinction.)
+#      5c's behavior, not this change's, and test 1c pins the distinction.)
 #   2. THE SWITCH OFF REPRODUCES THE OLD MODEL EXACTLY, including for a WINDOWED
 #      run, which is the only path that exercises the pre-window split.
 #   3. THE DIRECTION IS RIGHT AND SURVIVES THE BRACKET. Early clearing is
 #      NH-dominated, modern clearing is not, and the two do not overlap under
-#      any admissible within-region judgement. This is the measurement the whole
+#      any admissible within-region judgment. This is the measurement the whole
 #      product rests on; if a future OSCAR revision breaks it, the product needs
 #      re-deciding, not re-baselining.
 #   4. THE PRE-WINDOW CARBON TAKES ITS OWN SHARE. A run starting in 1900 must

@@ -8,7 +8,7 @@
 #   2. both equal the flux recorder's `gpp - ra` (R/fluxes.R), the definition
 #      diag_model_npp_modern.R measured with;
 #   3. the columns are not transposed, and the record MOVES with ENSO and with
-#      fertilisation (a record frozen at npp0 would pass 1 and fail 3).
+#      fertilization (a record frozen at npp0 would pass 1 and fail 3).
 # =====================================================================
 
 p_npp <- local({ p <- ccx_default_params(); ccx_set_enso(p, list(gamma_enso = 0.5)) })
@@ -37,7 +37,7 @@ test_that("the record is hemispheric, not transposed, and it moves", {
   # hemispheres sum to the 1750 constant's split, so the NH column carries npp_frac_NH
   frac <- rC$npp$npp_NH[1] / (rC$npp$npp_NH[1] + rC$npp$npp_SH[1])
   expect_lt(abs(frac - p_npp$npp_frac_NH), 0.05)
-  # ENSO modulation makes month-to-month variation; fertilisation makes a trend
+  # ENSO modulation makes month-to-month variation; fertilization makes a trend
   expect_gt(stats::sd(diff(rC$npp$npp_NH)), 0)
   yr <- floor(rC$npp$t)
   expect_gt(mean(rC$npp$npp_NH[yr == 1975]), mean(rC$npp$npp_NH[yr == 1950]))

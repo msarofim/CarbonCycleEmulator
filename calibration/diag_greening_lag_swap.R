@@ -11,10 +11,10 @@
 #
 # THE TEST. Two bases (LAG = hilda34g, the lag arm; CTL = the lag-0 control refit) x three lags
 # (0; the lag arm's own 2.644; 5 = the observed growth timing, descriptive). In each cell the 8-name
-# LAND BLOCK is re-optimised on the #15 LOGPOST, every other name held at the base, from TWO starts
+# LAND BLOCK is re-optimized on the #15 LOGPOST, every other name held at the base, from TWO starts
 # (the base's own block and the OTHER arm's), in coordinates whitened by the base's block precision.
 #   A  the lag's share of the npp_tsens flip, f_B, read as an ORDERING (> or < one half);
-#   B  which rows carry the npp_tsens move: the cross cells re-optimised with npp_tsens HELD;
+#   B  which rows carry the npp_tsens move: the cross cells re-optimized with npp_tsens HELD;
 #   C  the greening term's own growth signal against the land ENSO term's, vs Nino 3.4;
 #   D  (descriptive, open item 2) the L = 5 column: block, cost, timing, futures.
 # L = 0 is scored EXACTLY under the lag-0 label; L > 0 under the lag label. Compare on LIKELIHOOD
@@ -61,7 +61,7 @@ GS_FUT_SPLICE <- c(ssp585 = FALSE, vvH = TRUE)            # = the refit read's s
 GS_FUT_YEAR   <- 2300L
 GS_REFIT_READ <- file.path("outputs", "diagnostics", "obj15_refit_read_20261003.rds")   # the own-cell run targets
 GS_WORKERS    <- as.integer(Sys.getenv("CCX_GS_WORKERS", "6"))
-# SMOKE (CCX_GS_SMOKE=1): every cell at a tiny optimiser budget, to run every section end to end before the
+# SMOKE (CCX_GS_SMOKE=1): every cell at a tiny optimizer budget, to run every section end to end before the
 # real run; its outputs say SMOKE in their name and nothing in them is a result.
 GS_SMOKE      <- identical(Sys.getenv("CCX_GS_SMOKE", ""), "1")
 if (GS_SMOKE) { GS_BFGS_MAXIT <- 2L; GS_NM_MAXIT <- 10L; GS_ROUNDS <- 1L }
@@ -116,7 +116,7 @@ for (b in names(MD)) {
 }
 
 # ---- one cell: the block's conditional optimum at lag L, from a start ---------------------
-# `free` = the names optimised (the block, or the block minus npp_tsens for B's HELD cells); the held
+# `free` = the names optimized (the block, or the block minus npp_tsens for B's HELD cells); the held
 # npp_tsens stays at the BASE's value. Runs inside its own gate state and restores it.
 cell_opt <- function(b, L, start, free, max_rounds = GS_ROUNDS, hold = NULL) {
   md <- MD[[b]]
@@ -201,7 +201,7 @@ RR <- readRDS(GS_REFIT_READ)
 ID <- list()
 for (b in names(MD)) {
   Lb <- if (b == "LAG") L_LAG else 0
-  o <- cell_opt(b, Lb, "own", GS_BLOCK, max_rounds = 0L)  # no optimisation: the slope check AT the mode
+  o <- cell_opt(b, Lb, "own", GS_BLOCK, max_rounds = 0L)  # no optimization: the slope check AT the mode
   d <- o$logpost - MD[[b]]$logpost
   cat(sprintf("  %s at L %.4f: logpost %.6f (stored %.6f, diff %+.1e); likelihood %.4f; max |whitened slope| %.4f (gate < %g)\n",
               b, Lb, o$logpost, MD[[b]]$logpost, d, o$lik, max(abs(o$slope)), GS_MODE_TOL))
@@ -344,7 +344,7 @@ if (GS_POSTHOC) {
 
   # ---- 3c. POST-HOC (NOT pre-registered): npp_tsens PROFILED at the two cross cells --------------------
   # At each cross cell npp_tsens is HELD at nu* - delta, nu* + delta and at the value where f_B = 1/2 (the
-  # pre-registered ordering's boundary), the other 7 block names re-optimised (cell_opt's `hold`), and
+  # pre-registered ordering's boundary), the other 7 block names re-optimized (cell_opt's `hold`), and
   # compared with the free optimum. If nu* is the profile's maximum, both -/+ delta points lie below it; the
   # boundary's deficit is how much worse "the lag carries only half the flip" fits, conditionally.
   cat(sprintf("\n=== 3c. POST-HOC (not pre-registered): npp_tsens PROFILED at the two cross cells (held at nu* -/+ %g and at f = 1/2; the other %d names re-optimised) ===\n",

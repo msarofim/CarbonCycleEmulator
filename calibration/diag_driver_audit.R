@@ -272,7 +272,7 @@ sep("9. THE PARTITION DIAGNOSTIC THAT NEEDS NO NEW DATA: d13C PER ppm")
 # it: photosynthesis moves CO2 with a -18 permil fractionation, air-sea
 # exchange with -2 (invasion) / -10 (evasion). So the RATIO of the seasonal
 # d13C amplitude to the seasonal CO2 amplitude says how photosynthetic the
-# modelled cycle is, with no absolute amplitude and no new dataset involved.
+# modeled cycle is, with no absolute amplitude and no new dataset involved.
 #
 # BOTH SIDES COMPUTED HERE, IN ONE EXPRESSION, from the likelihood's own
 # harmonic estimator -- the amp_definition_mismatch rule. Peak-to-peak
@@ -409,7 +409,7 @@ if (!file.exists(npf)) {
   # COMPARE AT THE MODEL'S MODERN STATE, NOT AT THE PARAMETER. npp_frac_NH is a
   # 1750 split; MOD17 is 2001-2023. The model walks between them through
   # hemispheric clearing, so the like-for-like comparison is against the
-  # REALISED modern share -- and the 1750 anchor is then BACKED OUT through the
+  # REALIZED modern share -- and the 1750 anchor is then BACKED OUT through the
   # same clearing. Comparing the raw parameter to MOD17 would understate the
   # gap, because clearing was NH-heavy and lowers the NH share over time.
   npp0 <- c(NH = ccx_const("NPP_GLOBAL_PI") * p$npp_frac_NH,

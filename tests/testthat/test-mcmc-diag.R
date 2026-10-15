@@ -1,4 +1,4 @@
-# Known-answer tests for calibration/lib_mcmc_diag.R: rank-normalised split-R-hat and bulk- and
+# Known-answer tests for calibration/lib_mcmc_diag.R: rank-normalized split-R-hat and bulk- and
 # tail-ESS (Vehtari et al. 2021, Bayesian Analysis 16:667), written from the paper because
 # `posterior` is not installed. Nothing here is compared with another implementation: each
 # quantity is checked against an ANALYTIC value (AR(1) ESS, the ESS of a Gaussian AR(1) tail
@@ -57,7 +57,7 @@ test_that("R-hat is ~1 for iid chains, and each of its parts catches its own fai
   # sqrt(499/500 + var(means)) with means (0 x 6, 1 x 2) = 1.1010; measured sd 0.0077
   xs <- x; xs[, 1] <- xs[, 1] + 1
   expect_lt(abs(mcd_rhat(xs) - sqrt(499 / 500 + (6 * 0.25^2 + 2 * 0.75^2) / 7)), 3 * 0.0077)
-  # SCALE: one chain 3x wider, same centre. Only the FOLDED half sees it (measured 1.145, min 1.120)
+  # SCALE: one chain 3x wider, same center. Only the FOLDED half sees it (measured 1.145, min 1.120)
   xv <- x; xv[, 1] <- xv[, 1] * 3
   expect_lt(mcd_rhat_basic(mcd_z(mcd_split(xv))), 1.005)
   expect_gt(mcd_rhat(xv), 1.05)

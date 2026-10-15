@@ -103,7 +103,7 @@ OUTFILE           <- file.path(OUTDIR, "stream_neff.rds")
 # ccx_mode_file() returns an ABSOLUTE path; the ridge arms are made absolute
 # here so the vector is uniform and readRDS() below needs no wrapper. The three
 # `ridge_*` arms are PRE-FIX and quarantined -- this file fails loudly on them,
-# which is the intended behaviour until they are refit.
+# which is the intended behavior until they are refit.
 NEFF_ARMS <- c(ref    = ccx_mode_file(),
                pin120 = ccx_path("calibration", "output", "ridge_pin120", "mode_fit_pumpN.rds"),
                pin90  = ccx_path("calibration", "output", "ridge_pin90",  "mode_fit_pumpN.rds"),

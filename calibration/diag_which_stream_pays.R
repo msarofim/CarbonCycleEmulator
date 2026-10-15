@@ -29,7 +29,7 @@
 # diag_d13c_suess [3]'s partition verdict was computed on a model whose land
 # had the WRONG SIGN (diag_d13c_partition_refit.R re-ran it -- the verdict
 # survived, but nobody knew that until it was re-run), and
-# test-likelihood.R:114/117 spent five handoffs labelled a stale fixture while
+# test-likelihood.R:114/117 spent five handoffs labeled a stale fixture while
 # reporting a real bias. Inherited attribution is cheap to check and this is
 # the cheapest possible check.
 #
@@ -48,13 +48,13 @@
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-# ---- PINNED TO THE LOG FERTILISATION FORM (2026-08-14) --------------
+# ---- PINNED TO THE LOG FERTILIZATION FORM (2026-08-14) --------------
 # This diagnostic was written against NPP = NPP0(1 + beta ln(chi/chi0)) and
 # every number in its header is a LOG-FORM number. On 2026-08-14 the default
 # flipped to CCX_FERT_MM, under which `beta` is INERT -- so without this pin the
 # file would still run, still print a beta column, and silently report the same
 # MM answer for every beta. (That is not hypothetical: it happened to
-# diag_fert_pulse_gates.R and to the app's fertilisation switch on the day of
+# diag_fert_pulse_gates.R and to the app's fertilization switch on the day of
 # the flip, and identical rows are what caught both.)
 #
 # The pin makes this file reproduce its recorded numbers exactly. It does NOT

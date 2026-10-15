@@ -11,7 +11,7 @@
 # is worth pre-registering at all -- exactly as 27h's tau_ex profile killed
 # fork (a) before its prereg was written. [[no_power_null]]
 #
-# ⚠ TWO AUTHORISATIONS (Marcus 2026-08-29), both DIAGNOSTIC-ONLY:
+# ⚠ TWO AUTHORIZATIONS (Marcus 2026-08-29), both DIAGNOSTIC-ONLY:
 #   1. a CMIP6 ENSEMBLE value for seas_npp_amp_SH may be USED here; it may NOT be
 #      shipped, adopted, or called an observational constraint. The shipped
 #      constant stays SEAS_NPP_AMP_SH = 0.5027, status="data".
@@ -53,7 +53,7 @@ GC_G5_MOMIN  <- 0.10                           # a parameter "moves theta" if it
 GC_A_SHIP    <- ccx_const("SEAS_NPP_AMP_SH")
 GC_A_CMIP6   <- 0.94
 GC_A_GRID    <- c(0.352, GC_A_SHIP, 0.70, GC_A_CMIP6, 1.22)
-# ---- the respiration sweep. DELIBERATELY LEAVES THE BRACKET (authorisation 2):
+# ---- the respiration sweep. DELIBERATELY LEAVES THE BRACKET (authorization 2):
 # ---- 27n's floor sits at 13.95 K = 1.96x bracket HI and the profile turns there.
 GC_TA_GRID   <- c(1.0391, 3.5915, 5.0502, 7.1012, 9.0, 11.08, 13.95, 17.0, 20.0)
 

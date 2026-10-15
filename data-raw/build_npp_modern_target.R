@@ -8,7 +8,7 @@
 # option 4 lets the record and an observational modern-NPP row decide.
 #
 # RULINGS (Marcus 2026-09-29):
-#   CENTRE -- "the mean of verified totals makes the most sense": the verified
+#   CENTER -- "the mean of verified totals makes the most sense": the verified
 #     modern ACTUAL totals of notes/lit_2026-09-29_npp_global_pi.md:
 #       MOD17A3HGF C6.1   52.7   2001-2023, data/obs_npp_hemispheric.rds (READ, not typed)
 #       Ito 2011          56.2   GCB 17:3161, doi:10.1111/j.1365-2486.2011.02450.x,

@@ -3,7 +3,7 @@
 # CONVERTED-LAND model, and by which criterion.
 #
 # WHY THIS EXISTS. `beta`'s default (and `CCX_PARAM_TABLE$beta$init`, which
-# tracks it) was re-centred to 0.38 on 2026-08-12 "to the 1-D posterior
+# tracks it) was re-centered to 0.38 on 2026-08-12 "to the 1-D posterior
 # optimum". That was measured on the model that preceded `404d66d`, in which
 # land-use emissions had an airborne fraction of 0.002 -- i.e. against the bug.
 # On the shipped model 0.38 leaves CO2 ~20 ppm high at 2015-2024. This is an
@@ -16,13 +16,13 @@
 #   [B] the CO2 STREAM's own 1-D log-likelihood optimum (level + seasonal +
 #       ice core), which weights the whole record, not one decade;
 #   [C] the FULL 1-D log-posterior optimum, which is what the 2026-08-12
-#       re-centring claims to have used -- and which depends on sigma_d13c,
+#       re-centering claims to have used -- and which depends on sigma_d13c,
 #       the parameter handoff 13h sec.2.1c leaves open. So [C] is reported at
 #       more than one sigma, deliberately: if the answer moves with a number
 #       that is not yet decided, the default should not be pinned to it.
 #
 # WHAT IT DOES NOT DO. It does not touch q10, which is held at its default
-# 2.0. A 2-D (beta, q10) re-centring is the REFIT's job (PHASE 2), and doing
+# 2.0. A 2-D (beta, q10) re-centering is the REFIT's job (PHASE 2), and doing
 # it here would pre-empt the pre-registered test.
 #
 # RUNTIME ~3 min.
@@ -31,13 +31,13 @@
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-# ---- PINNED TO THE LOG FERTILISATION FORM (2026-08-14) --------------
+# ---- PINNED TO THE LOG FERTILIZATION FORM (2026-08-14) --------------
 # This diagnostic was written against NPP = NPP0(1 + beta ln(chi/chi0)) and
 # every number in its header is a LOG-FORM number. On 2026-08-14 the default
 # flipped to CCX_FERT_MM, under which `beta` is INERT -- so without this pin the
 # file would still run, still print a beta column, and silently report the same
 # MM answer for every beta. (That is not hypothetical: it happened to
-# diag_fert_pulse_gates.R and to the app's fertilisation switch on the day of
+# diag_fert_pulse_gates.R and to the app's fertilization switch on the day of
 # the flip, and identical rows are what caught both.)
 #
 # The pin makes this file reproduce its recorded numbers exactly. It does NOT

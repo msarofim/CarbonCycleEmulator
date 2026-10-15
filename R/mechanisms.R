@@ -17,10 +17,10 @@
 # they were the same switch, because NPP rising with CO2 (beta) was the model's
 # only long-term land uptake. ⚠ THAT IS NO LONGER TRUE (2026-10-01): the D2
 # canonical also retains carbon from nitrogen deposition (`ndep_ret`), a second
-# long-term land sink. Marcus ruled (review 10-01c B5) that the fertilisation
-# switch stays SPECIFICALLY CO2 fertilisation, with nitrogen effects a different
+# long-term land sink. Marcus ruled (review 10-01c B5) that the fertilization
+# switch stays SPECIFICALLY CO2 fertilization, with nitrogen effects a different
 # arm "(even though they matter for CO2 fertilization limits)" -- so its words
-# changed, not its behaviour, and the app's "no separate land-sink switch" box
+# changed, not its behavior, and the app's "no separate land-sink switch" box
 # was deleted (A3). There is still no N-deposition switch of its own.
 # =====================================================================
 
@@ -42,7 +42,7 @@
 # `ocean_sink` and `revelle` change a PARAMETER -- how strongly the model
 # responds to carbon it already has. There is no prescribed input series behind
 # them, and putting atmospheric CO2 in that slot would be drawing a model OUTPUT
-# in a panel labelled "the driver". The app says so instead.
+# in a panel labeled "the driver". The app says so instead.
 #
 # ⛔ NOTHING HERE DECLARES WHETHER A SWITCH REMOVES ITS DRIVER, and that is
 # deliberate: it is MEASURED, by differencing the series either side of
@@ -99,20 +99,20 @@ CCX_MECHANISMS <- list(
     # specifically about CO2 fertilization, with nitrogen effects a different
     # arm (even though they matter for CO2 fertilization limits)." The label
     # lost "(the land sink)", the blurb "the land stops taking up carbon", and
-    # the caveat "CO2 fertilisation IS the land sink -- there is no separate
+    # the caveat "CO2 fertilization IS the land sink -- there is no separate
     # land-uptake mechanism". All three were false at hilda33d: with this switch
     # on, N-deposition retention still holds ~30 GtC on land by 2024. The
-    # BEHAVIOUR is unchanged (beta / beta_max only; `ndep_ret` stays live).
-    label = "CO₂ fertilisation",
+    # BEHAVIOR is unchanged (beta / beta_max only; `ndep_ret` stays live).
+    label = "CO₂ fertilization",
     blurb = paste("Plants grow faster when there is more CO₂ in the air, and",
                   "that extra growth pulls carbon into the land. Switch it off",
                   "and plants no longer respond to the rising CO₂."),
-    caveat = paste("This switches off CO₂ fertilisation only. Nitrogen",
+    caveat = paste("This switches off CO₂ fertilization only. Nitrogen",
                    "deposition, from fuel burning and farming, is a separate",
                    "and smaller land sink in this model, and it stays on here",
-                   # Marcus 2026-10-02 (carbotopecomment): his wording, in the app's CO₂ / -isation style
+                   # Marcus 2026-10-02 (carbotopecomment): his wording; U.S. spelling since 2026-10-15 (Marcus)
                    "— even though, in the real world, lack of sufficient nitrogen",
-                   "can also limit the response to CO₂ fertilisation."),
+                   "can also limit the response to CO₂ fertilization."),
     # MUST ZERO WHICHEVER PARAMETER IS LIVE. This read `p$beta <- 0` until
     # 2026-08-14, and the flip to CCX_FERT_MM turned it into a NO-OP -- the
     # switch moved CO2 at 2100 by exactly 0.00 ppm while still rendering as an
@@ -336,7 +336,7 @@ CCX_MECHANISMS <- list(
     # emissions-driven. Left on, "nature alone" kept a human-made land sink: at
     # the D2 canonical (hilda33d, ndep_ret 10.2) it held 21 GtC on land by 2024
     # and put CO2 at 277.0 ppm instead of 282.3, so the warming release the
-    # caveat below promises was almost exactly cancelled. A zero column is
+    # caveat below promises was almost exactly canceled. A zero column is
     # inert at ndep_ret 0, so every #13 mode is unchanged.
     apply = function(p, F) {
       for (cc in c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH",
@@ -366,7 +366,7 @@ OCEAN_OFF_K_W <- 1e-3
 # ⛔ THE OCEAN SWITCH IS SPUN UP WITH THE OCEAN OPEN (2026-10-11; Marcus's comments 10-11: "I get
 # an error when selecting warming, ENSO, volcanoes, and ocean sink"). Every switch used to act on
 # the spin-up too. That is harmless for the others at the canonical: ENSO, volcanoes and
-# emissions leave the 1750 state bit-identical, and fertilisation, warming and Revelle move it
+# emissions leave the 1750 state bit-identical, and fertilization, warming and Revelle move it
 # by < 1 GtC. But closing the air-sea interface (k_w = OCEAN_OFF_K_W) IN THE SPIN-UP built a
 # different preindustrial world: 268 GtC moved inside the ocean, and the solved ¹⁴C production
 # fell to 7 % of the real one. With warming's effect or Revelle also off, the periodic carbon
@@ -428,7 +428,7 @@ ccx_apply_mechanisms <- function(p, F, off = character()) {
 #' a COEFFICIENT and the two series lie on top of one another -- true before
 #' 2026-10-02, when both began zeroing their input; see the CCX_DRIVERS header.) A
 #' hand-maintained flag would be a copy of that fact free to drift from it --
-#' and `enso` has already had one switch (fertilisation, 2026-08-14) silently
+#' and `enso` has already had one switch (fertilization, 2026-08-14) silently
 #' become a no-op when the live parameter moved underneath it.
 #'
 #' @param nm one name from CCX_MECHANISMS

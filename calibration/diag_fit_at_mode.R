@@ -6,7 +6,7 @@
 # carries n and sigma, so a long stream with a tight sigma dominates the list
 # without being the worst-fitting one. Ranking improvement work off that list
 # ranks by leverage, not by misfit. This computes what "how well does it match"
-# actually means: n, the RMS normalised residual (z), the mean z (BIAS, which
+# actually means: n, the RMS normalized residual (z), the mean z (BIAS, which
 # is the part a structural error shows up in), and the residual in the
 # stream's own physical units.
 #
@@ -53,7 +53,7 @@ m   <- M$md
 #   * `rep_dC` was never applied. The likelihood predicts the STATION as
 #     `box - rep_dC` (R/likelihood.R, the LIK_REP_SOURCE_D13C block); this file
 #     compared observations to the bare box, so both CO2 level streams showed a
-#     -5.29 ppm "bias" that was just the 5.18 ppm offset, unmodelled.
+#     -5.29 ppm "bias" that was just the 5.18 ppm offset, unmodeled.
 #   * `sigma_d13c` was RETIRED 2026-08-18, so `pm$sigma_d13c` is NULL and
 #     `sqrt(NULL^2 + REP^2)` is numeric(0): both d13C level rows silently
 #     reported n = 0 and were dropped from every ranking this file prints.

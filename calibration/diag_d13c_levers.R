@@ -47,7 +47,7 @@
 # 15-50 permil of Delta14C (tau_wood 150 -> +43.8; litter_slow_frac 0.5 -> +51.5).
 #
 # But 1500 m/yr IS the Wanninkhof global-mean CO2 transfer velocity (DESIGN.md
-# line 102; ~16.5 cm/hr = 1450 m/yr), which is why the prior is centred there.
+# line 102; ~16.5 cm/hr = 1450 m/yr), which is why the prior is centered there.
 # 4000 is 2.7x that, +2.45 sigma. It is not available as a physical value.
 #
 # WHAT THAT MEANS -- and it is the same gap 14C already found. The model needs

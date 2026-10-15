@@ -38,13 +38,13 @@
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-# ---- PINNED TO THE LOG FERTILISATION FORM (2026-08-14) --------------
+# ---- PINNED TO THE LOG FERTILIZATION FORM (2026-08-14) --------------
 # This diagnostic was written against NPP = NPP0(1 + beta ln(chi/chi0)) and
 # every number in its header is a LOG-FORM number. On 2026-08-14 the default
 # flipped to CCX_FERT_MM, under which `beta` is INERT -- so without this pin the
 # file would still run, still print a beta column, and silently report the same
 # MM answer for every beta. (That is not hypothetical: it happened to
-# diag_fert_pulse_gates.R and to the app's fertilisation switch on the day of
+# diag_fert_pulse_gates.R and to the app's fertilization switch on the day of
 # the flip, and identical rows are what caught both.)
 #
 # The pin makes this file reproduce its recorded numbers exactly. It does NOT

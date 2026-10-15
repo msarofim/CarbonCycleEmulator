@@ -7,7 +7,7 @@
 # ⚠ THE FORCED ONE. The FACE gate cleared gamma_diff = 0.25 on 08-29i against a
 # PREDICTED payment of `fert_k` +6.1 % (154.85 -> 164.23). The converged refit
 # went to 189.22 -- 3.6x that payment. A gate cleared at a predicted value has
-# to be re-read at the REALISED one, because what FACE constrains is the ridge
+# to be re-read at the REALIZED one, because what FACE constrains is the ridge
 # coordinate's implied response R(400->564), and fert_k moves it.
 #
 # ⚠ AND THE OTHER ONE. `h_ml` landed at 35.25 m, essentially the 35.38 m the

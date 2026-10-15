@@ -10,7 +10,7 @@
 # Both are CONDITIONAL slices at hilda34g (26 or 27 names held): a refit gives the joint answer.
 # ⛔ ADOPTS NOTHING; moves no stored value; changes no objective. No RNG.
 #
-# T. At the lag arm's base, lags L = 1, 2, 3, 4, 6, 8 months with the 8-name land block re-optimised
+# T. At the lag arm's base, lags L = 1, 2, 3, 4, 6, 8 months with the 8-name land block re-optimized
 #    (lib_block_reopt.R's br_cell); L = 0, 2.644, 5 are READ from the 10-04 (e) run (both starts agreed
 #    there). At each L: the existing rows' likelihood, the section-6 timing statistics, the futures. The
 #    candidate row is the regression of the observed detrended growth on the model's with a FREE slope
@@ -19,7 +19,7 @@
 #    et al. 1999, J. Climate 12:1990, eq. 31: n (1 - r1x r1y) / (1 + r1x r1y), lag-1 autocorrelations of
 #    the two detrended series) and the row's lag is read at multiples of it -- the WEIGHT is the ruling.
 # G. At the lag arm's own lag, npp_tsens HELD at 0, -0.006 (MAGICC6's C4MIP mean, lit note G9) and
-#    -0.012, the other 7 block names re-optimised; with the mode, a 4-point profile. At each: the
+#    -0.012, the other 7 block names re-optimized; with the mode, a 4-point profile. At each: the
 #    likelihood, futures and the net climate effect (br_net_climate()); the same effect at the control.
 #    The profile is fitted as a quadratic (10-04 e found it quadratic: symmetric +/- deficits), and each
 #    candidate prior's posterior mode follows analytically.
@@ -139,7 +139,7 @@ B0 <- TT[[which.min(abs(vapply(TT, `[[`, 0, "L") - L_LAG))]]$runs
 NE <- c(monthly = neff(B0$detr_mod, B0$detr_obs), annual = neff(B0$ann_mod, B0$ann_obs))
 cat(sprintf("  n_eff at the base (Bretherton 1999 eq. 31): monthly %.1f of %d points (lag-1 r: model %.3f, obs %.3f); annual %.1f of %d (%.3f, %.3f)\n",
             NE[["monthly"]], length(B0$detr_mod), r1(B0$detr_mod), r1(B0$detr_obs), NE[["annual"]], length(B0$ann_mod), r1(B0$ann_mod), r1(B0$ann_obs)))
-# the row's lag at each weight: spline through the profile, maximise lik + row on a fine grid
+# the row's lag at each weight: spline through the profile, maximize lik + row on a fine grid
 fine <- seq(min(tabT$L), max(tabT$L), by = 0.05)
 sp_lik <- stats::splinefun(tabT$L, tabT$lik, method = "natural")
 ROWS <- list()

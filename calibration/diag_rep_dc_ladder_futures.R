@@ -8,7 +8,7 @@
 # the phi signature. But that screen also found its futures RIDGE-SENSITIVE by
 # tens of ppm (beta_max/fert_k cor 0.998), and the rebalance was partial.
 # The T1 ladder (calibration/diag_rep_dc_product_ladder.R, 09-23) already holds
-# rep_dC PINNED at 9 rungs with the other 28 names FULLY re-optimised (all
+# rep_dC PINNED at 9 rungs with the other 28 names FULLY re-optimized (all
 # conv 0, NM maxit 6000, replicates return to the canonical to 1.9e-3). It
 # measured the historical products and never ran a future. This does.
 #

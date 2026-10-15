@@ -25,7 +25,7 @@
 #   STATIC mixed-layer mass, at the annual-mean SST. At a seas_ml 1 mode it read SH 0.616 at
 #   hilda31w (seawater runs ~0.05-0.15): December's austral-summer layer is thin, so its
 #   carbon over the annual-mean mass reads DIC far too low. It was valid when the 0.082 was
-#   measured (seas_ml 0); it is the seasonal-box artefact here, so it is not reported.
+#   measured (seas_ml 0); it is the seasonal-box artifact here, so it is not reported.
 # No RNG. Output: outputs/diagnostics/fco3_at_mode_<date>.{log,rds} (provenance in the rds).
 # =====================================================================
 for (f in list.files("R", pattern = "\\.R$", full.names = TRUE)) source(f)

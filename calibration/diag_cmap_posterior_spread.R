@@ -17,7 +17,7 @@
 # Per row: the SIGNED margin of the canonical's winner over the best other component, in pp of the row (the
 # definition test-cmap-tie.R's .cm_signed uses), at every draw.
 # THE RULED STATISTIC: the cut = the largest 5-95 % range of any row's signed margin over the draws.
-# Printed beside it, NOT ruled: each row's one-sided excursion from the canonical's margin (the closer analogue of
+# Printed beside it, NOT ruled: each row's one-sided excursion from the canonical's margin (the closer analog of
 # 10-12 h's "change from the canonical"), and the share of draws in which the row's winner differs.
 #
 # GATES, before a draw is read:

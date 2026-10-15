@@ -26,7 +26,7 @@ ccx_load_cpp()
 source(ccx_path("calibration", "lib_design_gates.R"))
 
 R1_TAKAHASHI <- ccx_const("SST_PCO2_SENSITIVITY")   # 0.0423 /degC, PROVISIONAL
-R1_DT        <- 0.5                                  # centred difference, degC
+R1_DT        <- 0.5                                  # centered difference, degC
 R1_ENSO_SOLUB<- -0.1274        # model slope, patch OFF (2026-09-04g sec.B4)
 R1_ENSO_OBS  <-  0.1153        # GCB on Nino3.4, same measurement
 R1_SCALES    <- c(0, 0.25, 0.5, 0.75, 1, 1.5)   # scale on the ENSO part of SST

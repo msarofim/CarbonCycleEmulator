@@ -11,7 +11,7 @@
 # THE PREMISE THAT MOTIVATED IT, which was reasonable and wrong. `kz` is
 # logit-bounded to [3942.5, 6528] and the arm-N mode sits at 6461.5 -- u_mode
 # 3.634, sigmoid 0.974, 97.4 % of the way to the ceiling. That LOOKS like an
-# optimiser pressed against a wall, and it mattered because
+# optimizer pressed against a wall, and it mattered because
 # diag_land_eagerness.R TEST E had just found `kz` to be the model's ONLY
 # PARTITION LEVER: it moves land DOWN, ocean UP and CO2 DOWN together, which is
 # exactly the combination the mode's three misses call for (land +2.04 sd,
@@ -44,8 +44,8 @@
 #
 #  3. AND rep_dC DOES NOT RESCUE IT. Since the CO2 level streams are fitted
 #     through a free +5.18 sd offset, the obvious suspicion was that the pin is
-#     an artefact of freezing that offset -- 21c sec.2c's trap, committed by me.
-#     Profiled with rep_dC re-optimised at every kz, the optimum moves 6462 ->
+#     an artifact of freezing that offset -- 21c sec.2c's trap, committed by me.
+#     Profiled with rep_dC re-optimized at every kz, the optimum moves 6462 ->
 #     6528, worth +0.6 log-units. THE PIN SURVIVES: rep_dC can TRANSLATE the
 #     record and raising kz changes its SHAPE, and a free offset does not
 #     rescue a curvature miss.
@@ -187,7 +187,7 @@ cat(sprintf("\n  sinks at that kz: land %.2f (%+.2f sd)  ocean %.2f (%+.2f sd)  
 # SO THE PROFILE ABOVE IS THE MISTAKE 21c sec.2c WARNS ABOUT, COMMITTED BY ME:
 # a frozen-block profile read as if it bounded the posterior, when the frozen
 # block contains the exact compensating parameter. Re-run it with `rep_dC`
-# PROFILED -- re-optimised at every kz, which is free because it enters the
+# PROFILED -- re-optimized at every kz, which is free because it enters the
 # likelihood as a pure offset -- and see whether the pin survives.
 cat("\n\nkz PROFILED WITH rep_dC FREE (re-optimised at each kz)\n")
 kr_eval_free <- function(kz) {
@@ -200,7 +200,7 @@ kr_eval_free <- function(kz) {
   o <- r$out; eluc <- ccx_forcing_eluc_annual(F)
   og <- ccx_ocean_grad_scored(o, sp)
   # Objective INCLUDING rep_dC's own prior, since rep_dC is what is being
-  # re-optimised -- otherwise the profile would buy level fit for free.
+  # re-optimized -- otherwise the profile would buy level fit for free.
   f <- function(rd) {
     e <- list(sigma_d14c = pm$sigma_d14c, rep_dC = rd,
               grad_off_co2 = pm$grad_off_co2, grad_off_d13c = pm$grad_off_d13c)
@@ -240,7 +240,7 @@ cat(sprintf("  and it is %s the bracket ceiling %.0f\n",
 
 # ---- WHAT THIS SCRIPT CONCLUDED, INCLUDING AGAINST ITSELF -----------
 # The rep_dC-compensation hypothesis in the block above is WRONG, and the
-# profile is what says so: with rep_dC re-optimised at every kz the optimum
+# profile is what says so: with rep_dC re-optimized at every kz the optimum
 # moves 6462 -> 6528, worth +0.6 log-units. The pin SURVIVES. rep_dC absorbs
 # part of the level shift (5.18 -> 3.32 at kz 8000) and the penalty is still
 # -163.6, because raising kz changes the SHAPE of the CO2 trajectory and rep_dC

@@ -11,7 +11,7 @@
 # amplitude, lag in the MODEL's own convention (R/model.R pump_seas_lag: NH
 # peaks mid-July + lag, SH mid-January + lag), peak/mean, the harmonic's share
 # of the seasonal variance; their ensemble median and IQR; and the UNIT-MEAN
-# ENSEMBLE-MEDIAN 12-month shape (month centres), so a later build can drive
+# ENSEMBLE-MEDIAN 12-month shape (month centers), so a later build can drive
 # the pump with the DATA's shape rather than a sine (the "use real data when
 # you have it" rule) -- the HS boxes' peak/mean of ~3 is a rectified bloom no
 # sine on [0, 1] can carry.

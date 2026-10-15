@@ -22,7 +22,7 @@
 #       measures the 1750 -> 2024 drift; if it is not small, the term is wrong
 #       and must move to the transient state.
 #
-# WHAT IT DOES NOT DO. It does not re-centre kz. The term's own optimum
+# WHAT IT DOES NOT DO. It does not re-center kz. The term's own optimum
 # (section 4) is inside the bracket and above the shipped default; that is one
 # stream's preference, and the refit is what weighs it.
 # =====================================================================

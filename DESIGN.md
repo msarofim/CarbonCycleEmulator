@@ -36,7 +36,7 @@ Scientific goals, in order:
 
 ## 2. Locked decisions (Marcus, 2026-08-09)
 
-> **Superseded (2026-10-15):** scenarios are the seven CMIP7 ScenarioMIP markers (van Vuuren et al. 2026), not SSPs; no posterior ensemble is shipped (the MCMC band is held, §5.3–5.4); ENSO is the detrended Niño 3.4 index, not MEIv2; GMST is IGCC for historical runs, futures use a response fitted to FaIR 2.2.4 (calib 1.6.0); the ocean adds a cold high-latitude surface box and a cold deep box per hemisphere (§3.1).
+> **Superseded (2026-10-15):** scenarios are the seven CMIP7 ScenarioMIP markers (van Vuuren et al. 2026), not SSPs; the Futures tab's CO₂ view shows an MCMC band over the fitted carbon-cycle parameters, and temperature has none (§5.3–5.4); ENSO is the detrended Niño 3.4 index, not MEIv2; GMST is IGCC for historical runs, futures use a response fitted to FaIR 2.2.4 (calib 1.6.0); the ocean adds a cold high-latitude surface box and a cold deep box per hemisphere (§3.1).
 
 | Decision | Choice |
 |---|---|
@@ -1418,7 +1418,7 @@ FIXED slab (`ccx_model_d14c_slabs()`), so the comparison is like-for-like at eve
 
 ### 5.3 Sampler
 
-> **Superseded (2026-10-15), §5.3–5.4:** the sampler was run at `hilda31w` from 2026-10-13: adaptive Metropolis, 4 chains × 200,000 iterations, 17,000 draws; max R̂ 1.24, on the seasonal-lag parameters, so not converged by the strict criterion. The CO₂ band built from it is in `data/futures_ribbons.rds` and is held (not displayed). The app live-runs the posterior mode, not a posterior median or a shipped ensemble. CHANGELOG 2026-10-13 (j), 2026-10-14 (a), (e), (f).
+> **Superseded (2026-10-15), §5.3–5.4:** the sampler was run at `hilda31w` from 2026-10-13: adaptive Metropolis, 4 chains × 200,000 iterations, 17,000 draws; max R̂ 1.24, on the seasonal-lag parameters, so not converged by the strict criterion. The CO₂ band built from it is in `data/futures_ribbons.rds` and is drawn on the Futures tab's CO₂ view since 2026-10-15; temperature is not banded. The app live-runs the posterior mode, not a posterior median or a shipped ensemble. CHANGELOG 2026-10-13 (j), 2026-10-14 (a), (e), (f).
 
 Adaptive Metropolis (adaptMCMC or custom), 4 chains, convergence gates R̂ < 1.05 and
 adequate ESS (computed with the `posterior` package; mind the ESS-maxlag trap from the
@@ -2109,7 +2109,7 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
 
 ## 7. Shiny app design
 
-> **Superseded (2026-10-15):** the shipped tabs (`app/ui.R`) are The Keeling Curve; Where does the carbon go?; What if…?; Isotope fingerprints; Futures (Scenarios / Build your own / Pulse lab); Known issues; What pins down what?; Under the hood. The scenario menu is the seven van Vuuren et al. (2026) CMIP7 markers, not SSPs. The ENSO driver is the detrended Niño 3.4 index. No posterior-ensemble ribbons are displayed (the band is held, §5.3); the app live-runs the posterior mode. The tab list below is the 2026-08 plan.
+> **Superseded (2026-10-15):** the shipped tabs (`app/ui.R`) are The Keeling Curve; Where does the carbon go?; What if…?; Isotope fingerprints; Futures (Scenarios / Build your own / Pulse lab); Known issues; What pins down what?; Under the hood. The scenario menu is the seven van Vuuren et al. (2026) CMIP7 markers, not SSPs. The ENSO driver is the detrended Niño 3.4 index. The Futures tab's CO₂ view shows the MCMC band (§5.3), and temperature has none; the app live-runs the posterior mode. The tab list below is the 2026-08 plan.
 
 Public, shinyapps.io. Precompute posterior-ensemble ribbons for historical + preset
 scenarios; run central-parameter model live for sliders/toggles/pulses (fast by §3.7).

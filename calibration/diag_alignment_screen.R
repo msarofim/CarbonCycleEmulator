@@ -1,6 +1,6 @@
 # =====================================================================
 # diag_alignment_screen.R -- HOW FAR CAN THE LAND BE BROUGHT INTO LINE WITH WHAT
-# WE KNOW ABOUT POOLS, FLUXES AND FERTILISATION, AND WHAT DOES THE RECORD CHARGE?
+# WE KNOW ABOUT POOLS, FLUXES AND FERTILIZATION, AND WHAT DOES THE RECORD CHARGE?
 # (CHANGELOG 2026-09-30 g; Marcus 2026-09-30 item 6: "once 1-4 are implemented,
 # do one more check to see how we can bring parameters and model responses into
 # better alignment with what we understand the size of pools and fluxes and
@@ -14,11 +14,11 @@
 # TWO PARTS.
 #  (1) A SCORECARD, for the control and every arm: every pool (ccx_stock_readout),
 #      modern NPP, the historical sinks and E_LUC vs GCB, bulk 0-1 m soil D14C vs
-#      Shi 2020, the fertilisation RESPONSES (not parameters) vs the literature,
+#      Shi 2020, the fertilization RESPONSES (not parameters) vs the literature,
 #      q10, and the SSP5-8.5 land-carbon windows vs Koven 2022.
 #  (2) A JOINT SCREEN: the best-supported literature RESPONSES enter as SOFT
 #      constraints (Gaussian log-penalties with the literature's own sd) and the
-#      11 rebalanced names are re-optimised (NM). ⚠ A SCREEN, NOT AN OBJECTIVE
+#      11 rebalanced names are re-optimized (NM). ⚠ A SCREEN, NOT AN OBJECTIVE
 #      CHANGE, and NOT THE REFIT (which waits, Marcus 09-30): it asks what
 #      alignment COSTS the record and WHO pays.
 #      Constraints (methodological choices, stated):
@@ -70,8 +70,8 @@ AS_ARMS <- list(J1 = list(fert = TRUE,  npp = FALSE, npp0 = FALSE),
                 J3 = list(fert = TRUE,  npp = TRUE,  npp0 = TRUE),
                 J4 = list(fert = FALSE, npp = TRUE,  npp0 = TRUE),
                 # + 09-30 (g), added while J1-J4 ran: the FUTURE only reached Koven's band with
-                # literature fertilisation AND q10 2.0 (09-29 v B, FROZEN); these price that
-                # combination on the record. q10 PINNED at its prior centre (2.0), not penalised.
+                # literature fertilization AND q10 2.0 (09-29 v B, FROZEN); these price that
+                # combination on the record. q10 PINNED at its prior center (2.0), not penalized.
                 J5 = list(fert = TRUE,  npp = FALSE, npp0 = FALSE, pin = c(q10 = 2.0)),
                 J6 = list(fert = TRUE,  npp = TRUE,  npp0 = TRUE,  pin = c(q10 = 2.0)))
 # + 09-30 (g), after J1-J4: the GROSS LAND LOOP. ra_ratio (Ra/NPP cycled THROUGH the
@@ -88,7 +88,7 @@ AS_GPP_PI <- 113    # GtC/yr, AR6 WG1 Fig. 5.12 preindustrial GPP, as recorded i
 # 09-30 i/j; predictions P-D3-1..4 registered in notes/prereg_2026-09-30c_nonco2_drivers_imbalance.md
 # at 40ca12d, BEFORE this arm ran). The two shares are EXTRA COORDINATES, stick-broken so the
 # simplex needs no bound: s_land = plogis(x1), s_ocean = (1 - s_land) * plogis(x2). The ruled prior
-# is FLAT on the simplex, so the arm maximises its own #14 likelihood over it (no Jacobian: a
+# is FLAT on the simplex, so the arm maximizes its own #14 likelihood over it (no Jacobian: a
 # flat-prior MAP on the natural scale is the ML). `imb` is the I(t) treatment, `cement` whether
 # GCB's cement sink is allocated with it -- both PENDING Marcus, so the screen PRICES them.
 # ⚠ Compare D3 arms with the control on the COMMON rows (everything except gcb_land_sink /
@@ -110,7 +110,7 @@ AS_PD3_ROW_MIN <- 8        # P-D3-1: the two GCB rows gain at least this (the fi
 # temperature sensitivity, SIGN-FREE prior; (c) not built. Predictions P-D2-1..5
 # registered in the prereg (61fd1b3) BEFORE any D2 run. Both are EXTRA COORDINATES
 # carrying their ruled priors in the space the refit will fit them in: ndep_ret on LOG
-# scale, prior N(log centre, NDEP_RET_PRIOR_LOGSD) there (= a lognormal with its
+# scale, prior N(log center, NDEP_RET_PRIOR_LOGSD) there (= a lognormal with its
 # log-Jacobian); npp_tsens on the identity scale, prior N(0, NPP_TSENS_PRIOR_SD).
 AS_ARMS$DN   <- list(fert = FALSE, npp = FALSE, npp0 = FALSE, ndep = TRUE)
 AS_ARMS$DT   <- list(fert = FALSE, npp = FALSE, npp0 = FALSE, tsens = TRUE)
@@ -293,7 +293,7 @@ one <- function(nm) {
   x0 <- c(u_start[iF], if (arm$npp0) stats::qlogis((1 - AS_NPP0_BOUNDS[1]) / diff(AS_NPP0_BOUNDS)),
           if (isTRUE(arm$ra)) stats::qlogis(0.05),      # start the gross loop small, not at 0 (logit)
           if (!is.null(arm$imb)) stats::qlogis(imb_start(arm)),   # the fixed-vector optimum (09-30 i)
-          if (isTRUE(arm$ndep)) log(AS_NDEP_CENTRE),              # D2: start at the prior centres
+          if (isTRUE(arm$ndep)) log(AS_NDEP_CENTRE),              # D2: start at the prior centers
           if (isTRUE(arm$tsens)) 0)
   o <- stats::optim(x0, obj, method = "Nelder-Mead", control = list(maxit = AS_MAXIT))
   u <- u_start; u[iF] <- o$par[seq_along(iF)]

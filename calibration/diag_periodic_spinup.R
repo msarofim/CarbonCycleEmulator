@@ -12,7 +12,7 @@
 # same quantity on the arm whose flatness the repo already gates
 # ([[threshold_from_obs_or_law]], [[tolerance_scaled_to_spread]]):
 #   * GATE P1 -- the periodic state is a FIXED POINT of the one-year map. An
-#     identity, so its tolerance is the solver's own PS_TOL, not a judgement.
+#     identity, so its tolerance is the solver's own PS_TOL, not a judgment.
 #   * GATE P2 -- the QUIET run from the periodic state is FLAT. Its noise floor
 #     is the SAME quantity measured on the seas_ml = 0 arm, which is
 #     `diag_f2_periodic_spinup.R`'s own construction and the arm

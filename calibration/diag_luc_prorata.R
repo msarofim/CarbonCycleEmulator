@@ -37,13 +37,13 @@
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-# ---- PINNED TO THE LOG FERTILISATION FORM (2026-08-14) --------------
+# ---- PINNED TO THE LOG FERTILIZATION FORM (2026-08-14) --------------
 # This diagnostic was written against NPP = NPP0(1 + beta ln(chi/chi0)) and
 # every number in its header is a LOG-FORM number. On 2026-08-14 the default
 # flipped to CCX_FERT_MM, under which `beta` is INERT -- so without this pin the
 # file would still run, still print a beta column, and silently report the same
 # MM answer for every beta. (That is not hypothetical: it happened to
-# diag_fert_pulse_gates.R and to the app's fertilisation switch on the day of
+# diag_fert_pulse_gates.R and to the app's fertilization switch on the day of
 # the flip, and identical rows are what caught both.)
 #
 # The pin makes this file reproduce its recorded numbers exactly. It does NOT
@@ -216,10 +216,10 @@ cat("    debit must not break.\n")
 # ---------------------------------------------------------------------
 # [5] FOUND WHILE MEASURING [3b], AND IT IS THE REASON THIS SECTION EXISTS.
 # 404d66d reports cumulative land 1750-2024 = -53.6 GtC against GCB's -57.4 --
-# a close agreement, and it was measured at beta = 0.38. At the re-centred beta
+# a close agreement, and it was measured at beta = 0.38. At the re-centered beta
 # = 0.60 the same quantity is +21.7. So the CO2 LEVEL and the GCB LAND BUDGET
 # want different betas, and the gap between them is ~75 GtC. Neither the beta
-# re-centring nor the debit decision can be made without seeing that plane, so
+# re-centering nor the debit decision can be made without seeing that plane, so
 # it is scanned here rather than argued about.
 LP_BETA_GRID <- c(0.30, 0.38, 0.45, 0.50, 0.60, 0.70, 0.80)
 cat(sprintf("\n[5] THE (beta, debit) PLANE: CO2 level vs the GCB land budget\n"))

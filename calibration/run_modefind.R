@@ -11,16 +11,16 @@
 # seasonal statistic, and an integrator whose substep count is chosen from the
 # diffusion stability criterion rather than fixed at 4. Every earlier mode is
 # quarantined under calibration/output/quarantine/ and is NOT comparable: the
-# likelihood it maximised is a different function.
+# likelihood it maximized is a different function.
 #
 # 2026-08-14: BACK TO 18, and the composition changed twice on one day, so the
 # count alone is misleading. `luc_scale` was ADDED (16 -> 17), then the
-# fertilisation FORM changed: `beta` LEFT and `beta_max` + `fert_k` entered
+# fertilization FORM changed: `beta` LEFT and `beta_max` + `fert_k` entered
 # (17 -> 18). The objective also gained the GLODAPv2 `d14c_deep_ocean` term and
 # had its GCB land-sink term corrected from net-vs-gross. So the 2026-08-12 mode
 # is quarantined under 20260814_pre_mm_fertilisation/ for the SAME reason as its
-# predecessors -- the likelihood it maximised is a different function, and MM is
-# not a reparameterisation of the log form, so nothing carries across.
+# predecessors -- the likelihood it maximized is a different function, and MM is
+# not a reparameterization of the log form, so nothing carries across.
 #
 # WHAT THIS RUN IS FOR, and what it is not. It is a MAP point, not a posterior:
 # it gives the app a calibrated point instead of hand-set defaults, and it
@@ -78,7 +78,7 @@ dir.create(dirname(MODE_OUT), showWarnings = FALSE, recursive = TRUE)
 
 lp_fun <- ccx_make_logpost()
 
-# optim minimises, and cannot navigate out of -Inf; map non-finite to a large
+# optim minimizes, and cannot navigate out of -Inf; map non-finite to a large
 # finite penalty so a bad proposal is steeply discouraged but still has a slope
 # back toward feasible space.
 n_eval <- 0L

@@ -21,8 +21,8 @@
 #   land        stage 1 fits the land lag and a common land scale to the detrended monthly growth ALONE (= A0);
 #   land_ocean  + the ocean limb w_enso_l2, with gcb_ocean_enso_slope moved INTO the module (and out of the main one).
 # For each scope and each land-row treatment (raw, low-pass): B1 unrefitted and B2 (the five other land names
-# re-optimised), the futures at B2. Then the JOINT objective's lag profile with the low-pass row (the 7-name land block
-# re-optimised at each lag): does smoothing the land row ALONE move the joint lag?
+# re-optimized), the futures at B2. Then the JOINT objective's lag profile with the low-pass row (the 7-name land block
+# re-optimized at each lag): does smoothing the land row ALONE move the joint lag?
 # ⛔ ADOPTS NOTHING; changes no objective. No RNG.
 # Usage: Rscript calibration/diag_iav_cut_smoothed_land.R [preview rds]   (CCX_SM_WORKERS, default 4; CCX_SM_SMOKE=1)
 # =====================================================================
@@ -139,7 +139,7 @@ if (any(bad)) stop("a cell failed: ", paste(vapply(RES[bad], function(o) as.char
 names(RES) <- vapply(RES, `[[`, "", "id")
 saveRDS(list(res = RES, scopes = SCOPES, commit = COMMIT), paste0(SM_OUT, "_cells.rds"))
 
-# every B cell scored on BOTH treatments at its own vector (so a raw-optimised point is also read on the low-pass row)
+# every B cell scored on BOTH treatments at its own vector (so a raw-optimized point is also read on the low-pass row)
 cell_vec <- function(o) { blk <- o$block[intersect(names(o$block), c(SM_REST, SM_GAMMA, SM_OCEAN))]; vec_of(blk, o$L) }
 read_cell <- function(o, sc) { v <- cell_vec(o); r <- dg_run(v); st <- unlist(dg_streams(r, v, obs = BR_OBS)); e <- land_res(r, v)
   main <- setdiff(names(id0$streams), if (sc == "land_ocean") SM_SLOPE_ROW)

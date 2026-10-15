@@ -50,7 +50,7 @@ p2p <- function(x) max(x) - min(x)
 # Monthly window operator: each observation is a MONTHLY MEAN, so the model shape
 # must be integrated over the month, never sampled at its midpoint. Same argument
 # as build_npp_seasonal_shape.R's 8-day windows; this project has been bitten by
-# point-sampling quantisation before. [[analytic_pulse_mean]]
+# point-sampling quantization before. [[analytic_pulse_mean]]
 mdays <- c(31,28.25,31,30,31,30,31,31,30,31,30,31)
 medge <- c(0, cumsum(mdays)) / sum(mdays)
 Wmon <- matrix(0, 12, SP_NGRID)

@@ -30,14 +30,14 @@
 #          the "~160" above); Huang & Qiu (1998) South Pacific 21.6; Qu et al.
 #          (2008) South Pacific 48.8 from Argo/WOD05; Qu et al. (2002) North
 #          Pacific 10-50N 61.6 from an eddy-permitting OGCM.
-# CENTRE: the GEOMETRIC MEAN of the two readings (the h_ml precedent, whose
+# CENTER: the GEOMETRIC MEAN of the two readings (the h_ml precedent, whose
 # 16 %/84 % points WERE the two defensible readings); SPREAD: the log-sd that
 # puts each reading at 1 sigma. ⚠ A WIDE prior BY DESIGN: the mapping from
 # the real subduction/obduction field to a closed ML <-> layers-1-3 loop over
 # one column is itself uncertain (observed obduction is concentrated in the
 # equatorial band and the Southern Ocean, the loop's return is the STC's),
 # and the prereg says the data rows -- bomb 14C, the deep d13C -- set it.
-# ⚠ The ORDER matters more than the centre: even at 160 Sv the loop replaces
+# ⚠ The ORDER matters more than the center: even at 160 Sv the loop replaces
 # layers 1-3 at 0.07 /yr against the canonical kz's ~3 /yr -- kz is what must
 # fall (PE-1).
 # Usage: Rscript data-raw/build_w_vent_prior.R  (from the repo root)

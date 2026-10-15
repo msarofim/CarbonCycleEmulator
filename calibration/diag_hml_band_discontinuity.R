@@ -31,7 +31,7 @@
 #
 #     sigma_eff(h)^2 = sigma_obs^2 + sigma_rep(h)^2
 #
-# with dnorm's NORMALISATION TERM RETAINED. Inflating sigma then costs
+# with dnorm's NORMALIZATION TERM RETAINED. Inflating sigma then costs
 # -log(sigma_eff), so discarding a row is CHARGED FOR rather than free, and the
 # gain is bounded (the best any inflation can do is sigma_eff = |miss|, at
 # -log(|miss| sqrt(2 pi)) - 1/2). Crucially the inflation is NOT A TUNING KNOB:
@@ -56,7 +56,7 @@
 #       I expect to reproduce 16f's -10.07 to better than 0.1.
 #   P3. Under ANY multiplicative taper the argmax over h_ml stays OUTSIDE the
 #       band, and the gain from leaving = (1 - w) |row sum|.
-#   P4. Under sigma-inflation with the normalisation retained, the gain from
+#   P4. Under sigma-inflation with the normalization retained, the gain from
 #       leaving is BOUNDED and smaller than the taper's; I expect it to be a
 #       LARGE fraction of the taper's gain rather than a small one, because the
 #       rows' misses are several sigma and z^2/2 dominates log(z).
@@ -265,7 +265,7 @@ straddle <- lapply(names(edges), function(nm) {
   cat(sprintf("DISCONTINUOUS streams: %s\n",
               paste(d$stream[d$appears | d$vanishes], collapse = ", ")))
   # THE DRIFT IS NOT NOISE TO BE TOLERATED, IT IS A SLOPE TO BE DERIVED. The
-  # objective's own gradient in h_ml is ~8 log-units per metre near the edges, so
+  # objective's own gradient in h_ml is ~8 log-units per meter near the edges, so
   # a 0.02 m straddle MUST move the continuous part by ~0.16 -- which is what
   # P1's first bar (0.05) collided with. The physical claim is not "nothing else
   # moves"; it is "the jump is not a slope", so the quantity to measure is the
@@ -410,7 +410,7 @@ for (i in seq_along(hs))
               if (abs(hs[i] - HB_H_IN) < 1e-9) "  <- pump's own h_ml" else ""))
 
 sep("PART 3b. THE THREE TAPERS -- EACH REMOVES THE CLIFF, NONE MOVES THE SUMMIT")
-# w(h) = 1 in-band, cosine ramp to 0 over HB_TAPER_W metres outside it.
+# w(h) = 1 in-band, cosine ramp to 0 over HB_TAPER_W meters outside it.
 hb_taper <- function(h, w) {
   d <- pmax(0, pmax(HB_BAND[1] - h, h - HB_BAND[2]))
   ifelse(d <= 0, 1, ifelse(d >= w, 0, 0.5 * (1 + cos(pi * d / w))))

@@ -1,6 +1,6 @@
 # =====================================================================
 # diag_pedagogy.R -- the model scored against the two arguments it was built to
-# refute. HEADLINE: THE MODEL PRODUCES THE SCEPTIC'S OWN "5-YEAR RESIDENCE
+# refute. HEADLINE: THE MODEL PRODUCES THE SKEPTIC'S OWN "5-YEAR RESIDENCE
 # TIME" NUMBER (4.3 yr) AND, IN THE SAME RUN, SHOWS 26 % OF A MASS PULSE STILL
 # AIRBORNE AFTER A CENTURY.
 #
@@ -61,7 +61,7 @@
 #     identity: solubility-only gives -23.50 and respiration-only +23.50 at
 #     300 yr, but -15.1 and +9.5 at 100 yr. Tested, part 4b.
 #
-# [5] THE MODEL REPRODUCES THE SCEPTIC'S HEADLINE STATISTIC. cor(CO2 growth
+# [5] THE MODEL REPRODUCES THE SKEPTIC'S HEADLINE STATISTIC. cor(CO2 growth
 #     rate, GMST) = +0.930 over 1960-2023 while 100 % of its trend is
 #     emissions-driven. Detrend both and r = 0.582 -- the genuine ENSO link,
 #     which explains wobbles, not the rise. Co-trending manufactures the rest.
@@ -248,7 +248,7 @@ for (nm in c("solubility only", "respiration only", "both")) {
 }
 
 # =====================================================================
-# 5. THE SCEPTIC'S HEADLINE STATISTIC, REPRODUCED
+# 5. THE SKEPTIC'S HEADLINE STATISTIC, REPRODUCED
 # =====================================================================
 spin <- cv$spin
 Fh <- ccx_build_forcing("historical", PED_HIST, prod_c14 = spin$prod_c14)

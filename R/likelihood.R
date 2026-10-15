@@ -41,11 +41,11 @@
 #
 # 1b. THE SAME ESTIMATOR RUNS ON MODEL AND OBSERVATIONS. ccx_year_harmonic()
 #    fits, per calendar year, `v ~ 1 + (t - midyear) + sin(2*pi*phi) +
-#    cos(2*pi*phi)`. Its intercept is a deseasonalised, detrended annual level
+#    cos(2*pi*phi)`. Its intercept is a deseasonalized, detrended annual level
 #    that is immune to partial month coverage (SPO has 8 sparse years, and the
 #    DESIGN 6 note records raw partial-year means shifting the 1950s by
 #    -0.77 ppm); its sin/cos coefficients are the seasonal statistic. Applying
-#    one estimator to both sides means neither NOAA's deseasonalisation method
+#    one estimator to both sides means neither NOAA's deseasonalization method
 #    nor the model's seasonal shape has to be trusted separately.
 #
 # 1c. D14C IS REDUCED TO ANNUAL MEANS FOR THE SAME REASON. The Hua et al. (2022)
@@ -99,8 +99,8 @@ LIK_ZONE_BOUNDS_NH <- c(40, 15)      # degrees N
 LIK_ZONE_BOUNDS_SH <- c(15)          # degrees S, SH3/SH1-2 split
 LIK_D14C_REP_BOMB  <- 25             # permil, inside LIK_D14C_BOMB_WIN (weighting spread)
 LIK_D14C_REP_OTHER <- 4              # permil, elsewhere
-# Applied as `t >= 1955 & t <= 1970` on MONTH-CENTRE decimal t (ccx_prepare_obs),
-# so the window is CALENDAR 1955-1969, 180 months: the first 1970 month centre
+# Applied as `t >= 1955 & t <= 1970` on MONTH-CENTER decimal t (ccx_prepare_obs),
+# so the window is CALENDAR 1955-1969, 180 months: the first 1970 month center
 # is 1970.042 > 1970 and no 1970 month is inside. Comment corrected 2026-09-12
 # (review C); the code is unchanged and every stored logpost stands.
 LIK_D14C_BOMB_WIN  <- c(1955, 1970)
@@ -109,7 +109,7 @@ LIK_D14C_BOMB_WIN  <- c(1955, 1970)
 # is retired (R/calibrate.R) and this constant now stands alone.
 #
 # ITS RECEIPT, which is why it was the half that survived: co-located
-# INDEPENDENT programmes at Mauna Loa -- NOAA in-situ against SIO flask,
+# INDEPENDENT programs at Mauna Loa -- NOAA in-situ against SIO flask,
 # n = 702 months -- disagree by 0.39-0.59 ppm RMS. That is a floor on
 # measurement error alone, and a station-vs-hemispheric-BOX term must exceed
 # it. 1.0 ppm is a plausible value for that quantity, measured on 2026-08-15
@@ -165,7 +165,7 @@ LIK_D13C_REP_ERR   <- 0.05           # permil
 #
 # ABSENCE CONTRACT, same as `deep` and the gradient offsets: a NULL `rep_dC`
 # SKIPS the offset rather than defaulting it to zero -- except that here zero IS
-# the no-offset behaviour, so absence and zero coincide numerically. The
+# the no-offset behavior, so absence and zero coincide numerically. The
 # contract is kept anyway so every pre-2026-08-18 caller reproduces exactly.
 # ⚠ PROVISIONAL, UNCITED (flagged 2026-09-12, review C; CLAUDE.md rule 2). The
 # value is the midpoint of a recollected bracket -- ~-25 permil for respired
@@ -212,7 +212,7 @@ LIK_ICE_DISCREPANCY_INFLATE <- as.numeric(Sys.getenv("CCX_ICE_DISCREPANCY", "1")
 # on 2026-08-15 as the justification for adding this term, from a DOWNWARD
 # profile, and downward it still holds overwhelmingly: at 0.79 tau_0 the cost is
 # `co2_seasonal_SPO` -57.00 and `co2_seasonal_MLO` -28.31. UPWARD it inverts. At
-# 1.26 tau_0 with the offsets re-optimised, the bill is annual-mean isotopes and
+# 1.26 tau_0 with the offsets re-optimized, the bill is annual-mean isotopes and
 # levels -- d13c_level_MLO -20.43, d13c_level_SPO -14.44, d14c_NH -12.06,
 # co2_level_MLO -9.54, d14c_SH -7.98, co2_gradient -7.49 -- while the FOUR
 # SEASONAL ROWS NET ONLY -3.40 and `co2_seasonal_SPO` actively IMPROVES by
@@ -371,7 +371,7 @@ LIK_USE_D13C_SEAS <- TRUE
 # it made the seasonal cycle weaker than its own side effect. Measured at
 # defaults, moving seas_amp_NH from 20 to 24 GtC/yr cost 1.2 log-units on the
 # seasonal term but 6 on the CO2 LEVEL term, because a bigger seasonal cycle
-# rectifies against the log CO2-fertilisation term and shifts the annual mean.
+# rectifies against the log CO2-fertilization term and shifts the annual mean.
 # The seasonal amplitude would then have been set by its rectification
 # side-effect rather than by the seasonal cycle. Per-year scoring puts ~50 term
 # pairs per station behind it and restores the intended ordering.
@@ -386,7 +386,7 @@ LIK_USE_D13C_SEAS <- TRUE
 # That shape is now a measured stratosphere->troposphere delivery function built
 # from Tans (1981) SCOPE 16 Tables 1-2 (DATA.md 9), so the window is admitted.
 #
-# CAVEAT that rides with it: at uncalibrated defaults the modelled NH peak is
+# CAVEAT that rides with it: at uncalibrated defaults the modeled NH peak is
 # still +0.75 yr late against the area-weighted observed aggregate, and a 4.5x
 # one-month step survives at the Part A / Part B join in 1963.04 -- inside this
 # window. Both push on tau_ex and the ocean-uptake parameters. Treat any
@@ -489,7 +489,7 @@ LIK_GCB_LAND_SD    <- 0.5            # GtC/yr, GCB 2025 stated land-sink 1 sigma
 #     "raw"    as published. 64 % of its sum of squares is interannual scatter, so
 #              the share it yields is mostly a regression of IAV on IAV (GATE V's
 #              question), not an allocation of the systematic imbalance.
-#     "smooth" a centred LIK_IMB_SMOOTH_YR-yr running mean, the window SHRINKING at
+#     "smooth" a centered LIK_IMB_SMOOTH_YR-yr running mean, the window SHRINKING at
 #              the two ends (so every GCB year has a value; the app's smoother
 #              returns NA there instead).
 #     "const"  the mean over every GCB year: a pure level shift.
@@ -536,7 +536,7 @@ ccx_comparable_rows <- function(rows, structs) {
   if (length(unique(gates)) > 1L) common <- setdiff(common, LIK_IMB_ROWS)
   # ⛔ THE LOW-PASS SWITCHES TOO (2026-10-12, code review sec.5). Under objective #17 / #18 a GCB
   # sink row is scored on its LOW-PASS part (ccx_land_highpass_cost()); an arm without the switch
-  # scores the same NAME year by year -- a different row with a different normalisation. Dropped
+  # scores the same NAME year by year -- a different row with a different normalization. Dropped
   # when the arms' switches differ (an absent switch = year by year). Live pairs this bites:
   # hilda29e vs hilda33p / hilda34g / hilda33d (both rows) and vs hilda29w (the ocean row).
   sw_of <- function(s, f) { v <- ccx_struct_block(s)[[f]]; if (is.null(v)) NA_real_ else as.numeric(v) }
@@ -717,7 +717,7 @@ ccx_enso_slope_row <- function(flux, obs, dn = stats::dnorm) {
 # (model land + E_LUC) over the scored GCB years. With P the orthogonal projection onto [1, ns(year, df)],
 # |e|^2 = |Pe|^2 + |(I-P)e|^2 EXACTLY, so the row splits into a low and a high part under its OWN
 # independence assumption, and the low-pass row = row + |(I-P)e|^2 / (2 s^2) needs NO new sigma (the
-# normalising constant stays the full row's). df 6 over the 66 GCB years is the ~11-yr scale the
+# normalizing constant stays the full row's). df 6 over the 66 GCB years is the ~11-yr scale the
 # imbalance smoothing already uses (LIK_IMB_SMOOTH_YR); df 4 and 9 bracketed it (+0.80 / +0.91 against
 # df 6's +0.76 at land B1: insensitive). Priced by calibration/diag_iav_cut_smoothed_land.R @565aa92:
 # at hilda33p the row is -49.85 = low -22.27 + high -27.58, and under the cut it takes B2's cost from
@@ -787,17 +787,17 @@ ccx_err_with_struct <- function(err, p) {
 
 # ---- THE INTERANNUAL MODULE (objective #17's stage 1) ------------------------------------------
 # THE ESTIMATOR (ruled "Monthly (Recommended)", 2026-10-06 m): NOAA MBL global CO2, monthly means of the
-# weekly reference, its CENTRED 12-month difference (removes the annual cycle), matched by month to the
+# weekly reference, its CENTERED 12-month difference (removes the annual cycle), matched by month to the
 # model's global mean ((NH + SH) / 2: equal-mass boxes) over LIK_IAV_WIN, both series detrended by the
 # residual-maker of [1, ns(t, LIK_IAV_TREND_DF)] on the matched months' own axis (removes the trend).
 # Exactly the refit read's s. 6 estimator (calibration/lib_block_reopt.R br_timing) that every 10-02 /
 # 10-04 / 10-06 diagnostic used, and the one the preview fitted (proposal s. 2).
 # THE LIKELIHOOD: -(n_eff / 2) log(SSR / SSR_ref) -- a Gaussian with its sigma profiled out, at an
 # EFFECTIVE sample size, because the monthly residuals are strongly autocorrelated (a 12-month
-# difference overlaps its neighbours 11 months in 12). SSR_ref is a constant: it moves the value, not
+# difference overlaps its neighbors 11 months in 12). SSR_ref is a constant: it moves the value, not
 # the optimum. Plus the `gcb_ocean_enso_slope` row, which pins the ocean limb (on the growth alone the
 # limb and the land term cancel and run away: w_enso_l2 55-113; proposal s. 5.3).
-# ⚠ The model's centred difference for Jul-Dec 2024 reads Jan-Jun 2025, so a module run must extend
+# ⚠ The model's centered difference for Jul-Dec 2024 reads Jan-Jun 2025, so a module run must extend
 # past the record (calibration/lib_design_gates.R DG_YEARS, forcing held in 2025 by design); the slope
 # row is read on the same run TRUNCATED to the objective's span (LIK_IAV_SPAN_END), which is how the main
 # objective and dg_streams() score it.
@@ -815,7 +815,7 @@ LIK_IAV_NEFF       <- 22.53880639959581
 #' The names stage 1 fits (the module), in the order the fitter reports them. The two land amplitudes
 #' move TOGETHER (one scale on hilda33p's NH : SH), since the global growth sees only their sum.
 CCX_IAV_MODULE_NAMES <- c("lag_enso_land", "gamma_enso_land_NH", "gamma_enso_land_SH", "w_enso_l2")
-#' The centred 12-month difference x[t + 6] - x[t - 6] (NA within six months of either end): the ONE
+#' The centered 12-month difference x[t + 6] - x[t - 6] (NA within six months of either end): the ONE
 #' definition (lib_block_reopt.R br_cen12's, verbatim, with a guard for short series).
 ccx_cen12 <- function(x) {
   n <- length(x); g <- rep(NA_real_, n)
@@ -896,7 +896,7 @@ LIK_GCB_FOSS_FRAC  <- 0.05           # fraction, 1 sigma
 #     and no doubling of the MCMC cost. ⚠ WHICH state depends on the spinup:
 #     under the aseasonal ccx_spinup it is the fixed point exactly; under
 #     CCX_OBJECTIVE_SPINUP (the PERIODIC spinup, since 2026-09-09x) the first
-#     row is the JANUARY INSTANT (first month-centre) of the periodic orbit,
+#     row is the JANUARY INSTANT (first month-center) of the periodic orbit,
 #     not the orbit's annual mean. For the ocean 14C inventory the two differ
 #     by 0.0014 sigma (review 2026-09-12) -- stated, not corrected. Measured against the alternative (a
 #     full no-fossil / no-LUC / no-bomb / no-nuclear counterfactual carrying the
@@ -957,7 +957,7 @@ LIK_EXCESS_C14_TARGET <- "table4_obs_range"
 # component at +3 % of the inventory in 1975 and +8 % in 1995. The MODEL's row
 # is total minus its 1750 state (note (a) above) and therefore CONTAINS that
 # component -- so the target the model is scored against must too. Applied as
-# a multiplicative factor per year to the CENTRE only (the half-widths stay:
+# a multiplicative factor per year to the CENTER only (the half-widths stay:
 # the correction is a bias, and the method spread the wide set carries already
 # exceeds it). Moves the 1995 target 51.4 -> 55.5 kmol, the 1975 one 48.6 ->
 # 50.1; at the canonical of 2026-09-16 the row's z fell from +3.9 to ~+3.4. The 09-15 (f)
@@ -976,7 +976,7 @@ LIK_EXCESS_C14_BASE_YEAR <- 1750
 # treating it as independent would claim twice the information it carries.
 # Set to cover the measured +4.8 % / +18.0 % spread of note (c) -- above their
 # midpoint, deliberately, because only two comparisons exist and one of the two
-# is against a modelled stratosphere.
+# is against a modeled stratosphere.
 LIK_EXCESS_C14_REP_FRAC <- 0.15
 
 # ---- deep-ocean D14C (2026-08-14; GLODAPv2.2023) ---------------------
@@ -1013,16 +1013,16 @@ LIK_EXCESS_C14_REP_FRAC <- 0.15
 # The reasoning that made that non-obvious: the incumbent bracket [3830, 6200]
 # is itself a hard box on this same quantity -- bottom box -220.4 to -163.5, a
 # half-width of 28.4 permil -- i.e. TIGHTER than every sigma candidate but the
-# most aggressive, so deleting it in favour of an "honest" likelihood term would
+# most aggressive, so deleting it in favor of an "honest" likelihood term would
 # LOOSEN the constraint, not tighten it. The bracket stays until a refit shows
 # this term holding kz without it.
 #
 # THE TWO DISAGREE ABOUT WHERE INSIDE THE BRACKET kz BELONGS, and that is the
-# term's actual content. The bracket is centred at -191.9 permil, 16.7 below the
+# term's actual content. The bracket is centered at -191.9 permil, 16.7 below the
 # observation; this term's own optimum is kz = 5525 (bottom box -175.3, z 0.00)
 # against the shipped default 5000 (-186.4, z -1.08), and it puts the bracket's
 # lower end at -4.40. So it pushes kz UP within the bracket rather than out of
-# it. Do not read that as a licence to re-centre kz by hand -- it is one stream
+# it. Do not read that as a license to re-center kz by hand -- it is one stream
 # among many and the refit is what weighs it.
 #
 # NOT inflated for model representation error. The build script anticipated
@@ -1047,7 +1047,7 @@ LIK_EXCESS_C14_REP_FRAC <- 0.15
 #
 # TWO THINGS THAT MEASUREMENT DOES NOT SETTLE, both still open for Marcus:
 #  * n_eff is only known to a factor of ~3.4 (1 sd on log n_eff), i.e. sigma to
-#    a factor of ~1.85. Marginalising that out gives a Student-t with nu ~ 2.1,
+#    a factor of ~1.85. Marginalizing that out gives a Student-t with nu ~ 2.1,
 #    which changes NEITHER live decision but cuts the kz-runaway penalty 4.3x
 #    (20.1 -> 4.67 against a 4.50 threshold) -- so under it this term could
 #    never replace the kz bracket. Measured in diag_deep_d14c_sigma_choice.R.
@@ -1102,7 +1102,7 @@ LIK_USE_D14C_PROFILE_MVN <- FALSE   # SUPERSEDED 2026-09-07 by the (level, contr
 LIK_D14C_PROFILE_BLOCK   <- 60
 
 # ---- OBJECTIVE CHANGE #10 (2026-09-07, Marcus): THE PROFILE AS (LEVEL, A-B, B-deep),
-# EACH A GENERALISED-NORMAL ROW WITH A DECLARED SIGMA AND SHAPE. ✅ ON.
+# EACH A GENERALIZED-NORMAL ROW WITH A DECLARED SIGMA AND SHAPE. ✅ ON.
 # WHY. The MVN row (#9) is the same three means in the (A, B, deep) basis with
 # the bootstrap covariance; rotated into (mean level, A-B, B-deep) it is three
 # nearly independent rows -- and the bootstrap's 0.98 correlation gave the
@@ -1123,7 +1123,7 @@ LIK_D14C_PROFILE_BLOCK   <- 60
 LIK_USE_D14C_PROFILE_GNORM <- TRUE
 LIK_D14C_PROFILE_BETA      <- 4
 
-#' Generalised-normal log density, parameterised so that the cost relative to
+#' Generalized-normal log density, parameterized so that the cost relative to
 #' the mode is |z|^beta / 2 with z = (x - mu) / sd: at beta = 2 this IS
 #' dnorm(x, mu, sd, log = TRUE), constant included.
 ccx_dgnorm_log <- function(x, mu, sd, beta = LIK_D14C_PROFILE_BETA) {
@@ -1150,7 +1150,7 @@ ccx_profile_d14c_spec <- function(block = LIK_D14C_PROFILE_BLOCK, beta = LIK_D14
 }
 
 #' The profile rows the objective carries at the model vector m = (A, B, deep)
-#' under the CURRENT switches: the three generalised-normal rows (#10), else
+#' under the CURRENT switches: the three generalized-normal rows (#10), else
 #' the one MVN row (#9), else NULL (the independent rows are scored by
 #' ccx_loglik() itself). ONE source for the objective and for every fixture.
 ccx_profile_rows_at <- function(m, depth = CCX_GLODAP_DEPTH_LEGACY) {
@@ -1346,7 +1346,7 @@ ccx_model_d14c_slabs <- function(sp, slabs = NULL) {
 #' The model's Delta14C over a depth window, EVERY box that occupies it
 #'
 #' The carbon-weighted Delta14C of all the water the model holds between `top`
-#' and `bot` metres: each low-latitude interior layer by its overlap fraction,
+#' and `bot` meters: each low-latitude interior layer by its overlap fraction,
 #' AND -- since 2026-09-16 (d), the whole-model review's finding 1 -- the HILDA
 #' deep box HD by ITS overlap fraction (HD is one well-mixed box from h_hs to
 #' the bottom under the HS area, so the fraction of its carbon inside the
@@ -1433,7 +1433,7 @@ ccx_d14c_deep_read <- function(sp) {
 #    every h_ml, its penalty FALLS 81 -> 53 log-units across h_ml 50 -> 220 --
 #    i.e. it rewards a LARGE h_ml and pushes against clause 1, the thing the pump
 #    exists to fix. Freezing at the h_ml = 75 grid instead overstates the miss at
-#    the fitted h_ml, biasing IN FAVOUR of adopting a pump. Fixed depths are
+#    the fitted h_ml, biasing IN FAVOR of adopting a pump. Fixed depths are
 #    neutral on both counts. (The size of that overstatement was quoted here as
 #    1.61 sigma; that is part 2b's frozen-at-75 contrast on part 2b's TIGHTER
 #    blk30 sigma of 20.16. On the sigma this term actually ships -- the
@@ -1470,7 +1470,7 @@ ccx_d14c_deep_read <- function(sp) {
 #
 #     sigma_eff(h)^2 = sigma_obs^2 + (shipped target - like-for-like target(h))^2
 #
-# with dnorm's normalisation RETAINED, so inflating is CHARGED FOR rather than
+# with dnorm's normalization RETAINED, so inflating is CHARGED FOR rather than
 # free and the gain is bounded by the density peak. sigma_rep is MEASURED off
 # GLODAP by data-raw/build_glodap_sigma_rep.R, never tuned.
 #
@@ -1518,7 +1518,7 @@ LIK_USE_HS_SURFACE   <- TRUE
 LIK_USE_EQ_B1        <- TRUE
 # The averaging window of the model's B1 contrast, calendar years inclusive.
 # The contrast is invariant to the epoch to first order (both sides ride the
-# atmosphere) and the product states no normalisation year (CHANGELOG 09-04g
+# atmosphere) and the product states no normalization year (CHANGELOG 09-04g
 # B1c); 2000-2015 is the prereg's choice and sits inside the climatology's
 # own span. The row reads the run's monthly rows of these years (the
 # ccx_epoch_year_samples() idiom), so it needs the run to reach the LAST one.
@@ -1529,11 +1529,11 @@ LIK_EQ_B1_YEARS      <- c(2000L, 2015L)
 LIK_OCEAN_GRAD_HML_OK_RETIRED <- c(85, 120)   # m; the skip option 5 replaced
 # Alkalinity stoichiometry, for the third row (Marcus 2026-08-16b). CaCO3
 # dissolution adds 2 mol alkalinity per mol C (the charge balance of CO3^2-,
-# a definition rather than a measurement); soft-tissue remineralisation
+# a definition rather than a measurement); soft-tissue remineralization
 # releases nitrate and so REMOVES ~1 mol per mol N. The N:C is READ FROM THE
 # REGISTRY since 2026-09-12 (review C): it was a typed 16/117 described as a
 # "recollection", and it is now the CITED Anderson & Sarmiento (1994)
-# remineralisation ratio (see ALK_NC_RATIO in R/constants.R, sourced before
+# remineralization ratio (see ALK_NC_RATIO in R/constants.R, sourced before
 # this file under the alphabetical bootstrap).
 LIK_ALK_PER_CARB <- 2
 LIK_ALK_NC_RATIO <- ccx_const("ALK_NC_RATIO")   # mol N per mol C, 16/117
@@ -1725,11 +1725,11 @@ ccx_model_ocean_alk_gradient <- function(spin, pump = NULL) {
 #' layer holds 0.885 (NH) / 0.919 (SH) of its mean mass at the DIC epoch (early
 #' November), so its surface DIC read 157 umol/kg LOW and the gradient 157 too
 #' STEEP. Round 6 was FITTED against that row; its P7 "302 -> 385" was the
-#' artefact and its d13C half was the deep box compensating it
+#' artifact and its d13C half was the deep box compensating it
 #' ([[seasonal_box_observable_artefact]], diag_seasonal_box_observable_artefact.R).
 #'
-#' THE READ NOW: the concentration at each of LIK_ANNUAL_MEAN_N month-centres of
-#' the year CENTRED on the epoch, each over the box's mass at that instant, then
+#' THE READ NOW: the concentration at each of LIK_ANNUAL_MEAN_N month-centers of
+#' the year CENTERED on the epoch, each over the box's mass at that instant, then
 #' the plain mean -- like-for-like with a gridded climatology (GLODAP's product
 #' is an annual field, not a November one). d13C is the mean of the instant
 #' ratios for the same reason. For a time-constant box the mass factor is 1 and
@@ -1752,7 +1752,7 @@ ccx_epoch_year_samples <- function(epoch)
 .ccx_run_covers_epoch <- function(out, epoch)
   max(out$t) >= max(ccx_epoch_year_samples(max(unlist(epoch)))) - 1e-9
 
-#' The mass (kg) of a hemisphere's box AT time t, honouring a seasonal box.
+#' The mass (kg) of a hemisphere's box AT time t, honoring a seasonal box.
 #' `which` = "ml" (the low-latitude mixed layer: seasonal when aux$mld_coef is
 #' present), "deep" (the bottom box, constant), "hs" (the cold box: seasonal
 #' when aux$mld_hs_coef is present). Reads ONLY what ccx_prepare() built, so it
@@ -1776,7 +1776,7 @@ ccx_box_mass_at <- function(aux, grid, which, h, t) {
 }
 
 #' Annual-mean concentration (umol/kg) and d13C (permil) of a box over the
-#' year centred on `epoch`. PER HEMISPHERE FIRST: each hemisphere's
+#' year centered on `epoch`. PER HEMISPHERE FIRST: each hemisphere's
 #' concentration at each sample is its carbon over ITS mass then, and the
 #' annual mean is taken there -- a gridded climatology is a time mean AT A
 #' PLACE, not a mass-weighted mean across places that are in antiphase (the
@@ -1788,13 +1788,13 @@ ccx_box_mass_at <- function(aux, grid, which, h, t) {
 #' to the annual-mean state.
 ccx_box_annual_conc <- function(out, aux, grid, which, epoch, hemis = HEMIS) {
   # ⭐ RULED 2026-09-12 (Marcus): READ THE MODEL'S OWN ROWS. For each of the 12
-  # month-centres of the epoch year take the NEAREST written row and the box
+  # month-centers of the epoch year take the NEAREST written row and the box
   # mass AT THAT ROW'S OWN TIME -- carbon over mass at the same instant. Until
   # then carbon was linearly INTERPOLATED to off-grid instants while the mass
   # was evaluated exactly there; with the mixed layer's f spanning 0.6-1.7 the
   # two were not like-for-like (1.39 umol/kg = 0.05 sigma_eff on the DIC row
   # at hilda31s). On the objective's monthly grid the rows ARE the month
-  # centres; on a finer grid (the synthetic tests) the nearest row is within
+  # centers; on a finer grid (the synthetic tests) the nearest row is within
   # half a step.
   tt <- ccx_epoch_year_samples(epoch)
   j  <- vapply(tt, function(t1) which.min(abs(out$t - t1)), integer(1))
@@ -2030,7 +2030,7 @@ ccx_eq_b1_target <- local({
 #' Weights are the boxes' AREAS -- the observation is an area-weighted mean of
 #' a gridded field -- constant in time, so the per-year means are taken per
 #' box first and combined once. The per-hemisphere halves ride along as
-#' `by_hemi` for the PE9 check (NOT scored: the modelled halves are equal by
+#' `by_hemi` for the PE9 check (NOT scored: the modeled halves are equal by
 #' construction, one velocity and near-equal areas).
 ccx_model_eq_b1 <- function(out, aux, years = LIK_EQ_B1_YEARS) {
   eq_cols <- paste0("eq_pco2_", HEMIS)
@@ -2041,7 +2041,7 @@ ccx_model_eq_b1 <- function(out, aux, years = LIK_EQ_B1_YEARS) {
             years[1], "-", years[2], "; the eq_b1 row is ABSENT for this run.")
     return(NULL)
   }
-  # the sampled rows: each year's 12 month-centres, nearest written row
+  # the sampled rows: each year's 12 month-centers, nearest written row
   j <- unlist(lapply(yrs, function(yr)
     vapply(ccx_epoch_year_samples(yr), function(t1) which.min(abs(out$t - t1)), integer(1))))
   # per-box window means and areas, in CCX_SURFACE_BOXES x HEMIS order; a box
@@ -2088,7 +2088,7 @@ ccx_zone_weights <- function(nh_bounds = LIK_ZONE_BOUNDS_NH,
 #' Per-calendar-year level, trend and first seasonal harmonic
 #'
 #' The single estimator applied to BOTH observations and model output (design
-#' note 1b), so no deseasonalisation method has to be trusted on one side only.
+#' note 1b), so no deseasonalization method has to be trusted on one side only.
 #'
 #' Per year, ordinary least squares of
 #'     v ~ 1 + (t - midyear) + sin(2*pi*phi) + cos(2*pi*phi),   phi = t mod 1
@@ -2324,7 +2324,7 @@ ccx_prepare_obs <- function() {
 #' rho -> 1 the innovation becomes (r_t - r_{t-1})/sd, so the fitted sd collapses
 #' to the RMS of the residual INCREMENTS rather than of the residual LEVEL. For a
 #' smooth model against a smooth observation series that is tiny -- sigma_co2 fell
-#' to 0.074 ppm -- and the level goes unpenalised. See the table in design note 1.
+#' to 0.074 ppm -- and the level goes unpenalized. See the table in design note 1.
 #'
 #' Two further defects, both fatal on their own:
 #'   * it is applied on OBSERVATION INDEX, so a 16-month SPO gap counts as one
@@ -2338,7 +2338,7 @@ ccx_ll_ar1_SUPERSEDED <- function(r, sd, rho) {
   if (n == 0) return(0)
   z <- r / sd
   if (n == 1) return(-0.5 * z^2 - sum(log(sd)))
-  # exact AR(1) likelihood for standardised residuals
+  # exact AR(1) likelihood for standardized residuals
   ll <- -0.5 * (1 - rho^2) * z[1]^2 + 0.5 * log(1 - rho^2)
   e  <- z[-1] - rho * z[-n]
   ll <- ll - 0.5 * sum(e^2)
@@ -2359,7 +2359,7 @@ ccx_ll_ar1_SUPERSEDED <- function(r, sd, rho) {
 #
 # ⚠ INSTANTS AGAINST MEANS -- UNDOCUMENTED UNTIL THE 2026-10-12 CODE REVIEW; THE
 # ESTIMATOR IS UNCHANGED. The model rows reduced here are INSTANTANEOUS states at
-# the month centres (ccx_run() records the state at F$t[i]); the station
+# the month centers (ccx_run() records the state at F$t[i]); the station
 # observations are monthly MEANS. Averaging a sinusoid over one month multiplies
 # its first harmonic by sinc(pi/12) = sin(pi/12) / (pi/12) = 0.98862, so the
 # seasonal rows compare a model amplitude ~1.1 % larger than its own monthly-mean
@@ -2369,7 +2369,7 @@ ccx_ll_ar1_SUPERSEDED <- function(r, sd, rho) {
 # co2_seasonal_SPO -0.38, d13c_seasonal_MLO -1.17, d13c_seasonal_SPO +0.24
 # log-units. The level and trend rows are unaffected to first order.
 .ccx_month_design <- local({
-  phi <- (seq_len(12) - 0.5) / 12                 # month centres within a year
+  phi <- (seq_len(12) - 0.5) / 12                 # month centers within a year
   X   <- cbind(1, phi - 0.5, sin(2 * pi * phi), cos(2 * pi * phi))
   list(X = X, P = solve(crossprod(X), t(X)))      # 4 x 12 pseudo-inverse
 })
@@ -2415,7 +2415,7 @@ ccx_model_stats <- function(out, obs) {
 #' @param out  data.frame from ccx_run_fast()$out
 #' @param obs  from ccx_prepare_obs()
 #' @param err  list(sigma_d13c, sigma_d14c, grad_off_co2, grad_off_d13c).
-#'   `sigma_co2` is RETIRED but still honoured if supplied -- see the CO2 level
+#'   `sigma_co2` is RETIRED but still honored if supplied -- see the CO2 level
 #'   block for the two branches. The gradient offsets are NOT optional in the
 #'   same sense: their absence SKIPS both gradient streams (LIK_GRAD_* block),
 #'   so check `by_stream` for ABSENT streams before quoting a total.
@@ -2496,7 +2496,7 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   # before today passes it, and their numbers have to keep reproducing.
   #   err$sigma_co2 ABSENT  -> sd = LIK_CO2_REP_ERR          (the objective)
   #   err$sigma_co2 PRESENT -> sd = sqrt(s^2 + REP^2)        (legacy parity)
-  # The absence is the NEW behaviour rather than the old, which inverts this
+  # The absence is the NEW behavior rather than the old, which inverts this
   # repo's usual absence-skips-a-stream idiom. That is deliberate: a caller
   # that has been updated says so by dropping the field, and one that has not
   # keeps its old weight instead of being silently re-weighted. Nothing here
@@ -2570,7 +2570,7 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   # and 1.76 ppm (16 %) of the 11.20 ppm era swing was this choice, not the
   # model. NOTE: THIS CHANGES THE OBJECTIVE -- nothing fitted before 2026-08-22
   # is comparable across it.
-  # ---- OPTIONAL: a localised DISCREPANCY window on the ice term ------
+  # ---- OPTIONAL: a localized DISCREPANCY window on the ice term ------
   # ADDED 2026-08-23 (Marcus): "recognizing that we can't solve the mid-century
   # pause, is there an artificial correction for just that period that would let
   # the rest of the model solve better?"
@@ -2771,7 +2771,7 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   # months are recovered from the obs bundle, so the data build is untouched.
   # ABSENCE CONTRACT: a bundle without the monthly frame, or an `out` that is
   # not on the monthly grid (annual-cadence test fixtures), keeps the full-year
-  # mean -- the pre-2026-09-12 behaviour, so older fixtures reproduce.
+  # mean -- the pre-2026-09-12 behavior, so older fixtures reproduce.
   for (hh in c("NH", "SH")) {
     o <- if (hh == "NH") obs$d14_nh_ann else obs$d14_sh_ann
     m <- ms$d14[[hh]]
@@ -2857,7 +2857,7 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   # ---- deep-ocean D14C, GLODAPv2 (see LIK_D14C_DEEP_NEFF) -------------
   # One scalar, one Gaussian. The only term in the objective that prices ocean
   # VENTILATION; everything else touching kz does so through d13C.
-  # ---- THE PROFILE ROWS (#9 MVN / #10 generalised-normal) -------------
+  # ---- THE PROFILE ROWS (#9 MVN / #10 generalized-normal) -------------
   # When a profile form is ON and the deep AND both slabs are present, the
   # three independent level rows below are REPLACED by ccx_profile_rows_at()'s
   # rows on the same three numbers. The form CONTAINS the deep and mid rows,
@@ -2985,13 +2985,13 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   #     is beta ~ 0.39 and it resists rising beta. Nothing caught it for months
   #     because the wrong sign pushed the same way as the CO2 streams.
   #     Same trap as the one fixed in the diagnostics at cc3abd5, but inside the
-  #     objective the MCMC optimises.
+  #     objective the MCMC optimizes.
   #     The gross sink must be reconstructed with the MODEL'S OWN land-use flux,
   #     which is luc_scale times GCB's -- hence the `luc` argument. Its NULL
   #     default is GCB's own column, bit-identical to the forcing at
   #     luc_scale = 1 (verified 1959-2024, max |diff| = 0), so every existing
   #     caller stays correct without knowing about the argument.
-  #     `gcb_ocean_sink` has no E_LUC analogue and was never affected.
+  #     `gcb_ocean_sink` has no E_LUC analog and was never affected.
   #
   # (b) YEAR ALIGNMENT. The previous code diffed ANNUAL MEANS of the stock,
   #     which is the flux over [mid-year y-1, mid-year y] -- half a year off

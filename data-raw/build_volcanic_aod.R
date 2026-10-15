@@ -22,7 +22,7 @@
 #      declared extrapolation, not a gap-fill.
 #
 # AREA WEIGHTING is exact: bands are weighted by sin(lat_hi) - sin(lat_lo) from
-# `lat_bnds`, not by cos(centre). Hemispheric means use the bands each side of
+# `lat_bnds`, not by cos(center). Hemispheric means use the bands each side of
 # the equator; the grid is symmetric so no band straddles it (GATE 2).
 #
 # Run:  Rscript data-raw/build_volcanic_aod.R

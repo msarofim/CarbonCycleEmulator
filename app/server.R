@@ -116,7 +116,7 @@ function(input, output, session) {
   output$w_land  <- renderText(fmt_gtc(latest()$land))
   output$w_ocean <- renderText(fmt_gtc(latest()$ocean))
 
-  # Marcus 2026-09-22 (W1): report each box, do not editorialise. The closure
+  # Marcus 2026-09-22 (W1): report each box, do not editorialize. The closure
   # is stated because this panel's whole claim is that the three add up --
   # and until 09-22 they did not (see partition_table()).
   output$w_takeaway <- renderText({
@@ -144,10 +144,10 @@ function(input, output, session) {
   # /!\ REWRITTEN 2026-09-24 (p), and both changes are CORRECTIONS OF FACT, not
   # of style:
   #
-  #   1. It used to credit the sink's growth to "CO2 fertilisation AND FOREST
+  #   1. It used to credit the sink's growth to "CO2 fertilization AND FOREST
   #      REGROWTH on former farmland". In GCB's accounting -- and in this model
   #      -- regrowth is netted INSIDE the land-use input, not inside the natural
-  #      sink, and CO2 fertilisation is this model's ONLY long-term land-uptake
+  #      sink, and CO2 fertilization is this model's ONLY long-term land-uptake
   #      term ([[ccx_land_sink_single_term]]) -- ⚠ true then, NOT since hilda33d
   #      (2026-10-01), which adds N-deposition retention; the "single cause"
   #      sentence below was deleted for that reason. The old sentence attributed the
@@ -184,7 +184,7 @@ function(input, output, session) {
     # clause rather than printing NA. "Carbon fertilization" is written in the app's own term.
     lead <- paste("Land-use change (agriculture, deforestation, and so forth) has been a net",
                   "source to the atmosphere for the whole record. However, over time the",
-                  "natural land sink has been growing due to CO₂ fertilisation")
+                  "natural land sink has been growing due to CO₂ fertilization")
     see <- sprintf("see “%s” below", APP_IMBALANCE_HEADING)
     when <- if (!is.na(obs) && !is.na(mod))
       sprintf(paste(", and so the total land contribution switched from a net source to a",
@@ -321,7 +321,7 @@ function(input, output, session) {
   # perturbations"): a "Years shown" window that ends before the split is observed
   # (e.g. 1750-1751) left the chart no rows and it crashed ("arguments imply differing
   # number of rows: 0, 1"). validate() rather than stop(): its message survives the
-  # error sanitising a deployed app applies.
+  # error sanitizing a deployed app applies.
   output$w_regrowth_plot <- renderPlotFit("w_regrowth_plot", {
     validate(need(input$w_years[2] >= APP_LUC_SPLIT$obs_window[1],
                   sprintf(paste("The deforestation and regrowth estimates begin in %d.",
@@ -394,7 +394,7 @@ function(input, output, session) {
   # at an older mode): ENSO -23 %, temperature -22 %,
   # volcanic light -8 %, but ALL THREE TOGETHER only -43 %, not -53 %. So every
   # number printed below is COMPUTED FROM THE COMBINED RUN, the blurbs are shown
-  # labelled and separate so they cannot read as a running total, and with more
+  # labeled and separate so they cannot read as a running total, and with more
   # than one ticked the scatter note says in words that they do not add.
   #
   # ⚠ ZERO SELECTED IS A LEGITIMATE STATE, not an error: it is the full model
@@ -418,8 +418,8 @@ function(input, output, session) {
     plot_counterfactual(APP_HIST$out, cf_alt(), input$c_years,
                         app_mech_key(cf_off())))
 
-  # One labelled block per ticked switch (Marcus's own fallback for the
-  # multi-select: "print more than 1 text box below"). Labelled and separated
+  # One labeled block per ticked switch (Marcus's own fallback for the
+  # multi-select: "print more than 1 text box below"). Labeled and separated
   # rather than concatenated -- see the non-additivity warning above.
   output$c_blurb <- renderUI({
     off <- cf_off()
@@ -442,7 +442,7 @@ function(input, output, session) {
   # CCX_MECHANISMS here: ccx_apply_mechanisms() appends one per switch in the
   # order it was given them, so they line up with cf_off() BY CONSTRUCTION. The
   # length check is there because that alignment is an assumption about another
-  # file, and an unlabelled list is better than a mislabelled one.
+  # file, and an unlabeled list is better than a mislabeled one.
   output$c_caveat <- renderUI({
     off <- cf_off(); r <- cf_run()
     if (is.null(r) || !length(r$caveats)) return(NULL)
@@ -796,7 +796,7 @@ function(input, output, session) {
       pr <- pulse_runs()
       # F4: the same pair of runs, differenced two ways. Carbon is a SHARE of
       # the pulse; temperature is degrees -- so they cannot share an axis, and
-      # the radio picks the panel rather than relabelling one.
+      # the radio picks the panel rather than relabeling one.
       # 2026-10-15 review: the temperature view now draws FaIR too (its mean; the grid has no band for it), as the
       # FaIR note and APP_PULSE_SHAPE_NOTE already said it did -- the RUN's settings, exactly as the CO₂ view
       if (identical(input$f_yvar, "gmst"))
@@ -867,7 +867,7 @@ function(input, output, session) {
         # fraction drains away -- but that is a claim about THIS model's
         # climate module at THIS pulse size, and a sentence stating it
         # unconditionally would go on stating it after a refit moved it. Both
-        # decays are normalised to their OWN value at y1, so the comparison is
+        # decays are normalized to their OWN value at y1, so the comparison is
         # of shapes and the pulse size cancels out of it.
         keep_T <- if (dT(y1) > 0) dT(y2) / dT(y1) else NA_real_
         keep_C <- f(y2) / f(y1)
@@ -1026,7 +1026,7 @@ function(input, output, session) {
           "identical starting conditions — and the difference between the two ",
           "is the pulse's effect.")
     } else NULL
-    # F5 (2026-09-24): the runs now reach 2150, which puts the stylised "+5 %
+    # F5 (2026-09-24): the runs now reach 2150, which puts the stylized "+5 %
     # per year" case 26x outside the range the CO2->forcing curve was fitted
     # over. ccx_run_coupled() has always warned about this to the console; on
     # a tab a student can drive there with one slider, the console is not
@@ -1065,7 +1065,7 @@ function(input, output, session) {
           # printed on the chart and asserted verbatim by test-constraint-map-panel.R.
           local({
             tot <- rowSums(APP_CMAP$MC)
-            sprintf(paste(" Read the row totals, not just the colours: the strongest row",
+            sprintf(paste(" Read the row totals, not just the colors: the strongest row",
                           "here is worth %s log-units and the weakest %s, so a bright",
                           "cell in a weak row is a large share of very little."),
                     fmt_cmap_total(max(tot)), fmt_cmap_total(min(tot)))
@@ -1209,12 +1209,12 @@ function(input, output, session) {
                 sh("CO₂ level", "Land uptake"), sh("Measured land & ocean sinks", "Land uptake")),
         # Marcus 2026-10-02: name the two numbers; the descriptions are params_meta.R's own
         sprintf(paste(" But the two numbers that set it (the maximum boost CO₂",
-                      "fertilisation can give, beta_max, and the CO₂ level needed for",
+                      "fertilization can give, beta_max, and the CO₂ level needed for",
                       "half that boost, fert_k) are only constrained as a combination: on",
                       "their own each is about %.0fx tighter than the fit leaves the",
                       "pair jointly."),
                 max(APP_CMAP$sd_ratio[c("beta_max", "fert_k")]))),
-        # 2026-10-01 (Marcus, review 10-01c A3): " CO2 fertilisation is this
+        # 2026-10-01 (Marcus, review 10-01c A3): " CO2 fertilization is this
         # model's only long-term land-uptake term, so the saturation shape --
         # the part that decides the future -- is exactly the part the
         # present-day record does not separate." DELETED. Its premise is false
@@ -1232,7 +1232,7 @@ function(input, output, session) {
   })
 
   # ---- 6. Under the hood ---------------------------------------------
-  # The box diagram. ARROWS CARRY THEIR FLUXES (2026-08-13): unlabelled arrows
+  # The box diagram. ARROWS CARRY THEIR FLUXES (2026-08-13): unlabeled arrows
   # were the single biggest pedagogical gap in the app -- the entire
   # "CO2 only lasts 5 years" lesson is that photosynthesis and air-sea exchange
   # are ~70 and ~95 GtC/yr while emissions are ~11 and the net imbalance ~5, and
@@ -1297,7 +1297,7 @@ function(input, output, session) {
   # here would be a second claim about the model that nothing checks.
   # TWO TABLES, BECAUSE THEY ARE TWO LISTS (Marcus 2026-09-22, review N12).
   # The card's prose named the STAND-INS and this table listed the PINS, and
-  # the tab presented them as one. The stand-in list is a judgement (RV_SHIMS,
+  # the tab presented them as one. The stand-in list is a judgment (RV_SHIMS,
   # sourced to the 09-16 whole-model review and gated); the pin list is read
   # off the mode file. Which stand-ins are currently HELD is computed.
   output$rv_standins <- renderTable({

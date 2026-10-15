@@ -42,7 +42,7 @@ QC_BASE     <- c("sst_seas_amp_NH", "sst_seas_amp_SH", "seas_T_amp_NH", "seas_la
 QC_LAND_PAR <- "seas_T_amp_SH"      # free in INCUMBENT/OCEAN, PINNED in LAND/JOINT
 QC_BR_LO <- ccx_const("SEAS_T_AMP_SH_OBS_LO")   # 3.5915 K, all SH land
 QC_BR_HI <- ccx_const("SEAS_T_AMP_SH_OBS_HI")   # 7.1012 K, SH land >30S
-QC_MID   <- sqrt(QC_BR_LO * QC_BR_HI)           # 5.0502, the prior's centre (27n's TA_INIT)
+QC_MID   <- sqrt(QC_BR_LO * QC_BR_HI)           # 5.0502, the prior's center (27n's TA_INIT)
 QC_PINS  <- c(mid = QC_MID, hi = QC_BR_HI)      # the two ends the prereg requires
 QC_ENT_BOUNDS <- c(0.5, 60)         # BOUNDS, not a prior -- 27j's, unchanged
 QC_ENT_INIT   <- 10                 # 27j's, unchanged

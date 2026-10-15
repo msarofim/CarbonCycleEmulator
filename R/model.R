@@ -81,7 +81,7 @@ CCX_OCEAN_BOX_COLS <- unlist(lapply(HEMIS, function(h)
 # C++ `pco2_rec` slot order cannot disagree.
 CCX_SURFACE_BOXES <- c("ml", "hs", "eq", "tr")
 
-# 1 Sv = 1e6 m3/s. The conveyor is parameterised by VOLUME flux because the two
+# 1 Sv = 1e6 m3/s. The conveyor is parameterized by VOLUME flux because the two
 # hemispheres have different ocean areas -- see ccx_default_params()$q_conv.
 CCX_SV_TO_M3YR <- 1e6 * 365.25 * 86400
 
@@ -218,10 +218,10 @@ CCX_F_LUC_WOOD_DEFAULT <- 0
 #'
 #'   NPP(t)  = npp * n(t),  n = insolation at an effective boreal latitude,
 #'             lagged by a PHENOLOGY parameter (leaf area develops over weeks),
-#'             normalised to unit annual mean;
+#'             normalized to unit annual mean;
 #'   R_h(t)  = the existing q10 soil respiration, modulated by
 #'             q10^(T_seas/10) with T_seas a climatological seasonal land
-#'             temperature of FREE amplitude, renormalised to unit annual mean
+#'             temperature of FREE amplitude, renormalized to unit annual mean
 #'             so the annual carbon budget is untouched (Jensen term removed).
 #'
 #' The sawtooth then EMERGES from Q10's exponential nonlinearity and the
@@ -231,13 +231,13 @@ CCX_F_LUC_WOOD_DEFAULT <- 0
 #' cycle to RMS 0.357 ppm (fitted sine: 0.608) with amp2/amp1 = 0.21 vs the
 #' observed 0.24 -- EMERGED, not fitted. The constants below are that
 #' diagnostic's interior optimum (extended-grid re-run; nothing sits at a
-#' grid edge). The light threshold optimised to ZERO -- at 75 N the polar
+#' grid edge). The light threshold optimized to ZERO -- at 75 N the polar
 #' night rectifies the growing season by itself -- so no threshold constant
 #' exists.
 #'
 #' WHAT THIS BUYS BEYOND SHAPE. The NPP-side amplitude is npp * (n - 1): no
 #' longer a fitted number but a PREDICTION carrying the model's own NPP, so
-#' fertilisation GROWS the cycle and land clearing SHRINKS it (the old
+#' fertilization GROWS the cycle and land clearing SHRINKS it (the old
 #' npp/npp0 scaling, inherited); and q10 gains a cross-timescale duty. The
 #' contamination risk of that duty is limited by construction: seas_T_amp_*
 #' absorbs the LINEAR seasonal response (at small amplitude only the product
@@ -567,7 +567,7 @@ CCX_ENSO_PARAMS <- c("gamma_enso_land_NH", "gamma_enso_land_SH",
 #'   absent, legacy `gamma_enso` present -> LAND takes the scalar times the
 #'                      retired CCX_ENSO_SHARE_LEGACY, OCEAN takes 0. That is
 #'                      the pre-2026-09-01 model bit for bit: the
-#'                      behaviour-preserving default the `gamma_diff` adoption
+#'                      behavior-preserving default the `gamma_diff` adoption
 #'                      did not have and should have.
 #'   neither         -> CCX_GAMMA_ENSO_DEFAULT throughout
 ccx_gamma_enso <- function(p) {
@@ -875,7 +875,7 @@ ccx_hs_sst_frac <- function(p) {
   as.numeric(v)
 }
 
-#' Unit-mean normalisers for the two driver shapes, on a 720-POINT midpoint
+#' Unit-mean normalizers for the two driver shapes, on a 720-POINT midpoint
 #' grid. BOTH cores must use exactly this definition (the C++ core precomputes
 #' it in unpack_par) or roundoff parity breaks.
 #'
@@ -884,7 +884,7 @@ ccx_hs_sst_frac <- function(p) {
 #' the polar-night edges of the 75 N effective latitude, so a 12-point norm
 #' disagrees with the integrator's effective annual mean by enough to leak
 #' +0.22 ppm over 275 zero-emission years -- pure quadrature, on top of the
-#' +0.25 ppm the fertilisation rectifier genuinely produces. At 720 points the
+#' +0.25 ppm the fertilization rectifier genuinely produces. At 720 points the
 #' norm is the continuous mean to well beyond the integrator's own accuracy,
 #' and only the physical rectifier remains.
 ccx_seas_norms <- function(p) {
@@ -921,9 +921,9 @@ ccx_seas_norms_for <- function(p, aux) {
 }
 
 # ---------------------------------------------------------------------
-# CO2 fertilisation: the functional FORM
+# CO2 fertilization: the functional FORM
 # ---------------------------------------------------------------------
-#' Fertilisation form codes. Structural, like `revelle_frozen` and the conveyor
+#' Fertilization form codes. Structural, like `revelle_frozen` and the conveyor
 #' geometry: they select a mechanism, they do not tune one.
 CCX_FERT_LOG <- 0L    # NPP = NPP0 (1 + beta ln(chi/chi0))       -- the incumbent
 CCX_FERT_MM  <- 1L    # NPP = NPP0 (1 + beta_max dchi/(K + dchi)) -- saturating
@@ -954,7 +954,7 @@ CCX_FERT_MM  <- 1L    # NPP = NPP0 (1 + beta_max dchi/(K + dchi)) -- saturating
 #' THE PARAMETERS ARE BOTH READABLE, which matters for a teaching model:
 #'   beta_max  the fractional NPP enhancement at INFINITE CO2 (asymptote - 1)
 #'   fert_k    the CO2 increment ABOVE PREINDUSTRIAL, in ppm, at which HALF of
-#'             beta_max is realised
+#'             beta_max is realized
 #'
 #' NOT A LIMIT OF THE LOG FORM. As fert_k -> Inf with beta_max/fert_k fixed, MM
 #' goes LINEAR, not logarithmic. So `beta` does not map onto (beta_max, fert_k)
@@ -990,7 +990,7 @@ CCX_FERT_MM  <- 1L    # NPP = NPP0 (1 + beta_max dchi/(K + dchi)) -- saturating
 #' WHAT SETTLES THAT; these are a default, not a calibration.
 CCX_FERT_FORM_DEFAULT <- CCX_FERT_MM
 
-# VOLCANIC DIFFUSE-LIGHT FERTILISATION, adopted 2026-08-29 (Marcus).
+# VOLCANIC DIFFUSE-LIGHT FERTILIZATION, adopted 2026-08-29 (Marcus).
 # Fractional NPP enhancement per unit stratospheric AOD. Named here and used by
 # BOTH ccx_default_params() and ccx_cpp_par(), the same way CCX_FERT_FORM_DEFAULT
 # is, so R and C++ cannot disagree about what a parameter list without the field
@@ -1014,12 +1014,12 @@ CCX_GAMMA_DIFF_DEFAULT <- 0.25
 # kg C/kg N is a STEADY ratio of sink RATE to deposition RATE -- N retained in wood
 # and soil organic matter binds carbon for as long as deposition continues. The
 # multiplier made the sink track d(ndep)/dt instead (pools relax to a new
-# equilibrium) and gave 0.37-0.70 kg C/kg N at its prior centre, below the
+# equilibrium) and gave 0.37-0.70 kg C/kg N at its prior center, below the
 # literature's 0.6-8.7 (calibration/diag_ndep_form_efficiency.R).
 # THE CARBON IS PHOTOSYNTHETIC: it leaves the atmosphere at alpha_photo and the
 # atmosphere's 14C, like NPP, and the flux trace counts it in `gpp`.
 # INTO THE PASSIVE POOL (soil_slow): the long-lived store where retained N and its
-# carbon sit; one pool, a modelling choice (a wood/soil split would need a cited
+# carbon sit; one pool, a modeling choice (a wood/soil split would need a cited
 # 15N-retention partition). CLAMPED AT ZERO DEPOSITION: the flux is one-way, and the
 # strongest-mitigation markers dip a hair below their 1750 emissions by 2300.
 # 0 = OFF and is the default; both add_flux()es skip a zero flux, so every
@@ -1035,17 +1035,17 @@ CCX_NDEP_RET_DEFAULT <- 0
 # an ABSENT field to this constant. Prior N(0, NPP_TSENS_PRIOR_SD) -- the literature
 # leans NEGATIVE (R/constants.R); a POSITIVE value raises post-2100 uptake.
 # The seasonal NEP rides on npp, so its amplitude scales with this factor, as it
-# does with fertilisation; there is no separate seasonal-temperature path.
+# does with fertilization; there is no separate seasonal-temperature path.
 CCX_NPP_TSENS_DEFAULT <- 0
 
-#' The fertilisation multiplier on NPP0, as a function of atmospheric CO2.
+#' The fertilization multiplier on NPP0, as a function of atmospheric CO2.
 #'
 #' Factored out of ccx_deriv() so that diagnostics, the app and the design-target
 #' arithmetic all read the SAME function the model integrates, rather than a
 #' re-typed copy of it. `src/ccx_core.cpp` carries the only other copy and
 #' test-parity.R gates the two against each other.
 #'
-#' @param chi atmospheric CO2, ppm (vectorised)
+#' @param chi atmospheric CO2, ppm (vectorized)
 #' @param p   parameter list; uses `fert_form` and then either `beta` or
 #'   (`beta_max`, `fert_k`)
 #' @param chi0 preindustrial CO2, ppm -- `aux$chi0` inside the model
@@ -1080,7 +1080,7 @@ ccx_fert_factor <- function(chi, p, chi0 = ccx_const("CO2_PI_PPM")) {
 
 #' Pro-rata shares of the four land pools, by preindustrial equilibrium stock.
 #'
-#' These are exactly the terms `aux$land0` sums, normalised -- so a debit split
+#' These are exactly the terms `aux$land0` sums, normalized -- so a debit split
 #' on them removes carbon in the same proportion as scaling npp0 by (1 - c)
 #' lowers the equilibrium. Derived from the parameters rather than stored, so a
 #' land-structure change cannot leave a stale weight vector behind.
@@ -1179,7 +1179,7 @@ ccx_inert_idx <- function(aux) {
 
 #' Set the inert boxes' 13C to their hemisphere's PASSIVE-pool 13C/C ratio.
 #'
-#' A MODELLING CHOICE, not a cited constant (2026-09-30): the inert pool is soil
+#' A MODELING CHOICE, not a cited constant (2026-09-30): the inert pool is soil
 #' carbon that no longer exchanges, so it carries the passive pool's isotopic
 #' composition. It enters no flux, so it moves nothing but bulk land/soil 13C
 #' readouts. No-op when the pool is off.
@@ -1293,7 +1293,7 @@ ccx_ocean_grid <- function(h_ml, total_depth = ccx_const("OCEAN_DEPTH"),
 #  (a) THE SHAPE IS MEAN-PRESERVING (the ruling). h_ml(t) is the Holte MLD
 #      climatology scaled so its annual mean is EXACTLY the fitted `h_ml`.
 #      The annual-mean entrainment effect is already inside the fitted
-#      h_ml, the pump and kz; any other normalisation double-counts it.
+#      h_ml, the pump and kz; any other normalization double-counts it.
 #  (b) THE INTERIOR GRID DOES NOT MOVE. ccx_ocean_grid() derives EVERY
 #      interior thickness from h_ml, so feeding it a time-varying h_ml
 #      would breathe the whole column seasonally -- the 1314-1861 m NADW
@@ -1303,16 +1303,16 @@ ccx_ocean_grid <- function(h_ml, total_depth = ccx_const("OCEAN_DEPTH"),
 #      dz_mid[1] is INVARIANT. kz_int stays at its annual-mean values.
 # ---------------------------------------------------------------------
 
-#' Discrete Fourier coefficients of a 12-month climatology, normalised to mean 1
+#' Discrete Fourier coefficients of a 12-month climatology, normalized to mean 1
 #'
 #' A full 6-harmonic series on 12 monthly values, NOT a 1-2 harmonic fit: the
 #' MLD cycle is markedly asymmetric (fast spring restratification, slow autumn
 #' deepening) and we have the real data, so we interpolate it rather than
-#' approximate it. Reconstruction is exact at the month centres to ~1e-15 and
+#' approximate it. Reconstruction is exact at the month centers to ~1e-15 and
 #' the CONTINUOUS annual mean is exactly 1, so the mean-preserving ruling holds
 #' between the sample points and not merely on them.
 #'
-#' The months are treated as CENTRES, tau = (m - 1/2)/12. With that half-integer
+#' The months are treated as CENTERS, tau = (m - 1/2)/12. With that half-integer
 #' sampling the Nyquist term must be counted ONCE, not twice -- without the
 #' halving the reconstruction is only good to 2e-3, which would show up as a
 #' spurious sub-monthly wiggle in dh/dt rather than as an obvious error.
@@ -1320,7 +1320,7 @@ ccx_mld_fourier <- function(h_m) {
   n <- length(h_m)
   if (n != 12L) stop("ccx_mld_fourier: expected 12 monthly values, got ", n)
   f   <- h_m / mean(h_m)                 # mean EXACTLY 1 -- the ruling
-  tau <- (seq_len(n) - 0.5) / n          # month CENTRES, fractions of a year
+  tau <- (seq_len(n) - 0.5) / n          # month CENTERS, fractions of a year
   kk  <- seq_len(n %/% 2)
   a <- vapply(kk, function(k) 2 / n * sum(f * cos(2 * pi * k * tau)), numeric(1))
   b <- vapply(kk, function(k) 2 / n * sum(f * sin(2 * pi * k * tau)), numeric(1))
@@ -1328,7 +1328,7 @@ ccx_mld_fourier <- function(h_m) {
   b[length(kk)] <- b[length(kk)] / 2
   co <- list(a0 = 1, a = a, b = b, k = kk, f_month = f)
   # The CONTINUOUS extremes of the interpolant, on a fine grid (2026-09-12,
-  # review A16). The 6-harmonic interpolant through 12 month-centre samples
+  # review A16). The 6-harmonic interpolant through 12 month-center samples
   # OVERSHOOTS the samples between them by ~0.6 % (SH max 1.6876 against the
   # sampled 1.6779), so the integrated mixed layer is thinner in summer and
   # deeper in winter than `f_month` says. A guard that reads the samples reads
@@ -1385,7 +1385,7 @@ ccx_mld_shape <- local({
 #' data-raw/build_cmip6_export_seasonal_shape.py + build_export_seasonal_prior.R).
 #' MODELS, NOT OBSERVATIONS -- the 08-27 provenance class of the land NPP shape.
 #' The median of unit-mean shapes is not itself unit-mean (0.934 / 0.941);
-#' ccx_mld_fourier() renormalises, so the factor's continuous mean is exactly 1.
+#' ccx_mld_fourier() renormalizes, so the factor's continuous mean is exactly 1.
 ccx_export_hs_seas_shape <- local({
   cache <- NULL
   function() {
@@ -1542,7 +1542,7 @@ ccx_seas_ml_guard <- function(grid) {
 #' here; everything structural lives in constants.R.
 ccx_default_params <- function() {
   list(
-    # ---- CO2 fertilisation --------------------------------------------
+    # ---- CO2 fertilization --------------------------------------------
     # `beta` IS NO LONGER LIVE AT THE DEFAULT. fert_form flipped to CCX_FERT_MM
     # on 2026-08-14 (Marcus), so the parameters that act are beta_max and
     # fert_k below, and this whole block is the history of the parameter they
@@ -1557,7 +1557,7 @@ ccx_default_params <- function() {
     # ratio chi/chi0. See the note above CCX_FERT_FORM_DEFAULT.
     #
     # CO2 fertilization, NPP = NPP0 (1 + beta ln(chi/chi0)).
-    # RE-CENTRED TWICE ON 2026-08-13, and the second move is the one that
+    # RE-CENTERED TWICE ON 2026-08-13, and the second move is the one that
     # stands. 0.38 was set on 2026-08-12 as the 1-D log-posterior optimum of the
     # model that PRECEDED 404d66d, in which land-use emissions had an airborne
     # fraction of 0.002 -- i.e. against the bug. On the converted-land model
@@ -1599,7 +1599,7 @@ ccx_default_params <- function() {
     # beta is calibrated; the mode-find is what actually sets it. See
     # R/calibrate.R.
     beta      = 0.75,
-    # ---- the LIVE fertilisation parameters (2026-08-14, review item 7) -
+    # ---- the LIVE fertilization parameters (2026-08-14, review item 7) -
     # fert_form = CCX_FERT_MM, so these two act and `beta` above does not;
     # test-fertilisation.R gates that in both directions, because a parameter
     # that quietly becomes live (or quietly stops being live) is the failure
@@ -1652,7 +1652,7 @@ ccx_default_params <- function() {
     # outside the permafrost region, permafrost 1200 PgC) and the soil-14C mass
     # check in that note (~1200-1800 GtC). The record alone is near-indifferent
     # between 1.5k and 3-4.5k passive GtC (CHANGELOG 2026-09-29 n). The scan surface is FLAT (0.60/30/0.04 and
-    # 0.70/40/0.04 both sit near 6 %), so these are a defensible centre and not
+    # 0.70/40/0.04 both sit near 6 %), so these are a defensible center and not
     # a knife-edge optimum -- do not treat them as fitted values.
     npp_leaf_frac = 0.60, # share of NPP allocated to leaves and fine roots;
                           # the rest goes to wood
@@ -1696,7 +1696,7 @@ ccx_default_params <- function() {
     # across the four pools (SHIPPED).
     f_luc_wood = CCX_F_LUC_WOOD_DEFAULT,
     k_w       = 1500,     # m/yr, gas transfer velocity
-    # ⚠ (code review 2026-10-12) does NOT track the cited prior centre, 1446
+    # ⚠ (code review 2026-10-12) does NOT track the cited prior center, 1446
     # (R/constants.R KW_PRIOR_CENTRE = CCX_PARAM_TABLE$k_w's init). k_w is FITTED
     # on every registered mode (hilda29e: 1870; the canonical hilda31w: 1835), so
     # this default reaches only uncalibrated runs. Whether to move it is the author's call
@@ -1755,14 +1755,14 @@ ccx_default_params <- function() {
                           # ⚠ NOT comparable to the 2026-09-04k shim's `u`,
                           # which acted over the WHOLE column: that convention
                           # divides this by 1/hs_frac (38 x 0.16 = 6.08).
-    tau_q     = 538,      # yr. HD <-> interior exchange, as HILDA parameterises
+    tau_q     = 538,      # yr. HD <-> interior exchange, as HILDA parameterizes
                           # it: an exchange volume flux of V_interior / tau_q,
                           # distributed over the interior layers IN PROPORTION
                           # TO THEIR VOLUME -- their q is "assumed independent
                           # of depth". Table 1: q^-1 = 538 +/- 510 yr.
     # THE HS AIR-SEA EXCHANGE AREA FACTOR (2026-09-06, Marcus). Multiplies the
     # cold box's gas-exchange area: 1 = HS exchanges on exactly the low-latitude
-    # law over its whole area (HILDA's assumption -- winter ice cover cancelling
+    # law over its whole area (HILDA's assumption -- winter ice cover canceling
     # the stronger high-latitude winds -- inherited as THEIRS, not measured).
     # Every residual of the 09-06 arc pointed at this one quantity: at ent26's
     # k_w the HS endmember is -86 permil against HILDA's -120, which puts a
@@ -1782,17 +1782,17 @@ ccx_default_params <- function() {
     # ⭐ WHY IT IS A KNOB AT ALL. HD sits at -109 permil and the interior
     # crosses -109 at ~1000 m, so a SINGLE-ENDMEMBER bulk exchange matches its
     # endmember at exactly ONE depth and fights the profile on both sides of
-    # it -- ageing above the crossover, YOUNGENING below. Our whole scored
+    # it -- aging above the crossover, YOUNGENING below. Our whole scored
     # band lies below, and is already too young against GLODAP. That is
     # arithmetic, not a property of the fit.
     #
-    # ⚠ `tau_q` KEEPS ITS PER-LAYER MEANING, IT IS NOT RENORMALISED: the
+    # ⚠ `tau_q` KEEPS ITS PER-LAYER MEANING, IT IS NOT RENORMALIZED: the
     # layer -> HD limb stays exactly y_k / tau_q whatever the set is, so a
     # smaller set means LESS total exchange, not the same exchange packed into
-    # fewer layers. Deliberate -- renormalising would smuggle a rate change in
+    # fewer layers. Deliberate -- renormalizing would smuggle a rate change in
     # with a geometry change and neither could then be read.
     #
-    # ⛔ A VALUE > 1 IS A DEPARTURE FROM HILDA, authorised by Marcus 2026-09-05
+    # ⛔ A VALUE > 1 IS A DEPARTURE FROM HILDA, authorized by Marcus 2026-09-05
     # ("we don't need to stay true to HILDA, but we should stay true to the
     # conceptual way that the simplified model's ocean works"). Any result on
     # such an arm must carry that label -- it is NOT "HILDA's model".
@@ -1957,7 +1957,7 @@ ccx_default_params <- function() {
     # diffusion operator, so it scales with `kz` and re-solves on every draw.
     #
     # THE DEFAULT IS THE OBSERVATION, NOT THE FIT. `PUMP_GRAD_OBS` = 233.109 is
-    # GLODAP's own gradient and is also this parameter's prior centre. The
+    # GLODAP's own gradient and is also this parameter's prior center. The
     # four-row objective prefers ~274.5 +/- 13.1 (1.178x) at the pre-gradient
     # mode, but that optimum is a fit at a `kz` the refit will move, so putting
     # it here would launder a fit as a structural constant. The refit is what
@@ -1985,7 +1985,7 @@ ccx_default_params <- function() {
     # "solved" = the field above: the divergence that holds the GLODAP shape
     # against the model's own diffusion, sized by `pump_grad`. "martin" = a
     # PRESCRIBED export `pump_export` (GtC/yr, the LS total, split by a_ls
-    # share) remineralised on a Martin profile F(z) = (z/h_ml)^-MARTIN_B below
+    # share) remineralized on a Martin profile F(z) = (z/h_ml)^-MARTIN_B below
     # the mixed layer, the seafloor remainder deposited in the bottom layer;
     # the gradient is then EMERGENT and `pump_grad` is IGNORED. ⚠ ORTHOGONAL to
     # `pump_mode` (the N/D export LAW), which applies to either field. The
@@ -2068,7 +2068,7 @@ ccx_default_params <- function() {
     # follows, INSTEAD of the LS sine,
     #   s_hs,h(t) = 1 + pump_hs_seas_amp x (F_h(t - pump_hs_seas_lag/12) - 1),
     # F_h = the 6-harmonic Fourier interpolant (ccx_mld_fourier(), the round-6
-    # idiom: exact at the month centres, continuous mean EXACTLY 1) of the
+    # idiom: exact at the month centers, continuous mean EXACTLY 1) of the
     # hemisphere's unit-mean ensemble-median HS shape in
     # data/obs_export_seasonal_shape_cmip6.rds, read once through
     # ccx_export_hs_seas_shape(). amp in [0, 1]: 1 = the CMIP6 shape; the
@@ -2085,7 +2085,7 @@ ccx_default_params <- function() {
     pump_hs_seas_lag = 0, # months, positive = later
     # THE HIGH-LATITUDE PUMP (2026-09-07d; pays choice C9 of
     # notes/prereg_2026-09-05_hilda_boxes.md). HS export PER UNIT AREA, in
-    # gC m-2 yr-1, remineralised in HD (one box) on the LS pump's two limbs, same
+    # gC m-2 yr-1, remineralized in HD (one box) on the LS pump's two limbs, same
     # fractionation, same carbonate share. ABSOLUTE, not relative to the LS
     # field: the first probe sized it as a fraction of the LS pump's net export
     # and that field is 73.6 GtC/yr at the round-2 winner (~4x the real ocean),
@@ -2094,7 +2094,7 @@ ccx_default_params <- function() {
     # in gC m-2 yr-1 is what the Southern-Ocean export literature reports and
     # what a prior can be put on. The end-member probe showed HS's DIC already
     # equals the observed high-latitude surface and the deep BELOW it lacks the
-    # +116-185 umol/kg / -0.87 permil of remineralised carbon this supplies.
+    # +116-185 umol/kg / -0.87 permil of remineralized carbon this supplies.
     # 0 = OFF, BIT-EXACT: aux$pump_hs is NULL and nothing is emitted (the
     # is.null(aux$pump) contract). Inert with the HS boxes off.
     pump_hs_gcm2 = 0,
@@ -2116,7 +2116,7 @@ ccx_default_params <- function() {
     # from its own reverse, which is the free decisive wiring check in
     # tests/test-conveyor.R.
     #
-    # PARAMETERISED BY VOLUME FLUX, NOT VELOCITY. The hemispheres have different
+    # PARAMETERIZED BY VOLUME FLUX, NOT VELOCITY. The hemispheres have different
     # ocean areas (1.55e14 vs 2.06e14 m2), so one velocity would not conserve
     # volume across the basin. Each box gains Q and loses Q, so a
     # uniform-concentration ocean is STILL an exact fixed point and
@@ -2146,8 +2146,8 @@ ccx_default_params <- function() {
                           # sec.2 theorem it MUST give a different atmosphere,
                           # and if it ties, the loop has been accidentally
                           # closed within a column. Never a physical setting.
-    kz        = 5000,     # m2/yr, interior eddy diffusivity. RE-CENTRED
-                          # 2026-08-12 from 4000, to the centre of the range that
+    kz        = 5000,     # m2/yr, interior eddy diffusivity. RE-CENTERED
+                          # 2026-08-12 from 4000, to the center of the range that
                           # puts deep-ocean D14C inside the observed -150 to -200
                           # (4000 sat at the -195 edge; 5000 gives -170). MUST
                           # track CCX_PARAM_TABLE$kz's init and [lo, hi] -- see
@@ -2184,7 +2184,7 @@ ccx_default_params <- function() {
     tau_ex    = 1.3,      # yr, interhemispheric atmospheric exchange
     # ⚠ (code review 2026-10-12) 1.3 is the STATION-pair SF6 basis that the
     # 2026-10-02 ruling REJECTED for this model (R/constants.R TAU_EX_PRIOR_CENTRE:
-    # the mass basis, prior centre 0.8 = CCX_PARAM_TABLE$tau_ex's init). tau_ex is
+    # the mass basis, prior center 0.8 = CCX_PARAM_TABLE$tau_ex's init). tau_ex is
     # FITTED on every registered mode (hilda29e: 0.893; the canonical hilda31w:
     # 0.943), so this default reaches only uncalibrated runs. Whether to move it is
     # the author's call
@@ -2265,7 +2265,7 @@ ccx_default_params <- function() {
     # NOTHING else. 1 = the model as of 2026-08-20f, bit for bit (the shipped values
     # are now 0.4969 / 0.5027 NH / SH -- see MEASURED 2026-08-20r below). 0 turns that one channel
     # off while leaving the annual carbon budget untouched, because the term is
-    # zero-annual-mean by construction (the / nrm$n normaliser is what makes it
+    # zero-annual-mean by construction (the / nrm$n normalizer is what makes it
     # so). NOT in CCX_PARAM_TABLE and never fitted -- it is the missing third
     # switch in a channel decomposition whose other two channels can already be
     # isolated exactly (seas_T_amp = 0 kills the respiration modulation,
@@ -2278,7 +2278,7 @@ ccx_default_params <- function() {
     # insolation SHAPES need to match observed productivity -- see the
     # SEAS_NPP_AMP_* block in R/constants.R for what CCX_SEAS_PHI_EFF actually
     # is and why its curve is 1.6x too big without them. Worth +548 log-units
-    # at the arm-N mode with the seasonal block re-optimised
+    # at the arm-N mode with the seasonal block re-optimized
     # (calibration/diag_phi_eff_profile.R), and seas_T_amp_NH then falls from a
     # fitted 48.07 to 10.8, against a MEASURED 11.45.
     # RE-DERIVE BOTH IF CCX_SEAS_PHI_EFF MOVES -- they are conditional on it.
@@ -2344,7 +2344,7 @@ ccx_default_params <- function() {
     # UPPER end is now derived (it IS the in-band value, which the box mean
     # cannot exceed, and it sets the prior width); its LOWER end, 5, has no
     # derivation anywhere and must not be used to set a tolerance.
-    # ⭐ FLIPPED 0 -> the DERIVED PRIOR CENTRE on 2026-09-04, when the 26-parameter
+    # ⭐ FLIPPED 0 -> the DERIVED PRIOR CENTER on 2026-09-04, when the 26-parameter
     # `ent26` mode was adopted. Held at 0 from 2026-09-03 deliberately, so that
     # the pre-registered Fix A refit had one mechanism to attribute P2 to and the
     # gate diagnostics' "defaults" arm still ran the model as it then shipped.
@@ -2361,7 +2361,7 @@ ccx_default_params <- function() {
     # ⚠ (2026-10-12) `hilda29e` did not fit it at all: it PINS ent_seas_amp_SH = 0
     # (its pins list), and so does the canonical since 2026-10-13, `hilda31w`
     # (verified 2026-10-15), so the channel is OFF at the canonical.
-    # ⚠ It is the PRIOR CENTRE, not the fitted 19.0291: `ccx_default_params()` is
+    # ⚠ It is the PRIOR CENTER, not the fitted 19.0291: `ccx_default_params()` is
     # the UNCALIBRATED reference vector (`sst_seas_amp_SH` is 1.2 here against a
     # fitted 1.85), and putting a fitted number in it would make the gates'
     # "defaults" column a second, undeclared copy of the mode.
@@ -2377,7 +2377,7 @@ ccx_default_params <- function() {
     # parameters, while ccx_cpp_par() silently substituted 0. That is an R-vs-C++
     # divergence about what ccx_default_params() MEANS, which is precisely what
     # the roundoff-parity rule exists to prevent, and it cost three debugging cycles
-    # (handoff 2026-08-13c sec.7 records the first). 0 is the behaviour-preserving
+    # (handoff 2026-08-13c sec.7 records the first). 0 is the behavior-preserving
     # value: it is what every ccx_run_fast() call on default parameters has been
     # using all along. Setting it to the table's 0.5 would silently change every
     # existing default-parameter result.
@@ -2397,14 +2397,14 @@ ccx_default_params <- function() {
     # model and nothing would error. FITTED only under a label that opens its gate
     # (CCX_PARAM_GATES$enso_lag_free in R/calibrate.R), held at 0 under every other.
     lag_enso_land = 0,
-    # VOLCANIC DIFFUSE-LIGHT FERTILISATION (2026-08-29). Fractional NPP
+    # VOLCANIC DIFFUSE-LIGHT FERTILIZATION (2026-08-29). Fractional NPP
     # enhancement per unit stratospheric AOD. 0 = OFF, and 0 is deliberate:
     # it makes every pre-2026-08-29 result bit-identical and keeps the
     # calibrated 21 comparable. Turning it on is an explicit act, and whether
     # it becomes a FITTED parameter is a separate decision (it is a
     # base_param, like ent_seas_amp_SH).
     # ⚠ ADOPTED AT 0.25 on 2026-08-29 -- see CCX_GAMMA_DIFF_DEFAULT. It is no
-    # longer the behaviour-preserving value, and that is deliberate.
+    # longer the behavior-preserving value, and that is deliberate.
     gamma_diff = CCX_GAMMA_DIFF_DEFAULT,
     # N-DEPOSITION RETENTION FLUX (D2 (a), 2026-09-30), kg C per kg N. 0 = OFF,
     # bit-exact; see CCX_NDEP_RET_DEFAULT.
@@ -2481,7 +2481,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # PER-EDGE sums (2026-09-08g), row = from (+1; row 1 = external), col = to.
     # The channels MERGE the cold boxes into their classes by design (HS is
     # "ml", HD is "int"), so nothing downstream could draw the HS/HD arrows
-    # with their own numbers. `.pump` keeps the labelled pump edges apart from
+    # with their own numbers. `.pump` keeps the labeled pump edges apart from
     # the flush that shares the HS->HD endpoint pair (ccx_flux_hs_derive()).
     .edges <- matrix(0, nb + 1L, nb + 1L)
     .pump  <- matrix(0, nb + 1L, nb + 1L)
@@ -2489,7 +2489,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # sec.1): the same layout, holding the 14C-signal the tendency actually
     # applies on each edge -- add_flux's `f14` (source ratio, unfractionated)
     # and add_diffusion's own `tr == "C14"` pass. `.pump14` and `.diff14`
-    # keep the labelled pump edges and the diffusive edges apart from the
+    # keep the labeled pump edges and the diffusive edges apart from the
     # rest, because the (ml, oc1) pair carries diffusion, entrainment AND
     # pump and nothing downstream could split them otherwise. Recording
     # only: no tendency reads these, and `record` is FALSE on every
@@ -2531,7 +2531,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
            " -- add a rule to ccx_flux_channel()")
     # int_exch is a GROSS magnitude: the interior has no single "downward" once
     # the conveyor's deep interhemispheric limb exists, so summing signed values
-    # would report a near-cancelling number that means nothing.
+    # would report a near-canceling number that means nothing.
     .fx[[cs$ch]] <<- .fx[[cs$ch]] + if (cs$ch == "int_exch") abs(F_C) else cs$sign * F_C
     if (from > 0L) .net[from] <<- .net[from] - F_C
     .net[to] <<- .net[to] + F_C
@@ -2539,7 +2539,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     if (identical(lab, "pump")) .pump[from + 1L, to + 1L] <<- .pump[from + 1L, to + 1L] + F_C
     invisible(NULL)
   }
-  # the 14C tap: `kind` is "pump" (a labelled pump edge), "diff" (add_diffusion)
+  # the 14C tap: `kind` is "pump" (a labeled pump edge), "diff" (add_diffusion)
   # or NULL (everything else); the channel sums are NOT touched here.
   .rec14 <- function(from, to, F_14, kind = NULL) {
     .edges14[from + 1L, to + 1L] <<- .edges14[from + 1L, to + 1L] + F_14
@@ -2602,8 +2602,8 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # ⛔ 14C CARRIES NO FRACTIONATION HERE, AND THAT IS THE CONVENTION, NOT AN
     # OMISSION. The C14 column is stored so that C14/C = 1 + D14C/1000
     # (ccx_spinup: `d14c_atm <- 1000 * (sum(C14)/sum(C) - 1)`), i.e. this model
-    # carries DELTA-14C, which is BY DEFINITION normalised for fractionation to
-    # a common d13C of -25 permil. That normalisation is exact precisely WHEN
+    # carries DELTA-14C, which is BY DEFINITION normalized for fractionation to
+    # a common d13C of -25 permil. That normalization is exact precisely WHEN
     # the 14C fractionation is the square of the 13C one, alpha14 = alpha13^2
     # (eps14 = 2*eps13 for small eps) -- so a Delta-14C tracer moves through a
     # fractionating interface unfractionated, and applying an alpha here would
@@ -2622,7 +2622,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     #
     # THE ONE RESIDUAL, AND ITS SIZE. The square law is exact for equilibrium and
     # ~1.9 rather than 2 for the diffusive/kinetic limb, so ~10 % of eps_k
-    # survives the normalisation: ~0.09 permil on the mean and, with
+    # survives the normalization: ~0.09 permil on the mean and, with
     # d(eps_k)/dT = 0.0088 permil/K, ~0.001 permil/K -- about 0.002 permil over a
     # +-1 K seasonal SST swing against a fitted sigma_d14c of ~5.3. THREE ORDERS
     # below the noise floor. It is a deviation from the DEFINING relationship,
@@ -2715,7 +2715,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       # dz_ML + dz_1 is conserved, so dz_mid[1] is INVARIANT; only dz_mid[2]
       # moves. Recomputed in full rather than patched, so it cannot drift.
       # (Under the cell dz_1 moves by share x the excursion and dz_mid[1] by
-      # (1 - share)/2 of it -- the geometric centre distance for the ML-area part.)
+      # (1 - share)/2 of it -- the geometric center distance for the ML-area part.)
       dzm      <- (gr$dz[-length(gr$dz)] + gr$dz[-1]) / 2
       ml_mass  <- aux$ml_mass_kg[[h]] * .ev$f  # mass tracks thickness
     } else {
@@ -2803,10 +2803,10 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
 
     veg_C <- y[ilef, "C"] + y[iwod, "C"]
     capacity <- (1 - p$npp_veg_frac) + p$npp_veg_frac * veg_C / veg0_h
-    # FERTILISATION -- the form is selected by p$fert_form, and the ONE
+    # FERTILIZATION -- the form is selected by p$fert_form, and the ONE
     # implementation lives in ccx_fert_factor() so this line and the C++ core
     # cannot drift apart from the diagnostics that price them.
-    # VOLCANIC DIFFUSE-LIGHT FERTILISATION -- twin of the block in
+    # VOLCANIC DIFFUSE-LIGHT FERTILIZATION -- twin of the block in
     # src/ccx_core.cpp. Absence of the FORCING COLUMN still reads as zero (a
     # run with no AOD supplied has no diffuse-light signal to carry).
     #
@@ -2844,7 +2844,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # (Marcus 2026-08-12): GPP is not one thing. Respiration of carbon fixed days
     # ago still carries the ATMOSPHERE's ratio, so returning it is a null loop
     # that equilibrates nothing. Respiration drawing on the plant's stored carbon
-    # carries the POOL's ratio, and that is the ocean-gross-exchange analogue
+    # carries the POOL's ratio, and that is the ocean-gross-exchange analog
     # which equilibrates isotopes faster than the net flux. add_flux takes the
     # source box's ratio, i.e. the second case -- so ra_ratio is the fraction of
     # GPP that genuinely cycles THROUGH the vegetation pool, and Marcus' two
@@ -2928,7 +2928,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # ever runs atmosphere -> vegetation; these go negative only if `npp` does,
     # i.e. if a diverging stage has driven CO2 below zero. Declared so that such
     # a state keeps returning its old (rejected) value instead of becoming a
-    # hard stop -- the guard must not quietly shrink the optimiser's feasible
+    # hard stop -- the guard must not quietly shrink the optimizer's feasible
     # set, which is how the pre-2026-08-11 substep wall truncated the posterior.
     # SINCE 2026-09-02 the ENSO land anomaly rides here too, so reason (a) now
     # also covers "the fitted gamma is large enough to shut photosynthesis off",
@@ -2993,7 +2993,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     if (isTRUE(p$seas_drivers > 0)) {
       # DRIVER PATH: npp * (n(t) - 1), n = phenology-lagged insolation at the
       # effective latitude, unit annual mean. The amplitude is NOT a knob: it
-      # is the model's own NPP, so fertilisation grows the cycle and clearing
+      # is the model's own NPP, so fertilization grows the cycle and clearing
       # shrinks it -- the old npp/npp0 scaling, now carried by npp itself.
       nrm  <- .snorm[[h]]
       seas <- (if (h == "NH") p$seas_npp_amp_NH else p$seas_npp_amp_SH) * npp *
@@ -3059,7 +3059,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # pre-2026-08-18 model. Zero-mean sine; the annual-mean pCO2 shift it
     # induces through carbonate-chemistry nonlinearity (~(0.042 A)^2/4, a few
     # tenths of a percent) is ACCEPTED as physics, the same call as the
-    # fertilisation rectifier -- the driver is zero-mean, the response is not.
+    # fertilization rectifier -- the driver is zero-mean, the response is not.
     # Hemisphere sign as for the land T: austral summer is January.
     if (isTRUE(p$seas_drivers > 0)) {
       a_s <- if (h == "NH") p$sst_seas_amp_NH else p$sst_seas_amp_SH
@@ -3089,8 +3089,8 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # The driver is zero-mean; the response is not, because carbonate chemistry
     # is nonlinear in DIC. That rectification is ACCEPTED AS PHYSICS -- the same
     # call already made for the seasonal SST term ten lines up and for the
-    # fertilisation rectifier. It is the ocean's own nonlinearity, not an
-    # artefact of the discretisation.
+    # fertilization rectifier. It is the ocean's own nonlinearity, not an
+    # artifact of the discretization.
     #
     # The peak month is absolute (no hemispheric sign flip): a sine peaks a
     # quarter cycle after its zero crossing, so peak month M is phase M/12-1/4.
@@ -3235,7 +3235,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # from the source box for free and correctly -- which is exactly what the
     # pCO2-side shim could not do, and why option A was ruled over it. ⛔ Adding
     # a 14C fractionation here would double-count ~17 permil (~3x sigma_d14c):
-    # the model stores Delta-14C, already normalised to alpha14 = alpha13^2.
+    # the model stores Delta-14C, already normalized to alpha14 = alpha13^2.
     # Under the equatorial cell (D1) the entrained VOLUME is a_ml x dh/dt at
     # layer 1's concentration C_1/(a_ls dz_1(t)) -- the same effective-thickness
     # factor `.r1` the diffusive interface uses; detrainment leaves ML water
@@ -3295,7 +3295,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       # carbon, the ONLY channel through which the pump touches uptake.
       sc <- (if (identical(p$pump_mode, "D")) y[iml, "C"] / aux$ml_C0[[h]] else 1) * s_pump
       for (kk in seq_len(grid$nl)) {
-        # alpha13_signed: GRANDFATHERED 2026-08-25e, BEHAVIOUR UNCHANGED, AND
+        # alpha13_signed: GRANDFATHERED 2026-08-25e, BEHAVIOR UNCHANGED, AND
         # OPEN. `S[k]` is built in ccx_pump_export() as the DIVERGENCE of the
         # diffusive flux that would hold the observed DIC profile, so it is
         # NEGATIVE by construction in some layers -- 2 of 10 at the adopted
@@ -3396,7 +3396,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     }
 
     # ---- ocean outcropping: the non-local limb runs UPWARD ------------
-    # THE MIRROR IMAGE OF `w_up`, AND NOT A RELABELLING OF IT. Here the deep box
+    # THE MIRROR IMAGE OF `w_up`, AND NOT A RELABELING OF IT. Here the deep box
     # ventilates to the mixed layer in ONE step, and the compensating flow
     # descends through every interface. Which limb is the non-local one decides
     # everything, in both directions:
@@ -3437,7 +3437,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     #
     # The effective velocity is Q / A_h, so the SAME volume flux gives the
     # smaller-area NH the faster limb. That asymmetry is the mechanism, not an
-    # artefact: it is why the conveyor is predicted to shrink the NH-SH d13C
+    # artifact: it is why the conveyor is predicted to shrink the NH-SH d13C
     # gradient (handoff 13b sec.4.4), which the likelihood already scores.
     if (!is.null(cg)) {
       w <- cg$Q / aux$a_oc[[h]]
@@ -3494,7 +3494,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       # (a) AIR-SEA, on exactly the law the mixed layer uses. HILDA assumes the
       #     gas exchange coefficient PER UNIT AREA is the same in high and low
       #     latitudes (their Table 1, g_l = g_h), justified by sea ice
-      #     suppressing exchange in winter and roughly cancelling the stronger
+      #     suppressing exchange in winter and roughly canceling the stronger
       #     high-latitude winds. That is THEIR ASSUMPTION and it is inherited
       #     here as one -- not a measurement.
       #
@@ -3548,7 +3548,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
         add_flux(ihs, ihd, y[ihs, "C"] * (-dh_hs_dt) / h_hs_t)   # detrainment
       }
 
-      # (b') THE HS PUMP (2026-09-07d): export from HS, remineralised in HD.
+      # (b') THE HS PUMP (2026-09-07d): export from HS, remineralized in HD.
       #      Same two limbs and fractionation as the LS pump, 14C unfractionated,
       #      DIC-limited scaling against HS's own preindustrial carbon under
       #      pump_mode "D". `is.null(aux$pump_hs)` (pump_hs_gcm2 = 0 or HS off)
@@ -3575,7 +3575,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
 
       # (c) HD <-> INTERIOR, volume-proportional over every interior layer.
       #     HILDA's q is "assumed independent of depth" and their Interior is
-      #     one advective-diffusive continuum, so the discretisation of that is
+      #     one advective-diffusive continuum, so the discretization of that is
       #     an exchange volume flux V_int/tau_q split by layer volume:
       #       Q_k = a_ls * dz_k / tau_q
       #     which makes the layer -> HD limb exactly y_k / tau_q and the HD ->
@@ -3641,7 +3641,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       #     int -> ml / ml -> int and classify into ml_int on their own, which
       #     keeps "surface ocean to deep (net)" right; the cell -> ML limb
       #     would otherwise land in conv_ml (both boxes are class "ml").
-      # NULL -> 0, the C++ marshalling's contract (R/cpp.R): a hand-built list
+      # NULL -> 0, the C++ marshaling's contract (R/cpp.R): a hand-built list
       # with the cell on but the pair deleted is "no loop", not an error here
       # while the C++ core runs it (review 2026-09-14)
       W <- (if (is.null(p$w_eq)) 0 else p$w_eq) * CCX_SV_TO_M3YR * aux$eq_w_share[[h]] *
@@ -3735,7 +3735,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       #         F = a_tr K (C_tr/(a_tr h_tr) - C_1/(a_ls dz_1)) / dz_mid_tr
       #           = K (C_tr/h_tr - C_1/(dz_1 * a_ls/a_tr)) / dz_mid_tr,
       #     layer 1 entering with the EFFECTIVE thickness dz_1 * a_ls/a_tr and
-      #     dz_mid_tr = (h_tr + dz_1)/2 the centre distance. dz_1 is layer 1's
+      #     dz_mid_tr = (h_tr + dz_1)/2 the center distance. dz_1 is layer 1's
       #     thickness NOW (it moves under seas_ml). A uniform column is exactly
       #     flux-free (P0g). ⛔ NOT folded into the column loop above: that
       #     loop's ML entry is the residual mixed layer's own interface.
@@ -3753,7 +3753,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       #     uniform surface is a fixed point and volume is conserved; alpha 1
       #     (bulk transport). Split by tr AREA like the cell's W. Its OWN
       #     channel label (R/fluxes.R `tr_ml`): both boxes are class "ml" and
-      #     unlabelled it would land in conv_ml.
+      #     unlabeled it would land in conv_ml.
       if (isTRUE(p$q_tr > 0)) {
         Q <- p$q_tr * CCX_SV_TO_M3YR * aux$tr_q_share[[h]]
         add_flux(itr, iml, Q * y[itr, "C"] / (aux$a_tr[[h]] * aux$h_tr), lab = "tr_ml")
@@ -3857,7 +3857,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     }
 
     # ---- prescribed emissions ---------------------------------------
-    # Fossil carbon comes from OUTSIDE the modelled system (geology), so it is a
+    # Fossil carbon comes from OUTSIDE the modeled system (geology), so it is a
     # true external source, and it is 14C-free.
     #
     # Its d13C is TIME-VARYING (2026-08-12) and arrives on the forcing table,
@@ -3866,7 +3866,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # a single modern value made the Suess decline ~30 % too steep -- see
     # calibration/diag_d13c_suess.R and forcing.R's note.
     add_source(iatm, forc$e_foss[[h]], ccx_forcing_d13c_foss(forc), -1000)
-    # Land-use change does NOT: it moves carbon that is already in the modelled
+    # Land-use change does NOT: it moves carbon that is already in the modeled
     # biosphere. Emitting it with add_source() while leaving the vegetation box
     # intact created carbon AND 14C ex nihilo -- ~28 kmol of 14C by 1995, 14-16 %
     # of the system excess (diag_excess_c14.R [2], 2026-08-12). As a transfer it
@@ -3883,7 +3883,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # not wood's lagged 14C. Handoff 13h sec.2.1b; measured in
     # calibration/diag_luc_prorata.R.
     #
-    # AT f_luc_wood = 1 (the 2026-08-12 behaviour, superseded; still reachable)
+    # AT f_luc_wood = 1 (the 2026-08-12 behavior, superseded; still reachable)
     # IT COMES OUT OF WOOD alone. Deforestation removes standing woody biomass,
     # so on that argument wood is the pool that should pay -- and it is the pool
     # whose 14C ratio the emitted carbon should carry, which is more lagged than
@@ -4004,7 +4004,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
 # rather than a fit. The sum telescopes, so the TOTAL export leaving the mixed
 # layer is the flux across the topmost interface alone.
 #
-# IT SCALES WITH kz, AND THAT IS A REAL PROPERTY RATHER THAN AN ARTEFACT. A 1-D
+# IT SCALES WITH kz, AND THAT IS A REAL PROPERTY RATHER THAN AN ARTIFACT. A 1-D
 # effective diffusivity standing in for 3-D ventilation also destroys gradients,
 # so holding a given gradient costs more export the larger kz is. At the
 # pre-gradient mode this needs ~25 GtC/yr against a 5-12 GtC/yr literature POC
@@ -4069,7 +4069,7 @@ ccx_pump_shape <- local({
     }
     cc <- cache
     # Outside the observed span the shape is held FLAT, which reproduces the old
-    # overlap function's own behaviour there (a layer entirely below the deepest
+    # overlap function's own behavior there (a layer entirely below the deepest
     # bin returned pr$shape[nrow(pr)]).
     Scum <- function(z) {
       if (z <= cc$z0) return(cc$S0 + (z - cc$z0) * cc$sh0)
@@ -4104,7 +4104,7 @@ ccx_pump_export <- function(p, aux, grid, kz_override = NULL) {
   # export is the same number in both hemispheres). The export horizon is the
   # ML base (Nowicki's euphotic depth averages 67.6 m; h_ml 65.2 at the
   # canonical of 2026-09-14, 69.5 at hilda31w); below it the flux follows Martin, F(z) = (z / h_ml)^-MARTIN_B,
-  # so layer k remineralises F(z_{k-1}) - F(z_k) of the export and the BOTTOM
+  # so layer k remineralizes F(z_{k-1}) - F(z_k) of the export and the BOTTOM
   # layer also takes what would cross the seafloor (3.1 % at 3700 / 65 m):
   # the budget closes without a sediment box, sum(S) = E exactly. NULL at
   # pump_export = 0, the pump_grad = 0 contract. `pump_grad` is not read.
@@ -4113,7 +4113,7 @@ ccx_pump_export <- function(p, aux, grid, kz_override = NULL) {
     if (!isTRUE(E > 0)) return(NULL)
     zi <- cumsum(grid$dz)                                    # ML base, then every interface
     Fz <- (zi / zi[1])^(-ccx_const("MARTIN_B"))              # Fz[1] = 1 at the ML base
-    frac <- -diff(Fz)                                        # remineralised per layer, nl of them
+    frac <- -diff(Fz)                                        # remineralized per layer, nl of them
     frac[grid$nl] <- frac[grid$nl] + Fz[grid$nl + 1]         # the seafloor remainder
     fc <- p$pump_carb_frac
     a_tot <- aux$a_ls$NH + aux$a_ls$SH
@@ -4127,17 +4127,17 @@ ccx_pump_export <- function(p, aux, grid, kz_override = NULL) {
   if (!isTRUE(p$pump_grad > 0)) return(NULL)
   shape <- ccx_pump_shape(grid)
   if (is.null(shape)) return(NULL)
-  # RE-NORMALISE ON THIS GRID'S OWN LAYERS, not on the build product's bins.
+  # RE-NORMALIZE ON THIS GRID'S OWN LAYERS, not on the build product's bins.
   # The stored shape spans exactly 1 between its first and last BIN, but a model
   # layer is a thickness-weighted average of several bins, so the bottom LAYER's
   # mean shape is not 1 (it reads 1.011 at h_ml = 100, which would deliver a
-  # 235.7 umol/kg gradient for a pump_grad of 233.1). Dividing by the realised
+  # 235.7 umol/kg gradient for a pump_grad of 233.1). Dividing by the realized
   # span makes `pump_grad` mean exactly what its name says: the model's
   # preindustrial bottom-box-minus-mixed-layer DIC gradient, directly comparable
   # with the target the likelihood scores.
   # ⚠ (code review 2026-10-12) "Exactly" holds for the diffusive LS column the
   # field is solved against, NOT for the spun-up model under the HILDA HS
-  # conduit: at hilda29e (the canonical until 2026-10-13) the realised
+  # conduit: at hilda29e (the canonical until 2026-10-13) the realized
   # bottom-minus-ML DIC is 372.6 (NH) / 363.0 (SH) umol/kg against pump_grad
   # 314.7, and 315.4 / 315.6 with tau_q = 0 (review-measured): switching the
   # conduit off removes the excess. (Not re-measured at hilda31w, pump_grad 330.7.)
@@ -4366,7 +4366,7 @@ ccx_prepare <- function(p, grid = ccx_grid_of(p)) {
 
   a_oc <- list(NH = ccx_const("OCEAN_AREA_NH"), SH = ccx_const("OCEAN_AREA_SH"))
   # THE AREA PARTITION. `a_oc` stays the hemisphere TOTAL -- the conveyor's
-  # interhemispheric limbs are parameterised by volume flux and need it -- and
+  # interhemispheric limbs are parameterized by volume flux and need it -- and
   # the two columns get their own shares. With hs_frac = 0, `a_ls` is `a_oc`
   # multiplied by exactly 1, so every downstream quantity is bit-identical.
   f_hs <- if (hs_on) p$hs_frac else 0
@@ -4639,7 +4639,7 @@ ccx_prepare <- function(p, grid = ccx_grid_of(p)) {
     # two pump modes cannot disagree about what "preindustrial" means.
     # setNames, NOT a bare lapply: HEMIS is an unnamed character vector, so
     # lapply over it returns an UNNAMED list and every `aux$ml_C0$NH` downstream
-    # silently reads NULL. (The neighbouring entries get their names from the
+    # silently reads NULL. (The neighboring entries get their names from the
     # named list they map over; this one has nothing to inherit from.)
     ml_C0       = stats::setNames(lapply(HEMIS, function(h)
                     dic0[[h]] * a_ml[[h]] * grid$h_ml * ccx_const("RHO_SEAWATER") /
@@ -4693,7 +4693,7 @@ ccx_prepare <- function(p, grid = ccx_grid_of(p)) {
     # emission-weighted fuel mix ran from ~-24 permil (1850, essentially all
     # coal) to ~-28 (today, gas and ~0 permil cement carbon in the total), and
     # holding the modern end fixed across the whole industrial period made the
-    # modelled Suess decline ~30 % too steep -- obs - model growing to +0.58
+    # modeled Suess decline ~30 % too steep -- obs - model growing to +0.58
     # permil at MLO by 2020. It is now built per year in
     # data-raw/build_calibration_data.R [5b] and carried on the forcing.
     # See calibration/diag_d13c_suess.R.
@@ -4806,7 +4806,7 @@ ccx_prepare <- function(p, grid = ccx_grid_of(p)) {
     # D1 IS LIVE (audit 2026-09-15 d): the ONE flag every a_ls/a_ml correction
     # reads -- the ML/layer-1 diffusion thickness, the seasonal excursion share,
     # entrainment. It is TRUE exactly when a_ml above was shrunk (eq_on ||
-    # tr_on); the C++ core derives the same flag from the two marshalled
+    # tr_on); the C++ core derives the same flag from the two marshaled
     # switches (unpack_aux). Gating those sites on eq_on alone left `tr`
     # without the cell -- a configuration ccx_tr_on() licenses -- with a
     # non-flux-free uniform column (125 GtC/yr, test-tr-box P0g-tr).
@@ -5006,7 +5006,7 @@ CCX_SUBSTEPS_MAX   <- 256L   # backstop, so a pathological draw cannot hang
 #'
 #' The operator is tridiagonal and non-symmetric as written, but similar to a
 #' symmetric matrix under D^(1/2) . D^(-1/2) with D = diag(dz), so its spectrum
-#' is real and non-positive. Symmetrising first means `eigen` returns exactly
+#' is real and non-positive. Symmetrizing first means `eigen` returns exactly
 #' real values instead of real values with 1e-17 imaginary parts.
 #'
 #' Linear in kz and independent of the state, so this is exact for the whole
@@ -5031,7 +5031,7 @@ ccx_diffusion_eigmax <- function(kz, grid) {
 
 #' Upper bound on the |eigenvalue| of the explicit OVERTURNING operator
 #'
-#' The advection operator is not symmetrisable the way diffusion is (the polar
+#' The advection operator is not symmetrizable the way diffusion is (the polar
 #' sinking limb is a non-local ml -> bottom entry), so this is a Gershgorin
 #' BOUND rather than the spectrum: every row's diagonal is -w/dz_k and its
 #' off-diagonal mass is at most the same, giving 2 * max_k(w / dz_k). Bounding
@@ -5196,7 +5196,7 @@ ccx_substeps_for <- function(p, grid = ccx_grid_of(p), dt = 1 / 12) {
   # so both mattered: at start 017 of the objective-#15 wave (h_ml 74.44) the bound
   # read 426/yr where the integrator's own Jacobian is 730/yr, RK4 ran at z = 4.06
   # against its 2.785 limit for ~10 days around the SH winter peak every year, and
-  # the objective there was integrator artefact (+273.2; 2x the count converges it).
+  # the objective there was integrator artifact (+273.2; 2x the count converges it).
   # No mode registered at the time moved (all at CCX_SUBSTEPS_MIN, z <= 1.19).
   # The canonical adopted since, hilda31w (h_ml 69.54), resolves to 6.
   .grids <- list(grid)

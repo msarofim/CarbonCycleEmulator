@@ -325,7 +325,7 @@ test_that("GATE H bounds the gradient CONTRAST, keeps its CO2 control, and canno
   expect_equal(ho$co2$se,  ho$co2$sd_resid  / sqrt(ho$co2$n_eff))
   expect_equal(ho$d13c$se, ho$d13c$sd_resid / sqrt(ho$d13c$n_eff))
   expect_lt(ho$co2$sd_resid, ho$co2$sd)      # the trend is NOT charged to the noise
-  # n_eff is a CORRECTION, never a licence: it may not exceed n.
+  # n_eff is a CORRECTION, never a license: it may not exceed n.
   expect_lte(ho$co2$n_eff,  ho$co2$n)
   expect_lte(ho$d13c$n_eff, ho$d13c$n)
   expect_identical(DG_H_NSD, DG_Q_NSD)   # one strictness across the family

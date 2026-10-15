@@ -8,17 +8,17 @@
 #  (1) WHAT WIDTH DOES THE EVIDENCE SUPPORT? The prior (data/prior_fert_k.rds) is
 #      lognormal, median = geometric mean of Walker 2021 and Varney 2024's K,
 #      log-sd 0.35 BY RULING. Neither source states an uncertainty that can be
-#      propagated to K (Walker's +/- is unlabelled; Varney gives a ratio of
+#      propagated to K (Walker's +/- is unlabeled; Varney gives a ratio of
 #      ensemble means). The one per-member SPREAD of the shape on disk is our
 #      CMIP6 1pctCO2-bgc GPP extraction (16 ESMs, notes/lit_2026-09-28_cmip6_gpp/),
-#      ruled a COMPARISON for the centre -- used here only for the WIDTH.
-#  (2) WHAT WOULD A GIVEN WIDTH DO? The 09-30 (d) fertilisation profile's SHAPE
+#      ruled a COMPARISON for the center -- used here only for the WIDTH.
+#  (2) WHAT WOULD A GIVEN WIDTH DO? The 09-30 (d) fertilization profile's SHAPE
 #      rows (K pinned with beta_max solved to hold enh(410 ppm); 9 names
 #      rebalanced) give the likelihood along K. A quadratic in ln K through the
 #      control and the two shape rows, combined with the lognormal prior, gives
 #      the posterior K for any width. VALIDATION: at the ruled 0.35 it must
 #      return the fitted K (the control was fitted under that prior).
-#  ⚠ The path holds enh(410) rather than re-optimising beta_max, so its costs
+#  ⚠ The path holds enh(410) rather than re-optimizing beta_max, so its costs
 #  are UPPER bounds and the likelihood may be flatter than measured; the table
 #  also reports a likelihood 1.5x wider.
 # No RNG. USAGE: Rscript calibration/diag_fert_k_prior_width.R
@@ -26,7 +26,7 @@
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 KW_PROFILE  <- ccx_path("outputs", "diagnostics", "fert_profile_fixedstock_20260930.rds")
 KW_CMIP6    <- file.path("notes", "lit_2026-09-28_cmip6_gpp", "gpp_shape_summary.csv")
-KW_EXCLUDE  <- "IPSL-CM6A-LR"          # flagged a probable artefact in the 09-28 lit note (R 1.11)
+KW_EXCLUDE  <- "IPSL-CM6A-LR"          # flagged a probable artifact in the 09-28 lit note (R 1.11)
 KW_WIDTHS   <- c(0.37, 0.35, 0.30, 0.26, 0.20, 0.14)
 KW_TARGETS  <- c(750, 625)            # the 09-28 (c) band's top and the band middle's K
 KW_LIK_WIDEN <- 1.5

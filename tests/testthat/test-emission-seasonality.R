@@ -119,7 +119,7 @@ test_that("the PHASES are right -- the part a conservation test cannot see", {
     expect_length(w[[k]], 12L)
   }
   # SH fire is far more sharply peaked than NH fossil -- if these ever came out
-  # comparable, a normalisation has been applied twice
+  # comparable, a normalization has been applied twice
   expect_gt(max(w$luc_SH) - min(w$luc_SH), 3 * (max(w$fossil_NH) - min(w$fossil_NH)))
 })
 

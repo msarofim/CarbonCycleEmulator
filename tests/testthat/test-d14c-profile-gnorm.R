@@ -1,6 +1,6 @@
 # =====================================================================
 # OBJECTIVE CHANGE #10 (2026-09-07, Marcus): the interior D14C profile as
-# (mean level, A-B, B-deep), three generalised-normal rows with declared sigmas
+# (mean level, A-B, B-deep), three generalized-normal rows with declared sigmas
 # (level: the deep row's convention; contrasts: the bootstrap) and shape 4.
 #
 # WHAT THESE TESTS GUARD:
@@ -53,7 +53,7 @@ test_that("with beta forced to 2 the rows are Gaussian rows on the derived (leve
   expect_equal(unname(rows[["d14c_profile_level"]]), stats::dnorm(sp$level, mean(m), sp$level_sd, log = TRUE), tolerance = 1e-12)
   expect_equal(unname(rows[["d14c_profile_ab"]]), stats::dnorm(sp$ab, m[1] - m[2], sp$ab_sd, log = TRUE), tolerance = 1e-12)
   expect_equal(unname(rows[["d14c_profile_bd"]]), stats::dnorm(sp$bd, m[2] - m[3], sp$bd_sd, log = TRUE), tolerance = 1e-12)
-  # at the targets the beta-4 rows are their normalising constants
+  # at the targets the beta-4 rows are their normalizing constants
   at <- ccx_profile_rows_at(sp$mu)
   expect_equal(unname(at[["d14c_profile_level"]]), ccx_dgnorm_log(0, 0, sp$level_sd, 4))
 })

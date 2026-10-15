@@ -10,7 +10,7 @@
 # FORC_LUC_NH_SHARE 0.55, both flagged "provisional" in DATA.md sec.6) and with
 # NO SEASONALITY AT ALL (DESIGN sec.3.6, "smooth annual->monthly"). Two ways
 # that can hurt:
-#   * the modelled MLO-SPO gradient is already wrong -- ~1.1 ppm in CO2 and
+#   * the modeled MLO-SPO gradient is already wrong -- ~1.1 ppm in CO2 and
 #     -0.210 vs -0.074 permil in d13C -- and a wrong share is the most obvious
 #     candidate. Nothing in the likelihood scores the gradient (review sec.2.3),
 #     so a wrong share is currently UNOBSERVABLE to the calibration.
@@ -23,7 +23,7 @@
 # THREE PARTS:
 #  1. LUC hemispheric share from OSCAR v3.1's REGIONAL sheet -- a real,
 #     time-varying number, against the constant 0.55.
-#  2. Sensitivity of the objective AND of the modelled gradient to both shares.
+#  2. Sensitivity of the objective AND of the modeled gradient to both shares.
 #  3. What an omitted seasonal cycle in each input would do, as a BOUNDING test.
 #
 # RUNTIME ~5 min.
@@ -48,7 +48,7 @@ ES_SIGMA <- list(sigma_co2 = 1.5, sigma_d13c = 0.44, sigma_d14c = 5)
 # WHAT IS SOURCED AND WHAT IS NOT, stated plainly. The REGIONAL E_luc series is
 # sourced. The NH fraction WITHIN each straddling region is NOT -- OSCAR's
 # regions are political aggregates, not hemispheres, and nothing in this repo
-# resolves them. The fractions below are geographic judgements, so they are
+# resolves them. The fractions below are geographic judgments, so they are
 # carried as a BRACKET and every number in this part is reported lo/central/hi.
 # The conclusion to trust is the one that survives the whole bracket.
 # ---------------------------------------------------------------------

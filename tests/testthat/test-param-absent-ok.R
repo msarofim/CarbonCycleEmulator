@@ -51,7 +51,7 @@ test_that("ccx_mode_start: migrated (what it ran), seeded, encoded; the shift is
   # at the registered FREE PARENT (hilda31s2, a hilda file that lacks all six).
   # 2026-09-22 (k): the free parent is now hilda32f, a CURRENT-build file that lacks nothing -- the
   # property needs a file WITH absent names, so the fixture is hilda31s2 BY NAME (still registered,
-  # as provenance). A test that reads "the free parent" for its migration behaviour breaks the day
+  # as provenance). A test that reads "the free parent" for its migration behavior breaks the day
   # the parent is refit; a fixture named for what it IS (an old-build file) does not.
   md <- readRDS(ccx_mode_file("hilda31s2"))
   rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm), add = TRUE)

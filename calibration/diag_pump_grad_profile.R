@@ -395,7 +395,7 @@ sep("PART 5. THE CARBONATE SHARE, AT THE BEST pump_grad")
 # fitted. Handoff 16c sec.3's whole argument is that alkalinity adjudicates
 # transient-vs-preindustrial from an observation not used to decide it -- so if
 # the TRANSIENT rows now want a different share, that is a finding about the
-# argument, not a licence to fit the share. Two arms, reported, never adopted.
+# argument, not a license to fit the share. Two arms, reported, never adopted.
 res5 <- lapply(PGP_CARB_ALT, function(cf) {
   t0 <- Sys.time()
   e  <- pgp_eval(pmode, best$grad, cf, pm$bomb_total, pm$luc_scale)

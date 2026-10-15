@@ -17,9 +17,9 @@
 # the band is the only honest way to show a difference against a budget that
 # does not close. ⚠ The band is an EXTREME attribution -- it asks where the
 # land sink would sit if ALL the unplaced carbon were land, and the same carbon
-# could equally be an emissions, ocean or growth error. Labelled as such.
+# could equally be an emissions, ocean or growth error. Labeled as such.
 #
-# ⚠ THE SMOOTH IS 5-YEAR CENTRED, at Marcus's request. The project's own
+# ⚠ THE SMOOTH IS 5-YEAR CENTERED, at Marcus's request. The project's own
 # APP_LUC_SMOOTH_YR convention is 11; this is deliberately shorter and is named
 # in FG_SMOOTH_YR so the label and the window cannot drift apart. An incomplete
 # window yields NA rather than a short mean, so each smoothed line stops
@@ -40,11 +40,11 @@ source(file.path("calibration", "lib_design_gates.R"))
 FG_OUT        <- ccx_path("calibration", "output", "figures")
 FG_FILE       <- "fig_land_sink_vs_gcb.png"
 FG_COMMIT     <- ccx_git_stamp(exclude = file.path(FG_OUT, FG_FILE))   # the figure is its product, not an input
-FG_SMOOTH_YR  <- 5L                      # centred; NOT the app's 11-yr convention
+FG_SMOOTH_YR  <- 5L                      # centered; NOT the app's 11-yr convention
 FG_G7_RECORD  <- 3.09                    # gate 7's recorded land sink -- the anchor
 FG_G7_TOL     <- 0.02
 FG_W <- 11; FG_H <- 9; FG_DPI <- 160
-# ⭐ COLOURS ARE COMPUTED, NOT CHOSEN -- AND THE TOOL IS NAMED, WHICH IS THE
+# ⭐ COLORS ARE COMPUTED, NOT CHOSEN -- AND THE TOOL IS NAMED, WHICH IS THE
 # POINT OF THE 2026-09-25 RE-STEP. The 09-24 (k) pair #C2185B / #12395C was
 # recorded here as "protan 13.5", from a throwaway dichromat implementation that
 # was never committed. `tools/palette_check.py` (committed 09-24 n; sRGB ->
@@ -58,14 +58,14 @@ FG_W <- 11; FG_H <- 9; FG_DPI <- 160
 # MINIMAL CHANGE subject to a worst-case floor of 12 (1.5x the target): the new
 # pair sits dE 2.8 and 1.5 from its predecessor under normal vision, i.e. the
 # figure looks the same, and keeps the warm-model / cool-observation semantic.
-# ⚠ NEITHER COLOUR COULD BE KEPT FIXED -- a search holding one of them exactly
+# ⚠ NEITHER COLOR COULD BE KEPT FIXED -- a search holding one of them exactly
 # found no partner clearing the floor. The protan gap is a JOINT property of the
 # pair, not a defect in one of them.
 #
 # Reproduce:  python3 tools/palette_check.py '#C4315F' '#16345A'
 # ⛔ FG_COL_SCORES is not decoration: test-figure-palette.R re-runs that command,
-# parses these two colours out of THIS file, and fails if the numbers below stop
-# matching -- so a colour cannot be changed without the receipt moving with it.
+# parses these two colors out of THIS file, and fails if the numbers below stop
+# matching -- so a color cannot be changed without the receipt moving with it.
 FG_COL        <- c(model = "#C4315F", gcb = "#16345A")
 FG_COL_SCORES <- c(normal = 32.1, protan = 12.6, deutan = 26.6, tritan = 40.8)
 FG_COL_TARGET <- 8      # the dataviz skill's OKLab dE floor
@@ -120,7 +120,7 @@ d <- merge(data.frame(year = a$year, m_resid = a$land,
                       o_net = gcb$land_sink - gcb$luc, imbal = gcb$imbalance),
            by = "year")
 
-smooth <- function(v, n = FG_SMOOTH_YR) {   # centred; NA on an incomplete window
+smooth <- function(v, n = FG_SMOOTH_YR) {   # centered; NA on an incomplete window
   h <- (n - 1L) %/% 2L
   vapply(seq_along(v), function(i) {
     j <- max(1, i - h):min(length(v), i + h)

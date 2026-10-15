@@ -78,7 +78,7 @@ GN_DBINS    <- c(0, 1, 250, 500, 1000, 1500, 2000, 3000, 4000, 5000,
                  6000, 8000, 10000, 12000, 15000, 20100)   # km
 GN_BLOCK_VALID <- 30    # deg; part 1 of diag_deep_d14c_neff.R puts rho = 0 at
                         # ~9000 km, so blocks below this BREAK correlation inside
-                        # themselves and are biased HIGH. Labelled, not dropped.
+                        # themselves and are biased HIGH. Labeled, not dropped.
 GN_NEFF_INCUMBENT <- LIK_D14C_DEEP_NEFF           # the D14C control's value
 GN_NEFF_RDS <- ccx_path("calibration", "output", "deep_d14c_neff",
                         "diag_deep_d14c_neff.rds")
@@ -586,7 +586,7 @@ if (is.null(gg)) {
   # preindustrial gradient is 0, and diag_dic_gradient.R's header sources the
   # surface anthropogenic load as ~50 umol/kg (GLODAP 0-75 m = 2028.9 modern
   # against ~1979 preindustrial). NOT a new dataset -- an in-repo figure, and
-  # labelled as approximate because that is what it is.
+  # labeled as approximate because that is what it is.
   GN_CANT_SURF <- 50
   miss3 <- gg$tco2$target - og$dic
   miss2 <- (gg$tco2$target + GN_CANT_SURF) - 0

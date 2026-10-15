@@ -12,11 +12,11 @@
 # WHY THIS EXISTS, AND WHY IT RUNS BEFORE THE REFIT. Handoff 2026-08-31b s.1a
 # lists the `kz` bracket as BLOCKING: `kz` rails at exactly 6528 (100 % of the
 # bracket) at every constrained point of the on-support land axis, so the
-# -285 / -298 price that s.8.3 puts to Marcus as a judgement call is SET BY THE
+# -285 / -298 price that s.8.3 puts to Marcus as a judgment call is SET BY THE
 # BRACKET, not by the data. [[ccx_price_measured_off_support]] states the
 # consequence: "-232 and -285 BRACKET the truth, and which end is right depends
 # on whether `kz` <= 6528 is defensible. Settle the bracket BEFORE the
-# judgement call -- it is cheaper and it moves the call."
+# judgment call -- it is cheaper and it moves the call."
 #
 # ⚠ THE MEMORY CALLS THE BRACKET "a numerically-chosen support, neither an
 # observation nor a law". THAT IS HALF WRONG, AND THE HALF THAT IS WRONG IS THE
@@ -65,7 +65,7 @@
 # widest admissible support is a turnover inside every narrower one. The prior
 # stays flat (dunif) inside, so within one frontier the posterior ranking is
 # the likelihood ranking, and every row -- INCLUDING THE ANCHOR -- is
-# re-optimised under the same widened support, which is what makes the deltas
+# re-optimized under the same widened support, which is what makes the deltas
 # like-for-like. ⚠ Deltas are comparable WITHIN a frontier only: the incumbent
 # and widened frontiers carry different priors and different log-jacobians, so
 # their absolute logposts are not on the same scale.
@@ -75,7 +75,7 @@
 # AFTER A REFIT SHOWS THE TERM HOLDING kz ALONE." `diag_kz_railed.R` asked that
 # at the mode with every other parameter FROZEN and found the likelihood turning
 # over at 6462, inside. PART 3's anchor row asks it again with kz/fert_k/q10
-# RE-OPTIMISED -- a strictly harder version of the same question -- and the
+# RE-OPTIMIZED -- a strictly harder version of the same question -- and the
 # constrained rows ask it where the axis is actually pressing.
 #
 # Run:  Rscript calibration/diag_kz_bracket_on_the_sourced_target.R   (~15 min)
@@ -413,7 +413,7 @@ cat(sprintf("\n(incumbent columns: %s -- on the [%.1f, %.1f] bracket.\n",
             KB_INC_SRC, KB_INCUMBENT[1], KB_INCUMBENT[2]))
 cat(" ⚠ Comparable as a SHAPE, not level-for-level: different prior, different jacobian.)\n")
 
-RAIL_TOL <- 1.0   # % of the widened bracket; the optimiser's own resolution in kz
+RAIL_TOL <- 1.0   # % of the widened bracket; the optimizer's own resolution in kz
 railed <- res$kz_pct > (100 - RAIL_TOL)
 cat("\nDOES THE OBSERVATION HOLD kz, OR ONLY THE BRACKET?\n")
 if (!any(railed)) {

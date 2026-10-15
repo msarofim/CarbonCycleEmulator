@@ -13,7 +13,7 @@
 # paths to the pre-fix `pump_arms` and `ridge_*` directories -- all of which
 # are now in calibration/output/quarantine/20260825_seas_isotope_rectification/,
 # so the file could not run at all. Editing the calls in place is how a chart
-# ends up labelled with the wrong run, so the arms are declared once, up top,
+# ends up labeled with the wrong run, so the arms are declared once, up top,
 # and every line below derives from them.
 #
 # THE PRE-FIX MODE IS INCLUDED DELIBERATELY, as the "before" row. Its LOGPOST is

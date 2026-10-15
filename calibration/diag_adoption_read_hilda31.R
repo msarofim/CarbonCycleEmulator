@@ -3,9 +3,9 @@
 # AT THE PROMOTED FILE through the resolvers the repo now uses (ccx_mode_base,
 # dg_vector, sl_* with `struct`), against the COLUMN CONTROL ent26
 # (CCX_MODE_COLUMN_CONTROL, quarantined). 2026-09-08f; Marcus: "adopt the round
-# 5 winner as the canonical." Modelled on diag_adoption_read_ent26.R.
+# 5 winner as the canonical." Modeled on diag_adoption_read_ent26.R.
 #
-# What it checks: (1) the file's `struct` and that the resolver honours it (hs_frac
+# What it checks: (1) the file's `struct` and that the resolver honors it (hs_frac
 # 0.16 at the canonical, 0 at the control); (2) the streams PROVENANCE gate --
 # dg_streams recomputed at the resolved vector equals the file's own `streams`
 # (a column-resolved hilda vector fails this by ~200 on the profile rows);

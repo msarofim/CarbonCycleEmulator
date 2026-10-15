@@ -24,7 +24,7 @@
 #     exactly the choice that BIT GATE S: its SH-area-mean bracket
 #     [1.54, 4.54] EXCLUDES the right answer while CONTAINING the pre-fix
 #     model's 4.16, because the pre-fix model was matching the
-#     76 %-cancelling area mean. Reuse GATE S's settled convention; do not
+#     76 %-canceling area mean. Reuse GATE S's settled convention; do not
 #     invent a second one here.
 #  2. It does NOT compare to the model, because THE MODEL DOES NOT EXPOSE
 #     MIXED-LAYER pCO2 in any run output -- `ccx_run()$out` carries ml_C
@@ -119,7 +119,7 @@ ser <- vapply(seq_len(12), function(m) {
   wm <- matrix(rep(w, each = nrow(sl)), nrow = nrow(sl))
   sum(sl[ok] * wm[ok]) / sum(wm[ok])
 }, numeric(1))
-# PER-CELL amplitudes, vectorised: project every cell onto the same two basis
+# PER-CELL amplitudes, vectorized: project every cell onto the same two basis
 # vectors at once, so this is the identical estimator applied cell-wise.
 tt  <- (seq_len(12) - 0.5) / 12
 cub <- matrix(pco2[, sel, ], ncol = 12)

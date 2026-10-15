@@ -19,7 +19,7 @@
 #    -1513.92 against `demean`'s -1512.02, but it CLIPS 6 of its 16 scored
 #    blocks, and the clipped ones are the EARLY blocks where the mean-state
 #    offset is largest. So that -1.91 is a LOWER bound on the rolling base, not
-#    its price. v6 reaches 1850; a centred 30-yr base for 1948 needs 1933.
+#    its price. v6 reaches 1850; a centered 30-yr base for 1948 needs 1933.
 #
 # ⛔ THIS FILE DOES NOT RULE. Ruling A is ADOPTED (`demean`, 2026-09-02). If the
 #    unclipped rolling base wins here, that is a REOPENING for Marcus, not an
@@ -87,7 +87,7 @@ cpc <- utils::read.table(ccx_path("data-raw", "downloads",
                          header = TRUE, check.names = FALSE)
 cpc <- data.frame(year = cpc[[1]], month = cpc[[2]], value = cpc[["NINO3.4"]])
 
-# Deseasonalise BOTH members of a pair on their OWN climatology over the shared
+# Deseasonalize BOTH members of a pair on their OWN climatology over the shared
 # base, then regress. Amplitude is the slope, phase is r, level is dclim.
 vp_pair <- function(A, B) {
   kA <- A$year >= VP_BASE[1] & A$year <= VP_BASE[2] & !is.na(A$value)

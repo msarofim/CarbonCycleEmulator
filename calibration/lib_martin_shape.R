@@ -1,6 +1,6 @@
 # =====================================================================
 # lib_martin_shape.R -- a SESSION-LOCAL override of ccx_pump_shape() that
-# replaces the GLODAP DIC-excess profile with a MARTIN remineralisation shape
+# replaces the GLODAP DIC-excess profile with a MARTIN remineralization shape
 # (Martin et al. 1987 DSR 34:267: F(z) = F(z_s) (z/z_s)^-0.858), integrated
 # with the model's OWN K(z) so the pump's diffusive-return construction
 # (ccx_pump_export()) turns it into Martin's per-layer source.

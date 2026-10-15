@@ -219,7 +219,7 @@ cat("    Only the DEEP D14C row is used as a target, as it already is.\n")
 #
 # The diffusion code's concentration is y_k/dz_k, and y_k = DIC_k * A * dz_k *
 # rho / mol_per_GtC, so y_k/dz_k is EXACTLY proportional to DIC_k with the layer
-# thickness cancelling. That is what makes this solve a two-line calculation
+# thickness canceling. That is what makes this solve a two-line calculation
 # rather than a fit.
 #
 # Steady state requires the source in box k to cancel the diffusive convergence
@@ -463,7 +463,7 @@ if (is.null(pm)) {
     cat("\n\n")
   }
   # THE CROSS-ARM COMPARISON IS THE POINT, and it only exists because the rows
-  # above are ABSOLUTE. Normalising each arm to its own h = 75 -- which is what
+  # above are ABSOLUTE. Normalizing each arm to its own h = 75 -- which is what
   # diag_h_ml_roles.R does, correctly, for a within-arm question -- would hide
   # whether the pump is better or worse than no pump at all.
   dlt <- prof[["pump D  "]][1, ] - prof[["pump OFF"]][1, ]

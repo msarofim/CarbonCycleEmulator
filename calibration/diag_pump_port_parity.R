@@ -21,7 +21,7 @@
 #      has to, because binning 50,634 bottles inside a likelihood evaluation is
 #      not an option. The two are NOT identical: a model layer spanning several
 #      bins gets their thickness-weighted mean rather than its own bottle set.
-#   3. NORMALISATION. `pump_grad` is re-normalised on each grid's own layers, so
+#   3. NORMALIZATION. `pump_grad` is re-normalized on each grid's own layers, so
 #      it delivers EXACTLY the gradient it names. The shim scaled the raw shape
 #      and landed 1.1 % high.
 #

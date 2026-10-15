@@ -15,7 +15,7 @@
 # varies are being represented by one shape.
 #
 # THE TEST THAT DECIDES IT, and it needs no model runs. If the misfit is an
-# aggregation artefact, then **each band on its own should be well described by
+# aggregation artifact, then **each band on its own should be well described by
 # its own insolation curve**, and the residual should collapse when the bands
 # are fitted separately. If instead each band is individually badly matched,
 # the premise ("productivity follows insolation") is what is wrong and splitting

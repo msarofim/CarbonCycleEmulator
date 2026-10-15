@@ -18,7 +18,7 @@
 #      §4.2): P-D2-1..5. P-D3-1..4 were written for D3-ALONE arms and are REPORTED, not
 #      scored, at a combined refit.
 #   4. THE FUTURES DECOMPOSITION (handoff 09-30c §3 step 3: "decompose the futures
-#      (fertilisation shape vs luc_scale's scenario land use vs ocean) before attributing
+#      (fertilization shape vs luc_scale's scenario land use vs ocean) before attributing
 #      the Koven move"). Every fitted name is in exactly one group; each group is SWAPPED
 #      both ways (control + the refit's group = add-one; refit - the group = remove-one), so
 #      an interaction shows as the two disagreeing. The likelihood-only group must move the

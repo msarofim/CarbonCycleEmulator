@@ -11,7 +11,7 @@ HQ_DIR   <- ccx_path("calibration", "output", "multistart_20260907b_hilda29")
 HQ_GS    <- c(0, 15, 30, 45, 60, 90, 120)   # gC m-2 yr-1 (120 = 6.9 GtC/yr = the first run's "rel 0.5")
 # JUDGED POINT (prereg amendment 2026-09-07d): the first run judged "rel 1" = 14 GtC/yr and failed P1 on SIZE
 # (+443); the prereg's alternative is "some point in the scan with P1 inside". The judged point is the scan
-# value whose HD - HS lands nearest the CENTRE of the observed window -- chosen by P1's own statistic, not by
+# value whose HD - HS lands nearest the CENTER of the observed window -- chosen by P1's own statistic, not by
 # any other prediction, so P2-P7 remain out-of-sample.
 HQ_YR_BOXES <- 2008                     # the end-member probe's DIC-bottle epoch
 HQ_P1 <- c(70, 185); HQ_P2 <- -0.5; HQ_P3 <- 20; HQ_P4 <- 2; HQ_P5_Z <- 2; HQ_P6 <- 0.2; HQ_P7 <- 2

@@ -18,7 +18,7 @@
 # shipped [30, 200]. Every one of its 22 parameters is strictly interior to the
 # shipped table (GATE 1). So the probe's mode is a FEASIBLE POINT of the
 # un-widened problem, and "is it better under the shipped bracket" is a matched
-# pair of evaluations, not a re-optimisation.
+# pair of evaluations, not a re-optimization.
 #
 # WHY THE BASELINE IS THE 08-30 LANDED REFIT AND NOT `CCX_MODE_CANONICAL`.
 # The probe warm-started from `refit_20260831_seas_lag_split/from90`, the byte
@@ -30,7 +30,7 @@
 #
 # WHY BOTH ARE EVALUATED UNDER THE SHIPPED TABLE AND NOTHING ELSE.
 # A logit's support IS its prior, so a logpost under a widened bracket carries a
-# reparameterisation constant and is not comparable with one under the shipped
+# reparameterization constant and is not comparable with one under the shipped
 # bracket -- that is the handoff's "~1.5". Putting BOTH points through ONE
 # harness under ONE table removes it by construction rather than estimating it.
 # This is the "MATCHED contrast" R/paths.R permits and the absolute-logpost
@@ -134,7 +134,7 @@ cat("       evaluates bit-identically under both. No constant to remove. OK\n")
 
 # ---- MEASURED OFFSETS: does each file reproduce its own stored logpost? ----
 # Reported, NOT gated. The incumbent's is an identity (same table); the probe's
-# is its widened-kz reparameterisation constant, whose SIZE is the thing the
+# is its widened-kz reparameterization constant, whose SIZE is the thing the
 # handoff predicted at ~1.5 and is worth reading, not asserting.
 cat(sprintf("\nMEASURED OFFSETS (this build, vs each file's stored logpost)\n"))
 cat(sprintf("  %-12s shipped-table %.4f  stored %.4f  offset %+.4f\n",

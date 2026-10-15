@@ -1,9 +1,9 @@
 # =====================================================================
-# diag_fert_ridge_residual.R -- AFTER rep_dC RE-OPTIMISES, WHAT STILL OBJECTS?
+# diag_fert_ridge_residual.R -- AFTER rep_dC RE-OPTIMIZES, WHAT STILL OBJECTS?
 # (2026-08-25)
 #
 # diag_fert_ridge_repdc.R showed rep_dC gives back a flat ~67 % of the
-# saturation cost at every cell, and falls MONOTONICALLY to its prior centre:
+# saturation cost at every cell, and falls MONOTONICALLY to its prior center:
 # 5.566 (mode) -> 4.98 (K=400) -> 2.87 (180) -> 1.37 (120) -> 0.15 (90) ->
 # -1.75 (60). At fert_k ~ 90 the 5.6-sigma blocker is ZERO.
 #

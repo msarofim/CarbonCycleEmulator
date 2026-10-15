@@ -16,19 +16,19 @@
 # STATED BEFORE THE RUN. Prediction: the drop is LESS than proportional (a few
 # kmol), because the model's ML equilibrates with the air in ~0.3 yr while the
 # sub-ML delivery is the slower step. Decision rule: k_w IS a lever iff, with
-# k_w pinned at 16.5 cm/h and the PK-2 surface + land names re-optimised, the
+# k_w pinned at 16.5 cm/h and the PK-2 surface + land names re-optimized, the
 # 1995 inventory falls by >= 5 kmol (>= 0.65 sigma of the objective's row) at
 # a cost <= 20 log-units on the 25 rows; it is NOT a lever if the drop is
 # < 5 kmol or the fit pays > 20 to keep it. Comparability caveat: Naegler's
 # <k> is a wind-weighted global mean at a fixed Schmidt convention; the model's
 # k_w is per ice-free area with the HS Schmidt factor -- comparable to ~10 %.
 # The canonical's 18.7 is z +0.9 on Naegler's own spread, so this is a test at
-# the centre of the bracket, not a refutation of the fitted value.
+# the center of the bracket, not a refutation of the fitted value.
 #
 # Arms (all on the canonical's solved field, its pins, the periodic spinup):
 #   RAW    k_w pinned at 16.5 cm/h, nothing else moved.
 #   ARM C  + {beta_max, fert_k, q10, kz_deep_frac, h_ml, bomb_total, sigma_d14c}
-#          re-optimised (the PK-2 names minus k_w); kz HELD.
+#          re-optimized (the PK-2 names minus k_w); kz HELD.
 #   ARM C+ the same with kz FREE as well (does the fit buy the rate back with kz?).
 #   The same three at k_w pinned at the canonical's own value (the harness:
 #   ARM C must find no improvement, the PK-2g gate), and a k_w PROFILE at
@@ -40,7 +40,7 @@ KW_COMMIT <- ccx_git_stamp()
 ccx_load_cpp(); source(ccx_path("calibration", "lib_design_gates.R"))
 
 KW_ARM       <- CCX_MODE_CANONICAL
-KW_NAEGLER   <- 16.5                      # cm/h, Naegler 2009 best estimate (unnormalised, global mean)
+KW_NAEGLER   <- 16.5                      # cm/h, Naegler 2009 best estimate (unnormalized, global mean)
 KW_NAEGLER_SD <- 3.2                      # cm/h, the four-study spread (15.9 +- 3.2)
 KW_PROFILE   <- c(15, 16.5, 18.7, 21)     # cm/h, raw profile
 KW_HOURS_PER_YEAR <- 365.25 * 24

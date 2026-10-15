@@ -30,7 +30,7 @@ GO_DISEQ_YEAR <- DG_Q_YEAR        # 1995, gate Q's year (Quay's reference year)
 # DIGITIZED BY EYE from the printed figure (ClaudeDocs/Papers/...Quay...pdf p.12), 3-basin average, +-0.2 permil.
 GO_QUAY_LAT   <- seq(-70, 70, by = 10)
 GO_QUAY_DISEQ <- c(-1.9, -1.5, -0.7, 0.3, 0.8, 1.3, 1.6, 1.7, 1.85, 1.6, 1.2, 0.8, 0.4, 0.1, -0.1)
-# APPROXIMATE ocean fraction by 10-deg band (centre latitude), typed from general knowledge, +-0.1;
+# APPROXIMATE ocean fraction by 10-deg band (center latitude), typed from general knowledge, +-0.1;
 # the Arctic band is set to an EFFECTIVE (ice-free) 0.3.
 GO_OCEAN_FRAC <- c(0.85, 0.98, 0.97, 0.90, 0.77, 0.78, 0.76, 0.77, 0.74, 0.63, 0.58, 0.53, 0.43, 0.31, 0.30)
 # crude gas-exchange weight ~ wind speed^2 (Wanninkhof 1992): Southern Ocean windy, tropics calm; +-30 %

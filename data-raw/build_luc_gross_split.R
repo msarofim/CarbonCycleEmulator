@@ -35,7 +35,7 @@
 #      09-24 (e) assumed: the prescribed NET land-use flux goes NEGATIVE at 2100
 #      in four of five SSPs, and in bookkeeping accounting that means gross
 #      regrowth OVERTAKING gross clearing -- the opposite of decay. So the future
-#      path is prescribed here and is labelled a prescription.
+#      path is prescribed here and is labeled a prescription.
 #
 # ⚠⚠ THE WHOLE PRODUCT IS ASSERTED FROM GCB's BOOKKEEPING MODELS, NOT MEASURED
 # BY CCX. 09-24 (h) showed this record cannot see the split. Tier 1 imports it.
@@ -136,15 +136,15 @@ cat("       closes to machine precision -> the model's forcing is untouched.\n")
 # OBSERVED regrowth: regrowth(t) ~ -a * sum_k (1/tau) exp(-k/tau) gross(t-k).
 # The back-extension supplies the pre-1959 history the kernel needs.
 # ⚠ NOT INDEPENDENT of R2: the history it convolves came from OSCAR's share. It
-# is the best the record allows and is labelled as such, not as an observation.
+# is the best the record allows and is labeled as such, not as an observation.
 # ⚠ AND THE DETRENDED CROSS-CORRELATION IS WHAT GIVES IT POWER, not the raw one:
 # regrowth and clearing both trend hard (regrowth's own trend is +0.0079
 # GtC/yr/yr, p = 1e-31), so a raw correlation mostly reads the trend.
 # ⚠ RECURSIVE, not an FIR convolution. A truncated kernel long enough for
 # tau = 60 yr is longer than the 275-year series, and the FIR form then returns
 # NA over the entire fit window. The one-pole recursion is the same exponential
-# response with no history requirement: initialised at its own equilibrium for
-# the first year's input, so the initialisation error decays as exp(-t/tau) and
+# response with no history requirement: initialized at its own equilibrium for
+# the first year's input, so the initialization error decays as exp(-t/tau) and
 # is gone many tau before the 1959 fit window opens.
 conv1 <- function(x, tau) {
   phi <- exp(-1 / tau)

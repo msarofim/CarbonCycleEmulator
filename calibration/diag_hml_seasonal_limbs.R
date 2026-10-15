@@ -1,6 +1,6 @@
 # =====================================================================
 # diag_hml_seasonal_limbs.R -- IS THE REFIT'S 35.38 m MIXED LAYER A REPAIR
-# OF THE SH OCEAN SEASONAL LIMB, OR AN ARTEFACT?
+# OF THE SH OCEAN SEASONAL LIMB, OR AN ARTIFACT?
 #
 # WHY THIS EXISTS. The 2026-08-28 option-5 refit freed h_ml and it moved
 # 96.47 -> 35.38 m, buying +4.06 logpost that is ENTIRELY prior credit
@@ -38,7 +38,7 @@
 # ---------------------------------------------------------------------
 # PREDICTIONS, WRITTEN BEFORE THE RUN.
 #   P1  REPAIR: the SH_ocean limb amplitude is LARGER at the new mode than at
-#       the old, moving toward obs 0.522. (Artefact -> unchanged or smaller.)
+#       the old, moving toward obs 0.522. (Artifact -> unchanged or smaller.)
 #   P2  PHASE: the SH_ocean limb rotates toward obs 8.52 months, away from the
 #       ~3.35 the arc has recorded. A magnitude that grows while the phase
 #       stays antiphase is NOT a repair -- it makes the cancellation worse

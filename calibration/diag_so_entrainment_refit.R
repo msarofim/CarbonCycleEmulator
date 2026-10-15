@@ -19,7 +19,7 @@
 #
 # THE COMPARISON IS MATCHED (`match_incumbents_optim`, as
 # diag_sst_seas_zeroing.R sec.1 sets out). The incumbent is NOT the stored
-# mode -- it is the stored mode RE-OPTIMISED OVER THE SAME SLICE, so the
+# mode -- it is the stored mode RE-OPTIMIZED OVER THE SAME SLICE, so the
 # challenger is not being credited with the freedom the slice gives both.
 #
 # ⚠ THE CHALLENGER HAS ONE MORE FREE PARAMETER AND NO PRIOR ON IT.
@@ -48,7 +48,7 @@ RF_BLOCK  <- c("sst_seas_amp_NH", "sst_seas_amp_SH",
                "seas_T_amp_NH", "seas_T_amp_SH", "seas_lag_p", "q10")
 # umol/kg. Bounds, not a prior: below is indistinguishable from off, above is
 # far outside the ~5-30 the prereg's pre-check derives for a mean over the SH
-# box. Optimised in log space so the step is scale-free like every other
+# box. Optimized in log space so the step is scale-free like every other
 # amplitude in the model.
 RF_ENT_BOUNDS <- c(0.5, 60)
 RF_ENT_INIT   <- 10
@@ -141,7 +141,7 @@ if (abs(gap - CCX_MODE_OFFSET_KNOWN) > 0.5)
 # determinism is load-bearing for a Nelder-Mead and is cheap to assert
 stopifnot(identical(lp_cached(0)(u0), one))
 
-# ---- INCUMBENT: the stored mode re-optimised over the SAME slice -------
+# ---- INCUMBENT: the stored mode re-optimized over the SAME slice -------
 sep("1. INCUMBENT -- ent = 0, the block re-optimised (match_incumbents_optim)")
 obj_inc <- function(v) { u <- u0; u[idx] <- v; -lp_cached(0)(u) }
 fit_inc <- optim(u0[idx], obj_inc, method = "Nelder-Mead",

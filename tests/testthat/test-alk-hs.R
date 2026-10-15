@@ -29,7 +29,7 @@ test_that("alk_hs ABSENT is bit-exact with the global constant, and an explicit 
 
   # the transient feels it, and the two cores agree AT the explicit value
   # the pure-R carbonate path WARNS below its 2 C fit range (the cold box at sst_hs 2 + a negative
-  # anomaly); pre-existing behaviour of ccx_run() under the HILDA structure, not this switch's
+  # anomaly); pre-existing behavior of ccx_run() under the HILDA structure, not this switch's
   rC <- ccx_run_fast(s2, F); rR <- suppressWarnings(ccx_run(s2, F))
   expect_gt(max(abs(rC$out$hs_C_SH - o0$hs_C_SH)), 1e-6)
   expect_lt(max(abs(rR$out$hs_C_SH - rC$out$hs_C_SH)) / max(abs(rC$out$hs_C_SH)), 1e-12)

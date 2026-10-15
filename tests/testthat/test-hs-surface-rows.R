@@ -66,7 +66,7 @@ test_that("rows are absent with the structure off, present with it on, and equal
   on <- hr_at(); g <- ccx_ocean_grad_scored(on$out, on$sp); hs <- g$hs_surf
   expect_false(is.null(hs)); tg <- ccx_hs_surface_target(); aux <- on$sp$aux
   # recompute DIC by hand: the ANNUAL MEAN over the epoch year (2026-09-11 (5)),
-  # 12 month-centres, each over the box's mass then (constant here: no seasonal HS)
+  # 12 month-centers, each over the box's mass then (constant here: no seasonal HS)
   tt <- ccx_epoch_year_samples(tg$dic$epoch)
   C <- stats::approx(on$out$t, on$out$hs_C_SH, xout = tt, rule = 2)$y
   expect_equal(hs$dic, mean(C * aux$mol_per_GtC / aux$hs_mass_kg$SH * 1e6), tolerance = 1e-12)

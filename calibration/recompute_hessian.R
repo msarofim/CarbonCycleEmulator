@@ -1,7 +1,7 @@
 # =====================================================================
 # recompute_hessian.R -- redo the Hessian at an already-located mode with a
 #                        VALIDATED, PER-PARAMETER step size, without repeating
-#                        the optimisation.
+#                        the optimization.
 #
 # WHY IT FIRST EXISTED: run_modefind.R used a single MODE_HESS_EPS = 1e-3 on the
 # unconstrained scale for all parameters. At the bomb-window mode that is far
@@ -19,7 +19,7 @@
 #  1. IT READ `md$u_mode` AND DECODED IT UNDER THE DEFAULT PARAMETER TABLE. The
 #     arm refit overrode h_ml's band to [85, 120] IN PROCESS
 #     (ccx_hml_band_provenance), so `u_mode` decoded under the default [30, 200]
-#     can give an h_ml metres away from the 87.56 the file's own par_mode says,
+#     can give an h_ml meters away from the 87.56 the file's own par_mode says,
 #     and it would then have computed a perfectly clean Hessian at the WRONG
 #     POINT and said nothing. It now re-encodes from `par_mode`, which is
 #     band-independent, under the band the file RECORDS in `hml_bound`, and
@@ -36,8 +36,8 @@
 #     `kz` fails when the step is far too LARGE; `h_ml` fails because
 #     ARM_HESS_EPS = 3e-4 is far too SMALL. h_ml is logit-transformed on
 #     [85, 120] and the mode sits at 7.3 % of that band, so du -> dh_ml is
-#     heavily compressed: 3e-4 in u reaches 7.1e-4 METRES. Curvature measured
-#     over seven ten-thousandths of a metre is reading the integrator's own
+#     heavily compressed: 3e-4 in u reaches 7.1e-4 METERS. Curvature measured
+#     over seven ten-thousandths of a meter is reading the integrator's own
 #     noise. The step is now chosen PER PARAMETER, and the chosen vector is
 #     written next to the Hessian -- a second-order block that cannot be
 #     reproduced without an unrecorded setting is a trap (the same lesson as
@@ -45,11 +45,11 @@
 #
 # THE STEP RULE, and WHY IT IS NOT "the largest stable step". The first version
 # of this rewrite swept the grid and took the largest step whose curvature
-# agreed with both neighbours. That is defensible for the DIAGONAL and it is
+# agreed with both neighbors. That is defensible for the DIAGONAL and it is
 # WRONG for the CROSS terms: it chose eps = 1e-1 for nearly everything, which
 # for `beta_max` is a move of 313 log-units -- far outside the quadratic region
 # -- and the resulting Hessian had a POSITIVE eigenvalue of +86.8 in the
-# (beta_max, fert_k) plane. The Michaelis-Menten fertilisation pair is a curved
+# (beta_max, fert_k) plane. The Michaelis-Menten fertilization pair is a curved
 # valley; a step that large reads its third and fourth derivatives, and a
 # diagonal-only stability scan cannot see that happening.
 #
@@ -96,7 +96,7 @@ HESS_OUT_FILE  <- sub("\\.rds$", "_hess.rds", HESS_MODE_FILE)
 # which is where h_ml's problem STARTS -- a sweep that cannot reach the answer
 # cannot report that it did not find it.
 HESS_EPS_GRID  <- c(1e-5, 3e-5, 1e-4, 3e-4, 1e-3, 3e-3, 1e-2, 3e-2, 1e-1, 3e-1)
-HESS_STABLE_TOL <- 0.02   # max relative disagreement with EITHER neighbour
+HESS_STABLE_TOL <- 0.02   # max relative disagreement with EITHER neighbor
 HESS_EPS_FRAC   <- 0.10   # step as a fraction of each direction's posterior sd
 HESS_FALLBACK   <- CCX_HESS_FALLBACK   # since 2026-10-13 ONLY where no interior step is finite; a no-plateau
                           # direction otherwise takes its MOST-STABLE grid step (R/calibrate.R; ruled), flagged loudly
@@ -308,7 +308,7 @@ cat(sprintf("\nwrote %s\n", HESS_OUT_FILE))
 
 if (HESS_UPDATE) {
   # Only ever after the gates, and only the second-order block. par_mode,
-  # logpost, streams and the optimisation trace are the refit's, not ours.
+  # logpost, streams and the optimization trace are the refit's, not ours.
   md$hessian <- H; md$cov <- Sigma; md$cor <- Cor; md$sd_unc <- sdv
   md$pd <- pd; md$eigen <- ev; md$hess_eps <- EPSV
   md$hess_eps_unstable <- failed; md$hess_diag_by_step <- D

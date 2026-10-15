@@ -10,13 +10,13 @@
 # box and no prior, so it was the free compensator. Round 5 puts its own
 # observation on it and asks where the sink goes next.
 #
-# CENTRE: the product's headline `factor` (0.653; NOT re-typed). WIDTH: the
+# CENTER: the product's headline `factor` (0.653; NOT re-typed). WIDTH: the
 # product carries two SAMPLED spreads -- across time windows (1961-90 ...
 # 1991-2020, log-sd ~0.04) and across hemispheres (NH 0.32 / SH 0.78, log-sd
 # 0.44). The hemispheric spread is the REPRESENTATION error of one factor
 # serving two hemispheres, not uncertainty in the global number, and at 0.44 the
 # fit would keep 1.83 for 2.7 log-units -- the round would answer nothing. The
-# shipped width is a JUDGEMENT, HSA_LOGSD_JUDGEMENT = 0.15, ~2.5x the measured
+# shipped width is a JUDGMENT, HSA_LOGSD_JUDGEMENT = 0.15, ~2.5x the measured
 # component spread (windows + the Schmidt-at-model-T alternative, in
 # quadrature), stated here and in the prereg so it can be vetoed. Both
 # alternatives are carried in the product for the record.

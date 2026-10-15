@@ -51,7 +51,7 @@ test_that("a params/forcing index mismatch refuses to run (mutation tests)", {
   expect_true(ccx_enso_index_check(p1, q))
   p9 <- p0; p9$enso_index <- 9L
   expect_error(ccx_enso_index_of(p9), "not one of")
-  # and the stamp survives marshalling, where the run path checks it
+  # and the stamp survives marshaling, where the run path checks it
   expect_identical(attr(ccx_cpp_forcing_prep(FI$detrend), "enso_index"), "detrend")
   # the ONE run path checks before the core is reached (a prep naming detrend,
   # a demean table: must stop at the guard, not in C++)

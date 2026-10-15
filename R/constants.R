@@ -24,7 +24,7 @@
 # Values that other constants are DERIVED FROM must be defined once, here, and
 # referenced -- never re-typed as a literal further down. A mutation test
 # (2026-08-10) caught exactly that bug: LAMBDA_C14 was written as log(2)/5700
-# and so was labelled "derived" while actually being an independent copy of the
+# and so was labeled "derived" while actually being an independent copy of the
 # half-life. Changing T_HALF_C14 left the decay rate silently unchanged.
 .T_HALF_C14   <- 5700              # yr, true half-life (see T_HALF_C14 entry)
 .SEC_PER_YR   <- 365.25 * 86400
@@ -53,7 +53,7 @@
 # N deposited, kg C/kg N. Du & de Vries 2024 book ch. (doi:10.1016/B978-0-323-91140-5.
 # 00016-6; full text) Tables 4.1-4.2: boreal / temperate / tropical 40 / 31 / 12 (de
 # Vries 2014) and 24 / 10 / 6 (Du & de Vries 2018); the lit note's central "~13" is a
-# round central of those (the note's judgement, lit note sec. 2a(iv)).
+# round central of those (the note's judgment, lit note sec. 2a(iv)).
 .NDEP_RET_FOREST_CENTRAL <- 13
 # The LAND-MEAN range, kg C/kg N (lit note sec. 2a(iv) table): 0.6 = aboveground wood
 # only (Schulte-Uebbing 2022 world 2 kg C/kg N x forest share 0.30) up to 8.7 = the
@@ -75,7 +75,7 @@
 # ---- inputs to the Southern-Ocean entrainment amplitude (2026-09-03) --
 # ⛔ NAMED HERE AND COMPUTED BELOW, NOT TYPED AS AN ANSWER. The entry that
 # replaced them carried `value = 30` with the arithmetic only in its prose
-# `source`, i.e. it was labelled "derived" while being an independent copy --
+# `source`, i.e. it was labeled "derived" while being an independent copy --
 # THE EXACT LAMBDA_C14 BUG this file's header warns about. Computing it moved
 # the number 30 -> 29.68, which is the drift a typed "derived" value hides.
 # ⛔⛔ BOTH BAND AMPLITUDES BELOW ARE NOW READ FROM data/ PRODUCTS, NOT TYPED
@@ -125,7 +125,7 @@
                               # COUNTING against the carbonate module's own
                               # K0/K1/K2 temperature dependence -- not a risk
                               # here, because this factor is used ONLY in a
-                              # back-of-envelope PRIOR CENTRE and never applied
+                              # back-of-envelope PRIOR CENTER and never applied
                               # inside the model.
 .ENT_PCO2_REF     <- 370      # uatm, reference surface pCO2 the % is taken on
 .ENT_SO_PCO2_AMP  <- .ccx_obs_rds("obs_so_pco2_seas_amp.rds")$band_amp_uatm
@@ -145,12 +145,12 @@
                               # ~5.6 % above the GLODAP surface value GATE G
                               # scores against (~2035). Left as inherited rather
                               # than switched, because the impact is measured and
-                              # negligible: 2150 -> 2035 moves the prior centre
+                              # negligible: 2150 -> 2035 moves the prior center
                               # by log(2035/2150)/ENT_SEAS_LOGSD = 0.11 sigma.
                               # Stated rather than quietly reconciled.
 .ENT_REVELLE      <- 13       # buffer factor. ⛔ DELIBERATELY NOT read off the
                               # model's own carbonate chemistry: this number
-                              # sets a PRIOR CENTRE, and a prior derived from
+                              # sets a PRIOR CENTER, and a prior derived from
                               # the code under test can never disagree with it
                               # ([[gate_reads_its_own_output]]).
 .ENT_BAND_AREA_FR <- 0.369    # 40-90 S ocean area as a fraction of SH ocean area
@@ -324,7 +324,7 @@ CCX_CONSTANTS <- list(
                    "14.8-16.5 (CCX_ALPHA_PHOTO_EPS_BIOSPHERE); label hilda_csl3v0kaidgbemwtc runs",
                    "ALPHA_PHOTO_EPS_STILL2003 (16.2).")),
 
-  # ---- THE MARTIN REMINERALISATION EXPONENT (registered 2026-09-14 h, option
+  # ---- THE MARTIN REMINERALIZATION EXPONENT (registered 2026-09-14 h, option
   # D + E) ----
   # The shape of the PRESCRIBED export field under `pump_field = "martin"`:
   # F(z) = F(z_s) (z / z_s)^-b, the open-ocean composite of Martin et al. 1987.
@@ -598,7 +598,7 @@ CCX_CONSTANTS <- list(
                    "ICDC 0.5 deg regrid doi:10.25592/uhhfdm.14635), NH share of global",
                    "NPP, mean over 2001-2023, sd 0.0135. The MODERN share -- NOT the",
                    "1750 parameter. Built by data-raw/build_npp_hemispheric.R.")),
-  # THE PRIOR CENTRE, and it is NOT the observation above. `npp_frac_NH` is a
+  # THE PRIOR CENTER, and it is NOT the observation above. `npp_frac_NH` is a
   # 1750 split and MOD17 is 2001-2023; the model walks between them through
   # hemispheric clearing, so the anchor is the observation walked BACK through
   # that clearing. Hence status "provisional": it rides on the model's own
@@ -711,8 +711,8 @@ CCX_CONSTANTS <- list(
     status = "data",
     source = paste("As SEAS_T_AMP_NH_OBS_LO but SH land >30S -- the UPPER bracket.",
                    ">45S is Antarctica and carries no respiring soil, so it is NOT used.")),
-  # THE OCEAN PAIR HAS NO MEASURED BRACKET, so its width is a JUDGEMENT and is
-  # labelled as one: 0.25 in log space (~ +/- 28 %), covering the difference
+  # THE OCEAN PAIR HAS NO MEASURED BRACKET, so its width is a JUDGMENT and is
+  # labeled as one: 0.25 in log space (~ +/- 28 %), covering the difference
   # between the area-weighted mean we can compute and the gas-exchange-weighted
   # mean the parameter actually is. Nothing measures that gap today. Replacing
   # this with a flux-weighted estimate would be a real improvement.
@@ -1016,11 +1016,11 @@ CCX_CONSTANTS <- list(
                    "ONLY. Gate S was rebased on SO_DPCO2_PEAK_MO.")),
 
   # ---- Southern-Ocean entrainment amplitude (2026-09-03) --------------
-  # REGISTERED BECAUSE IT BECAME A PRIOR CENTRE. `ent_seas_amp_SH` entered
+  # REGISTERED BECAUSE IT BECAME A PRIOR CENTER. `ent_seas_amp_SH` entered
   # CCX_PARAM_TABLE on 2026-09-03 (25 -> 26 parameters), and its prior is
-  # centred here. Until then the derivation lived only in a comment beside
+  # centered here. Until then the derivation lived only in a comment beside
   # ccx_default_params(), which is exactly the free-floating-number class the
-  # registry exists to close: a prior centre that is not a named constant
+  # registry exists to close: a prior center that is not a named constant
   # cannot be tied to its own arithmetic by a test.
   ENT_SEAS_BAND_AREA_FRAC = list(
     value = .ENT_BAND_AREA_FR, units = "fraction, dimensionless",
@@ -1092,7 +1092,7 @@ CCX_CONSTANTS <- list(
                    "it -- which is why both are registered",
                    "separately and why the prior width is NOT read off that",
                    "band's unsourced lower endpoint.")),
-  # ---- Remineralisation N:C for the alkalinity row (registered 2026-09-12) --
+  # ---- Remineralization N:C for the alkalinity row (registered 2026-09-12) --
   # Was a typed `16 / 117` in R/likelihood.R described as "an
   # Anderson-Sarmiento-type recollection rather than a citation" (review C);
   # the citation was checked against the published abstract on 2026-09-12 and

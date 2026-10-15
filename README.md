@@ -32,9 +32,9 @@ Teaching software, not peer-reviewed, not for citation.
   at stated values. The app live-runs this single parameter set (the posterior mode).
 - **Posterior sampling:** adaptive Metropolis, 4 chains × 200,000 iterations, 17,000 draws.
   Max R-hat 1.24, on the seasonal-lag parameters: not converged by the strict criterion.
-- **Uncertainty bands:** a CO₂ band built from those draws is in `data/futures_ribbons.rds`
-  and is not yet displayed. The app shows FaIR 5–95 % ranges on Known issue 5 and in the
-  pulse lab.
+- **Uncertainty bands:** the Futures tab's CO₂ view shows the 5–95 % range of those draws
+  (`data/futures_ribbons.rds`). It varies only the fitted carbon-cycle parameters, so temperature
+  has no band. The app also shows FaIR 5–95 % ranges on Known issue 5 and in the pulse lab.
 - **Tests:** full suite 8,095 passed, 0 failed, 1 skipped (commit `6278482`, 2026-10-15).
 - **Git tag `v1.0-hilda29l`** (2026-09-22) is an earlier internal freeze, not the app's
   BETA v1.0.
@@ -56,7 +56,7 @@ The app's **Known issues** tab measures each of these with the running model:
 4. Year-to-year variability is somewhat smaller than observed (about 70–90 %).
 5. CO₂ pulse decay compared with other sources: IRF(100) 0.37 here, 0.41 in Joos et al.
    (2013), 0.36 in FaIR 2.2.4 (calib 1.6.0).
-6. Uncertainty bands (pending; see Status).
+6. The uncertainty band covers only the carbon-cycle parameters.
 7. Stand-ins and provisional constants: 4 fitted stand-ins and 3 held at 0; 11 constants
    marked `provisional` in `R/constants.R`.
 8. Ocean CO₂ uptake declines with warming about twice as fast as in ocean models.

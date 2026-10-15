@@ -21,7 +21,7 @@
 # statistic -- but the single-arm gaps are NOT comparable to 27j line for line.
 #
 # ⚠ THE BRACKET END IS A METHODOLOGICAL CHOICE, so it is MEASURED, not picked:
-# LAND and JOINT run at BOTH the prior centre 5.0502 and HI 7.1012.
+# LAND and JOINT run at BOTH the prior center 5.0502 and HI 7.1012.
 #
 # ⚠ THE OFFSET IS NOW -1.5805, NOT -3.3223 (2026-08-28). Adopting the mode's
 # own h_ml band removes the 1.7418 that was a WRONG DECODE; what remains is
@@ -40,7 +40,7 @@ AQ_BASE     <- c("sst_seas_amp_NH", "sst_seas_amp_SH", "seas_T_amp_NH", "seas_la
 AQ_LAND_PAR <- "seas_T_amp_SH"      # free in INCUMBENT/OCEAN, PINNED in LAND/JOINT
 AQ_BR_LO <- ccx_const("SEAS_T_AMP_SH_OBS_LO")   # 3.5915 K, all SH land
 AQ_BR_HI <- ccx_const("SEAS_T_AMP_SH_OBS_HI")   # 7.1012 K, SH land >30S
-AQ_MID   <- sqrt(AQ_BR_LO * AQ_BR_HI)           # 5.0502, the prior's centre (27n's TA_INIT)
+AQ_MID   <- sqrt(AQ_BR_LO * AQ_BR_HI)           # 5.0502, the prior's center (27n's TA_INIT)
 AQ_PINS  <- c(mid = AQ_MID, hi = AQ_BR_HI)      # the two ends the prereg requires
 AQ_ENT_BOUNDS <- c(0.5, 60)         # BOUNDS, not a prior -- 27j's, unchanged
 AQ_ENT_INIT   <- 10                 # 27j's, unchanged

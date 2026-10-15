@@ -12,7 +12,7 @@
 #   (1) ccx_apply_structure() sets BOTH the model switch and the label, for
 #       both structures, from an explicit value and from CCX_MS_SEAS_ML;
 #   (2) it errors BY NAME on anything but 0/1 -- never coerces (1.5, "2", "");
-#   (3) ccx_mode_base() honours a file's recorded seas_ml, and reads an
+#   (3) ccx_mode_base() honors a file's recorded seas_ml, and reads an
 #       ABSENT field as 0 (a fact about every pre-09-10 file, not a default);
 #   (4) the label reaches the OBJECTIVE: the same vector scores differently at
 #       seas_ml 1 than at 0 (the mechanism is felt), and -Inf above the P8

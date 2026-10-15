@@ -8,7 +8,7 @@
 # being levied on the least-observed part of the record, and that bears on how
 # much weight it deserves.
 #
-# ⛔ THIS DECIDES NOTHING. It localises a cost in time. Nothing is adopted.
+# ⛔ THIS DECIDES NOTHING. It localizes a cost in time. Nothing is adopted.
 #
 # METHOD. Per-YEAR loglik contributions to d14c_NH / d14c_SH under both forcing
 # arms, reconstructed exactly as R/likelihood.R scores them (annual observation

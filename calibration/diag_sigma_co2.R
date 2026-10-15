@@ -194,7 +194,7 @@ for (i in seq_along(pts)) {
 
   s_ll   <- SC_GRID[which.max(ll)]
   s_post <- SC_GRID[which.max(lpost)]
-  # normalised posterior in u = log(sigma), on the sampler's own coordinates
+  # normalized posterior in u = log(sigma), on the sampler's own coordinates
   u  <- log(SC_GRID)
   w  <- exp(lpost - max(lpost)); w <- w / sum(w)
   mu <- sum(w * u); sdu <- sqrt(sum(w * (u - mu)^2))

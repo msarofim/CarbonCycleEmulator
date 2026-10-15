@@ -15,7 +15,7 @@
 #       that script -- the January seasonal drawdown biases the slope fast). Without a flux trace the model could demonstrate
 #       the second but could not print the first, and the whole point is that
 #       one model produces BOTH numbers.
-#   [2] The app's box diagram had six unlabelled arrows. An unlabelled arrow
+#   [2] The app's box diagram had six unlabeled arrows. An unlabeled arrow
 #       teaches nothing; ~120 GtC/yr of photosynthesis next to ~11 GtC/yr of
 #       emissions teaches the entire fallacy at a glance.
 #
@@ -60,14 +60,14 @@ CCX_FLUX_CHANNELS <- c(
   int_exch = "Interior ocean exchange (gross)",
   conv_ml  = "Conveyor surface limb",
   # THE EQUATORIAL CELL'S surface-divergence limb, cell -> mixed layer
-  # (2026-09-13g), LABELLED at the call site: both boxes are class "ml", so
+  # (2026-09-13g), LABELED at the call site: both boxes are class "ml", so
   # without the label it would land in conv_ml. Its two companion limbs
   # (layer k_eq -> cell, ML -> layer k_eq) classify into ml_int on their own,
   # which keeps "surface ocean to deep (net)" right under the cell.
   eq_ml    = "Equatorial cell to surface (gross)",
   # THE TROPICAL BOX's lateral exchange with the residual mixed layer, `q_tr`
   # (2026-09-14f; structural 0 under ruling R4, so this channel reads 0 until
-  # that later test). Labelled at the call site for the same reason as eq_ml.
+  # that later test). Labeled at the call site for the same reason as eq_ml.
   # The cell -> tr limb keeps the eq_ml label ("to surface"); tr -> layer k_eq
   # and the tr / layer-1 diffusion classify into ml_int on their own.
   tr_ml    = "Tropical box to mixed layer (gross)",
@@ -99,8 +99,8 @@ CCX_FLUX_DERIVED <- c(
 #   hs_pump                the HS biological export HS -> HD (inside `pump`)
 #   hs_hd_net              NET HS -> HD carbon, flush + pump. ⛔ CORRECTED 2026-10-12: this said
 #                          "(inside ml_int)". Only the FLUSH part (hs_hd_net - hs_pump) is inside
-#                          ml_int; the pump part is inside `pump` (a labelled edge goes to its label's
-#                          channel, but every edge, labelled or not, is in `edges`). See
+#                          ml_int; the pump part is inside `pump` (a labeled edge goes to its label's
+#                          channel, but every edge, labeled or not, is in `edges`). See
 #                          ccx_flux_warm_route().
 #   hd_int_net             NET HD -> low-latitude interior, the conduit (inside int_exch)
 CCX_FLUX_HS <- c(
@@ -173,7 +173,7 @@ ccx_flux_zero <- function() stats::setNames(numeric(length(CCX_FLUX_CHANNELS)),
 #' Returns NULL for an edge that carries no carbon between two DIFFERENT
 #' reservoir classes and has no channel (there are none today; the NULL branch
 #' exists so a future same-class flux fails the test-fluxes.R completeness
-#' assertion loudly instead of being absorbed into a neighbouring channel).
+#' assertion loudly instead of being absorbed into a neighboring channel).
 #'
 #' @param from,to box indices; `from = 0L` marks an external source
 #' @param lab explicit label, or NULL

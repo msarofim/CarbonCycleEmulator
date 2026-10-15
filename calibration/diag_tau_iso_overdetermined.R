@@ -10,7 +10,7 @@
 #   bomb-D14C rows, with bomb_total FITTED beside them, say it is right.
 #   THE QUESTION: is the bomb rows' -552 a measurement of k_w, or of
 #   (k_w, bomb_total) jointly -- i.e. how much of it does bomb_total absorb when
-#   it is re-optimised at each k_w, and how much does the rest of the standard
+#   it is re-optimized at each k_w, and how much does the rest of the standard
 #   nuisance arm absorb? And what weight would a D row need to move the joint
 #   optimum?
 #
@@ -20,7 +20,7 @@
 #   Stage 1  RAW: everything else fixed. Per point the 26-row dlik vs the
 #            canonical with the named rows, the four regional D's, gate D z,
 #            the model's OWN tau_iso (ML carbon / gross invasion at PI).
-#   Stage 2  PROFILES: at each k_w, re-optimise (a) bomb_total alone, (b)
+#   Stage 2  PROFILES: at each k_w, re-optimize (a) bomb_total alone, (b)
 #            bomb_total + sigma_d14c, (c) the standard nuisance arm minus k_w
 #            {beta_max, fert_k, q10, kz_deep_frac, h_ml, bomb_total, sigma_d14c}
 #            (arm C of the 09-20/21 probes without the axis name; h_ml is IN it
@@ -90,7 +90,7 @@ tau_iso <- function(sp, kw) {
 tau0 <- tau_iso(r_ref$sp, KW0)
 cat(sprintf("canonical: k_w %.1f m/yr, h_ml %.2f m; tau_iso NH %.2f yr, SH %.2f yr (ML carbon / gross PI invasion); ML D NH %+.3f SH %+.3f (obs %+.3f / %+.3f); gate D z %+.2f; bomb_total %.1f, sigma_d14c %.2f\n\n",
             KW0, v0$p$h_ml, tau0[["NH"]], tau0[["SH"]], gD_ref$region[["NH_ml"]], gD_ref$region[["SH_ml"]], OBS_D[["NH"]], OBS_D[["SH"]], gD_ref$z, v0$bomb_total, v0$sigma_d14c))
-point_v <- function(fac, pm = NULL) {   # the canonical's vector with k_w scaled; pm overlays a re-optimised nuisance set
+point_v <- function(fac, pm = NULL) {   # the canonical's vector with k_w scaled; pm overlays a re-optimized nuisance set
   v <- v0; v$p$k_w <- KW0 * fac
   if (!is.null(pm)) { for (n in names(pm)) if (n %in% names(v$p)) v$p[[n]] <- pm[[n]]
                       for (n in c("luc_scale", "bomb_total", "sigma_d14c", "rep_dC", "grad_off_co2", "grad_off_d13c")) if (!is.null(pm[[n]])) v[[n]] <- pm[[n]]

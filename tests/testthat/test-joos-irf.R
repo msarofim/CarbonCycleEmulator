@@ -19,7 +19,7 @@ test_that("the single-exponential null is exact and parameter-free", {
     expect_equal(f(300) / f(100), joos_tail_null(f(100)), tolerance = 1e-12,
                  info = sprintf("tau = %g", tau))
   }
-  # ...and for a half-life parameterisation too
+  # ...and for a half-life parameterization too
   for (hl in c(10, 42, 100)) {
     f <- function(t) 0.5^(t / hl)
     expect_equal(f(300) / f(100), joos_tail_null(f(100)), tolerance = 1e-12)

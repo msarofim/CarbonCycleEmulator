@@ -96,7 +96,7 @@ test_that("past the ENSO record the anomaly TAPERS to FORC_ENSO_POST on the inde
 })
 
 test_that("bomb 14C total is set by the prior, not by the provisional shape", {
-  # The shape is normalised to unit integral, so the placeholder cannot set the
+  # The shape is normalized to unit integral, so the placeholder cannot set the
   # magnitude -- only the (citable) total can.
   for (tot in c(50, 102, 150)) {
     F <- ccx_build_forcing("historical", c(1900, 2000), prod_c14 = 0,
@@ -109,7 +109,7 @@ test_that("SSP scenarios assemble and diverge from each other", {
   # suppressWarnings: this checks the EMISSIONS columns, and ccx_build_forcing()
   # rightly warns that it is holding GMST flat past 2024 (use ccx_run_coupled()
   # for a real future climate). Warning about the column this test does not look
-  # at is correct behaviour, not something to silence at source.
+  # at is correct behavior, not something to silence at source.
   a <- suppressWarnings(ccx_build_forcing("ssp126", c(2000, 2100), prod_c14 = 360))
   b <- suppressWarnings(ccx_build_forcing("ssp585", c(2000, 2100), prod_c14 = 360))
   e2100a <- sum(a$e_foss_NH[a$year == 2100] + a$e_foss_SH[a$year == 2100]) / 12

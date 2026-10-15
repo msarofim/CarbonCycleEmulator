@@ -152,7 +152,7 @@ for (a in an) { g11 <- dg_gate11(R[[a]], ARMS[[a]], obs); vd <- dg_gate11_verdic
 # GATE P7: the seasonal mixed layer (ON = arm C) must not be a vertical-gradient lever against its OFF control (arm B).
 tgP <- ccx_ocean_gradient_target()
 # ⭐ WITHIN ONE VECTOR since 2026-10-02 (W4; audit B7): the canonical's own fitted vector with its seasonal
-# mixed layer ON (as fitted) and OFF (relabelled seas_ml 0) -- dg_gateP7_same_vector(). Until then this line
+# mixed layer ON (as fitted) and OFF (relabeled seas_ml 0) -- dg_gateP7_same_vector(). Until then this line
 # compared arm B's FILE with arm C's, two different models, so the 10-01 "P7 PASS" was not the mixed layer's effect.
 # (2026-10-03) also at every EXTRA mode arm fitted with the mixed layer ON, so a candidate canonical is
 # judged on the gate the canonical is judged on.

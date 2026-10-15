@@ -6,7 +6,7 @@
 # ccx_pulse_ref_state), NOT here. Kept unconverted as the record of what it printed: do not quote its
 # IRFs or partitions as the canonical's.
 # =====================================================================
-# diag_fert_ridge_gates.R -- THE FERTILISATION RIDGE AGAINST GATES 4, 7 AND 12
+# diag_fert_ridge_gates.R -- THE FERTILIZATION RIDGE AGAINST GATES 4, 7 AND 12
 #                            AT ONCE, PLUS FACE AND THE LIKELIHOOD.  (2026-08-25)
 #
 # diag_af_trend_levers.R answered Marcus's gate-4 question and the answer was
@@ -21,13 +21,13 @@
 #     way needs the level to move ~0.11, i.e. kz to fall by more than its own
 #     value. Stratification cannot deliver this.
 #   * The Revelle buffer is ALREADY the largest working contributor (+0.0084).
-#   * Travelling ALONG the (beta_max, fert_k) ridge at fixed present-day NPP
+#   * Traveling ALONG the (beta_max, fert_k) ridge at fixed present-day NPP
 #     enhancement moves the trend by +0.0171 -- more than the whole gap -- and
 #     simultaneously takes the decadal sd from 0.019 to 0.040 (target 0.048),
 #     r(obs) from -0.06 to +0.57, and the RMSE to its best value.
 #
 # So gate 4's failure is a statement about the SATURATION SHAPE of CO2
-# fertilisation, along the one direction the historical CO2 integral cannot
+# fertilization, along the one direction the historical CO2 integral cannot
 # identify. That is the same direction FACE speaks to, and the same direction
 # every pinned probe has run away down.
 #

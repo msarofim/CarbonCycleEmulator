@@ -83,7 +83,7 @@ ccx_deriv_fast <- function(y, t, p, forc, grid, aux) {
   }
   dy
 }
-# floor = 0 reproduces the August form exactly; f is normalised to 1 at the ML
+# floor = 0 reproduces the August form exactly; f is normalized to 1 at the ML
 # base either way, so `kz` keeps its NATRE-comparable meaning in both families.
 ca_shape <- function(grid, z_K, floor = 0) {
   z <- cumsum(grid$dz)[seq_len(grid$nl)]

@@ -18,7 +18,7 @@
 #   1 BASIN    a superposition scan over L (one run per lag; s fitted in closed form, w at the base) finds
 #              the basin -- a START, never an answer;
 #   2 OPTIMUM  Nelder-Mead on (L, log s, w) over REAL runs of the full module objective, from that start;
-#   3 PROFILE  the lag's profile on real runs (s, w re-optimised per lag), its 1- and 2-sigma ranges
+#   3 PROFILE  the lag's profile on real runs (s, w re-optimized per lag), its 1- and 2-sigma ranges
 #              (drops of 0.5 / 2 in log-likelihood);
 #   4 LAPLACE  the module's Hessian in (L, s, w) by central differences on real runs -> the covariance the
 #              ruled cut posterior propagates (Marcus: "Laplace + propagation (Recommended)"). The steps stay

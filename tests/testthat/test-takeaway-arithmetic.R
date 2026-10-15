@@ -4,7 +4,7 @@
 # ⛔⛔ WHY THIS FILE EXISTS. Four numbers the app printed were computed wrongly, each inside a
 # renderText where no test could reach it:
 #   A1 the Scenarios span read the FIRST and LAST ticked runs, not the min and max;
-#   A2 `which.min(abs(t - 1958))` TIES on month-centred times and took December 1957;
+#   A2 `which.min(abs(t - 1958))` TIES on month-centered times and took December 1957;
 #   A3 the Keeling "today" was one December of the raw box against a typed 39-month obs window;
 #   A4 the land-use crossing year diffed ANNUAL MEANS, the half-year offset fixed on 09-24 (o).
 # The arithmetic now lives in named functions (app/global.R, app/R/plots.R), gated here on
@@ -23,7 +23,7 @@ for (e in parse(file.path(.root, "app", "global.R"))) {
   if (is.call(e) && length(e) >= 3L && identical(as.character(e[[1]]), "<-") &&
       is.name(e[[2]]) && as.character(e[[2]]) %in% .ta_want) eval(e, .ta_env)
 }
-.months <- function(y0, y1) seq(y0, y1 + 1 - 1e-9, by = 1 / 12) + 1 / 24   # month CENTRES, as the runs
+.months <- function(y0, y1) seq(y0, y1 + 1 - 1e-9, by = 1 / 12) + 1 / 24   # month CENTERS, as the runs
 .ta_plots_ok <- requireNamespace("ggplot2", quietly = TRUE) &&
   tryCatch({ assign("APP_LUC_SMOOTH_YR", 11L, envir = .ta_env)
              local({ library(ggplot2); sys.source(file.path(.root, "app", "R", "plots.R"), envir = .ta_env) })

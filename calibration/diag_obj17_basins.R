@@ -6,7 +6,7 @@
 # UNCONSTRAINED vector u: likelihood + prior + the log-Jacobian of each name's transform. The project compares fits on
 # LIKELIHOOD, never on stored logposts; this splits the lead into those three parts, per name and per row, each vector
 # scored in #17's OWN space (its file's base, structure and pins; diag_obj17_refit_read.R's score_on() and ledger(),
-# verbatim). Also printed: the natural-space density (likelihood + prior, no Jacobian), which a re-parametrisation
+# verbatim). Also printed: the natural-space density (likelihood + prior, no Jacobian), which a re-parametrization
 # leaves unchanged.
 # GATE: each vector reproduces its stored logpost (tol 1e-5, recompute_hessian.R's GATE 1), and the three parts sum to
 # the logpost difference exactly.

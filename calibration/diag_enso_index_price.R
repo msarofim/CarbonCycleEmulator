@@ -11,10 +11,10 @@
 #
 # PROTOCOL, per index (CCX_ENSO_INDEX_CODES):
 #   U  unrefitted: the mode vector, only the index swapped.
-#   E  the ENSO coordinates re-optimised (EP_ENSO). This ranks INDEX, not
+#   E  the ENSO coordinates re-optimized (EP_ENSO). This ranks INDEX, not
 #      AMPLITUDE -- the 09-02 bake-off's rule; relsst_lp is a different
 #      product's Nino 3.4 with 9 % more amplitude, so U alone would mis-rank it.
-#   B  EP_ENSO + the q10 ridge + the net-sink setters (EP_BROAD) re-optimised: a
+#   B  EP_ENSO + the q10 ridge + the net-sink setters (EP_BROAD) re-optimized: a
 #      PREVIEW of where the refit goes, q10 above all. An UPPER BOUND on a full
 #      refit's cost; Nelder-Mead, not converged by construction at EP_NM_MAXIT.
 # Futures at each B point: vvH / vvL, GCB spliced (the app's splice).

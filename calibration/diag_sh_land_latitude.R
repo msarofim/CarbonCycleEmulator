@@ -12,7 +12,7 @@
 #
 # That is a testable statement with more than one reading, so all of them are
 # computed rather than one being picked:
-#   1. LAND AREA          -- every square metre of ice-free land, deserts
+#   1. LAND AREA          -- every square meter of ice-free land, deserts
 #                            included. The literal reading of "land mass".
 #   2. VEGETATED AREA     -- MOD17's valid pixels: land that MODIS sees
 #                            vegetation on. Sahara/Atacama/Namib drop out.

@@ -24,7 +24,7 @@ test_that("3. the imbalance series follows its treatment over every GCB year", {
   expect_identical(raw$I, g$imbalance)
   cst <- ccx_imb_series(g, "const", FALSE)
   expect_equal(cst$I, rep(mean(g$imbalance), n), tolerance = 0)
-  # smooth: k = 1 is the raw series; interior = the plain centred mean; the ends SHRINK
+  # smooth: k = 1 is the raw series; interior = the plain centered mean; the ends SHRINK
   expect_identical(ccx_imb_series(g, "smooth", FALSE, k = 1L)$I, g$imbalance)
   sm <- ccx_imb_series(g, "smooth", FALSE, k = 11L)$I
   expect_false(anyNA(sm)); expect_length(sm, n)

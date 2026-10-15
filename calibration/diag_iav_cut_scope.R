@@ -2,11 +2,11 @@
 # =====================================================================
 # diag_iav_cut_scope.R -- the interannual-cut preview's B2, SPLIT into its ENSO and its volcanic part (2026-10-06).
 #
-# WHY. diag_iav_cut_preview.R's B2 (A1's interannual names held, the five other land names re-optimised) recovers
+# WHY. diag_iav_cut_preview.R's B2 (A1's interannual names held, the five other land names re-optimized) recovers
 # only 8 of B1's 80 log-units, and it moves beta_max and fert_k up ~14 %, which moves SSP5-8.5 CO2 in 2300 by
 # about -30 ppm. That is the leakage a cut is meant to prevent, so it needs an owner before any scope is
 # recommended: the ENSO names (lag + amplitude) or gamma_diff (whose AOD forcing has a non-zero mean)?
-# THE ARMS, both from A1 (read from the preview's rds), each B1 (unrefitted) and B2 (the 5 land names re-optimised):
+# THE ARMS, both from A1 (read from the preview's rds), each B1 (unrefitted) and B2 (the 5 land names re-optimized):
 #   ENSO  A1's lag and amplitude, gamma_diff at the canonical's 0.25;
 #   VOLC  the canonical's lag and amplitude, gamma_diff at A1's value.
 # ⛔ ADOPTS NOTHING. No RNG.

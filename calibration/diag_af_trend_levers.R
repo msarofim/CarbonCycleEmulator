@@ -11,7 +11,7 @@
 # AF rises when emissions grow fast or when SINKS SATURATE. Emissions are an
 # input, so the model's only freedom is in how its sinks change over time. He
 # named four candidate levers -- ocean warming/stratification, surface CO2
-# saturation (the Revelle buffer), fertilisation saturation, and deforestation
+# saturation (the Revelle buffer), fertilization saturation, and deforestation
 # reducing available land -- and said there may be others.
 #
 # STEP 1 WAS A CODE INVENTORY, NOT A SCAN, and it already answers part of it:
@@ -27,7 +27,7 @@
 #                                             CONSTANT. w_up defaults to 0. There
 #                                             is no path from temperature to
 #                                             vertical transport at all.
-#   land, fertilisation saturates    PRESENT  Michaelis-Menten is the live form
+#   land, fertilization saturates    PRESENT  Michaelis-Menten is the live form
 #                                             (CCX_FERT_MM); beta_max, fert_k
 #   land, clearing costs capacity    PRESENT  R/model.R:937-947 -- `cleared`
 #                                             scales npp0 by (1 - c) via
@@ -54,11 +54,11 @@
 #    far the AF trend moves. A lever that is present but worth 0.001/decade at
 #    its limit cannot close a 0.016/decade gap however it is tuned.
 #
-#  C THE FERTILISATION RIDGE, MOVED ALONG rather than across. fert_k cannot be
+#  C THE FERTILIZATION RIDGE, MOVED ALONG rather than across. fert_k cannot be
 #    scanned alone: it moves the land sink's LEVEL and its SHAPE together, and
 #    the level is already nearly right. The informative experiment holds the
 #    present-day NPP enhancement FIXED and varies fert_k, solving beta_max for
-#    each -- i.e. travelling along the rho = +0.997 ridge, which changes how
+#    each -- i.e. traveling along the rho = +0.997 ridge, which changes how
 #    saturated the response is at fixed historical integral. That isolates
 #    saturation SHAPE, which is the thing gate 4 is asking about.
 #
@@ -193,7 +193,7 @@ for (nm in c("q10", "f_luc_perm", "kz")) {
 }
 
 # =====================================================================
-# C  THE FERTILISATION RIDGE, TRAVELLED ALONG
+# C  THE FERTILIZATION RIDGE, TRAVELED ALONG
 # =====================================================================
 cat("\n=== C. ALONG THE (beta_max, fert_k) RIDGE at FIXED present-day NPP boost ===\n")
 d_now <- AL_CHI_NOW - ccx_const("CO2_PI_PPM")

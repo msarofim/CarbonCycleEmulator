@@ -6,7 +6,7 @@
 #   T1  u_hs in {38, 30, 24, 18}: profile in pump_hs_gcm2 (1-D optimum, rest held)
 #   T2  h_hs in {winner, 75}: the same profile
 #   T3  net conduit carbon flux interior <-> HD at the winner's spinup (a read)
-#   T4  remineralisation below 1000 m, LS + HS, vs the literature (a read)
+#   T4  remineralization below 1000 m, LS + HS, vs the literature (a read)
 #   T5  h_ml pinned at the OBSERVED LS annual-mean MLD, nothing refitted
 #   T6  h_ml pinned at the OBSERVED LS annual-maximum MLD, nothing refitted
 #   T7  the 40 m vs 180-200 m families of round 3, per stream (a diff of the scorer)

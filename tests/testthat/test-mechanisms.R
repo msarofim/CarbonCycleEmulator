@@ -32,7 +32,7 @@ mech_run_raw <- function(off = character(), years = c(1750, 2100), scen = "ssp24
 #
 # DERIVED, measured 2026-08-18 (notes/diag_2026-08-18_test_failures.md S3), as
 # max|dCO2| vs base over 1750-2100, ssp245:
-#   emissions 225.341 | fertilisation 201.185 | ocean_sink 116.211
+#   emissions 225.341 | fertilization 201.185 | ocean_sink 116.211
 #   revelle    34.107 | warming_feedback 18.140 | enso 0.537 (at 2032)
 # The smallest true effect is ENSO's 0.537. MECH_WIRED_MIN sits ~500x below it
 # and ~5 orders above the integrator's round-off in ppm, so a disconnected

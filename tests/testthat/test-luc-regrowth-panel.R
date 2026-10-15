@@ -46,7 +46,7 @@ LRP_SCALE_RX   <- "APP_LUC_SCALE"
 # the attribution retired 2026-09-24 (p): the land-use caveat used to credit the
 # natural sink's growth to "CO2 fertilisation AND forest regrowth", which names a
 # mechanism this model does not contain -- regrowth is netted inside the LUC
-# INPUT, and fertilisation was then the only long-term land-uptake term (not
+# INPUT, and fertilization was then the only long-term land-uptake term (not
 # since hilda33d, 2026-10-01, which adds N-deposition retention).
 LRP_RETIRED_RX <- "fertilisation and forest regrowth"
 LRP_HEADINGS   <- c("APP_REGROWTH_HEADING", "APP_IMBALANCE_HEADING")
@@ -98,7 +98,7 @@ test_that("4. the plot function exists and names its three series", {
   expect_true(has(.lrp_plots, sprintf("%s <- function", LRP_PLOT_FN)))
   for (lab in c("KEY_LUC_GROSS", "KEY_LUC_REGROW", "KEY_LUC_NET"))
     expect_true(has(.lrp_plots, sprintf("%s  ", lab)) || has(.lrp_plots, sprintf("%s ", lab)))
-  # the colours are NAMED palette entries, not literals in the plot body
+  # the colors are NAMED palette entries, not literals in the plot body
   expect_true(has(.lrp_plots, 'PAL[["luc_gross"]]'))
   expect_true(has(.lrp_plots, 'PAL[["luc_regrow"]]'))
 })

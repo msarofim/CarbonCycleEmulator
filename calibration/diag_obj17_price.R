@@ -7,7 +7,7 @@
 # the module), at hilda33p's vector, with the module's four names PINNED:
 #   REF  at hilda33p's own module values -- the canonical scored on #17's rows;
 #   B1   at stage 1's values (calibration/output/iav_module_<date>_hilda33p.rds), nothing refitted;
-#   B2   B1 with the five other land names re-optimised (beta_max, fert_k, luc_scale, imb_share_land, ndep_ret:
+#   B2   B1 with the five other land names re-optimized (beta_max, fert_k, luc_scale, imb_share_land, ndep_ret:
 #        the preview's block), whitened by hilda33p's stored block precision (lib_block_reopt.R's method);
 # and the futures at B2 (SSP5-8.5 and vvH in 2300) against the canonical's.
 # GATES: hilda33p reproduces its stored logpost under its OWN label; REF reproduces the smoke check's #17

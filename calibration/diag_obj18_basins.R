@@ -24,7 +24,7 @@
 # stored logpost, whose likelihood beats A by +2.38 only because its priors cost -36.6 (seas_lag_p_NH at -2.33).
 # The likelihood ranking is still printed for every basin.
 # ⭐ AND A NEAR-TIE (RULED 10-07 k, Marcus: "Read both within 0.5 (Recommended)"): `NEAR <id>` = the RUNNER-UP on likelihood
-# + prior when it lies within the optimiser's own convergence bound (the starts' recorded `cycle_tol`, 0.5) of the best on
+# + prior when it lies within the optimizer's own convergence bound (the starts' recorded `cycle_tol`, 0.5) of the best on
 # it; the chain reads it too. Found on the dry run's 8-start preview: the two basins 0.087 apart on likelihood + prior.
 # GATES: one structure / pin set / seas_ml / pump field / h_ml band across the wave; each representative reproduces
 # its stored logpost (1e-5, the objective's noise floor: memory objective_noise_floor_optimum_on_spike); the three

@@ -4,10 +4,10 @@
 # (CHANGELOG 2026-10-07 a). Found at #17's landing: promote's GATE 4 re-evaluated id 10 (basin A) 1.78e-6 off its
 # stored logpost, although the driver's own end-of-run check had reproduced it exactly; and fit_iav_module.R's
 # base-reproduction gate (then a literal 1e-6) stopped the one-pass check at 1.7e-6. Neither was a defect of the point.
-#   1. THE ROUND TRIP. The objective (promote's construction, verbatim) at the optimiser's own u_mode and at
+#   1. THE ROUND TRIP. The objective (promote's construction, verbatim) at the optimizer's own u_mode and at
 #      ccx_par_to_unc(par_mode), the point promote's GATE 4 evaluates; and at u_mode twice (determinism).
 #   2. THE FLOOR, and WHERE THE OPTIMUM SITS ON IT. 1e-12 single-name nudges of u at u_mode, and at NF_N_OFFSETS
-#      nearby points the optimiser did not choose (u_mode + N(0, NF_OFFSET_SD^2), seeded). A floor the optimum merely
+#      nearby points the optimizer did not choose (u_mode + N(0, NF_OFFSET_SD^2), seeded). A floor the optimum merely
 #      sits in scatters on BOTH sides; an optimum on the floor's upper tail moves DOWN under every nudge.
 #   3. THE dg PATH (fit_iav_module.R's GATE 0): the base's stored rows through dg_vector() / dg_run() / dg_streams(),
 #      and the same under 1e-12 nudges of h_ml.

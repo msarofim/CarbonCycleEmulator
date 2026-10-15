@@ -4,7 +4,7 @@
 # WHY. The seasonal arc has carried "the SH ocean limb is 0.45x observed and
 # ~5 months out of phase" for weeks, and NOTHING SCORED IT: the likelihood's
 # co2_seasonal_SPO row scores the TOTAL, which the model already matches to
-# ~1 % by cancelling a 2.55x land limb against the deficient ocean one. GATE S
+# ~1 % by canceling a 2.55x land limb against the deficient ocean one. GATE S
 # (2026-09-03) is the missing bound. This is its FIRST measurement, and it is
 # the PRE-REGISTRATION BASELINE for Fix A (freeing `ent_seas_amp_SH`).
 #

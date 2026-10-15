@@ -4,7 +4,7 @@
 #
 # THE QUESTION, AND WHY IT COMES BEFORE THE PUMP. At the MAP mode h_ml = 184.0 m
 # against an observed global-mean mixed layer of ~50-75 m, and kz sits 96.6 % of
-# the way up its bracket. The bound-artefact hypothesis was already tested and
+# the way up its bracket. The bound-artifact hypothesis was already tested and
 # REFUTED -- profiling gives an interior optimum at ~184 m. So the data genuinely
 # want a deep mixed layer, and the standing story is that k_w is pinned to +/-2 %
 # by bomb-14C, so the model cannot get carbon IN faster and must get it DOWN
@@ -59,7 +59,7 @@
 #     the step that distinguishes "not export" from "capacity".
 #  4. kz AS THE CONTROL. kz is the model's genuine pure-export knob -- it
 #     multiplies every interior diffusive flux and touches neither ml_mass_kg
-#     nor the chemistry. If the deep-h_ml preference survives re-optimising kz
+#     nor the chemistry. If the deep-h_ml preference survives re-optimizing kz
 #     at every depth, h_ml is supplying something no amount of export can.
 #
 # PRE-REGISTERED DECISION RULE, written before step 3 and 4 were run:
@@ -89,7 +89,7 @@
 # for item 9. Diffusion ventilates 14C in proportion to the carbon it moves, so
 # buying uptake with kz drives the deep-D14C term from z +1.70 to z +4.47 --
 # away from a target the model already misses on the under-depleted side. A
-# biological pump exports carbon as sinking particles and remineralises it at
+# biological pump exports carbon as sinking particles and remineralizes it at
 # depth, adding uptake WITHOUT mixing surface water down. That is a thing no
 # knob currently in the model can do, and it is why the pump case comes out of
 # this stronger than handoff sec.4.2 had it, not weaker.

@@ -67,7 +67,7 @@ AC_CHECKS <- list(
   c("W4/C3 airborne fraction reworded",  "the single most useful summary", "should not be"),
   c("C4 dated clause gone",              "since 2026-09-01", NA),
   c("C4 ENSO blurb",                     NA, "out of the surface ocean, year by year"),
-  # ⚠ C5 SUPERSEDED IN PART 2026-10-01 by Marcus's A3 ("Delete the fertilisation sentence where it
+  # ⚠ C5 SUPERSEDED IN PART 2026-10-01 by Marcus's A3 ("Delete the fertilization sentence where it
   # appears"): the whole "no separate land sink switch" box went, and with it the seasonal sentence this
   # used to require. The absent side still ratchets.
   c("C5 'exactly one reason' gone",      "for exactly one", NA),
@@ -104,7 +104,7 @@ AC_CHECKS <- list(
 )
 
 # THE 2026-10-01 RULINGS (Marcus, review notes/review_2026-10-01c_open_decisions.md: "1) Retire card 6.
-# 2) Say about 1.4 dC per 1000 GtC. 3) Delete the fertilisation sentence where it appears. 4) Fix Card 4
+# 2) Say about 1.4 dC per 1000 GtC. 3) Delete the fertilization sentence where it appears. 4) Fix Card 4
 # and 5, and the land pools, and add N deposition as a driver. 5) update the version to BETA v1.0
 # CarboTope. ... 8) If it is a gross rate, then name it that. 9) Reword: it should be specifically about CO2
 # fertilization, with nitrogen effects a different arm"). Kept apart from the 09-22 list so each round
@@ -115,7 +115,7 @@ AC_CHECKS_1001 <- list(
   # RE-PINNED 2026-10-11 (Marcus: "Re-pin both (Recommended)"): his 10-11 paragraph replaced the
   # horizon sentence and carries its claim ("about 1.4 degC per 1000 GtC from any time period ...").
   c("A2 pulse box: one figure",           "NOT in when you look", "per 1000 GtC from any"),
-  c("A3/B5 '(the land sink)' label gone", "CO₂ fertilisation (the land sink)", NA),
+  c("A3/B5 '(the land sink)' label gone", "CO₂ fertilization (the land sink)", NA),   # U.S. spelling since 10-15
   c("A3/B5 'IS the land sink' gone",      "IS the land sink", NA),
   c("A3 'single cause' gone",            "sink has a single cause", NA),
   c("A3 'only long-term' gone",          "only long-term land-uptake term", NA),
@@ -128,7 +128,7 @@ AC_CHECKS_1001 <- list(
   c("A7 N deposition in the table",       NA, "Nitrogen deposition on land"),
   c("B2 release name",                    "v1.0-hilda29l", "APP_RELEASE_NAME"),
   c("B4 ndep_ret named gross",            "Carbon stored per unit of nitrogen", "Gross carbon uptake per unit of nitrogen"),
-  c("B5 CO2 fertilisation only",          "the land stops taking up carbon", "This switches off CO₂ fertilisation only")
+  c("B5 CO2 fertilisation only",          "the land stops taking up carbon", "This switches off CO₂ fertilization only")
 )
 
 # THE 2026-10-06 RULINGS (Marcus, after the hilda33p adoption; handoff 10-06 §4.1): "Caveat sentence
@@ -243,7 +243,7 @@ test_that("MUTATION: the 10-06 list fires when the old intro returns or the cave
 })
 
 test_that("MUTATION: the 10-01 list fires when the deleted fertilisation sentence returns", {
-  mutated <- paste(.ac_src, '  caveat = paste("In this model CO₂ fertilisation IS the land sink")', sep = "\n")
+  mutated <- paste(.ac_src, '  caveat = paste("In this model CO₂ fertilization IS the land sink")', sep = "\n")
   expect_true(any(grepl("IS the land sink", ac_audit(mutated, AC_CHECKS_1001), fixed = TRUE)))
 })
 

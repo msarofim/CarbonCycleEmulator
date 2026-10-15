@@ -6,7 +6,7 @@
 # §A4 of the app review flagged that the model's box is converted as a
 # MASS-WEIGHTED WHOLE-ATMOSPHERE mean while every observational comparator is a
 # SURFACE mean, said the correction is NEGATIVE, and never put a number on it.
-# Appendix B repeated the flag and called it "a modelling question, not a
+# Appendix B repeated the flag and called it "a modeling question, not a
 # measurement, and nothing here settles it." That is half right: the SIZE is
 # arithmetic from stated inputs, and the size is what decides whether this term
 # is a footnote or a third of the discrepancy the prior is being asked to carry.
@@ -22,7 +22,7 @@
 # Both statements are load-bearing where they sit. They cannot both describe the
 # same box, and `rep_dC` is the parameter that absorbs the difference.
 #
-# WHAT IS COMPUTED, and every input is labelled OBSERVED / DERIVED / ASSUMED:
+# WHAT IS COMPUTED, and every input is labeled OBSERVED / DERIVED / ASSUMED:
 #   f_strat   the stratosphere's share of atmospheric mass        DERIVED
 #   gamma     the CO2 growth rate over the comparison window      OBSERVED
 #   Gamma     the MASS-WEIGHTED mean age of stratospheric air     ASSUMED (band)
@@ -51,7 +51,7 @@ MW_DATE <- format(Sys.Date(), "%Y%m%d")
 MW_OUT  <- file.path(.root, "outputs", "diagnostics",
                      sprintf("rep_dc_mass_weighting_%s.log", MW_DATE))
 
-# ---- INPUTS, each labelled ------------------------------------------
+# ---- INPUTS, each labeled ------------------------------------------
 # ASSUMED. Textbook tropopause pressures, stated as inputs rather than measured
 # here. The sensitivity to both is reported below, so the answer never rests on
 # either being exactly right.
@@ -185,8 +185,8 @@ grew <- (model_off - exp_mid) / (model_off - MW_MBL_OFF)
 say("  ⇒ the mass-weighting term makes the residue %.0f%% (NH) / %.0f%% (SH) LARGER.",
     100 * (grew[["NH"]] - 1), 100 * (grew[["SH"]] - 1))
 
-# ---- 6. against what re-centring the prior would buy ----------------
-# R2's cheapest option is to re-centre the prior from 0 on the measured offset.
+# ---- 6. against what re-centering the prior would buy ----------------
+# R2's cheapest option is to re-center the prior from 0 on the measured offset.
 # That moves the prior's mean by exactly the measured offset, so the two terms
 # are directly comparable in ppm -- and they point opposite ways.
 say("\n6. AGAINST R2's CHEAPEST OPTION")

@@ -94,7 +94,7 @@ for (nm in c(land = "land_sink", ocean = "ocean_sink")) {
   # is optimistic -- a garden of forking paths, stated rather than hidden. It
   # does not carry the verdict here: the count below says how many of the 13
   # lags are individually significant, and a signal that survives at nearly all
-  # of them is not an artefact of which one was picked.
+  # of them is not an artifact of which one was picked.
   nsig <- sum(vapply(PW_LAGS, function(L) {
     cc <- pw_cor(pw_index_annual(PW_INDEX, L), y); cc$ci[1] * cc$ci[2] > 0 }, logical(1)))
   cat(sprintf("     robustness to that choice: %d of %d lags individually significant\n",

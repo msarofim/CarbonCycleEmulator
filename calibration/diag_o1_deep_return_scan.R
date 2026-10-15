@@ -13,9 +13,9 @@
 #            gradient and its z, the PI profile (layer 2 / 6 / bottom - ML),
 #            the bomb / CO2 / profile rows, the sink.
 #   Stage 2  ARM C: per (arm, k) the (W, f) point with the best raw dlik,
-#            re-optimised over {beta_max, fert_k, q10, kz_deep_frac, h_ml,
+#            re-optimized over {beta_max, fert_k, q10, kz_deep_frac, h_ml,
 #            k_w, bomb_total, sigma_d14c} (the PK-2 machinery); the CONTROL
-#            re-optimised the same way at every f.
+#            re-optimized the same way at every f.
 #   Stage 3  the overlap check: the best THC point at tau_q x {0.5, 2}.
 #   The decision rule (prereg §4) is evaluated and printed; nothing adopted.
 # Usage: Rscript calibration/diag_o1_deep_return_scan.R      (DR_SMOKE=1 for a 3-point smoke)
@@ -50,7 +50,7 @@ cat(sprintf("export %.2f GtC/yr (martin); kz x %s; THC k %s x W %s Sv; STC k %s 
 
 # ---- the observations the decision rule reads (READ, never typed) --------
 obs <- ccx_prepare_obs()
-exc_obs <- obs$excess_c14                      # year / centre / half_width (Peacock + Key)
+exc_obs <- obs$excess_c14                      # year / center / half_width (Peacock + Key)
 tg <- ccx_ocean_gradient_target()
 cat(sprintf("obs: ocean bomb excess %s kmol; DIC gradient target %.1f (sd %.1f, cluster %.1f)\n\n",
             paste(sprintf("%d: %.1f +- %.1f", exc_obs$year, exc_obs$centre, exc_obs$half_width), collapse = ", "),
@@ -174,8 +174,8 @@ reopt_point <- function(arm, k, W, f) {
   st_raw <- attr(v_raw, "streams"); st_c <- attr(v, "streams"); cm <- intersect(names(st_c), names(ref_st))
   list(arm = arm, k = k, W = W, f = f, pm = pmb, dlik_raw = sum(st_raw[cm] - ref_st[cm]), dlik = sum(st_c[cm] - ref_st[cm]),
        d = st_c[cm] - ref_st[cm], n_eval = o1$counts[1] + o2$counts[1],
-       # the decision-rule reads at the re-optimised point, on the dg path (same physics, the harness the prereg names)
-       # the decision-rule reads at the re-optimised point, on the dg path (same physics, the harness the prereg names):
+       # the decision-rule reads at the re-optimized point, on the dg path (same physics, the harness the prereg names)
+       # the decision-rule reads at the re-optimized point, on the dg path (same physics, the harness the prereg names):
        # the fitted names are written onto the point's p directly (the pinned OFF names stay as point_p set them; the
        # ocean gammas at 0 -- ccx_set_enso() is NOT used because it would default an absent pinned gamma)
        read = { vv <- point_p(arm, k, W, f); for (n in names(pmb)) if (n %in% names(vv$p)) vv$p[[n]] <- pmb[[n]]

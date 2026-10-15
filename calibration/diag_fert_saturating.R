@@ -1,5 +1,5 @@
 # =====================================================================
-# diag_fert_saturating.R -- REVIEW ITEM 7. Does a saturating fertilisation
+# diag_fert_saturating.R -- REVIEW ITEM 7. Does a saturating fertilization
 # form hit the design target the log form provably cannot?
 #
 # THE DEFECT (review 2026-08-14 sec.4.1). NPP = NPP0(1 + beta ln(chi/chi0)) has
@@ -220,7 +220,7 @@ cat("  is why no value of beta could have passed both gates.\n")
 # lower land sink: that is the whole case for `luc_scale` (diag_luc_scale.R,
 # handoff sec.3.1's settlement at beta 0.55 / luc_scale 0.70). The obvious next
 # move is to stack the two and close gate 7. IT DOES NOT WORK, and the reason is
-# worth writing down: with the fertilisation parameters HELD, luc_scale only
+# worth writing down: with the fertilization parameters HELD, luc_scale only
 # removes carbon from the system. There is no beta left to relax, so the CO2
 # bias absorbs the whole change and the land sink barely moves.
 cat("\n--- 5. luc_scale on top of MM -- a negative result --------------\n")

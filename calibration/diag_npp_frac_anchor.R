@@ -3,7 +3,7 @@
 #                           CIRCULAR IT IS
 #
 # THE PROVENANCE OF A SHIPPED CONSTANT. `NPP_FRAC_NH_ANCHOR_1750` in
-# R/constants.R is the centre of npp_frac_NH's prior. It is NOT an observation:
+# R/constants.R is the center of npp_frac_NH's prior. It is NOT an observation:
 # MOD17 measures the MODERN NH share (0.594) and the parameter is a 1750 split,
 # so the anchor is that observation walked BACK through the model's own
 # hemispheric clearing. This script is where that number comes from, and it

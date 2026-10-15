@@ -6,7 +6,7 @@
 # this measures what turning it on costs and moves.
 #
 # PROTOCOL, the audit screen's (CHANGELOG 09-29 e): U unrefitted; B beta_max,
-# fert_k, kz re-optimised (the net-sink setters -- gamma_diff is not fitted).
+# fert_k, kz re-optimized (the net-sink setters -- gamma_diff is not fitted).
 # Futures vvH / vvL, GCB spliced. ⚠ A SCREEN; nothing registered or adopted.
 #
 # USAGE: Rscript calibration/diag_aod_mode_price.R   (~10 min, BLAS pinned)

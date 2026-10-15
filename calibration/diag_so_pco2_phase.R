@@ -14,7 +14,7 @@
 # which turns out to allow the SHARPER test: the model's premise is about
 # pCO2's phase relative to SST, and both sides of that are measurable
 # without ever forming a flux. The flux route is still run (sec.4) but it
-# carries a conversion the pCO2 route does not, and it is labelled weaker.
+# carries a conversion the pCO2 route does not, and it is labeled weaker.
 #
 # ⚠ pCO2 IS NOT FLUX. F = k * K0 * dpCO2. Nothing here contains the wind
 # seasonality in k or the temperature seasonality in K0. Both modulate the

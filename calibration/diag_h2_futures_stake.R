@@ -27,7 +27,7 @@
 #      G3b with both runs forced to the coupled loop's cap (tol 0, CLIM_MAX_ITER iterations), over 1750 to the SST
 #          record's last year, so the year the SST seam sits in is still tested exactly.
 #      WHY TWO. The GMST record ends a year before the SST record (2024 vs 2025), so the SST-observed year runs on
-#      MODELLED GMST, which carries the loop's convergence residual. Two arms whose futures differ can stop after
+#      MODELED GMST, which carries the loop's convergence residual. Two arms whose futures differ can stop after
 #      different iteration counts, and that year then differs at the residual (hilda31w: 6 vs 5 iterations, 8e-13 ppm
 #      in 2025; outputs/diagnostics/h2_futures_stake_20261013_hilda31w_G3_FAILED.log). That is not a leak: forced to
 #      one count the two are bit-identical through 2025. G3a alone would never see a leak INTO that year; G3b does.

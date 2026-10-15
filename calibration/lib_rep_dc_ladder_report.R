@@ -10,7 +10,7 @@
 # ⛔ THE ONE RULE THIS FILE ENFORCES: a product's movement is reported against
 # TWO yardsticks and never against a hand-picked absolute --
 #   (1) the REPLICATE NOISE FLOOR, the spread of that product across the
-#       perturbed re-optimisations AT THE CANONICAL RUNG. A product that moves
+#       perturbed re-optimizations AT THE CANONICAL RUNG. A product that moves
 #       less than its own floor has not moved; the ladder has no power there and
 #       says so instead of reporting a number.
 #   (2) its OWN OBSERVATIONAL SIGMA where one exists (RPL_OBS_SD).
@@ -36,7 +36,7 @@
 # ladder has no effect on it".
 RPL_CHECKS <- c("co2_pi", "part1000_close")
 # If the replicates cannot get back to within this of the canonical logpost, the
-# "noise floor" is measuring an INADEQUATE OPTIMISER BUDGET, not optimiser noise,
+# "noise floor" is measuring an INADEQUATE OPTIMIZER BUDGET, not optimizer noise,
 # and every /floor ratio below is against the wrong scale.
 RPL_FLOOR_SANE <- 5.0
 

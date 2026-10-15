@@ -21,7 +21,7 @@
 #
 # ⚠ `num` IS CARRIED, NOT HIDDEN IN A TOLERANCE. The model's own budget closes
 # to ~1e-6 GtC/yr in the 1750s and drifts to ~0.03 by 2021 -- PROPORTIONAL to
-# the flux, i.e. a discretisation term, not a leak (the state has no fourth
+# the flux, i.e. a discretization term, not a leak (the state has no fourth
 # reservoir: ccx_core.cpp sums all four land pools into `land_C` and mixed
 # layer + interior into `ocean_C`, and the atmosphere is the rest). It arises
 # because dg_annual_sinks() interpolates MONTHLY-sampled stocks to January-1
@@ -234,7 +234,7 @@ for (y0 in LB_DECADES) {
 # ---- [4b] the recent window, YEAR BY YEAR ---------------------------
 # ⚠ The handoff flags 2020-2024 as GCB's least-constrained years and says
 # FLAGGED, NOT INTERPRETED. A window mean can be one year wearing a disguise,
-# so the years are shown rather than summarised.
+# so the years are shown rather than summarized.
 cat(sprintf("\n[4b] THE RECENT WINDOW YEAR BY YEAR -- is it a signal or one year?\n"))
 cat(sprintf("  %6s %8s %8s %8s %8s %8s\n", "year", "G mdl", "G obs", "dGrow", "dLand", "IMBAL"))
 for (y in seq(max(d$year) - 9, max(d$year))) {

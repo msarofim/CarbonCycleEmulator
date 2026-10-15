@@ -1,12 +1,12 @@
 # =====================================================================
 # T-D0 (handoff 2026-09-08g §1): the LS biological pump under a MARTIN
-# remineralisation shape, UNREFITTED, at the canonical hilda31.
+# remineralization shape, UNREFITTED, at the canonical hilda31.
 #
-# WHAT IT DECIDES. Whether option D (Martin-curve remineralisation) lightens
+# WHAT IT DECIDES. Whether option D (Martin-curve remineralization) lightens
 # the deep and gate Q (assessment 09-08f §3.3), and HOW MUCH option C's
 # derived entrainment amplitude changes under D -- the C x D interaction
 # (handoff §3): C's amplitude is (C_1 - C_ml) x f(month), the sub-mixed-layer
-# DIC step, which is set by where the LS pump remineralises.
+# DIC step, which is set by where the LS pump remineralizes.
 #
 # PRE-REGISTERED (handoff §1): deep d13C falls >= 0.3 permil toward the
 # observed deep; gate Q's mean falls; the layer-1 DIC step shrinks by > 25 %.
@@ -14,8 +14,8 @@
 #
 # HOW. ccx_pump_shape() returns the DIC-excess PROFILE (0 at the mixed layer,
 # 1 at the bottom) whose diffusive return flux ccx_pump_export() turns into a
-# per-layer remineralisation source S_k = -(F_k - F_{k+1}), F_k = K_k dC/dz at
-# interface k. So a remineralisation SHAPE is a profile: with the model's OWN
+# per-layer remineralization source S_k = -(F_k - F_{k+1}), F_k = K_k dC/dz at
+# interface k. So a remineralization SHAPE is a profile: with the model's OWN
 # K(z) (ccx_kz_profile), set the interface flux to Martin's
 #   F(z_k) = F(z_s) (z_k / z_s)^(-b),  b = 0.858 (Martin et al. 1987, SOURCED)
 # and integrate C(z) = sum F dz / K back to a profile. Two arms beside the

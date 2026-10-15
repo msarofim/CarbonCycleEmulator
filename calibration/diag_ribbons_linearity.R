@@ -16,7 +16,7 @@
 #      sd = sqrt(g' Sigma g) exactly in expectation -- if it does, the arithmetic
 #      is right and the excess is the MODEL's, not the code's.
 #   T4 WHERE THE EXCESS LIVES: the residual y - y_lin regressed on each name's
-#      standardised displacement and its SQUARE; a convex response shows up as
+#      standardized displacement and its SQUARE; a convex response shows up as
 #      a positive coefficient on the square of the names that carry it.
 #   T5 IS THE GAUSSIAN RIGHT THERE: every draw scored on the objective; the log
 #      importance weight lp - lp_quad says where the real posterior falls off
@@ -80,7 +80,7 @@ f0 <- run_cells(u0)
 G <- do.call(rbind, parallel::mclapply(names(u0), function(n) {
   h <- DL_GRAD_FRAC * sqrt(Sig[n, n]); up <- u0; dn <- u0; up[[n]] <- up[[n]] + h; dn[[n]] <- dn[[n]] - h
   (run_cells(up) - run_cells(dn)) / (2 * h) }, mc.cores = 8)); rownames(G) <- names(u0)
-D <- sweep(U, 2, u0, "-"); S <- sweep(D, 2, sqrt(diag(Sig)), "/")   # standardised displacements
+D <- sweep(U, 2, u0, "-"); S <- sweep(D, 2, sqrt(diag(Sig)), "/")   # standardized displacements
 for (j in seq_along(DL_CELLS)) {
   cl <- DL_CELLS[[j]]
   y <- vapply(seq_len(pv$n_draws), function(i) kd$value[kd$draw == i & kd$scenario == cl[1] & kd$var == cl[2] &

@@ -6,7 +6,7 @@
 # INDEFINITE because the point was far from an optimum (gradients up to 6114
 # per log-unit), and marginal sds off an indefinite matrix are not a count.
 #
-# Maximises the LIKELIHOOD (objective change #8 included, NO priors) over the
+# Maximizes the LIKELIHOOD (objective change #8 included, NO priors) over the
 # same ten log-parameters with everything else at ent26, L-BFGS-B inside
 # physical box bounds, then recomputes the Hessian there and scores I1-I10.
 # ⚠ A conditional optimum of ten parameters with sixteen held is NOT a mode
@@ -67,7 +67,7 @@ ref_R0 <- local({ v <- v0; p <- v0$p; p$hs_frac <- 0; v$p <- p; r <- dg_run(v); 
 cat(sprintf("  logL at the arm %.3f;  ent26 (32 boxes) under objective #8 %.3f;  gap %+.2f\n",
             f0$ll, ref_R0, f0$ll - ref_R0))
 
-# ---- optimise ----------------------------------------------------------------
+# ---- optimize ----------------------------------------------------------------
 lo <- vapply(SO_ALL, function(n) log(SO_BOUNDS[[n]][1] / centre[[n]]), 0)
 hi <- vapply(SO_ALL, function(n) log(SO_BOUNDS[[n]][2] / centre[[n]]), 0)
 n_eval <- 0

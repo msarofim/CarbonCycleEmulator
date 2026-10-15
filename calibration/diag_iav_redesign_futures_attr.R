@@ -2,7 +2,7 @@
 # =====================================================================
 # diag_iav_redesign_futures_attr.R -- WHICH re-fitted name carries the redesign's futures move? (CHANGELOG 2026-10-07 d)
 # calibration/diag_iav_redesign_price.R found that at basin B the detrended index ALONE moves CO2 in 2300 by +0.02 ppm
-# (B1), but with the five land names re-optimised (B2) by +23 ppm under SSP5-8.5 (+11 under vvH). Here each B2 name is set
+# (B1), but with the five land names re-optimized (B2) by +23 ppm under SSP5-8.5 (+11 under vvH). Here each B2 name is set
 # back to B's value, ONE AT A TIME, everything else at B2 (the index detrended): the futures' change is that name's share.
 # GATES: the B2 and B1 vectors rebuilt here reproduce the pricing's stored futures exactly (B1 = all five set back).
 # Usage: Rscript calibration/diag_iav_redesign_futures_attr.R [pricing rds]

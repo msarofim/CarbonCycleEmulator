@@ -2,7 +2,7 @@
 # Gate: R/importance.R's importance-weight diagnostics (2026-10-08 i).
 #
 # The Pareto tail fit is RE-IMPLEMENTED ({loo} is not installed), so it is validated here against tails of
-# KNOWN shape rather than trusted: generalised-Pareto draws with k = 0.2 / 0.5 / 0.9 must come back near
+# KNOWN shape rather than trusted: generalized-Pareto draws with k = 0.2 / 0.5 / 0.9 must come back near
 # their k, and an importance problem with a known answer (a Gaussian proposal narrower or wider than a
 # Gaussian target) must land on the right side of the 0.7 rule.
 # =====================================================================

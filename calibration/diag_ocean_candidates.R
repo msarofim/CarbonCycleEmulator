@@ -386,7 +386,7 @@ aok  <- a_res[!vapply(a_res, function(e) is.null(e$total), logical(1))]
 # z_K = Inf column measures exactly how big that penalty is: the SAME model at
 # kz 5000 scores -2579.4 against the reference's -2269.7 -- a 309 log-unit gap
 # from a 22 % change in one parameter. Any comparison that lets the incumbent be
-# optimised and the challenger not is rigged, and by roughly that much.
+# optimized and the challenger not is rigged, and by roughly that much.
 #
 # The fix is not a full 19-parameter refit per z_K (that is ~5.4 h each). It is
 # to ask the question candidate A was actually proposed to answer:

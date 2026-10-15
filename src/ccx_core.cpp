@@ -57,7 +57,7 @@ using namespace Rcpp;
 // aux$hs_on, and EVERY entry point calls unpack_aux() before touching y.
 // They are file statics, so this core is not re-entrant across threads with
 // two different structures; it never was thread-safe and the calibration
-// parallelises by FORKING, which gives each worker its own copy.
+// parallelizes by FORKING, which gives each worker its own copy.
 static int NPH = 16;               // boxes per hemisphere (the stride)
 static int NB  = 32;               // boxes
 static const int NL = 10;          // ocean interior layers
@@ -204,7 +204,7 @@ struct Aux {
   int    inert_on;
   // D1 IS LIVE (audit 2026-09-15 d): eq_on || tr_on -- the one flag every
   // a_ls/a_ml correction reads (twin of R's aux$d1_on, derived here from the
-  // two marshalled switches rather than sent, so the two cannot disagree).
+  // two marshaled switches rather than sent, so the two cannot disagree).
   int    d1_on;
   // THE VENTILATION LOOP (option E, 2026-09-14 h): e_on gates it; k_e1..k_e2
   // 1-BASED as in R; e_w the thickness weights (annual-mean grid, 0 outside
@@ -234,7 +234,7 @@ static inline void ccx_alpha_as(double sst, const Aux &A,
   *a_up   = 1.0 + (eps_k - eps_dicg) / 1000.0;
 }
 
-// FERTILISATION FORM. Mirrors CCX_FERT_LOG / CCX_FERT_MM in R/model.R; the two
+// FERTILIZATION FORM. Mirrors CCX_FERT_LOG / CCX_FERT_MM in R/model.R; the two
 // must agree exactly or test-parity.R fails, which is the point.
 #define FERT_LOG 0
 #define FERT_MM  1
@@ -261,7 +261,7 @@ struct Par {
                              // 1-BASED as in R. 1 = every layer = HILDA's
                              // depth-independent q (2026-09-05f)
   double tau_ex_seas_amp, tau_ex_seas_phase;   // diagnostic, 2026-08-31; 0 = OFF
-  // CO2 fertilisation form and the saturating pair. `fert_form` selects which
+  // CO2 fertilization form and the saturating pair. `fert_form` selects which
   // of beta / (beta_max, fert_k) is live; the other is inert. See the long note
   // above CCX_FERT_FORM_DEFAULT in R/model.R for why a second form exists.
   int fert_form;
@@ -284,7 +284,7 @@ struct Par {
   // CCX_F_LUC_PERM_DEFAULT for why 1 rather than 0 is the default.
   double f_luc_perm;
   // WHERE the land-use debit comes from (2026-08-13). 1 = wood alone (the
-  // pre-2026-08-13 behaviour); below 1 the remainder is split pro rata across the
+  // pre-2026-08-13 behavior); below 1 the remainder is split pro rata across the
   // four land pools by their preindustrial equilibrium shares. The default and the
   // canonical mode run 0 = fully pro rata (CCX_F_LUC_WOOD_DEFAULT). Must reproduce
   // ccx_luc_pool_shares() in R/model.R exactly -- the weights are derived from
@@ -324,7 +324,7 @@ struct Par {
   // today this core gated it on A.seas_ml -- i.e. on whether `aux` carried
   // harmonics -- while R gated on ccx_seas_ml_on(p). ccx_spinup() builds
   // `aux` from the un-zeroed `p` and only THEN sets seas_drivers = 0, so the
-  // zeroing was honoured by R and IGNORED here, and the "aseasonal"
+  // zeroing was honored by R and IGNORED here, and the "aseasonal"
   // preindustrial equilibrium carried ~1940 GtC less ocean carbon. The gate
   // is now computed ONCE, by the same function the R core uses, and shipped.
   // A.seas_ml survives only as a DATA-PRESENCE conjunct.
@@ -596,7 +596,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
 
     // land, four pools -- see R/model.R for the structure and for what
     // npp_veg_frac and ra_ratio mean, including why the decoupled phi < 1/f
-    // stability bound does NOT hold (the CO2 feedback stabilises it).
+    // stability bound does NOT hold (the CO2 feedback stabilizes it).
     // Association order mirrors the R exactly (parity).
     const double chi_safe = (chi > 1e-6) ? chi : 1e-6;
 
@@ -625,7 +625,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       fert = 1.0 + P.beta_max * d / den;
       if (fert < 0.0) fert = 0.0;
     }
-    // VOLCANIC DIFFUSE-LIGHT FERTILISATION (2026-08-29). Stratospheric aerosol
+    // VOLCANIC DIFFUSE-LIGHT FERTILIZATION (2026-08-29). Stratospheric aerosol
     // scatters sunlight, raising the DIFFUSE fraction, and a canopy uses diffuse
     // light more efficiently because shaded leaves receive more of it -- so NPP
     // RISES after a large eruption (Gu et al. 2003 Science 299:2035; Mercado et
@@ -766,7 +766,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     // and it has the wrong sign; the conveyor was refuted as the fix). TWO
     // EXPLICIT LIMBS, resolving alpha PER DIRECTION: La Nina reverses the term,
     // and the reverse limb of a fractionating exchange is a different process.
-    // Unlabelled on both sides, so the flux trace counts it in ocean_net.
+    // Unlabeled on both sides, so the flux trace counts it in ocean_net.
     const double ge_ocn = P.gamma_enso_ocn[hi] * enso;
     if (ge_ocn > 0.0)      add_flux(iatm, iml,  ge_ocn, a_as_dn);
     else if (ge_ocn < 0.0) add_flux(iml, iatm, -ge_ocn, a_as_up);
@@ -852,11 +852,11 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       } else {
         for (int kk = 0; kk < NL; ++kk) {
           const int b = base + IML + 1 + kk;
-          // alpha13_signed: grandfathered 2026-08-25e, behaviour unchanged and
+          // alpha13_signed: grandfathered 2026-08-25e, behavior unchanged and
           // OPEN -- pump_org/pump_carb are a flux DIVERGENCE and are negative by
           // construction in some layers. See R/model.R for the full note.
           // the stratification feedback rescales the solved export with g (DESIGN §3.4a S):
-          // S - (1 - g) S_up, twin of R's vectorised expression. The tr branch above never
+          // S - (1 - g) S_up, twin of R's vectorized expression. The tr branch above never
           // meets it: ccx_prepare() refuses the feedback with the tropical box on.
           const double po = A.mix_on ? A.pump_org[hi][kk] - (1.0 - mix_g) * A.pump_up_org[hi][kk] : A.pump_org[hi][kk];
           const double pc = A.mix_on ? A.pump_carb[hi][kk] - (1.0 - mix_g) * A.pump_up_carb[hi][kk] : A.pump_carb[hi][kk];
@@ -881,7 +881,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     }
 
     // outcropping: the non-local limb runs UPWARD -- deep box to mixed layer in
-    // one step, with a distributed descending return. NOT a relabelling of
+    // one step, with a distributed descending return. NOT a relabeling of
     // w_up; see R/model.R for why which limb is non-local decides both what
     // arrives at the surface and what happens to the deep 14C age.
     if (P.w_out[hi] > 0.0) {
@@ -1065,7 +1065,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       add_flux(itr, iatm, gx_tr * pco2_tr, a_up_t, true);
       // (b) the diffusive interface with layer 1 over a_tr at the ML base's
       //     K: layer 1 enters with the effective thickness dz_1 * a_ls/a_tr,
-      //     centre distance (h_tr + dz_1)/2 -- twin of R's add_diffusion call,
+      //     center distance (h_tr + dz_1)/2 -- twin of R's add_diffusion call,
       //     same association order. dzl[1] is layer 1's thickness NOW.
       //     at kz_tr = kz_tr_frac x kz_int[0] (R6); 0 = no interface
       if (A.kz_tr > 0.0) {
@@ -1147,16 +1147,16 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     }
 
     // prescribed emissions -- see R/model.R for the reasoning. Fossil carbon is
-    // external to the modelled system; land-use change is not, so it is a
+    // external to the modeled system; land-use change is not, so it is a
     // TRANSFER out of the land pools (each carrying its own 13C/14C ratios)
     // rather than an external source that created 14C ex nihilo. The default and
     // the canonical mode run f_luc_wood = 0: PRO RATA over the four pools.
-    // f_luc_wood = 1 (the pre-2026-08-13 behaviour) takes it from WOOD alone.
+    // f_luc_wood = 1 (the pre-2026-08-13 behavior) takes it from WOOD alone.
     add_source(iatm, f[hi], d13c_foss, -1000.0);
     if (P.f_luc_wood >= 1.0) {
       add_flux(iwod, iatm, f[2 + hi], 1.0);
     } else {
-      // pro-rata weights = the four terms A.land0 sums, normalised
+      // pro-rata weights = the four terms A.land0 sums, normalized
       double w4[4] = {P.npp_leaf_frac * P.tau_leaf,
                       (1.0 - P.npp_leaf_frac) * P.tau_wood,
                       (1.0 - P.litter_slow_frac) * P.tau_soil_fast,

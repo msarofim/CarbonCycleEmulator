@@ -25,7 +25,7 @@
 #   dic_eq   the SOURCE-WATER contrast by depth bin (median DIC minus the 0-50 m
 #            median) -- the observation k_eq was chosen against (CHANGELOG 09-13 f
 #            inline; promoted to a product here), with the 5-30 deg column of
-#            both hemispheres (the `ml_lo` analogue) beside it.
+#            both hemispheres (the `ml_lo` analog) beside it.
 #   b1       THE RESERVOIR: band annual pCO2 minus the global ocean mean (Fix B's
 #            B1, +55.5 uatm at 09-04g), per hemisphere half (the asymmetry
 #            sensitivity's number), the widened-mask control, and a SIGMA FLOOR.
@@ -33,14 +33,14 @@
 #            MASK sensitivity (|widened - base|) with the month-to-month sd of
 #            the contrast beside it; a tighter or looser sigma is a RULING.
 #
-# MASK. 5S-5N, 160E-80W -- the Fix B judgement (diag_gateS_indep_and_fixB.R,
+# MASK. 5S-5N, 160E-80W -- the Fix B judgment (diag_gateS_indep_and_fixB.R,
 # prereg'd 09-04g), which is the Nino3.4 latitude band over the cold-tongue
 # longitudes. ⚠ THREE GRIDS, TWO LONGITUDE CONVENTIONS: SOM-FFN and Holte run
-# -180..180, ERSST runs 0..360. `lon_mask()` normalises both the axis and the
+# -180..180, ERSST runs 0..360. `lon_mask()` normalizes both the axis and the
 # window to 0..360 and GATES the selected span against the asked span -- the
 # naive `160 <= lon <= 280` on a -180..180 axis silently selected 20 deg of warm
 # pool at one sixth of the area (09-04g). Hemisphere halves are lat > 0 / lat < 0;
-# a cell centred ON the equator (ERSST's lat 0) is counted in NEITHER half and
+# a cell centered ON the equator (ERSST's lat 0) is counted in NEITHER half and
 # in the whole band.
 # Usage: Rscript data-raw/build_eq_cell_targets.R   -> data/obs_eq_cell.rds
 # =====================================================================
@@ -49,7 +49,7 @@ suppressMessages(library(ncdf4))
 EQ_LAT       <- c(-5, 5)               # the Nino3.4 band; hemisphere halves split at 0
 EQ_LON       <- c(160, -80)            # 160E -> 80W, WRAPS the date line (west edge, east edge)
 EQ_LON_WIDE  <- c(140, -70)            # the widened control (Fix B B1b)
-EQ_ML_LO_LAT <- c(5, 30)               # the `ml_lo` analogue column for the DIC contrast
+EQ_ML_LO_LAT <- c(5, 30)               # the `ml_lo` analog column for the DIC contrast
 EQ_SURF_M    <- 50; EQ_FLAG_OK <- 2; EQ_LON_BIN <- 10   # GLODAP conventions (build_hs_surface_targets.R)
 EQ_DIC_BINS  <- c(0, 50, 100, 150, 200, 300, 400, 600, 1000, 6000)
 EQ_SST_BASE  <- c(1991, 2020)          # the base period of ersst5.nino.mth.91-20 (forcing_enso.rds)

@@ -17,7 +17,7 @@
 #                       own box edges at h_ml = h)^2
 #
 # and the honest way to carry one is in quadrature, sigma_eff^2 = sigma_obs^2 +
-# sigma_rep^2, with dnorm's normalisation RETAINED so inflating is charged for.
+# sigma_rep^2, with dnorm's normalization RETAINED so inflating is charged for.
 # It is NOT a tuning knob: every number here is measured off GLODAP.
 #
 # THIS SHIPS THE **SIGNED** like-for-like TARGET, NOT |sigma_rep|, because the

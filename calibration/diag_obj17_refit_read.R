@@ -16,7 +16,7 @@
 # four names #16 fits). So nothing here compares stored logposts; each comparison scores BOTH vectors on ONE objective:
 #   0. Each vector reproduces its stored logpost in its OWN space. The wave's survey.
 #   1. ON #17's ROWS: #17 against REF = hilda33p with its own module values (diag_obj17_price.R's REF), and against the
-#      pricing's B1 (-10.86, unrefitted) and B2 (-10.25, five land names re-optimised).
+#      pricing's B1 (-10.86, unrefitted) and B2 (-10.25, five land names re-optimized).
 #   2. ON #16's ROWS (the full land row and the slope row): #17's vector against hilda33p's -- the cut's price in #16's
 #      own terms (the preview's raw-row land + ocean B2 was -39.2).
 #   3. THE MODULE: its likelihood (ccx_iav_module_loglik) at hilda33p's module values and at #17's (stage 1's), each
@@ -83,7 +83,7 @@ MOD_C  <- unlist(MD_C$par_mode[O17_MODULE])               # hilda33p's own modul
 MOD_N  <- stats::setNames(as.numeric(unclass(PIN_N)[O17_MODULE]), O17_MODULE)   # #17's (PINNED: stage 1's)
 
 #' ONE vector (a mode file's par_mode with pins, `over` overriding names) scored under `label` with `pins` applied in
-#' process and written onto the base -- diag_obj17_price.R's score17(), generalised to either vector.
+#' process and written onto the base -- diag_obj17_price.R's score17(), generalized to either vector.
 #' `base`: the base list to score on. NULL builds it BY HAND under `label` -- deliberately, to score a vector under
 #' ANOTHER objective (sections 1-2). A file in its OWN space passes ccx_mode_base(md), the file's own structure (the
 #' mode-struct lint's resolver; section 0).

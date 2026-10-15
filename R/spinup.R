@@ -5,7 +5,7 @@
 # whole 14C inventory simply decays: lambda = 1.216e-4/yr gives -24.0 per mil
 # over 200 yr and -41.7 per mil over 350 yr of pure drift. The pre-bomb Suess
 # decline the model has to reproduce is about -26.6 per mil (IntCal20,
-# 1750 -> 1950). The artefact would be LARGER than the signal.
+# 1750 -> 1950). The artifact would be LARGER than the signal.
 #
 # HOW IT IS SET. Production is NOT prescribed from the literature. It is solved
 # for, as the rate that holds atmospheric Delta14C at its 1750 value in steady
@@ -52,7 +52,7 @@ ccx_dic_for_pco2 <- function(pco2_target, alk, sst, cc = carb_coefs()) {
 #' MEASURED CONSEQUENCE of skipping this solve: the spinup residual goes from
 #' 6.3e-09 to 1.35e-01 GtC/yr, and over a zero-emission 1750-2024 run the
 #' atmospheric d13C DRIFTS -0.915 permil against -0.036 with the conveyor off.
-#' That artefact is nearly twice the entire d13C misfit the conveyor was
+#' That artifact is nearly twice the entire d13C misfit the conveyor was
 #' proposed to fix. DIAGNOSED, not guessed: setting sst_NH = sst_SH = 17 returns
 #' both the residual (5.15e-09) and the drift (-0.0362) to their conveyor-off
 #' values exactly.
@@ -151,7 +151,7 @@ ccx_c12_steady_conveyor <- function(p0, aux, grid, chi0, y, forc,
 # ⇒ Stored logposts, port targets and checkpoint `ref_logpost` stamps all remain
 #   valid: every one of those gates is 1e-8 relative and this is 8e-14.
 #
-# MARSHALLED ONCE (2026-09-12, review B2). Each of those ~190 calls re-ran
+# MARSHALED ONCE (2026-09-12, review B2). Each of those ~190 calls re-ran
 # `ccx_cpp_par(p0)` and `ccx_cpp_aux(aux, grid)` -- about half the spinup's
 # wall time. `ccx_deriv_prepare()` builds both once from the SAME `(p0, aux,
 # grid)` and the calls pass the prepared pair; the forcing is flattened once
@@ -343,7 +343,7 @@ ccx_spinup <- function(p = ccx_default_params(),
 
     # ocean: mixed layer in Henry equilibrium with the atmosphere; the interior
     # is at uniform CONCENTRATION, so C_k scales with layer thickness (this is
-    # exactly the zero-flux condition of the diffusion discretisation).
+    # exactly the zero-flux condition of the diffusion discretization).
     # STILL EXACT WITH OVERTURNING ON (w_up > 0): the upwelling limb carries
     # w_up * A * conc across every interface and the sinking limb returns the
     # same volume flux at the same concentration, so a uniform column has zero
@@ -360,9 +360,9 @@ ccx_spinup <- function(p = ccx_default_params(),
     # spurious d13C drift).
     dic <- ccx_dic_for_pco2(chi0, ccx_aux_alk(aux), aux$sst[[h]], cc = ccx_aux_carb(aux))
     y[i$ml, "C"] <- dic * aux$ml_mass_kg[[h]] / aux$mol_per_GtC
-    # GtC per metre of the INTERIOR column. With the equatorial cell on (D1,
+    # GtC per meter of the INTERIOR column. With the equatorial cell on (D1,
     # 2026-09-13g) the mixed layer covers a_ml < a_ls, so "the ML's carbon per
-    # metre" is scaled up by a_ls/a_ml to be the interior's; with the cell
+    # meter" is scaled up by a_ls/a_ml to be the interior's; with the cell
     # off the ratio is not formed and this is the 09-13d line, bit for bit.
     conc <- y[i$ml, "C"] / grid$dz[1]
     # `d1_on`, not `eq_on` (review 09-16 c, finding 7): the tropical box ALONE
@@ -422,7 +422,7 @@ ccx_spinup <- function(p = ccx_default_params(),
   # and leaving them on makes the isotope operator singular.
   p0$seas_amp_NH <- 0; p0$seas_amp_SH <- 0
   p0$seas_drivers <- 0
-  # the marshalled (p0, aux, grid), built once for every derivative call below
+  # the marshaled (p0, aux, grid), built once for every derivative call below
   prep <- ccx_deriv_prepare(p0, aux, grid)
 
   # Finish the 12C state when the conveyor couples the two columns. The analytic

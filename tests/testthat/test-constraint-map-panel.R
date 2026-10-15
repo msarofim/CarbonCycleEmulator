@@ -171,7 +171,7 @@ test_that("6. the plot functions actually RUN on the real product", {
 test_that("7. a row total never prints as a bare 0, and the prose uses the SAME formatter", {
   # ⛔ THE DEFECT (2026-09-25). The chart label was `sprintf("(%.0f)")`, so the
   # weakest row -- Δ¹⁴C pre-bomb at 0.196 -- printed "(0)" while the tab's prose
-  # called it 0.2 and divided by it ("about 133 times less"). A row labelled
+  # called it 0.2 and divided by it ("about 133 times less"). A row labeled
   # "(0)" also reads as "worth nothing", which is the misreading the tab's own
   # third caveat exists to prevent. Both now go through fmt_cmap_total().
   f <- file.path(.root, "data", "constraint_map.rds")

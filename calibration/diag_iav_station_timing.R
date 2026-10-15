@@ -8,7 +8,7 @@
 # land anomaly as soon as it is emitted. If the real stations see ENSO at different times from the global mean (a
 # tropical station early, the South Pole late), one land lag cannot satisfy both statistics, and the disagreement is
 # the two-box representation, not either data stream.
-# WHAT. The same estimator on every record: a centred 12-month difference of monthly CO2, 1980-2024, detrended by a
+# WHAT. The same estimator on every record: a centered 12-month difference of monthly CO2, 1980-2024, detrended by a
 # natural spline (df 5), cross-correlated with Nino 3.4 read k months late. Observed: NOAA MBL global (weekly ->
 # monthly), Scripps MLO and SPO (data/obs_co2_monthly.rds, the records the seasonal rows score). Model: the global
 # mean, the NH box and the SH box, at the canonical and at the growth module's optimum (A1, read from the preview rds).
@@ -48,7 +48,7 @@ run_at <- function(L, s, d) { v <- br_vec("BASE", c(stats::setNames(s * G0, ST_G
 
 # the index, monthly, on k = 12 year + month
 en <- as.data.frame(readRDS(ccx_path("data", "forcing_enso.rds"))); en$k <- as.integer(en$year) * 12L + en$month
-# the estimator on a monthly series given as (k, co2): complete monthly grid, centred difference, window, detrend
+# the estimator on a monthly series given as (k, co2): complete monthly grid, centered difference, window, detrend
 cen_grid <- function(k, x) { kk <- seq(min(k), max(k)); v <- x[match(kk, k)]; data.frame(k = kk, g = br_cen12(v)) }
 timing <- function(G) {
   G <- G[G$k >= BR_WIN[1] * 12L + 1L & G$k <= BR_WIN[2] * 12L + 12L & is.finite(G$g), ]

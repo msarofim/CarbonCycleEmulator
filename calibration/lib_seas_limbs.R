@@ -8,7 +8,7 @@
 # estimator, sourced by every file that quotes the number.
 #
 # ⛔ `diag_admissible_2x2_land_ocean.R` IS NOT EDITED TO USE THIS. That file is
-# a PRE-REGISTERED artefact (prereg 27q, committed `36e4051` before it existed)
+# a PRE-REGISTERED artifact (prereg 27q, committed `36e4051` before it existed)
 # and its gates may not move under a refactor. It keeps its inline copy; what
 # binds the two is a REPRODUCTION GATE -- `diag_2x2_repriced_at_enso25.R` sec.1
 # re-scores 27q's six STORED arms through this library and requires the stored
@@ -23,7 +23,7 @@
 # on the provisional ledger. This file still does not read them: it is the
 # ESTIMATOR, and its callers supply the targets.
 # ⛔ THE COPIES ARE NOT CONVERTED IN BULK -- several callers are pre-registered
-# artefacts whose gates may not move. What binds them is CONVERT ON TOUCH plus
+# artifacts whose gates may not move. What binds them is CONVERT ON TOUCH plus
 # `tests/testthat/test-spo-constants-tie.R`, which ties all 34 file-local copies
 # to the registry exactly and can only ratchet down.
 # =====================================================================
@@ -135,7 +135,7 @@ sl_overlay <- function(pv, pump_mode, struct = "", seas_ml = NULL, pins = NULL) 
 #' @param base_mods overrides applied to EVERY run, before the per-case ones --
 #'   for holding a mechanism at a stated value across a whole comparison
 #' @param seas_ml the mixed-layer switch the vector was fitted under (see
-#'   sl_overlay); NULL = the pre-09-12 behaviour
+#'   sl_overlay); NULL = the pre-09-12 behavior
 #' @param spinup the spinup FUNCTION the vector was fitted under. ⛔ 2026-09-12
 #'   (review A8): this used to call ccx_spinup() unconditionally, so a caller
 #'   resolving a PERIODIC-fitted mode file (every mode promoted since 09-09x,

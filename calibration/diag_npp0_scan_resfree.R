@@ -38,11 +38,11 @@
 #   EVERY scale by setting litter_slow_frac = default / scale, tau_soil_slow at
 #   its default. This asks the (m) question without the passive runaway the
 #   inventories reject. Identity (a) is still checked at the unmodified
-#   defaults; the optimisation and the control start from the fixed-stock ones.
+#   defaults; the optimization and the control start from the fixed-stock ones.
 # q10 PIN (RS_PIN_Q10=<value>; CHANGELOG 09-29 v): the decadal-only run pushed
 #   q10 below 1 at x0.75/x0.80 (respiration falling with warming, its seasonal
 #   term sign-flipped) -- the shared-q10 escape of memory q10_recovery_is_escape.
-#   This pins q10 at <value> for the optimisation and the control (removed from
+#   This pins q10 at <value> for the optimization and the control (removed from
 #   the free names) so the escape is closed. Identity (a) still runs at the
 #   unpinned warm start.
 # USAGE: Rscript calibration/diag_npp0_scan_resfree.R  (from a FROZEN copy;

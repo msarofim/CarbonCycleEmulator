@@ -9,7 +9,7 @@
 # asked to serve two processes that are distinct in the real ocean: decadal,
 # surface-intensified bomb-14C penetration, and millennial overturning age.
 #
-# THE TEST. Fix kz on a grid. At each value re-optimise EVERY other parameter, so
+# THE TEST. Fix kz on a grid. At each value re-optimize EVERY other parameter, so
 # the rest of the model gets its best possible chance to compensate. Then read
 # off, together:
 #

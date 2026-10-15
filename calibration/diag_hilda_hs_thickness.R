@@ -37,7 +37,7 @@ HT_SHIM_MEANZ  <- 1.81      # 09-04k2's reduced form
 HT_HS_P1B      <- -95       # prereg P1b: HS must fall BELOW this
 HT_HD_P2B      <- -125      # prereg P2b: HD must fall BELOW this
 HT_LS_OBS      <- c(-40, 20)   # GEOSECS via HILDA Table 2; O1
-HT_CROSSOVER_0 <- 1160         # the 09-05 crossover depth, in metres
+HT_CROSSOVER_0 <- 1160         # the 09-05 crossover depth, in meters
 # A MATERIALITY TOLERANCE, so a no-change arm cannot pass on the fourth decimal.
 HT_MEANZ_TOL   <- 0.02
 # HILDA's own gas exchange expressed as OUR k_w: their Table 1 gives 15.1 mol

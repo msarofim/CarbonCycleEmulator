@@ -114,7 +114,7 @@ cat("     correlated posterior OVERSTATES how pinned a quantity is.\n")
 
 # ---- P2d, DONE PROPERLY: how far can the quantity move INSIDE the posterior? --
 # The Laplace covariance is already stored in the mode file (26x26, pd), so this
-# costs 52 spinups rather than 25 refits. Linearise the observable in the
+# costs 52 spinups rather than 25 refits. Linearize the observable in the
 # UNCONSTRAINED coordinates, then sd = sqrt(g' Sigma g) is the spread the
 # EXISTING objective still permits -- along the posterior's own directions, not
 # along a coordinate axis.

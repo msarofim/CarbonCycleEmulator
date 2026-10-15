@@ -5,7 +5,7 @@
 #
 # The ship list lives HERE, once, so app/DEPLOY.md cannot drift from it (it named a mode file two
 # adoptions old until 2026-10-15). The parameter file's path is never typed: it is whatever
-# ccx_mode_file() returns at that commit. Only TRACKED files ship (git archive), so local artefacts
+# ccx_mode_file() returns at that commit. Only TRACKED files ship (git archive), so local artifacts
 # such as app/Rplots.pdf never do. data-raw/ is excluded: nothing in the app reads it at run time
 # since 2026-10-14 (nuclear 14C is data/forcing_nuclear_c14.rds).
 #

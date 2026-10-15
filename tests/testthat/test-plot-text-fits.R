@@ -69,7 +69,7 @@ test_that("0. the size every budget is MEASURED at is the size that RENDERS", {
   # `theme_ccx()` is called BARE at all 31 call sites, so its signature default
   # is the only number that renders. It used to be a literal 13, with a SECOND
   # copy named CCX_BASE_SIZE beside the budgets; tests 3 and 3b measure axis
-  # labels at that copy. Moving the signature alone desynchronised them.
+  # labels at that copy. Moving the signature alone desynchronized them.
   # \u26a0 MEASURED, and not the way the audit note put it: moving CCX_BASE_SIZE
   # alone moved NOTHING (theme_ccx() is complete, so its explicit element sizes
   # win over whatever it is added to). The exposure was the other direction.
@@ -114,7 +114,7 @@ test_that("2. every subtitle fits, including the one that clipped", {
   skip_if_no_plots(); skip_if(is.null(.pt_env), "plots.R did not load")
   e <- .pt_env
   subs <- c(
-    sprintf(paste("%d-yr centred mean, so each bold line stops %d yr short at both ends",
+    sprintf(paste("%d-yr centered mean, so each bold line stops %d yr short at both ends",
                   "— the thin annual line does not, and the recent years are on it.",
                   "Land-use emissions are OUTSIDE this sink, as GCB reports it."), 11L, 5L),
     sprintf("Shaded: before %d, the split itself is back-extended, not observed", 1959L))

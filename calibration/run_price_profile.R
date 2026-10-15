@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 # =====================================================================
 # run_price_profile.R -- a PRICE PROFILE at the canonical: ONE fitted name HELD at a value, every other fitted name
-# re-optimised, from ONE named start. Two starts that agree are the convergence check.
+# re-optimized, from ONE named start. Two starts that agree are the convergence check.
 #
 # WHY (2026-10-13). Card 7 says of k_w: "The data slightly prefer the literature value [Naegler 2009's 1,446]; what
 # holds it higher is the stated prior on how much gas exchange the cold high-latitude box gets". That was MEASURED at
@@ -10,7 +10,7 @@
 #
 # WHAT IT REUSES, NOT RE-IMPLEMENTS: the objective is run_mcmc_check.R's harness exactly (the canonical's gate, pins,
 # bands, structure, spin-up), with the held name ADDED to the pins, as run_dispersed_multistart.R holds one (CCX_MS_PIN;
-# ccx_pins_price_canonical(): "the canonical's objective with one READ name held"). The optimiser follows that driver's
+# ccx_pins_price_canonical(): "the canonical's objective with one READ name held"). The optimizer follows that driver's
 # recipe and constants (Nelder-Mead restarts, then a BFGS polish, per cycle; the cycle and restart stopping rules; a
 # budget on the CPU clock; an infeasible step scored strictly worse than the start). It is a re-statement of the recipe,
 # not the wave's code: the wave's start/reference machinery has no slot for a warm start from another objective's mode.
@@ -110,7 +110,7 @@ if (!is.finite(lp_st)) stop("the start is not finite under the held objective")
 PENALTY <- max(PP_PENALTY_FLOOR, PP_PENALTY_MULT * abs(lp_st))
 neg <- function(u) { names(u) <- CCX_PARAM_NAMES; v <- lp_eval(u); if (is.finite(v)) -v else PENALTY }
 
-# ---- the optimisation: cycles of NM restarts then a BFGS polish, resumable ---------
+# ---- the optimization: cycles of NM restarts then a BFGS polish, resumable ---------
 PP_ID <- list(hold = PP_HOLD, start = PP_START, mode_md5 = unname(tools::md5sum(ccx_mode_file())))
 S <- if (file.exists(PP_CKPT)) readRDS(PP_CKPT) else
   list(u = u_st, best = -lp_st, cycle = 0L, trace = data.frame(cycle = 0L, step = "start", logpost = lp_st, cpu_min = 0), id = PP_ID)

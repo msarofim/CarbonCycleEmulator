@@ -79,7 +79,7 @@ SC_MASK_WIN    <- c(1961, 1990)
 SC_MASK_MIN_MO <- 120                # months of the 360 in the window
 # CELL WEIGHT = cos(lat) x LAND FRACTION x station coverage. The land fraction
 # is derived from ERSSTv5's own ocean mask (the file is already downloaded for
-# the SST half): the fraction of 2 deg ERSST cell centres inside each 5 deg CRU
+# the SST half): the fraction of 2 deg ERSST cell centers inside each 5 deg CRU
 # cell that carry NO valid SST. Weighting by full cell area instead -- the
 # obvious thing -- gives 41.9 % of the globe, because at 5 deg a cell with one
 # coastal station counts as wholly land, and `absolute.nc` fills those cells
@@ -161,8 +161,8 @@ elat <- ncvar_get(nc, "lat"); elon <- ncvar_get(nc, "lon"); nc_close(nc)
 elon <- ((elon + 180) %% 360) - 180                    # 0..358 -> -180..180
 is_ocean <- is.finite(e1) & e1 > -100 & e1 < 100
 lon <- ncvar_get(nc_open(SC_CRU_NC), "lon")
-# Bin each ERSST centre into its CRU cell (both grids are regular 5 deg / 2 deg
-# with cell CENTRES stored, hence the half-width offsets).
+# Bin each ERSST center into its CRU cell (both grids are regular 5 deg / 2 deg
+# with cell CENTERS stored, hence the half-width offsets).
 ix <- findInterval(elon, sort(lon) - 2.5); iy <- findInterval(elat, sort(lat) - 2.5)
 n_tot <- n_oc <- matrix(0, nrow(tem), ncol(tem))
 lat_s <- sort(lat)

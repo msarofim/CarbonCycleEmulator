@@ -8,7 +8,7 @@
 # re-fit barely moved its cost but moved the futures by tens of ppm. So, two hypotheses:
 #   FORCED   the redesign's record prefers the lower beta_max by a margin the re-fit cannot give back;
 #   RIDGE    the record is ~indifferent along beta_max once the other land names follow, and B2 is one position on it.
-# THE TEST: PROFILE beta_max over RF_GRID with the other four land names re-optimised (whitened by B's stored Hessian
+# THE TEST: PROFILE beta_max over RF_GRID with the other four land names re-optimized (whitened by B's stored Hessian
 # block; diag_obj17_price.R's B2 method), under #17 as landed (shipped index, ocean row year by year) and under the
 # redesign, and read the logpost and the futures along each profile. The price that separates the two readings is the
 # logpost difference between beta_max at B's value and at B2's, under each objective.
@@ -106,7 +106,7 @@ with_objective <- function(pins, index, FUN) {
   FUN(ev)
 }
 
-#' The four followers re-optimised with beta_max HELD at `bm` (natural), under `index` with the ocean row `rows`
+#' The four followers re-optimized with beta_max HELD at `bm` (natural), under `index` with the ocean row `rows`
 #' ("lp" the redesign's, "full" #17's); whitened by B's stored Hessian block for the four; from B's own values.
 profile_cell <- function(bm, index, rows) {
   U <- chol(br_prec(MD_B, RF_FOLLOW)); u0 <- br_u_of_par(MD_B, RF_FOLLOW); key <- if (rows == "lp") "logpost_lp" else "logpost_full"

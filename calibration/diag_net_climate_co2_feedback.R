@@ -7,7 +7,7 @@
 # hilda34g gives +0.118 GtC/yr (2015-24) and, with q10 raised 1.06 -> 1.4 and nothing else moved, only -0.075:
 # a -0.19 GtC/yr response where ~1 K of warming on ~55 GtC/yr of soil respiration predicts ~-1.5. The two runs
 # also differ in CO2 (+3 ppm in 2024 at q10 1.4): CO2 is INTERACTIVE here, and TRENDY PRESCRIBES it (S1 and S2 see
-# the SAME observed CO2). A warmer run outgasses more, so its land is fertilised more, which biases the model's
+# the SAME observed CO2). A warmer run outgasses more, so its land is fertilized more, which biases the model's
 # full - held difference UP. br_net_climate() called that "second-order" without measuring it.
 #
 # THE MEASUREMENT: the full and held runs' 2015-24 CO2 difference (dCO2), and the model's own land response to CO2

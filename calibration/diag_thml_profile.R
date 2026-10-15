@@ -4,7 +4,7 @@
 # profile likelihood).
 #
 # WHAT IT DECIDES. The Hessian at hilda31 found h_ml STEP-UNSTABLE (12.5 %
-# disagreement between neighbouring steps vs the 2 % tolerance; ent26 1.2 %):
+# disagreement between neighboring steps vs the 2 % tolerance; ent26 1.2 %):
 # its curvature reads -53.5 per u^2 at steps <= 3e-2, -57.7 at 3e-2, -87 at
 # 0.1 and -38 at 0.3 (outputs/diagnostics/recompute_hessian_hilda31_20260908.log).
 # The C1 remap (2026-08-29k) removed the h_ml kinks; post-adoption they must

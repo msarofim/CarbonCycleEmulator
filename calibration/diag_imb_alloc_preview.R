@@ -14,7 +14,7 @@
 #
 # WHAT THIS IS: a PREVIEW at ONE fixed parameter vector (the alignment screen's
 # control). No fit. For each treatment of I(t) it reports the shares that
-# maximise the two rows, their standard errors, the rows' log-likelihood gain,
+# maximize the two rows, their standard errors, the rows' log-likelihood gain,
 # and how much of the share estimate comes from the imbalance's LEVEL versus its
 # INTERANNUAL noise. It bounds nothing about a refit (which moves every other
 # parameter too); it says what the new rows would ask for at today's fit.
@@ -51,7 +51,7 @@ IA_FREE11 <- c("beta_max", "fert_k", "luc_scale", "q10", "seas_T_amp_NH", "seas_
 IA_ID_TOL  <- 1e-3        # G1, the screen's tolerance
 IA_ROW_TOL <- 1e-6        # G2, log-units: the two forcing paths are exact by test-luc-scale.R
 IA_GRID    <- 0.002       # G3 simplex grid step
-IA_SMOOTH_YR <- 11L       # centred window, = the app's APP_LUC_SMOOTH_YR (app/global.R)
+IA_SMOOTH_YR <- 11L       # centered window, = the app's APP_LUC_SMOOTH_YR (app/global.R)
 IA_WINDOWS <- list(c(1959L, 2024L), c(1960L, 1989L), c(1990L, 2009L), c(2010L, 2024L))
 # the treatments of I(t) priced here -- the choice put to Marcus
 IA_TREAT <- c(RAW = "annual imbalance as published",

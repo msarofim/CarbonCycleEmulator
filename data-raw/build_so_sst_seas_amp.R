@@ -2,11 +2,11 @@
 # build_so_sst_seas_amp.R -- the SOUTHERN-OCEAN BAND (40-90 S) seasonal SST
 # half-amplitude, COMPUTED from ERSSTv5 rather than typed.
 #
-# WHY THIS EXISTS. `.ENT_SO_SST_AMP` (R/constants.R) was a typed 3.0 labelled
+# WHY THIS EXISTS. `.ENT_SO_SST_AMP` (R/constants.R) was a typed 3.0 labeled
 # "K, seasonal SST half-amplitude of the 40-90 S BAND (ERSSTv5)", with a comment
 # asserting the band "swings harder than the hemisphere containing it". The
 # 2026-09-09t whole-model review flagged it and 09-09v CONFIRMED the flag by
-# recomputation: **3.0 is the PEAK-TO-PEAK, labelled a half-amplitude** -- a true
+# recomputation: **3.0 is the PEAK-TO-PEAK, labeled a half-amplitude** -- a true
 # factor of 2 -- and the band actually swings LESS than the hemisphere
 # (1.4995 < 1.7464), so the comment was falsified like-for-like too. It reads
 # true only by comparing a p2p against a half-amp ⇒ [[amp_definition_mismatch]],

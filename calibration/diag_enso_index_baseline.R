@@ -10,7 +10,7 @@
 # (tau = 2.0 yr) now loads onto the whole land chain (35.5 yr).
 #
 # WHY THE MEAN IS NOT ZERO, and this is the substance of the ruling.
-# data-raw/build_calibration_data.R anomalises Nino 3.4 against
+# data-raw/build_calibration_data.R anomalizes Nino 3.4 against
 # ENSO_CLIM_BASE = 1991-2020 -- the WMO normal, a FIXED and RECENT base. The
 # tropical Pacific warmed over the record, so the early decades sit below zero
 # BY CONSTRUCTION. That warming is mean-state, not ENSO; the model already
@@ -26,9 +26,9 @@
 #   asis     the shipped index. 1991-2020 base, mean -0.218 over the span.
 #   demean   subtract the span mean. Removes the STEP at 1948; leaves the trend.
 #   detrend  remove a linear fit over the span. Removes mean AND mean-state warming.
-#   roll     ONI-style: centred 30-yr base refreshed every 5 yr, rebuilt from the
+#   roll     ONI-style: centered 30-yr base refreshed every 5 yr, rebuilt from the
 #            ABSOLUTE Nino 3.4 SST in nina34.data. ⚠ that record starts in 1948,
-#            so the early blocks CANNOT have a centred window -- they are
+#            so the early blocks CANNOT have a centered window -- they are
 #            CLIPPED, and the clipping is REPORTED rather than hidden.
 # THE EXTENSION THAT DID NOT SURVIVE ITS OWN CONTROL. `roll`'s clipping falls on
 # the EARLY blocks, which is exactly where the mean-state offset is largest, so
@@ -38,7 +38,7 @@
 # `roll_full` (rolling base, no early clipping) as the treatment.
 #
 # ⛔ GATE G-P REFUSES THEM, and the refusal is the finding. nina34.data's own
-# footer says ERSST **V6**; the local netCDF is v5. Deseasonalised over the
+# footer says ERSST **V6**; the local netCDF is v5. Deseasonalized over the
 # shared 1991-2020 window the two agree in PHASE (r 0.984) and disagree in
 # AMPLITUDE: regressing PSL on the v5 average gives slope 0.842, i.e. the v5
 # index swings ~19 % wider. That is FIVE TIMES the entire sd spread of the four
@@ -78,7 +78,7 @@
 #   G-M  MUTATION -- a deliberate +EI_MUT_OFFSET offset must move the logpost.
 #        A treatment machinery that cannot move the objective cannot price one
 #        ([[mutation_test_gates]]).
-#   G-B  INTENT -- each treatment's realised mean/trend in the BUILT column must
+#   G-B  INTENT -- each treatment's realized mean/trend in the BUILT column must
 #        match what its name claims, measured after interpolation, not before.
 #
 # Usage:  Rscript calibration/diag_enso_index_baseline.R
@@ -98,7 +98,7 @@ EI_WIN        <- c(1948, 2024)      # the ENSO-active record, as in the pre-chec
 # and the PSL missing code are NOT here any more: `lib_enso_index.R` owns them,
 # and nothing outside the builders read them.
 EI_CLIM_BASE  <- EIX_CLIM_BASE      # = ENSO_CLIM_BASE in build_calibration_data.R
-EI_ROLL_LEN   <- EIX_ROLL_LEN       # ONI centred base-period length, years
+EI_ROLL_LEN   <- EIX_ROLL_LEN       # ONI centered base-period length, years
 EI_ROLL_STEP  <- EIX_ROLL_STEP      # ONI base-period refresh interval, years
 EI_MUT_OFFSET <- 1.0                # deg C, the G-M mutation
 # ⭐ WHICH TREATMENT IS THE ONE THAT SHIPS. Before Ruling A was adopted
@@ -164,7 +164,7 @@ cat("    That gradient is mean-state warming of the Nino 3.4 box, not ENSO.\n")
 # bases, both rolling tables AND both clip counters -- so every number this
 # file has ever reported is unchanged.
 #
-# WHY THE ABSOLUTE ERSST GRID IS READ AT ALL: a centred 30-yr base for 1948
+# WHY THE ABSOLUTE ERSST GRID IS READ AT ALL: a centered 30-yr base for 1948
 # needs SST from 1933, and nina34.data starts in 1948. ⚠ It is a DIFFERENT SST
 # VERSION from the shipped index, which is why `fix_v5` is priced alongside it
 # rather than assumed immaterial.
@@ -290,7 +290,7 @@ if (!(abs(d_mut) > 1))
 # ([[tolerance_scaled_to_spread]]). The four v6 conventions differ from one
 # another by EI_CONV_SPREAD in anomaly sd; a product whose amplitude differs by
 # more than that cannot be differenced against them, because the difference
-# would be mostly product. Compared on the DESEASONALISED series over the shared
+# would be mostly product. Compared on the DESEASONALIZED series over the shared
 # climatology window, so the comparison is of ENSO amplitude and not of a
 # seasonal cycle or a mean either base period removes anyway.
 sd_conv <- vapply(EI_TREATMENTS, function(kd) {

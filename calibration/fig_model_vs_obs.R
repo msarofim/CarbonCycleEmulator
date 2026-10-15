@@ -4,11 +4,11 @@
 #
 # WHAT IT PLOTS THAT THE APP DOES NOT, and it is the whole point of the
 # STATION line: the likelihood predicts the STATION as `box - rep_dC` (and the
-# d13C analogue through mass balance at LIK_REP_SOURCE_D13C). `plot_keeling()`
+# d13C analog through mass balance at LIK_REP_SOURCE_D13C). `plot_keeling()`
 # in the app draws the raw model BOX against MLO and SPO with no offset, so the
 # calibrated model is EXPECTED to sit ~5.6 ppm above Mauna Loa there, by
 # construction, and the app has no way to say so (diag_app_params.R).
-# BOTH lines are drawn here and both are labelled. Which one belongs in the app
+# BOTH lines are drawn here and both are labeled. Which one belongs in the app
 # is Marcus's presentation decision, not a bug to be silently resolved.
 #
 # THE ICE TERM GETS NO OFFSET -- R/likelihood.R scores the bare co2_SH box
@@ -54,7 +54,7 @@ ic <- readRDS(ccx_path("data", "obs_icecore.rds"))
 # start at 154 CE and the model at FG_YEARS[1] = 1750, so plotting the full
 # record (a) compresses the industrial era to nothing and (b) draws "residuals"
 # for pre-1750 samples that are really the approx(rule = 2) FLAT EXTRAPOLATION
-# of the model's 1750 value -- an artefact of the interpolator, not a misfit.
+# of the model's 1750 value -- an artifact of the interpolator, not a misfit.
 ice <- as.data.table(ic$co2_samples)[, yr := as.numeric(age_CO2)][!is.na(yr)][yr >= FG_YEARS[1]]
 ice[, kind := fifelse(age_ice == "firn", "Law Dome firn", "Law Dome ice")]
 i13 <- as.data.table(ic$d13c_samples)[, yr := as.numeric(age_CO2)][!is.na(yr)][yr >= FG_YEARS[1]]

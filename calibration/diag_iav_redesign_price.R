@@ -18,7 +18,7 @@
 #
 # THE FOUR PRICES (the handoff's s. 3 items), all at basin B's vector (RULED 10-07: "B: better likelihood (Recommended)"):
 #   1 B1 / B2 / B3  the index switch at B's own module pins P0 (= #17's stage 1 at hilda33p), unrefitted (B1), then with
-#                the five land names re-optimised (B2: diag_obj17_price.R's block and method, whitened by B's stored Hessian
+#                the five land names re-optimized (B2: diag_obj17_price.R's block and method, whitened by B's stored Hessian
 #                block, BFGS + Nelder-Mead rounds), then with those five + the ocean pair (B3: pump_grad, kz), each scored
 #                with the ocean row both ways;
 #   2 STAGE 1    the module (lag, one land scale, w_enso_l2) refitted under the detrended index at B, and at hilda33p where
@@ -29,10 +29,10 @@
 #   3 RESISTANCE moving the module P0 -> P1 (the one-pass check at B: w 14.73 -> 16.71) and P0 -> P1d (item 2's answer at
 #                B), unrefitted, on the WHOLE main objective, under {shipped, detrended} x {ocean row year by year,
 #                low-pass}: the totals and every row;
-#   3b RATCHET   the ocean pair (pump_grad, kz: 94 % of the slope's drop at B) re-optimised at P0 and at P1, under #17 as
+#   3b RATCHET   the ocean pair (pump_grad, kz: 94 % of the slope's drop at B) re-optimized at P0 and at P1, under #17 as
 #                landed and under the redesign: does a higher w make the main objective weaken the ocean's ENSO response
 #                again (the mechanism behind the one-pass check's +1.55 sigma)? Read: the pair's move P0 -> P1 in B's own
-#                sd, the resistance with the pair re-optimised, and the model's ENSO ocean slope at each optimum;
+#                sd, the resistance with the pair re-optimized, and the model's ENSO ocean slope at each optimum;
 #   4 FUTURES    CO2 in 2300 (SSP5-8.5; vvH spliced on the historical emissions) at hilda33p, B, B1, B2 and B3 (br_futures()).
 # GATES (the driver stops on any): B reproduces its stored logpost and rows under its own label; the wrapper changes ONLY
 # the ocean row, and that row matches diag_obj17_lowpass_ocean_price.R's (dg path); the shipped index's 1959-2024 trend
@@ -220,7 +220,7 @@ d1_lp <- B1$st_lp - REF$st_lp[names(B1$st_lp)]; d1_full <- B1$st_full - REF$st_f
 cat(sprintf("  B1 likelihood: %+.4f on the redesign's rows (ocean low-pass) | %+.4f on #17's rows (ocean year by year)\n",
             B1$lik_lp - REF$lik_lp, B1$lik_full - REF$lik_full))
 cat("  per row (redesign's rows):\n"); print(round(row_table(d1_lp), 3))
-#' Re-optimise `block` at basin B's vector with the module at `pins` under `index`, maximising the logpost with the ocean
+#' Re-optimize `block` at basin B's vector with the module at `pins` under `index`, maximizing the logpost with the ocean
 #' row low-passed (rows "lp", the redesign's) or year by year (rows "full", #17's). Whitened by B's stored Hessian block,
 #' BFGS + Nelder-Mead rounds until every whitened slope < RP_MODE_TOL: diag_obj17_price.R's B2 method, for any block.
 reopt <- function(pins, index, block, rows, what) {

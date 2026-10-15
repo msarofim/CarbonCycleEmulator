@@ -5,7 +5,7 @@
 # Marcus 2026-10-08: "Evaluate if the posterior bands are feasible: if so, implement them." The ruled method is
 # the cut posterior "Laplace + propagation" (10-06 o): stage 1's Laplace pushed into the main fit's names through
 # the cross-Hessian, on top of the MAIN FIT'S OWN Laplace. The main fit's Laplace is the part that failed at
-# hilda33d (10-01 l: median lp - lp_quad -25.5, ESS 8 / 1000, the fertilisation ridge), and its names are
+# hilda33d (10-01 l: median lp - lp_quad -25.5, ESS 8 / 1000, the fertilization ridge), and its names are
 # stage 2's, so it is tested FIRST, at THIS canonical: if it fails, propagation cannot rescue it.
 #
 # TWO PROPOSALS, each N_DRAWS draws in u-space at the mode, every draw scored on the REAL objective (the stage-2

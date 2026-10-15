@@ -32,7 +32,7 @@
 #      IS old photosynthate. If they are, the two channels are isotopically
 #      DEGENERATE in 13C and the identifiability argument for splitting them
 #      FAILS. This section is written to be able to say that.
-#   3. THE 14C DISCRIMINANT. Delta14C is fractionation-normalised BY DEFINITION,
+#   3. THE 14C DISCRIMINANT. Delta14C is fractionation-normalized BY DEFINITION,
 #      so fresh photosynthate carries the ATMOSPHERE's Delta14C while soil_fast
 #      carries the atmosphere of a turnover time ago -- which, after the bomb
 #      peak, is a different number entirely. If 13C cannot separate the two

@@ -130,7 +130,7 @@ for (h in c("NH", "SH")) {
 # productivity box run backwards through the year, which fits and cannot exist.
 # So the four-box number is re-derived here under NON-NEGATIVITY, exactly, by
 # enumerating all 2^4 active sets. If it moves, the earlier number was an
-# artefact of the constraint being absent and must be withdrawn.
+# artifact of the constraint being absent and must be withdrawn.
 nnls_exact <- function(X, y) {
   p <- ncol(X); best <- NULL; bE <- Inf
   for (m in 0:(2^p - 1)) {

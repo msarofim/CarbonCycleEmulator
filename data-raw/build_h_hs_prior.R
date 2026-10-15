@@ -6,7 +6,7 @@
 # and the canonical fitted 393 m, 3-4x the observed HS mixed layer).
 #
 # THE SAME CONSTRUCTION AS THE ORIGINAL h_ml PRIOR (build_h_ml_prior.R, before
-# its 09-09w re-centring), for the same reason it had then: a TIME-CONSTANT
+# its 09-09w re-centering), for the same reason it had then: a TIME-CONSTANT
 # thickness has two defensible observations -- the HS annual MEAN (115 m,
 # poleward of 57.14 deg, both hemispheres, cos-lat weighted) and the HS annual
 # MAXIMUM (268 m; the water ventilated at all) -- and the mechanism that would
@@ -14,7 +14,7 @@
 # B) is BUILT BUT OFF at the canonical. So the prior encodes the ambiguity: a
 # lognormal whose 16 % and 84 % points ARE the two readings -- median = their
 # geometric mean, log-sd = half their log ratio. The box [20, 500] stays as the
-# transform's support. When option B is adopted, re-centre on the MEAN as
+# transform's support. When option B is adopted, re-center on the MEAN as
 # h_ml's was (09-09w) -- the same discharge, the same move.
 # Usage: Rscript data-raw/build_h_hs_prior.R   -> data/obs_h_hs_prior.rds
 # =====================================================================

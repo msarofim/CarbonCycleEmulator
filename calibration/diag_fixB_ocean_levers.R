@@ -13,8 +13,8 @@
 # NOTHING IS IMPLEMENTED, FITTED OR ADOPTED HERE.
 #
 # ⚠ EVERY ROW IS A CONDITIONAL PRICE: the other 25 parameters are held at
-# ent26 and nothing is re-optimised. A conditional price has been ~100 %
-# wrong twice in this repo. A promising row licenses a re-optimised
+# ent26 and nothing is re-optimized. A conditional price has been ~100 %
+# wrong twice in this repo. A promising row licenses a re-optimized
 # follow-up, never an adoption.
 #
 # Usage:  Rscript calibration/diag_fixB_ocean_levers.R
@@ -146,7 +146,7 @@ cat(sprintf("      REDUCES the depletion?  w_up %s, w_out %s\n",
 cat(sprintf("      and w_out beats w_up (the one-step limb)?  %s  (|%.5f| vs |%.5f|)\n",
             if (abs(i_out) > abs(i_up)) "CONFIRMED" else "MISSED", i_out, i_up))
 
-# P4 -- gate H, labelled weakest in advance
+# P4 -- gate H, labeled weakest in advance
 cat(sprintf("\n  P4 GATE H (WEAKEST ROW) -- contrast starts at %+.3f (z %+.2f)\n", base$contrast, base$zH))
 for (lv in c("w_up", "w_out"))
   cat(sprintf("      %-6s d(contrast)/d(lever) %+.5f  ->  %s\n", lv, slope_of(lv, "contrast"),

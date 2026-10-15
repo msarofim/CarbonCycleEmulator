@@ -55,7 +55,7 @@ sb_sigma_rep <- function(row, h) stats::splinefun(SR[[row]]$h, SR[[row]]$sigma_r
 sb_sd_obs <- function(row) tg[[row]]$sd
 sb_sd_eff <- function(row, h) sqrt(sb_sd_obs(row)^2 + pmax(0, sb_sigma_rep(row, h))^2)
 # The additive constant the identity leaves behind. CONSTANT WITHIN A POINT
-# because h_ml is fixed there, so it cannot influence the optimisation.
+# because h_ml is fixed there, so it cannot influence the optimization.
 sb_const <- function(h) sum(vapply(ROWS, function(r)
   -log(sb_sd_eff(r, h) / sb_sd_obs(r)), numeric(1)))
 
@@ -121,7 +121,7 @@ prof <- readRDS(ccx_path("outputs", "diagnostics", "hml_unbound_profile.rds"))
 pv_m <- prof$res[[k_m]]$pv
 u_m  <- vapply(CCX_PARAM_NAMES, function(n) NA_real_, 0)
 # rebuild u from the STORED parameter vector, so the guard tests the same vector
-# Stage A used rather than a re-optimised neighbour of it
+# Stage A used rather than a re-optimized neighbor of it
 u_m  <- ccx_par_to_unc(pv_m)
 got  <- lp_inf(u_m)
 cat(sprintf("  Stage A LOWER(%.4f) = %+.6f\n", a_m$h, a_m$lower))

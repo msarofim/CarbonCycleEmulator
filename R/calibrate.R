@@ -20,16 +20,16 @@ ccx_bracket_lnorm <- function(x, stem) {
   stats::dlnorm(x, log(sqrt(lo * hi)), log(hi / lo) / 2, log = TRUE)
 }
 
-# PRIOR WIDTH on sst_seas_amp_*, log space (~ +/- 28 %). A JUDGEMENT, not a
-# measurement, and labelled as one: it stands in for the gap between the
+# PRIOR WIDTH on sst_seas_amp_*, log space (~ +/- 28 %). A JUDGMENT, not a
+# measurement, and labeled as one: it stands in for the gap between the
 # area-weighted hemispheric mean ERSSTv5 gives and the gas-exchange-weighted
 # mean the parameter actually is. Nothing measures that gap today; the land pair
 # gets a DERIVED width instead because its bracket IS measured. Replacing this
 # with a flux-weighted estimate is a real improvement someone could make.
 SST_SEAS_LOGSD <- 0.25
 
-# PRIOR WIDTH on npp_frac_NH, on the natural (share) scale. A JUDGEMENT, and
-# labelled as one for the same reason SST_SEAS_LOGSD is: MOD17's interannual sd
+# PRIOR WIDTH on npp_frac_NH, on the natural (share) scale. A JUDGMENT, and
+# labeled as one for the same reason SST_SEAS_LOGSD is: MOD17's interannual sd
 # of 0.0135 measures one product's spread about its own mean, not the
 # product-to-product ambiguity that actually bounds the NH share. See the
 # npp_frac_NH entry below.
@@ -49,14 +49,14 @@ NPP_FRAC_NH_SD <- 0.04
 # ⭐ WHAT IT IS. The parameter is the IN-BAND anomaly DILUTED onto the SH box by
 # the 40-90 S ocean-area fraction. So there is a hard geometric ceiling: the box
 # mean cannot exceed the in-band amplitude, and it reaches it only if EVERY SH
-# ocean square metre behaves like the observed 40-90 S band. That no-dilution
+# ocean square meter behaves like the observed 40-90 S band. That no-dilution
 # limit sits at exactly log(1 / ENT_SEAS_BAND_AREA_FRAC) = 0.99696 above the
-# centre, and reading THAT ceiling as 2 sigma gives
+# center, and reading THAT ceiling as 2 sigma gives
 #
 #     ENT_SEAS_LOGSD = log(1 / ENT_SEAS_BAND_AREA_FRAC) / 2 = 0.49848
 #
 # -- one named, registered quantity, no unsourced endpoint. ⚠ The "2 sigma"
-# remains a CONVENTION (the project's shared strictness), and is labelled one.
+# remains a CONVENTION (the project's shared strictness), and is labeled one.
 #
 # ✅ AND IT CORROBORATES THE RECORDED BAND RATHER THAN DISCARDING IT: under this
 # width the band's own endpoints land at z -1.57 (5) and +2.02 (30). The 30
@@ -162,9 +162,9 @@ CCX_U_HS_DECLARED <- 38
 # Read by CCX_PARAM_TABLE$h_ml below; test-hml-floor.R holds it to the prior.
 CCX_HML_FLOOR_M <- 42.5
 CCX_PARAM_TABLE <- list(
-  # ---- CO2 fertilisation ---------------------------------------------
+  # ---- CO2 fertilization ---------------------------------------------
   # `beta` LEFT THE TABLE on 2026-08-14 when fert_form flipped to CCX_FERT_MM.
-  # It is not merely renamed: MM is NOT a reparameterisation of the log form (as
+  # It is not merely renamed: MM is NOT a reparameterization of the log form (as
   # fert_k -> Inf, MM goes LINEAR, not logarithmic), so no substitution carries
   # a beta posterior across. Any beta posterior in calibration/output/ is a
   # posterior for a DIFFERENT MODEL and must not be spliced into a new chain.
@@ -205,7 +205,7 @@ CCX_PARAM_TABLE <- list(
   # k_w: CITED 2026-10-02 (W5; objective #15; Marcus: "1446, log-sd 0.2"). Was lognormal(1500,
   # 0.4), "Wanninkhof global mean", uncited from 08-09. Naegler (2009)'s corrected four-study mean,
   # 16.5 cm/h -- R/constants.R KW_PRIOR_CENTRE / KW_PRIOR_LOGSD carry the sources and the ice /
-  # water-vapour caveats. `init` is a LITERAL (the pump_grad idiom: this table is built before
+  # water-vapor caveats. `init` is a LITERAL (the pump_grad idiom: this table is built before
   # R/constants.R is sourced); test-enso-lag.R ties it to the constant.
   k_w         = list(tr = "log",   init = 1446,
                      prior = function(x) dlnorm(x, log(ccx_const("KW_PRIOR_CENTRE")),
@@ -219,9 +219,9 @@ CCX_PARAM_TABLE <- list(
   # ccx_h_ml_prior(). The prior ENCODED the mean-vs-max ambiguity a seasonal
   # mixed layer would resolve (notes/options_2026-09-08d_seasonal_h_ml.md).
   #
-  # ⭐⭐ RE-CENTRED ON THE ANNUAL MEAN 59.7 m, 2026-09-09w (ruled by Marcus).
+  # ⭐⭐ RE-CENTERED ON THE ANNUAL MEAN 59.7 m, 2026-09-09w (ruled by Marcus).
   # Round 6 BUILT that seasonal mixed layer, so the ambiguity is DISCHARGED and
-  # the constant is the annual MEAN; keeping the geometric-mean centre would be
+  # the constant is the annual MEAN; keeping the geometric-mean center would be
   # a prior compensating for a mechanism the model now has. It was also costing
   # starts: P8 stops at 76.146 m and 61.3 % of the old prior lay past it, ITS
   # MEDIAN 83.94 INCLUDED, so ~3 starts in 5 died at the guard. Now 23.8 %.
@@ -265,7 +265,7 @@ CCX_PARAM_TABLE <- list(
   # Bisected at the default parameters:
   #   kz 3828.8 -> -200.00 permil  |  kz 5000 -> -170.1  |  kz 6200.7 -> -150.00
   # Bounds rounded INWARD to [3830, 6200], which lands at -199.96 / -150.01, i.e.
-  # inside the bracket at both ends. init 5000 (bracket centre is 5015).
+  # inside the bracket at both ends. init 5000 (bracket center is 5015).
   # Deliberately NOT a point value: kz also drives ocean CO2 uptake, and pinning it
   # would push all of that onto k_w and h_ml. Re-bisect if OCEAN_DEPTH, the grid,
   # or the observed bracket changes -- these are measured numbers, not settings.
@@ -284,7 +284,7 @@ CCX_PARAM_TABLE <- list(
   # bisected against was an uncited recollection. GLODAPv2 has since confirmed
   # the recollection (2627-3700 m: -175.3, within 0.3 of that bracket's
   # midpoint) but on the BOTTOM BOX, where these same bounds give -220.4 to
-  # -163.5. So the bracket is centred 16.7 permil BELOW the sourced target and
+  # -163.5. So the bracket is centered 16.7 permil BELOW the sourced target and
   # the new term pushes kz up inside it (own optimum 5525). Both facts are live;
   # neither is a reason to move the bounds by hand ahead of the refit.
   #
@@ -317,7 +317,7 @@ CCX_PARAM_TABLE <- list(
   #
   # Bounds NOT rounded inward this time -- the bisection tolerance is 0.5 m2/yr
   # and rounding would be smaller than the number's own meaning. init = the
-  # bracket centre, as before (was 5000 for a centre of 5015).
+  # bracket center, as before (was 5000 for a center of 5015).
   #
   # ---- RE-BISECTED WIDE 2026-09-01 (Marcus). [3942.5, 6528] -> below.
   # ⛔ THE DEFECT THIS FIXES IS THE TARGET, NOT THE RECIPE. Everything above
@@ -327,7 +327,7 @@ CCX_PARAM_TABLE <- list(
   # against GLODAPv2's sourced -175.26 +/- 10.259 permil (n_eff 20, layer
   # 2627.2-3700 m, [[ccx_glodap_deep]]). Expressed on the layer that is actually
   # scored, the old bracket was z in [-4.34, +1.22]: a box 5.55 sigma WIDE,
-  # centred 1.56 sigma BELOW the target, and TRUNCATING it at the top. That top
+  # centered 1.56 sigma BELOW the target, and TRUNCATING it at the top. That top
   # is where every constrained row of the land axis railed, so the -285/-298
   # price of gate 7 was being set by the recollection rather than by the data.
   #
@@ -341,12 +341,12 @@ CCX_PARAM_TABLE <- list(
   # k = 3 is the ruling: a 3-sigma box on a sourced observation, so the support
   # is the observation's own, and a turnover inside it is a turnover inside every
   # narrower one. ⚠ The FLOOR RISES as well as the ceiling (3942.5 -> 4379.1) --
-  # this is a RE-CENTRING on the sourced target, not only a widening. Every mode
+  # this is a RE-CENTERING on the sourced target, not only a widening. Every mode
   # file on disk stays strictly interior (kz 6169-6400).
   #
   # ⭐ AND IT IS NOT THE BRACKET THAT WAS HOLDING `kz`: on this support the
   # anchor row turns over INTERIOR at 6486.1 = 56 % of the box, with
-  # `fert_k`/`q10` re-optimised (PART 3). The exit condition R/calibrate.R states
+  # `fert_k`/`q10` re-optimized (PART 3). The exit condition R/calibrate.R states
   # above -- "delete it only after a refit shows the term holding kz alone" -- is
   # therefore CLOSER but still not met by a refit; the bracket stays.
   #
@@ -361,7 +361,7 @@ CCX_PARAM_TABLE <- list(
   # box, so a bound on `kz` alone remains sufficient AT THIS WIDTH -- it would
   # not obviously remain so at k = 1.
   #
-  # init = the bracket centre, as before.
+  # init = the bracket center, as before.
   # ---- RE-BISECTED 2026-09-06d ON THE 36-BOX STRUCTURE (Marcus's ruling,
   # prereg_2026-09-07 sec.4). [4379.1, 8109.9] -> below. The column bracket
   # above was bisected where `kz` ALONE set the bottom box; with HILDA's HS/HD
@@ -377,8 +377,8 @@ CCX_PARAM_TABLE <- list(
   # ⚠ A bracket on `kz` AT FIXED f: in the refit f is free and the deep row
   # pins the PRODUCT, so this is a SUPPORT (the role the bracket always had),
   # not an identification. Prediction R6 -- `kz` lands INTERIOR -- is the test.
-  # init = the GEOMETRIC centre, sqrt(1161.6 * 27808.0) = 5683.5, because the
-  # arithmetic centre (14485) of a 24x box is 2.3x the working arm's 6356 and
+  # init = the GEOMETRIC center, sqrt(1161.6 * 27808.0) = 5683.5, because the
+  # arithmetic center (14485) of a 24x box is 2.3x the working arm's 6356 and
   # would start the cold control with the deep far too young.
   # ⛔ THE PRIOR READS THE TABLE'S OWN BOX (2026-10-12, code review sec.5). It was the literal
   # dunif(x, 1161.6, 27808.0): ccx_adopt_mode_band() moves `lo`/`hi` to a mode file's recorded
@@ -397,7 +397,7 @@ CCX_PARAM_TABLE <- list(
   # h_hs joined 09-07 and the flush u_hs 09-08d (with an observation prior, below).
   # ⚠ The design said "log scale, box"; this table has no log-spaced box, so
   # both are `logit` on the box with a uniform prior on the NATURAL scale. The
-  # logit Jacobian pulls toward the box centre by ~1.7 log-units between
+  # logit Jacobian pulls toward the box center by ~1.7 log-units between
   # f = 0.05 and 0.5 -- the same convention h_ml and kz carry, and an order
   # of magnitude below the rows that pin f (the deep row + the profile
   # contrast). Stated, not hidden.
@@ -421,7 +421,7 @@ CCX_PARAM_TABLE <- list(
   # u_hs and the fit rebuilt the modern sink HERE, 0.82 -> 1.83 (2.8x the value
   # measured from ice x wind x Schmidt, 0.653, data/obs_hs_exchange_factor.rds)
   # -- the factor had a box and no prior, so it was the free compensator. Now
-  # lognormal on the measured 0.653, log-sd 0.15 (a JUDGEMENT, ~2.5x the
+  # lognormal on the measured 0.653, log-sd 0.15 (a JUDGMENT, ~2.5x the
   # measured component spread; the hemispheric split 0.32/0.78 is a
   # representation error, not carried), read lazily through ccx_hs_asx_prior().
   # Box unchanged. 1.83 sits at z +6.9; round 3's 0.82 at +1.5.
@@ -440,7 +440,7 @@ CCX_PARAM_TABLE <- list(
   # Holte HS annual MEAN 115 m and MAX 268 m as its 16 / 84 % points, COMPUTED
   # by data-raw/build_h_hs_prior.R and read lazily through ccx_h_hs_prior().
   # The canonical's 393 m on 2026-09-16 sat at z +1.91 (it was FLAT-prior free);
-  # the canonical hilda31w's 293.5 m sits at z +1.22 (2026-10-15). Re-centre
+  # the canonical hilda31w's 293.5 m sits at z +1.22 (2026-10-15). Re-center
   # on the MEAN when option B (the HS seasonal cycle) is adopted, as h_ml's
   # was on 09-09w. Every stored logpost moves by this prior's value at its
   # h_hs minus the flat density's; the likelihood is untouched.
@@ -464,7 +464,7 @@ CCX_PARAM_TABLE <- list(
   # 38 and the prior pulls toward 22 -- that contest IS round 4's question.
   # ⚠ THE PRIOR IS ON A VOLUME FLUX (Sv); the parameter is a VELOCITY over the
   # model's HS area (2026-09-16 d, review contradiction 1). The product stores
-  # the m/yr centre at the hs_frac it was built with (0.16); under a structure
+  # the m/yr center at the hs_frac it was built with (0.16); under a structure
   # with another hs_frac ("hilda_c", 0.128) the same Sv is hs_frac_built/hs_frac
   # times the velocity -- 21.84 -> 27.3 m/yr. The prior therefore takes the
   # parameter LIST as an optional second argument and converts at the live
@@ -523,7 +523,7 @@ CCX_PARAM_TABLE <- list(
   # w_eq-under-"hilda" contract, and the array pins the inert side.
   #
   # pump_export: the LS export in GtC/yr (both hemispheres, split by a_ls
-  # share), remineralised on the Martin profile below the mixed layer. PRIOR:
+  # share), remineralized on the Martin profile below the mixed layer. PRIOR:
   # OBSERVATION (ruling E4, Marcus 09-14 h: "Nowicki if it includes uncertainty
   # bounds") -- Nowicki, DeVries & Siegel 2022's 124-member ensemble, integrated
   # over the model's LS band (|lat| < 57.14) on its own grid: median 9.08, log-sd
@@ -546,7 +546,7 @@ CCX_PARAM_TABLE <- list(
   # 1995; Karstensen & Quadfasel 2002) and 505.8 Sv from SODA year-by-year
   # fields (Liu & Huang 2012 J. Climate 25:1096, who attribute the gap to the
   # nonlinearity climatological-mean fields miss). Lognormal, geometric-mean
-  # centre 284 Sv, log-sd 0.575 (each reading at 1 sigma) -- the h_ml precedent
+  # center 284 Sv, log-sd 0.575 (each reading at 1 sigma) -- the h_ml precedent
   # -- COMPUTED by data-raw/build_w_vent_prior.R and read lazily; the init
   # REPEATS the product's median (test-option-e.R ties the two). WIDE BY
   # DESIGN: the mapping from the real subduction/obduction field to a closed
@@ -582,12 +582,12 @@ CCX_PARAM_TABLE <- list(
   # CCX_PARAM_ABSENT_OK and PINNED in any array without the limb. Box [0, 60] = 2.4x the observed bracket's
   # top (14-25 Sv/index, the 1997-99 swing) and 1.9x the unrefitted need at
   # hilda30h (32.2); FLAT by ruling R3 (the 09-14 b gamma_eq precedent: the
-  # bracket is the VERDICT, not the prior). Init = the bracket's geometric centre.
+  # bracket is the VERDICT, not the prior). Init = the bracket's geometric center.
   # 0 = OFF, on the floor, does not encode -> seeded at init.
   w_enso_l2    = list(tr = "logit", lo = 0, hi = 60, init = 18.7,
                       prior = function(x) dunif(x, 0, 60, log = TRUE)),
   # pump_hs_gcm2: THE HIGH-LATITUDE PUMP, FITTED since 2026-09-07e (29 -> 30) --
-  # HS export per unit area in gC m-2 yr-1, remineralised in HD (pays choice C9).
+  # HS export per unit area in gC m-2 yr-1, remineralized in HD (pays choice C9).
   # The end-member probe put HS's DIC AT the observed high-latitude surface and
   # the deep +12 above it against an observed +116-185; at the round-2 winner
   # 60 gC m-2 yr-1 (3.5 GtC/yr) lands HD - HS at +127 and gains +17 log-units
@@ -602,7 +602,7 @@ CCX_PARAM_TABLE <- list(
   # own thickness, not the sources' 100-500 m). The probe's 60 sits at +1.6
   # sigma: the data rows and this prior will disagree, and that is the finding
   # to read, not to pre-empt. init = the prior median (a START, and NOT the
-  # probe point -- no centre off the code under test). An ancestor that ran 0
+  # probe point -- no center off the code under test). An ancestor that ran 0
   # cannot be ENCODED under logit (lo 0.5) and is seeded at init by
   # ccx_seed_unencodable(), the kz_deep_frac precedent. The init is a LITERAL
   # because this table is built before R/paths.R is sourced; it is TIED to the
@@ -620,7 +620,7 @@ CCX_PARAM_TABLE <- list(
   # against its fitted pump_grad 314.7; with tau_q = 0 it is 315.4 / 315.6
   # (review-measured; not re-measured at hilda31w, pump_grad 330.7). So
   # under the conduit `pump_grad` is the SOLVED FIELD's magnitude knob, not the
-  # model's realised gradient (see ccx_pump_export() in R/model.R).
+  # model's realized gradient (see ccx_pump_export() in R/model.R).
   # Everything else about the pump stays structural: the export SHAPE is GLODAP's
   # own profile solved against the model's diffusion, and the carbonate share is
   # PINNED by GLODAP's alkalinity gradient. This is the one number the data are
@@ -645,7 +645,7 @@ CCX_PARAM_TABLE <- list(
   # DIC/d13C gradients) predicts structurally.
   #
   # THE PRIOR MILDLY DOUBLE-COUNTS GLODAP, AND THAT IS DELIBERATE AND STATED.
-  # Its centre `PUMP_GRAD_OBS` is the same observation the `ocean_grad_dic`
+  # Its center `PUMP_GRAD_OBS` is the same observation the `ocean_grad_dic`
   # likelihood row scores. The width is what keeps that harmless: sd = 0.25 in
   # log-space is +/- 25 %, about 4.5x the likelihood's own 13.1 umol/kg, so the
   # data dominate by a wide margin and the prior only excludes absurd magnitudes.
@@ -672,14 +672,14 @@ CCX_PARAM_TABLE <- list(
   # observational content, and the fit used the freedom: 0.4662, i.e. 53 % of
   # global NPP on the hemisphere holding 19 % of the land.
   #
-  # THE CENTRE IS THE 1750 ANCHOR, NOT THE OBSERVATION. MOD17 measures the
+  # THE CENTER IS THE 1750 ANCHOR, NOT THE OBSERVATION. MOD17 measures the
   # MODERN share (NPP_FRAC_NH_OBS = 0.594) and this parameter is a 1750 split;
   # NPP_FRAC_NH_ANCHOR_1750 is that observation walked back through the model's
-  # own clearing, as a fixed point. Centring on the raw observation would
+  # own clearing, as a fixed point. Centering on the raw observation would
   # UNDERSTATE the target, because NH-heavy clearing lowers the NH share over
   # time. See R/constants.R for the derivation and its circularity pricing.
   #
-  # THE WIDTH IS A JUDGEMENT, like SST_SEAS_LOGSD and labelled as one. MOD17's
+  # THE WIDTH IS A JUDGMENT, like SST_SEAS_LOGSD and labeled as one. MOD17's
   # own interannual sd (0.0135) is the WRONG uncertainty -- it is the spread of
   # one product about its own mean, and the real ambiguity is product-to-product
   # (MOD17's global total already sits below the model's NPP_GLOBAL_PI). 0.04
@@ -720,7 +720,7 @@ CCX_PARAM_TABLE <- list(
   # data-raw/build_seasonal_climatology.R from CRU absolute + CRUTEM5 mask and
   # ERSSTv5). The land widths are DERIVED -- the lognormal whose +/-1 sigma spans
   # the measured area-weighted-to-boreal bracket, so the width is the weighting
-  # ambiguity itself. The ocean width is a stated JUDGEMENT
+  # ambiguity itself. The ocean width is a stated JUDGMENT
   # (SST_SEAS_LOGSD), because no bracket for it exists.
   #
   # THE RECOLLECTIONS WERE CLOSE TO RIGHT: 12 vs an observed 11.4, 2.0 vs 2.24,
@@ -787,7 +787,7 @@ CCX_PARAM_TABLE <- list(
   # doing entrainment's job. P1 (the limb's PHASE, now scored by GATE S) and P3
   # (`npp_frac_NH` back inside its bounds) are corroboration, not the test.
   #
-  # THE PRIOR CENTRE IS DERIVED, NOT CHOSEN: ENT_SEAS_AMP_SH_DERIV is
+  # THE PRIOR CENTER IS DERIVED, NOT CHOSEN: ENT_SEAS_AMP_SH_DERIV is
   # ENT_SEAS_AMP_SH_INBAND diluted onto the SH box by the registered 40-90 S
   # ocean-area fraction ENT_SEAS_BAND_AREA_FRAC (R/constants.R). ⭐ BOTH ARE
   # COMPUTED from named inputs since the 2026-09-03 provenance audit -- they
@@ -797,7 +797,7 @@ CCX_PARAM_TABLE <- list(
   # are read from data/ products since then), so NO VALUE IS TYPED HERE
   # (2026-09-12, review C; the numbers that stood in this comment were the
   # pre-09-09w ones). Print ccx_const("ENT_SEAS_AMP_SH_DERIV") for the live
-  # centre, which the `init` below must equal -- test-ent-seas-fitted.R ties
+  # center, which the `init` below must equal -- test-ent-seas-fitted.R ties
   # them. The WIDTH is derived too, from the no-dilution ceiling -- see
   # ENT_SEAS_LOGSD above.
   # `init` is typed literally because CCX_PARAM_TABLE is built before ccx_const()
@@ -812,13 +812,13 @@ CCX_PARAM_TABLE <- list(
   # not a defect to route around. ⚠ `tau_ex_seas_amp` is STILL implemented,
   # defaulted 0 and unfitted; it was deliberately NOT freed here, so that P2 has
   # one mechanism to attribute to.
-  # ⚠ `init` MOVED 10.952353 -> 6.552465 ON 2026-09-09w, with the prior centre it
+  # ⚠ `init` MOVED 10.952353 -> 6.552465 ON 2026-09-09w, with the prior center it
   # must track. It stays a LITERAL only because CCX_PARAM_TABLE is built in this
   # file, which the alphabetical bootstrap sources BEFORE constants.R, so
   # `ccx_const()` does not exist yet -- the `prior` closure below CAN call it
   # because it runs later. test-ent-seas-fitted.R:27 ties the two at the typed
   # precision (half a unit in the sixth decimal) and CAUGHT this drift on the day
-  # the centre moved, which is exactly the guard working ⇒ [[derived_must_mean_computed]].
+  # the center moved, which is exactly the guard working ⇒ [[derived_must_mean_computed]].
   ent_seas_amp_SH = list(tr = "log", init = 6.552465,
                      prior = function(x) dlnorm(x, log(ccx_const("ENT_SEAS_AMP_SH_DERIV")),
                                                 ENT_SEAS_LOGSD, log = TRUE)),
@@ -840,7 +840,7 @@ CCX_PARAM_TABLE <- list(
   # preserving the total) is the choice to revisit if the land pair ever runs
   # to the prior rather than to the data.
   #
-  # THE OCEAN PAIR IS CENTRED ON ZERO, which is the incumbent model: the prior
+  # THE OCEAN PAIR IS CENTERED ON ZERO, which is the incumbent model: the prior
   # does not presume the mechanism exists.
   # ⚠ WHERE THE MEASUREMENT PUTS IT (corrected 09-01j): closing the observed
   # ocean-sink slope needs +0.326 in EACH hemisphere, not the +0.137 an earlier
@@ -905,8 +905,8 @@ CCX_PARAM_TABLE <- list(
   # OSCAR's central estimate at ~1 sigma below GCB's, which is the honest
   # statement of what is known.
   #
-  # CENTRED AT 1, i.e. on GCB, because GCB is the standing convention for this
-  # repo's emissions and a prior centred anywhere else would be a silent
+  # CENTERED AT 1, i.e. on GCB, because GCB is the standing convention for this
+  # repo's emissions and a prior centered anywhere else would be a silent
   # re-basing. GCB's ANNUAL +/-0.7 GtC/yr (LIK_GCB_LUC_SD) against a 2015-2024
   # mean of 1.372 is 51 % -- deliberately NOT used as the width: that is the
   # uncertainty of a single year's flux, only partly correlated across years, so
@@ -934,7 +934,7 @@ CCX_PARAM_TABLE <- list(
   #   * "pinned at a boundary" -- not on the scale the sampler uses. sigma_co2
   #     was log-transformed, so sigma -> 0 is u -> -Inf and the lognormal prior
   #     closes it off smoothly; the posterior mode was INTERIOR and unimodal at
-  #     both points tested. The apparent edge was an artefact of natural units.
+  #     both points tested. The apparent edge was an artifact of natural units.
   #   * "will hurt covariance conditioning" -- max |r| with any other parameter
   #     was 0.043, against 0.907 for the worst pair in the same Laplace matrix.
   #     It was very nearly orthogonal to everything.
@@ -970,8 +970,8 @@ CCX_PARAM_TABLE <- list(
   # the 0.05 permil representation floor the stream already carries -- while the
   # parameter fitted 0.1931. It was explaining no scatter whatever; its entire
   # value was absorbing a +0.19 permil structural bias at 4x the representation
-  # error. On a stream Marcus has prioritised, that is a valve venting the
-  # signal. ccx_loglik() still honours the field if supplied (absence contract),
+  # error. On a stream Marcus has prioritized, that is a valve venting the
+  # signal. ccx_loglik() still honors the field if supplied (absence contract),
   # so every pre-2026-08-18 diagnostic reproduces exactly.
   #
   # `sigma_d14c` STAYS FREE, and the same measurement is the reason: its
@@ -990,8 +990,8 @@ CCX_PARAM_TABLE <- list(
   # PRIOR sd = 1.0 ppm, which is LIK_CO2_REP_ERR: the repo's own station-vs-box
   # scale, and the one number here with a receipt (co-located NOAA in-situ vs
   # SIO flask at Mauna Loa disagree 0.39-0.59 ppm RMS over 702 months, so a
-  # station-vs-BOX term must exceed it). Centred at ZERO, a shrinkage prior, for
-  # the same reason the gradient offsets are: centring on the measured offset
+  # station-vs-BOX term must exceed it). Centered at ZERO, a shrinkage prior, for
+  # the same reason the gradient offsets are: centering on the measured offset
   # would tell the model the answer and then congratulate it for agreeing.
   #
   # THE DIAL THIS SETS. Absorbing the measured +0.194 permil d13C common-mode
@@ -1020,8 +1020,8 @@ CCX_PARAM_TABLE <- list(
   # what is really a station's latitude. Same argument, and the same idiom, as
   # `luc_scale` absorbing E_LUC uncertainty instead of letting `fert_k` claim it.
   #
-  # BOTH PRIORS ARE CENTRED AT ZERO. They are shrinkage priors, not measurements
-  # dressed as priors: centring them on the measured offsets would tell the
+  # BOTH PRIORS ARE CENTERED AT ZERO. They are shrinkage priors, not measurements
+  # dressed as priors: centering them on the measured offsets would tell the
   # model the answer and then congratulate it for agreeing.
   #
   # grad_off_co2, sd 0.5 ppm. Chosen so the MEASURED intercepts (-0.386 at
@@ -1093,7 +1093,7 @@ CCX_NUISANCE_NAMES <- c("bomb_total", "luc_scale", "sigma_d14c", "rep_dC",
 #
 # PRIORS, as ruled 2026-09-30 (CHANGELOG 09-30 l/m; the constants in R/constants.R):
 #   ndep_ret   kg C retained per kg N deposited on land (the retention flux). LOG;
-#              lognormal, centre NDEP_RET_PRIOR_CENTRE (3.9), log-sd
+#              lognormal, center NDEP_RET_PRIOR_CENTRE (3.9), log-sd
 #              NDEP_RET_PRIOR_LOGSD (0.67). 0 (OFF) is not a point of this space,
 #              which is one more reason a holding label must HOLD it, not encode it.
 #   npp_tsens  1/K of GMST: NPP x exp(npp_tsens x GMST). ID; N(0, NPP_TSENS_PRIOR_SD),
@@ -1102,14 +1102,14 @@ CCX_NUISANCE_NAMES <- c("bomb_total", "luc_scale", "sigma_d14c", "rep_dC",
 #              (ccx_imb_shares(): s_ocean = (1 - s_land) x rest). LOGIT on [0, 1];
 #              Beta(1, 2) x Uniform(0, 1) is the FLAT simplex, Dirichlet(1, 1, 1),
 #              i.e. the ruling's "freedom to move it". ⚠ The logit Jacobians are
-#              part of THIS objective. The screens (09-30 k/n) maximised the shares'
+#              part of THIS objective. The screens (09-30 k/n) maximized the shares'
 #              LIKELIHOOD with no Jacobian, so the refit's shares will sit slightly
 #              off the screen's.
 # `init` values are LITERALS because this table is built before R/constants.R is
 # sourced (the pump_grad idiom), and test-gated-params.R ties each to its source:
-# ndep_ret = the prior centre; npp_tsens = the prior centre 0; the shares = the flat
+# ndep_ret = the prior center; npp_tsens = the prior center 0; the shares = the flat
 # simplex's CENTROID (1/3, 1/3, 1/3), i.e. land 1/3 and ocean_rest 1/2. No init is
-# taken from a screen: a start is never a centre read off the code under test.
+# taken from a screen: a start is never a center read off the code under test.
 CCX_PARAM_GATED <- list(
   ndep_ret             = list(tr = "log", init = 3.9,
                               prior = function(x) dlnorm(x, log(ccx_const("NDEP_RET_PRIOR_CENTRE")),
@@ -1159,7 +1159,7 @@ CCX_GATE_FLAG_ENSO_LAG <- "enso_lag_free"
 #   seas_T_lag     the respiration lag, months past the mid-July zero-lag peak (R/model.R
 #                  ccx_seas_t_lag()). Marcus: "Fit it in the refit (Recommended)", prior "Uniform
 #                  [0, 6] months (Recommended)": respiration cannot lead its driver, and a lag past
-#                  half a cycle aliases. LOGIT on the box, like kz / h_ml. NOT centred on the old 2.0
+#                  half a cycle aliases. LOGIT on the box, like kz / h_ml. NOT centered on the old 2.0
 #                  (a profile at an ancestral mode), which would be circular.
 # INIT = each box's MIDPOINT (0.875; 3 months), the gates' rule: a start is never a value read
 # off the code under test. `lo`/`hi` are LITERALS (this file is sourced before R/constants.R and
@@ -1499,7 +1499,7 @@ ccx_par_to_unc <- function(p) {
   # catches an ABSENT name. It does not catch a name that is PRESENT but sits
   # outside its transform's domain -- log(0), or a logit at its own bound --
   # which returns -Inf QUIETLY and hands a non-finite start vector to an
-  # optimiser three frames away. It became reachable the moment
+  # optimizer three frames away. It became reachable the moment
   # `ent_seas_amp_SH` entered the table with `tr = "log"`: a 25-parameter
   # ancestor migrates to 0 (what it RAN), and 0 is not a point of a log space.
   # Refusing here, by name and with the value, is the difference between "this
@@ -1818,7 +1818,7 @@ ccx_require_param_set <- function(md, what) {
 # never changes -- and on 2026-08-31, splitting `seas_lag_p` made every stored
 # 21-parameter `u_mode` fail here with a bare "subscript out of bounds" raised
 # three frames below the actual cause. A named vector carries its own contract;
-# honour it, and say so loudly when a name the caller needs is simply absent.
+# honor it, and say so loudly when a name the caller needs is simply absent.
 ccx_unc_to_par <- function(u) {
   nm <- names(u)
   # An UNNAMED `u` is the live fitted set in table order, and is NAMED here (2026-10-15, dormant bug 4):
@@ -1866,11 +1866,11 @@ ccx_init_unc <- function() ccx_par_to_unc(
 #' a normal in log x with sd = its logsd (0.22-0.4 here), a uniform under
 #' `logit` is a standard logistic, a normal under `id` is itself -- so ONE
 #' grid spacing and ONE window serve all 21 parameters, which is exactly what
-#' the natural scale could not give. The window is centred on the PRIOR's mode,
+#' the natural scale could not give. The window is centered on the PRIOR's mode,
 #' found by a coarse scan, not on `x`: the whole point of the statistic is that
 #' `x` may be far out in the tail.
 #'
-#' The probability integral transform is invariant under the reparameterisation,
+#' The probability integral transform is invariant under the reparameterization,
 #' so this returns the same number the natural-scale calculation would if the
 #' natural-scale calculation could be done accurately.
 #'
@@ -2167,10 +2167,10 @@ ccx_scaled_forcing <- function(sp = NULL, years = c(1750, 2024), luc_scale = 1,
 # @param verbose print the per-direction table
 # @return list(H, eps, sd_diag, curvature_by_step, verify, no_plateau, unstable)
 CCX_HESS_EPS_GRID   <- c(1e-5, 3e-5, 1e-4, 3e-4, 1e-3, 3e-3, 1e-2, 3e-2, 1e-1, 3e-1)
-CCX_HESS_STABLE_TOL <- 0.02    # max relative disagreement with EITHER neighbour
+CCX_HESS_STABLE_TOL <- 0.02    # max relative disagreement with EITHER neighbor
 CCX_HESS_EPS_FRAC   <- 0.10    # step as a fraction of the direction's posterior sd
 # NO PLATEAU (RULED 2026-10-13, Marcus: "Most-stable step (Recommended)"; CHANGELOG 2026-10-13 c). A direction with no
-# 2 % plateau takes the INTERIOR GRID STEP whose curvature disagrees least with its neighbours (the plateau test's own
+# 2 % plateau takes the INTERIOR GRID STEP whose curvature disagrees least with its neighbors (the plateau test's own
 # metric), and stays flagged. It used to take the fixed CCX_HESS_FALLBACK, 3e-4 in u, which under the WTC label reads
 # curvature noise of ~1e-5 / (3e-4)^2 ~ 110: more than kz_deep_frac's own curvature (~ -2.4), so id 17's Hessian lost
 # negative-definiteness on that step alone (objective_noise_floor_20261013_wtc.log). The fixed value is now used only
@@ -2217,7 +2217,7 @@ ccx_hessian_per_direction <- function(lp, u, verbose = TRUE) {
   no_plateau <- nm[is.na(eps)]
   # no plateau: the most-stable interior grid step (ruled 2026-10-13); the fixed fallback only when none is finite.
   # ⚠ A STABLE but NON-NEGATIVE plateau (a direction that is not a maximum) also has no sd, so it lands here too; the
-  # ruling does not cover it, and it keeps the fixed step it always had, labelled as what it is.
+  # ruling does not cover it, and it keeps the fixed step it always had, labeled as what it is.
   eps_fb <- ifelse(is.na(PL[, "best"]), CCX_HESS_FALLBACK, CCX_HESS_EPS_GRID[PL[, "best"]])
   fallback_how <- stats::setNames(ifelse(!is.na(PL[, "idx"]), "fixed_nonneg_plateau",
                                          ifelse(is.na(PL[, "best"]), "fixed_none_finite", "most_stable")), nm)[no_plateau]
@@ -2488,7 +2488,7 @@ ccx_struct_hilda_csl3v0ka <- function() {
   blk
 }
 #' ARM B1: arm A + the modern-NPP likelihood row (ccx_loglik(npp =)), NPP_GLOBAL_PI
-#' FIXED at 60 -- only fertilisation and clearing can answer the row. ⚠ AN
+#' FIXED at 60 -- only fertilization and clearing can answer the row. ⚠ AN
 #' OBJECTIVE CHANGE: compare with arm A on LIKELIHOOD minus the npp_modern row.
 ccx_struct_hilda_csl3v0kan <- function() {
   blk <- ccx_struct_hilda_csl3v0ka()
@@ -2715,7 +2715,7 @@ ccx_pins_price_canonical <- function(pins, pump_field, struct = Sys.getenv("CCX_
     !extra %in% ccx_inert_names(pump_field, struct)
 }
 #' Does `pins` equal `base` PLUS names that are INERT under this field / structure?
-#' (2026-09-18: generalised from the canonical-only form so the CONTROL's arm can
+#' (2026-09-18: generalized from the canonical-only form so the CONTROL's arm can
 #' carry `w_enso_l2 = 0` under a limb-less structure -- the name entered the table
 #' 09-17 k and the driver refuses it free without the limb.) Inert = the pump field's
 #' unread names, the cell's pair without the cell, the limb's name without the limb.
@@ -2883,7 +2883,7 @@ ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_
               "'); rule the reference set for this pin before launching.")
   # 2026-09-20 (r): the canonical FITS w_enso_l2, so its pin set under a structure WITHOUT the limb
   # would leave a name the structure never reads FREE -- the driver refuses such a name, and so
-  # does the reference set, by name (the L2 branch's "no layer-2 limb" refusal, generalised to
+  # does the reference set, by name (the L2 branch's "no layer-2 limb" refusal, generalized to
   # every inert name: a registered pin set does not license an arm on a structure it does not fit)
   # (applied AFTER the set is matched, so a foreign set still says "no registered incumbent")
   # 2026-10-06 (objective #17): under the interannual CUT the module's names are stage 1's, so a pin set that
@@ -3193,7 +3193,7 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     # ccx_run_fast() defaults to substeps = "auto" and escalates on NA, so this
     # -Inf now means the MODEL failed, not that the integrator hit its explicit-
     # diffusion stability limit. Until 2026-08-11 it meant the latter, and the
-    # mode-finder maximised straight into it: kz = 175,790 sat ~1 % below the
+    # mode-finder maximized straight into it: kz = 175,790 sat ~1 % below the
     # fixed-substep wall at ~155,000-178,000 (h_ml-dependent), so the posterior
     # was truncated by numerics wearing a prior's clothes. See test-stability.R.
     r <- tryCatch(ccx_run_fast(sp, F), error = function(e) NULL)
@@ -3201,14 +3201,14 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     # 2026-09-16 (d): a transient that had to ESCALATE its substeps ran at a
     # different count from the spinup that seeded it, and that mixed-count
     # number is 3-13 log-units off a consistent evaluation (review finding 3).
-    # The auto controller (ccx_substeps_for, test-stability.R) is the defence
+    # The auto controller (ccx_substeps_for, test-stability.R) is the defense
     # against the integrator's limit; the retry is a diagnostic convenience,
     # never an objective value. -Inf here means "not evaluable at a consistent
     # count", and it is recorded so a mode-finder cannot climb into it quietly.
     if (isTRUE(r$retried)) return(-Inf)
 
     # NOTE THE ABSENCE OF sigma_co2. Retired 2026-08-15; ccx_loglik() still
-    # honours the field if it is supplied, so the objective omits it EXPLICITLY
+    # honors the field if it is supplied, so the objective omits it EXPLICITLY
     # rather than passing a zero -- passing 0 would give the same number today
     # and would silently reacquire the old branch if the contract ever changed.
     # NOTE THE ABSENCE OF sigma_d13c TOO, retired 2026-08-18 on the same

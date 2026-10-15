@@ -6,7 +6,7 @@
 # WHY THIS EXISTS. diag_npp_eff_latitude.R measured the NPP-weighted effective
 # latitude at 38.35 N against a shipped CCX_SEAS_PHI_EFF["NH"] of 75, but it
 # could only answer the AGGREGATION question -- given the model's premise that
-# productivity follows normalised insolation, which single latitude represents
+# productivity follows normalized insolation, which single latitude represents
 # the hemisphere. It could not test the PREMISE, because MOD17A3HGF is annual.
 # If NH productivity is strongly RECTIFIED (a growing season that switches on
 # and off), a poleward phi_eff is a legitimate emulation of rectification and
@@ -31,7 +31,7 @@
 # composite ACCUMULATED over its window, so the model shape is integrated over
 # the same window rather than evaluated at its midpoint. Point-sampling a
 # curved shape at coarse steps biases the amplitude, and this project has been
-# bitten by exactly that quantisation before.
+# bitten by exactly that quantization before.
 #
 # AND THE WINDOWS ARE NOT ALL 8 DAYS. The last composite of each year runs from
 # DOY 361 to the end, so 5 days in a common year and 6 in a leap year. Treating

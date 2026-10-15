@@ -9,7 +9,7 @@
 # would rank AMPLITUDE, not the index. That is precisely the trap gate G-P caught
 # in diag_enso_index_baseline.R, one comparison earlier.
 # ⇒ EVERY CANDIDATE GETS ITS OWN BEST GAMMAS. The four gamma_enso coordinates are
-#   re-optimised per index with all 21 other parameters FROZEN at the 09-01
+#   re-optimized per index with all 21 other parameters FROZEN at the 09-01
 #   basin vector. That absorbs units and amplitude and gives each index its best
 #   shot, which is the only fair question.
 #
@@ -99,7 +99,7 @@ eb_install <- function(tbl, win) {
 }
 eb_restore <- function() assign("ccx_build_forcing", .EB_ORIG, envir = globalenv())
 
-# Re-optimise ONLY the four gammas. Nelder-Mead: the objective is a full model
+# Re-optimize ONLY the four gammas. Nelder-Mead: the objective is a full model
 # run, so a numerical gradient would cost 4x per step for a surface this small.
 eb_fit <- function(tbl, win) {
   tb <- eb_install(tbl, win); on.exit(eb_restore(), add = TRUE)

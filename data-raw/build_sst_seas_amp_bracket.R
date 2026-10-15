@@ -1,8 +1,8 @@
 # =====================================================================
 # build_sst_seas_amp_bracket.R -- MEASURE the weighting ambiguity on
-# sst_seas_amp_{NH,SH}, so its prior width stops being a JUDGEMENT.
+# sst_seas_amp_{NH,SH}, so its prior width stops being a JUDGMENT.
 #
-# THE PROBLEM. `SST_SEAS_LOGSD` = 0.25 is a chosen number, labelled as chosen at
+# THE PROBLEM. `SST_SEAS_LOGSD` = 0.25 is a chosen number, labeled as chosen at
 # R/calibrate.R:23: it stands in for the gap between the AREA-weighted
 # hemispheric SST amplitude we can compute and the GAS-EXCHANGE-weighted one the
 # parameter actually is. R/constants.R says outright "Nothing measures that gap
@@ -13,7 +13,7 @@
 #
 # ⛔ AND THE AMPLITUDE FACTORS ARE NOT TRUE OBSERVABLES (Marcus, 2026-09-01).
 # That rules out the tempting move -- recompute a flux-weighted number and
-# recentre the prior on it as if it were the truth. There is no observation of
+# recenter the prior on it as if it were the truth. There is no observation of
 # this parameter. What CAN be measured is the SPREAD ACROSS DEFENSIBLE
 # WEIGHTINGS, and that spread is the width. So this file mirrors the LAND pair
 # exactly: `ccx_bracket_lnorm()` over a LO/HI bracket whose width is the
@@ -292,9 +292,9 @@ for (hh in c("NH", "SH")) {
 # opposite of the hoped-for one -- so it must not be left for someone to
 # discover later.
 # ⚠ TWO SEPARATE DECISIONS, AND ONLY THE FIRST WAS ASKED FOR: replacing the
-# WIDTH, and moving the CENTRE. The bracket's geometric centre is NOT the
+# WIDTH, and moving the CENTER. The bracket's geometric center is NOT the
 # incumbent anchor, and since the amplitude factors are not observables, moving
-# the centre asserts something new about where the parameter should sit. Both
+# the center asserts something new about where the parameter should sit. Both
 # are shown; neither is taken.
 MODE_FILE <- "calibration/output/multistart_20260901_enso25/start_000.rds"
 if (file.exists(MODE_FILE)) {

@@ -94,7 +94,7 @@ kzb <- md$kz_bracket
 cat(sprintf("  %9s %5s | %11s | %9s %6s | %9s %9s %9s | %2s %8s\n", "h_ml", "rows",
             "cond dlp", "kz", "%brkt", "pump_grad", "beta_max", "fert_k", "re", "gain"))
 # ⚠ WALK OUTWARD FROM THE MODE, not left-to-right. Each point is warm-started
-# from its NEIGHBOUR, so the optimiser never has to cross the whole parameter
+# from its NEIGHBOR, so the optimizer never has to cross the whole parameter
 # range in one step. The first attempt started at h_ml = 32 -- the far end -- and
 # its warm start was the mode's uptake vector, 64 m away.
 HU_ANCHOR <- HU_GRID[which.min(abs(HU_GRID - pm$h_ml))]

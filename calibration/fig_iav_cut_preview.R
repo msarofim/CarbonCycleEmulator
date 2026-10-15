@@ -7,7 +7,7 @@
 #   b  the land ENSO lag profiles, each relative to its own best: the growth module; the main objective
 #      with every row (10-06); without the four seasonal rows (C1). Likelihood throughout.
 #   c  the four seasonal rows' preference split into information and visibility (C2), with the growth
-#      record's own analogue
+#      record's own analog
 #   d  data only: GCB 2025's two land sinks against Nino 3.4 read k months late (C4)
 # Usage: Rscript calibration/fig_iav_cut_preview.R [path/to/iav_cut_preview_<tag>.rds]
 # =====================================================================

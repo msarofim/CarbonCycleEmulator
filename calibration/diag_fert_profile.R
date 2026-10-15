@@ -1,12 +1,12 @@
 # =====================================================================
-# diag_fert_profile.R -- WHAT DOES THE RECORD PAY TO PUT FERTILISATION IN THE
+# diag_fert_profile.R -- WHAT DOES THE RECORD PAY TO PUT FERTILIZATION IN THE
 # LITERATURE BAND, AND WHO PAYS? (CHANGELOG 09-30 c; Marcus 2026-09-30: "Can we
 # do anything to bring the fertilization rate down?")
 #
 # The fitted (beta_max 2.55, fert_k 868) is above the 09-28 (c) band (beta_max
 # 1.3-2.0, K 500-750; notes/lit_2026-09-28_co2_fert_saturation.md). Both are
 # PINNED at each FP_POINTS row and the other 9 of the 11 rebalanced names --
-# q10 INCLUDED -- are re-optimised (NM, FP_MAXIT) from the CONTROL, the
+# q10 INCLUDED -- are re-optimized (NM, FP_MAXIT) from the CONTROL, the
 # fixed-stock tau-500 rebalanced vector (the q10 profile's control, identity
 # gated). Two kinds of row, PRE-REGISTERED to separate AMPLITUDE from SHAPE:
 #   shape_*  K moved into the band with beta_max solved so the present-day

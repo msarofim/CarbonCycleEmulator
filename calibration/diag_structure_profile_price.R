@@ -5,7 +5,7 @@
 # INDEFINITE because the point was far from an optimum (gradients up to 6114
 # per log-unit), and marginal sds off an indefinite matrix are not a count.
 #
-# Maximises the LIKELIHOOD (objective change #8 included, NO priors) over the
+# Maximizes the LIKELIHOOD (objective change #8 included, NO priors) over the
 # same ten log-parameters with everything else at ent26, L-BFGS-B inside
 # physical box bounds, then recomputes the Hessian there and scores I1-I10.
 # ⚠ A conditional optimum of ten parameters with sixteen held is NOT a mode

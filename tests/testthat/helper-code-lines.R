@@ -9,7 +9,7 @@
 # pattern until it goes quiet -- narrows it past the case it exists to catch.
 #
 # ⚠ It must be QUOTE-AWARE: a `#` inside a string is content, not a comment,
-# and ui.R carries hex colours. A naive `sub("#.*", "", ln)` deletes them.
+# and ui.R carries hex colors. A naive `sub("#.*", "", ln)` deletes them.
 #
 # ⚠ AND IT MUST LIVE IN ONE PLACE. By 2026-09-25 there were two byte-alike
 # copies (test-ui-year-bounds-lint.R, test-imbalance-panel.R) and a third was
@@ -41,7 +41,7 @@ ccx_code_lines <- function(ln) {
 test_that("0. the shared comment stripper keeps code and drops comments", {
   expect_identical(ccx_code_lines("x <- 1  # a comment"), "x <- 1  ")
   expect_identical(ccx_code_lines("# whole line"), "")
-  # ⚠ THE CASE THAT BREAKS A NAIVE sub("#.*", "") -- a hex colour in ui.R
+  # ⚠ THE CASE THAT BREAKS A NAIVE sub("#.*", "") -- a hex color in ui.R
   expect_identical(ccx_code_lines('col <- "#C4315F"'), 'col <- "#C4315F"')
   expect_identical(ccx_code_lines('col <- "#C4315F"  # the fg'), 'col <- "#C4315F"  ')
   # a `#` inside a string that is itself followed by a real comment

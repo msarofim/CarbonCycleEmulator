@@ -460,7 +460,7 @@ for (L in LAP) cat(sprintf("  (d) Laplace about %s, %g x sd, %d draws (seed %d):
 cat(sprintf("      ⚠ the Laplace puts h_ml's 99.9%% at %.1f m where the MCMC's is %.1f m: along h_ml the posterior is a RIDGE the local curvature does not see, so (c) is the answer to \"can a draw reach it\"\n",
             LAP[[1]]$h_ml_q[[2]], q_mc[[3]]))
 
-# (e) HOW BIG IS THE ARTEFACT where it occurs: every UNSTABLE start-file point, every stable one past
+# (e) HOW BIG IS THE ARTIFACT where it occurs: every UNSTABLE start-file point, every stable one past
 # SC_ARTEFACT_Z_CTRL (the near-limit control), each wave's best (the far control) and the MCMC's
 # unstable draws, re-scored at the controller's count and refined -- under TODAY's objective for that
 # point's own structure, pins and param set (an older wave's stored logpost was scored under its own

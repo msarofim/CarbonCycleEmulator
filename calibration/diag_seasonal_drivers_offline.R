@@ -40,7 +40,7 @@ target <- function(st, y0 = 1995, y1 = 2024) {
 tgt_mlo <- target("MLO")
 
 # ---- 2. Deterministic daily-mean TOA insolation at latitude phi ----
-# Standard flat-sun formula; S0 cancels in the normalised shape.
+# Standard flat-sun formula; S0 cancels in the normalized shape.
 insol_month <- function(phi_deg) {
   phi <- phi_deg * pi / 180
   d   <- (seq(15, 365, by = 30.4))[1:12]              # mid-month day-of-year
@@ -52,7 +52,7 @@ insol_month <- function(phi_deg) {
 # ---- 3. The driver model -------------------------------------------
 # NPP shape: light above a compensation threshold, rectified --
 #   n(t) ~ max(I(t) - c*max(I), 0), unit annual mean.
-# R_h shape: q10^(T_seas/10), unit annual mean (Jensen renormalised), with
+# R_h shape: q10^(T_seas/10), unit annual mean (Jensen renormalized), with
 #   T_seas = A_T * sin(2pi(t - t_lag)) lagging insolation.
 # CO2 cycle = -(1/M_hem) * integral(NPP_ann*(n-1) - R_ann*(r-1)) dt,
 # integrated monthly, zero-mean. NPP_ann, R_ann solved by LINEAR least

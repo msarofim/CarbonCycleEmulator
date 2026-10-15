@@ -13,7 +13,7 @@
 #
 # THE SHAPE. The land term's input becomes the lagged index passed through a CAUSAL exponential memory,
 #   x(t) = sum_{j=0..J} w_j N(t - L - j),  w_j = exp(-j / tau) / sum(exp(-j / tau)),  tau = 0 -> the model as built.
-# Normalised, so the amplitude keeps its meaning (GtC/yr per index unit, integrated). It is applied by wrapping
+# Normalized, so the amplitude keeps its meaning (GtC/yr per index unit, integrated). It is applied by wrapping
 # ccx_land_enso() for the duration of a run (both cores read the land series through it); tau = 0 is GATED
 # identical() to the unwrapped run, and tau > 0 must move the answer. The ocean limb keeps reading the index at t.
 #

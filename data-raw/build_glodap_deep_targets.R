@@ -238,7 +238,7 @@ cat("would LOOSEN the constraint, not tighten it.\n")
 # is a function of h_ml and rewards a LARGE h_ml (penalty falls 81 -> 53
 # log-units across h_ml 50 -> 220), pushing against the very clause the pump
 # exists to fix; freezing at the h_ml = 75 grid instead overstates the miss by
-# 1.61 sigma at the fitted h_ml = 184, biasing IN FAVOUR of the pump. Fixed
+# 1.61 sigma at the fitted h_ml = 184, biasing IN FAVOR of the pump. Fixed
 # depths are neutral on both counts AND are like-for-like to 0.09 sigma at
 # h_ml = 100, the value the pump delivers -- which is why the likelihood carries
 # a GATE on h_ml (LIK_OCEAN_GRAD_HML_OK) rather than a silent assumption.
@@ -425,7 +425,7 @@ grad$tco2_alkpop <- grad_dic_alk    # reported for the ratio; NOT a term
 # would be the same hazard the gradient TARGET has (see the h_ml note above) --
 # except here it would also be uncacheable.
 #
-# NORMALISED TO ITS OWN SURFACE, so it carries SHAPE only; the magnitude comes
+# NORMALIZED TO ITS OWN SURFACE, so it carries SHAPE only; the magnitude comes
 # from `pump_grad` at runtime. That keeps the one number a refit might touch out
 # of the build product entirely.
 GD_PROF_DZ <- 250                          # m, the binning already used above
@@ -478,7 +478,7 @@ cat("so that difference cannot leak into the pump's magnitude.\n")
 
 out <- list(
   gradient = grad,
-  dic_profile = prof,        # pump export shape (task 9); SHAPE only, normalised
+  dic_profile = prof,        # pump export shape (task 9); SHAPE only, normalized
   sigma_candidates = c(meas = 3, se_neff100 = r14$deep$sd_w / 10,
                        se_neff20 = r14$deep$sd_w / sqrt(20),
                        se_neff5 = r14$deep$sd_w / sqrt(5),

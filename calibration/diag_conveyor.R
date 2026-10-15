@@ -99,7 +99,7 @@ DC_DEEP_OBS  <- c(-150, -200)   # CCX_PARAM_TABLE's global-average bracket
 #   CO2: it is NOT. Greenland ice CO2 runs 20-30 ppm ABOVE Antarctic with a
 #   standard deviation of 6-10 ppm (vs 2-3 in Antarctic ice), from in-situ
 #   production by carbonate-acid reactions and oxidation of organics -- Anklin
-#   et al. 1995, Barnola et al. 1995, Tschumi & Stauffer 2000. The ARTEFACT is
+#   et al. 1995, Barnola et al. 1995, Tschumi & Stauffer 2000. The ARTIFACT is
 #   ~150x the signal below and the SCATTER alone is ~50x it.
 #   D14C: it IS, and it is the apposite test, because the observed offset is
 #   driven substantially by Southern Ocean upwelling of 14C-depleted water --

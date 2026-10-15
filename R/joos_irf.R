@@ -12,7 +12,7 @@
 #
 # EVERYTHING IN THIS FILE IS PROTOCOL, NOT MODEL. It builds the background and
 # the pulse Joos specifies; it does not change how the carbon cycle responds to
-# them. The constants are Joos's, and are labelled with what they are for.
+# them. The constants are Joos's, and are labeled with what they are for.
 # =====================================================================
 
 JOOS_PULSE     <- 100          # GtC, Joos's standard impulse
@@ -53,8 +53,8 @@ JOOS_PPM_PER   <- 2.123        # GtC per ppm, the conversion Joos states
 # passes diverge (562 -> 2364 -> 37221 ppm).
 #
 # The background is held to ~1 ppm in ~386, i.e. 0.26 % (as measured when this
-# was written, 2026-08; ccx_hold_forcing() reports the realised value). That is not exact and
-# the realised deviation is REPORTED rather than hidden; it perturbs the Revelle
+# was written, 2026-08; ccx_hold_forcing() reports the realized value). That is not exact and
+# the realized deviation is REPORTED rather than hidden; it perturbs the Revelle
 # factor by ~0.3 %, far below anything the IRF comparison resolves.
 JOOS_HOLD_TAUS <- c(2, 5, 10, 25, 50, 100, 200, 500)   # yr, relaxation basis
 JOOS_HOLD_PASS <- 3L
@@ -320,8 +320,8 @@ ccx_pulse_forcings <- function(spin, years_fwd, bomb_total_kmol, luc_scale) {
                               enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p),
                               nuc_share = ccx_nuc_share_of(p))
   # ⚠ THE FORWARD TABLE'S CLOCK RUNS ONE YEAR BEHIND REAL TIME (documented 2026-10-12, code review;
-  # behaviour unchanged). F_hist ends at t = JOOS_REF_YEAR + 0.958 (Dec 2010), and the state continues
-  # from the END of 2010; but years_fwd starts at JOOS_REF_YEAR, so F_fwd's first row is labelled
+  # behavior unchanged). F_hist ends at t = JOOS_REF_YEAR + 0.958 (Dec 2010), and the state continues
+  # from the END of 2010; but years_fwd starts at JOOS_REF_YEAR, so F_fwd's first row is labeled
   # t = JOOS_REF_YEAR + 0.042 (Jan 2010). Every forward label is therefore one year early: the AOD
   # column (the only time-varying background column left after the holds below) enters a year early,
   # and ccx_irf_pd()'s "release at JOOS_PULSE_YR" happens at real time JOOS_PULSE_YR + 1 (2016.0, not

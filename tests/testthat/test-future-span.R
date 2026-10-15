@@ -19,7 +19,7 @@
 #       axis trained on 1750 onward. Asserted by construction, and
 #       mutation-tested against the zoom it rejects.
 #   (d) ⭐ THE FITTED-RANGE CAVEAT. F5 did not create the extrapolation but it
-#       made it 26x worse: the stylised "+5 %/yr" pathway reaches 3,516 ppm at
+#       made it 26x worse: the stylized "+5 %/yr" pathway reaches 3,516 ppm at
 #       2100 (2.1x the fitted top) and 44,172 ppm at 2150 (26.2x). Measured
 #       both horizons, 2026-09-24. ccx_run_coupled() warns to the CONSOLE,
 #       which is not where a reader is. The note must fire outside the range

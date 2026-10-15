@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-14c: suite read, copy facts at hilda31w, the nuclear ¹⁴C source promoted to data/
 
+> ⚠ **SUPERSEDED by `notes/handoff_2026-10-15_prepublic_review.md`** (2026-10-15).
+
 **Supersedes** `notes/handoff_2026-10-14b_band_shipped.md` (which now points here). Written on Marcus's
 request ("Yes, write the handoff and remove the two suite worktrees"), 2026-10-14 ~12:20.
 

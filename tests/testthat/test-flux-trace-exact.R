@@ -112,7 +112,7 @@ test_that("the warm route equals a direct sum over the low-latitude edges", {
                   .s2$grid, .aux, record = TRUE)
   fl <- attr(dy, "fluxes")
   snap <- c(ccx_flux_derive(fl$channels, e$y, .aux), ccx_flux_hs_derive(fl$edges, fl$pump_edges, .aux))
-  E <- fl$edges; P <- fl$pump_edges; U <- E - P        # unlabelled = everything but the pump
+  E <- fl$edges; P <- fl$pump_edges; U <- E - P        # unlabeled = everything but the pump
   pump_w <- 0; mlint_w <- 0
   for (h in HEMIS) {
     ml <- .aux$idx[[h]]$ml + 1L; oc <- .aux$idx[[h]]$oc + 1L

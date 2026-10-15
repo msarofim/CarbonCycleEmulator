@@ -14,7 +14,7 @@
 #     model is scored against. Agreement between this product and the model's
 #     seasonal CO2 is therefore NOT evidence: some of it is guaranteed. Marcus
 #     accepted the circularity explicitly for a pedagogical tool (2026-08-27).
-#     The acceptance is not a licence to quote the agreement as a test.
+#     The acceptance is not a license to quote the agreement as a test.
 #     [[no_power_null]] -- a structurally guaranteed null reads exactly like a
 #     real negative, so state the circularity everywhere this product appears.
 #     ⚠ AND THE CIRCULARITY IS NOT UNIFORM: SH land has very few constraining
@@ -34,7 +34,7 @@
 #     handoff 27k warns about for the inversion's "observed" land.
 #     THE POINT OF DOING BOTH IS TO MEASURE THAT DEPENDENCE, NOT ASSERT IT SMALL.
 #
-# ⚠ (3) NEE HAS A NEAR-ZERO ANNUAL MEAN, so the unit-mean normalisation the
+# ⚠ (3) NEE HAS A NEAR-ZERO ANNUAL MEAN, so the unit-mean normalization the
 #     MOD17 pipeline uses (`unitmean`, divide by the annual mean) is UNDEFINED
 #     here -- it divides by a small net sink and explodes. Everything downstream
 #     of this file must work on ANOMALIES scaled by peak-to-peak, never on

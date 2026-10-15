@@ -4,7 +4,7 @@
 #
 # The model's only ENSO path to the ocean is SST solubility (WRONG sign:
 # solubility-only r -0.525, slope -0.163 GtC/yr per Nino3.4 unit vs GCB
-# +0.115, r +0.49), cancelled by the fitted additive flux gamma_enso_ocn_*.
+# +0.115, r +0.49), canceled by the fitted additive flux gamma_enso_ocn_*.
 # Option A: switch the column's upwelling limb ON (w_up > 0, shipped 0) and
 # MODULATE it by (1 - gamma x Nino3.4) -- El Nino suppresses upwelling, so less
 # DIC-rich water reaches the mixed layer, pCO2 falls, uptake RISES: the right
@@ -22,7 +22,7 @@
 # ⚠ SIZING. The handoff's ruling (2) -- gamma from the Fix B reservoir -- is
 # still OWED; this is a SCAN over W0 x gamma, not a declared number. W0's
 # bracket: 4 m/yr is the classical upwelling-diffusion value (Hoffert et al.
-# 1980 -- a RECOLLECTION, labelled); the scan runs 0.5-4 m/yr.
+# 1980 -- a RECOLLECTION, labeled); the scan runs 0.5-4 m/yr.
 # Usage: Rscript calibration/diag_ta0_enso_upwelling_sign.R
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)

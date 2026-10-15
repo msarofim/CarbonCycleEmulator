@@ -2,7 +2,7 @@
 # THE ENTRAINMENT CHANNEL'S CONDITIONAL LEVER ON THE SPO OCEAN LIMB.
 #
 # ⛔ THIS IS NOT A TEST OF THE HYPOTHESIS AND MUST NOT BE READ AS ONE. Nothing
-# is re-optimised: every coordinate except `ent_seas_amp_SH` is HELD at the
+# is re-optimized: every coordinate except `ent_seas_amp_SH` is HELD at the
 # 25-parameter refit winner, `sst_seas_amp_SH` included -- and that is the very
 # coordinate the hypothesis says is strained. So this measures the channel's
 # LEVER, not what a fit would do with it. P1-P5 are decided by the refit.
@@ -18,7 +18,7 @@ for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp(); source(ccx_path("calibration", "lib_design_gates.R"))
 
 EC_DIR  <- "calibration/output/multistart_20260902_demean25"
-# The scan grid straddles the derived prior centre and the recorded plausibility
+# The scan grid straddles the derived prior center and the recorded plausibility
 # band, and extends past it so saturation is visible rather than assumed.
 EC_ENT  <- c(0, 5, ccx_const("ENT_SEAS_AMP_SH_DERIV"), 20,
              ccx_const("ENT_SEAS_AMP_SH_INBAND"), 45)

@@ -21,7 +21,7 @@
 # of its answers are used.
 #
 # WHAT IT IS NOT. The emulator holds pool sizes at their preindustrial
-# steady state: it has no CO2 fertilisation, no LUC debit, no temperature
+# steady state: it has no CO2 fertilization, no LUC debit, no temperature
 # dependence of Rh, and no feedback of the land onto the atmosphere. It
 # answers "what shape of land holds the right amount of bomb 14C", which
 # is a partition question, and nothing else. Every number it produces is

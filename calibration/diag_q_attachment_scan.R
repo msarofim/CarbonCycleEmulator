@@ -42,7 +42,7 @@ QS_LUEKER_FLOOR <- 2.0       # degC; below this the transient EXTRAPOLATES
 QS_NEFF      <- LIK_D14C_DEEP_NEFF
 QS_SCORED_MIN_DEPTH <- 1500  # bomb addition <= 4.5 permil below this
 QS_ATTACH_REF  <- 1          # HILDA, depth-independent
-QS_TOL_Z       <- 0.05       # mean|z| materiality; prereg sec.1 (a JUDGEMENT)
+QS_TOL_Z       <- 0.05       # mean|z| materiality; prereg sec.1 (a JUDGMENT)
 QS_TOL_KZ_REL  <- 1e-3       # solver tolerance for "kz did not decrease"
 QS_B5_HD_PERMIL <- 5; QS_B5_KZ_REL <- 0.10
 QS_C1_KZ <- c(4800, 6200)    # prereg C1: incumbent obs-pinned kz window

@@ -14,10 +14,10 @@
 #   T4 asks for the JOINT optimum of  L(r, theta) + priors(theta) + logprior(r)
 #   over the free offset r = rep_dC and the other 28 names theta.  Profiling:
 #       max_{r,theta} [ ... ]  ==  max_r [ max_theta ( L + priors_theta ) + logprior(r) ]
-#   The inner maximisation is over theta AT FIXED r, where logprior(r) is an
+#   The inner maximization is over theta AT FIXED r, where logprior(r) is an
 #   ADDITIVE CONSTANT -- so the inner optimum does not depend on which rep_dC
 #   prior is in force.  T1 MEASURED that inner optimum at 9 values of r with all
-#   28 other names fully re-optimised.  Therefore
+#   28 other names fully re-optimized.  Therefore
 #       REST(r) := logpost_T1(r) - logprior_shipped(r)
 #   is the prior-free profile, and the T4 answer under ANY candidate prior is
 #       argmax_r [ REST(r) + logprior_candidate(r) ].
@@ -28,8 +28,8 @@
 # ⚠ THIS IS NOT THE CONJUGATE MAP, WHICH THIS PROJECT ALREADY MEASURED AS
 # UNUSABLE HERE. The 09-22 (u) side test found the analytic conjugate formula
 # understated every measured shift by up to 0.58 ppm against a 0.15 tolerance
-# and refused to print itself as the answer. That failure was a LINEARISATION of
-# the profile. This file does not linearise: it uses the profile T1 measured.
+# and refused to print itself as the answer. That failure was a LINEARIZATION of
+# the profile. This file does not linearize: it uses the profile T1 measured.
 # `~/.claude/CLAUDE.md`, "use real data when you have it" -- PCHIP through the
 # measured anchors, never a 2-parameter fit to them.
 #
@@ -83,7 +83,7 @@ RPP_GRID_N     <- 20001L   # fine grid inside the ladder for the argmax
 RPP_EDGE_FRAC  <- 0.01     # argmax within this fraction of a ladder end = BOUNDARY
 # ⛔⛔ THE FIRST VERSION OF THIS GATE WAS BLIND, AND THE MUTATION TEST SAID SO.
 # It scaled its own tolerance to the spread of the leave-one-out residuals --
-# but a corrupted rung CONTAMINATES ITS NEIGHBOURS' residuals too, so injecting
+# but a corrupted rung CONTAMINATES ITS NEIGHBORS' residuals too, so injecting
 # -20 log-units into one rung inflated the bound faster than the residual, and
 # the gate passed. A bound computed from the data it tests cannot reject that
 # data; it is [[gate_reads_its_own_output]] in a tolerance's clothing.
@@ -225,7 +225,7 @@ for (i in which(!is.na(lr))) cat(sprintf("            rung %7.3f  resid %+9.4f\n
 cat(sprintf("            => interpolation bar on a reconstructed logpost: %.3f log-units\n\n", interp_sd))
 
 # ---- GATE DOMINANCE: the only check here with EXTERNAL power -------------
-# The 09-22 (u) side test optimised the SAME objective at the same candidate
+# The 09-22 (u) side test optimized the SAME objective at the same candidate
 # corners with 8 of 29 names free. Its landing point is therefore a FEASIBLE
 # point of T1's fully-free conditional problem, so T1's profile loglik at the
 # SAME pinned rep_dC cannot be WORSE. Every row can fail; that is the point.

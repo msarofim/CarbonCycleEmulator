@@ -21,7 +21,7 @@
 #  1. BY CORE. The Law Dome record is five cores with two DIFFERENT gas-age
 #     offsets (DE08/DE08-2 at 31 yr, DSS/DSS0506 at 60 yr) and different
 #     accumulation rates. A real atmospheric misfit is the same in every core
-#     that covers the same years. A product artefact is not. This is the
+#     that covers the same years. A product artifact is not. This is the
 #     strongest test available without new data, and 98 of the 109 samples in
 #     1900-1970 are DE08/DE08-2, so the crossover is largely WITHIN ONE CORE.
 #
@@ -29,7 +29,7 @@
 #     growth-rate residual that changes sign. If the OBSERVATIONS show a
 #     mid-century pause in dCO2/dt that the model does not reproduce, the
 #     crossover is that feature and nothing else -- and "is the pause real
-#     atmosphere or a firn artefact" becomes the whole question. This is the
+#     atmosphere or a firn artifact" becomes the whole question. This is the
 #     test that says WHERE to look rather than how big it is.
 #
 #  3. FIRN SMOOTHING, AS A SCAN. Convolving the model with an air-age

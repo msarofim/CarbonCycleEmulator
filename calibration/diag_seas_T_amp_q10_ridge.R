@@ -8,17 +8,17 @@
 # PRODUCT A_T * ln(q10) is identified -- R/model.R says so in as many words.
 # The two priors jointly ask for a product the fit refuses:
 #
-#   prior CENTRE  14.3215 K x ln(2.00) = 9.927     <- sqrt(LO*HI), the actual prior
+#   prior CENTER  14.3215 K x ln(2.00) = 9.927     <- sqrt(LO*HI), the actual prior
 #   prior LO      11.4450 K x ln(2.00) = 7.933     <- the handoff's number
 #   the mode      25.9371 K x ln(1.0907) = 2.251
 #
 # so the joint prior implies 4.41x the modulation the likelihood accepts (the
-# handoff said 3.52x because it used the LO bracket where the prior is centred
+# handoff said 3.52x because it used the LO bracket where the prior is centered
 # on the geometric mean of the bracket -- see ccx_bracket_lnorm). Both
 # parameters are then fought in OPPOSITE directions along the putative ridge.
 #
 # WHAT WOULD MAKE THAT A RIDGE, AND WHAT WOULD REFUTE IT. If it is a ridge, then
-# fixing A_T anywhere in 5-50 K and re-optimising costs nothing, and q10 moves
+# fixing A_T anywhere in 5-50 K and re-optimizing costs nothing, and q10 moves
 # to hold the product. If the profile is NOT flat, the conflict is NOT a
 # two-parameter degeneracy and the soil-damping repair in sec.2 is aimed at the
 # wrong thing -- STOP THERE.
@@ -38,7 +38,7 @@
 # profiled parameter and its partner, and nothing else. `lik` reproduces the
 # 2026-08-21 first pass and is kept only for that. GATE 2 checks the
 # subtraction against an independently computed ccx_loglik either way, and the
-# full log-posterior is carried alongside, never optimised.
+# full log-posterior is carried alongside, never optimized.
 #
 # q10 HAS TWO JOBS AND THE SECOND ONE IS WHY THIS MIGHT NOT BE FLAT. Besides the
 # seasonal modulation it carries the ANNUAL climate-carbon feedback,
@@ -62,7 +62,7 @@
 #             for an SH misfit it did not cause.
 #   PAIRSH -- q10 and seas_T_amp_SH. The minimal HONEST pair test: each
 #             hemisphere may hold its own product. PAIR minus PAIRSH is the size
-#             of the shared-q10 artefact, printed rather than argued about.
+#             of the shared-q10 artifact, printed rather than argued about.
 #   BLOCK  -- the whole seasonal block. What the fit could actually do.
 #
 # NOTHING HERE IS COMPILE-TIME. Unlike diag_phi_eff_profile.R, seas_T_amp_NH is
@@ -86,7 +86,7 @@
 # 2.25, and A_T = 2.25 / ln(1.09) = 26 K is then DERIVED rather than fought
 # over. If that is right, re-anchoring `seas_T_amp_NH`'s prior downward cannot
 # deliver sec.2's stated success criterion ("q10 back near 2.0") -- it will move
-# A_T and leave q10 where it is. Profiling q10 with the amplitudes re-optimised
+# A_T and leave q10 where it is. Profiling q10 with the amplitudes re-optimized
 # is the transpose, and it separates the two claims for about half an hour
 # against the 15 hours a refit costs.
 #
@@ -142,7 +142,7 @@ RQ_SEAS_BLOCK <- c("seas_T_amp_SH", "seas_lag_p",
 # `beta_max`, `fert_k` and `luc_scale`, so the 352 log-units it charges for
 # q10 = 2.0 is an UPPER BOUND: raising q10 releases more soil carbon under the
 # observed warming, and the classic beta-gamma compensation -- more
-# fertilisation drawing it back down -- is exactly the repair BLOCK forbids.
+# fertilization drawing it back down -- is exactly the repair BLOCK forbids.
 # Freeing the three is what turns "the fit will not go there" into "the DATA
 # will not go there". The ocean parameters (`k_w`, `kz`, `h_ml`, `tau_ex`) stay
 # frozen, so it is a tighter upper bound and not the refit itself.
@@ -170,7 +170,7 @@ md <- readRDS(RQ_MODE_FILE)
 # ---- the anchors this profile is read against, all DERIVED --------------
 RQ_OBS_LO  <- ccx_const("SEAS_T_AMP_NH_OBS_LO")     # all NH land, CRU 1961-90
 RQ_OBS_HI  <- ccx_const("SEAS_T_AMP_NH_OBS_HI")     # NH land > 45N
-RQ_PRIOR_C <- sqrt(RQ_OBS_LO * RQ_OBS_HI)           # ccx_bracket_lnorm's centre
+RQ_PRIOR_C <- sqrt(RQ_OBS_LO * RQ_OBS_HI)           # ccx_bracket_lnorm's center
 RQ_PRIOR_S <- log(RQ_OBS_HI / RQ_OBS_LO) / 2
 RQ_Q10_C   <- 2.0                                   # CCX_PARAM_TABLE q10 prior
 RQ_Q10_S   <- 0.25
@@ -178,7 +178,7 @@ RQ_MODE_A  <- md$par_mode$seas_T_amp_NH
 RQ_MODE_Q  <- md$par_mode$q10
 RQ_MODE_X  <- md$par_mode[[RQ_PROFILED]]
 # amp: 5 to 50 as sec.2 specifies, with the four points that MEAN something --
-#      the two bracket ends, the prior centre and the mode -- exactly on grid.
+#      the two bracket ends, the prior center and the mode -- exactly on grid.
 # q10: the mode up to and past the LITERATURE 2.0, which is the value sec.2's
 #      success criterion is stated in terms of, plus the amplitude-implied
 #      2.25/ln(q10) = 11.445 point (q10 = 1.2160) so the two axes intersect.
@@ -271,7 +271,7 @@ rq_run <- function(pv) {
   # luc_scale TWICE. ccx_make_logpost() builds its ELUC_BASE from the unscaled
   # base_forcing for exactly this reason. GATE 2 caught the double-scale here at
   # 1.91 log-units; calibration/diag_phi_eff_profile.R still carries it (its
-  # by_stream/gcb_land_sink column only -- its optimisation went through
+  # by_stream/gcb_land_sink column only -- its optimization went through
   # ccx_make_logpost() and its seasonal-row conclusions do not touch LUC).
   el <- ccx_forcing_eluc_annual(F)
   for (z in c("e_luc_NH", "e_luc_SH", "cum_luc_NH", "cum_luc_SH"))
@@ -349,7 +349,7 @@ rq_case <- function(job) {
   f <- function(x) { u <- ub; u[ifr] <- x; v <- -rq_obj(u); if (!is.finite(v)) 1e12 else v }
   gains <- numeric(0); nev <- 0; conv <- NA
   if (length(free) == 0L) {
-    # FROZEN: no optimisation at all, one evaluation. The incumbent's own point.
+    # FROZEN: no optimization at all, one evaluation. The incumbent's own point.
     x <- numeric(0); best <- frozen
   } else if (length(free) == 1L) {
     # Brent, not Nelder-Mead: NM in one dimension is documented-unreliable and
@@ -428,7 +428,7 @@ RQ_YLAB  <- switch(RQ_AXIS, amp = "q10", q10 = "A_T (K)", sst = "sst_SH (K)")
 rq_other <- function(x) switch(RQ_AXIS, amp = x$q10, q10 = x$A_T,
                                sst = x$sst_SH)
 # The anchors worth marking on each axis, DERIVED: the mode, and on the amp
-# axis the two measured bracket ends and the prior centre, on the q10 axis the
+# axis the two measured bracket ends and the prior center, on the q10 axis the
 # literature value sec.2's success criterion is stated in.
 RQ_MARKS <- switch(RQ_AXIS,
   amp = c("MODE" = RQ_MODE_X, "obs LO (all NH land)" = RQ_OBS_LO,

@@ -219,7 +219,7 @@ say("    land_C_GtC seed %.4f -> periodic %.4f", sp_ase$diagnostics$land_C_GtC, 
 #
 # ⛔⛔ THE FIRST CUT OF THIS CHECK WAS A NULL WITH NO POWER, and it is kept here
 # as a GATE rather than deleted. It "tested" the hemispheric asymmetry by
-# symmetrising `seas_amp_NH`/`seas_amp_SH` (12 / 2 -> 7 / 7) and got a result
+# symmetrizing `seas_amp_NH`/`seas_amp_SH` (12 / 2 -> 7 / 7) and got a result
 # IDENTICAL to the as-fitted arm in every printed digit. That is not a physical
 # null: at `seas_drivers = 1` those two are DEAD PARAMETERS -- R/model.R:1291-1296
 # calls them "THE SINE'S KNOBS, live only at seas_drivers = 0". A test that moves
@@ -255,7 +255,7 @@ c4_sine <- arm_shift(b_sine, "SINE path instead (seas_drivers = 0, amps 12/2)")
 # (b) NOW THE IDENTITY: BOTH paths off. With no seasonal cycle at all there is
 # nothing to rectify, so the one-year map's fixed point and the instantaneous
 # fixed point are THE SAME STATE -- an identity at the solver's tolerance, not a
-# judgement ⇒ [[threshold_from_obs_or_law]].
+# judgment ⇒ [[threshold_from_obs_or_law]].
 b_off <- b_sine; b_off$seas_amp_NH <- 0; b_off$seas_amp_SH <- 0
 c4_off <- arm_shift(b_off, "BOTH paths off (the identity)")
 say("  ⇒ identity arm |d13C shift| %.3e; the two live arms are %+.3f and %+.3f",

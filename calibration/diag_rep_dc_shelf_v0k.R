@@ -11,7 +11,7 @@
 # GATE SHAPE (bound from OUTSIDE the ladder, as in T4p): the shipped N(0, 1) prior
 # pulls toward 0, so the prior-free optimum lies ABOVE the top rung (the fitted
 # value); below it, loglik and REST must be strictly increasing and concave.
-# Also reports beta_max / fert_k along the ladder (the fertilisation side effect).
+# Also reports beta_max / fert_k along the ladder (the fertilization side effect).
 # No RNG (the ladder's replicate seed is recorded in its own artifacts).
 # USAGE: Rscript calibration/diag_rep_dc_shelf_v0k.R
 # =====================================================================

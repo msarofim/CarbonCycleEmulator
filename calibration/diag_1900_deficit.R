@@ -56,9 +56,9 @@
 # WHY THE STRUCTURE WAS WRONG, from the budget's own layout rather than from
 # recollection: GCB reports E_LUC (bookkeeping) and S_LAND (the residual land
 # sink) as SEPARATE terms, and data/gcb_budget.rds carries them as separate
-# columns. The model's beta-fertilisation uptake is the analogue of S_LAND, so
+# columns. The model's beta-fertilization uptake is the analog of S_LAND, so
 # regrowing what E_LUC removed added a second, unbudgeted land sink on top of
-# the one already parameterised.
+# the one already parameterized.
 #
 # RUNTIME ~10 s.
 # =====================================================================
@@ -66,13 +66,13 @@
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-# ---- PINNED TO THE LOG FERTILISATION FORM (2026-08-14) --------------
+# ---- PINNED TO THE LOG FERTILIZATION FORM (2026-08-14) --------------
 # This diagnostic was written against NPP = NPP0(1 + beta ln(chi/chi0)) and
 # every number in its header is a LOG-FORM number. On 2026-08-14 the default
 # flipped to CCX_FERT_MM, under which `beta` is INERT -- so without this pin the
 # file would still run, still print a beta column, and silently report the same
 # MM answer for every beta. (That is not hypothetical: it happened to
-# diag_fert_pulse_gates.R and to the app's fertilisation switch on the day of
+# diag_fert_pulse_gates.R and to the app's fertilization switch on the day of
 # the flip, and identical rows are what caught both.)
 #
 # The pin makes this file reproduce its recorded numbers exactly. It does NOT
@@ -90,7 +90,7 @@ DF_WINDOW  <- c(1750, 1900)     # the window the deficit was quoted over
 DF_FULL    <- c(1750, 2024)     # the full historical run
 DF_MARKS   <- c(1775, 1800, 1825, 1850, 1875, 1900)
 DF_MARKS2  <- c(1900, 1930, 1960, 1990, 2010, 2024)
-DF_PULSE   <- 100               # GtC, the idealised pulse
+DF_PULSE   <- 100               # GtC, the idealized pulse
 DF_PYEAR   <- 1760              # pulse year; leaves 264 yr of response
 DF_PLAGS   <- c(10, 25, 50, 100, 150, 264)
 DF_PPM_GTC <- 0.4707            # ppm per GtC, whole atmosphere
@@ -111,7 +111,7 @@ annual <- function(o) stats::aggregate(
              land = o$land_C, ocean = o$ocean_C), mean)
 run_win <- function(F, s) annual(ccx_run_fast(s, F)$out)
 
-# externalise LUC on an assembled forcing: mass-exact, isotopically meaningless
+# externalize LUC on an assembled forcing: mass-exact, isotopically meaningless
 externalise <- function(F) {
   F$e_foss_NH <- F$e_foss_NH + F$e_luc_NH; F$e_foss_SH <- F$e_foss_SH + F$e_luc_SH
   F$e_luc_NH <- 0; F$e_luc_SH <- 0; F$cum_luc_NH <- 0; F$cum_luc_SH <- 0
@@ -170,7 +170,7 @@ cat(sprintf("%-26s %+8.1f %8s %8s %8.3f  <-- observations\n", "Law Dome",
             obs_air, "", "", obs_air / (cum_f + cum_l)))
 
 # =====================================================================
-# 3. THE MECHANISM TEST -- an idealised pulse pair, no historical forcing
+# 3. THE MECHANISM TEST -- an idealized pulse pair, no historical forcing
 #
 # Same DF_PULSE GtC, same year, one delivered as a wood transfer and one as an
 # external source, on a ZERO-emission background with GMST AND ENSO FROZEN.

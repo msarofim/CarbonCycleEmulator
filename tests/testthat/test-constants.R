@@ -2,7 +2,7 @@
 # Gate: constants provenance and internal consistency.
 #
 # Motivated by a real bug (2026-08-10): LAMBDA_C14 was written as the literal
-# log(2)/5700 while being LABELLED "derived" from T_HALF_C14. Changing the
+# log(2)/5700 while being LABELED "derived" from T_HALF_C14. Changing the
 # half-life left the decay rate untouched, and a mutation test that swapped in
 # the Libby 5568 yr value produced bit-identical output -- i.e. the decay gate
 # was inert. These tests make that class of decoupling impossible to reintroduce.
@@ -59,7 +59,7 @@ test_that("provisional constants are reported, not silently used", {
   # sourcing. Update the expected set deliberately when one is retired.
   # D14C_PI was RETIRED from this list on 2026-08-10 (IntCal20 supplied +2.16
   # per mil, replacing a 0-by-construction placeholder). The ledger failing on a
-  # retirement is the intended behaviour -- it forces the update to be deliberate.
+  # retirement is the intended behavior -- it forces the update to be deliberate.
   # ADDED 2026-08-16 with the biological pump (task 9): the two 13C
   # fractionations on the export limbs. Both are recollected working values --
   # ~20-22 permil depletion for marine organic matter, a small positive offset
@@ -70,7 +70,7 @@ test_that("provisional constants are reported, not silently used", {
   # of a source -- MOD17 is its source and NPP_FRAC_NH_OBS is `data`. It is
   # provisional because it is the OBSERVATION INVERTED THROUGH THE MODEL's own
   # clearing, so it rides on `luc_scale` and the land turnover times. The ledger
-  # is the right place for that: it keeps a model-dependent prior centre
+  # is the right place for that: it keeps a model-dependent prior center
   # visible. Its dependence is priced in calibration/diag_npp_frac_anchor.R and
   # is an order of magnitude below the prior width.
   # ADDED 2026-09-02 with the temperature-dependent air-sea 13C pair, and the
@@ -105,7 +105,7 @@ test_that("provisional constants are reported, not silently used", {
   # three files until the provenance audit; registering it is what let the two
   # entrainment constants be COMPUTED rather than typed, and it also sets the
   # prior WIDTH (1/it is the no-dilution ceiling). ⚠ So both ENT_SEAS_AMP_SH_*
-  # inherit this debt even though they are labelled "derived" -- the ledger is
+  # inherit this debt even though they are labeled "derived" -- the ledger is
   # the right place for that to stay visible.
   # ADDED 2026-09-14 g: ALPHA_PHOTO_EPS. The -18 permil terrestrial photosynthetic
   # discrimination had been a literal in ccx_prepare()'s aux for the model's
@@ -164,7 +164,7 @@ test_that("PUMP_GRAD_OBS IS the shipped ocean_grad_dic target, not a copy of it"
   # PROMISED BY R/constants.R AND WRITTEN 2026-08-16e (handoff 16d sec.4 flagged
   # it as the one piece of the pump wiring left undone).
   #
-  # `PUMP_GRAD_OBS` is the prior CENTRE for the fitted `pump_grad`, and it is the
+  # `PUMP_GRAD_OBS` is the prior CENTER for the fitted `pump_grad`, and it is the
   # same observation the `ocean_grad_dic` likelihood row scores -- a deliberate,
   # documented mild double-count. That is only defensible while the two are the
   # SAME NUMBER: if the target is ever re-derived (different depth bins, a newer
@@ -177,6 +177,6 @@ test_that("PUMP_GRAD_OBS IS the shipped ocean_grad_dic target, not a copy of it"
   expect_equal(ccx_const("PUMP_GRAD_OBS"), tg$dic$target, tolerance = 1e-9)
   # ...and it is `status = "data"`, so ccx_check_constants() must NOT be
   # reporting it as provisional -- the pump's magnitude prior is anchored on an
-  # observation, which is the whole argument for centring it there.
+  # observation, which is the whole argument for centering it there.
   expect_false("PUMP_GRAD_OBS" %in% ccx_check_constants(quiet = TRUE))
 })

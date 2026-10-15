@@ -15,7 +15,7 @@
 # WHAT IS EXPENSIVE. Cards 2, 3, 4 and 5 each need a model run that the app does
 # not already have (a gate run to 2025, a knockout run, a 1000-year pulse pair).
 # (2026-10-15 review: card 2 added -- rv_gradients() reads the same gate run as card 3.)
-# Each is memoised in RV_CACHE and computed on FIRST VIEW, not at startup --
+# Each is memoized in RV_CACHE and computed on FIRST VIEW, not at startup --
 # startup is already the app's worst number (APP_WARMUP_NOTE) and nobody should
 # pay for a tab they never open. (The old card 6, the one that spun up a second mode,
 # was RETIRED 2026-10-01; see the ledger.)
@@ -85,8 +85,8 @@ RV_FAIR_BAND_FMT   <- "%s, 5\u201395 %% of configurations"   # legend: label, th
 # ⚠ THIS IS A DIFFERENT LIST FROM THE PINS, and conflating them is the bug N12
 # caught. A PIN is generated -- it is a property of the mode file the app is
 # running, and rv_stand_ins() reads it off that file. A STAND-IN is a
-# JUDGEMENT: that a fitted name absorbs a discrepancy rather than representing
-# a process. Nothing in the parameter table records that judgement, so it is
+# JUDGMENT: that a fitted name absorbs a discrepancy rather than representing
+# a process. Nothing in the parameter table records that judgment, so it is
 # written here, with its source, rather than derived.
 #
 # SOURCE: the whole-model review of 2026-09-16 (d),
@@ -186,7 +186,7 @@ RV_REP_OBS_D13C_SH <- -0.011  # permil, hemispheric mean minus SPO
 # ---------------------------------------------------------------------
 RV_CACHE <- new.env(parent = emptyenv())
 
-#' Memoise one expensive review computation under `key`
+#' Memoize one expensive review computation under `key`
 #'
 #' Errors are cached too, as a `rv_failed` object, so a kernel that cannot run
 #' is reported once and does not re-throw on every re-render.
@@ -437,7 +437,7 @@ rv_pulse <- function() rv_memo("pulse", function() {
 # control beat the canonical on AIC. At hilda33d the canonical wins on the 24
 # rows the two objectives share (+4.68 log-units, dAIC -5.35), so the premise
 # had turned, and its caption printed "dAIC ... in the simpler version's
-# favour" whatever the sign. Its run (rv_control) and its panel
+# favor" whatever the sign. Its run (rv_control) and its panel
 # (rv_plot_control) went with it. The AIC comparison itself is still gated, in
 # tests/testthat/test-mode-file.R.
 # ---------------------------------------------------------------------
@@ -650,7 +650,7 @@ RV_CARDS <- list(
                               rv_enso_l2_phrase(RV_ENSO_L2_VS_OBS)),
                       "observed for equatorial transport variability (the",
                       "numbers are under the second chart, in sverdrups, Sv: a",
-                      "million cubic metres of water per second). It replaced a pair of",
+                      "million cubic meters of water per second). It replaced a pair of",
                       "fitted coefficients that had been overturning a",
                       "wrong-signed solubility response, which is why the",
                       "mechanism was adopted even though it costs fit. On its own",
@@ -754,41 +754,39 @@ RV_CARDS <- list(
   # stable public references: retire into RV_RETIRED_IDS (a hole, never reused) and
   # never renumber again -- a comment that leads with "card N" must not land on a
   # different question.
-  # B7 (Marcus 2026-10-01, "Laplace first, MCMC as the check" -- then "Hold the bands"):
-  # a Laplace band WAS built (calibration/build_futures_ribbons.R, 1000 draws) and FAILED
-  # its own check: scored on the objective, the draws sat a median 25 log-units below
-  # the Gaussian, importance ESS 8 / 1000, the posterior strongly non-Gaussian along the
-  # fertilisation ridge (calibration/diag_ribbons_linearity.R, diag_laplace_axes.R). So
-  # the card's approved text is TRUE again and is kept; the one added sentence (drafted
-  # for Marcus's wording) records that the worry it states was MEASURED.
-  # ⚠ 10-02 (CHANGELOG s-u): the MCMC check has since RUN, so three sentences below are out of date
-  # ("too wide", "individual standard errors", "a real sampler is planned"). The facts, for
-  # Marcus to word, are in notes/card6_facts_2026-10-02.md.
+  # B7 (Marcus 2026-10-01, "Laplace first, MCMC as the check" -- then "Hold the bands"): the card said there
+  # were no bands, and that the Laplace band had FAILED its check. 2026-10-15: the hilda31w MCMC band ships,
+  # and this is Marcus's copy for it (drafted on "Draft all four for me to edit"; his one edit deleted the
+  # Laplace sentences; notes/band_copy_drafts_2026-10-15.md). Every number below is pinned against its
+  # artifact by test-futures-ribbons.R ("issue 6's typed numbers"): change them together.
   list(id = 6, key = "bands", class = "gap",
-       title = "There are no uncertainty bands, anywhere",
-       plain = paste("Every line in this app is a single best fit. There is no",
-                     "posterior, so there are no ribbons, and no number here",
-                     "comes with a calibrated uncertainty."),
-       detail = paste("The parameters were located by dispersed multistart",
-                      "optimisation, and the curvature at the optimum is",
-                      "well-behaved enough to quote individual standard errors --",
-                      "but a Gaussian approximation at a mode is not a posterior,",
-                      "and at this model's conditioning the widest directions",
-                      "would be exactly the ones that approximation handles worst.",
-                      "Drawing a band from it would put a number on the chart that",
-                      "reads as calibrated uncertainty and is not.",
-                      "That has since been measured: a Gaussian band was built and",
-                      "run through the full model, and along the direction that",
-                      "trades the strength of CO\u2082 fertilisation against its",
-                      "shape the real fit falls away far faster than the Gaussian",
-                      "assumes, so the band would have been too wide. Running a real",
-                      "sampler is planned for the final model, not this beta: the",
-                      "compute is affordable, but no sampler has yet converged on",
-                      "this posterior, and that is a research problem rather than",
-                      "a queue wait."),
-       ask = paste("Would you want the posterior before you trusted any of this,",
-                   "or is a single best fit acceptable for a teaching tool that",
-                   "says so on every tab?")),
+       title = "The uncertainty band covers only the carbon-cycle parameters",
+       plain = paste("Each line in this app is a single best fit. On the Futures tab,",
+                     "the CO\u2082 view also shades how much the projection changes",
+                     "when the carbon-cycle parameters vary within their plausible",
+                     "range. The band leaves out other sources of uncertainty, so",
+                     "the full range is likely wider."),
+       detail = paste("The band comes from a Markov chain Monte Carlo sampler: four",
+                      "chains of 200,000 steps each, from which 17,000 parameter sets",
+                      "were run through the full model. It varies the 31 fitted",
+                      "carbon-cycle parameters. Fourteen other parameters are held at",
+                      "fixed values, and the climate response (fitted to FaIR), the",
+                      "non-CO\u2082 forcing and the model's structure are not varied.",
+                      "Temperature therefore changes only through CO\u2082, by less than",
+                      "0.1 \u00b0C, and no band is drawn for it.",
+                      "The sampler has not fully converged. Three parameters that set",
+                      "how far plant growth and respiration lag behind the seasons can",
+                      "compensate for one another, and one chain sampled a different",
+                      "combination of them for part of its run. This has less effect",
+                      "on the projections: bands computed from each chain separately",
+                      "agree to within about 5 ppm, at most about a fifth of the",
+                      "band's width.",
+                      "The depth of the ocean's mixed layer is cut off at about 75 m",
+                      "by a limit in the model's time-stepping, so its sampled range",
+                      "may be narrower than the data allow."),
+       ask = paste("Does a band that covers only the carbon-cycle parameters help",
+                   "you read the projections, or would you want the climate response",
+                   "included before relying on it?")),
   list(id = 7, key = "shims", class = "design",
        title = "Some parameters stand in for mechanisms, and some constants are unsourced",
        # 2026-10-15 review (Marcus: "Apply all"): three of the seven stand-ins are HELD at 0 at hilda31w, so
@@ -802,7 +800,7 @@ RV_CARDS <- list(
        # N11 + N12 (Marcus 2026-09-22): the "most that naming buys" clause is
        # cut, and the bigger fix -- the prose named the SHIMS while the table
        # below listed the PINS, and the card presented them as one list. They
-       # are two different things; both are now shown, labelled, with the
+       # are two different things; both are now shown, labeled, with the
        # overlap COMPUTED rather than described (rv_stand_ins()).
        # Marcus 2026-10-02 (carbotopecomment): "rather than quietly absorbed" and "and it is
        # worth keeping them apart" deleted; "parameter", not "name".
@@ -820,7 +818,7 @@ RV_CARDS <- list(
                       # 2026-10-06 (Marcus: "Add a line about k_w to the known issues tab"): wording
                       # DRAFTED for his review. The record: the k_w = 1446 price arm (CHANGELOG 10-05 a)
                       # fits 2.75 BETTER on likelihood; its -20 posterior price is ONE prior,
-                      # hs_asx_frac's judgement width (kept, 10-05 e). test-review-card-numbers.R ties
+                      # hs_asx_frac's judgment width (kept, 10-05 e). test-review-card-numbers.R ties
                       # "1,446" to KW_PRIOR_CENTRE and "about 1,850" to the canonical's fitted k_w.
                       # 2026-10-13 (g): "about 1,900" -> "about 1,850" (Marcus: "about 1,850"): hilda31w's k_w is
                       # 1835.4 (sd 52.5); 1,900 was 1.23 sd off. The next sentence's claim (the data prefer 1,446)

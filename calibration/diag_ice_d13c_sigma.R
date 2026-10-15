@@ -11,7 +11,7 @@
 #      (measurement + firn/representation), by era. ⚠ The spline was fitted TO these samples,
 #      so this UNDERSTATES independent noise somewhat; it is a floor, not a ceiling.
 #   S3 ICE vs THE SOUTH POLE STATION in the overlap (SPO d13C starts 1977): the offset and the
-#      scatter between two records of the SAME air -- the analogue of the CO2 row's
+#      scatter between two records of the SAME air -- the analog of the CO2 row's
 #      "ice - SPO = -0.31 +- 0.15 ppm, 1962-96" (likelihood.R).
 #   S4 THE CANONICAL'S RESIDUAL (hilda33d, its own spinup): model SH box vs each sample, read
 #      exactly as the CO2 ice row reads co2_SH (approx on the monthly series at the sample's

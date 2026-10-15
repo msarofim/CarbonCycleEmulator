@@ -6,7 +6,7 @@
 # WHY. HILDA declared u = 38 +/- 17 m/yr (their K(z) fit to 1970s GEOSECS 14C);
 # over the model's HS area that is a 70 Sv two-way flush. The 09-08c tests
 # showed the CO2 rows, not the deep, hold it there. Freeing it under a prior
-# centred on what the ocean actually forms lets round 4 READ whether the fit
+# centered on what the ocean actually forms lets round 4 READ whether the fit
 # runs back to 38 (the model NEEDS the flush for the sink) or settles near
 # the observation (the deep is bought at half the export).
 #
@@ -20,7 +20,7 @@
 #   low  = 18 + (29 - 13) = 34 Sv  (net of the recycled NADW)
 #   high = 18 + 29        = 47 Sv  (gross)
 # Converted with the model's OWN HS area (OCEAN_AREA_NH + _SH) x hs_frac and
-# 1 Sv = 3.156e13 m3/yr. Centre = geometric mean of the bracket. Width: the
+# 1 Sv = 3.156e13 m3/yr. Center = geometric mean of the bracket. Width: the
 # bracket's half-width in log, plus the AABW estimate's own relative error
 # (7/21) scaled by AABW's share of the total, in quadrature -- DERIVED, not typed.
 # ⚠ The bracket is an interpretive reading of a schematic (Talley Fig. 6a);

@@ -85,7 +85,7 @@ test_that("the overlay works on WHAT THE SERVER ACTUALLY PASSES", {
   expect_false(is.null(ov), info = "overlay NULL on the server's own argument")
   expect_gt(nrow(ov), 100L)
   # ⭐ THE WHO COLUMN MUST BE THE RUN NAMES, or ggplot gives the dashed line its
-  # own colour and the pairing the chart depends on is lost.
+  # own color and the pairing the chart depends on is lost.
   expect_setequal(unique(ov$who), names(slice))
   # and the run names really are the display labels, which is the thing that
   # differed from the ids

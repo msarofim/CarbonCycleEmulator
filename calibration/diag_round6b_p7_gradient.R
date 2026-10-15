@@ -5,12 +5,12 @@
 # gradients (ccx_ocean_grad_scored, the objective's own path) at hilda31p
 # (seas_ml 0) and at the round-6 modes (seas_ml 1). 2026-09-11.
 # RESULT (09-11, instant-over-mean-mass read, RETRACTED): d13C gradient -0.309
-# -> +0.018, DIC 302 -> 385 -- the DIC half was an OBSERVABLE ARTEFACT (157
+# -> +0.018, DIC 302 -> 385 -- the DIC half was an OBSERVABLE ARTIFACT (157
 # umol/kg of surface mass) ⇒ diag_seasonal_box_observable_artefact.R.
 # RESULT (09-11 (5), ANNUAL-MEAN read, round6_p7_annualmean.log): DIC 300 -> 227
 # (target 233, z -0.2: AT the observation); d13C -0.300 -> +0.031, still 2.0x
 # the bound -- but at an UNREFIT mode whose deep box the fit moved to cancel
-# the artefact. The mechanism's own P7 verdict waits on the refit.
+# the artifact. The mechanism's own P7 verdict waits on the refit.
 # =====================================================================
 suppressMessages(for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)); ccx_load_cpp()
 D <- "calibration/output/multistart_20260911_round6b_seasml1_sd1.0452"

@@ -18,8 +18,8 @@
 #   - the land ENSO lag L; a common scale s on the two land amplitudes (the GLOBAL growth sees only their
 #     sum, so the NH:SH split stays the canonical's); the diffuse-light gamma_diff (FIXED at 0.25 by the
 #     canonical, not a fitted name; free here, >= 0);
-#   - the estimator is the refit read's s. 6 one (lib_block_reopt.R br_timing): NOAA MBL global, centred
-#     12-month difference, 1980-2024, both series detrended by a natural spline (df 5). The centred
+#   - the estimator is the refit read's s. 6 one (lib_block_reopt.R br_timing): NOAA MBL global, centered
+#     12-month difference, 1980-2024, both series detrended by a natural spline (df 5). The centered
 #     difference removes the annual cycle and the spline the long-term trend: the two things Marcus named;
 #   - by SUPERPOSITION at each L (both terms are additive fluxes on the land), then CHECKED by direct runs
 #     and polished by a direct Nelder-Mead on real runs;
@@ -27,11 +27,11 @@
 #     only by timing, and the ocean has its own interannual row (gcb_ocean_enso_slope), so A2 is scored
 #     with that row added to the module and, for contrast, without it.
 # PART B -- THE COST (the cut's stage 2, approximated). At A1's optimum, the main objective row by row:
-#   B1 unrefitted; B2 the rest of the land block re-optimised; B3 B2 + the seasonal-cycle block and tau_ex.
+#   B1 unrefitted; B2 the rest of the land block re-optimized; B3 B2 + the seasonal-cycle block and tau_ex.
 #   A real stage 2 is a full refit of the other names (24 starts, hours); B2/B3 bound what it can recover.
 # PART C -- WHY THE JOINT FIT HOLDS THE LAG SHORT. Two tests that separate "the seasonal rows carry real phase
 #   information" from "the two-box model absorbing its seasonal errors through the lag":
-#   C1 the lag profile WITHOUT the four seasonal rows (10-06's 7-name land block re-optimised per lag),
+#   C1 the lag profile WITHOUT the four seasonal rows (10-06's 7-name land block re-optimized per lag),
 #      against 10-06's profile WITH them (read from its rds, gated on the identity cell);
 #   C2 each seasonal row's preference split EXACTLY (Gaussian rows, fixed sigma) into INFORMATION, I(L) =
 #      sum r0 E(L) / sd^2 (the no-land-ENSO residual projected on the model's land-ENSO signature), and
@@ -379,7 +379,7 @@ for (row in SEAS_ROWS) { X <- C2[C2$row == row, ]
               X$L[which.max(X$net)], X$L[which.max(X$I)], X$L[which.max(X$I_hp)], CUT_LAG_OBS, L0,
               X$net[X$L == CUT_LAG_OBS] - X$net[abs(X$L - L0) < 1e-12], X$I[X$L == CUT_LAG_OBS] - X$I[abs(X$L - L0) < 1e-12],
               X$V[X$L == CUT_LAG_OBS] - X$V[abs(X$L - L0) < 1e-12])) }
-# the growth analogue, on the module's own monthly estimator (sigma = the canonical's residual sd; n_eff-scaled)
+# the growth analog, on the module's own monthly estimator (sigma = the canonical's residual sd; n_eff-scaled)
 sig_g <- stats::sd(can_m - B$m$obs); y0g <- B$m$obs - (B$m$g000 + B$m$V + B$m$O)
 G2 <- do.call(rbind, lapply(seq_along(CUT_LAGS_A), function(i) { E <- EL[[i]]$m
   data.frame(L = CUT_LAGS_A[i], I = sum(y0g * E) / sig_g^2 * NE[["m"]] / length(E), V = sum(E^2) / (2 * sig_g^2) * NE[["m"]] / length(E)) }))

@@ -4,9 +4,9 @@
 #   committed 11a59de BEFORE this file existed. NO GATE MAY MOVE.
 #
 # HYPOTHESIS (27m). The model's SH land signal at SPO is 1.92x observed not
-# because its productivity is too big but because too little of it is CANCELLED.
+# because its productivity is too big but because too little of it is CANCELED.
 # CT2022: SH land nets only 25.1 % of its gross swing to air (NH 68.2 %). The
-# cancelling channel is soil respiration, scaled by `seas_T_amp_SH`, which the
+# canceling channel is soil respiration, scaled by `seas_T_amp_SH`, which the
 # fit drove to 1.0391 K = 28.9 % of its measured bracket's LOW end.
 #
 # ⚠ UNLIKE `seas_npp_amp_SH`, THIS IS A CALIBRATED PARAMETER, NOT A CONSTANT.
@@ -14,7 +14,7 @@
 #   (1) it is set through the UNCONSTRAINED VECTOR (tr = "log", so u = log(x)),
 #       not through base_params;
 #   (2) the conditional slice must REMOVE it from the free set -- leaving it in
-#       would let the optimiser walk straight back to the incumbent and report
+#       would let the optimizer walk straight back to the incumbent and report
 #       "no cost", which is a structurally guaranteed null. [[no_power_null]]
 #
 # Usage:  Rscript calibration/diag_seas_T_amp_sh_power.R
@@ -26,7 +26,7 @@ TA_YEARS <- c(1750, 2024)
 # THE MEASUREMENT, from R/constants.R -- every label below derives from these.
 TA_LO   <- ccx_const("SEAS_T_AMP_SH_OBS_LO")     # 3.5915 K, all SH land
 TA_HI   <- ccx_const("SEAS_T_AMP_SH_OBS_HI")     # 7.1012 K, SH land >30S
-TA_INIT <- sqrt(TA_LO * TA_HI)                   # 5.0503, the prior's centre
+TA_INIT <- sqrt(TA_LO * TA_HI)                   # 5.0503, the prior's center
 # Grid. The first four are the MEASURED bracket; the last two are GEOMETRY
 # POINTS reported for the floor and NOT proposed values -- prereg sec.2.
 TA_GRID <- c(1.0391, TA_LO, TA_INIT, TA_HI, 11.08, 13.95, 20.0)

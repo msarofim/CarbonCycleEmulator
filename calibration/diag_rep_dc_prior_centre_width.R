@@ -10,7 +10,7 @@
 # here is adoptable without the ruling and the restamp that §4.1 of the freeze
 # record requires.
 #
-# WHY THE QUESTION IS NOT "WHERE DOES THE MODE GO". Re-centring alone was
+# WHY THE QUESTION IS NOT "WHERE DOES THE MODE GO". Re-centering alone was
 # measured INERT in 2026-08-23 (diag_rep_dC_prior.R, at the arm-N mode): the
 # likelihood was ~10x tighter than the prior, so the prior could not move the
 # fit, only relabel it. ⚠ THAT MEASUREMENT PREDATES THIS CANONICAL -- it was
@@ -26,12 +26,12 @@
 #
 # THREE PARTS, AND PART 3 IS THE ONE THAT COUNTS:
 #   1. PROFILE  -- the likelihood-only optimum and curvature for `rep_dC`, with
-#      its correlated partners re-optimised. Gives (xL, sL).
+#      its correlated partners re-optimized. Gives (xL, sL).
 #   2. ANALYTIC -- the conjugate-normal prediction of the posterior mode for
 #      each (mu, sigma): xp = (xL/sL^2 + mu/sg^2)/(1/sL^2 + 1/sg^2). Cheap, and
 #      it assumes the likelihood is locally quadratic and that only the profiled
 #      partners respond.
-#   3. MEASURED -- an actual re-optimisation at each corner, with a real free
+#   3. MEASURED -- an actual re-optimization at each corner, with a real free
 #      set, and the analytic prediction CHECKED AGAINST IT. ⚠ A conjugate
 #      formula on a 29-parameter posterior is an approximation, and the whole
 #      point of tightening the prior is to make it bite; if the two disagree by
@@ -49,7 +49,7 @@ for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
 # ---- the trial priors ------------------------------------------------
-# mu = 0 is the shipped shrinkage centre; RPW_MU_MEAS is the MEASURED
+# mu = 0 is the shipped shrinkage center; RPW_MU_MEAS is the MEASURED
 # station-vs-hemisphere offset, the mean of NH -MLO +0.738 and SH-SPO +0.814
 # (calibration/diag_rep_dc_mbl_zonal.R, NOAA MBL zonal, doi:10.15138/DVNP-F961).
 RPW_MU_MEAS  <- 0.776
@@ -61,7 +61,7 @@ RPW_MU       <- c(0, RPW_MU_MEAS)
 RPW_SIGMA    <- c(1.0, 0.5, 0.2)
 RPW_FRANCEY  <- 0.2
 RPW_GRID     <- seq(2.6, 4.4, by = 0.2)   # around the canonical 3.52, for the curvature fit
-RPW_NPART    <- 3                          # how many correlated partners to re-optimise in part 1
+RPW_NPART    <- 3                          # how many correlated partners to re-optimize in part 1
 RPW_FREE_N   <- 8                          # part 3's free set: rep_dC + the 7 most correlated
 RPW_NM_MAXIT <- 1200
 RPW_AGREE_TOL <- 0.15                      # ppm; analytic vs measured mode
@@ -146,7 +146,7 @@ for (mu in RPW_MU) for (sg in RPW_SIGMA) {
   cat(sprintf("  %8.2f %8.2f %14.3f %+10.3f %12.2f\n", mu, sg, xp, xp - x0, (xp - mu) / sg))
 }
 
-# ---- part 3: MEASURED, by actual re-optimisation ---------------------
+# ---- part 3: MEASURED, by actual re-optimization ---------------------
 free <- if (!is.null(cv) && "rep_dC" %in% rownames(cv)) {
   r <- stats::cov2cor(cv)["rep_dC", ]
   c("rep_dC", names(sort(abs(r[setdiff(names(r), "rep_dC")]), decreasing = TRUE))[seq_len(RPW_FREE_N - 1)])

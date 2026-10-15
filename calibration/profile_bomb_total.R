@@ -7,7 +7,7 @@
 # +4.6 sigma toward Naegler & Levin's citable 99.3-104.9 kmol. Re-running the
 # mode-find moved it 151.2 -> 149.8. It did not.
 #
-# THE TEST. Fix bomb_total on a grid; at each value re-optimise every other
+# THE TEST. Fix bomb_total on a grid; at each value re-optimize every other
 # parameter so the rest of the model gets its best chance to compensate; and do
 # it under BOTH observational target sets, because which one to score against is
 # an open choice worth roughly 130 log-units (LIK_EXCESS_C14_TARGET).

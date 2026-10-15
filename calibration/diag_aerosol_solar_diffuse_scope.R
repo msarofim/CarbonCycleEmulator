@@ -166,12 +166,12 @@ sep("4. CONDITIONAL PRICING -- because the frozen column is NOT the price")
 # ⛔ THE 2026-08-29h LESSON, APPLIED IN ADVANCE. When `gamma_diff` itself was
 # priced, the FROZEN-parameter cost OVERSTATED the real one by 82 % at every
 # gamma [[ccx_diffuse_light]]: a new NPP term is absorbed by whatever else sets
-# NPP. Here that is the FERTILISATION PAIR (`beta_max`, `fert_k`) -- and the
+# NPP. Here that is the FERTILIZATION PAIR (`beta_max`, `fert_k`) -- and the
 # degeneracy is close to exact, because both an anthropogenic-AOD term and CO2
-# fertilisation raise NPP monotonically over the industrial period.
-# ⇒ SO THE IDENTIFIABLE PART IS THE SHAPE, NOT THE LEVEL: what fertilisation
+# fertilization raise NPP monotonically over the industrial period.
+# ⇒ SO THE IDENTIFIABLE PART IS THE SHAPE, NOT THE LEVEL: what fertilization
 # CANNOT imitate is the PEAK-THEN-DECLINE after 1979 -- the global-brightening
-# signature. This section re-optimises the pair at each A_peak and re-prices.
+# signature. This section re-optimizes the pair at each A_peak and re-prices.
 asd_ll <- function(a_peak, bm, fk) sum(unlist(asd_run(a_peak, beta_max = bm, fert_k = fk)$ll))
 tb <- CCX_PARAM_TABLE
 cat(sprintf("  re-optimising (beta_max, fert_k) from (%.4f, %.2f) at each A_peak\n",
@@ -208,13 +208,13 @@ cat(sprintf("  %-9s %8.3f %9s %10.4f %10.4f\n", "OBSERVED", OV$sd, "--", DG_AF_O
 # =====================================================================
 sep("5. ⭐ WHAT BREAKS THE DEGENERACY: FACE, NOT THE CO2 RECORD")
 # The CO2 record cannot separate an anthropogenic-AOD NPP term from CO2
-# fertilisation -- section 4 shows the fit absorbs ~100 % of the former into the
+# fertilization -- section 4 shows the fit absorbs ~100 % of the former into the
 # latter. But `beta_max` is not free: it is ALSO the model's predicted response
 # to a FACE enrichment, and THAT is an independent observation.
 # ⚠ Closed form, no runs: R(400 -> 564) = (1 + en(564)) / (1 + en(400)) - 1 with
 # en(chi) = beta_max * (chi - CO2_PI) / (fert_k + chi - CO2_PI), the same
 # expression `diag_fert_ridge_gates.R` and `diag_face_prior_for_beta_max.R` use.
-ASD_FACE_AMB <- 400; ASD_FACE_ENR <- 0.41     # Norby 2025 normalising enrichment
+ASD_FACE_AMB <- 400; ASD_FACE_ENR <- 0.41     # Norby 2025 normalizing enrichment
 ASD_FACE_OBS <- c("Norby 2025 synthesis" = 0.218, "Norby 2005 (young plantations)" = 0.23)
 CHI0 <- ccx_const("CO2_PI_PPM")
 Rface <- function(bm, K) {

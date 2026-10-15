@@ -46,7 +46,7 @@ source(ccx_path("calibration", "lib_glodap_obs.R"))
 #'
 #' The diffusion code's concentration is y_k/dz_k, and y_k = DIC_k * A * dz_k *
 #' rho / mol_per_GtC, so y_k/dz_k is EXACTLY proportional to DIC_k with the layer
-#' thickness cancelling. That is what makes this solve a two-line calculation
+#' thickness canceling. That is what makes this solve a two-line calculation
 #' rather than a fit.
 #'
 #' Steady state requires the source in box k to cancel the diffusive convergence

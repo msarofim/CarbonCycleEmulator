@@ -12,7 +12,7 @@
 #       and by how much per prior sd? A coordinate worth < ~1 log-unit per
 #       prior sd is prior-dominated and will come back as its prior.
 #   Q2  DIRECTION -- does the objective REWARD the partition the observation
-#       asks for (land -0.665, ocean +0.119 GtC/yr per index unit) or PENALISE
+#       asks for (land -0.665, ocean +0.119 GtC/yr per index unit) or PENALIZE
 #       it? This is not rhetorical: 09-01g measured the model in a
 #       COMPENSATING-ERROR state where land and ocean errors cancel 87 % in CO2
 #       growth, and CO2 outvotes partition 40:1 in this objective
@@ -24,16 +24,16 @@
 # reading says the other parameters are exactly what absorbs an ENSO change, so
 # a frozen slice OVERSTATES the cost of any move -- the gate-pricing arc
 # measured 253 log-units of pure artifact from precisely this
-# ([[ccx_gates_priced]]: iso-fit frontiers must RE-OPTIMISE at every step).
+# ([[ccx_gates_priced]]: iso-fit frontiers must RE-OPTIMIZE at every step).
 # So: a LARGE conditional response is evidence of leverage (Q1) and is safe to
 # read. A conditional SIGN (Q2) is a hypothesis about the refit, not a
-# prediction of it. Section 3 re-optimises a 3-parameter carbon slice at the one
+# prediction of it. Section 3 re-optimizes a 3-parameter carbon slice at the one
 # point that matters, which is the cheapest available check on whether the sign
 # survives.
 #
 # ⚠ MATCHED COMPARISON, SHIPPED TABLE, NO BAND ADOPTION. Every point is
 # evaluated through ONE ccx_make_logpost() built on the shipped
-# CCX_PARAM_TABLE, so the reparameterisation constant between this harness and
+# CCX_PARAM_TABLE, so the reparameterization constant between this harness and
 # the mode file's own recorded band CANCELS between rows. The absolute logpost
 # printed here is therefore NOT comparable with the stored one and is never
 # quoted as if it were ([[compare_gaps_not_absolute_logposts]],
@@ -147,7 +147,7 @@ for (r in PTS) {
 cat("\n  |part| = total absolute partition misfit against the two observed slopes.\n")
 
 # =====================================================================
-# 3. DOES THE SIGN SURVIVE RE-OPTIMISATION? the cheapest available check
+# 3. DOES THE SIGN SURVIVE RE-OPTIMIZATION? the cheapest available check
 # =====================================================================
 cat(sprintf("\n%s\n3. RE-OPTIMISING a %d-parameter carbon slice (%s) at the prescription\n   point -- the conditional cost above is an UPPER bound on the true one.\n%s\n",
             strrep("-", 78), length(EL_SLICE), paste(EL_SLICE, collapse = ", "),

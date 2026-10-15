@@ -30,7 +30,7 @@ FACE_COMMIT <- ccx_git_stamp()
 
 ## ---- named constants (every label below derives from these) ----------
 FACE_CHI0     <- 276.88        # model preindustrial, R/model.R
-FACE_ENRICH   <- 0.41          # Norby 2025 normalising enrichment
+FACE_ENRICH   <- 0.41          # Norby 2025 normalizing enrichment
 FACE_AMBIENT  <- c(376, 400)   # Norby-2005-era and recent ambient, ppm
 FACE_BMAX_HI  <- 3.0           # hard implausibility bound, calibrate.R:61
 FACE_K_LO     <- 20; FACE_K_HI <- 2000

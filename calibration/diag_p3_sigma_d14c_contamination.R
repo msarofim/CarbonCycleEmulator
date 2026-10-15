@@ -10,7 +10,7 @@
 # The worry is concrete. `sigma_d14c` is a FITTED error term on the two
 # Delta14C station streams. Inflating it relaxes every 14C residual, and the
 # 2026-08-23 pinned `foss` run inflated it +3.85 sd while absorbing a 14C-free
-# artefact. If the luc arm is doing a smaller version of the same thing, some of
+# artifact. If the luc arm is doing a smaller version of the same thing, some of
 # the `rep_dC` relief is being bought with a widened error bar rather than with
 # the mechanism under test.
 #
@@ -28,9 +28,9 @@
 #     move with the measured -5.014. A large unexplained residual is the arm
 #     doing real work; a small one means the ridge slid.
 #
-#  T3 THE CONDITIONAL RE-OPTIMISATION, WHICH IS THE DECISIVE ONE. Hold every
+#  T3 THE CONDITIONAL RE-OPTIMIZATION, WHICH IS THE DECISIVE ONE. Hold every
 #     coordinate at the landed luc mode, RESET `sigma_d14c` to the reference
-#     6.1251, and re-optimise `rep_dC` ALONE in 1-D. If `rep_dC` stays near
+#     6.1251, and re-optimize `rep_dC` ALONE in 1-D. If `rep_dC` stays near
 #     4.346, the inflated sigma bought nothing and P1 survives. If it springs
 #     back toward 5.566, the relief was the error bar.
 #
@@ -97,7 +97,7 @@ cat(sprintf("    covariance-predicted from the OTHER 20 moves = %+.3f sd\n",
 cat(sprintf("    unexplained residual = %+.3f sd\n",
             d_sd[["rep_dC"]] - pred_u / sd_u[["rep_dC"]]))
 
-# ---- T3/T4: the 1-D conditional re-optimisation -------------------
+# ---- T3/T4: the 1-D conditional re-optimization -------------------
 # Built by hand rather than through ccx_make_logpost() so `sigma_d14c` can be
 # OVERRIDDEN independently of the u-vector: the whole point is to evaluate the
 # luc arm's landed mode at a sigma it did not choose.

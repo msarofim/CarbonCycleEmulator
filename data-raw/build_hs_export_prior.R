@@ -7,7 +7,7 @@
 # NH the subpolar gyres and the Arctic. `pump_hs_gcm2` is its export per unit
 # area in gC m-2 yr-1, out of a box h_hs thick (20-500 m, fitted).
 #
-# SOURCES (typed here as CITED constants; the centre is COMPUTED from them):
+# SOURCES (typed here as CITED constants; the center is COMPUTED from them):
 #   [L25] Liniger, Moreau, Lannuzel, Carranza & Strutton (2025), Global
 #         Biogeochemical Cycles, doi:10.1029/2024GB008193. BGC-Argo, 2014-2022,
 #         SO south of 30 S: total 2.69 +/- 1.23 PgC/yr; per-zone export from DO
@@ -18,8 +18,8 @@
 #         Cycles, doi:10.1029/2019GB006236 (as averaged per zone by L25 sec.4.2):
 #         SIZ 0.9, PAZ 1.80, SAZ 1.80, STZ 1.25 molC m-2 yr-1.
 #   [N22] Nowicki, DeVries & Siegel (2022), GBC, doi:10.1029/2021GB007083:
-#         global export 10.2 PgC/yr (context only; not used in the centre).
-# CENTRE: the PAZ -- the zone the cold box most resembles -- averaged over the
+#         global export 10.2 PgC/yr (context only; not used in the center).
+# CENTER: the PAZ -- the zone the cold box most resembles -- averaged over the
 # two float-based estimates. SPREAD: log-sd chosen so that 1 sigma spans the
 # PAZ-with-turbulence value above and the SIZ mesopelagic value's order below,
 # and to carry the two things the sources do not cover: the NH subpolar half

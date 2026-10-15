@@ -18,12 +18,12 @@
 #      breaks the closure by ~0.6 GtC/yr. Asserted on the real forcing column.
 #   4. REGROWTH IS A REMOVAL AND THE SOURCE IS A SOURCE. A sign flip anywhere
 #      in the chain would still close test 1, because the split is a difference.
-#   5. THE ASSUMED YEARS ARE LABELLED AS ASSUMED. 57 % of the cumulative
+#   5. THE ASSUMED YEARS ARE LABELED AS ASSUMED. 57 % of the cumulative
 #      regrowth comes from the pre-1959 back-extension, which is a construction
 #      and not an observation; a product that lost that label would let the app
 #      present it as measured. ⚠ The GCB-observed window must carry the observed
 #      label for exactly the years GCB publishes, no more.
-#   6. THE FUTURE PATH DECAYS AND IS LABELLED PRESCRIBED. It does NOT fall out
+#   6. THE FUTURE PATH DECAYS AND IS LABELED PRESCRIBED. It does NOT fall out
 #      of the scenarios: the prescribed net LUC goes NEGATIVE in four of five
 #      SSPs, which in bookkeeping accounting is gross regrowth OVERTAKING gross
 #      clearing. Test 6b pins that fact so nobody re-derives the wrong design.

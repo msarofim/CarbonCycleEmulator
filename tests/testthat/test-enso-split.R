@@ -12,7 +12,7 @@
 # WHAT THIS FILE HAS TO HOLD:
 #   1. THE ABSENCE CONTRACT, IN BOTH CORES. A pre-split list carries only the
 #      legacy scalar and must reproduce the old model BIT FOR BIT -- the
-#      behaviour-preserving default the `gamma_diff` adoption did not have.
+#      behavior-preserving default the `gamma_diff` adoption did not have.
 #      ⚠ And R and C++ must agree about it: on 2026-08-30 `gamma_diff`'s two
 #      fallbacks had drifted apart for a 0.647 GtC/yr parity break that every
 #      test missed, because they all pinned EXPLICIT values and an explicit

@@ -11,7 +11,7 @@
 #
 # ⛔⛔ THIS IS A PROBE AND IT CHANGES NOTHING. No objective change, no mode
 # file written, no prior altered. `rep_dC` is PINNED at each rung and the other
-# 28 fitted names are FULLY re-optimised; the shipped N(0, LIK_CO2_REP_ERR)
+# 28 fitted names are FULLY re-optimized; the shipped N(0, LIK_CO2_REP_ERR)
 # prior term is left exactly as it is, because the question here is not "what
 # prior would move the fit" (that was T-(u), the centre/width side test) but
 # "does anything a reader would CARE about move when the offset moves".
@@ -19,8 +19,8 @@
 # WHY THIS IS THE DECISION-RELEVANT TEST. `rep_dC` is one of the five named
 # shims (whole-model review 09-16 d; freeze record §4.2). Its z is +3.5 and the
 # 09-22 (aa) mass-weighting term makes the residue it stands for LARGER, not
-# smaller (+2.67 -> +3.62 ppm NH). The open ruling R2 is whether to re-centre
-# and/or tighten its prior. That ruling is a LABELLING decision if the model's
+# smaller (+2.67 -> +3.62 ppm NH). The open ruling R2 is whether to re-center
+# and/or tighten its prior. That ruling is a LABELING decision if the model's
 # products are flat along the ladder, and a PHYSICS decision if they are not.
 # Nothing else in the menu answers that; the loglik total does not, because a
 # shim is exactly the thing that buys loglik without moving a product.
@@ -56,7 +56,7 @@
 #               half a gate evaluated only at u0 can never cover.
 #   NOISE    -- and then the canonical rung is re-run from RPL_N_REP PERTURBED
 #               starts. The spread of each product across those replicates is
-#               the OPTIMISER-NOISE FLOOR. A product that moves less than its
+#               the OPTIMIZER-NOISE FLOOR. A product that moves less than its
 #               own floor has not moved. Without this the ladder cannot tell
 #               physics from Nelder-Mead.
 #
@@ -98,7 +98,7 @@ RPL_LOG        <- file.path("outputs", "diagnostics", sprintf("%s_%s.log", RPL_T
 RPL_MU_MEAS    <- 0.776    # MEASURED station-vs-hemisphere offset, MBL zonal (diag_rep_dc_mbl_zonal.R)
 RPL_MU_MASSW   <- -0.215   # MASS-WEIGHTED expectation for a whole-atmosphere box (diag_rep_dc_mass_weighting.R)
 # The rungs. The top is the canonical's own fitted value; the two named targets
-# are rungs, not endpoints; 0.0 is the shipped prior's centre.
+# are rungs, not endpoints; 0.0 is the shipped prior's center.
 RPL_RUNGS      <- c(if (RPL_IS_CANON) 3.516 else round(readRDS(ccx_mode_file(RPL_MODE))$par_mode$rep_dC, 3),
                     3.000, 2.500, 2.000, 1.500, 1.000, RPL_MU_MEAS, 0.000, RPL_MU_MASSW)
 RPL_CANON_RUNG <- 1L       # index into RPL_RUNGS of the canonical rung (the replicate anchor)

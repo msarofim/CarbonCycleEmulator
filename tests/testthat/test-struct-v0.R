@@ -7,7 +7,7 @@ test_that("hilda_csl3v0 is hilda_csl3 plus npp_veg_frac = 0, and nothing else", 
   expect_identical(setdiff(names(b), names(a)), "npp_veg_frac")
   expect_identical(b[names(a)], a)
   expect_identical(b$npp_veg_frac, 0)
-  # the shipped default is 0.5; a label that equalled it would test nothing
+  # the shipped default is 0.5; a label that equaled it would test nothing
   expect_false(identical(ccx_default_params()$npp_veg_frac, 0))
 })
 
@@ -34,14 +34,14 @@ test_that("fert_k's prior is FLAT unless the label switches it on", {
   expect_identical(vapply(x, function(v) .ccx_prior_eval(s, v, NULL), 0), flat)
   expect_identical(vapply(x, function(v) .ccx_prior_eval(s, v, ccx_default_params()), 0), flat)
   # the labels that switch the prior ON: hilda_csl3v0k and the NPP option-4 arms built on it
-  # (A = hilda_csl3v0ka, B1 = hilda_csl3v0kan; 2026-09-29, extension authorised by Marcus)
-  # + arm A's inert-pool label (hilda_csl3v0kai; 2026-09-30, extension authorised by Marcus)
+  # (A = hilda_csl3v0ka, B1 = hilda_csl3v0kan; 2026-09-29, extension authorized by Marcus)
+  # + arm A's inert-pool label (hilda_csl3v0kai; 2026-09-30, extension authorized by Marcus)
   # + the D2 / D3 label chained from it (hilda_csl3v0kaidgb; 2026-09-30, objective #14; the
   #   09-30c handoff's "extend the label ledgers deliberately")
   # + the land ENSO lag label chained from THAT (hilda_csl3v0kaidgbe; 2026-10-02, objective #15;
   #   the 10-02 plan's "extend the four label ledgers")
   PRIOR_ON <- c("hilda_csl3v0k", "hilda_csl3v0ka", "hilda_csl3v0kan", "hilda_csl3v0kai", "hilda_csl3v0kaidgb",
-                "hilda_csl3v0kaidgbe", "hilda_csl3v0kaidgbem", "hilda_csl3v0kaidgbemw", "hilda_csl3v0kaidgbemwt", "hilda_csl3v0kaidgbemwtc")  # + the redesigned cut (2026-10-07, objective #18; Marcus: "Full redesign (Recommended)", the name "hilda_csl3v0kaidgbemwt (Recommended)")   # + the interannual cut's main half (2026-10-06, objective #17; Marcus: "Build: land + ocean module (Recommended)", the name "hilda_csl3v0kaidgbemw (Recommended)")   # + the stratification feedback (2026-10-04; DESIGN §3.4a S; extension authorised by Marcus's ruling "History + futures, one #16 refit")
+                "hilda_csl3v0kaidgbe", "hilda_csl3v0kaidgbem", "hilda_csl3v0kaidgbemw", "hilda_csl3v0kaidgbemwt", "hilda_csl3v0kaidgbemwtc")  # + the redesigned cut (2026-10-07, objective #18; Marcus: "Full redesign (Recommended)", the name "hilda_csl3v0kaidgbemwt (Recommended)")   # + the interannual cut's main half (2026-10-06, objective #17; Marcus: "Build: land + ocean module (Recommended)", the name "hilda_csl3v0kaidgbemw (Recommended)")   # + the stratification feedback (2026-10-04; DESIGN §3.4a S; extension authorized by Marcus's ruling "History + futures, one #16 refit")
   for (lab in PRIOR_ON) expect_identical(ccx_struct_block(lab)$fert_k_prior, 1L, info = lab)
   for (lab in setdiff(CCX_STRUCT_LABELS, PRIOR_ON)) {
     p <- ccx_apply_structure(ccx_default_params(), lab, seas_ml = "0")

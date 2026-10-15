@@ -33,7 +33,7 @@
 #                   the wording is a measured number.
 #   GAPS DROPPED -- no interpolation, no curve fitting. A site contributes to a
 #                   month only if it reported; a band with no contributing site
-#                   is dropped and the remaining band weights RENORMALISED.
+#                   is dropped and the remaining band weights RENORMALIZED.
 #                   ⚠ CONSEQUENCE: the contributing set changes month to month,
 #                   so some month-to-month variability is network turnover, not
 #                   atmosphere. Hence the comparisons downstream are MEANS OVER

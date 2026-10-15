@@ -1,6 +1,6 @@
 # =====================================================================
 # diag_phi_eff_profile.R -- PROFILE CCX_SEAS_PHI_EFF, WITH THE SEASONAL
-#                           BLOCK RE-OPTIMISED AT EVERY CANDIDATE
+#                           BLOCK RE-OPTIMIZED AT EVERY CANDIDATE
 #
 # THE SUSPECT, from handoff 2026-08-20d section 6. CCX_SEAS_PHI_EFF["NH"] = 75
 # deg is documented as a "flux-weighted effective" latitude but was fitted
@@ -11,14 +11,14 @@
 # in peak-to-peak. That is the size of the over-driving hypothesis; this script
 # asks what the DATA say about it.
 #
-# WHY THE BLOCK IS RE-OPTIMISED, AND WHY A FROZEN PROFILE WOULD BE WORTHLESS
+# WHY THE BLOCK IS RE-OPTIMIZED, AND WHY A FROZEN PROFILE WOULD BE WORTHLESS
 # HERE. The channel budget found NEP and soil respiration each about 2x the net
 # seasonal cycle and 6.6 months ANTIPHASE: they cancel, and seas_T_amp_NH = 48 K
 # is what buys the cancellation. Moving phi_eff while holding seas_T_amp_NH
 # fixed therefore breaks the cancellation by construction and would lose
 # whatever the truth is -- the incumbent's home ground in its purest form
 # (match_incumbents_optim). So at every candidate phi the seven parameters the
-# seasonal cycle actually identifies are RE-OPTIMISED on the full log-posterior:
+# seasonal cycle actually identifies are RE-OPTIMIZED on the full log-posterior:
 #     seas_T_amp_{NH,SH}  the respiration channel -- the cancellation partner
 #     seas_lag_p          phenology lag; absorbs any phase shift phi implies
 #     sst_seas_amp_{NH,SH} the ocean channel
@@ -31,7 +31,7 @@
 # THE OBJECTIVE IS THE POST-08-20g ONE -- the re-anchored seasonal priors from
 # handoff 20d section 4b. So the arm-N mode is NOT at its optimum here either:
 # it scores -2811.2 under these priors against a stored -2682.6 under the old
-# ones, and re-optimising the block at the SHIPPED phi already gains ~+229.
+# ones, and re-optimizing the block at the SHIPPED phi already gains ~+229.
 # Every number below is therefore internally comparable and NOT comparable with
 # anything from before 08-20g. This is a piece of the refit that section 4 owes,
 # restricted to one block -- it is NOT that refit.
@@ -56,7 +56,7 @@
 # `seas_npp_amp_{NH,SH}` (default 1 = the shipped model):
 #   "75,-15.75,0.49,1"  -- the shipped SHAPE with its amplitude halved, which is
 # what diag_seas_rectification.R measures the observed shape to want. Those two
-# are NOT re-optimised: the point of the case is to score a MEASURED pair.
+# are NOT re-optimized: the point of the case is to score a MEASURED pair.
 # writes calibration/output/phi_eff_profile_2d.rds. With no arguments it runs
 # the default grid and writes phi_eff_profile.rds. Both are read and merged by
 # the report at the end of this file, so passes accumulate rather than replace.
@@ -89,7 +89,7 @@ PE_NM_TRIES  <- 3         # restarts; stops early when a restart gains < PE_NM_T
 PE_NM_TOL    <- 2.0       # log-units; the phi differences of interest are ~1e2
 PE_WORKERS   <- 4         # = performance cores on this machine
 
-# The observed seasonal amplitudes the re-optimised block is COMPARED against
+# The observed seasonal amplitudes the re-optimized block is COMPARED against
 # (never fitted to directly -- they enter only through the priors re-anchored in
 # 08-20g). Read from the climatology product, not typed.
 sc <- readRDS(ccx_path("data", "obs_seasonal_clim.rds"))

@@ -4,7 +4,7 @@
 #
 # "Dormant" = on a path the canonical hilda31w and the app do not run, so no shipped number moves;
 # test-canonical-contracts.R and test-parity.R hold that. Each block below FAILS on the pre-fix code
-# (measured when written), so each has power. CHANGELOG 2026-10-15 (e).
+# (measured when written), so each has power. CHANGELOG 2026-10-15 (h).
 # =====================================================================
 
 test_that("a PINNED name with no model slot (bomb_total, luc_scale, the four likelihood names) is scored at its pinned value", {
@@ -44,7 +44,7 @@ test_that("a PINNED name with no model slot (bomb_total, luc_scale, the four lik
 
 test_that("a list without the saturating form's names STOPS in both cores, not only in R", {
   # ccx_cpp_par() filled fert_form = MM, beta_max = 0 and fert_k = 1, so a list lacking them reached
-  # the C++ core as the saturating form with NO fertilisation, while the R core stopped on fert_k and
+  # the C++ core as the saturating form with NO fertilization, while the R core stopped on fert_k and
   # returned numeric(0) on beta_max.
   p <- ccx_default_params()
   expect_identical(p$fert_form, CCX_FERT_MM)                    # the default form IS the saturating one

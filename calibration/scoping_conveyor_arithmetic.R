@@ -2,7 +2,7 @@
 # deep interhemispheric flow, SH upwelling. Volume flux Q in Sv -> per-hemisphere
 # velocities, mixed-layer flush times, deep transit time, and the Delta14C that
 # transit alone would produce. Paper design numbers, NOT a model run -- the
-# mechanism is NOT built. Idealised plug flow; ignores the source water own
+# mechanism is NOT built. Idealized plug flow; ignores the source water own
 # preindustrial Delta14C (~-50 permil) and all diffusion, so read it as
 # order-right, not as a prediction. See the handoff for the caveats.
 

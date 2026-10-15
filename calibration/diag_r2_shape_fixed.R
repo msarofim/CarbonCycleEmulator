@@ -1,6 +1,6 @@
 # =====================================================================
 # diag_r2_shape_fixed.R -- IS R2's LEVERAGE ON THE FUTURE ALL THROUGH THE
-# FERTILISATION SHAPE? (CHANGELOG 2026-09-30 g; notes/r2_explained_2026-09-30.md §5)
+# FERTILIZATION SHAPE? (CHANGELOG 2026-09-30 g; notes/r2_explained_2026-09-30.md §5)
 # The phi = 0 rep_dC ladder is a pure fert-SHAPE path (enh(410) fixed, K falls
 # 865 -> 644 at the measured 0.776). HYPOTHESIS (pre-registered in the note):
 # with (beta_max, fert_k) held at the control's values, pinning rep_dC at the

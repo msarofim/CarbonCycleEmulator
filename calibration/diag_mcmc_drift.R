@@ -10,7 +10,7 @@
 #       in physical units, and the share of h_ml draws within DRIFT_FLOOR_NEAR of its band's floor;
 #   (2) the log-posterior's mean in the window's first and second halves;
 #   (3) the leverage: across the pooled draws, each name's linear effect on the futures key cells
-#       (ppm or degC per posterior sd, from one multiple regression in standardised names), and the
+#       (ppm or degC per posterior sd, from one multiple regression in standardized names), and the
 #       cells' late-minus-early median shift beside the shift that leverage x name drift predicts.
 # ⚠ Cells and names are computed from the SAME draws, so they co-move: not independent votes.
 # It REPORTS; Marcus rules.

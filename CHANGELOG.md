@@ -2,7 +2,7 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
-## 2026-10-15 (e) — **The six dormant bugs from the pre-public code review (entry (d), "NOT fixed, reported"), FIXED, one commit each.** None is on the canonical `hilda31w`'s live path or the app's. Each has a block in the new `tests/testthat/test-dormant-fixes.R` that fails on the pre-fix code. After each fix, `test-canonical-contracts.R`, `test-parity.R` and 31 app-facing test files were run from a frozen worktree at that commit.
+## 2026-10-15 (h) — **The six dormant bugs from the pre-public code review (entry (d), "NOT fixed, reported"), FIXED, one commit each.** None is on the canonical `hilda31w`'s live path or the app's. Each has a block in the new `tests/testthat/test-dormant-fixes.R` that fails on the pre-fix code. After each of fixes 1–5, `test-canonical-contracts.R`, `test-parity.R` and 31 app-facing test files were run from a frozen worktree at that commit (1597, 1614, 1616, 1619 and 1623 passed, 0 failed). The six commits cite this entry as "(e)": they were written on a branch cut before main's (e)–(g), and the label moved to (h) at the merge.
 
 1. **Pinned names with no model slot are scored at their pinned value** (`R/calibrate.R`, `ccx_make_logpost()`). The six fitted names the model list has no field for (`bomb_total`, `luc_scale`, `sigma_d14c`, `rep_dC`, `grad_off_co2`, `grad_off_d13c`; now the named constant `CCX_NUISANCE_NAMES`) were read from `pv`, which holds the fitted names only. Pinned, one was NULL. Measured at `hilda31w` before the fix:
    - a pinned `rep_dC` scored as 0, and `co2_level_MLO` went from −70.84 to −662.42;
@@ -10,11 +10,71 @@ Project log: what was done, what was tried and abandoned, and why.
    - a pinned `bomb_total` stopped inside the forcing rebuild ("replacement has 0 rows").
 
    They are now read from `p_pr`, the base list plus this draw's fitted values, as the ENSO block has been since 2026-10-06. For a fitted name that is the same value bit for bit. A pinned name the base list does not carry is refused by name. With all six pinned at the canonical's fitted values, every stored stream row reproduces to < 1e-6. No registered mode pins any of the six.
-2. **Both cores stop on a list without the saturating form's names** (`R/cpp.R`, `ccx_cpp_par()`; `R/model.R`, `ccx_fert_factor()`). The marshaller filled `fert_form` = MM, `beta_max` = 0 and `fert_k` = 1, so a list lacking them reached the C++ core as the saturating form with no fertilisation. The R core stopped on a missing `fert_k` and returned `numeric(0)` on a missing `beta_max`. Under MM both cores now stop and name the missing parameter. The LOG form keeps its inert fillers, which the C++ unpack reads. The marshaller reads these names with `[[`, since `fert_k` prefixes `fert_k_prior`. The comment that called the default "the LOG form" now says MM, which it has been since 2026-08-14.
+2. **Both cores stop on a list without the saturating form's names** (`R/cpp.R`, `ccx_cpp_par()`; `R/model.R`, `ccx_fert_factor()`). The marshaller filled `fert_form` = MM, `beta_max` = 0 and `fert_k` = 1, so a list lacking them reached the C++ core as the saturating form with no fertilization. The R core stopped on a missing `fert_k` and returned `numeric(0)` on a missing `beta_max`. Under MM both cores now stop and name the missing parameter. The LOG form keeps its inert fillers, which the C++ unpack reads. The marshaller reads these names with `[[`, since `fert_k` prefixes `fert_k_prior`. The comment that called the default "the LOG form" now says MM, which it has been since 2026-08-14.
 3. **The D3 ocean share is read exactly** (`R/likelihood.R`, the GCB sink rows). `err$imb_share_ocean` partial-matched `imb_share_ocean_rest`, the stick-breaking coordinate. An `err` carrying the parameter pair scored that coordinate as the ocean share, and the pair check never fired. It reads `err[["imb_share_ocean"]]` (and `[["imb_share_land"]]`) now. Every caller builds `err` with the share names (`ccx_make_logpost()`, `ccx_load_mode()`), so no scored row moves. No other `err` name in `likelihood.R` is a prefix of another.
 4. **`ccx_unc_to_par()` decodes an unnamed vector** (`R/calibrate.R`). With `names(u)` NULL it took the live fitted names but never named `u`, so `u[[n]]` failed with "subscript out of bounds". It now names `u` after checking that the length matches the fitted set, and refuses a wrong length rather than assigning values by position to the wrong names. The objective names `u` before decoding, so it is unaffected.
-5. **The IntCal row scores only years inside the run** (`R/likelihood.R`). The window started at a typed 1750 and is read through `interp()`, which is `approx(rule = 2)`. A run starting in 1850 therefore scored IntCal's 1750–1849 rows against its own first row: 191 rows where 91 are in the run, −644.57 against −305.22 at the default parameters. The start is now `floor(min(out$t))`, the ice-core rows' rule since review A11 (2026-09-12). At a 1750 start the rows are the same, bit for bit. **One consequence to note:** IntCal's record reaches 1700, so a run starting before 1750 would now score those years too. No run in `R/`, `app/`, `tests/` or `calibration/` starts before 1750 (checked by grep). The 11 other test files that call `ccx_loglik()` read 900 / 0.
+5. **The IntCal row scores only years inside the run** (`R/likelihood.R`). The window started at a typed 1750 and is read through `interp()`, which is `approx(rule = 2)`. A run starting in 1850 therefore scored IntCal's 1750–1849 rows against its own first row: 191 rows where 91 are in the run, −644.57 against −305.22 at the default parameters. The start is now `floor(min(out$t))`, the ice-core rows' rule since review A11 (2026-09-12). At a 1750 start the rows are the same, bit for bit. IntCal's record reaches 1700, so a run starting before 1750 would now score those years too. No run in `R/`, `app/`, `tests/` or `calibration/` starts before 1750 (checked by grep). The 11 other test files that call `ccx_loglik()` read 900 / 0.
 6. **`ccx_enso_efold_yr()` interpolates from lag 0 when the ACF is already below 1/e at lag 1** (`R/forcing.R`). The k == 1 branch was `k (r1 − 1/e) / (r1 − 1/e)`, which is 1 month for any r1. The bracket there runs from lag 0 (ACF 1) to lag 1, so the crossing is `(1 − 1/e) / (1 − r1)`. The shipped Niño 3.4 record crosses between lags 7 and 8 (k = 8), so its 0.584-yr taper and every forcing built from it are unchanged.
+
+## 2026-10-15 (g) — **Code comments in U.S. spelling** (Marcus: "Convert the code comments to U.S. spelling too"). **1,466 words in 420 tracked files** (411 R, 4 Python, 4 shell, 1 C++). **Only comment text changed, proved per file by checks independent of the converter.**
+
+- **What changed:** 167 British forms, each mapped explicitly and case-preserved (CENTRE → CENTER, Labelled → Labeled):
+  - -ise / -isation → -ize / -ization;
+  - -our → -or;
+  - centre / metre → center / meter;
+  - doubled-l forms (modelled, labelled, cancelled …);
+  - artefact, judgement, ageing, programme, licence (noun), defence, analogue, catalogue, grey, per cent, sceptic.
+  - The largest: center 160, fertilization 127, optimized 114, centered 101, optimizer 88, labeled 75, artifact 66.
+- **Left as they were:**
+  - words that are already U.S. (noise, precise, otherwise, called, contour …);
+  - every identifier, file name and path (`test-fertilisation.R`, `kw_prior_centre`, `app_stylised_emissions`), backticked code, and `[[memory slugs]]`;
+  - text in double quotes inside a comment (mostly Marcus's rulings quoted verbatim, old app copy, code strings): 17 occurrences;
+  - `test-app-us-spelling.R`, whose comments name the British forms on purpose;
+  - the run records under `outputs/` and `calibration/output/`, which are frozen copies of what ran;
+  - docs (README, DESIGN, CHANGELOG, `notes/`), which are not code comments.
+- **Checks** (scratch scripts, session-only):
+  - R: `parse(keep.source = FALSE)` before and after, `identical()` in 411 / 411. Mutation: a one-character change in a string literal is caught.
+  - Python: `ast.dump()` identical in 4 / 4.
+  - Shell: every changed line differs only after its `#`, 4 / 4.
+  - C++: clang's preprocessor output, with comments stripped and `#include`s dropped, is identical. ⚠ The first C++ check was VACUOUS: Apple's `g++` is clang and rejects `-fpreprocessed`, so both sides were empty and "identical". Caught by mutation testing. The clang check catches a one-operator flip and ignores a comment-only edit. A first mutation (renaming `CCX_`) was itself bad, since it renamed a macro at its definition and its uses alike.
+  - Word level: every changed word in `git diff --word-diff` is a planned British → U.S. pair.
+- **One comment fixed by hand:** `app/R/plots.R` said the band note's "grey" was "British, as the app", which (f) made stale.
+
+## 2026-10-15 (f) — **The app's reader-facing text is in U.S. spelling** (Marcus: "Update spelling in the app to be U.S. spelling"). **Twelve strings changed in seven files, and a lint now keeps it that way:** `test-app-us-spelling.R` reads every string literal through R's parser.
+
+- **Changed** (display strings only):
+  - "fertilisation" → "fertilization" ×9: `R/mechanisms.R` (the What-if switch's label and caveat ×2), `app/R/params_meta.R` ×2, `app/global.R`, `app/server.R` ×2, `app/ui.R`;
+  - "colours" → "colors" (`server.R`); "grey band" → "gray band" (`plots.R`); "cubic metres" → "cubic meters" (`review.R`); "centred mean" → "centered mean" (`plots.R`).
+- **Kept as they are:**
+  - the mechanism key `fertilisation` (code: `ccx_apply_mechanisms()`, tests);
+  - ggplot's `"colour"` aesthetic and R's colour names (`grey20` …);
+  - "Met Office Hadley Centre" (a proper name);
+  - comments.
+  - The data artifacts' provenance notes and field names (`centre_m`, "digitised" …): the app renders none of them (checked).
+  - `R/constants.R` notes: the app shows only the provisional constants' names.
+- **Pins followed the sentences:** `test-app-review-copy.R` (the B5 required caveat, the A3/B5 forbidden label, the mutation's text) and `test-plot-text-fits.R` (its copy of the imbalance subtitle).
+- **The lint** (`getParseData()` STR_CONST plus `getParseText()`; comments and identifiers are never read):
+  - It found "centred", which my first regex scan had missed.
+  - It failed twice while being written, both times in the test itself. `srcfile = NULL` dropped the parse data, and the `nrow > 1000` guard caught it (8 strings read). Then `getParseData()` abbreviated long strings to "[N chars …]".
+  - Mutation-tested: four British forms in one string are caught; a comment, an identifier, the allowlist and the U.S. plural "analyses" are not.
+- **Checked:** 33 app-facing test files 1619 / 0. In the browser (all tabs visited), the rendered page has 13 "fertilization" and no British form except "Met Office Hadley Centre", and the server log has no errors.
+
+## 2026-10-15 (e) — **THE BAND IS LIFTED with Marcus's copy. `APP_RIBBONS_HOLD` is NULL; the Futures tab's CO₂ view draws the hilda31w MCMC band, and the temperature view says in words why it has none.** Marcus asked "Draft all four for me to edit"; the drafts are `notes/band_copy_drafts_2026-10-15.md` (`2514038`). His one edit: delete the two Laplace sentences from issue 6 ("A faster method, which treats the fit as a bell curve …"). The other three pieces went in as drafted.
+
+- **The four pieces:**
+  - the caption: "Shaded: the 5–95% range of 17,000 model runs, each with a different plausible set of the fitted carbon-cycle parameters. The climate response, the non-CO₂ forcing and the model's structure are held fixed, so the full uncertainty is likely wider." The template frame ("— a <label>.") is gone, and the count now prints with a thousands separator;
+  - issue 6: new title ("The uncertainty band covers only the carbon-cycle parameters"), plain, detail and ask; class "gap" kept;
+  - the parameter panel: "not yet a posterior — no uncertainty ranges are shown" replaced by two sentences on the band; the last sentence is unchanged;
+  - `APP_RIBBON_NOTE_TEMP`: worded.
+- **The label is in the artifact:** `promote_futures_ribbons.R --label=…` gives `label_ruled = TRUE`. `data/futures_ribbons.rds` md5 is now `799e76c3aec3b0da340dc668df14d0ac`. Bands are `identical()` to the landed source. **Byte-identical on a second run from a clean tree.** A first comparison differed only in the provenance stamp ("+dirty", because the first run had already written `data/`); a field-by-field check confirmed that, and the clean rerun matched byte for byte.
+- **Issue 6's typed numbers are pinned** (`test-futures-ribbons.R`, "issue 6's typed numbers"). Each number is read from the TEXT and compared with its artifact:
+  - exact: four chains, 200,000 steps, 17,000 sets (0 failed), 31 fitted, Fourteen held, and the three lag names, which are the top three R-hats;
+  - ordering: "less than 0.1 °C" against the widest GMST cell in 1750–2150, 0.0847 °C. The same check covers the temperature sentence;
+  - rounded to the typed precision: "about 5 ppm" (4.763), "about a fifth" (1/0.2076 → 5) and "about 75 m" (75.02, the substep cap at the mode; P8 alone 75.14).
+  - The by-chain read is tied to the shipped band (42 cells, ≤ 6e-13). The h_ml wall read is tied by the canonical's md5.
+  - **Mutation-tested:** 17 mutations of the text and of each artifact, each caught by name.
+- **README and DESIGN banners:** they said the band was "not yet displayed" / "held". Now they say what is drawn.
+- **Checked:** `test-futures-ribbons` 87 / 0 (was 65 / 0); 30 app-facing test files 1454 / 0. In the browser (`ccx-app`, 7788, 1280 px), the caption, the band on High, the temperature sentence, issue 6 and the panel render as above, neither old phrase appears anywhere on the page, and the server log has no errors.
 
 ## 2026-10-15 (d) — **Pre-public review of the whole app text, the repo documents and the model comments, APPLIED.** Four read-only reviewers (teaching tabs, Known issues + parameter table, model code, public docs) reported ~110 findings. Marcus ruled, verbatim: "Apply all (Recommended)" for the factual fixes (with copy-test pins following the changed sentences), "Apply all (Recommended)" for the cleanups, "Facts-only README + banners (Recommended)", and "Trim to a public version (Recommended)" for CLAUDE.md. The 34 app-facing test files read 1809 / 0.
 

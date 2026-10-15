@@ -9,7 +9,7 @@
 # TS_VALUES with ONLY tau_soil_slow moved among the residence times (the other
 # four at their defaults), NPP_GLOBAL_PI unscaled.
 #   frozen: the 29 fitted coords at the 09-29 (k) scale-1 optimum;
-#   rebal : re-optimise the same 11 names (NM, TS_MAXIT) from that optimum.
+#   rebal : re-optimize the same 11 names (NM, TS_MAXIT) from that optimum.
 # Reported: d_logpost vs the default (500) row, every stream's change, the
 # implied PI passive-soil stock, modern NPP.
 # IDENTITY: the TS_DEFAULT row, frozen, reproduces the 09-29 (k) scale-1

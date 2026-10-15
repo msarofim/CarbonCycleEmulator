@@ -11,7 +11,7 @@
 #
 # THAT TEST WAS AMPLITUDE-ONLY, AND HANDOFF 2026-08-20c SECTION 2d SAYS NOT TO
 # TRUST ONE. Every seasonal row scores a sin AND a cos, so raising an amplitude
-# at the wrong phase is penalised twice over. And we now know the phase IS
+# at the wrong phase is penalized twice over. And we now know the phase IS
 # wrong: CCX_SST_SEAS_LAG ships at 2.50 against an observed NH SST peak of 1.32
 # -- 1.18 months late, and never fitted (R/model.R calls it "a prior belief",
 # unidentifiable precisely because the amplitude it phases is ~0).
