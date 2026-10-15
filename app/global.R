@@ -284,6 +284,9 @@ app_params <- local({
   # none for the defaults; a mode file under a structure that opens the gate sets both (below)
   gated_fit  <- character(0)
   imb_shares <- list()
+  # 2026-10-15 review: the other likelihood-only names the mode FITS (the gradient offsets, sigma_d14c) printed
+  # "fitted" with value "—"; their fitted values now ride along for the parameter table, like rep_dC
+  lik_only   <- list()
   # the parameter table's "Set" column (2026-10-06): the mode file's own FITTED names and HELD
   # pins. NULL for the defaults, where nothing was fitted and the table prints no column.
   fitted_names <- NULL
@@ -314,6 +317,7 @@ app_params <- local({
     # (every gate the structure opens since 2026-10-02 -- the land ENSO lag's too)
     gated_fit  <- ccx_gated_names(ccx_mode_struct(md))
     imb_shares <- pm[intersect(c("imb_share_land", "imb_share_ocean_rest"), names(pm))]
+    lik_only   <- pm[intersect(c("grad_off_co2", "grad_off_d13c", "sigma_d14c"), names(pm))]
     fitted_names <- md$param_names
     held_names   <- names(ccx_mode_pins(md))
     # THE FILE'S OWN SPINUP (2026-09-21 h). Every mode since 09-09x is fitted under
@@ -349,7 +353,8 @@ app_params <- local({
     # computed quantity, computed from the wrong thing.
     .n_fit <- length(md$param_names)
     .n_pin <- length(ccx_mode_pins(md))
-    detail <- paste0("Maximum-a-posteriori fit of ", .n_fit,
+    # 2026-10-15 review: "Maximum-a-posteriori fit of" -> "Best fit of" (jargon on a reader-facing panel)
+    detail <- paste0("Best fit of ", .n_fit,
                      " parameters to CO₂, δ¹³C, Δ¹⁴C and Global Carbon Budget",
                      " sinks",
                      if (.n_pin) paste0(", with ", .n_pin,
@@ -369,7 +374,7 @@ app_params <- local({
   }
   list(p = p, source = src, status = status, detail = detail,
        bomb_total = bomb_total, luc_scale = luc_scale, rep_dC = rep_dC,
-       spinup_label = spinup_label, gated_fit = gated_fit, imb_shares = imb_shares,
+       spinup_label = spinup_label, gated_fit = gated_fit, imb_shares = imb_shares, lik_only = lik_only,
        fitted_names = fitted_names, held_names = held_names,
        has_posterior = file.exists(post_file))
 })
@@ -387,6 +392,7 @@ APP_SPINUP_LABEL <- app_params$spinup_label
 # the gated names the mode fits and the D3 shares, for the parameter table (2026-10-01)
 APP_GATED_FIT  <- app_params$gated_fit
 APP_IMB_SHARES <- app_params$imb_shares
+APP_LIK_ONLY   <- app_params$lik_only   # likelihood-only fitted values, for the parameter table (2026-10-15)
 # the parameter table's "Set" column (2026-10-06): NULL when no mode file loaded
 APP_FITTED_NAMES <- app_params$fitted_names
 APP_HELD_NAMES   <- app_params$held_names
@@ -701,11 +707,16 @@ APP_CMAP_WHY <- APP_CMAP_LOAD$why   # NULL when the map is shown
 
 # The sentence that keeps the map honest, printed on the chart AND asserted by
 # test-constraint-map-panel.R.
+# 2026-10-15 review: the technical clause ("a step of one conditional Hessian standard deviation, which costs every
+# parameter the same 0.5 log-units") moved off the main panel into APP_CMAP_STEP_DETAIL, shown in the sidebar's
+# "How this is measured" box (ui.R).
 APP_CMAP_NOTE <- paste(
-  "Leverage at one parameter set — the fitted mode — for a step of one",
-  "conditional Hessian standard deviation, which costs every parameter the same",
-  "0.5 log-units. It says which measurements would notice a change, not what a",
-  "different model structure would do.")
+  "Leverage at one parameter set — the fitted mode — for a nudge to each",
+  "parameter that costs the fit the same amount. It says which measurements",
+  "would notice a change, not what a different model structure would do.")
+APP_CMAP_STEP_DETAIL <- paste(
+  "Technically, each nudge is one conditional Hessian standard deviation, which",
+  "costs every parameter the same 0.5 log-units.")
 # ⭐ 2026-10-08 (h) (Marcus: "Main fit only"). At an interannual-CUT canonical (hilda29e) the El Niño settings
 # are fitted in a SEPARATE step and held while everything on the map is fitted, so they are not on it -- and nor
 # is the measurement that step scores. COMPUTED from the product's `module` record (gated by
@@ -881,7 +892,9 @@ app_fair_pulse <- function(bg, year, gtc) {
   if (!is.null(app_fair_pulse_why(bg, year, gtc))) return(NULL)
   pv <- attr(APP_FAIR_PULSE, "provenance")
   d <- APP_FAIR_PULSE[APP_FAIR_PULSE$scenario == bg & APP_FAIR_PULSE$release_year == year, ]
-  attr(d, "label") <- sprintf(APP_FAIR_PULSE_LAB_FMT, pv$model, as.integer(pv$n_configs))
+  attr(d, "label") <- sprintf(APP_FAIR_PULSE_LAB_FMT[["band"]], pv$model, as.integer(pv$n_configs))
+  # 2026-10-15 review: the TEMPERATURE view's key -- the grid stores only the mean of d_gmst (no 5-95 %)
+  attr(d, "label_mean") <- sprintf(APP_FAIR_PULSE_LAB_FMT[["mean"]], pv$model, as.integer(pv$n_configs))
   d
 }
 # The pulse's temperature SHAPE (Marcus 2026-10-15): his explanation, with the comparison sentence he chose
@@ -899,7 +912,10 @@ APP_PULSE_SHAPE_NOTE <- paste(
   "and by how much, depends on the background scenario.")
 
 # ⚠ DRAFTS for Marcus's wording (2026-10-12)
-APP_FAIR_PULSE_LAB_FMT <- "%s, %d-configuration mean (5\u201395 %% shaded)"
+# 2026-10-15 review: TWO keys from one constant -- `band` for the CO₂ view (mean + 5-95% band), `mean` for the
+# temperature view, where the grid has no band (d_gmst_mean only). "5–95%" without the space, as elsewhere.
+APP_FAIR_PULSE_LAB_FMT <- c(band = "%s, %d-configuration mean (5\u201395%% shaded)",
+                            mean = "%s, %d-configuration mean")
 # Marcus 2026-10-15: "FaIR was only run for 100 GtC pulses: set the pulse size to 100 GtC." The size is the grid's.
 APP_FAIR_PULSE_OFFGRID_FMT <- c(
   size  = "FaIR was only run for %g GtC pulses: set the pulse size to %g GtC.",
@@ -914,7 +930,9 @@ app_fair_check_label <- function(mode) {
   if (!identical(mode, "Pulse lab") || is.null(APP_FAIR_PULSE)) return(APP_FAIR_CHECK_LAB_SCEN)
   sprintf(APP_FAIR_CHECK_LAB_PULSE, as.numeric(attr(APP_FAIR_PULSE, "provenance")$pulse_gtc))
 }
-APP_FAIR_PULSE_NOTE <- paste("FaIR is shown for the same pulse on the same scenario. Before 2025 this",
+# 2026-10-15 review: the year is the splice's, not typed -- a FORMAT, filled in server.R as
+# sprintf(APP_FAIR_PULSE_NOTE, APP_SPLICE_YEAR + 1L) (kept a literal here so the gates can evaluate it alone).
+APP_FAIR_PULSE_NOTE <- paste("FaIR is shown for the same pulse on the same scenario. Before %d this",
                              "model follows the observed carbon budget and FaIR its own history, so the",
                              "two release the pulse into slightly different worlds.")
 
@@ -968,8 +986,13 @@ app_cmap_holder_phrase <- function(row, lost_share, lost_max = APP_CMAP_TIE_LOST
   stopifnot(length(lost_share) == 1L, is.finite(lost_share), lost_share >= 0, lost_share <= 1)
   sh <- 100 * row / sum(row)
   o  <- sort(sh, decreasing = TRUE)
+  # 2026-10-15 review: "influenced about equally by X (34%) and Y (22%)" was not equal. The review's proposed
+  # "though Y leads in some posterior draws" is FALSE for one shipped row: δ¹³C level & gradient's runner-up at the
+  # mode (High-latitude structure, 21%) wins 0 of 100 draws -- its 8 lost draws go to Land uptake (5) and Mixed
+  # layer (3) (outputs/diagnostics/cmap_posterior_spread_20261014_hilda31w_n100.rds, $winners). So the phrase says
+  # only what lost_share measures: the leader does not lead in every draw. Same variables as before.
   if (length(o) >= 2 && lost_share > lost_max)
-    return(sprintf("influenced about equally by %s (%.0f%%) and %s (%.0f%%)",
+    return(sprintf("led by %s (%.0f%%, though not in every posterior draw) ahead of %s (%.0f%%)",
                    names(o)[1], o[[1]], names(o)[2], o[[2]]))
   sprintf("mostly influenced by %s (%.0f%%)", names(o)[1], o[[1]])
 }
@@ -992,11 +1015,14 @@ APP_FAIR_LAB  <- "standard FaIR (dashed)"
 # lines come from this model's OWN carbon cycle (app_run_coupled -> ccx_run_coupled; checked
 # 2026-10-02: vvH 2150 826.6 ppm here vs FaIR's 832.7), and only the CO2 -> temperature step is
 # fitted to FaIR. The like-for-like warning about the historical splice is kept.
+# 2026-10-15 review: "Before 2024" was a typed year, and wrong -- the runs follow the observed budget THROUGH the
+# splice year (2024). Now a FORMAT, filled in server.R as sprintf(APP_FAIR_NOTE, APP_SPLICE_YEAR) (a literal here
+# so test-fair-overlay.R can evaluate it alone). "calibration 1.6.0" -> "calib 1.6.0", the app's other spelling.
 APP_FAIR_NOTE <- paste(
   "For CO\u2082, the solid line is this model's output, whereas the dashed lines are",
-  "standard FaIR 2.2.4 (calibration 1.6.0, 841-configuration ensemble mean). This is",
+  "standard FaIR 2.2.4 (calib 1.6.0, 841-configuration ensemble mean). This is",
   "the same for temperature, but this model's CO\u2082/temperature relationship is",
-  "fitted to FaIR, so they are not independent. \u26a0 Before 2024 they are not",
+  "fitted to FaIR, so they are not independent. \u26a0 Through %d they are not",
   "like-for-like: this model's runs are spliced onto the observed carbon budget and",
   "FaIR's are not, so a historical gap there is a difference of inputs, not of skill.")
 
@@ -1322,15 +1348,28 @@ APP_ERF_RANGE <- ccx_climate_module()$co2_erf_range
 app_erf_range_note <- function(cls, rng = APP_ERF_RANGE,
                                slack = CLIM_ERF_RANGE_SLACK) {
   hi <- suppressWarnings(max(vapply(cls, function(cl) max(cl$co2_ppm), numeric(1))))
-  top <- rng[2]
-  if (!is.finite(hi) || hi <= top + slack) return(NULL)
-  sprintf(paste("This pathway reaches %s ppm. The curve turning CO₂ into warming",
-                "was fitted between %s and %s ppm, so past that the temperature",
-                "shown is an extrapolation — here it runs to %.0f times the",
-                "highest concentration the curve has ever seen. Read it as",
-                "“very large” rather than as a number."),
-          format(round(hi), big.mark = ","), format(round(rng[1]), big.mark = ","),
-          format(round(top), big.mark = ","), hi / top)
+  lo <- suppressWarnings(min(vapply(cls, function(cl) min(cl$co2_ppm), numeric(1))))
+  top <- rng[2]; bot <- rng[1]
+  fmt <- function(x) format(round(x), big.mark = ",")
+  # 2026-10-15 review: "%.0f times" printed "1 times" just past the top (+2 %/yr); one decimal below 10x, whole
+  # numbers above it (where a decimal is false precision on an extrapolation).
+  ratio <- function(r) sprintf(if (r < 10) "%.1f" else "%.0f", r)
+  above <- if (is.finite(hi) && hi > top + slack)
+    sprintf(paste("This pathway reaches %s ppm. The curve turning CO₂ into warming",
+                  "was fitted between %s and %s ppm, so past that the temperature",
+                  "shown is an extrapolation — here it runs to %s times the",
+                  "highest concentration the curve has ever seen. Read it as",
+                  "“very large” rather than as a number."),
+            fmt(hi), fmt(bot), fmt(top), ratio(hi / top))
+  # 2026-10-15 review: the BOTTOM of the range too, mirroring ccx_run_coupled()'s console warning (which fires on
+  # either side at the same slack) -- a pathway drawn down below the fitted range was warned about only there.
+  below <- if (is.finite(lo) && lo < bot - slack)
+    sprintf(paste("This pathway falls to %s ppm. The curve turning CO₂ into warming",
+                  "was fitted between %s and %s ppm, so below that the temperature",
+                  "shown is an extrapolation. Read it as approximate."),
+            fmt(lo), fmt(bot), fmt(top))
+  if (is.null(above) && is.null(below)) return(NULL)
+  paste(c(above, below), collapse = " ")
 }
 
 #' Cumulative emissions, GtC, from an assembled forcing table

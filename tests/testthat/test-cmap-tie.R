@@ -54,18 +54,20 @@ test_that("the rule is posterior stability at the band's 5 %, and the margin cut
 })
 
 test_that("the phrase reports a tie as a tie and a winner as a winner, by STABILITY not margin", {
+  # 2026-10-15 (Marcus: "Apply all", pins follow the changed sentence): the tie marker was "about equally"; the phrase
+  # now reads "led by X (a%, though not in every posterior draw) ahead of Y (b%)" -- the logic tested is unchanged.
   f <- .env$app_cmap_holder_phrase
   close <- c(A = 21.6, B = 21.5, C = 10)      # 0.1 pp apart
   wide  <- c(A = 60, B = 10, C = 5)           # ~67 pp apart
   # stable winner -> named, however close the margin
   expect_match(f(close, 0), "mostly influenced by A", fixed = TRUE)
-  expect_false(grepl("about equally", f(close, 0), fixed = TRUE))
+  expect_false(grepl("not in every posterior draw", f(close, 0), fixed = TRUE))
   # unstable winner -> a tie, however wide the margin
-  expect_match(f(wide, 0.20), "about equally", fixed = TRUE)
+  expect_match(f(wide, 0.20), "not in every posterior draw", fixed = TRUE)
   expect_match(f(wide, 0.20), "A", fixed = TRUE); expect_match(f(wide, 0.20), "B", fixed = TRUE)
   # the boundary: "more than" 5 % is a tie; exactly 5 % is not
   expect_match(f(wide, 0.05), "mostly influenced by A", fixed = TRUE)
-  expect_match(f(wide, 0.0500001), "about equally", fixed = TRUE)
+  expect_match(f(wide, 0.0500001), "not in every posterior draw", fixed = TRUE)
   # ⭐ the RUNNER-UP's share must APPEAR in the tie case. Computed from the input, not typed: the phrase
   # reports shares OF THE ROW, so c(60, 10, 5) prints 80% / 13%.
   want <- sprintf("%.0f%%", 100 * sort(wide, decreasing = TRUE)[1:2] / sum(wide))
@@ -101,7 +103,7 @@ test_that("ON THE REAL PRODUCT: the stability is this map's, and the top three r
   ph  <- vapply(top, function(r) .env$app_cmap_holder_phrase(cm$MC[r, ], st$lost_share[[r]]), character(1))
   for (r in top) {
     if (st$lost_share[[r]] > .env$APP_CMAP_TIE_LOST_MAX)
-      expect_match(ph[[r]], "about equally", fixed = TRUE, info = r)
+      expect_match(ph[[r]], "not in every posterior draw", fixed = TRUE, info = r)
     else
       expect_match(ph[[r]], "mostly influenced", fixed = TRUE, info = r)
   }

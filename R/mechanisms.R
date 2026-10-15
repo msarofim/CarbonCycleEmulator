@@ -147,6 +147,13 @@ CCX_MECHANISMS <- list(
                    "at the surface, so the upper ocean becomes more layered and",
                    "mixes less, and the carbon we add is carried down into the",
                    "deep ocean more slowly."),
+    # 2026-10-15 review: the driver chart's note (app/server.R output$c_driver_ui). The generic "removes this input"
+    # contradicted the caveat above ("The world still warms either way"): the temperature line goes to zero because
+    # the model IGNORES temperature under this switch, not because the run is cooler.
+    driver_note = paste("The model ignores temperature under this switch, so its temperature input",
+                        "is drawn as zero: the purple line is what the counterfactual ran with. The",
+                        "world in this run still warms; only the carbon cycle's response to that",
+                        "warming is removed."),
     apply = function(p, F) {
       p$q10 <- 1; p$sst_scale <- 0
       # sst_obs = 0, or the observed HadSST4 columns would carry real SST
@@ -283,8 +290,10 @@ CCX_MECHANISMS <- list(
   ocean_sink = list(
     driver = NULL,  # CCX_DRIVERS; NULL = acts on a parameter, not an input
     label = "The ocean sink",
-    blurb = paste("The ocean has absorbed roughly a quarter of all our CO₂.",
-                  "Switch it off and that carbon stays in the air."),
+    # 2026-10-15 review: "roughly a quarter" -> the Where tab prints 29 % at hilda31w; and closing the ocean leaves
+    # MOST of that carbon in the air, not all of it (the land takes up some of the rest)
+    blurb = paste("The ocean has absorbed between a quarter and a third of all our CO₂.",
+                  "Switch it off and most of that carbon stays in the air."),
     # C6 (Marcus 09-24), MEASURED: `input$c_mech` drives only c_plot, c_growth,
     # c_growth_note, c_blurb, c_takeaway and w_luc_note. The isotope panels render
     # from APP_HIST$out, the fixed historical run, so this switch NEVER reaches
@@ -300,9 +309,11 @@ CCX_MECHANISMS <- list(
   emissions = list(
     driver = "emissions",  # CCX_DRIVERS; NULL = acts on a parameter, not an input
     label = "Our emissions",
+    # 2026-10-15 review: "the same 270 years" was typed, and the run is 275 (1750-2024). This file is sourced before
+    # app/global.R defines APP_HIST_YEARS, so "{n_years}" is filled by the app (server.R output$c_blurb).
     blurb = paste("Everything people put into the air: burning coal, oil and gas,",
                   "making cement, and clearing land. Switch it off and the model",
-                  "runs the same 270 years with nature alone."),
+                  "runs the same {n_years} years with nature alone."),
     # 2026-10-02 (carbotopecomments.10.2.26, Marcus): "Change to" -- his wording, verbatim.
     caveat = paste("While the direct effect of our emissions disappears, the indirect",
                    "effect through temperature still remains. ENSO and volcanoes also",
@@ -412,10 +423,10 @@ ccx_apply_mechanisms <- function(p, F, off = character()) {
 #' so, rather than substituting a model output.
 #'
 #' \u26d4 `removes_driver` IS MEASURED HERE, NOT DECLARED ANYWHERE. It is the
-#' comparison itself: `volcanic` and `emissions` zero their input column, so the
-#' two series separate; `enso` and `warming_feedback` zero a COEFFICIENT, so the
-#' two series lie exactly on top of one another and the panel's whole message is
-#' that the El Nino still happened and the model simply stopped listening. A
+#' comparison itself: every driver switch zeroes its INPUT column, so the two
+#' series separate. (2026-10-15 review: this said `enso` and `warming_feedback` zero
+#' a COEFFICIENT and the two series lie on top of one another -- true before
+#' 2026-10-02, when both began zeroing their input; see the CCX_DRIVERS header.) A
 #' hand-maintained flag would be a copy of that fact free to drift from it --
 #' and `enso` has already had one switch (fertilisation, 2026-08-14) silently
 #' become a no-op when the live parameter moved underneath it.

@@ -70,9 +70,12 @@ KEY_GROWTH_OBS  <- "Measured (NOAA global marine reference)"
 # the numbers they sit beside are the model's.
 KEY_PULSE_EXTRA  <- "The extra CO\u2082 (with the pulse, minus without)"
 KEY_PULSE_TAGGED <- "The pulse's own carbon atoms (tagged)"
+# 2026-10-15 review: the temperature view's model key, shown only beside FaIR (plot_pulse_warming(fair = ...)); a draft
+KEY_PULSE_WARM_MODEL <- "This model (with the pulse, minus without)"
 PANEL_PULSE_EXTRA  <- "The extra carbon"
 PANEL_PULSE_TAGGED <- "The pulse's carbon atoms"   # Marcus 2026-10-15
-PULSE_TAG_DECAY_NOTE <- paste("The tagged atoms leave the air within years, because the air swaps",
+# 2026-10-15 review: "leave the air within years" -> measured 49 % of the tagged atoms still in the air at +5 yr, 20 % at +20
+PULSE_TAG_DECAY_NOTE <- paste("Most of the tagged atoms leave the air within a couple of decades, because the air swaps",
                               "carbon with land and ocean every year. The extra CO\u2082 stays far",
                               "longer, because carbonate chemistry limits how much EXTRA carbon",
                               "the ocean can take up.")
@@ -92,7 +95,8 @@ PULSE_PARTITION_NOTE <- paste("This is how much extra carbon each reservoir hold
 # correction notice. The argument for the change is in the build script.
 GROWTH_UNIT_NOTE <- paste("Annual means differenced, model and measurement alike.",
                           "Measured growth is the NOAA marine boundary layer global",
-                          "reference, which begins in 1979. Review card 4 scores the",
+                          # 2026-10-15 review: readers see "issue N", not "card N"
+                          "reference, which begins in 1979. Known issue 4 scores the",
                           "Global Carbon Budget's January-to-January rate instead.")
 
 # ⭐ THE ONE FONT SIZE, and the ONLY place it is typed. `theme_ccx()` is called
@@ -531,7 +535,9 @@ app_sinks_annual <- function(out, F) {
              land_net   = land_net)
 }
 
-plot_gcb_bars <- function(out, gcb, F, window = c(2014, 2023)) {
+# 2026-10-15 review: the window was typed (2014-2023), a year short of the data; now the last ten years ending at the
+# splice year -- the same decade the regrowth readouts use (obs[2] - 9 .. obs[2]). Read at call time (global.R).
+plot_gcb_bars <- function(out, gcb, F, window = c(APP_SPLICE_YEAR - 9L, APP_SPLICE_YEAR)) {
   ann <- app_sinks_annual(out, F)
   k <- ann$yr >= window[1] & ann$yr <= window[2]
   g <- gcb[gcb$year >= window[1] & gcb$year <= window[2], ]
@@ -561,12 +567,13 @@ plot_gcb_bars <- function(out, gcb, F, window = c(2014, 2023)) {
 
 KEY_LUC_GROSS  <- "Cleared (gross land-use source)"
 KEY_LUC_REGROW <- "Forest regrowth (uptake)"
-KEY_LUC_NET    <- "Net land-use flux (what the model burns)"
+# 2026-10-15 review: "what the model burns" -> the net land-use input the model is given (nothing is burned)
+KEY_LUC_NET    <- "Net land-use flux (the input the model is given)"
 LAB_LUC_Y      <- "Land-use carbon flux (GtC per year)"
 NOTE_LUC_SPLIT <- paste("The split into clearing and regrowth is asserted from the Global",
                          "Carbon Budget's three bookkeeping models; this model does not",
                          "measure it. Both halves carry the fitted land-use scale and sum",
-                         "to the series the model burns.")
+                         "to the net land-use input the model is given.")
 
 #' The prescribed land-use flux, un-netted into clearing and forest regrowth
 #'
@@ -1368,11 +1375,13 @@ plot_d13c <- function(out, obs, yr_range, hemi = "both", rep_dC = 0) {
   k <- out$t >= yr_range[1] & out$t <= yr_range[2]
   o_all <- obs$d13[obs$d13$decimal_date >= yr_range[1] &
                    obs$d13$decimal_date <= yr_range[2], ]
+  # 2026-10-15 review: the solid (scored) line's key said "Northern box" while the caption calls the FAINT line
+  # "the box itself"; keyed as on the Keeling chart instead
   arms <- list(NH = list(col = "d13c_NH", co2 = "co2_NH", st = "MLO",
-                         lab = "Northern box", olab = "Measured, Mauna Loa",
+                         lab = "Model, Northern Hemisphere", olab = "Measured, Mauna Loa",
                          pal = PAL[["nh"]], opal = "#7b241c"),
                SH = list(col = "d13c_SH", co2 = "co2_SH", st = "SPO",
-                         lab = "Southern box", olab = "Measured, South Pole",
+                         lab = "Model, Southern Hemisphere", olab = "Measured, South Pole",
                          pal = PAL[["sh"]], opal = "#1a5276"))
   keep <- if (identical(hemi, "both")) c("NH", "SH") else hemi
   mod <- NULL; raw <- NULL; pts <- NULL; cols <- c()
@@ -1388,7 +1397,8 @@ plot_d13c <- function(out, obs, yr_range, hemi = "both", rep_dC = 0) {
   }
   gap <- if (identical(hemi, "both")) {
     n <- out$d13c_NH[k]; s <- out$d13c_SH[k]
-    sprintf(" The model's north-minus-south difference averages %+.2f\u2030 over this window \u2014 see Known issues, card 2.",
+    # 2026-10-15 review: "Known issues, card 2" -> "Known issue 2" (readers see issues, not cards)
+    sprintf(" The model's north-minus-south difference averages %+.2f\u2030 over this window \u2014 see Known issue 2.",
             mean(n - s))
   } else ""
   ggplot(mod, aes(t, v, colour = who)) +
@@ -1397,9 +1407,12 @@ plot_d13c <- function(out, obs, yr_range, hemi = "both", rep_dC = 0) {
     {if (!is.null(pts)) geom_point(data = pts, size = 0.5, alpha = 0.65)} +
     scale_colour_manual(values = cols[names(cols) %in%
                                       unique(c(mod$who, pts$who))]) +
+    # 2026-10-15 review: the longer keys overflow one legend row at 760 px; two rows, as the Keeling chart
+    guides(colour = guide_legend(nrow = 2, byrow = TRUE)) +
     labs(x = LAB_YEAR, y = LAB_D13C,
          caption = app_provenance_caption(paste0(
-           "Solid = the comparison the calibration scored (box minus the station offset of card 1); ",
+           # 2026-10-15 review: "of card 1" -> "of Known issue 1"
+           "Solid = the comparison the calibration scored (box minus the station offset of Known issue 1); ",
            "faint = the box itself; points = measurements.", gap))) +
     theme_ccx()
 }
@@ -1590,12 +1603,34 @@ plot_pulse_decay <- function(base_cl, pulse_cl, pulse_year, pulse_gtc, tag = NUL
 #' APP_PULSE_EMIS_METHOD = "constant" (Marcus's app-only fix, 2026-09-24), which is
 #' causal, so the pre-pulse ringing described above is gone (test-future-yvar.R (c),
 #' (c2)). The line starts from zero at the release (pulse_from_release(), above).
-plot_pulse_warming <- function(base_cl, pulse_cl, pulse_year, pulse_gtc) {
+#' @param fair NULL, or FaIR's rows for the SAME pulse (app_fair_pulse(), global.R). 2026-10-15 review: the FaIR
+#'   note and APP_PULSE_SHAPE_NOTE said FaIR was shown here, and nothing was drawn. Drawn now as plot_pulse_decay()
+#'   draws FaIR -- dashed, PAL[["off"]], annual means from zero at the release (pulse_from_release()) -- but the
+#'   MEAN ONLY: the grid stores d_gmst_mean and no 5-95% for temperature, so the key (attr "label_mean") says
+#'   "mean" and no band is drawn. Without `fair` the chart is exactly what it was (layer 2 = the model's line).
+plot_pulse_warming <- function(base_cl, pulse_cl, pulse_year, pulse_gtc, fair = NULL) {
   d <- pulse_from_release(base_cl$year, pulse_cl$gmst - base_cl$gmst, pulse_year)
   names(d)[2] <- "dT"
-  ggplot(d, aes(year, dT)) +
+  if (is.null(fair) || !nrow(fair) || is.null(fair$d_gmst_mean))
+    return(ggplot(d, aes(year, dT)) +
+      geom_hline(yintercept = 0, colour = "grey75", linewidth = 0.3) +
+      geom_line(colour = PAL[["pulse"]], linewidth = 0.9) +
+      labs(x = LAB_YEAR, y = LAB_PULSE_WARMING,
+           caption = app_provenance_caption()) +
+      theme_ccx())
+  fk <- attr(fair, "label_mean")
+  if (is.null(fk)) fk <- attr(fair, "label")
+  fm <- pulse_from_release(fair$year, fair$d_gmst_mean, pulse_year); names(fm)[2] <- "dT"
+  d$who <- KEY_PULSE_WARM_MODEL; fm$who <- fk
+  keys <- c(KEY_PULSE_WARM_MODEL, fk)
+  d <- rbind(d, fm)
+  d$who <- factor(d$who, levels = keys)
+  ggplot(d, aes(year, dT, colour = who, linetype = who)) +
     geom_hline(yintercept = 0, colour = "grey75", linewidth = 0.3) +
-    geom_line(colour = PAL[["pulse"]], linewidth = 0.9) +
+    geom_line(linewidth = 0.9) +
+    scale_colour_manual(values = stats::setNames(c(PAL[["pulse"]], PAL[["off"]]), keys)) +
+    scale_linetype_manual(values = stats::setNames(c("solid", "22"), keys)) +
+    guides(colour = guide_legend(ncol = 1), linetype = guide_legend(ncol = 1)) +
     labs(x = LAB_YEAR, y = LAB_PULSE_WARMING,
          caption = app_provenance_caption()) +
     theme_ccx()

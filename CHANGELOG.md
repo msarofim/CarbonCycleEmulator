@@ -2,6 +2,56 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-15 (d) — **Pre-public review of the whole app text, the repo documents and the model comments, APPLIED.** Four read-only reviewers (teaching tabs, Known issues + parameter table, model code, public docs) reported ~110 findings. Marcus ruled, verbatim: "Apply all (Recommended)" for the factual fixes (with copy-test pins following the changed sentences), "Apply all (Recommended)" for the cleanups, "Facts-only README + banners (Recommended)", and "Trim to a public version (Recommended)" for CLAUDE.md. The 34 app-facing test files read 1809 / 0.
+
+- **Box diagram** (Marcus's own requests, `0d694df`):
+  - two arrows between mixed layer and deep, biological pump down and mixing back up, and the same for the cold column;
+  - litterfall's label under its arrow; every label anchored along its arrow, so none overlap;
+  - text ~12 % larger and scaled with the panel width, with the height following the width;
+  - the tab's two columns stack below 992 px;
+  - his sentence; the two-hemisphere note.
+- **Docs** (`7caeede`): README facts-only status, run/test and data-licence paragraph; DESIGN/DATA dated banners; the private memory-store notes moved to a gitignored `CLAUDE.local.md`. Claude Code loads it automatically (code.claude.com/docs/en/memory).
+- **Model comments** (`0695062`): comments and roxygen only, checked by a diff filter. Covered: the land-use debit runs pro rata, not from wood alone; substeps are 6 at hilda31w; seas_T_lag is fitted; the "every registered mode" lines; stale canonical numbers; dangling references; ¹⁴C half-life pointers.
+- **App text, FALSE statements fixed:**
+  - the airborne fraction was defined upside down;
+  - the Δ¹⁴C box called exchange "uptake";
+  - "temperatures … feeding scenario emissions through FaIR";
+  - "Only CO₂";
+  - "1 times";
+  - a "no remainder" sentence that prints a remainder;
+  - issue 4's held strength called "fitted";
+  - Pinatubo 1.5 → 1.0 ppm;
+  - issue 2's CO₂ gradient called "right" (it is 0.90×, z −4.3);
+  - El Chichón 1982;
+  - issue 3's "deficit is northern" (the south is the larger miss);
+  - the "more El Niño-driven" finding, which reverses on the What-if estimator;
+  - the pump "influences nothing else" (18.5 % of its leverage is on the δ¹³C level);
+  - the "fitted to" table, which lacked ice-core δ¹³C and the bomb-¹⁴C inventory and had the wrong IntCal and ice-core years;
+  - "today" disagreed between tabs.
+- **New in the app:**
+  - FaIR's temperature response is DRAWN on the pulse lab's temperature view; the page and today's shape note said it was shown.
+  - Glosses for ppm, ‰, δ¹³C and Δ¹⁴C.
+  - Sea-surface temperature and the detrended ENSO index in the drivers table.
+  - A below-range CO₂ note.
+  - Plain-language names in the stand-in tables and the "little influence" list.
+  - Parameter values as "1,840", not "1.84e+03". Below 1000 they keep `formatC`, which test-app-params-table holds.
+  - The gradient offsets and sigma_d14c carry their fitted values instead of "—".
+- **Pins:** `test-cmap-tie.R`'s tie marker "about equally" → "not in every posterior draw". The phrase now reads "led by X (a%, though not in every posterior draw) ahead of Y (b%)". The review's proposed "though Y leads in some draws" is false for the δ¹³C row, whose runner-up wins 0 of 100 draws.
+- **Left for Marcus:**
+  - issue 6 (bands) and everything about uncertainty bands or posterior wording;
+  - issue 4's class "structural", whose gloss does not describe a variance shortfall;
+  - issue 7's "slightly";
+  - the warm-up note.
+- **NOT fixed, reported:** six DORMANT model bugs, none on the canonical's live path:
+  - pinned likelihood-only names read as NULL in `ccx_make_logpost()`;
+  - the C++ core silently drops fertilization on a list without the Michaelis-Menten names;
+  - `err$imb_share_ocean` partial-matches;
+  - `ccx_unc_to_par()` with an unnamed `u`;
+  - the IntCal row starts at a typed 1750;
+  - `ccx_enso_efold_yr()`'s k == 1 branch.
+  
+  These are behavior changes, so they wait for Marcus.
+
 ## 2026-10-15 (c) — **Schwartz's "second order" claim CHECKED against FaIR and CarboTope: it does not hold. If CO₂ emissions stop in 2030, about 71 % (FaIR) / 66 % (CarboTope) of the 2030 excess is still in the air in 2130, against about 37 % / 36 % of a 100 GtC pulse released into the same world: 1.9× / 1.8×, and the ratio grows with the horizon (≈1.6–1.7× at +20 yr, ≈2.0× at +270).** Record: `outputs/diagnostics/zec_vs_pulse_20261015/` (README, CSVs, gates).
 
 - **The question (Marcus):** "if anthropogenic CO2 emissions were to end in 2030, what percent of the anthropogenic increase would remain in 2130, compared to if we add an emission pulse in 2030, what percent of that pulse would remain in 2130."

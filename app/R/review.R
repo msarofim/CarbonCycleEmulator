@@ -12,8 +12,9 @@
 # (calibration/lib_design_gates.R), and a card whose kernel will not run says so
 # in place of its number rather than falling back to a literal.
 #
-# WHAT IS EXPENSIVE. Cards 3, 4 and 5 each need a model run that the app does
+# WHAT IS EXPENSIVE. Cards 2, 3, 4 and 5 each need a model run that the app does
 # not already have (a gate run to 2025, a knockout run, a 1000-year pulse pair).
+# (2026-10-15 review: card 2 added -- rv_gradients() reads the same gate run as card 3.)
 # Each is memoised in RV_CACHE and computed on FIRST VIEW, not at startup --
 # startup is already the app's worst number (APP_WARMUP_NOTE) and nobody should
 # pay for a tab they never open. (The old card 6, the one that spun up a second mode,
@@ -40,7 +41,8 @@ RV_CLASS_GLOSS <- c(
   # U5/N6 (Marcus 2026-09-22): "one ocean column per hemisphere" read as "no
   # ocean circulation", which is false at hilda29l. The limitation that is real
   # is the INTERHEMISPHERIC one: the two oceans never touch.
-  structural = paste("a consequence of the model's shape -- each hemisphere has",
+  # 2026-10-15 review: " -- " -> " — " in reader-visible strings (mechanical cleanup, approved).
+  structural = paste("a consequence of the model's shape — each hemisphere has",
                      "its own ocean, and they exchange carbon only through the",
                      "air. Closing it means a different model, not a better fit."),
   # `accounting` ("the fit prefers a simpler version ...") went with the old card 6, its
@@ -73,8 +75,9 @@ RV_FAIR_LAB_FMT    <- "%s, %d-configuration mean"   # legend: the file's own lab
 # the FaIR band (Marcus 2026-10-12, "Draw the band"): the file's own 5th-95th percentile across configs
 RV_FAIR_BAND_COLS  <- c(lo = "irf_p05", hi = "irf_p95")
 RV_FAIR_BAND_FMT   <- "%s, 5\u201395 %% of configurations"   # legend: label, then the percentiles above
-RV_SEAS_WINDOW   <- c(2000, 2024)   # the climatology window for the seasonal panels
-RV_GRAD_WINDOW   <- c(2000, 2024)   # where the MLO-SPO gradients are read
+# 2026-10-15 review: RV_SEAS_WINDOW and RV_GRAD_WINDOW (both c(2000, 2024)) REMOVED -- nothing in app/, tests/,
+# R/ or calibration/ read them, and RV_GRAD_WINDOW was false: card 2 reads the gradients over every year the gate's
+# own observed record has (dg_gateH_obs(): CO2 from 1962, d13C from 1980), which its caption now prints.
 
 # ---------------------------------------------------------------------
 # THE STAND-INS (card 7 since the 2026-10-01 renumbering; card 8 at review N12, Marcus 2026-09-22)
@@ -288,11 +291,15 @@ rv_gateD <- function() rv_memo("gateD", function() {
 # TWO DIFFERENT QUANTITIES AND THE CARD MUST NOT MERGE THEM: the SENSITIVITY of
 # the ocean sink to the ENSO index (0.89x observed, carried by a physical
 # upwelling limb) and the VARIANCE of the year-to-year growth anomaly (0.59x).
-# The model has the first and not the second. The knockout run below zeroes
+# The model has the first and not the second.
+# 2026-10-15 review: those ratios were an older canonical's. At hilda31w the slope is 1.05x and the variance
+# 0.88x (both printed live under card 4's charts) -- the gap between the two is smaller, the distinction the same. The knockout run below zeroes
 # EVERY ocean ENSO mechanism -- the shim pair AND the layer-3 limb -- because a
 # knockout that misses one reads the full model as its own control.
 # ---------------------------------------------------------------------
 RV_ENSO_WIN <- c(1959, 2024)
+# (2026-10-15 review: at hilda31w the limb strength is HELD -- a pin from the interannual cut's module -- not
+# fitted; card 4's text and caption now say so.)
 # Where the canonical's fitted limb strength (`w_enso_l2`, Sv per index unit)
 # sits against the observed interannual bracket (data/obs_eq_cell.rds
 # w0_prior$interannual$per_index_sv: Meinen, McPhaden & Johnson 2001, 50 Sv
@@ -331,6 +338,10 @@ rv_variability <- function() rv_memo("variability", function() {
   # a time-varying airborne fraction, GtC/yr), NOT the ppm/yr spline the "What
   # if…?" tab uses. The two agree qualitatively; their numbers are not
   # interchangeable and neither may be quoted as the other.
+  # ⛔ 2026-10-15 review: they do NOT agree qualitatively at hilda31w. Here the model tracks the index MORE
+  # closely than the record (r +0.48 vs +0.29, n = 66); on the What-if estimator it tracks it LESS (+0.18 vs
+  # +0.29, reviewer-measured). So the card no longer says the missing variance "is not El Niño-shaped"; the
+  # caption's comparative word is computed from r_model vs r_obs, and the detail states both readings.
   ens <- tryCatch({
     en <- as.data.frame(readRDS(ccx_path("data", "forcing_enso.rds")))
     ea <- stats::aggregate(nino34_anom ~ year, data = en, FUN = mean, na.rm = TRUE)
@@ -375,6 +386,9 @@ rv_enso_slope <- function() rv_memo("enso_slope", function() {
        ratio = full$slope / obs$slope,
        w_enso_l2 = if (is.null(v2$p$w_enso_l2)) 0 else
          rv_arm(CCX_MODE_CANONICAL)$p$w_enso_l2,
+       # 2026-10-15 review: whether the canonical HOLDS that strength (a pin) or fits it -- card 4b's caption
+       # says which, read off the mode file rather than typed (hilda31w: held)
+       w_enso_l2_held = "w_enso_l2" %in% names(rv_arm(CCX_MODE_CANONICAL)$pins),
        # the observed bracket card 4's text compares it with (A4, 2026-10-01)
        w_obs = tryCatch(rv_enso_l2_bracket(), error = function(e) NULL))
 })
@@ -400,7 +414,8 @@ rv_pulse <- function() rv_memo("pulse", function() {
   fair <- readRDS(ccx_path("data", RV_FAIR_PD100_FILE))
   fp <- attr(fair, "provenance")
   if (!startsWith(fp$climate, RV_PD_CLIMATE))
-    stop("card 5: the FaIR line's climate (", fp$climate, ") is not the card's (", RV_PD_CLIMATE, ")")
+    # 2026-10-15 review: "card 5:" -> "issue 5:" (this message renders on the tab via rv_plot_unavailable())
+    stop("issue 5: the FaIR line's climate (", fp$climate, ") is not the issue's (", RV_PD_CLIMATE, ")")
   list(t = o$t[k], irf = o$irf[k],
        read = vapply(RV_IRF_READ, at, numeric(1)),
        joos = vapply(RV_IRF_READ, joos_irf, numeric(1)),
@@ -469,7 +484,8 @@ rv_oclim_problems <- function(x, mode_file) {
 rv_ocean_climate <- function() rv_memo("ocean_climate", function() {
   x <- readRDS(do.call(ccx_path, as.list(RV_OCLIM_FILE)))
   p <- rv_oclim_problems(x, ccx_mode_file())
-  if (length(p)) stop(paste(p, collapse = "; "), " -- rebuild it with calibration/build_ocean_climate_card.R")
+  # 2026-10-15 review: " -- " -> " — " (this message renders on the tab via rv_plot_unavailable())
+  if (length(p)) stop(paste(p, collapse = "; "), " — rebuild it with calibration/build_ocean_climate_card.R")
   x
 })
 
@@ -497,7 +513,8 @@ RV_CARDS <- list(
                       "parameter, `rep_dC`, applied to CO₂ and δ¹³C together by mass",
                       "balance. Tying the two species is deliberate: a free δ¹³C",
                       "offset would have absorbed the Suess overshoot and reported",
-                      "a good fit. The prior is N(0, 1 ppm) -- the repo's own",
+                      # 2026-10-15 review: " -- " -> " — " throughout the card strings below (mechanical cleanup).
+                      "a good fit. The prior is N(0, 1 ppm) — the repo's own",
                       "station-vs-box scale, itself larger than the 0.39-0.59 ppm",
                       "RMS between co-located instruments at Mauna Loa. The fitted",
                       "value sits well outside that prior, which is the flag.",
@@ -514,12 +531,14 @@ RV_CARDS <- list(
                                     "against. Differencing the NOAA marine-boundary-layer",
                                     "reference against these same two stations, month by",
                                     "month, gives %+.2f ppm in the north and %+.2f ppm in",
-                                    "the south -- positive in every year of the record. So",
+                                    "the south — positive in every year of the record. So",
                                     "the model's sign is the physically expected one, and",
                                     "its north-south ordering is right too. What is not",
                                     "right is the size, and the chart above shows the gap:",
+                                    # 2026-10-15 review: the measured line is DOTTED (and is the two
+                                    # stations' mean; its label now says so), so "the lower" -> "the lower dotted line"
                                     "the fitted offset is the upper dashed line, the",
-                                    "measured one the lower. Re-centring the prior on the",
+                                    "measured one the lower dotted line. Re-centring the prior on the",
                                     "measured value would relabel most of that gap rather",
                                     "than remove it."),
                               RV_REP_OBS_NH, RV_REP_OBS_SH),
@@ -527,13 +546,14 @@ RV_CARDS <- list(
                                     "because one number is tied across both species by",
                                     "mass balance \u2014 and that side had never been checked",
                                     "against an observation at all. Built from the flask",
-                                    "network, the measured \u03b4\u00b9\u00b3C offset is %+.3f permil in",
-                                    "the north and %+.3f in the south. The model's is the",
+                                    # 2026-10-15 review: "permil" -> "\u2030" (the tab's own unit sign)
+                                    "network, the measured \u03b4\u00b9\u00b3C offset is %+.3f\u2030 in",
+                                    "the north and %+.3f\u2030 in the south. The model's is the",
                                     "same in both hemispheres, because it is one",
                                     "common-mode number. Worse, the carbon signature that",
                                     "would reconcile the measured CO\u2082 and \u03b4\u00b9\u00b3C offsets",
-                                    "is about \u221235 permil in the north and \u221213 in the",
-                                    "south, where the model assumes a single \u221226.5 \u2014 so no",
+                                    "is about \u221235\u2030 in the north and \u221213\u2030 in the",
+                                    "south, where the model assumes a single \u221226.5\u2030 \u2014 so no",
                                     "one value describes both. The tie itself, not just its",
                                     "size, is doing work it cannot support."),
                               RV_REP_OBS_D13C_NH, RV_REP_OBS_D13C_SH),
@@ -544,43 +564,55 @@ RV_CARDS <- list(
                               RV_REP_OBS_SOURCE)),
        ask = paste("The fit needs several times the station offset that is",
                    "actually measured. Is a stand-in of that size acceptable in a",
-                   "teaching model -- and if not, what do you suggest as possible ways to address this offset?")),
+                   "teaching model — and if not, what do you suggest as possible ways to address this offset?")),
   list(id = 2, key = "gradient", class = "structural",
        title = "The north-south δ¹³C gradient is twice the observed one",
+       # 2026-10-15 review (Marcus: "Apply all"): "close to right" / "is right" -> "about 10 % low" / "nearly
+       # right". Measured at hilda31w (rv_gradients()): CO2 2.18 vs 2.43 +/- 0.059 ppm = 0.90x (z -4.3, 1962-2023);
+       # d13C 1.97x (1980-2023). Card 2's caption prints both ratios live.
        plain = paste("Between Mauna Loa and the South Pole, the model's δ¹³C",
-                     "difference is about twice what is measured -- as a nearly",
+                     "difference is about twice what is measured — as a nearly",
                      "constant offset, not a drift. The CO₂ gradient between the",
-                     "same two stations is close to right."),
+                     "same two stations is about 10 % low — far closer than the isotopic one."),
        detail = paste("Closing it needs a persistent north-minus-south isotopic",
                       "flux the model has no carrier for. Each hemisphere has its",
                       "own ocean and they exchange only through the air, so",
                       "nothing can carry an isotopic signal from one deep ocean",
                       "to the other. Every lever tried moved the levels of the two",
                       "hemispheres and not the difference between them. That the",
-                      "CO₂ gradient is right while the isotopic one is not is the",
+                      "CO₂ gradient is nearly right while the isotopic one is not is the",
                       "diagnostic: the transport is not obviously wrong, the",
                       "isotopic loading of it is."),
-       ask = paste("Is a 2x hemispheric isotope gradient a deal-breaker for a",
-                   "model whose CO₂ gradient and both Suess trends are right?",
+       # 2026-10-15 review: "2x" -> "2×"; "whose CO₂ gradient and both Suess trends are right" -> the 10 % qualifier
+       ask = paste("Is a 2× hemispheric isotope gradient a deal-breaker for a",
+                   "model whose CO₂ gradient is within about 10 % and whose Suess trends are right?",
                    "What mechanism might help close it?")),
   list(id = 3, key = "diseq", class = "structural",
        title = "The ocean's north-south isotopic disequilibrium is too symmetric",
-       plain = paste("The measured air-sea δ¹³C disequilibrium is much larger in",
+       # 2026-10-15 review (Marcus: "Apply all"): "disequilibrium" defined at first use; GLODAP expanded once.
+       plain = paste("The measured air-sea δ¹³C disequilibrium (how far surface seawater's δ¹³C",
+                     "sits from balance with the air above it) is much larger in",
                      "the northern surface ocean than the southern. The model has",
-                     "the right global size but far too little of the asymmetry --",
+                     "the right global size but far too little of the asymmetry —",
                      "about a third of the observed difference."),
+       # 2026-10-15 review: "The deficit is on the northern side." was half true -- on the hemisphere panel
+       # (rv_gateD()$hemi vs $obs_hemi, hilda31w) the north is LOW by 0.08 permil (0.93 vs 1.01) but the south is
+       # HIGH by 0.12 (0.84 vs 0.72). And "over-determined by roughly 15%" -> plain words; that 15 % was MEASURED
+       # AT hilda29l and has not been re-measured at hilda31w.
        detail = paste("This is the same structural limit as issue 2, seen in a",
-                      "second, independent observation (GLODAP surface bottles",
-                      "rather than atmospheric stations). The deficit is on the",
-                      "northern side. There is a related quantitative tension",
-                      "worth knowing: the model's air-sea isotopic exchange time",
-                      "is over-determined by roughly 15% -- the surface bottles",
-                      "want it longer, the atmospheric δ¹³C decline holds it where",
-                      "it is -- so a fix that satisfies one moves away from the",
+                      "second, independent observation (GLODAP ocean bottle samples",
+                      "from the surface, rather than atmospheric stations). The miss",
+                      "is on both sides: the north is too small and the south too",
+                      "large, the south by more. There is a related quantitative tension",
+                      "worth knowing: the ocean bottles and the atmospheric δ¹³C",
+                      "decline disagree by about 15 % on how fast the air and sea",
+                      "exchange isotopes — the surface bottles want it slower, the",
+                      "atmospheric δ¹³C decline holds it where",
+                      "it is — so a fix that satisfies one moves away from the",
                       "other. Note also that the southern cold box equilibrates",
                       "with the deep ocean, so its disequilibrium is a statement",
                       "about the model's deep δ¹³C, not its surface."),
-       ask = paste("Same question as issue 2 -- these are one flaw with two",
+       ask = paste("Same question as issue 2 — these are one flaw with two",
                    "observables. And: would an interhemispheric deep exchange be",
                    "worth building into a teaching model to close it?")),
   list(id = 4, key = "variance", class = "structural",
@@ -590,7 +622,7 @@ RV_CARDS <- list(
        title = "Year-to-year variability is somewhat smaller than observed",
        # Marcus 2026-10-02 (carbotopecomment): "The app's ENSO switch is a sensitivity, not a
        # reconstruction." deleted. 60% still MEASURED 10-02: 0.268 vs 0.459 ppm/yr = 58%.
-       plain = paste("The model's ENSO sensitivity is close to right -- push the",
+       plain = paste("The model's ENSO sensitivity is close to right — push the",
                      "index and the ocean sink responds by nearly the amount the",
                      "Global Carbon Budget shows. But the total year-to-year",
                      "wobble in CO₂ growth is only about 70–90% of the observed",
@@ -608,12 +640,17 @@ RV_CARDS <- list(
        # recomputes from the canonical's mode file and the data product (since
        # 10-08 g; before that no test did, whatever this said); the
        # numbers themselves are printed live in card 4b's caption.
-       detail = paste("The sensitivity is carried by a physical mechanism -- a",
-                      "layer-3 upwelling anomaly driven by the ENSO index (Niño 3.4),",
-                      sprintf("whose fitted strength sits %s the range",
+       # 2026-10-15 review (Marcus: "Apply all"): w_enso_l2 is HELD at hilda31w (a pin from the interannual cut's
+       # module), so "whose fitted strength" -> "whose strength, fixed by a separate fit to the year-to-year
+       # record" (test-review-card-numbers.R still finds "sits <phrase> the range"). ENSO and Sv defined once here.
+       detail = paste("The sensitivity is carried by a physical mechanism — a",
+                      "layer-3 upwelling anomaly driven by the ENSO index (Niño 3.4;",
+                      "ENSO is the El Niño–Southern Oscillation),",
+                      sprintf("whose strength, fixed by a separate fit to the year-to-year record, sits %s the range",
                               rv_enso_l2_phrase(RV_ENSO_L2_VS_OBS)),
                       "observed for equatorial transport variability (the",
-                      "numbers are under the second chart). It replaced a pair of",
+                      "numbers are under the second chart, in sverdrups, Sv: a",
+                      "million cubic metres of water per second). It replaced a pair of",
                       "fitted coefficients that had been overturning a",
                       "wrong-signed solubility response, which is why the",
                       "mechanism was adopted even though it costs fit. On its own",
@@ -627,11 +664,13 @@ RV_CARDS <- list(
                       # canonical: zeroing gamma_diff moves CO2 by 1.53 ppm at
                       # its largest in 1991-95 and by -0.73 ppm at 2024. The
                       # corrected statement is the more interesting one.
+                      # 2026-10-15 review: RE-MEASURED at hilda31w (gate run, gamma_diff 0.25 -> 0, annual mean of
+                      # the two hemispheric boxes): largest 0.99 ppm, in 1993. "about one and a half" -> "about one".
                       "and the interesting part is that it is not all for want of",
-                      "a mechanism: the volcanic path IS here and running --",
+                      "a mechanism: the volcanic path IS here and running —",
                       "stratospheric aerosol scatters sunlight, the model's plants",
                       "use that diffuse light better, and switching the path off",
-                      "moves CO₂ by about one and a half parts per million in",
+                      "moves CO₂ by about one part per million in",
                       "the years after Pinatubo. It is present and the total",
                       "wobble is still short.",
                       # Marcus 2026-10-06 (carbotopecomments.10.2.26): "Change to" -- his wording.
@@ -655,20 +694,26 @@ RV_CARDS <- list(
                       # where they are computed.
                       "\n\nWe looked for a pattern in the misses and did not find",
                       "one. Year by year, the difference between the model's growth",
+                      # 2026-10-15 review (Marcus: "Apply all"): "El Ni\u00f1o index" -> "ENSO index"; 1983 is the year
+                      # AFTER El Chich\u00f3n (April 1982), not the eruption; and the closing claim ("more El Ni\u00f1o-driven
+                      # ... so the variance it lacks is of some other kind") held on the first chart's estimator
+                      # (r +0.48 vs +0.29) but REVERSED on the What-if tab's (+0.18 vs +0.29), so both are stated.
+                      # The ask's "is not El Ni\u00f1o" -> "is not clearly El Ni\u00f1o" to match.
                       "and the measured growth shows no usable association with the",
-                      "El Ni\u00f1o index, with volcanic aerosol, or with the decade:",
+                      "ENSO index, with volcanic aerosol, or with the decade:",
                       "on sixty-six years none of the three reaches significance,",
                       "and the decade averages all sit well inside one year's",
-                      "scatter. The single largest overshoot is 1991 -- the model",
+                      "scatter. The single largest overshoot is 1991 \u2014 the model",
                       "does not draw down as much carbon after Pinatubo as the",
-                      "record does -- but 1983, the other big eruption, misses the",
-                      "other way, so even that is not a rule. What the caption",
-                      "above reports is the finding that survives: the model's",
-                      "variability is more El Ni\u00f1o-driven than the real record's,",
-                      "so the variance it lacks is of some other kind."),
+                      "record does \u2014 but 1983, the year after El Chich\u00f3n (the other",
+                      "big eruption), misses the other way, so even that is not a rule.",
+                      "On the first chart's measure the model's variability is more",
+                      "ENSO-driven than the record's; on the What-if tab's measure it",
+                      "is less \u2014 so we cannot say the missing variance is not",
+                      "El Ni\u00f1o-shaped."),
        ask = paste("Is a model that gets the ENSO sensitivity right but only part",
                    "of the variance acceptable for teaching what makes CO₂ wobble?",
-                   "And if the missing variability is not El Ni\u00f1o, not volcanic and",
+                   "And if the missing variability is not clearly El Ni\u00f1o, not volcanic and",
                    "not a trend \u2014 what would you look for next?")),
   list(id = 5, key = "pulse", class = "comparison",
        # Marcus 2026-10-15: title and ask are his; the plain is his own comment's statement ("We do decay
@@ -694,6 +739,8 @@ RV_CARDS <- list(
                       # ⭐ RE-CHECKED 2026-10-12 at hilda29e on the climate-FREE protocol (ccx_pd100):
                       # 1000-yr split 17.4 / 57.6 / 25.0 % (z +0.20 / -0.23 / -0.01); IRF 20/100/300
                       # 0.522 / 0.379 / 0.295 vs Joos 0.596 / 0.409 / 0.322. Every claim below holds.
+                      # 2026-10-15 review: RE-CHECKED at hilda31w (rv_pulse()): 1000-yr split 18.4 / 56.8 / 24.8 %
+                      # (z +0.35 / -0.37 / -0.05); IRF 20/100/300 0.514 / 0.374 / 0.293. Every claim below holds.
                       "point. Where the difference sits is visible in the two",
                       "charts: the pulse leaves the air faster here, most of all",
                       "in the first few decades, but after a thousand years the",
@@ -744,10 +791,13 @@ RV_CARDS <- list(
                    "says so on every tab?")),
   list(id = 7, key = "shims", class = "design",
        title = "Some parameters stand in for mechanisms, and some constants are unsourced",
-       plain = paste("Several fitted parameters are stand-ins: they absorb a",
+       # 2026-10-15 review (Marcus: "Apply all"): three of the seven stand-ins are HELD at 0 at hilda31w, so
+       # "fitted parameters" -> "parameters" here and "is fitted freely and" is cut from the detail; and
+       # "inverted through the model" -> plain words. ("slightly", below, is Marcus's call and untouched.)
+       plain = paste("Several parameters are stand-ins: they absorb a",
                      "discrepancy rather than represent a process. Several",
-                     "physical constants are still marked provisional -- their",
-                     "values were inverted through the model or held, rather than",
+                     "physical constants are still marked provisional — their",
+                     "values were inferred by fitting the model or simply held, rather than",
                      "traced to a measurement."),
        # N11 + N12 (Marcus 2026-09-22): the "most that naming buys" clause is
        # cut, and the bigger fix -- the prose named the SHIMS while the table
@@ -757,11 +807,11 @@ RV_CARDS <- list(
        # Marcus 2026-10-02 (carbotopecomment): "rather than quietly absorbed" and "and it is
        # worth keeping them apart" deleted; "parameter", not "name".
        detail = paste("Each is named in the code and listed below. The two lists below",
-                      "are different things. A stand-in is fitted",
-                      "freely and absorbs a discrepancy instead of representing a",
+                      "are different things. A stand-in",
+                      "absorbs a discrepancy instead of representing a",
                       "process; a held parameter is one the calibration is not",
                       "allowed to move at all, carried at a stated number. Some",
-                      "parameters are in both -- a stand-in that was switched off by",
+                      "parameters are in both — a stand-in that was switched off by",
                       "holding it at zero. The stand-ins that matter most for what",
                       "this app claims are the station offset (issue 1), the",
                       "δ¹³C gradient offset (issue 2 is scored net of it), and a",
@@ -792,6 +842,8 @@ RV_CARDS <- list(
   # 10-08 i). ⚠ CLAUDE'S DRAFT, FOR MARCUS'S WORDING -- the numbers are NOT typed here: they are printed live under
   # the two charts from data/ocean_climate_card.rds. The two qualitative claims ("about twice", "decades earlier")
   # are tied to that product by test-ocean-climate-card.R.
+  # (2026-10-15 review: Marcus's 10-15 plain no longer says "decades earlier"; test-ocean-climate-card.R holds that
+  # phrase only where the text makes it, so "about twice" is the one claim the card's prose still carries.)
   list(id = 8, key = "ocean_climate", class = "response",
        # Marcus 2026-10-15: title, plain's second sentence and the detail's first sentence are his. "about" is
        # kept in the title: the per-K ratio is 1.8 +/- 0.4 at hilda31w, and test-ocean-climate-card.R ties it.
@@ -800,7 +852,7 @@ RV_CARDS <- list(
                      "takes up less. In this model that decline happens about twice as quickly",
                      "as in the Global Carbon Budget models."),
        detail = paste("CarboTope was not tuned to this mechanism. The seawater",
-                      "chemistry is not the cause -- how fast CO\u2082 pressure rises with",
+                      "chemistry is not the cause \u2014 how fast CO\u2082 pressure rises with",
                       # Marcus 2026-10-15: "tested but not settled," deleted; the mixing sentence and the
                       # second-chart sentence are his ("in 2300" moved to the clause that names the year).
                       # "carbon-rich" -> "has not adjusted to the warming": CLAUDE'S DRAFT answering his question

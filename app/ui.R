@@ -159,6 +159,10 @@ navbarPage(
                      c("Both" = "both", "Northern only" = "NH",
                        "Southern only" = "SH")),
         checkboxInput("k_obs", "Show measurements", TRUE),
+        # 2026-10-15 review: the chart's unit gets its tooltip (house style: ppm is glossed).
+        p(tags$small("CO₂ is measured in ",
+                     gloss("ppm", "parts per million: molecules of CO₂ in every million molecules of dry air"),
+                     ".")),
         info_box("Why the two hemispheres differ",
                  p("Almost all fossil fuel is burned north of the equator, so",
                    "the Northern Hemisphere runs a little higher. Air takes",
@@ -204,10 +208,13 @@ navbarPage(
                  # year's emissions to one year's uptake, so it moves with how
                  # fast emissions are changing and how far the sinks are from
                  # equilibrium -- not only with how good the sinks are.
+                 # 2026-10-15 review: the definition was upside down (emissions / rise) and single-year,
+                 # while the chart (plot_airborne_fraction: atmosphere / cumulative emitted) is cumulative.
                  p("The ", gloss("airborne fraction",
                                  "the share of everything ever emitted that is still in the air"),
-                   " is the ratio of emissions to the rise in atmospheric",
-                   "concentration in a given year. It is a popular metric, but",
+                   " is the rise in atmospheric carbon divided by the carbon emitted;",
+                   sprintf("the chart uses the cumulative form (everything since %d).", APP_HIST_YEARS[1]),
+                   "It is a popular metric, but",
                    "easily misunderstood: it depends both on how quickly emissions",
                    "are changing and on the total sink (itself a reflection of how",
                    "far the land and ocean are from equilibrium), so any change —",
@@ -359,16 +366,27 @@ navbarPage(
         radioButtons("i_hemi", "Hemisphere (\u03b4\u00b9\u00b3C)",
                      c("Both" = "both", "Northern only" = "NH",
                        "Southern only" = "SH")),
+        # 2026-10-15 review: δ / Δ / ‰ get tooltips; the δ¹³C fall is credited to land-use carbon as well as
+        # fossil (both are plant carbon); Δ¹⁴C's decline measures EXCHANGE of atoms, not net uptake.
         info_box("What the two isotopes tell you",
-                 p(tags$strong("δ¹³C"), " — plants prefer the lighter carbon-12,",
-                   "so fossil fuels (ancient plants) are ¹³C-poor. Burning them",
+                 p(tags$strong(gloss("δ¹³C", paste("delta carbon-13: how far the air's ratio of ¹³C to ¹²C",
+                                                    "sits from a reference standard, in parts per thousand (‰)"))),
+                   " — plants prefer the lighter carbon-12,",
+                   "so fossil fuels (ancient plants) and the carbon released by clearing land are",
+                   "both ¹³C-poor. Adding them",
                    "dilutes the air's ¹³C. That falling line is the fingerprint",
-                   "that the extra CO₂ is fossil, not volcanic or oceanic."),
-                 p(tags$strong("Δ¹⁴C"), " — carbon-14 is radioactive and decays",
+                   "that the extra CO₂ is fossil and land-use carbon, not volcanic or oceanic."),
+                 p(tags$strong(gloss("Δ¹⁴C", paste("capital delta carbon-14: how far the ratio of ¹⁴C to ¹²C",
+                                                    "sits from a fixed reference, in parts per thousand (‰),",
+                                                    "corrected for the way plants and water sort isotopes by mass"))),
+                   " — carbon-14 is radioactive and decays",
                    "over thousands of years, so fossil carbon has none left at",
                    "all. The 1960s spike is from atmospheric nuclear weapons",
-                   "tests, and how fast it fell tells us how quickly the ocean",
-                   "and land take carbon out of the air."))
+                   "tests, and how fast it fell tells us how quickly carbon atoms",
+                   "are swapped between the air, the ocean and the land — much",
+                   "faster than extra CO₂ is removed (see the Pulse lab)."),
+                 p(tags$small("Both are reported in ", gloss("‰", "per mil: parts per thousand"),
+                              ", as small differences from a reference ratio.")))
       ),
       mainPanel(
         width = 9,
@@ -493,9 +511,12 @@ navbarPage(
         uiOutput("f_notes"),
         # F1 (Marcus 2026-09-22): his reframing, used as supplied, and the
         # "honest reading" paragraph deleted as he asked.
+        # 2026-10-15 review: FaIR is not run on these scenarios -- this model's own CO₂ plus the scenario's
+        # non-CO₂ forcing go through a climate response FITTED to FaIR. Marcus's opening words kept.
         info_box("Where the future temperature comes from",
-                 p("Future scenario temperatures are a result of feeding scenario",
-                   "emissions through the FaIR model. The pulse lab and the",
+                 p("Future scenario temperatures are a result of feeding this model's CO₂,",
+                   "plus the scenario's other warming agents, through a simple climate",
+                   "response fitted to FaIR. The pulse lab and the",
                    # ⭐ "fossil" added 2026-09-26: both of those controls change
                    # FOSSIL CO₂ only. Land-use emissions always come from the
                    # background scenario (app_stylised_emissions), and the pulse
@@ -544,7 +565,7 @@ navbarPage(
             h4("The stand-ins and the provisional constants, listed"),
             # N12 (Marcus 2026-09-22): two lists, labelled, because they are
             # two different things -- see card 7's detail (card 8 before the 10-01 renumbering).
-            h5("Stand-ins: fitted parameters that absorb a discrepancy"),
+            h5("Stand-ins: parameters that absorb a discrepancy (some switched off)"),   # 2026-10-15 review: 3 of 7 are held at 0
             tableOutput("rv_standins"),
             h5("Held: parameters the calibration was not allowed to move"),
             tableOutput("rv_shims"),
@@ -576,7 +597,9 @@ navbarPage(
                    "influence on."),
                  p("The size of every nudge is chosen to cost the fit half of a",
                    "log-likelihood unit, so that all the rows in the chart can be",
-                   "intercompared in a meaningful fashion.")),
+                   "intercompared in a meaningful fashion."),
+                 # 2026-10-15 review: the technical clause moved here from the main-panel caveat (APP_CMAP_NOTE)
+                 p(tags$small(APP_CMAP_STEP_DETAIL))),
         info_box("Pinned, or pulled?",
                  p("A measurement can be sensitive to a parameter in two",
                    "different ways. It can sit at its own best value, so moving",
@@ -653,7 +676,11 @@ navbarPage(
         tableOutput("h_data"),
         h4("What it cannot do"),
         tags$ul(
-          tags$li("No methane, nitrous oxide, aerosols or ozone. Only CO₂."),
+          # 2026-10-15 review: "No methane ... Only CO₂" was false of the Futures temperatures (non-CO₂
+          # forcing is prescribed there) and of the volcanic diffuse-light term.
+          tags$li(paste("The carbon cycle tracks only CO₂. Methane, nitrous oxide, aerosols and",
+                        "ozone enter only as prescribed warming in the Futures temperatures;",
+                        "volcanic haze enters only through its diffuse-light effect.")),
           # U5/N6 (Marcus 2026-09-22): "No ocean circulation — diffusion only"
           # was STALE. The canonical carries HILDA cold surface and deep boxes
           # in each hemisphere, a biological pump in both columns, and an

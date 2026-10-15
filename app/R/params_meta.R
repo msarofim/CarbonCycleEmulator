@@ -32,10 +32,13 @@
 #' quantities, which is what the table prints.
 APP_PARAM_META <- list(
   # ---- land -----------------------------------------------------------
-  beta_max      = list(desc = "CO₂ fertilisation, maximum boost", unit = "—"),
+  # 2026-10-15 review: units for beta_max (R/model.R: NPP = NPP0 (1 + beta_max dchi/(K + dchi)), so beta_max is
+  # the fractional NPP boost at infinite CO2) and q10 (the factor respiration grows by per 10 °C), both "—" before
+  beta_max      = list(desc = "CO₂ fertilisation, maximum boost",
+                       unit = "fraction of preindustrial growth"),
   fert_k        = list(desc = "CO₂ needed for half that boost",
                        unit = "ppm above preindustrial"),
-  q10           = list(desc = "Soil respiration's response to warming", unit = "—"),
+  q10           = list(desc = "Soil respiration's response to warming", unit = "factor per 10 °C"),
   npp_frac_NH   = list(desc = "Northern share of plant growth", unit = "—"),
   luc_scale     = list(desc = "Scale on the historical land-use emissions", unit = "—"),
 
@@ -64,14 +67,16 @@ APP_PARAM_META <- list(
                        unit = "µmol/kg"),
 
   # ---- circulation limbs ------------------------------------------------
+  # 2026-10-15 review: "El Niño" -> "ENSO" in these descriptions, matching the ENSO block below and the app's
+  # "ENSO index" (each is a response to the index, which runs both ways, not to El Niño alone)
   w_eq          = list(desc = "Equatorial upwelling cell strength", unit = "Sv"),
-  gamma_eq      = list(desc = "How strongly El Niño modulates that cell",
+  gamma_eq      = list(desc = "How strongly ENSO modulates that cell",
                        unit = "per index unit"),
   w_vent        = list(desc = "Ventilation loop strength", unit = "Sv"),
-  gamma_vent    = list(desc = "How strongly El Niño modulates the ventilation loop",
+  gamma_vent    = list(desc = "How strongly ENSO modulates the ventilation loop",
                        unit = "per index unit"),
   w_thc         = list(desc = "Overturning (deep return) strength", unit = "Sv"),
-  w_enso_l2     = list(desc = "El Niño upwelling limb, third ocean layer",
+  w_enso_l2     = list(desc = "ENSO upwelling limb, third ocean layer",
                        unit = "Sv per index unit"),
 
   # ---- the seasonal cycle ------------------------------------------------
@@ -79,10 +84,11 @@ APP_PARAM_META <- list(
                        unit = "K, half-amplitude"),
   seas_T_amp_SH = list(desc = "Southern land seasonal temperature swing",
                        unit = "K, half-amplitude"),
+  # 2026-10-15 review: "month" -> "months", as lag_enso_land and seas_T_lag below
   seas_lag_p_NH = list(desc = "Northern lag between sunlight and peak plant growth",
-                       unit = "month"),
+                       unit = "months"),
   seas_lag_p_SH = list(desc = "Southern lag between sunlight and peak plant growth",
-                       unit = "month"),
+                       unit = "months"),
   sst_seas_amp_NH = list(desc = "Northern sea-surface seasonal temperature swing",
                          unit = "K, half-amplitude"),
   sst_seas_amp_SH = list(desc = "Southern sea-surface seasonal temperature swing",
@@ -103,7 +109,8 @@ APP_PARAM_META <- list(
   # ---- radiocarbon and the likelihood ------------------------------------
   bomb_total    = list(desc = "Total bomb ¹⁴C released by weapons testing", unit = "kmol"),
   sigma_d14c    = list(desc = "Δ¹⁴C mismatch allowance", unit = "‰"),
-  rep_dC        = list(desc = "Station-versus-box CO₂ offset (see Known issues, card 1)",
+  # 2026-10-15 review: "card 1" -> "issue 1" (the tab labels them "Issue N")
+  rep_dC        = list(desc = "Station-versus-box CO₂ offset (see Known issues, issue 1)",
                        unit = "ppm"),
   grad_off_co2  = list(desc = "Station-versus-box offset on the north-south CO₂ gradient",
                        unit = "ppm"),
@@ -125,7 +132,8 @@ APP_PARAM_META <- list(
   imb_share_ocean_rest = list(desc = "Ocean's share of the gap the land does not take", unit = "—"),
   # the land ENSO lag (2026-10-02, W1; R/calibrate.R CCX_PARAM_GATED_ENSO_LAG): fitted only under
   # the label that opens the lag gate. Wording DRAFTED 2026-10-02 for Marcus's review.
-  lag_enso_land        = list(desc = "Delay between El Niño and the land's carbon response",
+  # 2026-10-15 review: "El Niño" -> "the ENSO index" (the app's name for what the lag is measured from)
+  lag_enso_land        = list(desc = "Delay between the ENSO index and the land's carbon response",
                               unit = "months"),
   # the citation batch's two fitted names (2026-10-12; R/calibrate.R CCX_PARAM_GATED_WTC): fitted only under the
   # label that opens the WTC gate (hilda31w). Wording DRAFTED 2026-10-13 for Marcus's review; he ruled "Use the
@@ -191,6 +199,24 @@ app_validate_param_meta <- function(names, meta = APP_PARAM_META,
   bad
 }
 
+#' Format parameter values for a reader: three significant figures, thousands separated
+#'
+#' 2026-10-15 review: the table used formatC(v, digits = 3, format = "g"), which prints k_w as "1.84e+03" and kz
+#' as "1.38e+04" -- scientific notation on a page written for undergraduates. Same three figures, no exponent
+#' (format() still chooses one for a value too large or small to print plainly).
+#' ⚠ tests/testthat/test-app-params-table.R compares each HELD row with formatC(pin, digits = 3, format = "g");
+#' the two agree for every pin at hilda31w (none is >= 1000), but a future pin of 1000 or more would differ.
+# Below 1000 the table keeps formatC(..., "g") (test-app-params-table.R holds held rows to it); at 1000 and above
+# "g" switches to scientific notation ("1.84e+03"), so those print as "1,840".
+app_param_value_fmt <- function(v)
+  ifelse(abs(v) >= 1000, prettyNum(signif(v, 3), big.mark = ","), formatC(v, digits = 3, format = "g"))
+
+#' The plain-English description of each parameter name (the name itself where the table has none)
+#'
+#' 2026-10-15 review: for the Known-issues stand-in and held tables, which printed code names only.
+app_param_desc <- function(names, meta = APP_PARAM_META)
+  vapply(names, function(n) if (is.null(meta[[n]]$desc)) n else meta[[n]]$desc, "", USE.NAMES = FALSE)
+
 #' The parameters table the "Under the hood" tab prints
 #'
 #' Values come from the running parameter vector; a name the vector does not
@@ -232,7 +258,7 @@ app_param_table <- function(names, values, meta = APP_PARAM_META, extra = charac
   }, numeric(1))
   tab <- data.frame(
     Parameter = vapply(names, function(n) meta[[n]]$desc, ""),
-    Value = ifelse(is.na(v), "—", formatC(v, digits = 3, format = "g")),
+    Value = ifelse(is.na(v), "—", app_param_value_fmt(v)),
     Units = vapply(names, function(n) meta[[n]]$unit, ""),
     row.names = NULL, check.names = FALSE)
   if (!is.null(fitted) || !is.null(held))

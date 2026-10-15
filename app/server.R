@@ -122,10 +122,13 @@ function(input, output, session) {
   output$w_takeaway <- renderText({
     d <- latest()
     s <- d$atmosphere + d$land + d$ocean
+    # 2026-10-15 review: "%s is in the land" -> the land SINK (GCB convention, partition_table()), with the
+    # clearing it is net of; both numbers from the same row. The land as a stock gained far less.
     sprintf(paste("Of the %s of carbon emitted since 1750, %s is still in the",
-                  "air, %s is in the land and %s is in the ocean — %s, %s and",
+                  "air, %s was taken up by the land sink (while land clearing released %s",
+                  "from it) and %s is in the ocean — %s, %s and",
                   "%s of the total. The three add back to %s."),
-            fmt_gtc(d$emitted), fmt_gtc(d$atmosphere), fmt_gtc(d$land),
+            fmt_gtc(d$emitted), fmt_gtc(d$atmosphere), fmt_gtc(d$land), fmt_gtc(d$cum_luc),
             fmt_gtc(d$ocean), fmt_pct(d$atmosphere / d$emitted),
             fmt_pct(d$land / d$emitted), fmt_pct(d$ocean / d$emitted),
             fmt_gtc(s))
@@ -235,13 +238,15 @@ function(input, output, session) {
                  # reads as a double negative. The two small terms keep their
                  # signs because no word orders them.
                  a <- function(v) sprintf("%.2f", abs(v))
-                 sprintf(paste("Taking the whole gap apart gives no remainder at all. Against",
+                 # 2026-10-15 review: it said "no remainder at all ... exactly ... Nothing is left
+                 # unexplained" while printing the remainder (0.007 GtC/yr at hilda31w).
+                 sprintf(paste("Taking the whole gap apart accounts for almost all of it. Against",
                                "the measured budget this model's land sink runs about %s GtC",
-                               "a year high over %d\u2013%d, and that is exactly the budget's own",
+                               "a year high over %d\u2013%d, and that is almost exactly the budget's own",
                                "leftover carbon (%s), plus a cement sink this model does not",
                                "have (%s), less the fitted land-use scaling (%s) \u2014 with the",
                                "model's own growth and ocean differences adding %+.2f and %+.2f.",
-                               "Nothing is left unexplained: the terms close to %.3f GtC a year,",
+                               "The terms leave a remainder of %.3f GtC a year,",
                                "about %.0f%% of the gap they account for."),
                          a(z$d_land), z$window[1], z$window[2],
                          a(z$imbal), a(z$cement), a(z$d_luc),
@@ -294,7 +299,8 @@ function(input, output, session) {
                div(class = "readout", sprintf("%.2f", mean(now$gross_GtC)))),
         column(4, div(class = "readout-label", "Forest regrowth"),
                div(class = "readout", sprintf("%.2f", mean(now$regrowth_GtC)))),
-        column(4, div(class = "readout-label", "Net, what the model burns"),
+        # 2026-10-15 review: "what the model burns" -> it is a net land-use INPUT, not something burned
+        column(4, div(class = "readout-label", "Net, the land-use input the model is given"),
                div(class = "readout", sprintf("%.2f", mean(now$net_GtC))))
       ),
       div(class = "readout-label",
@@ -425,7 +431,10 @@ function(input, output, session) {
     div(style = "margin-top:12px; font-size:0.93rem;",
         lapply(off, function(n) {
           m <- CCX_MECHANISMS[[n]]
-          tags$p(tags$strong(m$label), tags$br(), m$blurb)
+          # 2026-10-15 review: "{n_years}" in a blurb (R/mechanisms.R, which is sourced before APP_HIST_YEARS
+          # exists) is the run's own length, filled here -- it read "the same 270 years" for a 275-year run
+          tags$p(tags$strong(m$label), tags$br(),
+                 gsub("{n_years}", diff(APP_HIST_YEARS) + 1L, m$blurb, fixed = TRUE))
         }))
   })
 
@@ -619,7 +628,11 @@ function(input, output, session) {
       bits <- c(bits, lapply(withd, function(n) {
         d <- ccx_driver_series(n, APP_HIST$forcing, APP_PARAMS, F_off = fo)
         # MEASURED, not asserted: whether the switch touched the input at all.
-        note <- if (isTRUE(d$removes_driver))
+        # 2026-10-15 review: a switch may carry its own `driver_note` (R/mechanisms.R). "Warming's effect" does:
+        # its input is drawn as zero, but the world in that run still warms, so "removes this input" misled.
+        note <- if (isTRUE(d$removes_driver) && !is.null(CCX_MECHANISMS[[n]]$driver_note))
+          CCX_MECHANISMS[[n]]$driver_note
+        else if (isTRUE(d$removes_driver))
           sprintf(paste("Switching off “%s” removes this input: the purple",
                         "line is the driver the counterfactual actually ran with."),
                   CCX_MECHANISMS[[n]]$label)
@@ -647,13 +660,17 @@ function(input, output, session) {
 
   output$c_takeaway <- renderText({
     off <- cf_off()
-    a <- APP_HIST$out; i <- nrow(a)
+    a <- APP_HIST$out
+    # 2026-10-15 review: "today" was the run's last MONTH (426 ppm, a December of the raw box) while the Keeling
+    # tab's "today" is an annual mean (423); now the last full year's annual mean, and the sentence names it.
+    y_now <- max(floor(a$t + 1e-9))
+    co2_now <- function(o) app_annual_mean_of(o$t, o$co2_global, y_now)
     if (!length(off))
-      return(sprintf(paste("Nothing is switched off: this is the full model, at",
-                           "%.0f ppm today. Tick a mechanism to see what the",
-                           "model does without it."), a$co2_global[i]))
+      return(sprintf(paste("Nothing is switched off: this is the full model, with",
+                           "global-average CO₂ at %.0f ppm in %d. Tick a mechanism to see what the",
+                           "model does without it."), co2_now(a), y_now))
     b <- cf_alt()
-    d <- b$co2_global[i] - a$co2_global[i]
+    d <- co2_now(b) - co2_now(a)
     # ⛔⛔ A SWITCH WITH NO EFFECT ON THE LEVEL IS NOT A SWITCH WITH NO EFFECT,
     # and until 2026-09-25 this sentence could not tell the reader apart from
     # the other. Tick El Nino and volcanic haze together and it printed "CO2
@@ -669,14 +686,14 @@ function(input, output, session) {
     # the numeric sentence stops saying anything — no hand-chosen tolerance is
     # involved, and changing the format changes the threshold with it.
     if (abs(d) < TAKEAWAY_PPM_RESOLUTION)
-      return(sprintf(paste("With %s switched off, CO₂ today is unchanged to the",
+      return(sprintf(paste("With %s switched off, global-average CO₂ in %d is unchanged to the",
                            "nearest ppm — these are year-to-year mechanisms, and",
                            "they move the wobble rather than the level. The",
                            "growth-rate chart below is where they show up."),
-                     app_mech_list(off)))
-    sprintf(paste("With %s switched off, CO₂ today would be %.0f ppm instead of",
+                     app_mech_list(off), y_now))
+    sprintf(paste("With %s switched off, global-average CO₂ in %d would be %.0f ppm instead of",
                   "%.0f — a difference of %s%.0f ppm."),
-            app_mech_list(off), b$co2_global[i], a$co2_global[i],
+            app_mech_list(off), y_now, co2_now(b), co2_now(a),
             if (d > 0) "+" else "", d)
   })
 
@@ -697,8 +714,10 @@ function(input, output, session) {
     d13c_drop <- app_annual_mean_of(o$t, o$d13c_NH, 1850) -
                  app_annual_mean_of(o$t, o$d13c_NH, max(floor(o$t + 1e-9)))
     ip <- which.max(o$d14c_NH)
-    sprintf(paste("δ¹³C has fallen %.2f‰ since 1850 as fossil carbon diluted the",
-                  "air — the fingerprint that the extra CO₂ is fossil. Δ¹⁴C tells",
+    # 2026-10-15 review: the fall was credited to fossil carbon only; land-use carbon is ¹³C-poor plant carbon too
+    sprintf(paste("δ¹³C has fallen %.2f‰ since 1850 as fossil and land-use carbon (both originally",
+                  "from plants) diluted the air — the fingerprint that the extra CO₂ is fossil and",
+                  "land-use carbon. Δ¹⁴C tells",
                   "a different story: weapons testing nearly %s it by %d, and",
                   # Marcus 2026-10-02 (carbotopecomment), his wording
                   "the rate at which it declines provides information about the",
@@ -778,8 +797,11 @@ function(input, output, session) {
       # F4: the same pair of runs, differenced two ways. Carbon is a SHARE of
       # the pulse; temperature is degrees -- so they cannot share an axis, and
       # the radio picks the panel rather than relabelling one.
+      # 2026-10-15 review: the temperature view now draws FaIR too (its mean; the grid has no band for it), as the
+      # FaIR note and APP_PULSE_SHAPE_NOTE already said it did -- the RUN's settings, exactly as the CO₂ view
       if (identical(input$f_yvar, "gmst"))
-        plot_pulse_warming(pr$base$climate, pr$pulse$climate, pr$year, pr$gtc)
+        plot_pulse_warming(pr$base$climate, pr$pulse$climate, pr$year, pr$gtc,
+                           fair = if (isTRUE(input$f_fair)) app_fair_pulse(pr$bg, pr$year, pr$gtc))
       else
         plot_pulse_decay(pr$base$climate, pr$pulse$climate, pr$year, pr$gtc,
                          tag = list(out = pr$tagged$out, tag = pr$tagged$tag), pulse_out = pr$pulse$out,
@@ -825,9 +847,10 @@ function(input, output, session) {
     if (identical(input$f_mode, "Pulse lab")) {
       # 2026-10-12: offered again, now that FaIR was run on this tab's pulse -- with the reason when it was not
       pr <- pulse_runs(); why <- app_fair_pulse_why(pr$bg, pr$year, pr$gtc)
-      return(div(class = "caveat", if (is.null(why)) APP_FAIR_PULSE_NOTE else why))
+      # 2026-10-15 review: both notes are FORMATS now -- the year is the splice's (global.R), never typed
+      return(div(class = "caveat", if (is.null(why)) sprintf(APP_FAIR_PULSE_NOTE, APP_SPLICE_YEAR + 1L) else why))
     }
-    div(class = "caveat", APP_FAIR_NOTE)
+    div(class = "caveat", sprintf(APP_FAIR_NOTE, APP_SPLICE_YEAR))
   })
 
   output$f_takeaway <- renderText({
@@ -902,6 +925,11 @@ function(input, output, session) {
       # 2026-10-12 code review: min/max over EVERY ticked run (app_scenario_span, global.R); it read
       # the first and last ticked run, and the menu is not ordered by outcome.
       sp <- app_scenario_span(future_runs())
+      # 2026-10-15 review: one ticked scenario printed "span 620 to 620 ppm"
+      if (length(future_runs()) == 1L)
+        return(sprintf(paste("By %d this scenario reaches %.0f ppm and %.1f °C.",
+                             "A scenario is a choice, not a forecast."),
+                       sp$year, sp$co2[1], sp$gmst[1]))
       sprintf(paste("By %d these scenarios span %.0f to %.0f ppm and %.1f to",
                     "%.1f °C. The spread is a choice, not a forecast."),
               sp$year, sp$co2[1], sp$co2[2], sp$gmst[1], sp$gmst[2])
@@ -973,11 +1001,16 @@ function(input, output, session) {
       # RULED 2026-10-11 (Marcus: "Temperature only (Recommended)"): "on concentrations and
       # temperature" -> "on temperature". At hilda29e the CO2 response per GtC spreads 6.4-7.0 % across
       # 10-500 GtC (pulse_vs_tcre_20261011.log), ~3x the temperature figure this sentence quotes.
+      # 2026-10-15 review: these numbers were MEASURED at the app's defaults (APP_PULSE_LIN_SRC: background
+      # APP_SCENARIO_BG, release APP_PULSE_YEAR_DEFAULT), so the sentence says so; both read from the constants.
       p(sprintf(paste("The effects of a pulse of carbon emissions on temperature are",
                       "insensitive to the size of the pulse in this model.",
-                      "Across pulses from %g to %g GtC, the figure above moves by only %.1f%%,",
+                      "At the default settings (%s background, released %d), across pulses",
+                      "from %g to %g GtC, the figure above moves by only %.1f%%,",
                       "and the impact on temperature is about %.1f °C per 1000 GtC from any",
                       "time period between %d and %d years after release."),
+                sub("\\s*\\(.*\\)$", "", names(APP_SCENARIOS)[match(APP_SCENARIO_BG, APP_SCENARIOS)]),
+                APP_PULSE_YEAR_DEFAULT,
                 APP_PULSE_LIN_SIZES[1], APP_PULSE_LIN_SIZES[2], APP_PULSE_LIN_SPREAD,
                 APP_PULSE_PER1000_ABOUT,
                 min(as.integer(names(APP_PULSE_PER1000_BY_HORIZON))),
@@ -1000,7 +1033,9 @@ function(input, output, session) {
     # where the warning belongs. CONDITIONAL -- nothing renders unless a run
     # actually leaves the range. See app_erf_range_note() in global.R.
     cls <- switch(input$f_mode %||% "Scenarios",
-                  "Pulse lab"     = list(pulse_runs()$pulse$climate),
+                  # 2026-10-15 review: + the BASE run -- the note now also warns below the range, and without the
+                  # pulse the run falls lower (vvLN: 236 ppm vs 246), which is the console's number
+                  "Pulse lab"     = list(pulse_runs()$pulse$climate, pulse_runs()$base$climate),
                   "Build your own" = list(stylised_run()$climate),
                   lapply(future_runs(), `[[`, "climate"))
     note <- app_erf_range_note(cls)
@@ -1092,7 +1127,9 @@ function(input, output, session) {
     MC <- APP_CMAP$MC
     sh <- function(row, col) 100 * MC[row, col] / sum(MC[row, ])
     tn <- cm_tensions()
-    seas <- if (is.null(tn)) NULL else tn[grepl("seasonal", tn$up) | grepl("seasonal", tn$down), ]
+    # 2026-10-15 review: BOTH sides seasonal (was either), because the sentence below now says these pairs set the
+    # two seasonal cycles against each other. At hilda31w the same four pairs either way (q10 is one: CO₂ vs δ¹³C cycle).
+    seas <- if (is.null(tn)) NULL else tn[grepl("seasonal", tn$up) & grepl("seasonal", tn$down), ]
     # ⛔⛔ PER PARAMETER, NOT PER COMPONENT. A component's total is a SUM over its
     # parameters, so a component holding ONE parameter looks "unwatched" beside
     # one holding seven, however hard its parameter is pinned -- and the first
@@ -1100,7 +1137,17 @@ function(input, output, session) {
     # single parameter `k_w` has the HIGHEST total leverage of all 29. A sum is
     # not a rate until you divide by the count.
     par_tot <- sort(colSums(APP_CMAP$M))
-    quiet <- names(par_tot)[1:3]
+    # 2026-10-15 review: the three quietest were all LIKELIHOOD/REPORTING-only names (grad_off_d13c, grad_off_co2,
+    # imb_share_ocean_rest), printed as code. Those are the map's names with no slot in the model's parameter list
+    # (APP_PARAMS) other than the two FORCING parameters the app carries separately (as output$h_params does);
+    # the rest print as their plain-English labels (APP_PARAM_META, params_meta.R), quoted as the table shows them.
+    lik_only <- setdiff(names(par_tot), c(names(APP_PARAMS), "bomb_total", "luc_scale"))
+    quiet <- utils::head(setdiff(names(par_tot), lik_only), 3L)
+    quiet <- vapply(quiet, function(nm) {
+      d <- APP_PARAM_META[[nm]]$desc
+      sprintf("“%s”", if (is.null(d)) nm else d)
+    }, character(1))
+    pump_top <- names(which.max(MC[, "Biological pump"]))
     tagList(
       p(tags$strong("The ocean's Δ¹⁴C is a ventilation measurement, not an uptake",
                     "measurement. "),
@@ -1110,11 +1157,14 @@ function(input, output, session) {
         # Marcus 2026-10-02: "That is the useful reading and also the limiting one:" deleted
         " A change to the ocean's structure that leaves its ventilation rate alone",
         " would barely register in the radiocarbon profile at all."),
-      p(tags$strong("The interior chemistry is the only thing influenced by the",
-                    "biological pump. "),
+      # 2026-10-15 review: "the only thing influenced by" -> "the measurement ... influences most" (48 % of the
+      # pump's leverage at hilda31w, not all of it); said only while it is the pump's largest row
+      p(tags$strong(if (identical(pump_top, "Ocean interior chemistry"))
+                      "The interior chemistry is the measurement the biological pump influences most. "
+                    else sprintf("The biological pump influences %s more than any other measurement. ", pump_top)),
         sprintf(paste("%.0f%% of the interior DIC, δ¹³C and alkalinity gradients'",
-                      "sensitivity is to the pump, and the pump has almost no",
-                      "influence anywhere else (%.0f%% of the atmospheric CO₂",
+                      "sensitivity is to the pump, and the pump has much less",   # 2026-10-15 review: 18.5 % of its
+                      "influence elsewhere (%.0f%% of the atmospheric CO₂",          # leverage is on the d13C level row
                       "level's sensitivity)."),
                 sh("Ocean interior chemistry", "Biological pump"),
                 sh("CO₂ level", "Biological pump")),
@@ -1127,9 +1177,12 @@ function(input, output, session) {
                       "own the seasonal machinery — and they disagree about it:"),
                 sh("CO₂ seasonal cycle", "Seasonal cycle"),
                 sh("δ¹³C seasonal cycle", "Seasonal cycle")),
+        # 2026-10-15 review: "seasonal parameters (seas_lag_p_NH, ..., q10)" -- q10 is land uptake, and code names
+        # are not reader copy
         if (!is.null(seas) && nrow(seas))
-          sprintf(" %s of the strongest opposing pairs are seasonal parameters (%s).",
-                  nrow(seas), paste(seas$par, collapse = ", ")) else NULL,
+          sprintf(paste(" %s of the strongest opposing pairs are parameters that set the CO₂ and",
+                        "δ¹³C seasonal cycles against each other."),
+                  nrow(seas)) else NULL,
         " The fitted phase and amplitude are a compromise between the two tracers.",
         # ⚠ CLAUDE'S DRAFT, FOR MARCUS'S WORDING (2026-10-02, carbotopecomment: "Can we change
         # this to a theory about why the tracers seem to be inconsistent given our model
@@ -1148,14 +1201,16 @@ function(input, output, session) {
         " the same seasonal settings — and with one seasonal setting per hemisphere,",
         " the fit can only split the difference."),
       p(tags$strong("The land's magnitude is well constrained; its shape is not. "),
+        # 2026-10-15 review: "pinned hard" / "only pinned as a combination" -> "constrained" ("pinning" is the
+        # sidebar's defined term for one kind of sensitivity, not a synonym for well constrained)
         sprintf(paste("Land uptake takes %.0f%% of the CO₂ level's sensitivity and",
                       "%.0f%% of the measured budget's, so how much carbon the land",
-                      "takes up today is pinned hard."),
+                      "takes up today is tightly constrained."),
                 sh("CO₂ level", "Land uptake"), sh("Measured land & ocean sinks", "Land uptake")),
         # Marcus 2026-10-02: name the two numbers; the descriptions are params_meta.R's own
         sprintf(paste(" But the two numbers that set it (the maximum boost CO₂",
                       "fertilisation can give, beta_max, and the CO₂ level needed for",
-                      "half that boost, fert_k) are only pinned as a combination: on",
+                      "half that boost, fert_k) are only constrained as a combination: on",
                       "their own each is about %.0fx tighter than the fit leaves the",
                       "pair jointly."),
                 max(APP_CMAP$sd_ratio[c("beta_max", "fert_k")]))),
@@ -1203,9 +1258,9 @@ function(input, output, session) {
   # `bomb_total` and `luc_scale` are FORCING parameters the app applies through
   # app_build_forcing(), and `rep_dC` is the station offset the likelihood
   # scored through. All three have a fitted value this app is running on, so
-  # printing them as "—" would understate what is known. The remaining
-  # likelihood-only names (the gradient offsets, sigma_d14c) genuinely are not
-  # carried, and print "—" correctly.
+  # printing them as "—" would understate what is known. Since 2026-10-15 the
+  # other likelihood-only names the mode fits (the gradient offsets, sigma_d14c)
+  # are carried too (APP_LIK_ONLY), so no fitted row prints "—".
   output$h_params <- renderTable(
     # + the GATED D2/D3 names when the mode fits them (2026-10-01): CCX_PARAM_NAMES is this process's
     # table and the gate is closed in the app; the D3 shares are likelihood-side and carried from the
@@ -1213,7 +1268,7 @@ function(input, output, session) {
     app_param_table(CCX_PARAM_NAMES,
                     c(APP_PARAMS, list(bomb_total = APP_BOMB_TOTAL,
                                        luc_scale  = APP_LUC_SCALE,
-                                       rep_dC     = APP_REP_DC), APP_IMB_SHARES),
+                                       rep_dC     = APP_REP_DC), APP_IMB_SHARES, APP_LIK_ONLY),
                     extra = APP_GATED_FIT,
                     # 2026-10-06: the "Set" column, from the mode file's own lists (params_meta.R)
                     fitted = APP_FITTED_NAMES, held = APP_HELD_NAMES),
@@ -1221,7 +1276,7 @@ function(input, output, session) {
 
   # ---- 7. Known issues (the beta review) -----------------------------
   # Each panel is rendered ONLY when its tab is visible, which is what keeps the
-  # expensive cards (3-6, each needing a model run the app does not already
+  # expensive issues (2-5, each needing a model run the app does not already
   # have) off the startup path. withProgress gives the first view of the tab a
   # reason for the wait instead of a blank panel.
   rv_render <- function(id, f, label) renderPlotFit(id, {
@@ -1253,7 +1308,10 @@ function(input, output, session) {
       return(data.frame(Problem = c("The stand-in list does not match this build.",
                                     x$shim_problems), check.names = FALSE))
     held <- names(x$shims) %in% x$shims_held
-    data.frame(`Stand-in` = names(x$shims),
+    # 2026-10-15 review: both tables printed code names only; the plain-English description from the
+    # parameter label table (APP_PARAM_META, params_meta.R) leads, the code name follows
+    data.frame(`Stand-in` = app_param_desc(names(x$shims)),
+               `Code name` = names(x$shims),
                `What it stands in for` = unlist(x$shims, use.names = FALSE),
                `In this fit` = ifelse(held, "held at a value (below)", "fitted freely"),
                check.names = FALSE)
@@ -1263,7 +1321,8 @@ function(input, output, session) {
     x <- rv_stand_ins()
     if (rv_failed(x) || !length(x$pins))
       return(data.frame(Note = "The held-parameter list is unavailable in this build."))
-    data.frame(`Held parameter` = names(x$pins),
+    data.frame(`Held parameter` = app_param_desc(names(x$pins)),
+               `Code name` = names(x$pins),
                `Held at` = formatC(as.numeric(x$pins), digits = 4, format = "g"),
                `Also a stand-in` = ifelse(names(x$pins) %in% x$shims_held, "yes", ""),
                check.names = FALSE)
@@ -1274,8 +1333,8 @@ function(input, output, session) {
     if (rv_failed(x)) return(div(class = "caveat", x$msg))
     tagList(
       p(sprintf(paste("%d of the model's %d physical constants are still marked",
-                      "provisional \u2014 their values were inverted through the model,",
-                      "or held, rather than traced to a published measurement:"),
+                      "provisional \u2014 their values were inferred by fitting the model,",   # 2026-10-15 review
+                      "or simply held, rather than traced to a published measurement:"),
                 length(x$provisional), x$n_constants)),
       p(tags$code(paste(x$provisional, collapse = ", "))),
       if (!is.na(x$n_fitted))
@@ -1293,35 +1352,58 @@ function(input, output, session) {
   # data-raw/build_ndep_forcing.R: a proxy built from NOx + NH3 emissions, the
   # CMIP7 ScenarioMIP history (van Vuuren et al., Zenodo v1.1.1) to 2023 and the
   # seven-marker mean for 2024.
+  # 2026-10-15 review: (1) the observed SEA-SURFACE temperature is a driver too (sst_obs = 1 at hilda31w;
+  # data-raw/build_sst_forcing.R: HadSST.4.2.0.0 hemispheric annual anomalies, re-based to 1850-1900, file 1850-2025)
+  # and was missing; (2) the ENSO row is named for the index the canonical RUNS (ccx_enso_index_of(APP_PARAMS) =
+  # "detrend" at hilda31w), and (3) ends where the run ends instead of "present". New end years read APP_HIST_YEARS;
+  # the ENSO start is CCX_DRIVERS$enso$since (R/mechanisms.R).
   output$h_drivers <- renderTable({
+    y_end <- APP_HIST_YEARS[2]
+    enso_lab <- switch(ccx_enso_index_of(APP_PARAMS),
+                       detrend = "ENSO index (detrended Ni\u00f1o 3.4)",
+                       demean  = "ENSO index (Ni\u00f1o 3.4)",
+                       "ENSO index (from Ni\u00f1o 3.4)")
     data.frame(
       Driver = c("Fossil CO\u2082 emissions", "Land-use change CO\u2082",
-                 "Global mean temperature", "El Ni\u00f1o index (Ni\u00f1o 3.4)",
+                 "Global mean temperature", "Sea-surface temperature, each hemisphere",
+                 enso_lab,
                  "Volcanic aerosol", "Bomb and industrial \u00b9\u2074C",
                  "Nitrogen deposition on land"),
       Covers = c("1750\u20132024", "1750\u20132024", "1850\u20132024",
-                 "1948\u2013present", "1850\u20132024", "1952\u20132023",
+                 sprintf("1850\u2013%d", y_end),
+                 sprintf("%d\u2013%d", CCX_DRIVERS$enso$since, y_end), "1850\u20132024", "1952\u20132023",
                  "1750\u20132024"),
       Source = c("Global Carbon Budget 2025",
                  "Global Carbon Budget 2025 (OSCAR v3.1 before 1850)",
-                 "IGCC", "NOAA PSL",
+                 "IGCC", "Met Office Hadley Centre HadSST.4.2.0.0", "NOAA PSL",
                  "NASA GISS, CMIP7 stratospheric aerosol",
                  "Tans (1981) / Naegler & Levin (2006); Laemmel et al. 2025",
                  "Built from NOx and NH\u2083 emissions, CMIP7 ScenarioMIP (van Vuuren et al.)"),
       check.names = FALSE)
   }, striped = TRUE, width = "100%")
 
+  # 2026-10-15 review, every row checked against R/likelihood.R and the canonical's own scored streams
+  # (ccx_mode_file()$streams at hilda31w): ADDED the ice-core d13C row (d13c_icecore: Rubino et al. 2019 samples,
+  # in-run and before LIK_ICE_D13C_END, i.e. 1752-1976) and the ocean bomb-14C inventory (excess_c14_ocean: Naegler &
+  # Levin 2006, 1975 and 1995); the South Pole's SEASONAL cycle is scored (co2_seasonal_SPO); the ice-core CO2 row is
+  # scored only before LIK_ICE_CO2_END (1752-1957, was "1700-1978"); IntCal20 ends where Hua begins (1750-1940, was
+  # "1750-1950"); Hua's Delta14C measures EXCHANGE of atoms, not net uptake.
   output$h_data <- renderTable({
     data.frame(
-      Record = c("Mauna Loa CO\u2082", "South Pole CO\u2082", "Law Dome ice cores",
+      Record = c("Mauna Loa CO\u2082", "South Pole CO\u2082", "Law Dome ice-core CO\u2082",
+                 "Law Dome ice-core \u03b4\u00b9\u00b3C (Rubino et al. 2019)",
                  "Mauna Loa & South Pole \u03b4\u00b9\u00b3C", "Zonal \u0394\u00b9\u2074C (Hua et al. 2022)",
-                 "IntCal20 tree-ring \u0394\u00b9\u2074C", "Global Carbon Budget 2025",
+                 "IntCal20 tree-ring \u0394\u00b9\u2074C",
+                 "Ocean bomb-\u00b9\u2074C inventory (Naegler & Levin 2006)", "Global Carbon Budget 2025",
                  "GLODAPv2.2023 ocean bottles"),
-      Covers = c("1958\u2013present", "1975\u2013present", "1700\u20131978", "1977\u20132024",
-                 "1941\u20132019", "1750\u20131950", "1959\u20132024", "depth climatology"),
-      `Used for` = c("CO\u2082 level and seasonal cycle", "Southern CO\u2082 level",
-                     "Preindustrial CO\u2082", "The fossil fingerprint",
-                     "Ocean and land uptake speed", "Preindustrial \u00b9\u2074C decline",
+      Covers = c("1958\u2013present", "1975\u2013present", "1752\u20131957", "1752\u20131976", "1977\u20132024",
+                 "1941\u20132019", "1750\u20131940", "1975 and 1995", "1959\u20132024", "depth climatology"),
+      `Used for` = c("CO\u2082 level and seasonal cycle", "Southern CO\u2082 level and seasonal cycle",
+                     "CO\u2082 before the station record", "\u03b4\u00b9\u00b3C before the station record",
+                     "The fossil fingerprint",
+                     "Air\u2013sea and air\u2013land exchange speed",
+                     "Pre-bomb \u00b9\u2074C (industrial Suess effect)",
+                     "How much bomb \u00b9\u2074C the ocean took up",
                      "Splitting land from ocean uptake",
                      "The ocean's interior carbon and \u03b4\u00b9\u00b3C"),
       check.names = FALSE)

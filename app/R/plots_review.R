@@ -94,7 +94,9 @@ rv_plot_repdc <- function() rv_guard(rv_rep_dc(), function(x) {
              # linewidth, not label.size (2026-10-13): ggplot2 4.0 dropped label.size, so 4.0.2 IGNORED it
              # ("Ignoring unknown parameters") and drew a border round the box. linewidth = 0 is the 4.0 form.
              linewidth = 0, label.padding = unit(0.12, "lines"),
-             label = sprintf("measured offset %.2f ppm", RV_REP_OBS_MEAN)) +
+             # 2026-10-15 review: the line is the TWO stations' mean (RV_REP_OBS_MEAN), while the card's text quotes
+             # Mauna Loa's own +0.74 -- so the label says which it is
+             label = sprintf("measured offset (mean of both stations) %.2f ppm", RV_REP_OBS_MEAN)) +
     scale_colour_manual(values = stats::setNames(
       c(RV_COL_ALT(), RV_COL_MODEL()),
       c("Model box − Mauna Loa",
@@ -103,7 +105,8 @@ rv_plot_repdc <- function() rv_guard(rv_rep_dc(), function(x) {
     labs(x = LAB_YEAR, y = "Difference from Mauna Loa (ppm)",
          caption = rv_cap(sprintf(paste(
            "Means over %d monthly observations: box %+.2f ppm, scored %+.2f ppm (RMS %.2f).",
-           "The fitted offset is %.1fx the measured one, an excess of %+.2f ppm",
+           # 2026-10-15 review: "%.1fx" -> "%.1f×" (the tab's other ratios use the multiplication sign)
+           "The fitted offset is %.1f× the measured one, an excess of %+.2f ppm",
            "(about %.0f GtC of airborne carbon). The measured value is the NOAA",
            "marine-boundary-layer reference minus these stations; it excludes Mauna",
            "Loa, so the northern half of it is independent of this comparison."),
@@ -121,9 +124,13 @@ rv_plot_repdc <- function() rv_guard(rv_rep_dc(), function(x) {
 # gradient between the same two stations is right, and a panel showing only the
 # d13C half invites the wrong diagnosis (transport) over the right one
 # (isotopic loading).
+# (2026-10-15 review: at hilda31w the CO2 gradient is NEARLY right -- 0.90x, z -4.3 on the observed se -- not
+# right; the card's text says "about 10 % low". The caption now also prints the years each mean covers, read off
+# the gate's own observed series: dg_gateH_obs() has no window constant, it uses every year with both stations.)
 # ---------------------------------------------------------------------
 rv_plot_gradient <- function() rv_guard(rv_gradients(), function(x) {
   g <- x$g; ho <- x$ho
+  yrs <- function(o) sprintf("%d–%d", as.integer(min(o$year)), as.integer(max(o$year)))
   d <- data.frame(
     what  = factor(rep(c("CO₂ gradient (ppm)", "δ¹³C gradient (‰)"), each = 2),
                    levels = c("CO₂ gradient (ppm)", "δ¹³C gradient (‰)")),
@@ -140,8 +147,9 @@ rv_plot_gradient <- function() rv_guard(rv_gradients(), function(x) {
                                                c("Measured", "Model"))) +
     labs(x = NULL, y = "Mauna Loa minus South Pole",
          caption = rv_cap(sprintf(
-           "Model/measured: CO₂ %.2f×, δ¹³C %.2f×. Error bars are the observed standard error.",
-           ratio[1], ratio[2]))) +
+           paste("Model/measured: CO₂ %.2f×, δ¹³C %.2f×. Means over the years both stations report:",
+                 "CO₂ %s, δ¹³C %s. Error bars are the observed standard error."),
+           ratio[1], ratio[2], yrs(ho$co2), yrs(ho$d13c)))) +
     theme_ccx() + theme(legend.position = "none")
 })
 
@@ -208,20 +216,24 @@ rv_plot_variance <- function() rv_guard(rv_variability(), function(x) {
     scale_colour_manual(values = stats::setNames(c(RV_COL_OBS(), RV_COL_MODEL()),
                                                  c("Measured", "Model"))) +
     labs(x = LAB_YEAR, y = "Growth-rate anomaly (GtC/yr)",
+         # 2026-10-15 review: the unit (GtC/yr) added to the standard deviations
          caption = rv_cap(paste(sprintf(
-           paste("Standard deviation: model %.3f against %.3f ± %.3f measured",
+           paste("Standard deviation: model %.3f GtC/yr against %.3f ± %.3f measured",
                  "— %.2f×. Same detrending applied to both."),
            v$sd_model, v$sd_obs, v$se_obs, v$ratio),
            # N7 (Marcus 2026-09-22): "commonalities between the years it over-
            # and undershoots?" The answer that matters is this one -- the model
            # is MORE ENSO-correlated than the record is, so the variance it is
            # missing is not ENSO-shaped. Computed, so it cannot go stale.
+           # ⛔ 2026-10-15 review: SOFTENED. True on THIS chart's estimator (hilda31w: r +0.48 vs +0.29) but
+           # REVERSED on the What-if tab's (+0.18 vs +0.29), so "what is missing is not El Niño-shaped" is cut and
+           # the comparative word is COMPUTED from the two r values; card 4's detail states both readings.
            if (is.null(x$enso)) "" else sprintf(
              paste("These anomalies track the ENSO index at r %+.2f for the model",
-                   "and %+.2f for the measurements (n = %d) — the model is if anything",
-                   "more El Niño-driven than the record, so what is missing from its",
-                   "variance is not El Niño-shaped."),
-             x$enso$r_model, x$enso$r_obs, x$enso$n)))) +
+                   "and %+.2f for the measurements (n = %d): on this chart's measure the",
+                   "model tracks the ENSO index %s the record does."),
+             x$enso$r_model, x$enso$r_obs, x$enso$n,
+             if (x$enso$r_model > x$enso$r_obs) "more closely than" else "less closely than")))) +
     theme_ccx()
 })
 
@@ -255,16 +267,21 @@ rv_plot_enso <- function() rv_guard(rv_enso_slope(), function(x) {
     guides(colour = guide_legend(nrow = 2), linetype = guide_legend(nrow = 2)) +
     labs(x = "ENSO index (Niño 3.4, annual mean)",
          y = "Ocean uptake anomaly (GtC/yr)",
+         # 2026-10-15 review: the slope's unit (GtC/yr per index unit) added
          caption = rv_cap(paste(sprintf(
-           paste("Slope per index unit: budget %+.3f ± %.3f, model %+.3f ± %.3f",
+           paste("Slope (GtC/yr per index unit): budget %+.3f ± %.3f, model %+.3f ± %.3f",
                  "(%.2f×). With the ocean's ENSO mechanisms off the model gives",
                  "%+.3f — the wrong sign, which is why the mechanism matters."),
            x$obs$slope, x$obs$se, x$full$slope, x$full$se, x$ratio, x$sol$slope),
            # A4 (2026-10-01): the numbers behind card 4's "a little below the
            # range observed" -- live, from the mode file and the data product
+           # (2026-10-15 review: "inside" the range at hilda31w -- the word is RV_ENSO_L2_VS_OBS -- and the
+           # strength is HELD there, not fitted, so "fitted strength" -> "strength (held fixed)"; the parenthesis
+           # is read off the mode file's pins, so a canonical that fits it again prints "(fitted)")
            if (is.null(x$w_obs) || !x$w_enso_l2 > 0) "" else sprintf(
-             paste("The upwelling limb's fitted strength is %.1f Sv per index unit;",
+             paste("The upwelling limb's strength (%s) is %.1f Sv per index unit;",
                    "the observed range is %g–%g (Meinen et al. 2001)."),
+             if (isTRUE(x$w_enso_l2_held)) "held fixed" else "fitted",
              x$w_enso_l2, x$w_obs[1], x$w_obs[2])))) +
     theme_ccx()
 })
@@ -295,10 +312,14 @@ rv_plot_irf <- function() rv_guard(rv_pulse(), function(x) {
     guides(colour = guide_legend(nrow = 2, byrow = TRUE), linetype = guide_legend(nrow = 2, byrow = TRUE)) +
     labs(x = "Years after the pulse",
          y = "Fraction of the pulse still in the air",
+         # 2026-10-15 review: each reading now names its source and includes FaIR's (x$fair_read, the same
+         # PD100 protocol); FaIR is glossed once; "this source" -> "neither source" (there are two)
          caption = rv_cap(paste0(
-           paste(sprintf("At %d yr: %.3f vs %.3f.", x$horizons, x$read, x$joos),
+           paste(sprintf("At %d yr: this model %.3f, Joos %.3f, FaIR %.3f.",
+                         x$horizons, x$read, x$joos, x$fair_read),
                  collapse = "  "),
-           "  A comparison, not a test — nothing from this source scores the model."))) +
+           "  FaIR is a widely used simple climate model.",
+           "  A comparison, not a test — neither source scores the model."))) +
     expand_limits(y = c(0, 1)) +   # Marcus 2026-10-02 (carbotopecomment): "the y axis should run zero to 1"
     theme_ccx() +
     # the band's key on a row of its own: beside the two-row line legend it clipped both (rendered 2026-10-12)
@@ -328,9 +349,10 @@ rv_plot_partition <- function() rv_guard(rv_pulse(), function(x) {
     scale_fill_manual(values = stats::setNames(c(RV_COL_OBS(), RV_COL_MODEL()),
                                                c("Joos et al. 2013", "This model"))) +
     labs(x = NULL, y = sprintf("Share of the pulse at %d years (%%)", RV_IRF_HORIZON),
+         # 2026-10-15 review: plainer wording of what the z-scores are, and "Bars" -> "Error bars"
          caption = rv_cap(sprintf(
-           paste("In the multi-model spread's own standard deviations: %s.",
-                 "Bars are Joos et al.'s published \u00b12 sd range."),
+           paste("How far each share is from the multi-model mean, in that study's standard deviations: %s.",
+                 "Error bars show Joos et al.'s published \u00b12 sd range."),
            paste(sprintf("%s %+.2f", pretty[res], cmp$z), collapse = ", ")))) +
     theme_ccx()
 })
@@ -376,20 +398,27 @@ rv_plot_oclim <- function() rv_guard(rv_ocean_climate(), function(x) {
 # CARD 8b -- what it is worth: CO2 in 2300, lower by this much if this ocean's warming response were the ocean
 # models' size (its sea-surface warming response scaled by f, unrefitted; bars = the ocean models' +-1 sigma).
 RV_OCLIM_SCEN <- c(vvH = "High", vvM = "Medium")   # SSP5-8.5 removed (Marcus 2026-10-15)
+# 2026-10-15 review: the year the chart reads, named once -- the y label, the caption and the product's columns
+# (d_<year>, base_<year>, ...) all derive from it
+RV_OCLIM_YEAR <- 2300L
 rv_plot_oclim_stake <- function() rv_guard(rv_ocean_climate(), function(x) {
   t <- x$stake$table
   t <- t[match(names(RV_OCLIM_SCEN), t$scenario), ]
+  col <- function(stem) t[[sprintf(stem, RV_OCLIM_YEAR)]]
   d <- data.frame(scen = factor(RV_OCLIM_SCEN[t$scenario], levels = RV_OCLIM_SCEN),
-                  v = -t$d_2300, lo = -pmax(t$d_2300_gcb_lo_sd, t$d_2300_gcb_hi_sd),
-                  hi = -pmin(t$d_2300_gcb_lo_sd, t$d_2300_gcb_hi_sd))
+                  v = -col("d_%d"), lo = -pmax(col("d_%d_gcb_lo_sd"), col("d_%d_gcb_hi_sd")),
+                  hi = -pmin(col("d_%d_gcb_lo_sd"), col("d_%d_gcb_hi_sd")))
   ggplot(d, aes(scen, v)) +
     geom_col(fill = RV_COL_MODEL(), width = 0.6) +
     geom_errorbar(aes(ymin = lo, ymax = hi), width = 0.16, colour = "grey25") +
-    labs(x = NULL, y = "Lower CO₂ in 2300 (ppm)",
+    labs(x = NULL, y = sprintf("Lower CO₂ in %d (ppm)", RV_OCLIM_YEAR),
+         # 2026-10-15 review: "Of 1020 / 577 ppm." -> "Out of ... ppm in <year> (<scenarios>)", the scenario
+         # names from RV_OCLIM_SCEN in the same order as the numbers
          caption = rv_cap(sprintf(paste(
-           "Of %s ppm. The model's response to sea-surface warming scaled by %.2f (%.2f to %.2f for the",
+           "Out of %s ppm in %d (%s). The model's response to sea-surface warming scaled by %.2f (%.2f to %.2f for the",
            "ocean models' ±1 sd, the bars), nothing refitted: the fit to the past would move too."),
-           paste(sprintf("%.0f", t$base_2300), collapse = " / "), x$stake$f[["f_T"]],
+           paste(sprintf("%.0f", col("base_%d")), collapse = " / "), RV_OCLIM_YEAR,
+           paste(RV_OCLIM_SCEN[t$scenario], collapse = " / "), x$stake$f[["f_T"]],
            x$stake$f[["f_T_lo"]], x$stake$f[["f_T_hi"]]))) +
     theme_ccx()
 })
