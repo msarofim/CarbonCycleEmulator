@@ -43,3 +43,6 @@ CarboTopeSubstack.docx
 # them (grepped). Untracked here, not deleted from disk.
 Rplots.pdf
 tests/testthat/Rplots.pdf
+
+# Local, untracked Claude Code session notes (the author's private setup; 2026-10-15).
+CLAUDE.local.md

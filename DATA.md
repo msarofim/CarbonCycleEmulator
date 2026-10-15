@@ -41,6 +41,12 @@ Reproduce everything:
 Rscript data-raw/download_data.R && Rscript data-raw/build_carbonate_tables.R && Rscript data-raw/build_calibration_data.R && Rscript tests/run_tests.R
 ```
 
+> **Amended 2026-10-15:** this cannot reproduce everything from a fresh clone. `download_data.R`
+> copies two inputs from the author's other repositories (IGCC GMST, RCMIP emissions) and skips
+> them, with a warning, when they are absent; the FaIR-derived products and the van Vuuren inputs
+> also come from the author's FaIRtoFrEDI repository. The app and
+> the test suite need none of this: they read the tracked `data/*.rds` (README §Run / test).
+
 ---
 
 ## 2. Calibration targets (what the model is fitted to)
@@ -104,7 +110,8 @@ a **methodological choice awaiting Marcus' call**.
 |---|---|---|---|
 | Fossil CO₂ | 1750–2024 | GtC/yr | GCB 2025 historical budget |
 | Land-use change CO₂ | 1750–2024 | GtC/yr | GCB 2025 bookkeeping **1850–2024**; **1750–1849 from OSCAR v3.1 rescaled to GCB's level** (§4a) |
-| Future emissions | 1750–2500, 5 SSP markers | GtC/yr | RCMIP v5.1.0 (`Mt CO2/yr` ÷ 1000 ÷ 3.664) |
+| Future emissions (SSPs; **not in the app menu** since the van Vuuren markers replaced them, row below) | 1750–2500, 5 SSP markers | GtC/yr | RCMIP v5.1.0 (`Mt CO2/yr` ÷ 1000 ÷ 3.664) |
+| **Future emissions (the app's scenario menu; row added 2026-10-15)** | 1750–2300, the seven CMIP7 ScenarioMIP markers (`vvVL` … `vvH`) | GtC/yr (fossil, land use) | van Vuuren et al. 2026, Zenodo 10.5281/zenodo.20713982 **v1.1.1** (not the DOI printed in the paper, which resolves to v1.0). `data-raw/build_vv_scenarios.R` → `data/vv_emissions.rds`, plus `data/forcing_climate_vv.rds` (each marker's non-CO₂ ERF from FaIR 2.2.4 (calib 1.6.0) runs). The input is a copy pinned in the author's FaIRtoFrEDI repository, sha256-checked by the build script; it is not in `MANIFEST.csv` |
 | GMST anomaly | 1850–2024 | °C | IGCC (standing obs convention) |
 | ENSO (Niño 3.4) | 1948–2026 | SST anomaly, 1991–2020 base | NOAA PSL |
 | Nuclear-industry ¹⁴C | 1950–2023, 22 countries | GBq/yr → mol ¹⁴C/yr | Laemmel et al. 2025, doi:10.5281/zenodo.15034663; **summed per year into `data/forcing_nuclear_c14.rds` by `data-raw/build_nuclear_c14_source.R` (2026-10-14)**, sha256 per file checked against MANIFEST.csv. Before that it was summed from `data-raw/downloads/nuclear14c/` at run time, and its absence silently zeroed the source. A LOWER BOUND: coverage is incomplete by construction (e.g. USA 2010–2023 only) |
@@ -512,12 +519,23 @@ spread in production (1.6–2.5 atoms/cm²/s). A factor-2 miss would indicate a 
 |---|---|---|
 | ~~**Bomb ¹⁴C time shape**~~ | **CLOSED 2026-08-10** without UNSCEAR — see §9. | — |
 | ~~Ocean bomb-¹⁴C inventory~~ | **ACQUIRED 2026-08-11** — see below | — |
-| 7 provisional constants | Ocean areas and depth, surface alkalinity, seawater density, preindustrial NPP, SST–pCO₂ sensitivity | Cited sources. **The SST–pCO₂ sensitivity additionally risks double-counting** the carbonate module's own temperature dependence — check before applying |
+| 11 provisional constants (`ccx_check_constants()`, 2026-10-15), four of them legacy defaults the canonical overrides with cited values (`ALK_SURFACE`, `OCEAN_DEPTH`, `ALPHA_PHOTO_EPS`, `PUMP_EPS13_ORG`; `R/calibrate.R`, structure `hilda_csl3v0kaidgbemwtc`) | The other seven: `PUMP_EPS13_CARB`, `NPP_GLOBAL_PI`, `NPP_FRAC_NH_ANCHOR_1750`, `ALPHA_AS_FCO3`, `ALPHA_AS_DOWN_LEGACY`, `ALPHA_AS_UP_LEGACY`, `ENT_SEAS_BAND_AREA_FRAC`. (This row said "7", listing ocean areas and depth, surface alkalinity, seawater density, preindustrial NPP and SST–pCO₂ sensitivity, until 2026-10-15; the last of those is no longer on the list.) | Cited sources |
 | Scripps site unreachable | `scrippsco2.ucsd.edu` returns 404 on every asset path; the files in `data-raw/manual/` are irreplaceable and therefore tracked in git | Site restoration, or an alternative mirror |
 
 ---
 
-## 9. Licences and citation
+## 8a. Licences and citation
+
+(Numbered §9 until 2026-10-15, a duplicate of the bomb-¹⁴C §9 below, which keeps the number
+because other files cite it.)
+
+The MIT licence covers this repository's code and the author's own text. It does not cover
+third-party data: the observations, emissions and model outputs in `data/` (processed) and
+`data-raw/manual/` (raw files that cannot be fetched by script: Scripps CO₂ Program records,
+redistributed because the program's website returned HTTP 404 for every data file on
+2026-08-09, and tables transcribed from published papers) remain under their providers' terms.
+Sources, access dates, checksums and citations are in `data-raw/downloads/MANIFEST.csv` and
+this file. Cite the original providers when you use these data.
 
 | Source | Licence |
 |---|---|
@@ -529,6 +547,29 @@ spread in production (1.6–2.5 atoms/cm²/s). A factor-2 miss would indicate a 
 | Laemmel et al. 2025 nuclear ¹⁴C | CC-BY 4.0, doi:10.5281/zenodo.15034663 |
 | Law Dome (Rubino et al. 2019) | cite ESSD 11:473–492; data doi:10.25919/5bfe29ff807fb |
 | seacarb | cite Gattuso et al., R package |
+| Eide et al. 2017 oceanic ¹³C Suess field (PANGAEA) | CC-BY-3.0, as recorded in §2b |
+
+Licence **not yet recorded** for these sources (rows added 2026-10-15; citations are in
+`MANIFEST.csv` or the section named):
+
+| Source | Licence |
+|---|---|
+| van Vuuren et al. 2026 CMIP7 ScenarioMIP markers (Zenodo 10.5281/zenodo.20713982 v1.1.1) | not yet recorded |
+| RCMIP emissions v5.1.0 | not yet recorded |
+| IGCC GMST (Forster et al.) | not yet recorded |
+| OSCAR v3.1 pre-1850 land-use emissions (§3a) | not yet recorded |
+| GLODAPv2.2023 | not yet recorded |
+| EDGAR v4.3.2 monthly CO₂; GFED4.1s | not yet recorded |
+| Met Office / CRU: HadSST4, CRUTEM5, CRU absolute climatology, HadISST ice | not yet recorded |
+| MODIS MOD17 NPP/GPP (via uni-hamburg.de) | not yet recorded |
+| MPI-ULB ocean pCO₂ climatology (Landschützer et al. 2020) | not yet recorded |
+| CMIP6 NPP (`Lmon`, per-model) | not yet recorded |
+| NASA GISS stratospheric aerosol, CMIP7 v2-2-1 | not yet recorded |
+| Holte et al. 2017 Argo mixed-layer climatology | not yet recorded |
+| input4MIPs CMIP7 C4MIP Δ¹⁴C / δ¹³C (Graven et al.) | not yet recorded |
+| Nowicki et al. 2022 biological carbon pump (figshare) | not yet recorded |
+| Tans 1981 (SCOPE 16) tables; Naegler & Levin 2006 tables (`data-raw/manual/`) | not yet recorded |
+| FaIR 2.2.4 (calib 1.6.0) runs (the author's, from FaIRtoFrEDI) | not yet recorded |
 
 ---
 

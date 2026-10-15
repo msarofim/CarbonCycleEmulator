@@ -4,21 +4,6 @@
 Rscript -e 'shiny::runApp("app", launch.browser = TRUE)'
 ```
 
-`.claude/launch.json` in this repo holds the same command as a named config
-(`ccx-app`, port 7788) for editor/agent launchers.
-
-⚠ **A Claude Code session launched from a SIBLING repo cannot see it.** The
-harness resolves `launch.json` from the SESSION root, and the standing rule is to
-launch sessions from `FaIRtoFrEDI/` (the memory keyspace follows the launch cwd).
-Such a session has two options, and the second is cleaner:
-
-1. temporarily add a `ccx-app` entry to `FaIRtoFrEDI/.claude/launch.json` — that
-   file is TRACKED, so revert it afterwards (`git checkout -- .claude/launch.json`).
-   `cwd` outside the project root is rejected, so the command needs an absolute
-   `setwd()` in its `runtimeArgs`;
-2. start it from this repo directly with the command above and point the browser
-   at `http://127.0.0.1:7788`.
-
 ## The name and the URL (ruling R3, 2026-09-22)
 
 The app is **CarboTope**. `APP_TITLE` in `app/global.R` is the one constant every

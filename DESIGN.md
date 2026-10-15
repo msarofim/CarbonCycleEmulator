@@ -1,6 +1,6 @@
 # CarbonCycleEmulator — Design Document
 
-**Status: DRAFT — awaiting Marcus sign-off. No model code until approved.**
+**Status (2026-10-15):** design record, not a draft. The model is built; the canonical parameter set is `hilda31w` (2026-10-13); the app is BETA v1.0 CarboTope. Sections keep the 2026-08-09 spec with dated amendments in place; where they disagree, the amendment and README §Status are current.
 Created 2026-08-09. This document is the authoritative spec; changes to it are logged in
 `CHANGELOG.md`.
 
@@ -9,7 +9,7 @@ Created 2026-08-09. This document is the authoritative spec; changes to it are l
 ## 1. Purpose & audience
 
 A simple, calibrated global carbon cycle model (two hemispheres, monthly steps, land +
-box-diffusion ocean, ¹²C/¹³C/¹⁴C) wrapped in a public RShiny app. The app is a
+box-diffusion ocean, ¹²C/¹³C/¹⁴C) wrapped in a public R Shiny app. The app is a
 communication tool calibrated to an **undergraduate environmental-studies major**: someone
 who knows what the Keeling curve and the greenhouse effect are, but not what a Revelle
 factor or Δ¹⁴C is. Every panel gets a one-sentence takeaway; isotope notation and unit
@@ -35,6 +35,8 @@ Scientific goals, in order:
    signposting appendix.
 
 ## 2. Locked decisions (Marcus, 2026-08-09)
+
+> **Superseded (2026-10-15):** scenarios are the seven CMIP7 ScenarioMIP markers (van Vuuren et al. 2026), not SSPs; no posterior ensemble is shipped (the MCMC band is held, §5.3–5.4); ENSO is the detrended Niño 3.4 index, not MEIv2; GMST is IGCC for historical runs, futures use a response fitted to FaIR 2.2.4 (calib 1.6.0); the ocean adds a cold high-latitude surface box and a cold deep box per hemisphere (§3.1).
 
 | Decision | Choice |
 |---|---|
@@ -78,9 +80,10 @@ Per hemisphere *h* ∈ {N, S}, per isotope *i* ∈ {12, 13, 14}, carbon mass in 
 - **Ocean** `C_ml[h,i]` (mixed layer) + `C_z[h, z, i]`, z = 1…10 interior layers with
   thickness increasing downward to a mean full depth ≈ 3700 m [VERIFY]. Interior layers
   exchange by vertical eddy diffusion only; no advective overturning loop in v1 (§10).
-  **HILDA structure (the canonical `hilda31s` mode since 2026-09-11):** adds a high-latitude
+  **HILDA structure (canonical since 2026-09-11, first in `hilda31s`; carried by the
+  canonical `hilda31w`, 2026-10-13):** adds a high-latitude
   surface box `C_hs[h,i]` and a high-latitude deep box `C_hd[h,i]` per hemisphere beside the
-  low-latitude column (`ccx_apply_structure(p, "hilda")`; §3.4 and `INDEX_ccx_ocean_struct`).
+  low-latitude column (`ccx_apply_structure(p, "hilda")`; §3.4 and the author's private notes).
 
 State dimension (measured on the code 2026-09-12, `dim(spinup$y)`): column configuration
 2 hemispheres × 3 isotopes × (1 atm + 4 land + 11 ocean) = 16 boxes/hemisphere = **96 states**;
@@ -112,7 +115,8 @@ d M_atm[h]/dt =
   > became **Michaelis–Menten** on 2026-08-14 (CHANGELOG "2026-08-14 (cont.) — DECISION 2
   > TAKEN: the default IS the saturating form"): NPP = NPP₀ · (1 + β_max · Δχ / (K + Δχ)),
   > Δχ = χ − χ₀, fitted names `beta_max` and `fert_k` (`ccx_fert_factor()` in `R/model.R`).
-  > The canonical `hilda29e` runs MM (fert_form 1; β_max 2.01, K 669 ppm). The log form above
+  > The canonical `hilda31w` runs MM (fert_form 1; β_max 2.01, K 601 ppm; read from its mode
+  > file 2026-10-15; at the previous canonical `hilda29e`, K was 669 ppm). The log form above
   > is kept reachable (`fert_form` = 0) so pre-2026-08-14 results reproduce.
   NPP₀ global ≈ 60 GtC/yr [PROVISIONAL, cited 2026-09-29 as PRESENT-DAY ~60 (IPCC TAR §3.2.1;
   bracketed by Haberl 2007, Ito 2011, MOD17); no 1750 source exists — see R/constants.R. ~~To be
@@ -587,6 +591,8 @@ CHANGELOG 10-05.
 
 ### 3.6 Forcings (all prescribed, monthly-interpolated)
 
+> **Superseded (2026-10-15):** the ENSO driver is the detrended Niño 3.4 index (NOAA PSL, from 1948; zero before), not MEI; future scenarios are the seven CMIP7 ScenarioMIP markers (van Vuuren et al. 2026, Zenodo 10.5281/zenodo.20713982 v1.1.1; `data-raw/build_vv_scenarios.R`), not SSPs, which stay in `data/` but are not in the app menu; future GMST comes from a response fitted to FaIR 2.2.4 (calib 1.6.0). Sources and builds: DATA.md §3.
+
 | Forcing | Source | Notes |
 |---|---|---|
 | Fossil emissions | GCB (latest) global fossil CO₂ | N/S split ≈ 95/5 fixed [VERIFY]; smooth annual→monthly, no fossil seasonality in v1 |
@@ -681,7 +687,7 @@ model (§5.2), not ignored.
 
 ## 5. Calibration design
 
-### 5.1 Free parameters (draft — ~16)
+### 5.1 Free parameters (draft — ~16) (31 fitted, 14 held at hilda31w)
 
 | Param | Meaning | Draft prior |
 |---|---|---|
@@ -1412,6 +1418,8 @@ FIXED slab (`ccx_model_d14c_slabs()`), so the comparison is like-for-like at eve
 
 ### 5.3 Sampler
 
+> **Superseded (2026-10-15), §5.3–5.4:** the sampler was run at `hilda31w` from 2026-10-13: adaptive Metropolis, 4 chains × 200,000 iterations, 17,000 draws; max R̂ 1.24, on the seasonal-lag parameters, so not converged by the strict criterion. The CO₂ band built from it is in `data/futures_ribbons.rds` and is held (not displayed). The app live-runs the posterior mode, not a posterior median or a shipped ensemble. CHANGELOG 2026-10-13 (j), 2026-10-14 (a), (e), (f).
+
 Adaptive Metropolis (adaptMCMC or custom), 4 chains, convergence gates R̂ < 1.05 and
 adequate ESS (computed with the `posterior` package; mind the ESS-maxlag trap from the
 Julia world — verify the R estimator's defaults rather than assuming).
@@ -1433,15 +1441,16 @@ only — measured ≤ 1.3e-16 relative on the canonical's final state, code revi
 ## 6. Sanity gates (all must pass before headline claims)
 
 > ⚠ **STALE CANONICAL (banner added 2026-10-12, code review; numbers below NOT rewritten).** The ledger
-> below was measured at `hilda30c`. The canonical is **`hilda29e`** since 2026-10-08 (CHANGELOG 2026-10-08 (e)),
-> and the current whole-model scorecard is `outputs/diagnostics/whole_model_scorecard_20261012_hilda29e.log`.
+> below was measured at `hilda30c`. The canonical is **`hilda31w`** since 2026-10-13 (CHANGELOG 2026-10-13 (f);
+> amended 2026-10-15). The most recent whole-model scorecard log is
+> `outputs/diagnostics/whole_model_scorecard_20261012_hilda29e.log`, made at the previous canonical `hilda29e`.
 > Read every "at `hilda30c`" / "the canonical" below as the 09-14 state, not today's.
 
 > ⭐⭐ **THE LIVE ACCEPTANCE LEDGER (rewritten 2026-09-14 g — option J of the 09-12 assessment; the canonical is `hilda30c`
 > since 2026-09-13 d).** Measured by `calibration/diag_whole_model_scorecard.R` →
 > `outputs/diagnostics/whole_model_scorecard_20260913_hilda30c.log` (arms: `ent26` column control, `hilda31p` `seas_ml` 0
 > control, `hilda30c` canonical; every arm spun up as its file records). The bounds and their provenance are the gate ledger
-> (memory `INDEX_ccx_gates.md`); the verdict and ranked options are `notes/assessment_2026-09-12_hilda31s.md`.
+> (author's private notes); the verdict and ranked options are `notes/assessment_2026-09-12_hilda31s.md`.
 >
 > | gate | what it tests | at `hilda30c` | verdict |
 > |---|---|---|---|
@@ -1463,7 +1472,7 @@ only — measured ≤ 1.3e-16 relative on the canonical's final state, code revi
 > `notes/scoping_2026-09-15c_kz_pump_structure.md`).** CCX's ocean is a diffusive column (a mixed layer over ten layers exchanged by an
 > eddy diffusivity `kz` with a HILDA high-latitude box, plus a biological pump) with **no advective deep return**. Under that
 > class, one object sets three things at once, and the measurements below (all at the canonical `hilda30c`, on the Mac, 09-15 c →
-> 09-16 b; the arc's index is memory `INDEX_ccx_ocean_pump.md`) show that it cannot hold the observed ocean at the observed rates:
+> 09-16 b; the arc's index is in the author's private notes) show that it cannot hold the observed ocean at the observed rates:
 >
 > 1. **Diffusion is the bomb-¹⁴C carrier** — at 1975 diffusion + entrainment at the mixed-layer base carry 70 % of the bomb ¹⁴C
 >    into the interior, the pump 19 %, the HS route 12 % (the ¹⁴C edge recorder, `calibration/diag_kz_pump_pathways.R`). The
@@ -1683,7 +1692,7 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
    *hemispherically-integrated bomb tracer* — rather than a parameter nobody tried.
 
    **Caveat on the magnitudes, not on the ordering:** this is a frozen 1-D profile,
-   so the logL costs are upper bounds — memory `ccx_seas_q10_ridge` measured
+   so the logL costs are upper bounds — an earlier profile (author's private notes) measured
    `beta_max`/`fert_k` absorbing 85 % of exactly this kind of frozen cost for
    `q10`. What the profile establishes is the *location* of the gradient optimum
    and the *direction* of the disagreement, both of which are robust to that.
@@ -2100,6 +2109,8 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
 
 ## 7. Shiny app design
 
+> **Superseded (2026-10-15):** the shipped tabs (`app/ui.R`) are The Keeling Curve; Where does the carbon go?; What if…?; Isotope fingerprints; Futures (Scenarios / Build your own / Pulse lab); Known issues; What pins down what?; Under the hood. The scenario menu is the seven van Vuuren et al. (2026) CMIP7 markers, not SSPs. The ENSO driver is the detrended Niño 3.4 index. No posterior-ensemble ribbons are displayed (the band is held, §5.3); the app live-runs the posterior mode. The tab list below is the 2026-08 plan.
+
 Public, shinyapps.io. Precompute posterior-ensemble ribbons for historical + preset
 scenarios; run central-parameter model live for sliders/toggles/pulses (fast by §3.7).
 
@@ -2241,7 +2252,7 @@ CarbonCycleEmulator/
 Conventions inherited from global CLAUDE.md: labels derive from named constants; output
 provenance stamps; commit per unit of work; quarantine-don't-delete for bugged outputs.
 
-## 9. Open questions for Marcus (blocking only where noted)
+## 9. Open questions as of 2026-08-09 (resolved; see CHANGELOG)
 
 - **Q1.** GCB land sink as *soft* constraint (inflated σ) with ocean sink at stated
   uncertainty — agreed? (Non-blocking; default = yes.)
