@@ -131,3 +131,19 @@ test_that("the IntCal row scores only the years inside the run, as the ice-core 
   expect_identical(r1$ll, hand(r1$out, 1850))           # a later start: its own years only
   expect_gt(abs(hand(r1$out, 1750) - r1$ll), 100)       # POWER: the pre-fix window is far off
 })
+
+test_that("the ENSO e-folding time interpolates from lag 0 when the ACF is below 1/e at lag 1", {
+  # The k == 1 branch was k (r1 - 1/e) / (r1 - 1/e), which is 1 month whatever r1 is. The bracket
+  # there is lag 0 (ACF 1) to lag 1, so the crossing is (1 - 1/e) / (1 - r1) months.
+  x <- sin(1.3 * seq_len(2000))                 # deterministic; lag-1 ACF ~ cos(1.3) = 0.27 < 1/e
+  r <- stats::acf(x, lag.max = 60, plot = FALSE)$acf[-1]
+  expect_lt(r[1], exp(-1))                       # the k == 1 case
+  expect_equal(ccx_enso_efold_yr(x) * 12, (1 - exp(-1)) / (1 - r[1]), tolerance = 1e-12)
+  expect_gt(abs(ccx_enso_efold_yr(x) * 12 - 1), 0.1)   # POWER: not the old constant 1 month
+  # the shipped record takes the k > 1 branch, so the forcing's taper is unchanged
+  en <- as.data.frame(readRDS(ccx_path("data", "forcing_enso.rds"))); en <- en[!is.na(en$nino34_anom), ]
+  r <- stats::acf(en$nino34_anom, lag.max = 60, plot = FALSE)$acf[-1]
+  k <- which(r < exp(-1))[1]
+  expect_gt(k, 1L)
+  expect_identical(ccx_enso_efold_yr(en$nino34_anom), ((k - 1) + (r[k - 1] - exp(-1)) / (r[k - 1] - r[k])) / 12)
+})
