@@ -2,6 +2,21 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-15 (c) — **Schwartz's "second order" claim CHECKED against FaIR and CarboTope: it does not hold. If CO₂ emissions stop in 2030, about 71 % (FaIR) / 66 % (CarboTope) of the 2030 excess is still in the air in 2130, against about 37 % / 36 % of a 100 GtC pulse released into the same world: 1.9× / 1.8×, and the ratio grows with the horizon (≈1.6–1.7× at +20 yr, ≈2.0× at +270).** Record: `outputs/diagnostics/zec_vs_pulse_20261015/` (README, CSVs, gates).
+
+- **The question (Marcus):** "if anthropogenic CO2 emissions were to end in 2030, what percent of the anthropogenic increase would remain in 2130, compared to if we add an emission pulse in 2030, what percent of that pulse would remain in 2130."
+- **FaIR:** `FaIRtoFrEDI/scripts/run_fair_zec_vs_pulse_for_ccx.py` (`8c685cb`, fixed `417db44`; branch `heat-ed-morbidity`, NOT pushed). Seven van Vuuren markers, 841 configs, paired. Gates G1–G6 pass; G5 reproduces the pulse lab's shipped FaIR grid to 8e-17.
+  - The first run stopped at G4: the calculated `CO2` total is NaN until `f.run()` sums FFI + AFOLU, and `np.array_equal` counts NaN as unequal. Fixed with `equal_nan`; no result was involved.
+- **CarboTope:** `calibration/diag_zec_vs_pulse.R` (`6724e834`), using the app's `app_run_coupled()`.
+  - G3 (causality) was first written EXACT and failed on vvHL (2.1e-8 ppm) and vvVL (5.7e-11). The coupled loop's arms stop after different numbers of passes, and at a tighter tolerance the difference is exactly 0, so this is convergence noise.
+  - G3 is now 1e-6 ppm: 50× that noise, 3500× below the loop's one real acausal path (3.5e-3, 09-24). Mutation (zeroing a year early): G3 fails at 5.55 ppm.
+- **Choices, stated:**
+  - fossil + land-use CO₂ zero from 1 Jan 2030; non-CO₂ per the marker; pulse over 2030;
+  - excess measured against preindustrial;
+  - two pulse backgrounds, with the zero-emission one (like for like) as the headline;
+  - the climate feedbacks on.
+- **The premise, illustrated linearly** (Joos et al. 2013 Table 5 response over the GCB record): about 48 % of the 2030 excess was emitted since 2000. So "fairly new" is half true, yet the same superposition still gives 0.70 left vs IRF(100) 0.41. ⚠ That illustration overstates the 2030 excess (214 vs the models' 155–162 ppm); quote the models.
+
 ## 2026-10-15 (b) — **Marcus's text review `CarboTopecomments.10.15.26.docx` APPLIED, plus the factual fixes and test-pin updates he approved. The affiliation is off `LICENSE` and `README.md` (`4746a1d`). The 34 app-facing test files read 1808 / 0: card 4's two by-design failures, red since 10-08, are GREEN because their sentences are now true.**
 
 - **His wording, applied:**

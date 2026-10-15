@@ -1,0 +1,10 @@
+calibration/diag_zec_vs_pulse.R | commit 6724e834 | canonical hilda31w (refit_20261013_hilda31w_wtc_hilda_csl3v0kaidgbemwtc) | 2026-10-15 08:50
+CO2 emissions zero from 2030; pulse 100 GtC over 2030; horizon 100 yr; GtC/ppm 2.1240; coupled tol 1e-04 K
+  vvVL  excess 160.0 ppm at 2030 -> 67.7 % left at +100; pulse 36.6 % (zero bg), 35.7 % (scenario bg)
+  vvLN  excess 160.7 ppm at 2030 -> 65.9 % left at +100; pulse 36.4 % (zero bg), 34.5 % (scenario bg)
+  vvL   excess 159.6 ppm at 2030 -> 66.2 % left at +100; pulse 36.4 % (zero bg), 36.5 % (scenario bg)
+  vvML  excess 160.8 ppm at 2030 -> 66.5 % left at +100; pulse 36.5 % (zero bg), 40.4 % (scenario bg)
+  vvM   excess 161.5 ppm at 2030 -> 65.5 % left at +100; pulse 36.4 % (zero bg), 49.1 % (scenario bg)
+  vvHL  excess 161.1 ppm at 2030 -> 67.5 % left at +100; pulse 36.6 % (zero bg), 44.0 % (scenario bg)
+  vvH   excess 161.6 ppm at 2030 -> 65.8 % left at +100; pulse 36.4 % (zero bg), 54.6 % (scenario bg)
+gates G1 G3 G4 passed; wrote outputs/diagnostics/zec_vs_pulse_20261015/ccx_hilda31w_zec2030_vs_pulse100_h100.csv | 0.5 min
