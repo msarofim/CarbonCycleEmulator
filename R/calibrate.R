@@ -1055,6 +1055,13 @@ CCX_PARAM_TABLE <- list(
 
 CCX_PARAM_NAMES <- names(CCX_PARAM_TABLE)
 
+# THE SIX FITTED NAMES WITH NO MODEL SLOT (named 2026-10-15): two FORCING parameters and four
+# LIKELIHOOD ones. ccx_default_params() has no field for them, so they reach a run only through
+# ccx_make_logpost()'s own reads and ccx_load_mode()'s ([[ccx_two_param_lists]]).
+# test-dormant-fixes.R holds this list equal to setdiff(CCX_PARAM_NAMES, names(ccx_default_params())).
+CCX_NUISANCE_NAMES <- c("bomb_total", "luc_scale", "sigma_d14c", "rep_dC",
+                        "grad_off_co2", "grad_off_d13c")
+
 # ---- LABEL-GATED FITTED NAMES (2026-09-30; OBJECTIVE #14) --------------
 # THE FOUR NAMES OF D2 AND D3 (Marcus 2026-09-30: the non-CO2 land-sink drivers and
 # the GCB imbalance allocation; CHANGELOG 09-30 h-n). They are FITTED under a
@@ -3093,6 +3100,19 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     # the structure + this draw's values, for the priors that read the
     # structure (u_hs's live hs_frac, 2026-09-16 d); base_params carries it
     p_pr <- base_params; for (n in names(pv)) p_pr[[n]] <- pv[[n]]
+    # ⛔ THE SIX NAMES WITH NO MODEL SLOT ARE READ FROM `p_pr`, NOT `pv` (2026-10-15, the pre-public
+    # code review's dormant bug 1; the same defect as the ENSO block below). `pv` holds the FITTED
+    # names only, so a PINNED one was NULL here: a pinned rep_dC scored as 0 (co2_level_MLO -70.84 ->
+    # -662.42 at hilda31w), a pinned grad_off_* dropped its gradient row with nothing said, and a
+    # pinned bomb_total or luc_scale stopped in the forcing rebuild. No registered mode pins one, so
+    # no stored number moves: for a fitted name `p_pr` carries this draw's value, bit for bit. A
+    # pinned name whose value the base does not carry is refused, since NULL would switch a row off.
+    .nz_miss <- CCX_NUISANCE_NAMES[vapply(CCX_NUISANCE_NAMES, function(n) is.null(p_pr[[n]]), logical(1))]
+    if (length(.nz_miss))
+      stop("ccx_make_logpost(): ", paste(.nz_miss, collapse = ", "), " is neither fitted nor carried ",
+           "by base_params. A PINNED name's value lives in the base list (ccx_mode_base() writes it); ",
+           "set base_params$", .nz_miss[1], " to the pinned value.")
+    nz <- lapply(stats::setNames(nm = CCX_NUISANCE_NAMES), function(n) p_pr[[n]])
     for (n in CCX_PARAM_NAMES) {
       s <- CCX_PARAM_TABLE[[n]]
       lp <- lp + .ccx_prior_eval(s, pv[[n]], p_pr) + .log_jac(u[[n]], s)
@@ -3104,7 +3124,7 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     # and the sampler would move a prior-only coordinate with zero leverage
     # ([[intersect_is_a_silent_default]]; audit 2026-09-06d). Refuse by name.
     # Only the fitted names that HAVE a model slot are checked: the six
-    # nuisances (bomb_total, luc_scale, sigma_d14c, rep_dC, grad_off_*) never
+    # nuisances (CCX_NUISANCE_NAMES: bomb_total, luc_scale, sigma_d14c, rep_dC, grad_off_*) never
     # enter the model list by design ([[ccx_two_param_lists]]).
     .miss <- setdiff(MODEL_SLOTS, names(p))
     if (length(.miss))
@@ -3155,12 +3175,12 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
 
     F <- base_forcing
     F$c14_cosmo <- sp$prod_c14
-    F$c14_bomb  <- base_forcing$c14_bomb * (pv$bomb_total / CCX_BOMB_REF)
-    .cols <- LUC_SCALER$cols(pv$luc_scale)
+    F$c14_bomb  <- base_forcing$c14_bomb * (nz[["bomb_total"]] / CCX_BOMB_REF)
+    .cols <- LUC_SCALER$cols(nz[["luc_scale"]])
     for (cc in CCX_LUC_COLS) F[[cc]] <- .cols[[cc]]
-    attr(F, "luc_scale") <- pv$luc_scale
+    attr(F, "luc_scale") <- nz[["luc_scale"]]
     eluc <- ELUC_BASE
-    eluc$eluc <- LUC_SCALER$eluc(pv$luc_scale)
+    eluc$eluc <- LUC_SCALER$eluc(nz[["luc_scale"]])
     # ccx_run_fast() defaults to substeps = "auto" and escalates on NA, so this
     # -Inf now means the MODEL failed, not that the integrator hit its explicit-
     # diffusion stability limit. Until 2026-08-11 it meant the latter, and the
@@ -3184,15 +3204,15 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     # and would silently reacquire the old branch if the contract ever changed.
     # NOTE THE ABSENCE OF sigma_d13c TOO, retired 2026-08-18 on the same
     # absence-contract terms as sigma_co2 above.
-    err <- list(sigma_d14c = pv$sigma_d14c, rep_dC = pv$rep_dC,
+    err <- list(sigma_d14c = nz[["sigma_d14c"]], rep_dC = nz[["rep_dC"]],
                 # The gradient offsets ride in `err` because that is the channel
                 # for likelihood-side parameters (the sigmas already do). Their
                 # ABSENCE skips the gradient terms rather than zeroing them --
                 # see the LIK_GRAD_* block -- so this line is what turns them on
                 # for the objective while leaving every legacy diagnostic
                 # visibly, rather than silently, without them.
-                grad_off_co2 = pv$grad_off_co2,
-                grad_off_d13c = pv$grad_off_d13c)
+                grad_off_co2 = nz[["grad_off_co2"]],
+                grad_off_d13c = nz[["grad_off_d13c"]])
     # D3 (R/likelihood.R, LIK_IMB_*): GCB's imbalance shares. Read from `p_pr`
     # -- the structure plus this draw's fitted values -- so a screen can carry
     # them in base_params and a refit can fit them, through ONE resolver. Absent

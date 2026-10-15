@@ -2,6 +2,15 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-15 (e) — **The six dormant bugs from the pre-public code review (entry (d), "NOT fixed, reported"), FIXED, one commit each.** None is on the canonical `hilda31w`'s live path or the app's. Each has a block in the new `tests/testthat/test-dormant-fixes.R` that fails on the pre-fix code. After each fix, `test-canonical-contracts.R`, `test-parity.R` and 31 app-facing test files were run from a frozen worktree at that commit.
+
+1. **Pinned names with no model slot are scored at their pinned value** (`R/calibrate.R`, `ccx_make_logpost()`). The six fitted names the model list has no field for (`bomb_total`, `luc_scale`, `sigma_d14c`, `rep_dC`, `grad_off_co2`, `grad_off_d13c`; now the named constant `CCX_NUISANCE_NAMES`) were read from `pv`, which holds the fitted names only. Pinned, one was NULL. Measured at `hilda31w` before the fix:
+   - a pinned `rep_dC` scored as 0, and `co2_level_MLO` went from −70.84 to −662.42;
+   - pinned `grad_off_*` dropped both gradient rows from `by_stream` with no message;
+   - a pinned `bomb_total` stopped inside the forcing rebuild ("replacement has 0 rows").
+
+   They are now read from `p_pr`, the base list plus this draw's fitted values, as the ENSO block has been since 2026-10-06. For a fitted name that is the same value bit for bit. A pinned name the base list does not carry is refused by name. With all six pinned at the canonical's fitted values, every stored stream row reproduces to < 1e-6. No registered mode pins any of the six.
+
 ## 2026-10-15 (d) — **Pre-public review of the whole app text, the repo documents and the model comments, APPLIED.** Four read-only reviewers (teaching tabs, Known issues + parameter table, model code, public docs) reported ~110 findings. Marcus ruled, verbatim: "Apply all (Recommended)" for the factual fixes (with copy-test pins following the changed sentences), "Apply all (Recommended)" for the cleanups, "Facts-only README + banners (Recommended)", and "Trim to a public version (Recommended)" for CLAUDE.md. The 34 app-facing test files read 1809 / 0.
 
 - **Box diagram** (Marcus's own requests, `0d694df`):
