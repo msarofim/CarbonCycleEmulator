@@ -32,7 +32,7 @@ Continues `handoff_2026-08-31e_the_basin.md`, whose **§8.6 "re-price in the new
 `diag_design_gates_at_mode.R` carried `stopifnot(identical(md$param_names, CCX_PARAM_NAMES))`. The
 08-31 `seas_lag_p` split made every stored mode a 21-parameter file in a 22-parameter build, so the
 script **aborted before its first gate** — the same one true thing the 6 failing tests say, in a file
-nobody was running. `diag_joos_irf.R` was worse: an unrecognised arm argument (a typo, or a perfectly
+nobody was running. `diag_joos_irf.R` was worse: an unrecognized arm argument (a typo, or a perfectly
 legal mode PATH) **silently ran the uncalibrated defaults** and reported gate 12 as if that were the
 question.
 
@@ -93,7 +93,7 @@ a SLURM array instead of a queue. ⚠ **Claude cannot submit** (VPN + gateway + 
   So is **N = 40**, the one of the four settings with no measurement behind it.
 - ⭐ **The port gates itself, and each bound matches its own claim.** (a) the START point is an
   EVALUATION ⇒ **1e-8 relative** against `calibration/torch/port_targets.csv` (measured on the Mac,
-  carrying host + commit); (b) the FINAL value is an OPTIMISATION ⇒ an **ORDERING**, no threshold.
+  carrying host + commit); (b) the FINAL value is an OPTIMIZATION ⇒ an **ORDERING**, no threshold.
   Mutation-tested. ⚠ The target is **not** each file's stored `logpost`: the incumbent's −0.85 is
   objective drift and would have eaten most of a 1.0-log-unit budget before the port was considered.
 - **The wall guard PROJECTS and SHORTENS.** `optim()` cannot be interrupted once entered, so a
@@ -174,7 +174,7 @@ Clean at `330d177`. **Suite 1282 / 6 FAIL / 2 skip** — same count as 08-31e, D
 
 `CCX_PARAM_TABLE$kz`: **[3942.5, 6528] → [4379.1, 8109.9]**, `init` 6244.5. Same recipe, same
 default parameters, run against GLODAP's sourced **−175.26 ± 10.259‰ on the bottom box** at
-**k = 3σ**. ⚠ **The floor RISES too — a RE-CENTRING, not only a widening.** Every mode file stays
+**k = 3σ**. ⚠ **The floor RISES too — a RE-CENTERING, not only a widening.** Every mode file stays
 strictly interior. ⭐ On this support the anchor turns over **INTERIOR at 6486 = 56 % of the box**:
 the bracket was not what held `kz`.
 

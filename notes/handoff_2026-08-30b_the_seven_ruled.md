@@ -112,7 +112,7 @@ volcano — it cost one iteration here.
 
 **Marcus's setup calls, 2026-08-30:** **BOTH arms** (`from90` and `pin90`) — the pinned arm is what
 re-measures `PIN_PRIOR_CREDIT` and closes the deliberately-failing test; **`h_ml` UNBOUNDED over
-[30, 200]** — which is already the tracked driver's behaviour since the 08-28 inversion, both of the
+[30, 200]** — which is already the tracked driver's behavior since the 08-28 inversion, both of the
 bound's original reasons now discharged (the σ-inflation adoption retired the skip, the C1 remap
 removed the kinks); **SMOKE FIRST**.
 
@@ -138,7 +138,7 @@ end-to-end and the gates fire; it does not locate a mode.
 Each smoke dir was **seeded with a byte copy** of its incumbent (`refit_20260825f_from90` /
 `_pin90`) so `ARM_WARM` exercises the real warm-start path. Driver run from a **FROZEN copy**.
 
-**Startup gates all passed**: H1 (shipped support, prior NOT renormalised), H2 (init 75 round-trips),
+**Startup gates all passed**: H1 (shipped support, prior NOT renormalized), H2 (init 75 round-trips),
 H3 (rows LIVE at h_ml 31 / 75 / 199), and the pin round-trip (90 → 90, err 1.4e-14).
 
 **Warm-start logposts** — and they are the expected drop, not a surprise:
@@ -155,7 +155,7 @@ The −40.5 on the free arm matches the frozen adoption price measured independe
 The free arm recovering ~38 of the **40.49** the adoption cost the frozen vector, in ONE unconverged
 polish, is the right order for the recorded CONDITIONAL price of diffuse light (−7.42, memory
 `ccx_diffuse_light`). ⚠ Both arms drive `h_ml` to 35.25 / 36.99 and `kz` still rails (95.1 % / 97.7 %)
-— **the SAME behaviour `handoff_2026-08-28c` §3 ruled is not a finding**, and a MAXIT=60 artefact
+— **the SAME behavior `handoff_2026-08-28c` §3 ruled is not a finding**, and a MAXIT=60 artifact
 until the converged run says otherwise.
 
 **PRODUCTION RUN LAUNCHED** into `calibration/output/refit_20260830_gamma_diff_remap/{from90,pin90}`,
@@ -204,7 +204,7 @@ should be re-run against the C1 objective before any covariance off this refit i
   freeze `aod_*` (architecture, not oversight); **never add an AOD → temperature term**; AOD pre-1850
   is zero so Tambora is absent; `diag_landed_gap_streams.R` is still QUARANTINED and hard-stops;
   `refit_20260828_sigma_eff` is RATIFIED "do not adopt"; the pinned-96 successor is undecided and is
-  NOT a config change; two diagnostic-only authorisations stand.
+  NOT a config change; two diagnostic-only authorizations stand.
 - The driver emits ~10 harmless `rm(): object not found` warnings on the UNPINNED arm (locals that
   only the pinned path creates). Cosmetic, pre-existing.
 - Nothing was quarantined this session. Nothing at a canonical path was overwritten — the smoke wrote

@@ -10,7 +10,7 @@ there, but interannual variability is not a dealbreaker."*
 **Answer: no easy benefit from either.** Solar is dead on magnitude, by a factor of ~175 against the
 mechanism the model already has. Anthropogenic aerosol is a *real* mechanism — it is what Mercado et
 al. 2009 is actually about, the same paper the volcanic term already cites — but it is ~100 %
-degenerate with CO₂ fertilisation, contributes nothing to interannual variability, and buying it
+degenerate with CO₂ fertilization, contributes nothing to interannual variability, and buying it
 would relocate `beta_max` by 2.3× while changing nothing the data can see.
 
 ⇒ Gate V's status is now recorded in the lib: **a FAIL is not a blocker.**
@@ -62,13 +62,13 @@ cannot help gate V.** It does not:
 not significant, difference: +0.0057 → +0.0120 per decade at A_peak = 0.10, against the observed
 +0.0147, with the AF level still right (0.4225 vs 0.4313).
 
-## 3. …but it is ~100 % degenerate with CO₂ fertilisation
+## 3. …but it is ~100 % degenerate with CO₂ fertilization
 
 The frozen-parameter cost is enormous and **almost entirely fictitious** — the same lesson the
 volcanic `gamma_diff` pricing taught in August, when the frozen column overstated the real cost by
-82 %. Re-optimising the fertilisation pair (`beta_max`, `fert_k`):
+82 %. Re-optimizing the fertilization pair (`beta_max`, `fert_k`):
 
-| A_peak | beta_max | fert_k | **Δ logL re-optimised** | Δ logL frozen | absorbed |
+| A_peak | beta_max | fert_k | **Δ logL re-optimized** | Δ logL frozen | absorbed |
 |---|---|---|---|---|---|
 | 0.00 | 0.6974 | 304 | 0.0 | 0.0 | — |
 | 0.02 | 0.7547 | 352 | **+5.3** | −106 | 105 % |
@@ -78,9 +78,9 @@ volcanic `gamma_diff` pricing taught in August, when the frozen column overstate
 
 ⇒ **The data cannot tell the two apart.** A gain of +5 to +8 log units on an objective measured in
 thousands is not a signal; it is the fit shrugging. Both terms raise NPP monotonically over the
-industrial period, so CO₂ fertilisation absorbs the aerosol term nearly exactly.
+industrial period, so CO₂ fertilization absorbs the aerosol term nearly exactly.
 
-The only feature fertilisation *cannot* imitate is the **post-1979 decline** — the global-brightening
+The only feature fertilization *cannot* imitate is the **post-1979 decline** — the global-brightening
 signature. Separating them needs a target keyed to that decline, which the objective does not have.
 
 ## 4. FACE narrows it but does not decide it
@@ -101,7 +101,7 @@ honest reading is that **neither the CO₂ record nor FACE can identify the term
 
 ⚠ **And that is the argument against adding it now**: buying the aerosol term relocates `beta_max`
 by a factor of 2.3 while changing nothing measurable — and `beta_max` is what the pulse IRF and every
-fertilisation result rest on. An unidentifiable term that silently moves an identified parameter is a
+fertilization result rest on. An unidentifiable term that silently moves an identified parameter is a
 bad trade.
 
 ## 5. ⇒ Rulings recorded
@@ -109,8 +109,8 @@ bad trade.
 * **Solar → photosynthesis: DECLINED** on magnitude and on structure. Not implemented; the
   arithmetic is in §1 and does not need a run.
 * **Anthropogenic aerosol → diffuse light: DECLINED FOR NOW, not refuted.** It is physically real
-  and roughly free once the fertilisation pair re-optimises, but unidentifiable against CO₂
-  fertilisation on the current observation set, and it costs a 2.3× `beta_max` relocation.
+  and roughly free once the fertilization pair re-optimizes, but unidentifiable against CO₂
+  fertilization on the current observation set, and it costs a 2.3× `beta_max` relocation.
   ⇒ **The thing that would make it worth revisiting is a target keyed to the post-1979 decline**
   (a land-sink or NPP trend constraint spanning the brightening period), not more CO₂ data.
 * **Gate V's failure is NOT a blocker** (Marcus). Recorded at the gate itself in

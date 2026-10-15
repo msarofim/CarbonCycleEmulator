@@ -21,7 +21,7 @@ fix it led to. It is self-contained.
   without Marcus's ruling.
 - **The answer (10-03 j).** The RK4 substep controller `ccx_substeps_for()` under-resolves the SH winter
   mixed-layer peak near the P8 wall. The integration there runs past RK4's stability limit for ~10 days a year, and
-  the objective returns integrator artefact. 017's stored logpost is +273.2 of artefact.
+  the objective returns integrator artifact. 017's stored logpost is +273.2 of artifact.
 - **What happened next.** Marcus ruled the fix in; it is applied (10-04 a), and the full suite is clean.
 
 ## 2. Decisions and their reasons
@@ -63,12 +63,12 @@ fix it led to. It is self-contained.
 ## 4. The numbers a next session will want (all in the diagnostic's log and rds)
 - **017.**
   - The value: −1306.890 at the controller's 15 substeps, −1580.051 converged (×2 to ×16 agree to 2.3e-4). The
-    artefact is +273.2, almost all on `co2_seasonal_SPO`: +72.55 at 15 substeps against −199.76 converged.
+    artifact is +273.2, almost all on `co2_seasonal_SPO`: +72.55 at 15 substeps against −199.76 converged.
   - Smoothness: on the converged objective the pair sums are h_ml −0.198, kz −0.015, kz_deep_frac −0.011. At the
     controller's count they were −3e37, −250.7 and −250.9.
   - The stiffness at 017's SH winter peak (t = 0.646 yr): the integrator's Jacobian is 730/yr. The shipped bound gave
     426; with (A) 676; with (A+B) 827. The result was z 4.06 against 2.785, unstable for 10.3 days a year.
-  - 017's `need` is 14.99997: the simplex parked 2.6e-5 below the 15 → 16 substep switch, climbing INTO the artefact.
+  - 017's `need` is 14.99997: the simplex parked 2.6e-5 below the 15 → 16 substep switch, climbing INTO the artifact.
   - The h_ml+ blow-up: the periodic orbit's SH mixed layer holds −17.8 GtC in January 1750 and −96.8 GtC at its
     minimum, and |δ¹³C_SH| reaches 1.4e17 ‰. The periodic spinup "converged" anyway (resid ≤ 4.5e-10), because Newton
     finds the fixed point of an unstable discrete map just as readily.
@@ -76,10 +76,10 @@ fix it led to. It is self-contained.
   49.65 m. The P8 wall is at 75.504 m.
 - **Who was in it.**
   - Every registered mode sits at 4 substeps with z ≤ 1.19. Every `seas_ml` = 1 mode file has h_ml ≤ 65.23 m.
-  - 51 of the 434 start-file endpoints were unstable, 13 of them converged. A material artefact needs z ≥ 3.84: 17
+  - 51 of the 434 start-file endpoints were unstable, 13 of them converged. A material artifact needs z ≥ 3.84: 17
     points, 16 of them positive.
   - Only ONE converged start is materially off: 09-16 `hilda_c` id 23 (+27.6).
-  - MCMC stage 1 (`hilda33d`) made one excursion, to 73.34 m (2 draws), with an artefact of +0.004.
+  - MCMC stage 1 (`hilda33d`) made one excursion, to 73.34 m (2 draws), with an artifact of +0.004.
   - The Laplace misses the h_ml ridge's reach (99.9 % at 59.2 m against the MCMC's 69.5 m).
 - **After the fix.**
   - At 017's h_ml on the canonical's column the count is 29; doubling it moves SH CO₂ by 1.7e-7 relative, against

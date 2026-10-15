@@ -21,7 +21,7 @@ shape it did) and `calibration/torch/README.md`. Memory: [[ccx_one_basin_at_25_p
 3. ⛔ **The 22-parameter two-basin structure does not exist at 25 parameters.** §2
 4. ✅ **Both sub-questions answered**: ENSO seeding bought **0.0000**; the observation-implied
    partition converged to the same mode. §3
-5. ⚠ **36 dispersed tasks CANCELLED by Marcus** once the answer was clear. The bound is 4 dispersed
+5. ⚠ **36 dispersed tasks CANCELED by Marcus** once the answer was clear. The bound is 4 dispersed
    starts at ONE dispersion — not a proof. §4
 6. ⛔ **TWO FIXES OWED AND UNCOMMITTED.** A clobbered `PROJ` wrote round 1 into the SLR-RFF-BRICK
    tree; a collector threshold prints a false verdict. §5
@@ -31,7 +31,7 @@ shape it did) and `calibration/torch/README.md`. Memory: [[ccx_one_basin_at_25_p
 
 ## 1. ⭐ THE RESULT
 
-Job **16732800**, `--array=0-45%10`, `cpu_short`, 180 min budget. **10 COMPLETED, 11 CANCELLED.**
+Job **16732800**, `--array=0-45%10`, `cpu_short`, 180 min budget. **10 COMPLETED, 11 CANCELED.**
 
 | id | start | start log-post | final |
 |---|---|---|---|
@@ -84,7 +84,7 @@ been meaningless.
 
 * **ENSO seeding bought 0.0000.** Seeded and unseeded reach the same point; Nelder-Mead finds the
   ocean direction unaided within one restart, so the **+1.91 conditional advantage does not survive
-  re-optimising.** ⭐ **This is measurable ONLY because ids 1/2 were kept as unseeded controls.**
+  re-optimizing.** ⭐ **This is measurable ONLY because ids 1/2 were kept as unseeded controls.**
   Watch the ordering flip mid-run: at restart 1 the controls led; at restart 2 the seeded led; both
   gaps were sub-log-unit. **Sub-noise differences that swap sign between restarts are noise, and
   reading a winner off either snapshot would have been wrong.**
@@ -94,7 +94,7 @@ been meaningless.
 
 ## 4. ⚠ WHAT THE SURVEY DOES *NOT* SHOW
 
-**4 dispersed starts at ONE dispersion** (sd 1.0466 about the cold init). 36 more were cancelled
+**4 dispersed starts at ONE dispersion** (sd 1.0466 about the cold init). 36 more were canceled
 deliberately, on the reasoning that they would repeat the answer. That is a **bound, not a proof**
 ([[no_power_null]]). If a reviewer asks "could there be a better basin?", the honest answer is that
 4 random starts spanning −10⁵ to −2×10⁶ all found this one, and no wider search was run.
@@ -133,9 +133,9 @@ untouched.
 ### 5b. `collect_dispersed_multistart.R` — a bound that does not match its claim
 
 The verdict gates at **`1e-8`**, which is the right bound for an **evaluation identity** (port gate
-a) and the wrong one for comparing two **optimiser outputs**. It printed *"4 dispersed starts did
+a) and the wrong one for comparing two **optimizer outputs**. It printed *"4 dispersed starts did
 NOT reach the best re-converged known basin"* for a difference of **−0.0000**. Key it off the
-optimiser's convergence tolerance instead. ⚠ This is [[gate_bound_matches_its_claim]], reproduced by
+optimizer's convergence tolerance instead. ⚠ This is [[gate_bound_matches_its_claim]], reproduced by
 me in the same session that cited it.
 
 ## 6. ⚠ THE OPEN DECISIONS
@@ -154,7 +154,7 @@ me in the same session that cited it.
 ## 7. ⚠ NON-OBVIOUS STATE, AND THE TORCH LESSONS
 
 * **Data:** `/scratch/ms17839/CarbonCycleEmulator/calibration/output/multistart_20260901_enso25/`
-  — 10 `start_*.rds`, 10 checkpoints, `summary.csv`. Checkpoints for the cancelled ids 10–19 are
+  — 10 `start_*.rds`, 10 checkpoints, `summary.csv`. Checkpoints for the canceled ids 10–19 are
   partial and harmless (the collector reads only `start_*.rds`).
 * ⭐ **`Rscript -e` EATS `$` ON TORCH** [[torch_rscript_e_eats_dollar]]. The r/4.5.1 module is a
   Singularity wrapper that re-quotes argv into a **double-quoted** `bash -c`. `bp$pump_mode <- "N"`

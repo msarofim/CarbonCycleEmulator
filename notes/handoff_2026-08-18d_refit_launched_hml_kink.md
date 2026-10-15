@@ -82,7 +82,7 @@ redone.
 1. The kink list is **DERIVED in-process** from `ccx_pump_shape()`, never typed, so it cannot drift
    from the code that creates the kinks. A count ≠ 3 prints a re-run warning.
 2. **Kink-proximity check at the found mode**, with `ARM_HESS_EPS` converted from the unconstrained
-   scale to **metres at wherever in the band the mode actually sits** (2.06e-3 m at h_ml 94.36,
+   scale to **meters at wherever in the band the mode actually sits** (2.06e-3 m at h_ml 94.36,
    2.57e-3 m at 100 — the logit scale position matters). A straddle prints loudly that this arm's
    `log|-H|` and Laplace evidence are unreliable.
 3. **Diagonal step-stability re-measured AT the mode** (eps × 1/3, 1, 3). The pre-refit sweep could

@@ -5,7 +5,7 @@
 **Nothing is running.** **Suite: 1157 pass / 0 fail** (unchanged — `R/` and `src/` were never
 touched today). Four commits, `74ad6ed..7364f4c`.
 
-**⚠ TWO DECISIONS ARE OWED (§6), and one of them is not a modelling choice — it is whether the
+**⚠ TWO DECISIONS ARE OWED (§6), and one of them is not a modeling choice — it is whether the
 model may use the GPP end of a 1.4× product disagreement.**
 
 ---
@@ -31,7 +31,7 @@ model may use the GPP end of a 1.4× product disagreement.**
 
 Collect: `notes/collect_2026-08-27h_tau_ex_has_no_power_and_the_wrong_sign.md`. Commit `1daa92f`.
 Two new diagnostics: `calibration/diag_tau_ex_seasonal_power.R` (15-point profile, gradient offsets
-re-optimised, ~12 min) and `diag_tau_ex_conditional_power.R` (whole 8-par slice re-optimised at
+re-optimized, ~12 min) and `diag_tau_ex_conditional_power.R` (whole 8-par slice re-optimized at
 fixed `tau_ex`, ~35 min).
 
 **The wider slice was NOT run and no prereg was written for it.** Its null was structurally
@@ -44,7 +44,7 @@ guaranteed. [[no_power_null]]
 - **INVARIANCE.** Over an 8× grid at any price: SPO total −1.7 %, **SH-LOCAL land +1.7 %**, while
   NH-origin falls 73 %.
 - **SIGN.** At 4.00τ (−4529 log-units) the inversion's SPO land ratio goes **2.01× → 2.07×,
-  WORSE.** NH-origin peaks month 6.47, SH-local land 10.09 — **108° apart, partly CANCELLING.**
+  WORSE.** NH-origin peaks month 6.47, SH-local land 10.09 — **108° apart, partly CANCELING.**
 
 **This is the second half of 27e**, which exonerated `tau_ex` as a PARTITION lever but was frozen
 in the other 20 parameters and called every cost an overstatement. 27h §4 said the binding error is
@@ -116,12 +116,12 @@ All four arms converged (1 restart, last gain 0.0000). ~75 min.
 | δ¹³C-per-ppm | 1.940 | **1.390** | 1.000 |
 
 At 9.24 the ocean limb is nearly IN PHASE with land at 10.08, so they now **ADD** where they
-cancelled — the assembly nature uses ([[seas_spo_two_wrong_pieces]]). But:
+canceled — the assembly nature uses ([[seas_spo_two_wrong_pieces]]). But:
 
 1. **SH-local land is still 0.906 = 1.33× the observed 0.683.** The GPP end was not far enough, so
    two in-phase parts overshoot → **P4, total 1.267 vs gate [1.114, 1.222]**.
 2. **The wrong-phase solubility limb is still carried at `sst_seas_amp_SH` = 0.656** (37.6 % of
-   observed, z −3.92), cancelling the channel and holding the net ocean at 0.258 vs 0.522 →
+   observed, z −3.92), canceling the channel and holding the net ocean at 0.258 vs 0.522 →
    **P5, 0.495× vs a ≥0.75 gate**.
 
 ⚠ **`seas_T_amp_NH` lands at 31.41, prior z +3.50** — the largest positive flag in the slice, moving
@@ -170,7 +170,7 @@ it, **not clean.** Do not quote the slice as tidy.
 
 ## 6. ⇒ THE TWO DECISIONS OWED
 
-### (i) A MODELLING CHOICE — where next
+### (i) A MODELING CHOICE — where next
 
 - **(A) RE-DERIVE THE (shape, size) PAIR — my recommendation.** `CCX_SEAS_PHI_EFF['SH'] = −30` and
   `SEAS_NPP_AMP_SH` fitted TOGETHER against the observed SH productivity cycle, as `R/constants.R`
@@ -179,13 +179,13 @@ it, **not clean.** Do not quote the slice as tidy.
   re-fitted** — 75 won that contest in the NH, −30 was not tested the same way.
   [[ccx_phi_eff_amplitude]] already reports the latitudes right and the amplitude not.
 - **(B) PIN `sst_seas_amp_SH`, or price it honestly.** It sits at 37.6 % of observed, z −3.92,
-  cancelling a channel that now works. [[orthogonality_bounds_efficiency]] — pin the lever when the
+  canceling a channel that now works. [[orthogonality_bounds_efficiency]] — pin the lever when the
   conclusion needs it, and measure the exchange rate rather than arguing about it.
 - **(C) 4b, the second SH ocean column.** Not ruled out, **no longer indicated**: the existing
   channel reached its physical band and the right phase. Revisit only if (A) and (B) leave a
   residual that is genuinely oceanic.
 
-### (ii) NOT A MODELLING CHOICE — is the model ENTITLED to the GPP end?
+### (ii) NOT A MODELING CHOICE — is the model ENTITLED to the GPP end?
 
 **`seas_npp_amp_SH` was FIXED, not fitted, in every arm.** A clean interaction shows the two
 corrections COUPLE. **It does not show that 0.352 is the right value.** PsnNet and GPP disagree by

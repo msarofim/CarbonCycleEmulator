@@ -38,7 +38,7 @@ For each row `r ∈ {dic, d13c, alk}`, replace the hard skip with
 logL_r(h)   = dnorm(model_grad_r(h), target_r, σ_eff,r(h), log = TRUE)
 ```
 
-**The normalisation term `−log(σ_eff √(2π))` is RETAINED.** This is the whole mechanism: without it,
+**The normalization term `−log(σ_eff √(2π))` is RETAINED.** This is the whole mechanism: without it,
 inflating σ would be free and the design would collapse back into a taper. With it, widening is
 *charged for*, and the best any inflation can do at a miss of `m` is `σ_eff = |m|`, giving
 `−log(|m|√(2π)) − ½`. Bounded, and the bound is what makes (B) tractable.
@@ -135,7 +135,7 @@ entirely.
 | input | status |
 |---|---|
 | `σ_rep` for all three rows | **DONE** — 16g part 4 (DIC, δ¹³C) + `diag_alk_sigma_rep.R` (ALK) |
-| the form, and that normalisation is retained | **DONE** — §2 |
+| the form, and that normalization is retained | **DONE** — §2 |
 | the quadrature assumption, stated | **DONE** — §3 |
 | build/interpolation design + gates | **DONE** — §4, §5 |
 | **the cost, re-derived over all three rows** | **BLOCKED on the refit** — §6 |

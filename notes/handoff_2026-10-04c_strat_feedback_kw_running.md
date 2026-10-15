@@ -45,7 +45,7 @@ Self-contained. **Last updated 2026-10-04 19:50** (Marcus: "write a handoff"). T
 - **(o) The preview** (`calibration/diag_mix_preview.R` → `outputs/diagnostics/mix_preview_20261004.*`):
   - every registered mode −1.5 to −1.9 likelihood, unrefitted;
   - futures SMALL: SSP5-8.5 +2.5 ppm at 2100 and +5.5 at 2300 (q ½–2: +2.7 to +11.0), vvH +2.9, low scenarios ≈ 0;
-  - the record mildly disfavours it (−1.40 at the cited s after kz);
+  - the record mildly disfavors it (−1.40 at the cited s after kz);
   - CCX's EXISTING ocean climate effect (−0.43 GtC/yr, 2015–24 vs a 1901–20 climate held) against GCB's
     −0.20 ± 0.05 is NOT like-for-like and is OPEN (§4).
 
@@ -102,7 +102,7 @@ Self-contained. **Last updated 2026-10-04 19:50** (Marcus: "write a handoff"). T
   - `R/model.R`: helpers `ccx_mix_on()`, `ccx_kz_upper()`, `ccx_mix_g_series()`, `ccx_mix_tdeep_after()`,
     `ccx_point_mix_g()`; `ccx_pump_export(…, kz_override)`; `ccx_prepare()` builds aux `mix_on` / `kz_up` /
     `pump_up`; `ccx_deriv()` applies both substitutions.
-  - `R/forcing.R` (`ccx_forcing_at()`, the runner) and `R/cpp.R` (marshalling, `ccx_run_prepared(…, tdeep0)`,
+  - `R/forcing.R` (`ccx_forcing_at()`, the runner) and `R/cpp.R` (marshaling, `ccx_run_prepared(…, tdeep0)`,
     `ccx_deriv_fast`).
   - `src/ccx_core.cpp` (`Aux`, `deriv()`, `ccx_deriv_cpp()`, `ccx_run_cpp()`).
   - `R/constants.R` (`MIX_STRAT_S`, `_Q`, `_Q_LO`, `_Q_HI`, `MIX_TDEEP_TAU`).
@@ -131,7 +131,7 @@ Self-contained. **Last updated 2026-10-04 19:50** (Marcus: "write a handoff"). T
   `INDEX_ccx_ocean_struct` (14,255 B, just under its 14 KB soft budget) and `INDEX_infra`.
 - **Pending:** nothing uncommitted. The full suite has not been re-run (§4 item 8).
 
-## 4. Open items, in order (each is Marcus's to prioritise)
+## 4. Open items, in order (each is Marcus's to prioritize)
 1. **Land the `k_w` price arm** (§3).
 2. **Objective #16:** the greening decision plus the stratification feedback, then ONE refit (the D1 precedent). It
    waits on THREE rulings from Marcus:

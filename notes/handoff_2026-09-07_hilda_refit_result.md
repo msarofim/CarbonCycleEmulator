@@ -27,7 +27,7 @@ Torch logs), `outputs/diagnostics/hilda28_{predictions,basins}_20260907.{rds,log
 * Declaring `h_hs = h_ml` coupled the HS bomb capacity to the mixed layer; every basin moved `h_ml`
   to an extreme (37–47 or 184–200 m). Not separated before launch.
 
-## 3. ⇒ NEXT — the ruling, then three tests (each local, ~10 min: conditional re-optimisation from a stored start)
+## 3. ⇒ NEXT — the ruling, then three tests (each local, ~10 min: conditional re-optimization from a stored start)
 **The ruling:** what is the LEVEL's weight in the profile row? Options, none pre-decided: (a) keep
 #9 (the correlation is measured; a 50 ‰ common miss at 3.2σ costing 5 units IS the statistics of a
 ±15 ‰ mean); (b) the independent rows + the B−deep contrast as a fourth row (keeps the level's
@@ -35,12 +35,12 @@ triple weight; over-counts, and says so); (c) the MVN with the common-mode varia
 n_eff (10.3²) rather than the 16-block bootstrap. The column's shape error (−48 under #9) and the
 winner's level error (−35 under #8) are the two numbers any choice has to be argued against.
 **Then:**
-1. `h_hs` DECOUPLED from `h_ml` (fixed 134, or free): re-optimise from the winner AND from the
+1. `h_hs` DECOUPLED from `h_ml` (fixed 134, or free): re-optimize from the winner AND from the
    structural start (ids 12 and 43). Does `h_ml` return; does `hs_asx_frac` leave the floor?
 2. The exchange floor lowered ([0.02, 2]): does the winner drive it to zero? A cold box that wants
    NO air–sea exchange is a "delete the HS box" signal, not a fit.
-3. Re-optimise the structural start under the ruled objective and print the pump gradient rows:
-   is −21.9 a K_deep-too-small artefact (it should shrink as f rises toward 0.05) or the structure's.
+3. Re-optimize the structural start under the ruled objective and print the pump gradient rows:
+   is −21.9 a K_deep-too-small artifact (it should shrink as f rises toward 0.05) or the structure's.
 
 ## 4. NON-OBVIOUS STATE
 * Torch: nothing running; `multistart_20260907_hilda28/` there = here. Nothing else changed.

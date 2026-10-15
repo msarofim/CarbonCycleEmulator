@@ -100,7 +100,7 @@ Integrating the deepening limb, `(c₁ − c) ∝ 1/h`, hence
 anomaly is continuously relaxed toward the atmosphere, whereas the shim never had to survive
 equilibration. ⚠ **The band omits that damping entirely**, so as an undamped construction it should
 *overpredict*; instead its under-sized `f_ent` factor pulls it back down. **Two errors partially
-cancelling** — the pattern this project has been burned by three times.
+canceling** — the pattern this project has been burned by three times.
 
 **The functional forms are also distinguishable on the hemispheric RATIO, which is the cleanest
 discriminator available because it divides ΔC out:**
@@ -112,7 +112,7 @@ discriminator available because it divides ΔC out:**
 | **the model** | **0.96** |
 
 ⇒ the model's hemispheric contrast is **6 %** from the moving-boundary form and **26 %** from
-`f_ent`. ⚠ This compares two ALGEBRAS against the model's behaviour — it is a statement about which
+`f_ent`. ⚠ This compares two ALGEBRAS against the model's behavior — it is a statement about which
 formula describes the mechanism, **not** evidence that the model is right.
 
 ### 3d. ⛔ THE DEEPEST ONE: P1's quantity is UNOBSERVABLE IN PRINCIPLE

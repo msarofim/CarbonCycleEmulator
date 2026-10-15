@@ -43,7 +43,7 @@ decoupling class. A third hand-rewrite buys a year at most, so both now fail lou
   with NO slot in `ccx_default_params()`** — global.R carries them separately — so they printed
   "—" although the app runs on their fitted values. **Any loop over `CCX_PARAM_NAMES` against a
   parameter LIST silently misses these three.**
-- **N12 — the pins and the shims were two lists presented as one.** Two labelled tables now, with
+- **N12 — the pins and the shims were two lists presented as one.** Two labeled tables now, with
   the **overlap COMPUTED** (7 stand-ins, 9 pins, 3 in both at `hilda29l`, all held at 0 — i.e.
   stand-ins switched off). `RV_SHIMS` is sourced to the 09-16 whole-model review and gated by
   `rv_validate_shims()`, 4 more mutation-tested checks.
@@ -110,18 +110,18 @@ and undershoots the growth rate). The C2 panel is now the natural place for it.
 ## 5b. NEXT — what is actually owed
 1. ⏳ **R2 — `rep_dC`'s prior. THE SIDE TEST IS DONE** (`diag_rep_dc_prior_centre_width.R`,
    CHANGELOG 09-22 (u); run at `outputs/diagnostics/rep_dc_prior_centre_width_20260922.log`).
-   **Re-centring alone: +0.049 ppm, free.** **Tightening σ 1.0→0.2: −1.65 ppm at −17.6
-   log-units.** ⭐⭐ **They INTERACT** — the tightening costs 28.7 centred at 0 but 17.6 centred
-   at the measured 0.78, so **the centre matters only once the width is tight**; if it is ever
-   tightened it must be re-centred in the same move. ⛔⛔ **And who pays is NOT the station
+   **Re-centering alone: +0.049 ppm, free.** **Tightening σ 1.0→0.2: −1.65 ppm at −17.6
+   log-units.** ⭐⭐ **They INTERACT** — the tightening costs 28.7 centered at 0 but 17.6 centered
+   at the measured 0.78, so **the center matters only once the width is tight**; if it is ever
+   tightened it must be re-centered in the same move. ⛔⛔ **And who pays is NOT the station
    levels** (`co2_level_MLO` +0.92, `co2_level_SPO` +0.31, `d13c_level_SPO` +8.56 all IMPROVE):
    the cost is **`co2_icecore` −13.45** and **bomb-¹⁴C −10.7**. The offset is held up by the
    preindustrial anchor and the ventilation constraint. **The measured offset is now ON CARD 1**,
    as Marcus ruled. Remaining for R2 proper: ⛔ An OBJECTIVE change (freeze record §4.1: a ruling, then
-   a restamp of every mode). **The measurement is in** (§4). What it says: re-centring on +0.78
-   moves the fit z +3.52 → +2.74, **relieving 22 % and relabelling 78 %** — and
-   [[ccx_rep_dc_prior]] already measured the centre as **nearly inert** (likelihood-only optimum
-   5.62 ppm at curvature sd 0.097, ~10× tighter than the prior), so re-centring would barely move
+   a restamp of every mode). **The measurement is in** (§4). What it says: re-centering on +0.78
+   moves the fit z +3.52 → +2.74, **relieving 22 % and relabeling 78 %** — and
+   [[ccx_rep_dc_prior]] already measured the center as **nearly inert** (likelihood-only optimum
+   5.62 ppm at curvature sd 0.097, ~10× tighter than the prior), so re-centering would barely move
    the fit at all. **The WIDTH is the live question**: a representation term's defensible σ floor
    is ~0.2 ppm (Francey et al. 2019), 5× tighter than today's 1.0, at which the same value sits at
    z +13.7. ⛔ >1/3 of the offset's value is isotopic — never a CO₂-only ruling.
@@ -194,7 +194,7 @@ and undershoots the growth rate). The C2 panel is now the natural place for it.
   and the standing rule in `~/.claude/CLAUDE.md` now carries the professional/informal split
   rather than a single form.
 - **Memory updated, retraction propagated**: `ccx_rep_dc_co2_bias` (the retracted paragraphs are
-  marked in place, not deleted), `ccx_rep_dc_prior` (cross-linked — it is why re-centring would
+  marked in place, not deleted), `ccx_rep_dc_prior` (cross-linked — it is why re-centering would
   not move the fit), two new files `ccx_app_label_tables_gated` and
   `ccx_app_says_what_it_is_fitted_to`, both indexed in `INDEX_ccx_ref.md` (8.9 KB, well inside
   budget).

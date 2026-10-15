@@ -111,11 +111,11 @@ FUTURE.
     here.
 
 **Pre-registered predictions** (write them in the prereg before any run):
-- fertilisation amplitude falls;
+- fertilization amplitude falls;
 - the post-2100 land sink falls toward Koven;
 - q10 can rise;
 - modern NPP: (a) and (b) RAISE NPP, while (c) does not. ⇒ **D4's hope rests mostly on (c)**, and on the
-  fertilisation amplitude falling.
+  fertilization amplitude falling.
 
 ### Step 2: build D2
 - Structure labels chained from `hilda_csl3v0kai`: one per driver, plus all three together.
@@ -129,7 +129,7 @@ FUTURE.
   - conservation;
   - mutation-test every guard.
 
-### Step 3: D3, the imbalance allocation (an OBJECTIVE CHANGE, #13 → #14, authorised by D3)
+### Step 3: D3, the imbalance allocation (an OBJECTIVE CHANGE, #13 → #14, authorized by D3)
 
 **Today.** `R/likelihood.R` ~2424 scores ANNUAL model sinks:
 - `gcb_ocean_sink` against GCB's ocean sink, σ `LIK_GCB_OCEAN_SD`;
@@ -159,7 +159,7 @@ land (09-24 identity, [[ccx_land_sink_is_gcb_imbalance]]; at arm A, 09-30 c).
   GCB's land sink plus ALL of the imbalance.
 - It also already computes the 5-term identity (`app_imbalance_identity()`).
 - With D3 it can draw `GCB_land + s_land · Imb(t)` (and the ocean equivalent) as **"this calibration's
-  attribution"**. That is the fitted solution, labelled as the MODEL's attribution, not GCB's and not an
+  attribution"**. That is the fitted solution, labeled as the MODEL's attribution, not GCB's and not an
   uncertainty.
 - `IMB_BAND_NOTE` / `IMB_BAND_SHORT` and the test's wording assertions change with it.
 - Even before D3, the identity gives the model's IMPLIED allocation and could be drawn now.
@@ -168,7 +168,7 @@ land (09-24 identity, [[ccx_land_sink_is_gcb_imbalance]]; at arm A, 09-30 c).
 - **Screen.** Extend `calibration/diag_alignment_screen.R` (arms, soft constraints, scorecard, futures;
   env `AS_ONLY`, `AS_TAG_SUFFIX`, `AS_SMOKE`) with the D2 labels and the D3 objective.
   - The scorecard is the acceptance view: pools, NPP, GPP, sinks vs GCB, soil Δ¹⁴C vs Shi, the
-    fertilisation responses (Keenan, 400→564, 2×, 4×), q10, and the Koven windows.
+    fertilization responses (Keenan, 400→564, 2×, 4×), q10, and the Koven windows.
 - **Then the refit** on the new label and objective #14.
   - **Consider Torch first** (standing rule: say the verdict out loud; Torch is free as of 09-26, but ask
     first).
@@ -199,12 +199,12 @@ land (09-24 identity, [[ccx_land_sink_is_gcb_imbalance]]; at arm A, 09-30 c).
 ## 4. Still open (not ruled)
 - **R2** (`rep_dC` prior): the menu is in `notes/r2_explained_2026-09-30.md` §6.
   - (a) keep it as a named shim;
-  - (c) σ 0.2 centred on 0.776: `rep_dC` 1.74 for −16.0.
+  - (c) σ 0.2 centered on 0.776: `rep_dC` 1.74 for −16.0.
   - Quote its future only from a full refit.
 - **`ra_ratio` ≈ 0.08:** free it at the refit, under the AR6-GPP cap (`AS_GPP_PI` 113)?
   +3.2 log-units; otherwise inert.
 - **A century-scale q10 split:** worth it only together with D2. On its own it trades against
-  fertilisation (J5/J6).
+  fertilization (J5/J6).
 - **The K prior stays 0.35** (e).
 - **Carried from earlier handoffs:**
   - the prereg P1 wording;
@@ -292,7 +292,7 @@ Extended:
   Δ 4.9e-4. Its SSP5-8.5 2300 CO₂ is **1406.71**.
 - Arm A (`ka`) fixed-stock τ-500 control: 2300 = **1387.8816**. v0k: **1388.28**.
 
-**Screen behaviour to remember.**
+**Screen behavior to remember.**
 - Soft penalties at the literature σ are too weak to move this record. To change the fit, change the
   structure or the objective (D2, D3).
 - q10 = 2 rails β_max at its hard bound of 3.0 (J5). If a new structure still rails β_max, inspect the

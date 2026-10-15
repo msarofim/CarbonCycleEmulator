@@ -23,7 +23,7 @@ Marcus asked: *"So it seems like the factor of 1.2 creates inconsistencies with 
 ⚠ **The premise was corrected before acting.** The ÷1.20 does **NOT** create an inconsistency *between* Graven and Hua — they disagree with each other in 1963–65 either way and the divisor does not touch that. It makes the **MODEL** fit the observed Δ¹⁴C record worse, and that cost lands **post-1970, where the two compilations AGREE to 2–3 ‰**. The corrected statement — *it degrades agreement with the best-established part of the observations* — still supports the revert, so the revert proceeded.
 
 **The case, in the order it actually carries weight:**
-1. ⭐⭐ **The cost is not where the forcing moved.** Localised per year (self-checked against `ccx_loglik`'s own stream totals): the 1955–62 "dump" carries **−22.0** of the −92.7 and only **−5.5** of the SH's −69.5; **post-1970 carries −49.9 (54 %), of which the SH is −45.4 (65 % of its own)** — *outside* the bomb window, at **σ ≈ 7 ‰ not 25**, in the years the compilations agree. And the model was **already z +4.31 too low in SH 1971 BEFORE the de-biasing** (→ +6.13 after), so it deepens a pre-existing deficit the fit could not close at the old forcing either.
+1. ⭐⭐ **The cost is not where the forcing moved.** Localized per year (self-checked against `ccx_loglik`'s own stream totals): the 1955–62 "dump" carries **−22.0** of the −92.7 and only **−5.5** of the SH's −69.5; **post-1970 carries −49.9 (54 %), of which the SH is −45.4 (65 % of its own)** — *outside* the bomb window, at **σ ≈ 7 ‰ not 25**, in the years the compilations agree. And the model was **already z +4.31 too low in SH 1971 BEFORE the de-biasing** (→ +6.13 after), so it deepens a pre-existing deficit the fit could not close at the old forcing either.
 2. **Gate 5's newly-ruled trough flips PASS → FAIL** (z −1.80 → −2.55). ⚠ A **SOFT** flip: both arms are on the same side of the observation, and the bound is a 30 %/4-draw tolerance.
 3. **λ 0.1996 → 0.3490 /yr**, so gross air-sea exchange at Tans' own Broecker flux covers **75 % → 43 %** — DATA.md §9 names that agreement as the main evidence the budget-closure step is sound.
 
@@ -62,7 +62,7 @@ Marcus asked: *"So it seems like the factor of 1.2 creates inconsistencies with 
 - ⚠ **`excess_c14_ocean` at 1995 sits ~72 kmol against an upper bound of 59** even after rescaling `bomb_total`. A SCORED stream, so the fit already sees it — check arc state before calling it new.
 
 ## 7. ⛔ THE METHOD LESSON OF THE DAY
-**Twice in one session the penalty's mechanism was asserted from where the FORCING CHANGED rather than from where the COST LANDED, and both times it was wrong.** Localise a cost in time before explaining it. Both explanations were retracted in-pass at every quoting site.
+**Twice in one session the penalty's mechanism was asserted from where the FORCING CHANGED rather than from where the COST LANDED, and both times it was wrong.** Localize a cost in time before explaining it. Both explanations were retracted in-pass at every quoting site.
 
 ## 8. What I would do first next session
 1. **Merge `isotopic-audit-20260909` → `main`.** Nothing is owed, the suite is at its pre-existing 3, and the branch now carries four closed rulings plus five new diagnostics.

@@ -53,10 +53,10 @@ default instead of the legacy scalar → 5), and `test-seas-lag-split.R` now exe
 - **BOTH ARMS.** `from90` (free) and `pin90` (`fert_k` pinned at 90 via `CCX_PIN_PARAMS`). The pinned
   arm re-measures `PIN_PRIOR_CREDIT`.
   ⚠ **The 08-30 refit WIDENED the arm gap** (−21.19 vs the incumbent arms' −19.86) and showed the
-  excess **−9.52 is a likelihood differential re-optimisation cannot recover**, so
+  excess **−9.52 is a likelihood differential re-optimization cannot recover**, so
   `test-mode-file.R`'s premise is **permanently** false. This run re-measures the gap on comparable
   arms; it is not expected to close it.
-- **`h_ml` UNBOUNDED over its shipped support [30, 200]**, prior NOT renormalised — unchanged from
+- **`h_ml` UNBOUNDED over its shipped support [30, 200]**, prior NOT renormalized — unchanged from
   08-30; both original reasons for the bound are discharged.
 - **The seasonal `tau_ex` diagnostic is NOT fitted here.** `tau_ex_seas_amp` / `tau_ex_seas_phase`
   are `base_param`s at default 0, so this run scores the shipped model bit for bit. Fitting them is

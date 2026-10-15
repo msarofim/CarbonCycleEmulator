@@ -48,7 +48,7 @@ O5b: "yes: prereg, build, probe". `h_ml`'s box floor → 42.5 m (the Holte prior
 - `INDEX_ccx.md` is 16.7 KB (soft 14): merge before the next add.
 
 ## 4. Non-obvious state
-- `pump_hs_seas_amp` / `_lag` are STRUCTURAL (on `p`, default 0, marshalled by name, not in the table); `aux$hs_export_seas_coef` is built
+- `pump_hs_seas_amp` / `_lag` are STRUCTURAL (on `p`, default 0, marshaled by name, not in the table); `aux$hs_export_seas_coef` is built
   whenever the HS pump is on (cached read of the CMIP6 rds) and is inert at amp 0.
 - Any diagnostic that compares a stored logpost must go through `ccx_mode_start()` (the band term) or `ccx_adopt_mode_band()`; the
   band-blind `ccx_unc_to_par(md$u_mode)` is wrong for EVERY pre-09-16 file now, the canonical included.

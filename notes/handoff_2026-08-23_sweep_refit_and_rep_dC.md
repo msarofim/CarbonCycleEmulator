@@ -24,7 +24,7 @@ items** — panel #7 (gates at defaults) and panel #12 (`rep_dC`'s prior).
 8. **`diag_fit_at_mode.R` was stale five ways** and printed MISMATCH on all 14 rows while its
    rankings were quoted into memory. Fixed; its gate is now fatal with an empty allow-list. §4.
 9. **The per-direction Hessian is folded into the refit driver.** No more manual second step. §5.
-10. **`rep_dC`: panel item #12 does not survive measurement.** Re-centring moves the fit ≤0.03 ppm
+10. **`rep_dC`: panel item #12 does not survive measurement.** Re-centering moves the fit ≤0.03 ppm
     and only relabels the flag. The prior was NOT changed. §6.
 11. **Marcus's challenge to §6's framing is live and only partly answered.** §6b — the test that
     would settle it needs data not in the repo.
@@ -55,7 +55,7 @@ that is not a refinement, it is the whole measurement.
 
 **Gate 12's background is not the explanation and points the other way**: the mode's held 2010
 background is 394.8 ppm vs the defaults' 387.6, and a higher background makes a pulse last
-*longer* (in-model PI 33.9 vs PD 42.1). It fails in spite of a bias in its favour. `ccx_irf()` is
+*longer* (in-model PI 33.9 vs PD 42.1). It fails in spite of a bias in its favor. `ccx_irf()` is
 a paired difference so the imperfect hold cancels.
 
 **Gate 4 is the imbalance-immune target.** AF = growth ÷ emissions; GCB's `imbalance` is the
@@ -144,7 +144,7 @@ Verified: driver vs reference `max|ΔH|/max|H|` **1.4e-8**; rewired `recompute_h
 own prior output **bit-identical**. Confirms `ccx_hess_step_sd` by measurement — the scalar 3e-4
 is **250× too small for `h_ml`, 167× `kz`, 67× `gamma_enso`**.
 
-**A 3.0e+04 "relative difference" in the first comparison was a DENOMINATOR ARTEFACT** — worst
+**A 3.0e+04 "relative difference" in the first comparison was a DENOMINATOR ARTIFACT** — worst
 cell `[rep_dC, bomb_total]` where the reference is exactly 0.0. **Compare Hessians by matrix
 norm, not cell-wise.**
 
@@ -161,9 +161,9 @@ each direction's actual step at 0.02.
 
 ### 6a. What was measured
 
-- **The centre is nearly inert.** Likelihood-only optimum **5.62 ppm, curvature sd 0.097** with
-  `k_w`/`bomb_total` re-optimised — the data are ~10× tighter than the 1.0 ppm prior.
-  **Re-centring anywhere in [0, 3] ppm moves the posterior ≤ 0.03 ppm** and moves `prior_z`
+- **The center is nearly inert.** Likelihood-only optimum **5.62 ppm, curvature sd 0.097** with
+  `k_w`/`bomb_total` re-optimized — the data are ~10× tighter than the 1.0 ppm prior.
+  **Re-centering anywhere in [0, 3] ppm moves the posterior ≤ 0.03 ppm** and moves `prior_z`
   5.57 → 3.59 at μ = 2. **Demoting the top-ranked flag by relabeling is
   `prior_z_grid_scale` repeated on purpose.**
 - **The prior sd has no receipt for the quantity it constrains.** `LIK_CO2_REP_ERR` = 1.0 ppm is
@@ -207,7 +207,7 @@ transition problem is real for another reason.** Full write-up:
 `notes/lit_2026-08-23_1940s_co2_plateau.md`.
 
 - **The circularity caveat above is RETRACTED.** `obs$ice` is the RAW sample file, not the spline
-  — DATA.md:52 mislabelled it (now corrected). Overlap 1962–96: ice − SPO **−0.31 ± 0.15 ppm**;
+  — DATA.md:52 mislabeled it (now corrected). Overlap 1962–96: ice − SPO **−0.31 ± 0.15 ppm**;
   split by type **FIRN −0.40 ± 0.19 (n=20), ICE −0.24 ± 0.23 (n=27)**, differing by 0.16 ppm
   (t = −0.53, n.s.). Both independent of Scripps ⇒ genuine cross-validation. **Test 1 needed no
   download: the data were already on disk** — the second time that lesson has applied here.
@@ -230,10 +230,10 @@ transition problem is real for another reason.** Full write-up:
 1. **Raw Law Dome samples (DE08 / DE08-2 / DSS) instead of the spline.** Removes the circularity
    in 6b outright. This is the decisive one and it is a download, not an analysis.
 2. **Regress the ice-era residual on dCO₂/dt versus on cumulative emissions.** A firn/Δage
-   artefact scales with the growth rate; a model budget error scales with cumulative emissions.
+   artifact scales with the growth rate; a model budget error scales with cumulative emissions.
    Same shape as the GCB-imbalance regression that returned r = 0.771.
 3. **Give the ice term its own offset parameter and see if it is identified.** Directly
-   parameterises Marcus's hypothesis. If `rep_ice` is well determined and lands several ppm from
+   parameterizes Marcus's hypothesis. If `rep_ice` is well determined and lands several ppm from
    `rep_dC`, the eras genuinely differ; if it is unidentified or lands near zero, they do not.
    Costs an objective change and therefore a refit — now ~1 warm cycle.
 
@@ -248,7 +248,7 @@ span/width 3.6 draws, clustering 2. Corrected: excursion **± 0.016 → ± 0.041
 **13.1 σ → 5.1 σ**, range **~5–7 σ** across the `n_eff` estimator. **Never quote 12.7 σ again.**
 
 **The conclusion survives** — 5 σ still rejects a terrestrial explanation, so 2026-08-22 §4's
-withdrawal of the LUC time-profile programme stands. **A third error term is unquantified and now
+withdrawal of the LUC time-profile program stands. **A third error term is unquantified and now
 binding:** systematic/calibration drift that is *non-linear and localised near mid-century* (a
 constant offset cancels by construction; a linear drift is absorbed by the fitted trend). Nothing
 in the repo bounds it.
@@ -299,5 +299,5 @@ cd ~/Documents/2026/CodeProjects/CarbonCycleEmulator && claude --remote-control 
 > together**. And `q10`'s structural incapacity (γ_L ≈ −4 vs C4MIP −45.1 ± 50.6), the largest
 > listed item at 3 h–3 d.
 >
-> **Do NOT** re-run arm D, re-centre `rep_dC`'s prior, or scope a small-change refit at 20
+> **Do NOT** re-run arm D, re-center `rep_dC`'s prior, or scope a small-change refit at 20
 > restarts — a warm cycle finds the same mode.

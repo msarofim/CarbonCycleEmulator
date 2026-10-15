@@ -93,7 +93,7 @@ separately.
 
 ## 4. ⛔⛔ THE PHYSICS PROBLEMS — all four are structural, and three are in the ocean
 
-### 4a. **The ocean's ENSO response has the WRONG SIGN and is cancelled by a fitted coefficient**
+### 4a. **The ocean's ENSO response has the WRONG SIGN and is canceled by a fitted coefficient**
 Measured like-for-like (model's own annual ocean uptake regressed on annual Niño3.4 with a year
 term, n = 66):
 
@@ -120,7 +120,7 @@ seasonal lags. Amplitudes are per-hemisphere arrays; **timing parameters are not
 ### 4c. **Ocean carbon-uptake CAPACITY is too small on centennial timescales**
 IRF(100) = **0.276** against Joos et al. (2013)'s 0.409, while the tail SHAPE is inside their band
 and the **present-day ocean sink is right** (−0.32σ) and the **surface DIC is right** (−0.06σ).
-⇒ That combination localises it: not an uptake RATE error, not a surface carbonate error, but a
+⇒ That combination localizes it: not an uptake RATE error, not a surface carbonate error, but a
 **capacity/buffering** one in the interior. ⚠ Gate 12 is a comparison against another model, not an
 observation, so this is a **reported difference and an open research question** — the "P5 falsified"
 label is withdrawn. What is still owed is a **hypothesis**.

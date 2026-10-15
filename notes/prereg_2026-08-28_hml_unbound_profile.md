@@ -32,7 +32,7 @@ in which case `kz` and the `h_ml` bound are propping each other up and neither i
 ## 2. THE DESIGN
 
 Profile `h_ml` across the **SHIPPED** band [30, 200] — the model's own support, *not* the refit's
-[85, 120] — re-optimising the uptake set at every point:
+[85, 120] — re-optimizing the uptake set at every point:
 
     FREE : beta_max, fert_k, k_w, kz, pump_grad          (5)
     FIXED: h_ml (the profiled coordinate) and the other 15

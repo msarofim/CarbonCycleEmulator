@@ -85,7 +85,7 @@ points"**, which is why the C1 defect was a caveat and not a blocker. **That was
 refit band [85,120], and the 08-28 σ-inflation adoption RETIRED that band** — `h_ml` now has an
 interior maximum over its full prior support **[30,200]**, 4.9× wider.
 
-**26 kinks there**, density **0.086 → 0.153 per metre (1.78×)**, closest pair **0.33 m**. They
+**26 kinks there**, density **0.086 → 0.153 per meter (1.78×)**, closest pair **0.33 m**. They
 **cluster on the 25 m GLODAP bin edges** (tight groups at h_ml = 50, 75, 100, 125, 150, 175) because
 `h_ml` IS the first layer boundary and the deeper ones scale with it.
 ⚠ **`CCX_PARAM_TABLE$h_ml$init = 75` sits EXACTLY on a kink**, as `ARM_HML_INIT = 100` already did.
@@ -106,7 +106,7 @@ interpolating **S** rather than **shape** is C1 *and* conservative.
 
 ⚠ **BUT IT IS NOT "A CODE FIX, NOT A SCIENCE CHANGE"**, which is what the plan note claimed. It
 moves the pump field **9.6–15.8 % of the median layer step**, and the export is a DIFFERENCE of
-adjacent layers, so that is the scale the pump uses. And **a remap's between-edge behaviour is a
+adjacent layers, so that is the scale the pump uses. And **a remap's between-edge behavior is a
 SUB-BIN MODEL the data do not contain** — CUM exceeds its local 3-bin range in 10 of 29 intervals
 (worst 42 % of a bin step at ~450 m, the thermocline), while the incumbent's piecewise-CONSTANT
 assumption is equally absent from the data and is exactly what made it kinked. **Neither is "the
@@ -118,7 +118,7 @@ observations."**
 
 - **`CCX_GAMMA_DIFF_DEFAULT <- 0.25`** (`R/model.R`), used by BOTH `ccx_default_params()` and
   `ccx_cpp_par()` — the `CCX_FERT_FORM_DEFAULT` pattern, so R and C++ cannot disagree about what a
-  parameter list without the field MEANS. **NOT behaviour-preserving, deliberately.**
+  parameter list without the field MEANS. **NOT behavior-preserving, deliberately.**
 - **`ccx_pump_shape()` is the CUM remap.**
 
 **Suite 1227 / 7 fail / 2 skip. ATTRIBUTION RUN: with the remap adopted but `gamma_diff` back at 0,
@@ -201,7 +201,7 @@ Memory: [[default_off_hides_the_bug]].
 - **`refit_20260828_sigma_eff` — RATIFIED "do not adopt"** (Marcus). ⚠ The pinned-96 successor is
   **NOT** a config change: `ARM_HML_BOUND` is PROVENANCE-ONLY since `2153bd6`, a BOUND ≠ a PIN, and
   both are undecided.
-- **Two DIAGNOSTIC-ONLY authorisations (Marcus)**: a CMIP6 ensemble value for `SEAS_NPP_AMP_SH` may
+- **Two DIAGNOSTIC-ONLY authorizations (Marcus)**: a CMIP6 ensemble value for `SEAS_NPP_AMP_SH` may
   be USED but never shipped; a diagnostic arm may leave a bracket for MEASUREMENT, never adoption.
 - **Run drivers from a FROZEN COPY** ([[never_edit_a_running_script]]).
 - ⚠ The **seasonal arc's structural wall** from 08-29c is unchanged: one scalar `seas_lag_p` serves

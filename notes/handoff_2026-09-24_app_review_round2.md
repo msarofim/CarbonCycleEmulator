@@ -26,7 +26,7 @@ file, parameter or prior moved. Everything is app copy, notes, tests and memory.
 | **F5** | **APPROVED — Scenarios and Build-your-own span 1900–2150**, and the history→scenario splice sitting mid-frame is **accepted**. ⚠ That was the whole objection, so it is now a build item, not a question. | "I'm okay with the history->scenario splice being midframe" |
 | **F1 → F2 → F4** | **Build order fixed.** F1 the driver panel, then F2 the residual panels, then F4 the temp/CO₂ radio. | "Do F1, then F2, then F4" |
 | **F3** | **INVESTIGATE FIRST**: can FaIR estimate the ENSO residual? **If not, caveats in the text only.** See §4 — the answer is a qualified yes and the qualification matters. | "can we use FaIR to estimate the ENSO residual? Otherwise, just add caveats" |
-| **Q3** | **PURSUE** — separate forest regrowth from CO₂ fertilisation. "It may fix some of the mismatches." ⭐ §5 gives a TESTABLE hypothesis for which mismatch. | "I think this is worth pursuing" |
+| **Q3** | **PURSUE** — separate forest regrowth from CO₂ fertilization. "It may fix some of the mismatches." ⭐ §5 gives a TESTABLE hypothesis for which mismatch. | "I think this is worth pursuing" |
 
 ## 3. What is BUILT vs what is NEXT
 **BUILT and browser-verified (`50cd822`, pushed):** all ten COPY items C1–C10, zero
@@ -74,21 +74,21 @@ effect instead") is exactly that instinct. **Measure the overlap before building
    objective change. **Marcus's fallback — "otherwise, just add caveats to the text" — is the
    cheap branch and should be costed against the refit before anyone starts.**
 4. ⚠ Like-for-like: FaIR's GMST and IGCC must be on the **same reference window** before
-   differencing, or the residual carries a constant offset that is pure artefact.
+   differencing, or the residual carries a constant offset that is pure artifact.
 
 **Recommended first step (cheap, no model change):** difference the two series, regress the residual
 on Niño3.4, and report how much of the ENSO temperature signal the GMST driver is ALREADY carrying.
 That number decides whether F3 is a build or a caveat, and it is a few hours, not a refit.
 
-## 5. ⭐⭐ Q3 — forest regrowth vs CO₂ fertilisation, with a TESTABLE hypothesis
-**Today: in this model CO₂ fertilisation IS the land sink** — there is no separate land-uptake
+## 5. ⭐⭐ Q3 — forest regrowth vs CO₂ fertilization, with a TESTABLE hypothesis
+**Today: in this model CO₂ fertilization IS the land sink** — there is no separate land-uptake
 mechanism (`R/mechanisms.R`, the `fertilisation` caveat says so in as many words).
 
 ⭐ **THE HYPOTHESIS THAT MAKES THIS WORTH DOING, and it is testable:** the model crosses from land
 net-source to net-sink in **1971**; the measured budget crosses in **1989** — an **18-year** gap
-(CHANGELOG 09-22 (s)). If a SINGLE fertilisation term has to do the work of BOTH fertilisation and
+(CHANGELOG 09-22 (s)). If a SINGLE fertilization term has to do the work of BOTH fertilization and
 regrowth, it must be tuned strong enough to cover both — and since regrowth was small early in the
-record and grew later, an over-strong fertilisation term would make the sink appear **TOO EARLY**.
+record and grew later, an over-strong fertilization term would make the sink appear **TOO EARLY**.
 ⇒ **An early crossing is exactly the signature a missing regrowth term would produce.** That is a
 prediction Q3 can be tested against, not a hope.
 

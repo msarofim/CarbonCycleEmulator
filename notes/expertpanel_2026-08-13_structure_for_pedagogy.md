@@ -41,7 +41,7 @@ this session (provenance in §9), not recalled.
 4. **The one structural gap that does matter is the flux layer, and it is missing.**
    `ccx_run()` returns stocks and ratios only. The residence-time argument *is* an argument
    about gross fluxes — the model computes them inside `add_flux()` and discards them. The
-   "Under the hood" box diagram consequently has **unlabelled arrows**. **This is the
+   "Under the hood" box diagram consequently has **unlabeled arrows**. **This is the
    highest-value structural addition for the stated goal, and it is an output change, not
    a box change.** §1, §6.
 
@@ -125,7 +125,7 @@ model must reproduce it.* Measured on the historical run, 1960–2023:
 | cor(detrended growth, detrended GMST) | +0.582 |
 | regression slope | +1.55 ppm/yr per K |
 
-**The model reproduces the sceptic's headline statistic at r = 0.93 while 100 % of its
+**The model reproduces the skeptic's headline statistic at r = 0.93 while 100 % of its
 trend is emissions-driven.** That is the demonstration: co-trending manufactures r = 0.93;
 strip the trends and the genuine, physical, ENSO-mediated link is r = 0.58 and it explains
 year-to-year *wobbles*, not the rise. The model has the ENSO term (`gamma_enso`) precisely
@@ -181,8 +181,8 @@ stocks, ratios and two ¹⁴C inventories. It emits **no flux**. Consequences:
 - **The box diagram cannot be honest.** `app/server.R:213` draws six arrows with **no
   numbers on them**. The whole point of the diagram for this audience is that the arrows
   (~120 GtC/yr photosynthesis, ~80 GtC/yr each way air–sea) are **enormous** next to the
-  ~11 GtC/yr of emissions and the ~5 GtC/yr net imbalance. **An unlabelled arrow teaches
-  nothing; a labelled one teaches the entire fallacy in one glance.**
+  ~11 GtC/yr of emissions and the ~5 GtC/yr net imbalance. **An unlabeled arrow teaches
+  nothing; a labeled one teaches the entire fallacy in one glance.**
 - **Diagnosis loses its cheapest instrument.** Several sessions' worth of ocean work has
   been inferred from stocks. A flux trace would have made §2c of handoff 13c visible
   immediately.
@@ -240,7 +240,7 @@ it is the strongest single argument for keeping Revelle emergent.** Ship it.
 
 ## 3. THE ATMOSPHERE EXPERT
 
-**Two hemispheric boxes are the right call and should be defended, not apologised for.**
+**Two hemispheric boxes are the right call and should be defended, not apologized for.**
 The interhemispheric gradient is doing real pedagogical work that a global box cannot:
 the NH−SH CO₂ difference **grows from ~0.5 to ~4 ppm tracking cumulative NH fossil
 emissions** (DESIGN §6 gate 9), and the bomb spike arrives in the SH **1.33 yr late and
@@ -251,7 +251,7 @@ confirm chemically. **Two boxes buy an entire independent argument for one param
 
 **The atmosphere lens' warning about Claim A (§1b).** The r = +0.93 result is a *rhetorical
 hand grenade* and must be presented with care. Left unframed it reads as confirmation of
-the sceptic's point. The framing that works is sequential and the app must enforce the
+the skeptic's point. The framing that works is sequential and the app must enforce the
 order: *(1) here is the correlation, it is real, r = 0.93. (2) here is the same correlation
 after removing both trends: r = 0.58, and it is ENSO. (3) here is the model with
 temperature's effect on the carbon cycle switched off entirely — the trend barely moves.
@@ -289,7 +289,7 @@ text is stale and should be updated.
 
 **The land is where the temperature-driven CO₂ release actually comes from** — measured, the
 +1 K run's source is **land −22.8 GtC** at 300 yr, with the ocean's solubility outgassing
-and buffered re-uptake **very nearly cancelling** (−0.04 GtC net). *That near-zero is a
+and buffered re-uptake **very nearly canceling** (−0.04 GtC net). *That near-zero is a
 coincidence at 300 yr, not a structural identity* — I checked: solubility-only puts the
 ocean at −23.50 GtC and respiration-only at +23.50 GtC, and at 100 yr they are −15.1 vs +9.5,
 i.e. not equal. **Flagged explicitly because a −0.04 net with two ±23 limbs is precisely the
@@ -308,7 +308,7 @@ extrapolation.**
 This is **not** a conservation error (LUC is a veg→atmosphere transfer, not an external
 source — `project_ccx_luc_c14_leak`), and a nonzero pre-1850 LUC flux is defensible on the
 physical merits. **The objection is that nobody chose it.** Compare the treatment of the
-two neighbouring cases in the same file: GMST's flat-hold raises a **warning on every
+two neighboring cases in the same file: GMST's flat-hold raises a **warning on every
 build** (`forcing.R:232`), and `d13c_foss`'s back-fill carries an explicit justifying
 comment. LUC gets neither. It sets the 1750–1850 land trajectory, the ice-core CO₂ fit over
 that century, and — because LUC carries biospheric δ¹³C — part of the preindustrial isotope
@@ -350,7 +350,7 @@ decline being **+21–25 % too fast** (handoff 13c §3) — an open, unexplained
 must not present the δ¹³C trace as a clean match. Either plot obs and model together and
 say the model over-declines, or plot the *observations* for the argument and use the model
 only for the counterfactuals. **The second is better teaching and better honesty: the
-sceptic's claim is refuted by measurements, and the model's job is to explain why.**
+skeptic's claim is refuted by measurements, and the model's job is to explain why.**
 
 ---
 
@@ -382,7 +382,7 @@ converts the lesson from "the model says so" to "the carbon has a label on it, a
 says fossil."
 
 **What the pedagogical lens will not accept.** A "complexity necessary to match reality but
-not too much more" model must be **fully inspectable**, and unlabelled arrows on the box
+not too much more" model must be **fully inspectable**, and unlabeled arrows on the box
 diagram (§1c) fail that. So does the diagram's **"Vegetation / Soil"** caption against a
 four-pool land model (`model.R:80`) — a labels-vs-structure drift of exactly the class the
 standing rule exists to prevent. **R6: fix the diagram's labels and put numbers on its
@@ -521,7 +521,7 @@ All measured this session against branch `luc-veg-debit` at `4c10d93`, reproduce
   the cell handoff 13c §4 calls "the interesting one".
 - **Budget closure check:** atm +302.2, ocean +172.6, land +29.0 = **503.8 GtC** against
   cumulative fossil **504.7 GtC** (LUC is a veg→atm transfer, not an external source, so it
-  correctly does not appear). Closes to **0.17 %**, the residual being month-centring of the
+  correctly does not appear). Closes to **0.17 %**, the residual being month-centering of the
   endpoints rather than non-conservation — the suite's conservation test is the authority.
 - **Ocean uptake 2.60 GtC/yr (2015–2024)** against GCB's 3.22 — the model runs ~19 % low
   **at default parameters**; this is a known consequence of not using the mode and is not a

@@ -67,7 +67,7 @@ productivity lever. Two levers, opposite directions, same veto. The cause is alr
 already matched and can only punish a driver that MOVES.** [[seas_right_observable_wrong_drivers]]
 
 **AND THE PROFILE SHOWS THE MECHANISM DIRECTLY.** The SPO total goes **1.1407 → 1.0831 → 1.0702 →
-1.0780** against an observed **1.168**. Cancelling SH land pulls the total DOWN and AWAY. The total
+1.0780** against an observed **1.168**. Canceling SH land pulls the total DOWN and AWAY. The total
 was only right in the first place **BY CANCELLATION** — land 1.92× too big against an ocean 0.45× too
 small — so **any single-channel fix breaks it.** [[land_and_ocean_are_one_fix]]
 
@@ -98,7 +98,7 @@ is not sufficient — what compounds it here is the **warm-start step**: 27i mov
 sd increments, while this grid jumps `seas_T_amp_SH` by **3.5× then 1.4× then 1.4×**, throwing the
 simplex far enough onto the ridge that it has to walk back.
 
-**FIX FOR THE NEXT RUN (not applied — the run is live):** either reparameterise to
+**FIX FOR THE NEXT RUN (not applied — the run is live):** either reparameterize to
 `(seas_T_amp_NH x ln q10)` and a ratio, or **drop `q10` from the conditional slice** and say so — the
 seasonal rows do not identify it anyway, which is exactly what makes it free to wander. Adding
 intermediate warm-start rungs would also help. **Do not simply raise `TA_RESTOL`**; that would buy
@@ -150,7 +150,7 @@ coincidences; it is a row with no power punishing motion.
 is the admissible lever and it needs the same counterweight.**
 
 **Proposed: a 2×2 in `seas_T_amp_SH` × `ent_seas_amp_SH`**, same parameter-balanced
-`JOINT − LAND − OCEAN + INCUMBENT`. The reach is there in advance: cancelling SH land drops the SPO
+`JOINT − LAND − OCEAN + INCUMBENT`. The reach is there in advance: canceling SH land drops the SPO
 total ~0.06 ppm (1.1407 → 1.0780 frozen) while 27j's entrainment channel added **≈0.37 ppm at month
 9.24** against an observed 8.52. **P6 is what makes it worth doing** — the ocean limb moved only
 z −1.19 here, so there is room. ⚠ **NOT RUN, NOT PRE-REGISTERED.**

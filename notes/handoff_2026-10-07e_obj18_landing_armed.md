@@ -97,7 +97,7 @@
    - adopt #18 or not;
    - the `w_enso_l2` path: accept / iterate / redesign. Its sign now depends on the basin.
 6. **Owed, ruled ("driver later"):** the duplicate-start fix in `calibration/run_dispersed_multistart.R`.
-   - An unseedable seeded slot (its seed hits a name the arm PINS) becomes a dispersed draw, labelled as such.
+   - An unseedable seeded slot (its seed hits a name the arm PINS) becomes a dispersed draw, labeled as such.
    - The preflight refuses duplicate start vectors, with a test.
    - Derive "seedable" from the arm's FREE set, not from a list of pinned special cases: the 09-17 fix keyed on the ocean pair is exactly what re-opened.
 

@@ -14,7 +14,7 @@
   CO₂ LEVEL rows, with r falling 0.35 → 0.25. Water not upwelled from a deep box stays there, so the index's decadal structure
   (mean +0.042 over 1959–2024; forcing demeaned exactly, first non-zero 1948) integrates into the level. **The return must be
   shallow for a reason the interannual regression cannot see.**
-- **GLODAP cut** (`glodap_dic_talk_subset.csv`, 5 °S–5 °N 160 °E–80 °W, flag 2, 10,568 bottles 1973–2021, raw — labelled):
+- **GLODAP cut** (`glodap_dic_talk_subset.csv`, 5 °S–5 °N 160 °E–80 °W, flag 2, 10,568 bottles 1973–2021, raw — labeled):
   DIC over the 0–50 m median 1982.9: +29 (50–100 m), **+115 (100–150), +176 (150–200)**, +223 (200–300). The EUC source water
   IS the model's layer 2–3. Inline in the CHANGELOG (f); not yet a `data/` product.
 

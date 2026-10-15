@@ -90,7 +90,7 @@ The analytic shift is replacing one `N(0, 2)` prior term with four, evaluated at
 **The residual is the precision of `gamma_enso` as printed, not a discrepancy.**
 
 ⇒ **The likelihood at both reference points is untouched.** That is a stronger statement of the
-split's behaviour-preserving default than the trajectory bit-identity test in `test-enso-split.R`,
+split's behavior-preserving default than the trajectory bit-identity test in `test-enso-split.R`,
 because it covers the whole objective rather than two output columns.
 
 **And the dispersion scale moved for a bookkeeping reason, not a physical one.** 1.0493 → 0.9592,
@@ -105,7 +105,7 @@ read 0.9592 as "the basins got closer".
 
 Both are **migrated 21-parameter vectors** with the ocean ENSO pair at 0, and
 `diag_enso_objective_leverage.R` measures a strictly uphill direction at each: the ocean pair is
-worth **+1.98** at the new basin after re-optimising a 3-parameter carbon slice, with a conditional
+worth **+1.98** at the new basin after re-optimizing a 3-parameter carbon slice, with a conditional
 optimum near **+0.10 in each hemisphere**.
 
 **This does not block the survey.** Reference points are start points and port-gate anchors, not

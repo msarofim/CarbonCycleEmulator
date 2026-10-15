@@ -24,7 +24,7 @@ This session executed its §8 in order, on two rulings from Marcus.
 5. ✅ **THE FOUR SPO CONSTANTS ARE REGISTERED** and their **34 copies in 14 files are TIED**. §5
 6. ⛔ **A CLOSURE GATE CONSIDERED AND REFUSED** — the 1.1 % residual is a bootstrap-median
    artifact, and its only available bound was itself. §5
-7. ✅ **THE ENSO BUILDER FOLD IS DONE** and proved behaviour-preserving to the bit. §6
+7. ✅ **THE ENSO BUILDER FOLD IS DONE** and proved behavior-preserving to the bit. §6
 8. ⛔ **ONE HANDOFF NUMBER DOES NOT REPRODUCE:** `roll` clips **6 of 16** scored blocks, not
    09-02k §4's "7 of 17". The run log is authoritative. §6
 9. **Suite 1622 PASS / 6 FAIL / 2 skip**, failure set byte-identical to standing. ⚠ Not comparable
@@ -60,7 +60,7 @@ Both executed. The refit is the remaining item and it is his to launch.
 wholesale and so could not have caught a builder bug): FALSE **−1568.4936**, TRUE **−1512.0151**,
 gain **+56.4785**. Both published numbers back to **3e-5**, inside their own printed precision.
 
-⚠ **`asis` NOW MEANS THE PRE-ADOPTION INDEX**, relabelled in the bake-off and in
+⚠ **`asis` NOW MEANS THE PRE-ADOPTION INDEX**, relabeled in the bake-off and in
 `eix_nino34_shipped()`'s header — that function returns the STORED column, not what the model sees.
 
 **AND THE DIAGNOSTIC'S OWN GATE HAD TO FOLLOW THE MODEL.** `diag_enso_index_baseline.R`'s **G-I**
@@ -98,7 +98,7 @@ Same grid, epoch and variable names as v5 — **gated (V-G), not assumed**.
 New file: `calibration/diag_enso_v6_provenance.R`.
 
 ### Q1 — IS THE 15 % AMPLITUDE GAP A VERSION EFFECT? **PARTLY, AND ONLY PARTLY.**
-| pair, deseasonalised 1991-2020 | r | slope | Δclim |
+| pair, deseasonalized 1991-2020 | r | slope | Δclim |
 |---|---|---|---|
 | PRODUCT nina34 vs CPC(v5) | 0.9836 | 0.839 | +0.602 |
 | **VERSION grid v6 vs grid v5** | 0.9939 | **0.949** | **+0.039** |
@@ -149,7 +149,7 @@ total, against a rounding envelope of ±0.002. **Not a defect**: the reported li
 medians**, and a median does not commute with `amp()`/`ang_mo()`. Gating it would have meant taking
 the bound from the residual itself. The arithmetic is in `R/constants.R` so nobody "fixes" a limb.
 
-**THE COPIES ARE TIED, NOT CONVERTED** — several callers are pre-registered artefacts whose gates
+**THE COPIES ARE TIED, NOT CONVERTED** — several callers are pre-registered artifacts whose gates
 may not move. `test-spo-constants-tie.R` holds **34 copies across 14 files** exactly, fails when a
 listed declaration disappears (so the list can only shrink), and fails on a new unlisted copy.
 It **parses** rather than sources. Mutation-tested three ways.

@@ -43,7 +43,7 @@ The landed vectors are not a mode. [[one_fix_confirmed_residual_is_land]]
 `Rscript calibration/diag_seas_rectification.R` (offline, no model runs, ~4 min, frozen copy).
 The script has profiled the SH pair since it was written; **the row had never been read for this
 question.** Form C is `1 + A*(I(phi)/mean I - 1)` — exactly what `seas_npp_amp_*` already does —
-with **A re-optimised at every phi**, which the script's own header calls "the only fair way".
+with **A re-optimized at every phi**, which the script's own header calls "the only fair way".
 
 **FORM C: residual (rms as a fraction of observed peak-to-peak) and the fitted amplitude**
 
@@ -101,7 +101,7 @@ product. Taken literally that swaps GPP/PsnNet for another productivity climatol
 onto **the same insolation basis** — which lands on **the same flat ridge** and returns a new number
 without pinning anything. **A replacement product is necessary and not sufficient.** To be worth
 the download it must either (a) come with a shape that BREAKS the ridge, or (b) be paired with a
-decision to stop parameterising the SH shape by a latitude at all. See the options put to Marcus in
+decision to stop parameterizing the SH shape by a latitude at all. See the options put to Marcus in
 sec.5.
 
 ## 4. INDEPENDENCE IS A SPECTRUM — audit before downloading anything

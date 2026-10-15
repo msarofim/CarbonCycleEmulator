@@ -43,9 +43,9 @@ parameter's bracket* — and even there the effect is **1.5e-3 against the 1.148
 three orders of magnitude short.** I set an absolute 0.001 instead of deriving it from the quantity
 under test ([[derive_gate_from_the_thing]]); derived from the gap it should have been ~1e-2.
 
-**The small residual is real and has a cause worth naming:** `seas_r_norm` normalises ⟨factor⟩ = 1,
+**The small residual is real and has a cause worth naming:** `seas_r_norm` normalizes ⟨factor⟩ = 1,
 but the flux is factor × C_soil(t) and the soil pool has its own seasonal cycle, so
-⟨factor·C⟩ ≠ ⟨factor⟩⟨C⟩. **What survives the normalisation is the factor–pool COVARIANCE**, and it
+⟨factor·C⟩ ≠ ⟨factor⟩⟨C⟩. **What survives the normalization is the factor–pool COVARIANCE**, and it
 is ~1e-3 GtC/yr at 13.95 K. Not a bug; not useful either.
 
 ## 3. SCOPING FOR ENSO + VOLCANOES (Marcus, 2026-08-29)
@@ -93,7 +93,7 @@ of heterotrophic respiration that is **0.31 GtC/yr ≈ 0.15 ppm/yr**, against an
 
 ⇒ **"Adding volcanoes" is NOT about adding a temperature effect — that is already in, and it is an
 order of magnitude too small.** The literature attributes the Pinatubo CO₂ anomaly to **DIFFUSE-LIGHT
-FERTILISATION** — stratospheric aerosol scatters sunlight, raising the diffuse fraction and canopy
+FERTILIZATION** — stratospheric aerosol scatters sunlight, raising the diffuse fraction and canopy
 light-use efficiency, so NPP rises (Gu et al. 2003, *Science*; Mercado et al. 2009, *Nature*).
 **That is a MISSING MECHANISM driven by stratospheric AOD, and it needs an AOD series the repo does
 not have.**

@@ -8,7 +8,7 @@ exchange rates. The equatorial surface box would still need a hemispheric split,
 
 ---
 
-## 1. THE JUSTIFICATION BAR IS MET — the intermediate-water problem is real and localised
+## 1. THE JUSTIFICATION BAR IS MET — the intermediate-water problem is real and localized
 
 Measured 2026-09-04j against GLODAP at the bottle epoch (2002, n = 37,394):
 
@@ -18,7 +18,7 @@ Measured 2026-09-04j against GLODAP at the bottle epoch (2002, n = 37,394):
 | **mid 500–2500 m** | **+3.30** | **max +4.49 at 1160 m** (−86.9 vs −144.1 ‰) |
 | bottom > 2500 m | **+1.85** | **the only layer the likelihood scores** |
 
-⇒ The defect is **real, large, localised at intermediate depth, and unscored.** Taking that as
+⇒ The defect is **real, large, localized at intermediate depth, and unscored.** Taking that as
 sufficient justification is well-founded on the evidence.
 
 ## 2. ✅ THE ISOTOPE POINT IS CORRECT, AND IT IS ALREADY HOW THE MODEL WORKS

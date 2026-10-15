@@ -21,8 +21,8 @@ Written on Marcus's request ("Yes, write the handoff note"), 2026-10-12. **Nothi
 | Item | Outcome |
 |---|---|
 | **Joos background session merged** | `3c45224` cherry-picked as `55206e3`, relettered (n): Joos's split ± are ±2 s.d., label only. PR #1, which Marcus merged, then fixed the two `lib_design_gates.R` band strings and ratified `DG_L_NSD` = 1 s.d., text only (q, r). |
-| **Five Joos-labelled logs quarantined** ("Quarantine + README") | `outputs/quarantine/20261012_joos_pm_label/` (o). PR #1 confirmed "Keep them quarantined". |
-| **"Easy improvements?"** | None. The ocean excess and fertilisation would be model changes, and FaIR ΔT would need a FaIR re-run. Marcus: finalize the model, work on the text. |
+| **Five Joos-labeled logs quarantined** ("Quarantine + README") | `outputs/quarantine/20261012_joos_pm_label/` (o). PR #1 confirmed "Keep them quarantined". |
+| **"Easy improvements?"** | None. The ocean excess and fertilization would be model changes, and FaIR ΔT would need a FaIR re-run. Marcus: finalize the model, work on the text. |
 | **Beta copy worklist** | `notes/beta_copy_worklist_2026-10-12.md`: A 5, B 11, C 16, D 5, E 5, F 6 (p). Measured: `APP_SPLICE_YEAR` = **2024**, so `APP_FAIR_NOTE`'s typed "Before 2024" is a year early. |
 | **Pre-beta code review** ("one more full code review … then push") | Seven read-only lanes. Record: `notes/code_review_2026-10-12.md`; scripts in `outputs/diagnostics/code_review_20261012/` (s). **Clean at the canonical:** conservation ≤ 1e-13, R↔C++ ≤ 1.3e-16, stability, periodic spin-up 1.4e-10, mode resolution, logpost Δ 0, app loaders, pulse pairing. |
 | **IntCal σ bug — MEASURED** ("Measure impact first") | The row's σ is the ¹⁴C-AGE sigma (yr) used as ‰; the published Δ¹⁴C σ is 1.2–1.4 ‰. PSIS on 1000 draws (k-hat 0.149, ESS 437): **`luc_scale` +0.67, `bomb_total` −0.54, `rep_dC` +0.53 sd**; vvM CO₂ 2100 563.8 → 564.0 ppm, band shift ≤ 0.066 × its width; 2010–19 land sink 2.861 → 2.907. **Nothing canonical changed** (u). |

@@ -43,7 +43,7 @@
 - **Mine, stated:**
   - test (15) was removed with the branch, as the previous handoff scoped it: it is the spec of deleted code.
   - The README's 2300 number is against hilda29e ITSELF: +11.56 ppm (1486.85 vs 1475.29). The read's +12.26 is against REF (hilda29e under the new label).
-  - The legacy fCO3 recipe was dropped as an artefact (SH 0.616 at seas_ml 1); not reported.
+  - The legacy fCO3 recipe was dropped as an artifact (SH 0.616 at seas_ml 1); not reported.
   - The fCO3 epoch question (present day vs 1750) is recorded as Marcus's, not resolved.
 
 ## 3. Files

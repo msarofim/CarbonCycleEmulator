@@ -4,7 +4,7 @@
 #
 # "Dormant" = on a path the canonical hilda31w and the app do not run, so no shipped number moves;
 # test-canonical-contracts.R and test-parity.R hold that. Each block below FAILS on the pre-fix code
-# (measured when written), so each has power. CHANGELOG 2026-10-15 (h).
+# (measured when written), so each has power. CHANGELOG 2026-10-15 (j).
 # =====================================================================
 
 test_that("a PINNED name with no model slot (bomb_total, luc_scale, the four likelihood names) is scored at its pinned value", {

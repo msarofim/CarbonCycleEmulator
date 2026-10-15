@@ -8,7 +8,7 @@ land structure that has since been replaced outright.
 
 **(a) The LUC leak — a real bug, fixed on `luc-veg-debit` commit `98c1783`.**
 Land-use-change emissions were emitted with `add_source()` into the atmosphere
-while the vegetation box was left intact. LUC carbon is *inside* the modelled
+while the vegetation box was left intact. LUC carbon is *inside* the modeled
 biosphere (unlike fossil carbon, which is geological), so this created carbon
 ex nihilo: **321.6 GtC** of phantom land carbon by 2024, and ~**28 kmol** of
 ¹⁴C by 1995 — 14–16 % of the system excess. After the fix the model is
@@ -45,7 +45,7 @@ restructure). When it is run it writes to `calibration/output/mode_fit.rds` at
 the canonical path, and this directory stays as provenance.
 
 Diagnostics that need a parameter vector currently fall back to
-`ccx_default_params()`, which is the honest behaviour: `diag_bomb_partition.R`
+`ccx_default_params()`, which is the honest behavior: `diag_bomb_partition.R`
 prints `parameters: ccx_default_params() -- NO mode fit found`.
 
 ## 4. The two older quarantine directories are not equivalent

@@ -37,7 +37,7 @@
   `outputs/diagnostics/obj16_preview_20261004.*`). In both, the honestly-weighted version does almost nothing.
   - **Timing row:** at its measured weight (n_eff 22.7 monthly / 44.8 annual) it moves the lag 2.64 → 2.75 / 2.90
     months. Reaching ~5 needs 5–10× n_eff, the 09-26 "loud" objection. **Recommended: no row; a card-4 disclosure.**
-  - **Greening prior:** no literature-centred prior moves the sign. The profile's sd is 0.0085 against the literature's
+  - **Greening prior:** no literature-centered prior moves the sign. The profile's sd is 0.0085 against the literature's
     0.029, and zero is 1.1 sd from the optimum.
     - ⚠ The model's net climate effect on the land sink is +0.12 GtC/yr against GCB's −0.8 ± 0.7.
     - **Recommended: P3 (a GCB net-climate row, `q10` freed, previewed first) or P4 (pin at 0: −0.26 likelihood,
@@ -92,7 +92,7 @@
   lag. Cells:
   - R1: the land block + `q10` free;
   - RH: `q10` held;
-  - Q1.25 and Q1.4: `q10` held there, the land block re-optimised.
+  - Q1.25 and Q1.4: `q10` held there, the land block re-optimized.
 - Outputs: `outputs/diagnostics/obj16_p3_preview_20261004.{log,rds}` (+ `_cells.rds`). Each evaluation costs ~3× an
   ordinary one; expect ~2–3 h under the `k_w` arm's load.
 - **What to read:**
@@ -101,7 +101,7 @@
   - then finish the greening proposal's §5 with the result and ask Marcus to choose between P3 and P4.
 - If it is not finished when the session starts, check with `ps` for `frozen_p3`, or for the R processes.
 
-## 4. Open items, in order (each is Marcus's to prioritise)
+## 4. Open items, in order (each is Marcus's to prioritize)
 1. **Land the `k_w` price arm** (§3).
 2. **The greening decision:** read the P3 preview (§3b), then Marcus chooses P3 or P4. Either is an objective change:
    ONE objective #16, priced on every registered mode and restamped (the D1 precedent), then a refit.
@@ -117,7 +117,7 @@
 ## 5. Non-obvious state
 - **Compare on LIKELIHOOD over #15's 27 rows**, never on stored logposts. The lag's flat prior and Jacobian sit in
   hilda34g's; a pinned arm has no prior for its pinned name.
-- `calibration/lib_block_reopt.R` holds the block re-optimisation machinery. `diag_greening_lag_swap.R` keeps its own
+- `calibration/lib_block_reopt.R` holds the block re-optimization machinery. `diag_greening_lag_swap.R` keeps its own
   verbatim copies, so its recorded outputs stay reproducible.
 - Its slope gate is **curvature-blind off the base**. Read a failed gate with two starts or a held profile, never with
   a finite-difference Newton step, without first evaluating the objective AT the step.

@@ -55,7 +55,7 @@ HILDA's HD is **−136** because their HS is at −120 against our −86 ⇒ thi
 (1788, 2× HILDA's 906-equivalent) the cold box is too well equilibrated for HILDA's geometry to
 reach the observed deep age at any `K`.** The 32-box posterior pins `k_w` 20.8× tighter than its
 prior — but that pin was fitted with ONE surface box. The structure re-opens the question of
-whether HS should carry its own exchange (HILDA's own assumption is winter ice cover cancelling the
+whether HS should carry its own exchange (HILDA's own assumption is winter ice cover canceling the
 stronger high-latitude winds — inherited in `R/model.R`'s comment as THEIR assumption).
 
 ## 3. ⭐ THE TRANSIENT: THE CO₂ SINK IS A THERMOCLINE QUANTITY, AND K(z) RETURNS IT

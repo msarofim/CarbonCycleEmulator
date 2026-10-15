@@ -55,7 +55,7 @@ and converge **0.135 GtC/yr** into the NH at 20 Sv.
 
 **Measured cost of believing it:** spinup residual 6.3e-09 → **1.35e-01**, and over a
 zero-emission 1750–2024 run the atmospheric δ¹³C **drifts −0.915 ‰** against −0.036 with
-the conveyor off. That artefact is **nearly twice the entire δ¹³C misfit the conveyor was
+the conveyor off. That artifact is **nearly twice the entire δ¹³C misfit the conveyor was
 proposed to fix.** It would have looked like a result.
 
 **Diagnosed, not guessed:** setting `sst_NH = sst_SH = 17` returns both the residual
@@ -243,7 +243,7 @@ production** — carbonate–acid reactions and oxidation of organics, on Greenl
 higher carbonate load (~0.4 ± 0.2 µmol/L vs far lower in Antarctic ice). Anklin et al.
 1995; Barnola et al. 1995; Tschumi & Stauffer 2000.
 
-**The artefact is ~150× the model's predicted signal and the scatter alone is ~50×.** This
+**The artifact is ~150× the model's predicted signal and the scatter alone is ~50×.** This
 is not "weak evidence"; the measurement cannot see 0.15 ppm even in principle. **Antarctic
 cores are the reliable CO₂ record precisely because Greenland's are not**, so there is no
 ice-core CO₂ pair that constrains this.
@@ -286,7 +286,7 @@ candidate decision for Marcus.
   `ccx_cpp_par()`'s selection vector. **NOT in `CCX_PARAM_TABLE`** — the count is still 16.
   The three structural ones are coerced to **integer** in `ccx_cpp_par()` because
   `unpack_par` reads them into `int`.
-- **`aux$a_oc` is new** and marshalled to C++. The conveyor's interhemispheric limbs are
+- **`aux$a_oc` is new** and marshaled to C++. The conveyor's interhemispheric limbs are
   the only fluxes in the model where the hemisphere's area does **not** cancel between
   source and sink.
 - **`ccx_advection_eigbound()` gained a `p` argument** and now folds in the conveyor

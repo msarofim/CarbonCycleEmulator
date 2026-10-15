@@ -28,7 +28,7 @@ New: `data-raw/build_cmip6_npp_seasonal_shape.py`, `data-raw/build_carbontracker
 with their weaknesses written into the `notes` column, not just into this file.
 
 **Two gates fired during the build and both would have corrupted the answer silently:**
-- **`SAM0-UNICON` returns NEGATIVE NPP** (−29.0/−19.7 PgC/yr). Under a unit-mean normalisation that
+- **`SAM0-UNICON` returns NEGATIVE NPP** (−29.0/−19.7 PgC/yr). Under a unit-mean normalization that
   inverts the model's entire seasonal shape. Now **rejected loudly**, not filtered downstream.
 - **`UKESM1-0-LL` died on `2014-12-31`** — a **360-day calendar has no 31 December**. That is a
   calendar error, not a data gap, and it would have deleted a major structural family from the
@@ -49,7 +49,7 @@ CMIP6 is monthly; MOD17 is 8-daily. Product and window were **confounded**, so
 
 **⇒ MOD17-monthly resembles CMIP6-monthly far more than it resembles MOD17-8day.** Most of the
 apparent "the non-MODIS product disagrees in the SH" is the **WINDOW**. Without this control I would
-have reported a product difference that was mostly a smoothing artefact.
+have reported a product difference that was mostly a smoothing artifact.
 
 **CORRECTIONS TO 27l:** (a) the SH swing "1.0 percentage point" is an 8-day-grid figure — on matched
 monthly windows it is **2.9 pp**; (b) the degeneracy is **worse** than the 3.2× reported, not better —

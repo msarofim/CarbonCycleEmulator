@@ -15,14 +15,14 @@ wrong in its remedy — see §3.
    at (75, −30). **+548.7 log-units for two constants and no latitude change.** §3.
 3. **The shipped latitudes were never the error — the amplitude was.** 75 is the best *shape* match
    once amplitude is free (polar night = a hard zero); its curve was simply 1.6× too big. §2.
-4. **`seas_T_amp_NH` came home**: re-optimises to **11.08** against a measured **11.45**, from a
+4. **`seas_T_amp_NH` came home**: re-optimizes to **11.08** against a measured **11.45**, from a
    fitted 48.07. The cancellation hypothesis is confirmed by its own repair. §3.
 5. **`npp_frac_NH` re-anchored and SHIPPED** — `dnorm(·, 0.5986119, 0.04)`, the *fixed point*, not
    the audit's 0.6136. Circularity priced at ≤0.0013. §4.
 6. **Banding the hemisphere was tested and REJECTED**, twice, in two forms. Under a non-negativity
    constraint every multi-box fit deletes its own low-latitude boxes and loses to one curve. §5.
 7. **A CORRECTION is on the record**: the "four boxes beat one curve, 7.1 % vs 7.4 %" claim was an
-   artefact of an unconstrained solve using **negative** amplitudes. The honest number is 9.9 %. §5.
+   artifact of an unconstrained solve using **negative** amplitudes. The honest number is 9.9 %. §5.
 8. **TWO tests fail, neither modified**: `test-fluxes.R:99` (from 08-20g) and `:100` (new, and a
    direct consequence of the amplitude change). **947 pass.** §6.
 9. **`sst_seas_amp_NH` = 0.41 against an observed 2.237 in ALL 31 profile cells.** Untouched by this
@@ -96,7 +96,7 @@ Offline, no model runs. Four forms, each adding one parameter, window-integrated
 | NH `psnnet` | 11.4 % | **11.4 % (c = 0)** | 11.0 % (γ 1.60) | **7.4 %** (φ 74.8, A 0.50) |
 | SH `psnnet` | 12.8 % | 12.8 % (c = 0) | 12.2 % | 11.8 % |
 
-**A light THRESHOLD buys NOTHING — it optimises to zero and *chooses* to be the incumbent form.**
+**A light THRESHOLD buys NOTHING — it optimizes to zero and *chooses* to be the incumbent form.**
 (The original offline fit recorded the same and it was never followed up.) **A free amplitude buys
 34–35 % in the NH**, and its φ is an **interior minimum at 75**:
 
@@ -131,7 +131,7 @@ shipped value came from, not proof.
 ## 3. THE PROFILE, AND WHAT SHIPPED (`diag_phi_eff_profile.R`, 31 cells, 5 passes)
 
 Every cell patches **both cores**, rebuilds in its own `tempdir()`, passes **three gates**, and
-**re-optimises the seven parameters the seasonal cycle identifies** (`seas_T_amp_{NH,SH}`,
+**re-optimizes the seven parameters the seasonal cycle identifies** (`seas_T_amp_{NH,SH}`,
 `seas_lag_p`, `sst_seas_amp_{NH,SH}`, `npp_frac_NH`, `q10`) on the full posterior. A frozen profile
 would be worthless: moving φ at a fixed `seas_T_amp_NH = 48 K` breaks the cancellation by
 construction.
@@ -167,7 +167,7 @@ factors and the suite says so.**
 **The hemispheres INTERACT — a 1D φ profile misleads.** At SH −30 the NH optimum is 38–45 and 75
 loses by ~390; at SH −15.75 the ordering REVERSES. `seas_lag_p`, `q10` and `npp_frac_NH` are global.
 Pass 1 was a 1D slice **and** ran most cells at amplitude 1 while 75 and 65 carried their measured
-factors — rigged in 75's favour, and read as if it were not. Marcus' question (§1.5) is what exposed
+factors — rigged in 75's favor, and read as if it were not. Marcus' question (§1.5) is what exposed
 it; the measured-ridge pass fixed both flaws at once.
 
 ---
@@ -184,12 +184,12 @@ MOD17's own 0.0135 interannual sd. Option (b) would have RELOCATED the circulari
 (`cum_luc / land0`, and `land0` ∝ `npp_frac_NH`), and the **+0.0149** difference is larger than
 every other model-dependence in the table.
 
-**The width 0.04 is a stated JUDGEMENT**, like `SST_SEAS_LOGSD`. The old mode sits at **−3.31 σ**,
+**The width 0.04 is a stated JUDGMENT**, like `SST_SEAS_LOGSD`. The old mode sits at **−3.31 σ**,
 which is the point. `NPP_FRAC_NH_ANCHOR_1750` is `provisional` and joins the ledger **deliberately**
-— it keeps a model-dependent prior centre visible.
+— it keeps a model-dependent prior center visible.
 
 **And the profile vindicates it independently**: the audit's −794 veto on raising `npp_frac_NH` was
-**an artefact of φ = 75**. Re-optimised it runs 0.459 at the old configuration and **0.55–0.62
+**an artifact of φ = 75**. Re-optimized it runs 0.459 at the old configuration and **0.55–0.62
 wherever NEP is de-amplified** — the fit asks for the observed share by itself.
 
 ---
@@ -200,7 +200,7 @@ wherever NEP is de-amplified** — the fit asks for the observed share by itself
 spans 0.94 → 3.96, best-fit φ spans 5 → 86). **The fix does not follow from it.**
 
 `diag_npp_bands.R` — per-band residuals are **11.5 / 13.7 / 8.3 / 9.5 %** against a whole-hemisphere
-**11.4 %**; two bands are *worse*. **So the misfit is NOT an aggregation artefact.** The pattern:
+**11.4 %**; two bands are *worse*. **So the misfit is NOT an aggregation artifact.** The pattern:
 40–55 and 55–90 want φ **poleward** of their own centroids with A ≈ 1 (rectification, independently
 confirmed per band); 0–23.5 and 23.5–40 are **not light-shaped at all** (water-driven).
 
@@ -305,7 +305,7 @@ second-order block is not.** Fixing it needs a step-size study for `h_ml`, NOT d
    parameters free; a full refit has 21.
 3. **`sst_seas_amp_NH`** — does it move off 0.4 now that NEP is de-amplified and its prior is
    re-anchored? If not, §6's headline defect is confirmed as independent of everything done here.
-4. **`npp_frac_NH`** — the profile wants 0.55, the prior centres 0.599. A large prior_z means the
+4. **`npp_frac_NH`** — the profile wants 0.55, the prior centers 0.599. A large prior_z means the
    two are still fighting.
 5. **`kz`** — still pinned near the bracket top? That is the standing question from §5.2h.
 
@@ -344,7 +344,7 @@ Everything in 20d §8 still applies. New:
 - **The last MOD17 composite of a year is 5–6 days, not 8.** Treating it as 8 inflates the winter
   end of the NH cycle — the end carrying the rectification signal.
 - **A 1D profile of a 2D surface with an interaction reads as an answer.** Pass 1 said 38–45; pass 2
-  reversed it. Fill the plane, and check that every cell got the same optimisation.
+  reversed it. Fill the plane, and check that every cell got the same optimization.
 - **`net_photosynthesis` is in the 8-day file** and is much closer to NPP than `gpp`.
 - **A two-arm gate fires on a one-arm run** if it compares against a NULL. §7.3.
 

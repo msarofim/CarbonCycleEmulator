@@ -70,7 +70,7 @@ seasonality is substantially its PRIOR — do not treat NH and SH as equally obs
 are independent but GPP proxies; FLUXNET towers have unusable SH coverage for a hemispheric aggregate.
 
 **Two build gates fired and both would have corrupted the answer silently:**
-- **`SAM0-UNICON` returns NEGATIVE NPP** (−29.0/−19.7 PgC/yr) — under unit-mean normalisation that
+- **`SAM0-UNICON` returns NEGATIVE NPP** (−29.0/−19.7 PgC/yr) — under unit-mean normalization that
   inverts the model's whole seasonal shape. **Now rejected loudly.**
 - **`UKESM1-0-LL` died on `2014-12-31` — a 360-day calendar has no 31 December.** A calendar error
   that looks like a legitimate skip while deleting a major structural family.
@@ -159,7 +159,7 @@ breaks it.** [[seas_right_observable_wrong_drivers]] [[land_and_ocean_are_one_fi
 
 **PROPOSED: a 2×2 in `seas_T_amp_SH` × `ent_seas_amp_SH`**, 27j's parameter-balanced
 `INTERACTION = JOINT − LAND − OCEAN + INCUMBENT` (npar 7−6−7+6 = 0) with the **admissible** lever
-replacing the forbidden productivity one. Reach known in advance: cancelling SH land drops the SPO
+replacing the forbidden productivity one. Reach known in advance: canceling SH land drops the SPO
 total ~0.06 ppm (1.1407 → 1.0780 frozen) while 27j's entrainment channel added **≈0.37 ppm at mo
 9.24** (obs 8.52). **P6 is what makes it worth running.**
 
@@ -171,7 +171,7 @@ total ~0.06 ppm (1.1407 → 1.0780 frozen) while 27j's entrainment channel added
   RIDGE IS EXACT** (2.2609–2.2663 across q10 1.09→2.0, Hessian **cor −0.972**; the seasonal rows move
   only 4.3 log-units across the whole range and **do NOT identify q10**). Nelder-Mead crawls a
   direction the data does not constrain — points took **10 / 70 / 150+ min**. **Drop `q10` from the
-  slice, or reparameterise to (product, ratio); add intermediate warm-start rungs. DO NOT raise
+  slice, or reparameterize to (product, ratio); add intermediate warm-start rungs. DO NOT raise
   `TA_RESTOL`** — that buys speed by accepting under-convergence, the failure 27h already made once.
   [[ccx_seas_q10_ridge]]
 - ⚠ **A GATE THAT DECLINES TO RUN IS WORSE THAN ONE THAT FAILS.** The first 27n driver read streams
@@ -206,7 +206,7 @@ total ~0.06 ppm (1.1407 → 1.0780 frozen) while 27j's entrainment channel added
   at the mode.** It is where the model-signature dependence gets MEASURED rather than asserted small.
 - **The CLOSURE ARM (27n prereg sec.5), recorded before testing so it cannot be back-fitted:**
   CMIP6's 1.87× bigger productivity × CT2022's 0.251 net/gross = **0.655 against an observed 0.683 —
-  two products agreeing to 4 % on a quantity neither was fitted to.** ⚠ **NOT AUTHORISED**: it sets
+  two products agreeing to 4 % on a quantity neither was fitted to.** ⚠ **NOT AUTHORIZED**: it sets
   `SEAS_NPP_AMP_SH` to a CMIP6 **ensemble** value, Marcus's call exactly as the GPP end was. And the
   flux-ratio transfer to an SPO signature is an **approximation, not an identity.**
 - **The basis decision is STILL OPEN** and should be taken on §3's evidence: the SH insolation fit has

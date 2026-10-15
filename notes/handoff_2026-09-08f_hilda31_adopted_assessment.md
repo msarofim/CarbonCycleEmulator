@@ -1,5 +1,5 @@
 # Handoff — 2026-09-08f. `hilda31` ADOPTED as the canonical (the first fitted under a structure; the mode file now carries it); the ASSESSMENT says the model is NOT yet acceptable — the ENSO ocean sign is still the broken link — and ranks the options; two diagnostics (F, H) point at the deep's missing light carbon and at the LAND as the lifetime's owner.
-# **Every number GENERATED at the adopted file (`diag_adoption_read_hilda31.R`, `diag_whole_model_scorecard.R` arm C, the F/H one-liners in CHANGELOG 09-08f). Martin's exponent and Joos's 1000-yr split are SOURCED from the papers' text; Ledwell's diffusivity is the one labelled recollection.**
+# **Every number GENERATED at the adopted file (`diag_adoption_read_hilda31.R`, `diag_whole_model_scorecard.R` arm C, the F/H one-liners in CHANGELOG 09-08f). Martin's exponent and Joos's 1000-yr split are SOURCED from the papers' text; Ledwell's diffusivity is the one labeled recollection.**
 
 Read first: `notes/assessment_2026-09-08_acceptable_state.md` (the verdict and options A–J), CHANGELOG 2026-09-08f, and for the
 round that produced the canonical `notes/handoff_2026-09-08e_round5_launched.md` §3b. Memory: [[ccx_hilda31_adopted]],
@@ -13,7 +13,7 @@ column control by PATH: **`CCX_MODE_COLUMN_CONTROL`**.
 **The one thing to know:** a mode file now carries `struct`, and **every base list must come from `ccx_mode_base(md)`** —
 `ccx_default_params()` has `hs_frac = 0` and the same vector scores −23,306,061 there. Routed: `ccx_load_mode`, `dg_vector`,
 `app/global.R`, `sl_*` (`struct=`), `diag_joos_irf.R`, `recompute_hessian.R`, two tests; ~55 diagnostics still overlay
-directly (a ratchet lint is owed, modelled on `test-overlay-idiom-lint.R`).
+directly (a ratchet lint is owed, modeled on `test-overlay-idiom-lint.R`).
 Exposed and fixed: the HS pump's `lab = "pump_hs"` named no flux channel (the flux trace and the app died with the structure
 ON) → `"pump"`; promote/hessian re-imposed a uniform `h_ml` prior from the recorded band → only when it differs.
 Tests: the nine round-3-era failures now pass (one pre-existing seas-lag-split error remains); `test-enso-demean` gap
@@ -29,23 +29,23 @@ Strained: `rep_dC` +3.40, `sst_seas_amp_NH` −2.96, `kz_deep_frac` −2.51, `pu
 
 ## 3. The assessment, in five lines (`notes/assessment_2026-09-08_acceptable_state.md`)
 1. **Not acceptable yet.** The ocean arc delivered the deep and made every structural quantity observation-consistent at zero
-   transient cost; **it moved nothing on the chain**, and the ENSO ocean response is still a wrong-signed mechanism cancelled by
+   transient cost; **it moved nothing on the chain**, and the ENSO ocean response is still a wrong-signed mechanism canceled by
    fitted coefficients — the 09-04 release blocker, unchanged.
 2. **F (done):** the heavy cold surface (+2.41) is the 2 °C EQUILIBRIUM fractionation acting on a deep that is 0.85 ‰ too heavy
-   (deep +1.29 vs ~+0.4); the HS pump OFF makes it heavier; the deep lacks remineralised light carbon below 1000 m (LS pump
-   0.18 GtC/yr vs ~1.2 real, Martin b 0.858 SOURCED). ⇒ **Option D (Martin remineralisation) is the Q / HS-δ¹³C candidate.**
+   (deep +1.29 vs ~+0.4); the HS pump OFF makes it heavier; the deep lacks remineralized light carbon below 1000 m (LS pump
+   0.18 GtC/yr vs ~1.2 real, Martin b 0.858 SOURCED). ⇒ **Option D (Martin remineralization) is the Q / HS-δ¹³C candidate.**
 3. **H (done):** pulse partition at 100 yr air 0.28 / ocean 0.32 / **land 0.41**; Joos 2013 at 1000 yr ocean 59 ± 12 % /
    land 16 ± 14 % / air 25 ± 9 % (SOURCED). ⇒ the short lifetime is the LAND's; a gate on the land share (an ordering) and a
    land-return mechanism are the follow-ups.
 4. **The structural root:** the LS column ventilates only by `kz` (3.7 cm²/s at 100 m; Ledwell ~0.1, RECOLLECTED), so the LS
    pump exports 37 GtC/yr (real ~10) above 400 m; a mode-water ventilation limb (E) is the direction A, B, D all point to.
 5. **Options and order:** **A** ENSO-modulated upwelling limb (probe first; 1–2 d) before **B** the tropical box; **C** the
-   seasonal mixed layer + **D** Martin remineralisation as ROUND 6 (one refit, both sourced); **G** gate the δ¹³C gradient
+   seasonal mixed layer + **D** Martin remineralization as ROUND 6 (one refit, both sourced); **G** gate the δ¹³C gradient
    LEVEL (objective, cheap); **I** NH bomb timing; **J** DESIGN §6 / CITATION (Marcus's text). E is the research question.
 
 ## 4. Rulings owed
 (1) Round 6 = C + D together, or one at a time? (2) A (the cheap probe) now, in parallel with round 6? (3) The `hs_asx_frac`
-width (0.15, a JUDGEMENT) and the `u_hs` width (0.242, derived) stand in the adopted canonical — ratify or revisit.
+width (0.15, a JUDGMENT) and the `u_hs` width (0.242, derived) stand in the adopted canonical — ratify or revisit.
 (4) `test-alpha-as`'s GATE Q assertion stays red until D (or another Q fix) lands — ratify leaving it red.
 
 ## 5. Files (this commit) and the things still owed

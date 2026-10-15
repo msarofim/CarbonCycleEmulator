@@ -32,10 +32,10 @@ nuisances, which is what the fit did.
 
 −H had **four negative eigenvalues** (−13 … −430); gradients **−3460** (`k_w`), **+6114**
 (`bomb_total`), **−1025** (`hs_asx_frac`) per log-unit. Conditional sds 0.003–0.14 everywhere;
-marginals 1–2.4 off a regularised matrix, driven by trades: `hs_asx_frac`–`k_w` **r −0.97**,
+marginals 1–2.4 off a regularized matrix, driven by trades: `hs_asx_frac`–`k_w` **r −0.97**,
 `hs_asx_frac`–`u_hs` −0.94, `u_hs`–`k_w` +0.84, f–`z_K` −0.74. **I1 failed for a good reason:**
 `h_hs` moves `d14c_SH` by 16 log-units at ±0.5 — the cold box's bomb capacity before it flushes to
-HD scales with thickness; 09-05b's "not a term" was a steady-state result I over-generalised.
+HD scales with thickness; 09-05b's "not a term" was a steady-state result I over-generalized.
 ⇒ [[hessian_at_non_optimum_is_not_a_count]].
 
 ## 2. RUN 2 — THE FREE OPTIMUM REMOVES THE CONDUIT (I7–I10)
@@ -45,14 +45,14 @@ L-BFGS-B, 76 iterations, 3.6 min; +453 log-units, the whole gap. **I7 ✅** (tri
 `h_ml`/`kz`/`h_hs` ridge, eigenvalues −42 and −5.5 — the ridge [[ccx_hessian_is_the_blocker]] knows).
 Where it went: `tau_q` → **5000 (upper bound)**, `u_hs` → 9.8, f → 0.43 (K_deep 3810), `kz` → 8821,
 `h_ml` → 196. **That is candidate A alone** — DESIGN §3.4a's "K(z) fixes the deep age" — rediscovered
-by the optimiser, with the deep at −183 and the intermediate abandoned.
+by the optimizer, with the deep at −183 and the intermediate abandoned.
 
 ## 3. RUN 3 — THE DECLARED CONDUIT REMOVES `K(z)` INSTEAD (I11–I13)
 
 Conduit held at HILDA (`u_hs` 38, `tau_q` 538, `z_K` 253, bottom); free {f, `hs_asx_frac`, `h_hs`,
 `kz`, `k_w`, `bomb_total`, `h_ml`}. Gap −36. **f → 1.000, the UPPER bound = uniform `K`**; `kz` →
 3786, `h_ml` → 202. Slabs **+2.95 / +2.35**, deep +2.4 — worse than `ent26` on the profile. **I11 ⛔,
-I12 ✅ (−36), I13 ⛔** (f on the bound). ⚠ The printed "3 of 3 DATA-SUPPORTED" is an artefact for f:
+I12 ✅ (−36), I13 ⛔** (f on the bound). ⚠ The printed "3 of 3 DATA-SUPPORTED" is an artifact for f:
 a parameter on a bound has a fake 4e12 curvature. For `hs_asx_frac` (0.736, msd **0.096**) and
 `h_hs` (122 m, msd 0.36) the support is real, −H is PD (I10 ✅ here), and the L-BFGS-B line-search
 abort (code 52) is at the bound, not before it.
@@ -136,7 +136,7 @@ three levels AND the contrast — inside 1σ.** Transient at matched parameters 
 | `hs_asx` 0.7 | **−193** | −15 | −51 | **−115** | +3 | +8 | 2.98 (−0.55) |
 
 Against the 09-06b bottom arm's −459 and the uniform conduit's −2849. Of the −193, the pump's δ¹³C
-gradient is −115 — the matched-parameter artefact the optimiser recovered in every run — so the
+gradient is −115 — the matched-parameter artifact the optimizer recovered in every run — so the
 structure's true unrecovered cost before a refit is of order **−60 to −80**, mostly CO₂ level and
 bomb. That is the arm to refit.
 

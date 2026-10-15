@@ -23,7 +23,7 @@
 4. **O5 PROBED** (`diag_o5_seasonal_export_scan.R`): under martin 9.08 the SPO row −252 → −119 raw / −206 → −89 after arm C, the total −895 → −742 /
    −289 → −126; the SPO PHASE lands on obs (+6.05 vs +5.99 mo). PASSES its rule (a)–(c). Honest reading: the rule was in log-lik and the row is
    quadratic — in AMPLITUDE a third of the 0.32-ppm deficit closes (0.248 → 0.358 vs obs 0.585). Layer-2 inversion persists (−67/−71). Arm C put
-   h_ml on its floor (32 m; z ≈ −1.8 on the 59.7-centred Holte prior — the first z of −2.8 was against the retired 83.9 centre, corrected).
+   h_ml on its floor (32 m; z ≈ −1.8 on the 59.7-centred Holte prior — the first z of −2.8 was against the retired 83.9 center, corrected).
 5. **THE h_ml FLOOR MEASURED** (`diag_o5_hml_pinned_armc.R`): h_ml pinned at the canonical 65.2 m → O5's arm-C gain +123.8 = 76 % of the free gain
    (−287.0 → −163.2); at the prior's 16 % point 42.5 m → 93 % (−134.9). The thin ML bought 37.5 of −125.7. O5 SURVIVES at a fixed reservoir.
 6. **THE SOURCE** (`data-raw/build_cmip6_export_seasonal_shape.py` + `build_export_seasonal_prior.R` → `data/obs_export_seasonal_shape_cmip6.rds`,
@@ -59,10 +59,10 @@ Solved field + the factor at amp 1: SPO 1.175 ppm (2× obs, −899) — the mech
   objective's own row is 1750-referenced, 51.4 ± 7.6; Naegler 2009's +8 % CO₂-uptake correction of the Peacock/Key obs NOT applied).
 
 ## 4. Non-obvious state
-- `pump_seas_amp` / `pump_seas_lag` are STRUCTURAL: on `p`, default 0, marshalled by name, NOT in `CCX_PARAM_TABLE` / `CCX_PARAM_NAMES` /
+- `pump_seas_amp` / `pump_seas_lag` are STRUCTURAL: on `p`, default 0, marshaled by name, NOT in `CCX_PARAM_TABLE` / `CCX_PARAM_NAMES` /
   `CCX_PARAM_ABSENT_OK`; the arm-C probes set them on `base_params`. Registering them is the build-tier step, with the source's prior.
 - `data-raw/downloads/cbpm/` holds 1.3 GB of CbPM monthly HDF4 (2003–2014, gitignored); `data-raw/downloads/cmip6_export_seasonal_shape.*` the
-  epc100 climatologies. The Pangeo catalogue CSV lives in the session scratchpad (`PANGEO_CAT=` env for the builder), not in the tree.
+  epc100 climatologies. The Pangeo catalog CSV lives in the session scratchpad (`PANGEO_CAT=` env for the builder), not in the tree.
 - `calibration/torch/port_targets.csv` is STILL the E arm's — regenerate before ANY array.
 - The summary reporter prints no suite totals: use `as.data.frame(test_dir(reporter = "silent"))` for counts (the `_counts.log` idiom); the first
   commit message of `01ba2df` carried an unread count and was amended before push.

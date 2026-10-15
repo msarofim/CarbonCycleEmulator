@@ -1,4 +1,4 @@
-# Handoff — 2026-09-23 (a). **T1 and T2 are BOTH DONE and neither points at a labelling fix. The products move sub-σ but move TWO FAILING GATES toward their observations; and the offset is held by TWO PARTIALLY REDUNDANT anchors whose stated weighting UNDERSTATES them — arm A refuted its own hypothesis and inverted (3.06×, not a collapse). R2 is now waiting on one thing only: T4, which needs the objective change.**
+# Handoff — 2026-09-23 (a). **T1 and T2 are BOTH DONE and neither points at a labeling fix. The products move sub-σ but move TWO FAILING GATES toward their observations; and the offset is held by TWO PARTIALLY REDUNDANT anchors whose stated weighting UNDERSTATES them — arm A refuted its own hypothesis and inverted (3.06×, not a collapse). R2 is now waiting on one thing only: T4, which needs the objective change.**
 
 > Self-contained for this session. **Read first, in this order:** handoff **(q)** 09-22 (the marine
 > arm + T3, which set this menu) · CHANGELOG **09-23 (a)** and **(b)** ·
@@ -15,15 +15,15 @@ directory and `CHANGELOG.md`. Commits `3edcd33` · `1c88049` · `422e473` · `93
 
 ## 2. T1 — the product ladder. **The products MOVE.**
 `calibration/diag_rep_dc_product_ladder.R` + `lib_rep_dc_ladder_report.R`; 12 jobs, all `conv 0`.
-`rep_dC` HARD-PINNED at 9 rungs **3.516 → −0.215**, the other **28 names fully re-optimised** at each.
+`rep_dC` HARD-PINNED at 9 rungs **3.516 → −0.215**, the other **28 names fully re-optimized** at each.
 
 - ⭐ **THE LADDER SPANS BOTH CANDIDATE TARGETS ON PURPOSE.** The menu predates T3 and said
   "3.52 → 0.78"; T3 moved the target to the mass-weighted **−0.215**. Which is right IS the ruling,
   so the ladder covers **+0.776** (measured offset) *and* **−0.215** rather than pre-empting it.
-- ⭐⭐ **THE NOISE FLOOR IS ZERO — MEASURED, THEN DISPROVED AS AN ARTEFACT.** Three replicates
+- ⭐⭐ **THE NOISE FLOOR IS ZERO — MEASURED, THEN DISPROVED AS AN ARTIFACT.** Three replicates
   started **156 log-units away** and all returned to **−1425.3620 exactly**, within **1.9e-3** in
   parameter space. All-zero is the suspicious-uniformity signature, so it was checked: the
-  replicates took **122.6 / 128.8 / 123.0 min** against the canonical's **44.6**. They travelled.
+  replicates took **122.6 / 128.8 / 123.0 min** against the canonical's **44.6**. They traveled.
 - ⛔ **WHICH MAKES `/floor` DEGENERATE — ratios of 135–6317 say "the floor is zero", not "6317 σ".
   READ `/obs sigma`.**
 - ⭐⭐⭐ **EVERY PRODUCT WITH AN OBSERVATIONAL σ MOVES SUB-σ**: CO₂ gradient **0.91 σ**, gate D
@@ -32,7 +32,7 @@ directory and `CHANGELOG.md`. Commits `3edcd33` · `1c88049` · `422e473` · `93
   land sink **3.091 → 2.959** GtC/yr. ⚠ **Airborne fraction does not care: +0.2 %.**
 - ⭐⭐ **THE DIRECTION IS THE FINDING.** Releasing `rep_dC` moves **gate D** (z −6.60 → **−6.14**)
   and **gate GL** (z −10.03 → **−8.26**) **TOWARD their observations**; both still FAIL. The strain
-  `rep_dC` absorbs is partly the strain those gates report ⇒ **R2 is NOT a pure labelling decision.**
+  `rep_dC` absorbs is partly the strain those gates report ⇒ **R2 is NOT a pure labeling decision.**
 - ⛔ **`co2_pi` AND `part1000_close` ARE IDENTITIES, NOT PRODUCTS** — the spinup is *solved* to
   `CO2_PI_PPM`, and the closure is the partition's own mass residual. Both read exactly 0.0000
   movement against an exactly 0.0000 floor. They are reported under CHECKS; **never count them as
@@ -66,7 +66,7 @@ measured floor (shipped 0.000, `ice_sigma` 0.375, `ice_dropped` 0.000, `bomb_dro
   **`bomb_dropped` sits −3996.2**, *entirely* in its two dropped rows (`d14c_SH` −2134.4, `d14c_NH`
   −1870.7; every other stream within ±6). The bomb arm has not become a different model — it has let
   the ¹⁴C directions **run free because nothing scores them**. **Its collapse is priced on a model
-  whose ¹⁴C behaviour is unconstrained; the ice arm's is not.**
+  whose ¹⁴C behavior is unconstrained; the ice arm's is not.**
   ⚠ **`ice_sigma`'s loglik is on its OWN modified σ and is NOT comparable to either.**
 - ⭐⭐ **A STREAM'S DEBIT UNDERSTATES ITS HOLD.** T1's decomposition charged the ice **56 %** and the
   bomb pair **41 %**; the release test gives **59 %** and **65 %**. The ice agrees; the bomb nearly
@@ -75,7 +75,7 @@ measured floor (shipped 0.000, `ice_sigma` 0.375, `ice_dropped` 0.000, `bomb_dro
 
 ## 4. WHERE R2 STANDS, and what is left
 **Nothing is adopted and R2 is still a ruling.** What has changed is that three of the four menu
-items are now measured and **none of them supports a labelling fix**:
+items are now measured and **none of them supports a labeling fix**:
 
 - **T3 (09-22 aa)** — the mass-weighting term makes the residue **36 % LARGER** (+2.67 → +3.62).
 - **T1** — the products move, sub-σ, but **toward** two failing gates.
@@ -124,7 +124,7 @@ CO₂-only ruling.
   **current** — `app/global.R` was written 31 s before it started, the mode file is unchanged since
   09-20, and the two obs products rebuilt on 09-22 are not read by the app. ⛔ Stop it via the
   process holding the RESOURCE (`lsof -nP -iTCP:7788 -sTCP:LISTEN -t`), **never `pkill -f`** on the
-  runApp string — that is precisely the string-matching error that mislabelled 13 R processes today.
+  runApp string — that is precisely the string-matching error that mislabeled 13 R processes today.
 - ⚠ **`CarboTopeSubstack.docx` + its `~$` lock are still in the repo root.** Marcus's drafting — do
   not read, edit or commit. Untracked, left as found.
 - ⚠ **`outputs/diagnostics/whole_model_scorecard_20260920_hilda29l.rds` still has an uncommitted

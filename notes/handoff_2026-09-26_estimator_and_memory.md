@@ -80,7 +80,7 @@ outstanding from the doc.
 
 `app_annual_growth()` differences **annual means**. GCB's `atm_growth` is NOAA's published
 `co2_gr_gl` (GCB's header cites NOAA/ESRL for the column) and is a **Jan-to-Jan** difference of the
-**deseasonalised** series. The panel compared one to the other; its caption said *"annual means
+**deseasonalized** series. The panel compared one to the other; its caption said *"annual means
 differenced"* while half its data was not.
 
 ⚠ **Not a bias — a RESHUFFLE.** Model RMS **0.397 either way**. What moves is which year is worst:
@@ -113,7 +113,7 @@ Marcus's instinct was right.
 - **ONE app instance, `:7793`**, on the current code, HTTP 200. ⚠ Cold start **~128 s** at load
   2.8 — consistent with the ~115–120 s already recorded, and still **not** the idle re-time that
   is a deploy blocker.
-- **New data artefact**: `data/mbl_global_growth.rds`, built by
+- **New data artifact**: `data/mbl_global_growth.rds`, built by
   `data-raw/build_mbl_global_growth.R`. ⭐ **No new download** — NOAA's MBL global reference was
   already in the repo (manifest key `mbl_zonal_gl`); the build **verifies its sha256 against the
   MANIFEST**. Cross-checked against NOAA's `co2_annmean_gl`: levels agree to −0.012 ppm, growth to
@@ -128,7 +128,7 @@ Marcus's instinct was right.
   requires the two estimators to stay far apart. **Mutation-tested: 6 assertions fail.**
   ⚠ The suite's own counterfactual test was still passing the GCB table — the new guard caught it.
 - **New shared test helper**: `tests/testthat/helper-code-lines.R`, one quote-aware comment
-  stripper, replacing two byte-alike copies. Carries its own test 0 including the hex-colour case.
+  stripper, replacing two byte-alike copies. Carries its own test 0 including the hex-color case.
 - **No refit, no objective change, no mode file written.** `emissions-interp-constant` (`35f38dc`)
   still rides with the next refit.
 - **Unchanged deploy blockers, all Marcus's**: the two `SET-BEFORE-DEPLOY` URLs (⚠ update

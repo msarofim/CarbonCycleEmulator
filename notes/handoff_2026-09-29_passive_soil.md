@@ -14,7 +14,7 @@ Item 1 of the previous handoff: **what holds the model's modern NPP at 70** (aga
 verified totals), and whether B2 (a fitted NPP₀) is worth building. The residence-time rescan
 answered that, then opened a second question: **how big and how old the passive soil pool is**, and
 what that choice does to the 2300 futures. Every run is at arm A (`hilda_csl3v0ka`) at v0k basin 1,
-with the 11 names from the 09-29 (k) scan re-optimised.
+with the 11 names from the 09-29 (k) scan re-optimized.
 
 ## 2. Decisions (Marcus) and results, in order
 1. **NPP₀ rescan with the residence times free** (Marcus: free alongside the 11; no priors; unbounded).
@@ -35,11 +35,11 @@ with the 11 names from the 09-29 (k) scan re-optimised.
    - ⚠ Land ×PI falls 1.63 → 1.29 only because the PI stock grows, so the **Koven multiple benchmark
      is stock-dependent**.
 4. **Swap decomposition.** CHANGELOG (p). It is order-robust.
-   - **τ alone (retention)** gives −48 to −70 ppm; the fertilisation pair gives +9 to +21.
-   - `fert_k` alone gives +28 to +35: a HIGHER `fert_k` WEAKENS fertilisation, so (o)'s first guess
+   - **τ alone (retention)** gives −48 to −70 ppm; the fertilization pair gives +9 to +21.
+   - `fert_k` alone gives +28 to +35: a HIGHER `fert_k` WEAKENS fertilization, so (o)'s first guess
      had the wrong sign.
 5. **Literature (subagent)** → `notes/lit_2026-09-29_passive_soil_stock.md`. CHANGELOG (q).
-   - The evidence favours a passive stock of ~1500 GtC (1200–2000), not 3–4.5k. AR6 Fig. 5.12: soils
+   - The evidence favors a passive stock of ~1500 GtC (1200–2000), not 3–4.5k. AR6 Fig. 5.12: soils
      1700 + permafrost 1200.
    - ⚠ Naegler & Levin 2006's "2200 PgC" is their MODEL's setting, not an observation.
 6. **`R/model.R` comment fixed** (Marcus: "fix the model.R comment"; `06aec68`). Only the bomb-¹⁴C
@@ -76,7 +76,7 @@ with the 11 names from the 09-29 (k) scan re-optimised.
   - `tau_soil_slow_swap`;
   - `soil_d14c_shi2020`;
   - plus the smoke logs.
-- **Code:** only the `R/model.R` comment (~line 1232). **No model behaviour changed.**
+- **Code:** only the `R/model.R` comment (~line 1232). **No model behavior changed.**
 - **Notes:** `lit_2026-09-29_passive_soil_stock.md` (per-source access level: FULL / ABS / SNIP; He 2016
   is abstract-only; Scharlemann, Trumbore and Ciais are search-summary only).
 

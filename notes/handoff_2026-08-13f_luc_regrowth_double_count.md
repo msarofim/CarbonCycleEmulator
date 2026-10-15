@@ -30,7 +30,7 @@ three ocean decisions are still open and still Marcus'.
    prefers **β = 0.30**, a permanent LUC prefers **β = 0.70**. **`mode_fit.rds` is not just
    stale, it is fitted to the defect.** No refit should start until this is settled — that
    is now a *third* reason the refit is blocked, and unlike the other two it is not an open
-   question of judgement but a bug.
+   question of judgment but a bug.
 5. **IT MAKES THE δ¹³C PROBLEM WORSE, and every δ¹³C result dated 2026-08-13 was measured
    on the defective model** (§3). Land-use carbon is isotopically light, so the model has
    been running with part of its Suess forcing switched off. The ocean conclusions of
@@ -80,8 +80,8 @@ makes the control a genuine flat line, which is what the gate wants.)
 **Why it is structurally wrong, argued from the budget's own layout rather than from
 recollection.** GCB reports **E_LUC** (bookkeeping) and **S_LAND** (the residual land sink)
 as *separate* terms — `data/gcb_budget.rds` carries them as separate columns. The model's
-β-fertilisation uptake is the analogue of S_LAND. So regrowing what E_LUC removed adds a
-**second, unbudgeted land sink** on top of the one already parameterised. And whatever share
+β-fertilization uptake is the analog of S_LAND. So regrowing what E_LUC removed adds a
+**second, unbudgeted land sink** on top of the one already parameterized. And whatever share
 of regrowth E_LUC does or does not net out, **full recovery to the preindustrial stock is
 not defensible: converted land is farmed, not left to reforest.**
 

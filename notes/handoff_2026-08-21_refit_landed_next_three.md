@@ -18,7 +18,7 @@ got fixed. This file is for *what happens next*, and §§2–4 are written to be
 4. **⚠ NO UNCERTAINTIES ARE QUOTABLE.** The Hessian is unstable at `h_ml`. `par_mode` is fine;
    `sd_unc`, `cov`, `logdet_negH` and any Laplace evidence are NOT. **§3 fixes this.**
 5. **The `seas_T_amp` × ln(`q10`) conflict is the big new finding** and it is a *physical*
-   conflict, not a parameterisation nuisance. **§2, and it is the most valuable of the three.**
+   conflict, not a parameterization nuisance. **§2, and it is the most valuable of the three.**
 6. **`sst_seas_amp_NH` = 0.467 against an observed 2.237 (−5.97 σ)** — untouched all week. **§4.**
 7. **Two tests fail by design**, both in `test-fluxes.R` (:99 and :100), both reported and awaiting
    Marcus. See 20e §6.
@@ -52,7 +52,7 @@ ln(`q10`), not either factor:
 
 | | `seas_T_amp_NH` | `q10` | product |
 |---|---|---|---|
-| **prior centres** | 11.445 (measured) | 2.00 (literature) | **7.933** |
+| **prior centers** | 11.445 (measured) | 2.00 (literature) | **7.933** |
 | the 08-18 mode | 48.07 | 1.2613 | 11.16 |
 | the 7-parameter profile | 11.08 | 1.2201 | 2.205 |
 | **the converged mode** | **25.94** | **1.0907** | **2.251** |
@@ -82,11 +82,11 @@ respiration is *below* 10 cm are allowed for.
 ### What to do, in order
 
 1. **Establish that the ridge is real before repairing it.** Profile `seas_T_amp_NH` from 5 to 50 at
-   the converged mode with **`q10` re-optimised at each point** (the `diag_phi_eff_profile.R`
-   partial-reoptimisation idiom — reuse it, do not rewrite it). If the profile is flat in the
+   the converged mode with **`q10` re-optimized at each point** (the `diag_phi_eff_profile.R`
+   partial-reoptimization idiom — reuse it, do not rewrite it). If the profile is flat in the
    product and the two coordinates trade one-for-one, the diagnosis holds. **If it is not flat, stop
    — the conflict is somewhere else and this whole section is wrong.**
-2. **Find a damping factor with provenance, or say plainly that it is a judgement.** A measured
+2. **Find a damping factor with provenance, or say plainly that it is a judgment.** A measured
    soil-temperature seasonal climatology would be ideal. If none is cheaply available, the honest
    move is `SEAS_T_SOIL_DAMPING` as a `provisional` constant with a stated range, in the
    `SST_SEAS_AMP_LOGSD` idiom — **not** a silently widened prior.
@@ -119,7 +119,7 @@ kink is **10.85 m away**. The log even says so.
 **The likely cause is the opposite of the usual one — the step is too SMALL.** `ARM_HESS_EPS` =
 3e-4 on the unconstrained scale, and `h_ml` is `logit`-transformed on [85, 120], so near the lower
 bound du → dh_ml is heavily compressed: **the step reaches 7.12e-4 m**. Curvature measured over
-seven ten-thousandths of a metre is reading the integrator's own noise, not the posterior.
+seven ten-thousandths of a meter is reading the integrator's own noise, not the posterior.
 
 ### What to do
 
@@ -151,15 +151,15 @@ cells, so it is independent of the NEP repair.
   **off improved** the objective (+11.8 NH, +7.2 SH) — it was not merely inert but harmful.
 - The 08-20d phase fix (`CCX_SST_SEAS_LAG` 2.50 → 1.32, measured) recovered **44 %** of the penalty
   for raising it. **56 % survives**, so phase is not the answer.
-- Its prior width `SST_SEAS_LOGSD` = 0.25 is a **stated judgement**, not a measurement, and it
+- Its prior width `SST_SEAS_LOGSD` = 0.25 is a **stated judgment**, not a measurement, and it
   stands in for exactly the gap this section is about: ERSSTv5 gives an **area-weighted** mean and
   the parameter is a **gas-exchange-weighted** one.
 
 ### The first move is a per-stream veto profile, not a new download
 
 Profile `sst_seas_amp_NH` from 0.467 to 2.237 at the converged mode, with the rest of the seasonal
-block re-optimised, and read the **per-stream** decomposition — the same design that showed the
-−794 veto on `npp_frac_NH` was a φ = 75 artefact. **Which rows reject it, and by how much, is the
+block re-optimized, and read the **per-stream** decomposition — the same design that showed the
+−794 veto on `npp_frac_NH` was a φ = 75 artifact. **Which rows reject it, and by how much, is the
 whole question.** Three outcomes, each pointing somewhere different:
 
 - **the CO₂ seasonal rows veto it** → the air-sea flux response is too strong; suspect the

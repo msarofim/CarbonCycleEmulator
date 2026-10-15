@@ -28,18 +28,18 @@ Where the pulse sits (GtC of 100), CarboTope / Joos Table 5 fit:
 
 ## 2. What the tests support
 
-- **Land: too strong at all times, through CO₂ fertilisation.**
-  - With no fertilisation, the land takes up ≈ 0 of the pulse (−0.25 GtC at 20 yr).
+- **Land: too strong at all times, through CO₂ fertilization.**
+  - With no fertilization, the land takes up ≈ 0 of the pulse (−0.25 GtC at 20 yr).
   - `beta_max` × 0.75 puts the land on Joos at both 20 and 100 yr (18.6 / 22.2 against 19.25 / 23.66).
   - An independent check: the canonical's 2015–2023 land sink is 3.16 GtC/yr, against its own fitted GCB target of 2.67 (with the mode's imbalance shares). That is +0.49, about +1 gate-7 sd.
 - **Ocean: too much in the first year, then less than Joos.**
   - The first-year ocean uptake is 7.5 GtC, against 3.5 in Joos's fit.
-  - Gas exchange at the cited centre (k_w 1446 m/yr, Naegler 2009, against the fitted 1870) removes 1.1 GtC of the 4.1 GtC first-year excess.
+  - Gas exchange at the cited center (k_w 1446 m/yr, Naegler 2009, against the fitted 1870) removes 1.1 GtC of the 4.1 GtC first-year excess.
 - **Both together** (k_w 1446, `beta_max` × 0.70): IRF 0.570 / 0.416 / 0.322, against Joos 0.596 / 0.409 / 0.322.
   - That closes 100 and 300 yr.
   - It leaves −0.026 at 20 yr, all of it ocean (25.2 against 20.6 GtC).
 - **No single lever has the gap's shape** (ΔIRF20 / ΔIRF100 = 2.45).
-  - Fertilisation is about 1.2; `kz` is 1.24.
+  - Fertilization is about 1.2; `kz` is 1.24.
   - k_w is early-only (4.4–4.8), but small.
 
 ## 3. What the tests rule out
@@ -57,7 +57,7 @@ Where the pulse sits (GtC of 100), CarboTope / Joos Table 5 fit:
 - **Equilibration time:** about 0.6 yr for the mixed layer and 1.6 yr for the high-latitude box.
 - **Initial uptake rates:** the ocean's gas-exchange limit is 12.8 GtC/yr and the model's first-quarter mean is 10.1. Joos's ocean fit has an initial slope of 3.8.
 - **Land:** initial ΔNPP 6.15 GtC/yr against Joos's land-fit slope of 2.8; d ln NPP / d ln CO₂ = 0.66.
-- **Thermocline diffusion** matches its analytic √t law (2.08 / 9.29 predicted, 1.96 / 10.66 modelled), so there is no sign of a transport bug.
+- **Thermocline diffusion** matches its analytic √t law (2.08 / 9.29 predicted, 1.96 / 10.66 modeled), so there is no sign of a transport bug.
 
 ## 5. Unexplained, and what would separate it
 
@@ -66,7 +66,7 @@ Where the pulse sits (GtC of 100), CarboTope / Joos Table 5 fit:
   - the SH mixed layer's winter depth (1.68 × h_ml);
   - the 292 m high-latitude box.
 - Joos's raw year-one ocean value per model is in the Supplement, which is not in Papers/. Only the fit is available.
-- The fertilisation strength (β_eff 0.66) has not been checked against any FACE observation.
+- The fertilization strength (β_eff 0.66) has not been checked against any FACE observation.
 - ⚠ **Context:** CarboTope's TH20 of 12.85 yr is below EVERY individual model in Joos Table 4 (the lowest is CLIMBER2-LPJ at 13.0, p. 2802), although it is inside the 5–95 % range.
 
 ## 6. Found on the way

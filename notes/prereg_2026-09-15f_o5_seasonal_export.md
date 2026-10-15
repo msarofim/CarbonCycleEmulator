@@ -19,7 +19,7 @@ recalled. `hilda30c` stays canonical; every registered mode stays bit-reproducib
 (`R/model.R` ~2373: lag 0 peaks mid-July NH / mid-January SH). Zero-mean by construction, so ∫ s_h dt over any whole year = 1 ×
 the year. `pump_seas_amp ∈ [0, 1]` (the export never reverses; `ccx_prepare()` refuses outside by name), `pump_seas_lag` in
 months (any finite). The factor multiplies EVERY pump limb — the LS pump's org + carb legs from BOTH surface boxes (ml, tr) and the
-HS pump (`pump_hs`) — one statement about export production, no per-box knob. Both cores; marshalled by exact name; 0 = OFF emits
+HS pump (`pump_hs`) — one statement about export production, no per-box knob. Both cores; marshaled by exact name; 0 = OFF emits
 NOTHING (bit-exact; the `w_thc` contract). Under `seas_ml` the ML thickness moves independently; nothing else is touched.
 **P0 contracts:** (a) `amp = 0` bit-exact incl. the canonical's 25 streams; (b) annual-mean pump flux at amp 1 = the constant
 export to 1e-6 relative (a whole-year integral); (c) R/C++ parity ≤ 1e-10 at amp {0.5, 1} × lag {0, 2} × `seas_ml` {0, 1};
@@ -44,7 +44,7 @@ surprise is visible.
 - Control (solved field, the canonical): amp ∈ {0.5, 1} × lag 0 — how much the canonical's own SPO row moves (recorded; the
   canonical was fitted at amp 0, so a cost is expected and is NOT a criterion).
 - Arm C at the best grid point: the PK-2 surface names (`beta_max, fert_k, q10, kz_deep_frac, h_ml, k_w, bomb_total,
-  sigma_d14c`) re-optimised — does the SPO recovery survive a refit of the names that also move the seasonal rows?
+  sigma_d14c`) re-optimized — does the SPO recovery survive a refit of the names that also move the seasonal rows?
 ## 4. Decision rule (stated before the run)
 O5 PASSES as posed iff at some grid point (a) `co2_seasonal_SPO` recovers ≥ 50 % of its martin-9.08 cost (≥ −126 vs the
 canonical) AND (b) the martin total improves by ≥ 100 log-units over the amp-0 martin point (the recovery is not paid for by

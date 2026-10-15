@@ -39,7 +39,7 @@ Two things make this more than truncation noise:
    9.0 % of the bracket. With the constraining rows switched off the surface is
    flat/multi-modal enough that two arms of the same objective wander to
    unrelated corners. A comparison run in that regime is noise.
-2. **It is not a truncation artefact of the search alone.** Measured separately
+2. **It is not a truncation artifact of the search alone.** Measured separately
    at otherwise-init parameters: crossing `h_ml` 84.99 → 85.00 (absent → live)
    **costs 10.07 log-units** and 119.99 → 120.01 (live → absent) **gains 9.6**,
    so the objective actively *pays* to leave the band; and `h_ml`'s own

@@ -48,7 +48,7 @@ memory [[ccx_land_limb_worse_at_enso25]].
 ⭐ **A PARAMETER INSIDE ITS BRACKET IS NOT THE OBSERVABLE INSIDE ITS BRACKET.** Both cluster
 representatives agree to three decimals on every limb.
 ⛔ **Do NOT reach for `npp_frac_NH` as the fix**: matching the observed land limb by share alone needs
-≈0.81, **outside its [0.4, 0.8] bounds**, and its own prior centre makes the limb worse — which is
+≈0.81, **outside its [0.4, 0.8] bounds**, and its own prior center makes the limb worse — which is
 [[sh_land_undercancels]] reproducing. The SIZE was already exonerated; the missing piece is CANCELLATION.
 ⚠ **These are PRE-alpha-change numbers** and the file says so; re-running reproduces every CO₂ number
 exactly but moves the d¹³C ratios (`r_SPO` 2.063 → 2.172). `alpha_as_tdep` is now recorded in its output.
@@ -125,7 +125,7 @@ before committing it.**
   migration contract. ⚠ Check every call site actually goes through one of them —
   [[split_name_must_hard_error]] records ~110 lines that once ran with a mechanism OFF.
 * ⚠ **`ccx_seas_lag_p()` still uses a PRECEDENCE rule (split wins) where `ccx_gamma_enso()` uses a
-  hard error.** Two split contracts, two behaviours, one repo. Worth ruling on.
+  hard error.** Two split contracts, two behaviors, one repo. Worth ruling on.
 * ⚠ The fitted coefficients are **strongly ANTIsymmetric** — ocean −0.950 (NH) / +1.187 (SH) — where
   both seeds assumed symmetric. Nobody has asked whether that is physical.
 * ⚠ The four sit at **|z| ≤ 0.68** and moved nothing in the prior screen; the ENSO limb contributes
@@ -136,7 +136,7 @@ before committing it.**
 **(b) The temperature-dependent alphas** (`6263bf6`, today).
 * **R ↔ C++**: `ccx_alpha_as()` exists in both (`R/model.R`, `src/ccx_core.cpp:114`). Same formula,
   same units, same legacy branch.
-* **Marshalling — audit it FIELD BY FIELD, and mind the trap.** ⚠ I ran this audit twice and got a
+* **Marshaling — audit it FIELD BY FIELD, and mind the trap.** ⚠ I ran this audit twice and got a
   false "uninitialised memory" both times, once from `tr -d 'a["]'` eating every letter `a` and once
   from a character class `[a-zA-Z_]` that excluded the digit in `fco3`. The correct form:
   ```
@@ -169,7 +169,7 @@ before committing it.**
 * **What it is**: the 25-parameter set, arm N, from the 09-01 survey's basin. The survey established
   **ONE basin at 25 parameters, −1495.795, all ten starts** ([[ccx_one_basin_at_25_par]]), so a
   dispersed multi-start is probably NOT needed again — a polish from `start_000.rds` / `start_005.rds`
-  may be enough. ⚠ That is a judgement to make explicitly, not to assume.
+  may be enough. ⚠ That is a judgment to make explicitly, not to assume.
 * **Cost**: the 09-01 survey ran **151 min per start** on Torch (job 16732800). ⭐ **Say the Torch
   verdict out loud before launching anything locally** ([[consider_torch_first]]); submission is
   Marcus's call.
@@ -196,7 +196,7 @@ before committing it.**
 * `alpha_as_tdep` **defaults ON**, so the LEGACY path is now the untested one; `test-alpha-as.R`
   asserts both. If you would rather ship it off until the refit lands, that is one line.
 * `calibration/lib_seas_limbs.R` is new and **`diag_admissible_2x2_land_ocean.R` deliberately does
-  NOT use it** — that file is a pre-registered artefact whose gates may not move under a refactor.
+  NOT use it** — that file is a pre-registered artifact whose gates may not move under a refactor.
   GATE R re-scoring its stored arms is what binds them.
 * **Memory consolidated**; snapshot `../memory_backup_20260902/`. `INDEX_ccx_seas.md` had breached its
   HARD ceiling (17.6 KB) — the closed 08-27 sub-arc moved to `INDEX_ccx_arch.md`, now 11.6 KB.
@@ -219,5 +219,5 @@ root `MEMORY.md` carries the objective-change banner.
 
 **Three errors of mine this session, all caught by output contradicting an expectation rather than by
 review:** GATE Q built self-referentially; the §4 diagnostic's stored ratios nearly drifting under my
-own change (a 3-byte file difference); and the marshalling audit's two false positives. ⚠ The pattern
+own change (a 3-byte file difference); and the marshaling audit's two false positives. ⚠ The pattern
 is that **the checks I wrote were wrong more often than the code was** — weigh that when reviewing §6.

@@ -18,7 +18,7 @@ Part A / Part B join at 1963.04, where a 4.5× one-month step survives."
 
 **That fact was two days out of date.** The join step was reduced **4.5× → 1.59×** on 2026-08-10
 by the sub-annual rebuild, and `DATA.md` §9 plus `notes/handoff_2026-08-10b` both record what
-remains as *defensible real acceleration*, not a method artefact. `Rscript
+remains as *defensible real acceleration*, not a method artifact. `Rscript
 data-raw/build_bomb_c14_source.R` prints the live value. **Check a caveat against the script that
 produces it before building a work plan on it** — this one survived two handoffs after being fixed.
 
@@ -68,7 +68,7 @@ this test (measured in `[C]`, not assumed).
 
 **(i) LUC debits the vegetation box** (commit `98c1783`). `add_source(iatm, e_luc, …)` →
 `add_flux(iveg, iatm, e_luc)` in both cores. Fossil stays a source — geology *is* outside the
-modelled system; LUC never was. `d13c_bio` removed from both cores and `ccx_cpp_par()`:
+modeled system; LUC never was. `d13c_bio` removed from both cores and `ccx_cpp_par()`:
 `add_flux` carries veg's own emergent ¹³C ratio.
 
 **The model is now carbon-conservative and was not.** Total change 1750→2024 = **503.79 GtC**
@@ -83,7 +83,7 @@ GtC** of land carbon from nothing, alongside the ~28 kmol of ¹⁴C.
 
 `ra_ratio` encodes Marcus' GPP caution directly (2026-08-12): respiring carbon fixed days ago
 returns the *atmosphere's* ratio and is a **null loop**; respiring from the pool returns the
-*pool's* ratio and is the **ocean-gross-exchange analogue**. It is the fraction of GPP that
+*pool's* ratio and is the **ocean-gross-exchange analog**. It is the fraction of GPP that
 cycles **through the pool**, and his two regimes are its endpoints. Leaf growth-and-decay is not
 this flux — it is the veg → soil → atm cascade, lagged rather than equilibrating.
 
@@ -138,7 +138,7 @@ pools cycle the bomb ¹⁴C, a large slow pool holds carbon while barely seeing 
 
 **The two likelihood failures are a stale fixture, not a loophole.** The AR(1) pathology they were
 written to catch has **not** returned. `ccx_default_params()`'s `beta = 0.40` now leaves CO₂
-~12 ppm low. Resolving them = re-centring the defaults, which is a **decision**, not a fix.
+~12 ppm low. Resolving them = re-centering the defaults, which is a **decision**, not a fix.
 
 **The two pulse failures are a physical benchmark and are more serious.** Against recalled Joos
 et al. (2013) IRF values (0.59 / 0.41 at 20 / 100 yr):
@@ -150,14 +150,14 @@ et al. (2013) IRF values (0.59 / 0.41 at 20 / 100 yr):
 | 0.50 | 0.402 | 0.243 |
 
 **φ = 0 reproduces Joos almost exactly.** The capacity term is doing **two jobs and only one was
-asked for**: clearing reduces productivity (wanted), but it also amplifies CO₂ fertilisation on
+asked for**: clearing reduces productivity (wanted), but it also amplifies CO₂ fertilization on
 the way up (more veg → more NPP → more veg), and that positive feedback over-drains the pulse.
 
 None of the four has been modified or skipped, per the standing rule.
 
 ---
 
-## 6. Re-centring `ccx_default_params()` — what it does and does not touch
+## 6. Re-centering `ccx_default_params()` — what it does and does not touch
 
 Established by inspection, worth not re-deriving:
 
@@ -173,7 +173,7 @@ Established by inspection, worth not re-deriving:
   in **sign as well as magnitude**. It is a label not derived from a computed value — fix it
   regardless of what happens to β.
 
-**Recommendation: do not re-centre until the land layout is final**, or it gets done twice.
+**Recommendation: do not re-center until the land layout is final**, or it gets done twice.
 
 ---
 
@@ -189,7 +189,7 @@ Established by inspection, worth not re-deriving:
    `min(veg/veg0, 1)` so clearing costs capacity while growth does not add it. **The clamp was not
    implemented** because at defaults the land pool stays *above* veg0 all century, so it would be
    inert historically — whether it bites depends on a calibrated β and on the new pool layout.
-3. **Then re-centre `ccx_default_params()`** (§6), in a commit that changes nothing else, recording
+3. **Then re-center `ccx_default_params()`** (§6), in a commit that changes nothing else, recording
    every expected value that moves. Fix `app/global.R:74` here.
 4. **Then one mode-find** covering the LUC debit + the new land together (~2 h at 0.047 s/eval).
    Expect **β to fall from 0.883 to ~0.25–0.30** — a scan already puts CO₂ @2020 at 413.7 ppm

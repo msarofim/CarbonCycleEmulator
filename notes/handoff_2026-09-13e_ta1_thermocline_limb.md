@@ -22,7 +22,7 @@ scorecard reads reproduced to 0.0) and only the anomaly is priced. 87 s per R ru
 - **Why**: the layer-1 ↔ ML coupling (0.35 yr) closes the deficit across one interface; T-A0's bottom return (gain 0.100, 4×
   this) propagated it down the column but cost −135 on `d14c_profile_bd`. ⚠ T-A0 never recorded its contrast (like-for-like
   caveat on the "58 %"). ⚠ 26 and 109 Sv are both MODEL-DERIVED scales; my recollection that equatorial upwelling is "tens of Sv"
-  is UNSOURCED and labelled so in the CHANGELOG.
+  is UNSOURCED and labeled so in the CHANGELOG.
 
 ## 3. The ruling owed (Marcus)
 Option B ruling 2 said "a dedicated equatorial box ONLY if PB1 fails on magnitude". A layer-1 limb on `ml_lo` HAS failed on

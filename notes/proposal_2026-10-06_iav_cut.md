@@ -6,7 +6,7 @@
 > - `diag_iav_kernel_preview.R` (C5), `diag_iav_station_timing.R` (C6), `diag_iav_cut_se.R` (error bars) and
 >   `diag_iav_cut_scope.R` (B2 split into its ENSO and volcanic parts).
 >
-> These are CONDITIONAL slices: every other name stays at the canonical, apart from the blocks B2/B3 re-optimise.
+> These are CONDITIONAL slices: every other name stays at the canonical, apart from the blocks B2/B3 re-optimize.
 > A real stage-2 refit gives the joint answer.
 
 > **RULINGS SO FAR (Marcus, 2026-10-06, verbatim):**
@@ -27,7 +27,7 @@ the other parameters in the model care about."*
 ## 1. What it is, and why it is not the row declined twice
 - **The interannual module** fits the interannual names to the detrended 12-month growth.
   - The names: the land ENSO lag, the land ENSO amplitude, `gamma_diff`, and optionally `w_enso_l2`.
-  - The growth: a centred 12-month difference of NOAA MBL global CO₂, 1980–2024, detrended with a natural spline,
+  - The growth: a centered 12-month difference of NOAA MBL global CO₂, 1980–2024, detrended with a natural spline,
     df 5. The difference removes the annual cycle and the spline the trend.
 - **The main module** fits every other name to the existing rows, with the interannual names held.
 - Statistics calls this a *modular* or *cut* calibration: a module's data inform only that module's names, so a
@@ -46,7 +46,7 @@ the other parameters in the model care about."*
 | land ENSO lag, months | 2.61 | **5.86** (1σ 4.6–7.2; 2σ 3.1–8.8, monthly n_eff 22.5) |
 | land ENSO amplitude | 1 × (0.508 / 0.487) | **× 1.38** |
 | `gamma_diff` (fixed today) | 0.25 | **0.56** |
-| modelled growth peak after Niño 3.4 (record +5) | +1 | +6 |
+| modeled growth peak after Niño 3.4 (record +5) | +1 | +6 |
 | detrended growth r: monthly / annual | 0.59 / 0.64 | **0.71 / 0.77** |
 | sd ratio, model / observed: monthly / annual | 0.53 / 0.61 | 0.74 / 0.78 |
 | What-if readout's annual miss, ppm/yr | 0.370 | **0.328** (−11.5 %) |
@@ -81,7 +81,7 @@ the other parameters in the model care about."*
   - 1966 −3.9; 2016 −3.4; 2023 −3.1;
   - 1963 −2.8 (Agung); 1998 −2.4.
 - **A refit of the other names recovers little:**
-  - B2 re-optimises the five other land names and lands at −71.9;
+  - B2 re-optimizes the five other land names and lands at −71.9;
   - B3 adds the six seasonal-cycle names and `tau_ex`, and lands at −72.1 (both pass the slope gate);
   - what comes back is the ice core and level rows (`co2_icecore` −5.5 → −0.8). The land sink (−48.0) and the
     seasonal rows (MLO −5.8, SPO −5.3) do not move.
@@ -93,9 +93,9 @@ the other parameters in the model care about."*
   | ENSO only (A1's lag and amplitude, `gamma_diff` 0.25) | −45.2 | +2.7 % / +1.4 % | −8.8 ppm |
   | volcanic only (`gamma_diff` 0.56) | −33.3 | +11 % / +13 % | −22.4 ppm |
 
-  - The volcanic arm also leaves the two ice cores and both CO₂ level rows paying −15 after the re-optimisation.
+  - The volcanic arm also leaves the two ice cores and both CO₂ level rows paying −15 after the re-optimization.
   - **So `gamma_diff` is not an interannual-only name.** Its AOD forcing has a positive mean (an eruption only ever
-    adds), so raising it shifts long-term land carbon, and the fertilisation pair and the futures move with it.
+    adds), so raising it shifts long-term land carbon, and the fertilization pair and the futures move with it.
   - The ENSO names nearly are interannual-only, because the index is demeaned (Ruling A).
 - **The app shows little of the land-sink cost.** Its land-sink panel smooths GCB and the model over 11 years
   (`APP_LUC_SMOOTH_YR`), so the cost shows only in the thin annual line.
@@ -123,7 +123,7 @@ the other parameters in the model care about."*
      A1). A two-box model cannot make one station lead the global mean.
 3. **The seasonal rows carry real information, but about something else** (C2).
    - Each row's lag preference splits exactly into information minus visibility (gated to 9e-14).
-   - Information peaks at short lags; visibility actually favours long lags.
+   - Information peaks at short lags; visibility actually favors long lags.
    - The information comes from the big years (1983, 2016, 1992, 1998, 2011 carry 45 % of what lag 5 costs, at the canonical amplitudes).
    - For MLO, point 2 explains it. **For SPO it is unexplained:** SPO's own growth peaks on the global mean's timing.
 4. **A response SHAPE does not reconcile them** (C5).
@@ -151,14 +151,14 @@ the other parameters in the model care about."*
    - The ENSO part is what the growth record pins, and it barely leaks into the trend names.
    - `gamma_diff` fails the split's own premise: it is not interannual-only.
      - The growth's 0.56 is only 1.4σ (monthly) to 2.8σ (annual) from 0.25.
-     - Moving it drags the fertilisation pair and the 2300 futures.
+     - Moving it drags the fertilization pair and the 2300 futures.
      - The canonical's objective prefers 0 (+1.74).
    - It deserves its own decision. One candidate: an AOD term made zero-mean, as Ruling A made the ENSO index.
 3. **The ocean limb, REVISED after Marcus asked why it is not in the module.** My first recommendation was to keep it in
    the main objective; I now recommend moving it INTO the module, together with its own row.
    - **Why it was left out at first.** The growth record sees land plus ocean together.
      - The ocean term reads Niño 3.4 unlagged and has the opposite sign, so on the growth alone a bigger ocean
-       response is cancelled by a bigger land one.
+       response is canceled by a bigger land one.
      - Measured, A2 on the growth alone runs away: `w_enso_l2` 55 / 113 (monthly / annual), land ×2.4 / ×4.1.
    - **What pins it is its own interannual observation,** `gcb_ocean_enso_slope`, GCB's ocean ENSO slope. Before that
      row existed (objective #13), the objective had no power on the ocean's ENSO response; the limb refit landed at

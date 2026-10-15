@@ -6,7 +6,7 @@ Marcus 09-13 ("Run the T-A2 scan first, and then scope the equatorial cell"). Fo
 Niño3.4-modulated limb with a LAYER-1 return is right-signed, exactly linear and free, and 4× too weak
 (gain 0.0250 GtC/yr per (m/yr) per index; T-A0's whole-column limb 0.100).
 
-## 1. The limb, generalised to a return at layer k — ANOMALY ONLY
+## 1. The limb, generalized to a return at layer k — ANOMALY ONLY
 Signed exchange between the mixed layer and layer k, ΔV(t) = −γ_A·Niño3.4(t) (m/yr per index unit),
 each tracer at its own gradient: F_tr(k → ML) = ΔV·(y[k,tr]/dz_k − y[ml,tr]/dz_ml(t)). El Niño (N > 0)
 ⇒ ΔV < 0 ⇒ less layer-k water reaches the mixed layer. **k = 1 IS T-A1** (there ΔK = ΔV·dz_mid on the
@@ -16,7 +16,7 @@ both hemispheres equally; spinup = the file's own periodic one, taken before the
 
 **Why anomaly-only, with no mean W0 (stated, with its evidence).** The periodic spinup integrates in C++
 (`ps_phi` → `ccx_run_fast`), so a MEAN limb to layer k ≥ 2 cannot be put in the equilibrium without the
-core, and a transient started off its own equilibrium would drift — a mean-state artefact, not the limb.
+core, and a transient started off its own equilibrium would drift — a mean-state artifact, not the limb.
 T-A0's table (re-read today, `ta0_enso_upwelling_sign_20260908.rds`) shows the response is a function of
 W0·γ ALONE: slope = −0.1628 + 0.0998·(W0·γ), R² 0.9996 across W0 = 0.5–4 m/yr, residuals < 0.006; the
 γ = 0 intercepts at W0 = 0.5 / 1 / 2 / 4 are −0.16287 / −0.16284 / −0.16279 / −0.16274 — a mean limb up to

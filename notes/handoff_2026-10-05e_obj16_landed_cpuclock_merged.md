@@ -32,10 +32,10 @@
 | scorecard gates | no verdict flips; GATE V z −4.39 | −4.60 |
 | survey | ONE basin; 16 converged, 8 out of time (all slept) | — |
 
-- ⚠ **"Two basins" (10-05 m, c, d) was wrong.** They were value groups within 0.19, inside the optimiser's 0.5 bound, and the collector puts all 16 starts in ONE basin.
+- ⚠ **"Two basins" (10-05 m, c, d) was wrong.** They were value groups within 0.19, inside the optimizer's 0.5 bound, and the collector puts all 16 starts in ONE basin.
 - If Marcus adopts: the steps are in `notes/handoff_2026-10-05b` §5 step 7. Then ask whether the hilda34g assessment becomes a #16 assessment.
 
-## 3. Open items (each is Marcus's to prioritise)
+## 3. Open items (each is Marcus's to prioritize)
 1. **#16: adopt or not.** §2 is the read.
 2. **Optional:** resume the 8 sleep-affected starts (12, 13, 14, 15, 16, 18, 20, 21) from their checkpoints.
    - With today's driver this runs on the CPU clock, so the collector will WARN about a mixed wave (D3, by design).
@@ -46,7 +46,7 @@
    - (c) the end-of-run "eval rate … SIZE THE ARRAY ON THIS" line under-reports ~10× (pre-existing): fix?
 4. **Carried, unchanged:**
    - H2 (deferred);
-   - `hs_asx_frac`'s judgement width (kept);
+   - `hs_asx_frac`'s judgment width (kept);
    - H1's observed-ratio arm (needs his download permission);
    - card 4 wording (his text);
    - the substep held-K rule (optional);

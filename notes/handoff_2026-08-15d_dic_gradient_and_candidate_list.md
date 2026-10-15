@@ -163,7 +163,7 @@ one the objective is blind to.
   6.5e-07 GtC over 96 states, and it `stop()`s above 1e-6. If you change `ccx_spinup()`, this
   copy will fail loudly rather than drift.
 - **The observed profile has a slight mid-depth maximum** (1314–1861 m sits ~3 µmol/kg above the
-  bottom), so two boxes per hemisphere need a **negative** source — not remineralisation.
+  bottom), so two boxes per hemisphere need a **negative** source — not remineralization.
   Reported with magnitudes (min S ≈ −0.14 GtC/yr), **not smoothed away**.
 - **The free validations are NOT in the objective:** ocean inventory 32,827 → 36,467 GtC
   (canonical ~38,000) and natural ¹⁴C production 0.672 → 0.736 of canonical. Both improve. **Do
@@ -178,7 +178,7 @@ one the objective is blind to.
 
 | # | task | status |
 |---|---|---|
-| ~~1–5c, 6b, 7~~ | objective, β, `luc_scale`, GLODAPv2, gradient, shares, seasonality, MM fertilisation, `sigma_co2` | **DONE** |
+| ~~1–5c, 6b, 7~~ | objective, β, `luc_scale`, GLODAPv2, gradient, shares, seasonality, MM fertilization, `sigma_co2` | **DONE** |
 | **6** | `LIK_EXCESS_C14_TARGET` | **NOT a blocker** |
 | **8** | **THE REFIT**, 19 parameters, ~5.4 h | structurally unblocked; held only by the fork |
 | **9** | **the pump** | **all three clauses PASS** — but on the background-state channel, not export. §2 |

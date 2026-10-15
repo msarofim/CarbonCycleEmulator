@@ -37,7 +37,7 @@
 - **What does not help:**
   - a memory kernel reconciles nothing;
   - smoothing the land-sink row alone moves the joint lag only 2.5 → 2.9.
-- **`gamma_diff` is not interannual-only.** Its AOD forcing has a positive mean, so it drags the fertilisation pair and
+- **`gamma_diff` is not interannual-only.** Its AOD forcing has a positive mean, so it drags the fertilization pair and
   2300 CO₂ by −22 ppm. Held at 0.25, as Marcus leans.
 - **The low-pass land-sink row, priced.** It is an exact orthogonal split (df 6), so it needs no new σ. Under the cut,
   B2 goes from −36 to **−10**, the land row's trend part improves, and what remains is the seasonal rows (−13).
@@ -69,7 +69,7 @@
    - Mutation-test it: break the projection, and the test must fail.
 3. **`gcb_ocean_enso_slope` MOVES to the module**: out of the main objective under #17.
 4. **The monthly growth data product** (Hard rule 3).
-   - A `data-raw/` builder of the NOAA MBL global monthly series and its centred 12-month difference, plus a MANIFEST
+   - A `data-raw/` builder of the NOAA MBL global monthly series and its centered 12-month difference, plus a MANIFEST
      row and `data/*.rds`.
    - The source is the weekly `data-raw/downloads/mbl_zonal_co2_GL.txt`: month means of column V5, as in
      `lib_block_reopt.R br_obs_growth()`. The annual builder `data-raw/build_mbl_global_growth.R` is the template.

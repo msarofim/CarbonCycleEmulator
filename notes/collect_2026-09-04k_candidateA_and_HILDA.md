@@ -62,7 +62,7 @@ of area) over an advective-diffusive Interior, **plus a separate high-latitude s
 well-mixed high-latitude deep box (HD)**. Transport is **four** parameters: eddy diffusivity `K`,
 upwelling `w`, HS↔HD exchange `u`, and HD↔Interior exchange `q`.
 
-⭐⭐ **THE DIVISION OF LABOUR IS THE WHOLE POINT.** In HILDA, `K(z)` handles the **upper** ocean and
+⭐⭐ **THE DIVISION OF LABOR IS THE WHOLE POINT.** In HILDA, `K(z)` handles the **upper** ocean and
 bomb-¹⁴C penetration; **deep ventilation goes through the high-latitude conduit** (`u`, `q`), NOT
 through `K`. Their fitted deep diffusivity is **K₀ = 465 m²/yr**.
 ⛔ **Our model has no conduit, so `K` must do BOTH jobs — and the table above prices that: every arm

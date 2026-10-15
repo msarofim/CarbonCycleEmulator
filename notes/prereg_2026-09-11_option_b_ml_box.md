@@ -2,14 +2,14 @@
 
 > Status: DESIGN NOTE + PREREGISTERED PREDICTIONS. Nothing built. The build is a fresh session's job
 > (weeks-scale per `handoff_2026-09-08j`, §4). Standard: [[ccx_pedagogical_not_emulator]] — the product
-> is the CHAIN; a mechanism that buys its observable by breaking a neighbouring link is worse than a miss.
+> is the CHAIN; a mechanism that buys its observable by breaking a neighboring link is worse than a miss.
 
 ## 0. What round 6 established that this note starts from (all MEASURED, CHANGELOG 2026-09-11)
 1. The seasonal mixed layer (`seas_ml = 1`) refits to −1492.16 and is **−17.8 on likelihood** against
    `hilda31p`, ALL of it on `ocean_grad_d13c` (−9.2) and `ocean_grad_dic` (−8.9).
 2. **GATE P7 FAILS at 2× its bound**: the modern surface−deep δ¹³C gradient goes −0.309 → +0.018
    (target −0.861; z +3.4 → +5.5); the DIC gradient 302 → 385 (target 233; z +2.1 → +4.7). The
-   mechanism homogenises the isotope gradient and steepens the DIC one, both away from the observation.
+   mechanism homogenizes the isotope gradient and steepens the DIC one, both away from the observation.
 3. What it BUYS: priors +6.2; `sst_seas_amp_NH` z −2.89 → −2.07 (P2 relaxed, not inside 2σ);
    `ent_seas_amp_SH` 18.7 → 9.5 (P12 half-retired); `pump_hs_gcm2` +2.39 → +1.54.
 4. **P1c (09-09p/q)**: the SH ocean has two ANTIPHASE seasonal regimes (thermal subtropics peak Jan,
@@ -20,7 +20,7 @@
    above the global mean; the model's representable tropical contrast is EXACTLY ZERO (two hemispheric
    boxes, no tropical one); the observed ENSO ocean sensitivity (+0.1153 ± 0.0246 GtC/yr per Niño3.4
    unit) needs 0.24× that reservoir; the model's solubility-only path is WRONG-SIGNED (r −0.43) and is
-   cancelled by four fitted `gamma_enso_*`. **This is THE release blocker, unchanged since 09-03.**
+   canceled by four fitted `gamma_enso_*`. **This is THE release blocker, unchanged since 09-03.**
 
 ## 1. THE HYPOTHESIS (one sentence)
 **Round 6's P7 failure and the ENSO sign error have ONE cause: the single hemispheric mixed-layer box has no
@@ -58,7 +58,7 @@ own entrainment once the box is right).
    POLEWARD-masked Holte MLD climatology PLUS an SST seasonal amplitude PINNED to an observation** (the
    poleward-of-40° SST cycle — a data task beside the MLD one), NOT fitted. No new free parameter beyond the
    build; the 09-05 rule's point (no fitted amplitude inside a structural test) is kept.
-4. **`ent_seas_amp_SH` STAYS FITTED in the first B refit; PB3 reads where it goes** (≤ 1.5× centre or → 0).
+4. **`ent_seas_amp_SH` STAYS FITTED in the first B refit; PB3 reads where it goes** (≤ 1.5× center or → 0).
    Retiring it first would make the test blind ([[no_power_null]]): a free parameter that goes to zero is the
    evidence that `ml_hi`'s entrainment does the shim's job.
 
@@ -68,7 +68,7 @@ own entrainment once the box is right).
    40° is 36 % — and ruling 1 puts `ml_hi` at 57°+. PB2 is amended accordingly (below); the 40–90 °S row
    stays as the shipped GATE S at the canonical, reported beside it, never substituted.
 6. **`h_hs` goes under the HS Holte prior, as 09-08d did for `h_ml`** (ruling: "follow 09-08d"): lognormal,
-   centred between the observed 57°+ annual MEAN and MAX (NH 128 / 307, SH 103 / 154), log-sd from the
+   centered between the observed 57°+ annual MEAN and MAX (NH 128 / 307, SH 103 / 154), log-sd from the
    mean-vs-max spread, built by the same idiom (`data-raw/build_h_ml_prior.R` → a computed product, never a
    typed number). At `hilda31p` `h_hs` is 417 m; **PREDICTION (added here, before any run): the pin costs
    < 5 log-units on the CO₂ rows** (09-08c: HS thickness cancels at steady state; the −107 at 75 m was
@@ -78,7 +78,7 @@ own entrainment once the box is right).
 ## 2c. ⛔ AMENDMENT 2026-09-11 (4)/(5): §0's items 1–3 are RETRACTED as findings about the mechanism
 The ocean-gradient row read INSTANT box carbon over the ANNUAL-MEAN mass — exact for a time-constant
 box, 157 µmol/kg low for the seasonal one at the GLODAP epoch. Round 6 was FITTED against that row; its
-"DIC 302 → 385" was the artefact (annual-mean read: 226 vs 233) and its δ¹³C half is the deep box the fit
+"DIC 302 → 385" was the artifact (annual-mean read: 226 vs 233) and its δ¹³C half is the deep box the fit
 moved to cancel it ⇒ [[seasonal_box_observable_artefact]], CHANGELOG 09-11 (4)–(5). **RULED (Marcus): annual
 mean of the concentration over the mass at the time**, shipped `c0bf185`, priced −0.0957 at `hilda31p`.
 **Round 6b** (the same arm under the corrected objective) = Torch job 17367892, outdir
@@ -94,13 +94,13 @@ alone until then. The build is PAUSED at the R side (`seas_ml = 2` unreachable, 
 - **PB1 (the blocker).** The solubility-only ENSO→ocean response **flips sign** (r > 0 against the
   observed +0.535) at a physically sized upwelling modulation (T-A0's ~26 Sv), with the four
   `gamma_enso_*` coefficients moving TOWARD zero on refit (their |sum| 0.356 → < 0.18, i.e. they stop
-  doing the cancelling). Net sensitivity within 2 se of +0.1153 GtC/yr per index unit.
+  doing the canceling). Net sensitivity within 2 se of +0.1153 GtC/yr per index unit.
 - **PB2 (P1c resolved by construction).** The SH ocean seasonal ΔpCO₂ shows TWO regimes: `ml_lo` peaks
   near Jan (thermal), `ml_hi` near Aug (DIC); the hemispheric mean cancels toward the observed 3.69 µatm
   while GATE S's phase window, **re-cut to the 57–90 °S product (ruling 5, amended 2026-09-11)**, passes on
   `ml_hi`. The 40–90 °S GATE S stays reported at the canonical; it is not `ml_hi`'s region.
 - **PB3 (P2/P12 again, and they must do BETTER than round 6, not merely as well).** `sst_seas_amp_NH` inside
-  2σ; `ent_seas_amp_SH` within 1.5× its centre (round 6: 1.45×) or retired.
+  2σ; `ent_seas_amp_SH` within 1.5× its center (round 6: 1.45×) or retired.
 - **PB4 (the deep is untouched).** `d14c_profile_*` and `d14c_mid` rows move by < 1 log-unit each; GATE 7
   (sinks) and GATE G (surface DIC) keep their verdicts.
 - **PB5 (likelihood, the 09-09x rule).** Compared on LIKELIHOOD against `hilda31p`: the split must not

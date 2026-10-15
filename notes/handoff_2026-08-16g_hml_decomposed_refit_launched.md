@@ -102,7 +102,7 @@ that is what Marcus decided to do (§4), with §3 as the reason it is worth tryi
 
 The band exists because a fixed-depth target is like-for-like with the model's boxes only near 100 m.
 That is a **representation error**, and the honest way to carry one is **in quadrature** —
-`σ_eff(h)² = σ_obs² + σ_rep(h)²` **with dnorm's normalisation term retained**, so inflating is
+`σ_eff(h)² = σ_obs² + σ_rep(h)²` **with dnorm's normalization term retained**, so inflating is
 *charged for* rather than free and the gain is bounded (best case `σ_eff = |miss|`). **Not a tuning
 knob:** `σ_rep(h)` is *measured* as the shipped-minus-like-for-like target gap.
 
@@ -199,7 +199,7 @@ must still see [30, 200].
 - **`init` moves 75 → 100 out of NECESSITY, not taste.** 75 is outside the new bound and
   `.to_unc()` returns NaN, so the mode-find would have started from a non-finite point. 100 is the
   pump's own `h_ml` and the depth every pump diagnostic scores at.
-- **The prior is narrowed WITH the bounds.** Leaving `dunif(30, 200)` would keep a density normalised
+- **The prior is narrowed WITH the bounds.** Leaving `dunif(30, 200)` would keep a density normalized
   over a support the sampler can no longer reach. That is a **constant +1.58**, identical in both
   arms, so it **cancels from the evidence contrast** — stated because a constant that was *not*
   identical between arms would not.

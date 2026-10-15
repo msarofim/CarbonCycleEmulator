@@ -110,6 +110,6 @@ van Vuuren H marker (CHANGELOG 2026-09-29 (b); `outputs/diagnostics/phi0_futures
 - **CCX CO₂ at 2300.** **875 ppm** (`hilda29l`) and **1374 ppm** (φ = 0).
 - **The matched ESM row.** Koven 2022's SSP5-8.5 rows are the like-for-like comparison. They are
   concentration-driven at **2162 ppm** in 2300, which is HIGHER CO₂ than either CCX arm. More CO₂ should mean
-  more fertilisation, yet those ESMs gain **less** land: 0.89–1.28× (computed above).
+  more fertilization, yet those ESMs gain **less** land: 0.89–1.28× (computed above).
 - **Not fully matched.** The warming paths differ (CCX's own vs each ESM's), and CCX's land base scope
   (permafrost is not represented) differs from the ESMs'.

@@ -69,7 +69,7 @@ trending ~0.03 GtC/yr² this is worth ~0.015 GtC/yr of bias, i.e. nothing; it do
 interannual variability, which is the part of the GCB series a partition constraint is
 supposed to use. Fix it in the same commit as §1 — it is the same three lines.
 
-`gcb_ocean_sink` has no `E_LUC` analogue and is unaffected by §1, as the handoff says.
+`gcb_ocean_sink` has no `E_LUC` analog and is unaffected by §1, as the handoff says.
 
 ---
 
@@ -185,7 +185,7 @@ objected.
 **Recommendation: yes, make the gradient an explicit target.** It is nearly free (gate 9's
 seasonally adjusted decadal series already exists and is computed by the same estimator the
 likelihood uses), it is the only thing that would give τ_ex a physically appropriate
-constraint, and it is the natural home for the δ¹³C gradient miss (−0.210 modelled against
+constraint, and it is the natural home for the δ¹³C gradient miss (−0.210 modeled against
 −0.074 observed) which currently has no term either.
 
 ### 2.4 Monthly — the seasonal cycle should stay fitted, not become derived
@@ -210,7 +210,7 @@ against `d13c_level_MLO` by 68. The per-year scoring decision was right and is w
 3. **A deep-ocean Δ¹⁴C term** (12d §§8–9, still never built). Its purpose in leverage terms
    is precise: **nothing in the objective constrains `kz` except δ¹³C**, the misfitting
    stream (`kz` leverage: `d13c_level_MLO` 9.3, `d14c_SH` 8.4, `d14c_NH` 7.8, `co2_level_MLO`
-   6.9, `gcb_ocean_sink` 6.4 — all small and mutually cancelling, which is why the bracket
+   6.9, `gcb_ocean_sink` 6.4 — all small and mutually canceling, which is why the bracket
    has to exist). **BLOCKED on GLODAPv2**, correctly, per 13i §A3.
 4. **Quay 2003 / Eide 2017 / SHCal20** (13h §5 decision 3): these are the three the handoff
    lists as candidates. On the leverage evidence, admit **Quay's mixed-layer Suess rate**
@@ -276,7 +276,7 @@ it is the one place the shipped default is better: δ¹³C prefers the high-β s
 that should not be buried. It does not come close to outweighing two failed hard gates.
 
 **And 188 GtC is not a tuned number pulled to fit** — it sits inside OSCAR's published
-206 ± 57 PgC, about 0.5σ below centre, and LUC × 0.75 = 217 GtC is *within a few GtC of
+206 ± 57 PgC, about 0.5σ below center, and LUC × 0.75 = 217 GtC is *within a few GtC of
 OSCAR's central value* while still closing 25 of the 32 ppm.
 
 ### 3.3 What this means, and what it does not
@@ -320,15 +320,15 @@ sensitivity sweep — but do it **after** the gradient term exists, or it will m
 issue sits next to it.** `ccx_default_params()$gamma_enso` is **0**, while
 `CCX_PARAM_TABLE$gamma_enso$init` is 0.5 and `app/global.R:71` overrides the default to the
 table's init. This is documented and deliberate (`model.R:372–382` — 0 is the
-behaviour-preserving value after the R/C++ divergence of 2026-08-13d), so it is **not a bug**.
+behavior-preserving value after the R/C++ divergence of 2026-08-13d), so it is **not a bug**.
 It is a provenance hazard: **every "at default parameters" number in this repo — the β
-re-centring, the Joos gate, the Pulse Lab reversal, and everything in this review — is
+re-centering, the Joos gate, the Pulse Lab reversal, and everything in this review — is
 ENSO-off, while the app the numbers describe runs ENSO-on.** For pulse work that is almost
 certainly immaterial (ENSO is an internal soil↔atmosphere transfer, and its leverage tops out
 at 16.3 log-units anywhere in the objective). It should still be stated on every output, and
 the two should be reconciled rather than left as an asymmetry a reader has to know about.
 On the forcing itself: a +1.438 post-2020 mean in an index the model treats as a zero-mean
-oscillation is an **extension artefact to fix at the source**, not a physical claim.
+oscillation is an **extension artifact to fix at the source**, not a physical claim.
 
 **Bomb-¹⁴C shape — yes, it has to stop being provisional, and §2.2(i) is why.** The argument
 was previously "magnitude absorbs shape error, so the post-peak decay can still constrain
@@ -342,7 +342,7 @@ cannot be trusted to constrain ventilation, which is the handoff's own question 
 
 ## 4. (c) COMPONENTS — one component has a demonstrated failure; the ocean is re-motivated
 
-### 4.1 Fertilisation — the binding structural defect, and the arithmetic of why
+### 4.1 Fertilization — the binding structural defect, and the arithmetic of why
 
 `NPP = NPP₀(1 + β ln(χ/χ₀))` has **one parameter controlling two things the data want to set
 independently**:
@@ -434,7 +434,7 @@ and doing it early is the cheaper ordering** (13i §A3, unchanged and still righ
 | **Land pools (4)** | **keep 4; free none of them** | Nothing in (a) asks for more or fewer. The layout fixed the bomb-¹⁴C partition (+51 % → +0 % at 1975) and 13i records that **one** free land timescale was enough to undo it (`tau_soil_fast` → 11.16 yr, +3.6σ). No stream scores the ¹⁴C partition, so nothing would catch the regression a second time. Structure, not parameters — the existing decision is correct. |
 | **`ra_ratio` = 0 (no gross land loop)** | **keep, document the asymmetry** | The asymmetry against gross air–sea and gross interhemispheric is real but defensible on measurement: δ¹³C moves only 0.10 ‰ across `ra_ratio`'s whole range while Δ¹⁴C moves 2.7 → −14.6 ‰, which forbids large values. And no stream could pay for it: the leverage matrix has nothing that would identify it. Leaving it free would be a 17th parameter with no data behind it. |
 | **Temperature × ENSO interaction** | **do not build** | They act on the same pool through independent terms, and `gamma_enso`'s max leverage anywhere in the objective is **16.3 log-units**. An interaction between a well-constrained parameter and an unconstrained one is an unidentifiable parameter. Revisit only if a growth-rate-variance statistic enters the likelihood — which is what `test-mechanisms.R:32` is actually asking for. |
-| **Atmosphere (2 boxes, no stratosphere)** | **keep** | v2 backlog. The bomb delivery kernel is measured (Tans 1981), not parameterised; the case for explicit strat boxes was the peak *shape*, and §3.4 says resolve the shape at the source instead. |
+| **Atmosphere (2 boxes, no stratosphere)** | **keep** | v2 backlog. The bomb delivery kernel is measured (Tans 1981), not parameterized; the case for explicit strat boxes was the peak *shape*, and §3.4 says resolve the shape at the source instead. |
 | **Conveyor (built, off)** | **keep off, do not ship** | Fails its own falsification test (13c §2c: it moves the MLO−SPO δ¹³C gradient the wrong way) and fails the pedagogy one-sentence test. `project_ccx_upwelling_does_not_close_d13c`'s result — reversing a closed vertical loop is provably invisible to the atmosphere — is the general warning that covers this whole family of options. |
 
 ---
@@ -455,10 +455,10 @@ everything else 40 : 1.** Four criteria agreeing is not four pieces of evidence 
 share a denominator.
 
 With `luc_scale` free, β ≈ 0.50 becomes compatible with the CO₂ level too (−2.6 ppm), and
-the incompatibility dissolves without a structural change. **The fertilisation form still
+the incompatibility dissolves without a structural change. **The fertilization form still
 has to change** — β 0.50 sits *exactly on* the 5th percentile at TH 20 (12.2 vs 12.2), which
 is not a margin — but the ordering matters: `luc_scale` is a cheap input fix that buys the
-gates back now, and the fertilisation form is the expensive structural fix that buys margin.
+gates back now, and the fertilization form is the expensive structural fix that buys margin.
 
 **Q: "Re-run the Joos IRF gate at the current default before anything else in (d)."**
 **Done — §4.1. It fails at all three horizons, and DESIGN §6 gate 12's recorded status is
@@ -476,7 +476,7 @@ own test. The two failures have one cause.
 
 | option | one sentence | verdict |
 |---|---|---|
-| saturating fertilisation | "plants respond less and less to each extra bit of CO₂, because something else eventually runs short" | **passes** |
+| saturating fertilization | "plants respond less and less to each extra bit of CO₂, because something else eventually runs short" | **passes** |
 | biological pump | "plankton grow at the surface, die, and sink, which is why the deep ocean is rich in carbon and the surface is poor" | **passes** |
 | conveyor | — (13c: no sentence survived) | **fails** |
 | `luc_scale` | "how much carbon deforestation released is itself uncertain, and the model lets the data say" | **passes**, and it teaches something the app currently cannot |
@@ -497,7 +497,7 @@ Unchanged recommendation from 13i (**report, don't edit**), with one upgrade:
 **`test-pulse.R:83, :100, :101, :112` are no longer only an internal disagreement.** The Joos
 scan reproduces the same defect against an outside benchmark at the same β. They are the
 model correctly reporting a structural failure, and they should stay failing until the
-fertilisation form changes — not be re-derived to a passing threshold.
+fertilization form changes — not be re-derived to a passing threshold.
 
 **Add gate 12 to the suite.** DESIGN §6 lists it as a hard gate; `diag_joos_irf.R` is a
 diagnostic nobody runs, which is exactly how its recorded status went stale across two β
@@ -515,7 +515,7 @@ The other six remain as 13i and A5 describe them.
 - **The refit is not wrong, it is premature in three specific ways.** It would run against
   an objective with a sign error (§1), with 40 : 1 weighting that has already driven β past
   two hard gates (§2), missing the input parameter that carries the residual it is meant to
-  explain (§3), and with a fertilisation form that cannot satisfy both ends of the data
+  explain (§3), and with a fertilization form that cannot satisfy both ends of the data
   (§4.1). 13h §3.1's pre-registered prediction (β 0.088 → ~0.5, q10 0.169 → ~1.5) is
   **unchanged and still the right test** — and §3.3 adds a second pre-registered prediction
   to run alongside it.
@@ -532,15 +532,15 @@ The other six remain as 13i and A5 describe them.
 | **4** | **GLODAPv2 pull** | One pull unblocks the `kz` decision (13i A3, currently BLOCKED on provenance) *and* the pump's deep DIC/δ¹³C targets. Doing it before the refit is the cheaper ordering, as 13i already argued. | — |
 | **5** | **Add the interhemispheric-gradient terms (CO₂ + δ¹³C)** | τ_ex is currently set by the seasonal cycle (§2.3); the gradient is 3× off and unscored; and the hemispheric-share sensitivity sweep measures nothing until this exists. Data already in repo. | — |
 | **6** | **Re-take the free-σ decision, and `LIK_EXCESS_C14_TARGET`** | §2.2(iv) and §2.2(i) are new evidence on two decisions already flagged for Marcus and answered "left free" / "flagged". Both were taken without leverage numbers. | Marcus |
-| **7** | **Saturating fertilisation (two-parameter), to the §4.1 design target** | The one component with a demonstrated failure against an external benchmark. PHASE-3-class. Buys margin on gate 12 that β ≤ 0.50 does not have. | — |
-| **8** | **THEN the refit**, ~18 parameters | Every blocker above is inside the objective or inside the model it optimises. | 1–7 |
+| **7** | **Saturating fertilization (two-parameter), to the §4.1 design target** | The one component with a demonstrated failure against an external benchmark. PHASE-3-class. Buys margin on gate 12 that β ≤ 0.50 does not have. | — |
+| **8** | **THEN the refit**, ~18 parameters | Every blocker above is inside the objective or inside the model it optimizes. | 1–7 |
 | **9** | **Pump**, on the §4.2 pre-registered test | | 4, 8 |
 
 ### What NOT to do
 
 - **Do not hand-tune stream weights to "balance" the objective.** The imbalance is real
   information about which data constrain which parameters; the fix is to add constraints that
-  are missing (§2.5) and to re-take σ decisions on evidence (§2.6), not to equalise log-units.
+  are missing (§2.5) and to re-take σ decisions on evidence (§2.6), not to equalize log-units.
 - **Do not delete `excess_c14_ocean` or `d14c_intcal`.** Correct physics with a loose σ.
 - **Do not free any land turnover parameter.** 13i priced this; nothing scores the property
   it would break.
@@ -556,12 +556,12 @@ The other six remain as 13i and A5 describe them.
 Deliberately **not** applied: every one of these encodes a methodological choice that is
 Marcus'. Listed so the decision is concrete rather than abstract.
 
-1. **§3.3, fertilisation** — replace the log form's specification with the two-parameter
+1. **§3.3, fertilization** — replace the log form's specification with the two-parameter
    saturating form and the §4.1 design target (integral of β ≈ 0.7, marginal slope at 388 ppm
    ≤ that of β ≈ 0.5). Record the log form and why it was abandoned, per the CHANGELOG rule.
 2. **§3.6, forcings** — `E_LUC` gains a calibrated scale with a sourced prior; the table entry
    stops presenting a ±27 ppm quantity as prescribed-exact.
-3. **§5.1, free parameters** — ~16 → ~18 (`luc_scale`, fertilisation's second parameter).
+3. **§5.1, free parameters** — ~16 → ~18 (`luc_scale`, fertilization's second parameter).
 4. **§5.2, likelihood** — add the interhemispheric-gradient terms; state explicitly that
    `gcb_land_sink` compares **gross to gross**; record the free-σ asymmetry as a known
    property with its measured leverage.

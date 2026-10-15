@@ -3,7 +3,7 @@
 ## The bug
 `calibration/diag_rep_dc_release_test.R`'s drop-arm closure conflated **an infeasible parameter
 vector** with **a missing likelihood stream**. `ccx_make_logpost()` returns a bare `-Inf` with **no
-`streams` attribute** whenever the optimiser proposes a vector the spinup cannot take; the closure
+`streams` attribute** whenever the optimizer proposes a vector the spinup cannot take; the closure
 then ran `setdiff(drop, names(NULL))`, concluded every dropped stream was absent, and `stop()`ed:
 
     Error in lp_arm(w) : arm ice_dropped: stream(s) absent: co2_icecore
@@ -11,7 +11,7 @@ then ran `setdiff(drop, names(NULL))`, concluded every dropped stream was absent
 
 Measured: `k_w`, `h_ml` and `tau_ex` at +60 in unconstrained space all go off-support (`kz` at +60
 does not). **Every gate had passed** — because all of them evaluated only at `u0`, which is feasible
-by construction, and none had power over the points an optimiser invents. Fixed by returning `-Inf`
+by construction, and none had power over the points an optimizer invents. Fixed by returning `-Inf`
 off-support and reserving the `stop()` for a *feasible* point whose streams list genuinely lacks the
 name (the renamed-row defect the guard exists for), plus a new **GATE INFEASIBLE** that probes each
 arm off-support and is mutation-tested to fail without the fix.

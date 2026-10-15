@@ -13,7 +13,7 @@ question I must answer, not edit) · **RULING** (a methodological choice).
 ## 0. THE HEADLINE — two comments are one bug, and it is a big one
 
 > *"In 2024, why isn't the dashed line the sum of the three colored bars? … the gap between the
-> grey line and the dashed line is much bigger than the negative green line."*
+> gray line and the dashed line is much bigger than the negative green line."*
 > *"I'm also concerned about the disparity between our land estimate and GCB's land estimate."*
 
 **MEASURED at `hilda29l` over 1750–2024** (`partition_table()` + `app_build_forcing()`):
@@ -56,8 +56,8 @@ and the app panel is wrong.**
 - **(a)** plot the **GCB convention**: land area = `land_C` change **+ cumulative LUC**, dashed
   line stays **total** emissions. The three then sum to total, matching how everyone reads a
   carbon budget, and the GCB bars become like-for-like by the same change.
-- **(b)** keep the raw pools and make the dashed line **cumulative fossil only**, relabelled.
-  Honest, closes to 0.2 %, but it is not the budget anyone recognises and it makes the LUC
+- **(b)** keep the raw pools and make the dashed line **cumulative fossil only**, relabeled.
+  Honest, closes to 0.2 %, but it is not the budget anyone recognizes and it makes the LUC
   story invisible.
 **I recommend (a)** — it is the convention the gate already uses, it fixes both panels with one
 change, and it makes Marcus's requested deforestation note (§2) natural to add.
@@ -122,16 +122,16 @@ change, and it makes Marcus's requested deforestation note (§2) natural to add.
 |---|---|---|---|
 | N1 | *"is credited"* → *"will be credited in the acknowledgements for the tool and any potential future publication"* | COPY | Verbatim. |
 | N2 | Delete *"Each one is measured below by the running model, not quoted from a note."* | COPY | ⚠ That sentence is **true and load-bearing for me** (it is why the tab cannot go stale) but it is inside baseball for a reader. Deleting the sentence does not change the design. |
-| N3 | **Should the `rep_dC` prior be centred at zero?** *"I wouldn't be surprised if there is supposed to be a station/hemisphere offset. Especially if the hemisphere is meant to represent surface CO₂ for ocean and land carbon sinks."* | **RULING — the sharpest comment in the review** | The prior is deliberately a **shrinkage** prior: `R/calibrate.R` says centring it on the measured offset "would tell the model the answer and then congratulate it for agreeing." **But Marcus's point is different and stronger** — if a hemispheric *surface* mean genuinely sits above a remote marine station, then **zero is not the physically neutral centre** and the 3.52σ strain is partly an artifact of centring. This is exactly K3: **measure the real offset, then decide.** Changing the prior centre is an **objective change** (restamps every mode) — §4.1 of the freeze record. |
+| N3 | **Should the `rep_dC` prior be centered at zero?** *"I wouldn't be surprised if there is supposed to be a station/hemisphere offset. Especially if the hemisphere is meant to represent surface CO₂ for ocean and land carbon sinks."* | **RULING — the sharpest comment in the review** | The prior is deliberately a **shrinkage** prior: `R/calibrate.R` says centering it on the measured offset "would tell the model the answer and then congratulate it for agreeing." **But Marcus's point is different and stronger** — if a hemispheric *surface* mean genuinely sits above a remote marine station, then **zero is not the physically neutral center** and the 3.52σ strain is partly an artifact of centering. This is exactly K3: **measure the real offset, then decide.** Changing the prior center is an **objective change** (restamps every mode) — §4.1 of the freeze record. |
 | N4 | *"What carrier would you expect to close it?"* → *"What mechanism might help close it?"* | COPY | Verbatim. |
-| N5 | Do we expect isotope differences between MLO/SPO and **hemispheric averages**? | **Q** | Same class as K3/N3, for δ¹³C. `grad_off_d13c` is the δ¹³C analogue and card 2 is scored **net** of it. Honest answer: yes, we should expect one, and we have not measured it. |
+| N5 | Do we expect isotope differences between MLO/SPO and **hemispheric averages**? | **Q** | Same class as K3/N3, for δ¹³C. `grad_off_d13c` is the δ¹³C analog and card 2 is scored **net** of it. Honest answer: yes, we should expect one, and we have not measured it. |
 | N6 | *"one ocean column per hemisphere, no interhemispheric deep exchange"* — **"Do we have no ocean exchange at all? And didn't we add tropical boxes?"** | **Partly FALSE — needs care** | The phrase is about **interhemispheric deep** exchange specifically, but it reads as "no ocean circulation", which is wrong: `hilda_csl3` carries HILDA cold surface/deep boxes per hemisphere, a biological pump in both columns, and the **layer-3 Niño3.4 return limb**. The **tropical box (`hilda_tr`) and the equatorial cell were explored and NOT adopted** — that arc is closed. Text must say precisely what exists and what does not. |
 | N7 | Commonalities between years the model over/undershoots the growth rate? | **FEATURE (analysis)** | A real diagnostic, and it would strengthen card 4. Candidates: volcanic years, strong El Niño/La Niña, the 1990s. Not yet run. |
 | N8 | *"variance beyond ENSO — volcanic and land-side"* with **"no mechanism here"** — *"I thought we also had volcanic aerosol diffusion?"* | **FALSE — my error** | **He is right.** `gamma_diff = 0.25` is live. My card-4 text denies a mechanism the model has. Must be corrected to: the volcanic path exists (diffuse light → NPP) and the variance is still short — which is a **more interesting** statement, not a weaker one. |
 | N9 | Reword the Joos comparison (exact text supplied) | COPY | Verbatim. ⚠ His phrasing *"we do not calibrate to match future projections"* is right and better than mine. |
 | N10 | *"named mechanism"* → *"physical mechanism"* / *"replacing a shim with a physical mechanism"* | COPY | Verbatim. |
 | N11 | Delete *"which is the most that naming buys: a named stand-in is still a stand-in"* | COPY | |
-| N12 | **How do the three named shims relate to the 9 parameters listed below?** | **BUG (inconsistency) — he caught a real one** | They are **two different lists** and the card presents them as one. The table lists the **9 PINS** (`ent_seas_amp_SH`, `w_eq`, `gamma_eq`, `pump_export`, `w_vent`, `gamma_vent`, `w_thc`, `gamma_enso_ocn_NH/SH`) — names **held at a value**. The prose names the **SHIMS** (`rep_dC`, `grad_off_d13c`, `sst_seas_amp_NH/SH`) — names **fitted freely as stand-ins**. Only `ent_seas_amp_SH` and the ENSO pair are in both. **The card must show both lists, labelled, and say how they differ.** |
+| N12 | **How do the three named shims relate to the 9 parameters listed below?** | **BUG (inconsistency) — he caught a real one** | They are **two different lists** and the card presents them as one. The table lists the **9 PINS** (`ent_seas_amp_SH`, `w_eq`, `gamma_eq`, `pump_export`, `w_vent`, `gamma_vent`, `w_thc`, `gamma_enso_ocn_NH/SH`) — names **held at a value**. The prose names the **SHIMS** (`rep_dC`, `grad_off_d13c`, `sst_seas_amp_NH/SH`) — names **fitted freely as stand-ins**. Only `ent_seas_amp_SH` and the ENSO pair are in both. **The card must show both lists, labeled, and say how they differ.** |
 
 ## 8. Under the hood
 
@@ -191,7 +191,7 @@ K3 / N5**, which need the NOAA MBL **zonal** pull described in Appendix A §A4.
 
 ## 10. Rulings I need
 - **R1 — the budget convention (§0).** (a) GCB convention (add LUC back to land; dashed stays total) — **recommended**; or (b) dashed line becomes fossil-only.
-- **R2 — `rep_dC`'s prior centre (N3).** Measure first (K3), then decide. **An objective change**: it restamps every mode and is on the freeze record's OUT list. Not to be done casually before a review.
+- **R2 — `rep_dC`'s prior center (N3).** Measure first (K3), then decide. **An objective change**: it restamps every mode and is on the freeze record's OUT list. Not to be done casually before a review.
 - **R3 — the rename (O1).** App title only, or repo/URL too? Decide before the post.
 - **R4 — affiliation (U3).** Drop "NYU Marron Institute" here only, or change the standing rule?
 
@@ -278,7 +278,7 @@ which quotes global − MLO = **−0.46 to −0.88 ppm** (1980–2020) and globa
 ## A5. Where this points (NOT a recommendation — R2 is Marcus's, and it is an objective change)
 The evidence so far says `rep_dC` is **not** a representation offset: it is a constant, nearly
 equal-in-both-hemispheres, ~3.5 ppm **level bias** in modern airborne CO₂ against an ice-core
-anchored preindustrial (~7.4 GtC of excess airborne carbon). Re-centring its prior would not fix
+anchored preindustrial (~7.4 GtC of excess airborne carbon). Re-centering its prior would not fix
 that; it would move where the bias is booked. ⚠ And because a third of its value is isotopic,
 any change must be judged on **both** species at once. **Next step is A4's MBL zonal pull** — it
 converts A3's middle row from arithmetic into measurement, and it is an hour's work.
@@ -340,17 +340,17 @@ inside their published ranges: global−MLO **−0.639** in [−0.88, −0.46]; 
   is a constant. ~0.5 ppm of drift over the record — small against the 2.7 ppm discrepancy, real.
 
 ## B3. What it says about R2 — **a ruling input, not a recommendation**
-- Re-centring the prior on the measured offset (≈ **+0.78 ppm**) moves the fitted +3.515 from
+- Re-centering the prior on the measured offset (≈ **+0.78 ppm**) moves the fitted +3.515 from
   **z +3.52 to z +2.74**: it **relieves 22 % of the strain and relabels the other 78 %.**
-  **+2.74 ppm ≈ 5.8 GtC of airborne carbon still unexplained.** Re-centring does not dissolve the
+  **+2.74 ppm ≈ 5.8 GtC of airborne carbon still unexplained.** Re-centering does not dissolve the
   finding; it makes the residue smaller and better-founded.
-- ⚠ **THE WIDTH IS THE BIGGER QUESTION THAN THE CENTRE.** A station-representation term's defensible
+- ⚠ **THE WIDTH IS THE BIGGER QUESTION THAN THE CENTER.** A station-representation term's defensible
   σ floor is **~0.20 ppm** (Francey et al. 2019, ACP 19:14741) — **5× tighter than today's 1.0 ppm.**
   At that width the same fitted value sits at **z +13.7**. Today's prior is wide enough to admit a
   structural error wearing a representation term's clothes, which is exactly what `R/calibrate.R`
   says the prior exists to resist.
 - ⛔ **STILL CANNOT BE DECIDED ON CO₂ ALONE.** `rep_dC` is tied across species by mass balance and
-  **more than a third of its 1306.9 log-units is isotopic** (A1). A CO₂-justified re-centring moves
+  **more than a third of its 1306.9 log-units is isotopic** (A1). A CO₂-justified re-centering moves
   the δ¹³C levels too.
 - ⚠ **CIRCULARITY IS ASYMMETRIC and the SH row is the weaker one.** NOAA's MBL reference **excludes
   Mauna Loa** (altitude site) — so NH−MLO is genuinely independent — but **includes South Pole**.
@@ -359,7 +359,7 @@ inside their published ranges: global−MLO **−0.639** in [−0.88, −0.46]; 
   (`GtC_PER_PPM/2`). Stratospheric lag (mean age ~5 yr, Andrews et al. 2001) puts a mass-weighted
   mean **below** a surface mean, which would widen the gap. ⚠ **But `R/model.R` gives each
   hemisphere one well-mixed troposphere and NO stratosphere**, so what the box physically is may be
-  closer to a tropospheric mean than its own unit conversion claims. That is a modelling question,
+  closer to a tropospheric mean than its own unit conversion claims. That is a modeling question,
   not a measurement, and **nothing here settles it.**
 
 ⛔ **Any change to this prior is an OBJECTIVE change** — freeze record §4.1: a ruling, then a restamp

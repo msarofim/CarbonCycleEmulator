@@ -37,7 +37,7 @@ be boundable exactly from artifacts already on disk**, so this ran in two stages
 - **Stage A** (`diag_sigma_inflation_pricing.R`, seconds): bracket every point.
 - **Stage B** (`diag_sigma_inflation_profile.R`, ~55 min): refit all 26 with the rows ON.
 
-`σ_eff(h)² = σ_obs² + σ_rep(h)²`, normalisation retained, **σ_rep PCHIP through the MEASURED
+`σ_eff(h)² = σ_obs² + σ_rep(h)²`, normalization retained, **σ_rep PCHIP through the MEASURED
 points** — `hml_band_discontinuity.rds` (DIC, δ¹³C) and `alk_sigma_rep.rds` (ALK). Never fitted.
 
 ## 2. THE HEADLINE, AND THE RETRACTION
@@ -53,7 +53,7 @@ transferred. **16g's 21 % is not wrong** — it correctly describes 16g's frozen
 DIC + δ¹³C only (ALK's σ_rep did not exist until 08-18).
 
 **B1 ✗ and I pre-registered that I expected it to fail.** The argmax is at 82 m. **B2 is what
-decides**: 0.033 is 21× below the 0.70 restart noise floor and below the optimiser's own restart
+decides**: 0.033 is 21× below the 0.70 restart noise floor and below the optimizer's own restart
 tolerance. **An argmax 3 m outside a band by less than the fit's own noise is not actionable.**
 
 ## 3. BOTH CLIFFS GONE, AND THE PROFILE IS NOW WELL-POSED
@@ -71,9 +71,9 @@ shipped skip the same profile ran to the edge of the support and had to be stopp
     LOWER(h) = lp_shipped - rows_shipped + rows_inflated_AT_THE_STORED_VECTOR
     UPPER(h) = lp_shipped - rows_shipped + SUM -log(sqrt(2pi) sigma_eff)      [the density PEAK]
 
-Rigorous in opposite directions: re-optimising with a term switched ON can only RAISE the objective
+Rigorous in opposite directions: re-optimizing with a term switched ON can only RAISE the objective
 above its value at the stored vector, and no term can beat its own density peak. **B3 ✓ 26/26 —
-every refit landed inside.** Stage A cost seconds and correctly localised the undecided region to
+every refit landed inside.** Stage A cost seconds and correctly localized the undecided region to
 the shallow side alone. ⇒ **Score a candidate objective change at the incumbent's OWN stored
 vectors before refitting it.**
 
@@ -83,8 +83,8 @@ for a challenger that did not match its incumbent's path):
     dnorm(t, v, s_eff, log) = dnorm(t, v', s_obs, log) - log(s_eff/s_obs),  v' = t - (t-v)*s_obs/s_eff
 
 so the **shipped** `ccx_loglik` does the scoring; `ccx_ocean_grad_scored()` is overridden **in the
-driver's process only** (captured and restored `on.exit`), and the normalisation rides as a
-per-point constant — `h_ml` is FIXED at each point, so it cannot influence the optimisation.
+driver's process only** (captured and restored `on.exit`), and the normalization rides as a
+per-point constant — `h_ml` is FIXED at each point, so it cannot influence the optimization.
 **The guard, that the override reproduce Stage A's LOWER at the mode by a completely different
 route, agreed at 0.000e+00.**
 

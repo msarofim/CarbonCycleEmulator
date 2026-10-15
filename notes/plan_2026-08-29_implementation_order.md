@@ -30,7 +30,7 @@ is what `2153bd6` did on 08-28 and it is still costing us). So the order is chos
 
 ## 1. THE RECOMMENDED ORDER
 
-### ① VOLCANIC DIFFUSE-LIGHT FERTILISATION — *do this first*
+### ① VOLCANIC DIFFUSE-LIGHT FERTILIZATION — *do this first*
 **Why first.** It is the only change that adds a **MISSING MECHANISM** rather than re-partitioning
 an existing one; it is additive (one forcing + one parameter, no restructure); the defect is the
 largest single miss in the record (**Pinatubo: model +0.04 vs observed −1.94 ppm/yr, ~0 %

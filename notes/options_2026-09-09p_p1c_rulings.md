@@ -80,7 +80,7 @@ picked. Ruling A does not create this problem; it **exposes** it.
 
 ### A3. `ml` → **0–40 °S** (the low-latitude complement; amp 12.6–22.2, peak ~1.3)
 - ✅ **PRO — the honest geographic match** for a low-latitude box, and it is a genuine observation
-  with a healthy, non-cancelling amplitude.
+  with a healthy, non-canceling amplitude.
 - ⛔ **CON — the model would fail on phase by ~6 months**, for the reason in §1. Same informative
   failure as A1, without A1's like-for-like justification.
 - ⚠ It also leaves `hs` (16 %) facing a 60 % band, which is worse than A1's split.
@@ -92,7 +92,7 @@ Take the 16 % highest-latitude SH ocean as the `hs` target and the remaining 84 
 - ⭐ **PRO — derivable from the product already in hand**, no new data.
 - ⛔ **CON — it assumes the model's box boundary is LATITUDINAL. It is not: `hs_frac` is an area
   fraction with no declared latitude**, and a HILDA high-latitude box is a *water-mass* concept.
-  Choosing a latitude to realise it is exactly the kind of silent methodological choice that has to
+  Choosing a latitude to realize it is exactly the kind of silent methodological choice that has to
   be ruled, so this option **contains a second ruling inside it**.
 - ⛔ **CON — 16 % of SH ocean is roughly poleward of ~55 °S**, where the observed amplitude is
   largest (25.19 in 60–90 °S); `ml` would then inherit the residual, still mixing both regimes.
@@ -139,16 +139,16 @@ a box, the area mean of the anomaly **IS** the anomaly of the area mean, so **(1
 ⇒ **The estimator is NOT a free choice in Ruling B either: any observation compared against a
 well-mixed box must be reduced AREA-MEAN-FIRST.** That removes a degree of freedom from P1c.
 
-⚠ **BUT DO NOT CORRECT ONE LEG OF A TWO-LEG SUM ALONE.** The prior centre adds a **solubility** term
+⚠ **BUT DO NOT CORRECT ONE LEG OF A TWO-LEG SUM ALONE.** The prior center adds a **solubility** term
 (**46.95 µatm**, from `.ENT_SO_SST_AMP` = 3.0 K, "the 40–90 S BAND, ERSSTv5") to the observed one,
 and **that term's own convention — per-cell or area-mean — is NOT STATED in `constants.R`**. If it
 is also per-cell, the two biases partially **cancel** in the sum. **Establish the SST leg's
 convention before changing either.**
 
 ⇒ **IMPACT IS MODEST EITHER WAY, and that is worth saying plainly**: swapping 19.45 → 16.26 moves
-the in-band value **29.68 → 28.25** and the prior centre **10.95 → 10.43**, a **4.8 %** change —
+the in-band value **29.68 → 28.25** and the prior center **10.95 → 10.43**, a **4.8 %** change —
 because the **solubility term dominates the sum**, not the observed amplitude. **A real defect, a
-small number.** ⚠ It still touches P12's reading, since 10.95 is the centre that profile was set
+small number.** ⚠ It still touches P12's reading, since 10.95 is the center that profile was set
 against; and `ent_seas_amp_SH` is being retired anyway, which bounds the consequence further.
 
 ## 4. RULING B — what quantity, and what the model must expose
@@ -196,7 +196,7 @@ none either.** So B1/B2 need a new output column, `pco2_ml_NH/SH`, per month.
 ## 5. What I would do, in order
 1. ✅ **DONE — §3's estimator question is resolved**: 19.45 is the phase-blind per-cell reduction,
    the area-mean harmonic (16.26) is what a well-mixed box requires, and the propagated effect on the
-   prior centre is 4.8 %. ⚠ **Still owed before changing the constant**: the SST leg's convention.
+   prior center is 4.8 %. ⚠ **Still owed before changing the constant**: the SST leg's convention.
 2. **Expose `pco2_ml` in both cores** with a parity assertion (B2's prerequisite; no physics moves).
 3. **Run A1 as a REPORTED comparison**, alongside A2 for reference, and let the pair speak: if A1
    fails on phase while A2 passes, that is the structural finding, stated as such.

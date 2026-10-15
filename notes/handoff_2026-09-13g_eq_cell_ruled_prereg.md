@@ -19,7 +19,7 @@
   (⚠ not independent of the index); `alk_eq` **2296**; `dic_eq` by bin (+28/+115/+176/+222 at 50–300 m; NH half +150/+208 vs SH
   +95/+157 at 100–200); **`w0_prior`** (27 ± 3 Sv; 1997–99 swing 50 Sv = **14–25 Sv per index** on this forcing; citations).
   Three regressions against earlier cuts all close (B1 +55.5, band 4.1 %, GLODAP bins). ⚠ A first-draft bottle selector asserted the
-  band WRAPS after 0..360 normalisation — it does not (160..280); caught by its own `stopifnot` before any number was read.
+  band WRAPS after 0..360 normalization — it does not (160..280); caught by its own `stopifnot` before any number was read.
 - **The transport source** (was "unsourced recollection" in (e)/(f) — RETRACT that label): Meinen et al. 2001 *JPO* 31:3230 — mean
   upwelling across 50 m **24–30 Sv** (= **51–64 m/yr** through the cell), interannual p2p 50 Sv ⇒ T-A2's 26 Sv per index is at the TOP
   of the observed bracket; **γ_eq ≈ 0.9–1.1** per index against W0, i.e. the floor `max(0, 1 − γN)` binds near N = +1 (1997 annual +0.84).
@@ -48,7 +48,7 @@
    `ccx_eq_b1_scored()` (the `hs_surface` triple, `:1251-1294`) under a `LIK_USE_EQ_B1` switch.
 4. `R/calibrate.R`: `w_eq`, `gamma_eq` in `CCX_PARAM_TABLE` (R3 via `ccx_w_eq_prior()`); `ccx_migrate_par_set` fills absent names.
 5. `R/paths.R`: register `hilda30e`. Then `src/ccx_core.cpp` twin (`IEQ`, `Aux`/`Par` fields, `unpack_*`, the block, the output
-   columns) + `R/cpp.R` by-name marshalling (send unconditionally, zero-fill when off).
+   columns) + `R/cpp.R` by-name marshaling (send unconditionally, zero-fill when off).
 6. `tests/testthat/test-eq-cell.R` = P0a–g; run the FULL suite (the mode-struct lint ratchet and `test-mode-file` will see the new mode).
 7. `calibration/diag_eq_cell_probe.R` (PE1, N1, PE6 unrefitted at `w_eq` 27, `gamma_eq` 1) → ONE Torch array → PE2–PE8 → PE9.
 Unchanged and still owed after the cell: **M** (per-hemisphere MLD handle), pin-vs-retire of `ent_seas_amp_SH`, option K, the ~35

@@ -1,6 +1,6 @@
 # Handoff — CarbonCycleEmulator, 2026-09-01b
 # **THE FOUR-PARAMETER ENSO DESIGN IS BUILT. 22 → 25 PARAMETERS.**
-# **Nothing is fitted; the default is behaviour-preserving to the BIT.**
+# **Nothing is fitted; the default is behavior-preserving to the BIT.**
 # **The riskiest thing here was not the physics — it was one name becoming four.**
 
 **Repo:** `~/Documents/2026/CodeProjects/CarbonCycleEmulator/`, trunk `main`.
@@ -16,7 +16,7 @@
 
 1. ✅ **`gamma_enso` → `gamma_enso_land_NH/_SH` + `gamma_enso_ocn_NH/_SH`.** R core, C++ twin,
    parameter table, migration, app, tests. **22 → 25 fitted parameters.** §1
-2. ✅ **The default is BEHAVIOUR-PRESERVING TO THE BIT** — the thing the `gamma_diff` adoption did
+2. ✅ **The default is BEHAVIOR-PRESERVING TO THE BIT** — the thing the `gamma_diff` adoption did
    not have. A legacy list reproduces the old model at `tolerance = 0`. §2
 3. ⛔ **THE REAL HAZARD WAS THE RENAME, NOT THE PHYSICS.** `p$gamma_enso <- …` existed at ~110 call
    sites and would have become a line assigning a field NOTHING READS — every one of them running
@@ -46,7 +46,7 @@ sign (GCB's ocean sink is r = +0.535 with Niño3.4; the model gives −0.51 thro
 Emitted as **TWO EXPLICIT LIMBS with alpha resolved per direction** — invasion carries
 `alpha_as_down`, the La Niña reversal carries `alpha_as_up`. One signed flux with a single alpha is
 the 08-25e seasonal-NEP bug exactly, and no conservation gate can see it. Both limbs are
-**unlabelled**, so the trace classifies them `as_down`/`as_up` and `ocean_net` counts them — the
+**unlabeled**, so the trace classifies them `as_down`/`as_up` and `ocean_net` counts them — the
 same call, and the same reason, as the artificial mid-century sink.
 
 ## 2. THE ABSENCE CONTRACT — AND WHY THE OCEAN GETS ZERO
@@ -104,7 +104,7 @@ keep the ORIGINAL prior, so the split adds a degree of freedom without smuggling
 the land total where the scalar had N(0, 2) — the land prior is **wider by √2**. It is a WIDENING,
 not a shift, and at a fitted 0.85 the prior is weak either way. **The alternative is 2/√2 on each
 half**, which preserves the total exactly. Revisit if the land pair ever runs to the prior rather
-than to the data. Ocean entries are centred on **0** = the incumbent model, so the prior does not
+than to the data. Ocean entries are centered on **0** = the incumbent model, so the prior does not
 presume the mechanism exists.
 ⚠ **The "+0.137 each" this file first quoted was wrong** — see §9: that was a SLOPE gap wearing a
 coefficient's name. Closing the observed slope needs **+0.326 each**; the OBJECTIVE's own

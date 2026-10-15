@@ -77,7 +77,7 @@ memory `ccx_gate4_no_power`.
 * **8** — differenced two station-years that `d13c_level_MLO/SPO` score every year of, at a typed
   0.10 ‰ with no derivation.
 * **10** — its own header said target AND sigma came from `ccx_deep_d14c_target()`, "the LIKELIHOOD's
-  own accessor". **A gate tied to the stream it checks cannot fail independently of the optimiser.**
+  own accessor". **A gate tied to the stream it checks cannot fail independently of the optimizer.**
 ⚠ Each retirement block records **what was lost**: 8 and 10 were the only places certain quantities
 were PRINTED beside their targets. **Bring back the print, never the verdict.**
 
@@ -100,7 +100,7 @@ of an sd, `sd/sqrt(2(n−1))` = **0.080 GtC/yr**, MC-validated to 3 decimals —
 `lib_design_gates.R`. **Report it; do not chase it; do not read a FAIL as blocking a headline claim.**
 
 **Knockout decomposition** (`diag_gateV_variability_drivers.R`, 5 runs in 0.5 s). Temperature is
-**SMOOTHED with an 11-yr centred mean, NOT held** — `ccx_hold_climate()` removes the TREND and would
+**SMOOTHED with an 11-yr centered mean, NOT held** — `ccx_hold_climate()` removes the TREND and would
 compare two climates:
 
 | driver removed | sd | variance lost |
@@ -124,7 +124,7 @@ and both are tiny converted: ΔTSI **0.031 %** and **0.011 %**. With NPP taken p
 irradiance — a **CEILING**, since photosynthesis saturates — that is **0.0082 GtC/yr** of 11-yr
 amplitude = **0.91 % of the anomaly sd, 0.004 % of its variance**, and **0.29 GtC over 50 yr** for
 the secular shift. `gamma_diff` 0.25 × Pinatubo AOD 0.110 is **1.445 GtC/yr**.
-⭐⭐ **THE STRUCTURAL REASON, WHICH GENERALISES: aerosols change the DIFFUSE FRACTION** (light into
+⭐⭐ **THE STRUCTURAL REASON, WHICH GENERALIZES: aerosols change the DIFFUSE FRACTION** (light into
 shaded canopy — Gu 2003 / Mercado 2009, the pair the volcanic term already cites); **the sun changes
 TOTAL irradiance, 1:1 at best.** The high-leverage channel is unavailable to solar **by physics**.
 **Nothing was implemented** — no run rescues three orders of magnitude.
@@ -133,15 +133,15 @@ TOTAL irradiance, 1:1 at best.** The high-leverage channel is unavailable to sol
 Mt/yr in 1979** → 71.8, but its interannual sd about a 12-dof spline is **2.7 % of the peak**
 (sulfate lifetime is days). Gate V moves **0.698 → 0.690**, slightly the WRONG way. What it DOES
 move is the **AF trend, +0.0057 → +0.0120 /decade** (obs +0.0147 ± 0.0080), level still right.
-⛔⛔ **~100 % DEGENERATE WITH CO₂ FERTILISATION**, and the frozen column says the opposite — the same
-trap as the August `gamma_diff` pricing (frozen overstated by 82 %). Re-optimising (`beta_max`,
+⛔⛔ **~100 % DEGENERATE WITH CO₂ FERTILIZATION**, and the frozen column says the opposite — the same
+trap as the August `gamma_diff` pricing (frozen overstated by 82 %). Re-optimizing (`beta_max`,
 `fert_k`): frozen **−106 / −692 / −2810 / −11362** becomes **+5.3 / +8.3 / +1.0 / −151.9**.
 ⚠ FACE narrows but does not decide: R(400→564) **11.5 → 15.5 %** against an envelope from **0 %**
 (EucFACE, mature P-limited) to **23 %** (Norby 2005 young plantations).
 ⇒ **THE ARGUMENT AGAINST ADDING IT NOW: it relocates `beta_max` 2.3× while changing nothing
-measurable**, and `beta_max` carries the pulse IRF and every fertilisation result.
+measurable**, and `beta_max` carries the pulse IRF and every fertilization result.
 ⇒ **REVISIT ONLY with a target keyed to the POST-1979 DECLINE** (the brightening signature —
-the one feature fertilisation cannot imitate). **Never with more CO₂ data.**
+the one feature fertilization cannot imitate). **Never with more CO₂ data.**
 
 ---
 
@@ -227,7 +227,7 @@ the rest are properties of the REFERENCE.
   `sd()` could not separate a drift from a wiggle, so the same statistic ranked the UNCALIBRATED
   DEFAULTS above the adopted mode — and the ranking inverted the moment the two were separated.
 * ⭐ **A gate whose target and sigma come from the stream it checks cannot fail independently of the
-  optimiser** (gate 10, which said so in its own header and was kept anyway).
+  optimizer** (gate 10, which said so in its own header and was kept anyway).
 * ⭐ **Price a new NPP term CONDITIONALLY or not at all.** Twice now the frozen-parameter cost has
   been ~100 % wrong in the direction that rejects a real mechanism.
 * ⭐ **Before believing a null, state what it could have detected** (the solar-cycle band search:

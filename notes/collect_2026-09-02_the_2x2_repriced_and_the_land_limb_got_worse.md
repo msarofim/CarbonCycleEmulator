@@ -2,7 +2,7 @@
 # **THE VERDICT IS NOT REHABILITATED. IT IS STRENGTHENED.**
 # **The overshoot grew +42.4 % → +62.1 %, and the SH LAND LIMB got 33 % WORSE
 # while its PARAMETER moved inside its bracket.**
-# **The cause is `npp_frac_NH`, a JUDGEMENT-width prior, not `seas_T_amp_SH`.**
+# **The cause is `npp_frac_NH`, a JUDGMENT-width prior, not `seas_T_amp_SH`.**
 
 > **CORRECTION 2026-09-02 (second session).** The title line above read
 > **+18.7 % → +62.1 %** while the body (§ the 2×2 table, below) reads
@@ -38,7 +38,7 @@ Re-scoring 27q's three stored arms through today's harness misses their stored a
 **ATTRIBUTED**: with `gamma_diff` returned to its pre-adoption **0**, every one of the twelve limbs
 reproduces to **≤7e-14**.
 
-⇒ The whole gap is **volcanic diffuse-light fertilisation** — implemented `328cdb8`, coefficient
+⇒ The whole gap is **volcanic diffuse-light fertilization** — implemented `328cdb8`, coefficient
 adopted at 0.25 in `a2298dc`, both 2026-08-29; **27q ran 2026-08-28 and therefore ran at 0**. Nothing
 else moved. That control is in the script, so a SECOND change later would fail it rather than hide
 inside a loosened tolerance. [[gate_bound_matches_its_claim]]
@@ -111,14 +111,14 @@ the SH land limb should scale with the SH share to first order: 0.3515 → 0.492
 predicts 1.838 against a measured 1.912 — **+4.0 %**. The step IS a productivity shift across the
 equator and nothing else.
 
-⇒ **THE FIT TRADED A MEASURED-BRACKET FLAG FOR A JUDGEMENT-WIDTH ONE AND THE OBSERVABLE GOT WORSE.**
+⇒ **THE FIT TRADED A MEASURED-BRACKET FLAG FOR A JUDGMENT-WIDTH ONE AND THE OBSERVABLE GOT WORSE.**
 `npp_frac_NH`'s width is `NPP_FRAC_NH_SD` = 0.04, one of the two the prior screen labels JUDGEMENT;
 the move is **−0.141, i.e. 3.5 prior-sd**, and it is the same parameter §2 recorded as having
 "crossed zero AGAIN" (+1.25 at from90 → −2.28 now).
 
 ## 6. What this does and does not settle
 
-* ✅ **§4's premise is answered and it goes the other way.** The 18 % overshoot was not an artefact
+* ✅ **§4's premise is answered and it goes the other way.** The 18 % overshoot was not an artifact
   of an SH land limb that has since moved; the limb moved and the overshoot grew.
 * ⛔ **It does not re-run 27q's P1.** The interaction needs six refitted arms at 25 parameters —
   ~15 min locally, no Torch. Whether that is worth running is now a DIFFERENT question: the arm
@@ -135,7 +135,7 @@ the move is **−0.141, i.e. 3.5 prior-sd**, and it is the same parameter §2 re
 ## 7. What landed
 
 * `calibration/lib_seas_limbs.R` — the SPO limb estimator, extracted. ⛔ `diag_admissible_2x2_land_ocean.R`
-  is **NOT** edited to use it: that file is a pre-registered artefact whose gates may not move under a
+  is **NOT** edited to use it: that file is a pre-registered artifact whose gates may not move under a
   refactor. What binds them is GATE R, which re-scores its stored arms through the library.
   ⚠ The library's `sl_overlay()` refuses the `intersect(names(p), CCX_PARAM_NAMES)` idiom every
   pre-split diagnostic uses — on a 21-parameter ancestor that assigns NULL to `seas_lag_p_NH/_SH`,

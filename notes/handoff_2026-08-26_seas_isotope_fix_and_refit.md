@@ -112,10 +112,10 @@ objection that survives, outvoted rather than decisive.
    settled. If it is wanted, apply the §5 restart trap fix first.
 2. **The pump's `alpha13_signed` (b) case** — 0.4 % of gross, and `PUMP_EPS13_ORG` is uncited.
 3. **A DESIGN §6 gate sweep** at the new modes — four gates were re-measured, there are more.
-4. **The reparametrisation race, REDESIGNED.** `calibration/diag_ridge_reparam.R` exists and its
+4. **The reparametrization race, REDESIGNED.** `calibration/diag_ridge_reparam.R` exists and its
    gate passes (`lp2(v) = lp(u(v))` to 2.6e−9), but its starts are at lp −26,000 to −150,000, i.e.
    1.4–8× worse than the driver's COLD init — it measures gross descent, not the near-optimum
    ridge-crawling that costs 332k evals. Use start sd ≈ 0.02–0.03 (median lp −1,672),
-   evals-to-threshold as the statistic. It parallelises: ~50 min on four free cores.
+   evals-to-threshold as the statistic. It parallelizes: ~50 min on four free cores.
 5. **Torch** — worth it for arm COUNT and the MCMC, not for a single arm (Nelder-Mead is serial).
    `cpu_short` caps at 4 h wall = ~89k iterations, so MCMC needs `cs` or checkpointing.

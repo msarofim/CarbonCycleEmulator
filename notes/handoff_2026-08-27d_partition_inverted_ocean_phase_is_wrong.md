@@ -16,12 +16,12 @@ CHANGELOG 2026-08-27d. Commits `b8f7838`, `f0c9a25`, `61ec881`.
 
 1. **§7c-3 is OPEN and its candidate CHANGED.** Not a land box. §1, §3
 2. **THE HEADLINE: the model makes SPO's cycle by SUBTRACTING two antiphase pieces where
-   nature ADDS two in-phase ones.** The 2 % CO2 agreement is two errors cancelling. §1
+   nature ADDS two in-phase ones.** The 2 % CO2 agreement is two errors canceling. §1
 3. **The model's SH ocean component is 0.45× in size and 5.17 MONTHS out of phase.** §1
-4. **Two standing readings REVERSE**: `sst_seas_amp_SH`'s −6.32 σ flag is the model penalised
+4. **Two standing readings REVERSE**: `sst_seas_amp_SH`'s −6.32 σ flag is the model penalized
    for being RIGHT, and the SH land excess is mostly IMPORTED FROM THE NH. §3
 5. **A number in the record moves: the SPO partition residual is 1.93×, not ~1.5×** — an
-   estimator artefact, and it is a METHODOLOGICAL CHOICE owed to Marcus. §4
+   estimator artifact, and it is a METHODOLOGICAL CHOICE owed to Marcus. §4
 6. **Two named next steps, both observational, neither requiring a refit.** §5
 
 ---
@@ -94,7 +94,7 @@ its SH land and cancels part of it. That is the same defect the inversion then m
 
 ## 3. ⇒ TWO STANDING READINGS REVERSE, AND §7c-3'S CANDIDATE CHANGES
 
-**(a) `sst_seas_amp_SH`'s −6.32 σ flag is the model being PENALISED FOR BEING RIGHT.** The channel
+**(a) `sst_seas_amp_SH`'s −6.32 σ flag is the model being PENALIZED FOR BEING RIGHT.** The channel
 is solubility-only: `sst_seas_amp_SH` modulates SST and nothing else, so colder austral winter
 water takes CO2 UP and the channel's atmospheric contribution can only peak in austral autumn.
 Month 4.16 is the *only* phase it can have. Adding amplitude to a wrong-phase channel makes the
@@ -103,7 +103,7 @@ objecting to a refusal that the physics justifies.
 
 ⚠ **The MECHANISM that would have the observed phase — a seasonal mixed-layer / entrainment cycle
 bringing DIC-rich water up in austral winter — is MY READING, not a citation.** I have no source
-to hand and am not labelling it established. **The PHASE is the measurement**; the mechanism is
+to hand and am not labeling it established. **The PHASE is the measurement**; the mechanism is
 §5's first item.
 
 **(b) THE SH LAND BOX IS DEAD AS POSED.** **0.821 of the model's 1.373 ppm SH land component

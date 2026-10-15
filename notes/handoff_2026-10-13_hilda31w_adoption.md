@@ -43,7 +43,7 @@
 - **"Adopt id 17"**; the name **"hilda31w"**. "hilda31e" was offered beside it and declined. It is one letter from `hilda31pe`, this refit's new-basin start.
 - **Mine, stated:**
   - The tolerance lives in ONE named constant rather than four literals.
-  - The fixed 3e-4 stays for a direction with no finite interior step and for a stable NON-NEGATIVE plateau. Both are outside the ruling, and both are labelled.
+  - The fixed 3e-4 stays for a direction with no finite interior step and for a stable NON-NEGATIVE plateau. Both are outside the ruling, and both are labeled.
   - The resume ran in committed stages, so no stamp reads `+dirty`.
 
 ## 3. Files

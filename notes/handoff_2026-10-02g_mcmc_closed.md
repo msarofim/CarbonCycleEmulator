@@ -71,7 +71,7 @@
 - **Whether to commit the stage-1 chains and pooled draws** (about 2 MB, untracked).
 - **B8:** the verdict (§5) and the acts (§7) of `notes/assessment_2026-10-01_hilda33d_DRAFT.md`.
 - **The copy in Claude's wording, his to edit:**
-  - the card 4 and 5 sentences, the land-pools line, the fertilisation caveat and the pulse-box sentence;
+  - the card 4 and 5 sentences, the land-pools line, the fertilization caveat and the pulse-box sentence;
   - card 6's added sentence (bands), which could now cite the MCMC result.
 - **The review list's §C** (13 older items), including the deploy checklist (both URLs are placeholders).
 - **The A9 copy items:**

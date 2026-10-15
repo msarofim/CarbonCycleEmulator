@@ -35,7 +35,7 @@
    `CCX_MS_TAG=<round-1 date>` so it lands in the same directory.
 5. Pull the start files + checkpoints to the Mac (`rsync` from the outdir), run `calibration/collect_dispersed_multistart.R`, then read
    (in this order): `gcb_land_sink` and what paid (β_max / q10 / the CO₂ level rows); kz under the every-box Δ¹⁴C rows (review finding 1
-   was a directional pull on exactly this); `h_hs` under its prior (canonical 393 m is z +1.9); `u_hs` at the converted centre 27.3 m/yr;
+   was a directional pull on exactly this); `h_hs` under its prior (canonical 393 m is z +1.9); `u_hs` at the converted center 27.3 m/yr;
    the scorecard's 7 / H / GL / Q; `sst_seas_amp_SH`'s z; whether the `seas_ml`-0 control still loses. Promotion = a NEW label via
    `promote_multistart_mode.R` (never an in-place edit of `CCX_STRUCT_HILDA`); nothing to restamp — a fitted mode is stamped.
 6. After the read: prereg the layer-2 ENSO limb as a REFIT (review avenue 1; rule in the physical unit; W0 pinned to Meinen 2001's

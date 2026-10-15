@@ -3,7 +3,7 @@
 `calibration/diag_gcb_seam_1959.R` → `calibration/output/gcb_seam_1959/{gcb_seam_1959.rds,.log}`.
 Data-only; **no refit**, as §6 specified. Reads with `handoff_2026-08-25_gcb_imbalance_programme.md`.
 
-## VERDICT: §5's century-drift reading does NOT survive. The programme shrinks.
+## VERDICT: §5's century-drift reading does NOT survive. The program shrinks.
 
 Four of the five things §5 rested on fail their own error bar or their own decomposition.
 
@@ -12,7 +12,7 @@ Four of the five things §5 rested on fail their own error bar or their own deco
 | 37.8 ppm cumulative, **56 % pre-1959** | reproduced exactly (identity closes to 1.4e-10) |
 | "the century drift" | **1850–1939 nets 16.6 GtC and changes sign twice**; the 1940s+50s carry **28.1 of 44.7 GtC = 63 %** in 17 % of the years |
 | implicitly, that 44.7 GtC is a number to explain | **0.43–1.5 σ** once the errors are correlated as a smoothed reconstruction's must be |
-| the seam is a candidate generator | **confirmed, and localised: it is the OCEAN SINK, not growth** |
+| the seam is a candidate generator | **confirmed, and localized: it is the OCEAN SINK, not growth** |
 | `rep_dC` might live here | growth is **exonerated** and the agreement is **circular anyway** |
 
 ## T0 — the bar, before any attribution
@@ -102,7 +102,7 @@ causality backwards: the CO₂ level is an *input* to the imbalance, not an outp
 
 **63 % of the pre-seam cumulative is the 1940–58 window** — i.e. the published CO₂ plateau the
 08-23/08-24 arc spent six refits on and **de-ranked**, plus the decade immediately before the
-methodology change whose ocean sink T1 resolves as stepped. The successor programme would have
+methodology change whose ocean sink T1 resolves as stepped. The successor program would have
 re-inherited the arc that was just closed.
 
 ## What survives, and what should be done with it
@@ -115,4 +115,4 @@ re-inherited the arc that was just closed.
 - **G4 (a refit) is unjustified by this line.**
 - **What is worth keeping** is narrow: GCB's pre-1959 `ocean_sink` carries a resolved
   **+0.23 to +0.28 GtC/yr** discontinuity at its own methodology seam. That is a caveat to put on
-  any future use of the pre-1959 budget, not a programme.
+  any future use of the pre-1959 budget, not a program.

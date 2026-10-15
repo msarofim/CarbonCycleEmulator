@@ -15,7 +15,7 @@ ssh torch 'sacct -j 17150003 -X --format=JobID,State,ExitCode,Elapsed | tail -50
 rsync -a torch:/scratch/ms17839/CarbonCycleEmulator/calibration/output/multistart_20260907f_hilda30/ calibration/output/multistart_20260907f_hilda30/
 CCX_MS_STRUCT=hilda CCX_MS_OUTDIR=calibration/output/multistart_20260907f_hilda30 Rscript calibration/collect_dispersed_multistart.R
 ```
-  then a `diag_hilda30_predictions.R` modelled on `diag_hilda29_predictions.R` (add R9–R11: `hs_surf_*` rows, the
+  then a `diag_hilda30_predictions.R` modeled on `diag_hilda29_predictions.R` (add R9–R11: `hs_surf_*` rows, the
   prior-z of `pump_hs_gcm2`, unimodality in that coordinate).
 
 ## 2. What changed since round 2 (all in git)

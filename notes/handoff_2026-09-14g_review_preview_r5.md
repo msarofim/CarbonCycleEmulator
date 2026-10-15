@@ -25,7 +25,7 @@
    The dead bomb-window message no longer calls the shape provisional.
 7. **Option E scoped** (`scoping_2026-09-14g_option_e_ventilation.md`): the four numbers that make kz, the 45 GtC/yr field and the T-DIC
    exposure one object; the mode-water loop; D as a prescribed export with an emergent gradient; rulings E1–E6; PE-1..PE-5 + N-E1.
-8. **Withdrawn from the review**: "the app holds GMST flat past 2024" — `app/server.R:118-151` runs futures / stylised / pulse through
+8. **Withdrawn from the review**: "the app holds GMST flat past 2024" — `app/server.R:118-151` runs futures / stylized / pulse through
    `ccx_run_coupled()`; the flat hold is a warned placeholder for bare `ccx_build_forcing()` callers only.
 
 ## 2. What is owed to Marcus (nothing below happens without a ruling)

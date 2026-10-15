@@ -135,7 +135,7 @@ a fresh process in a `tempdir()` copy, gating that the patch took.
    **8.78 ppm against an observed 6.754, +30 %**, where the mode undershoots by −22 %.
    **The NH "deficit" is not a deficit of drivers.** It is what two over-large antiphase land
    channels look like after being tuned to cancel, with `seas_T_amp_NH = 48 K` (4.2× observed)
-   doing the cancelling. Restore the observed 11.45 K, the cancellation weakens, and the cycle
+   doing the canceling. Restore the observed 11.45 K, the cancellation weakens, and the cycle
    blows up. **Anyone who reads 20c §2 and goes hunting for missing NH amplitude will waste the
    session.**
 4. **The isotopes move the right way and do not close.** Observed drivers take the MLO signature
@@ -169,7 +169,7 @@ together.**
 with the observations added to `R/constants.R` as data-status constants, the `PUMP_GRAD_OBS`
 idiom). The **land widths are derived**, not chosen: the lognormal whose ±1σ spans the measured
 area-weighted-to-boreal bracket, so the width *is* the weighting ambiguity. **The ocean width
-(0.25 in log space) is a stated judgement** — `SST_SEAS_AMP_LOGSD`, flagged `provisional` —
+(0.25 in log space) is a stated judgment** — `SST_SEAS_AMP_LOGSD`, flagged `provisional` —
 because no bracket for it exists. Replacing it with a gas-exchange-weighted estimate is a real
 improvement someone could make.
 
@@ -228,24 +228,24 @@ The data is in hand; the **form** is not settled, and it is a real fork rather t
 
 MOD17A3HGF C6.1, 0.5° netCDF regrid, no registration: **global 52.75 PgC/yr, NH share 0.5942**
 (sd 0.0135 across 2001–2023). Compared **at the model's modern state, never at the parameter** —
-`npp_frac_NH` is a 1750 split, MOD17 is 2001–2023, and NH-heavy clearing walks the realised
+`npp_frac_NH` is a 1750 split, MOD17 is 2001–2023, and NH-heavy clearing walks the realized
 share down in between, so comparing the raw parameter would *understate* the gap:
 
 | | |
 |---|---|
 | `npp_frac_NH` fitted (1750) | 0.4662 |
-| → model's realised modern share | 0.4461 |
+| → model's realized modern share | 0.4461 |
 | MOD17 observed | **0.5942** |
 | ⇒ 1750 anchor implied by MOD17 | **0.6136** |
 
-It is a **single scalar applied at 1750**, not a time series; the realised share moves only
-through clearing (0.4662 → 0.4466 over 1750–2024), and fertilisation cancels out of the share.
+It is a **single scalar applied at 1750**, not a time series; the realized share moves only
+through clearing (0.4662 → 0.4466 over 1750–2024), and fertilization cancels out of the share.
 The implied anchor sits comfortably inside the old UNIFORM[0.4, 0.8], so nothing was bounding
 the parameter away from it.
 
-**The fork.** A prior on the 1750 *parameter* centred at 0.6136 bakes in the model's own
+**The fork.** A prior on the 1750 *parameter* centered at 0.6136 bakes in the model's own
 clearing at the current `luc_scale` — mildly circular. The alternative is a **likelihood term on
-the modern realised NH NPP share**, which scores the observable instead
+the modern realized NH NPP share**, which scores the observable instead
 (`ccx_bound_observable`). **Not resolved, and deliberately not resolved silently** — unlike the
 seasonal amplitudes, where the parameter *is* the observable and no such choice arises.
 

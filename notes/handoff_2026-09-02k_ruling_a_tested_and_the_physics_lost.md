@@ -64,7 +64,7 @@ Nino 3.4 correlate **r = 0.896** over the **same 696 months** (1948-2005) and th
 ### THE BAKE-OFF (`calibration/diag_enso_index_bakeoff.R`)
 ⛔ **A FIXED-VECTOR COMPARISON WOULD HAVE RANKED AMPLITUDE, NOT INDEX** (°C sd 0.75 vs MEI's
 dimensionless 1.0) — the same trap gate G-P caught one comparison earlier. So **each candidate got
-its own four `gamma_enso` coordinates re-optimised**, the other 21 parameters frozen at the 09-01
+its own four `gamma_enso` coordinates re-optimized**, the other 21 parameters frozen at the 09-01
 basin vector. Reported on a COMMON span and a NATIVE span, because a native-span winner could be
 the index that simply covers more years — coverage wearing an index result's clothes.
 
@@ -110,7 +110,7 @@ exempt a second file. ⇒ [[baseline_list_must_shrink]]
 ## 4. ⛔ THE PROVENANCE HOLE I OPENED AND HALF-CLOSED (`994c03b`, `a49eab9`, `255c20f`)
 
 **GATE G-P** (in `diag_enso_index_baseline.R`) refuses to difference the local ERSST**v5** grid
-against the shipped index: deseasonalised over 1991-2020 they agree in PHASE (**r 0.984**) and
+against the shipped index: deseasonalized over 1991-2020 they agree in PHASE (**r 0.984**) and
 disagree in AMPLITUDE (**slope 0.842**), **4.8×** a bound DERIVED from the sd spread of the four
 conventions it must separate. Mutation-tested BOTH ways inline.
 

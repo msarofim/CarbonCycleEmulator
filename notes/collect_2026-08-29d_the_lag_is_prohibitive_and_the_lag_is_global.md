@@ -89,7 +89,7 @@ valid place to open the same angle. **Not started.**
 
 ## 5. THE CMIP6 BLOCK — ⚠ DIAGNOSTIC ONLY
 
-Under authorisation 1; `seas_npp_amp_SH` = 0.94 is a CMIP6 ENSEMBLE value, **never shipped, never an
+Under authorization 1; `seas_npp_amp_SH` = 0.94 is a CMIP6 ENSEMBLE value, **never shipped, never an
 observational constraint**. The shipped constant remains **0.5027**, `status="data"`.
 
 | lag | SH-land | r_SPO | `seas_T_amp_SH` | Δlogpost |
@@ -101,7 +101,7 @@ observational constraint**. The shipped constant remains **0.5027**, `status="da
 Consistent with 29c: at the mode's geometry the doubled gross just **doubles the error** (SH-land
 2.304). It also shows the same lag bill (−746.6), so **the NH cost is independent of the gross** —
 as it must be, since the gross is SH-only. Every `seas_T_amp_SH` here is far outside its bracket and
-is a MEASUREMENT under authorisation 2, not a fitted value.
+is a MEASUREMENT under authorization 2, not a fitted value.
 
 ## 6. NOTHING ADOPTED
 

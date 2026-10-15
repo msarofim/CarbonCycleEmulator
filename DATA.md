@@ -62,7 +62,7 @@ Rscript data-raw/download_data.R && Rscript data-raw/build_carbonate_tables.R &&
 | Zonal Δ¹⁴C, 5 zones, monthly | 1941.2–2019.4, n=4689 | bomb-era target, both hemispheres | Hua et al. 2022 via `SoilR::Hua2021` |
 | **IntCal20 Δ¹⁴C** | 1700–1950 | **pre-bomb Suess target** | Reimer et al. 2020 via `rintcal` |
 | GCB global budget | 1959–2024 | sink partition constraint | GCB 2025 (Friedlingstein et al. 2026) |
-| **NOAA MBL global CO₂ growth, monthly** (`data/mbl_global_growth_monthly.rds`) | g defined 1979-07–2025-07; scored 1980–2024, n=540 | **objective #17's interannual MODULE only** (stage 1: the land ENSO lag and amplitude, `w_enso_l2`), never the main objective. Centred 12-month difference of monthly means, detrended in `ccx_iav_growth_pair()` | NOAA GML MBL reference (Lan et al. 2024, doi:10.15138/DVNP-F961), manifest key `mbl_zonal_gl`; built by `data-raw/build_mbl_global_growth_monthly.R` (added 2026-10-06) |
+| **NOAA MBL global CO₂ growth, monthly** (`data/mbl_global_growth_monthly.rds`) | g defined 1979-07–2025-07; scored 1980–2024, n=540 | **objective #17's interannual MODULE only** (stage 1: the land ENSO lag and amplitude, `w_enso_l2`), never the main objective. Centered 12-month difference of monthly means, detrended in `ccx_iav_growth_pair()` | NOAA GML MBL reference (Lan et al. 2024, doi:10.15138/DVNP-F961), manifest key `mbl_zonal_gl`; built by `data-raw/build_mbl_global_growth_monthly.R` (added 2026-10-06) |
 
 **Cross-checks, deliberately NOT used as extra likelihood terms** (using them would
 double-count the same measurements):
@@ -211,7 +211,7 @@ gap, since NH-heavy clearing lowers the NH share over time.
 | quantity | value |
 |---|---|
 | `npp_frac_NH`, fitted 1750 parameter | 0.4662 |
-| → model's realised modern NH share | 0.4461 |
+| → model's realized modern NH share | 0.4461 |
 | MOD17 observed modern NH share | **0.5942** |
 | gap (model − observed) | **−0.1481** |
 | ⇒ 1750 anchor implied by MOD17 | **0.6136** |
@@ -259,7 +259,7 @@ for NPP sits at or beyond the PsnNet end.
 | *annual product (§3c)* | 38.35 / −15.75 | | | *p2p 1.003 / 0.366* | |
 
 **Rectification is real and it is not worth 75.** The observed NH shape sits ~11° poleward of
-the insolation-weighted aggregate, so the defence of a poleward φ is genuine. But the shipped
+the insolation-weighted aggregate, so the defense of a poleward φ is genuine. But the shipped
 75 over-drives the *observed* peak-to-peak by ~1.6×, and 38.35 under-delivers it by ~0.6×.
 
 **Shape and amplitude give different latitudes, and both are reported.** No insolation shape
@@ -430,7 +430,7 @@ and a hard `stop()` in the build script.
 
 **What is sourced and what is not.** The *regional* E_LUC series is sourced. The NH fraction
 *within* each straddling region is **not** — OSCAR's regions are political aggregates, not
-hemispheres — so those fractions are geographic judgements carried as a **lo/central/hi
+hemispheres — so those fractions are geographic judgments carried as a **lo/central/hi
 bracket**, and every year of the product ships all three.
 
 | period | E_LUC (GtC) | NH lo | NH central | NH hi |
@@ -444,7 +444,7 @@ bracket**, and every year of the product ships all three.
 
 **The direction survives the whole bracket.** Pre-1950 even the *low* end is ≥ 0.60;
 post-1990 even the *high* end is ≤ 0.53. The two ends do not overlap under any admissible
-judgement, which is what makes *"no constant can represent this"* a measurement rather than a
+judgment, which is what makes *"no constant can represent this"* a measurement rather than a
 preference — and note that 0.55 is not even the flux-weighted mean, which is **0.620**.
 Against the retired constant, the time-varying share moves **+31 GtC** of cumulative
 land-use carbon into the northern box by 1959 and leaves **+20 GtC** there by 2024.
@@ -465,7 +465,7 @@ land-use carbon into the northern box by 1959 and leaves **+20 GtC** there by 20
   of ~0.385. The alternative — extrapolating the observed decline forward — runs the NH
   share negative before 2260.
 
-**What it buys, and what it does not.** At default parameters it moves the modelled 2015–24
+**What it buys, and what it does not.** At default parameters it moves the modeled 2015–24
 MLO−SPO CO₂ gradient from **5.26 → 5.03 ppm** against an observed **3.97**, i.e. it closes
 about a fifth of the model's error in the right direction; the δ¹³C gradient barely moves
 (−0.245 → −0.238 ‰ against an observed −0.074), confirming that the *provisional shares are
@@ -490,7 +490,7 @@ Two bugs this caught, both of which inflated a prescribed total while looking fi
 1. Splining the bomb-¹⁴C series undershot either side of the 1962 peak; clipping those
    negatives back to zero **added 4.3 %** to the calibrated total. Fixed by `"constant"`.
 2. Masking source records with decimal time instead of integer years dropped the **entire
-   final year** of every record — month-centred `t` for year Y runs Y.04…Y.96, all of which
+   final year** of every record — month-centered `t` for year Y runs Y.04…Y.96, all of which
    satisfy `t > Y`. Cost another 0.28 % of the bomb total.
 
 Both are now gated: `test-forcing.R` asserts cumulative fossil emissions match GCB to 1e-10
@@ -502,7 +502,7 @@ and that the bomb total is set by its prior rather than by the provisional shape
 
 Natural production is **not optional**: with no cosmogenic source, unbalanced decay drifts
 atmospheric Δ¹⁴C by −24.0 ‰ over 200 yr and −41.7 ‰ over 350 yr, against a −26.6 ‰
-pre-bomb Suess signal — the artefact would exceed the signal.
+pre-bomb Suess signal — the artifact would exceed the signal.
 
 `ccx_spinup()` solves for the production rate that holds atmospheric Δ¹⁴C at its 1750 value
 in steady state, given the model's own inventory and ventilation. This makes the canonical
@@ -524,12 +524,12 @@ spread in production (1.6–2.5 atoms/cm²/s). A factor-2 miss would indicate a 
 
 ---
 
-## 8a. Licences and citation
+## 8a. Licenses and citation
 
 (Numbered §9 until 2026-10-15, a duplicate of the bomb-¹⁴C §9 below, which keeps the number
 because other files cite it.)
 
-The MIT licence covers this repository's code and the author's own text. It does not cover
+The MIT license covers this repository's code and the author's own text. It does not cover
 third-party data: the observations, emissions and model outputs in `data/` (processed) and
 `data-raw/manual/` (raw files that cannot be fetched by script: Scripps CO₂ Program records,
 redistributed because the program's website returned HTTP 404 for every data file on
@@ -537,7 +537,7 @@ redistributed because the program's website returned HTTP 404 for every data fil
 Sources, access dates, checksums and citations are in `data-raw/downloads/MANIFEST.csv` and
 this file. Cite the original providers when you use these data.
 
-| Source | Licence |
+| Source | License |
 |---|---|
 | Scripps CO₂ Program | cite Keeling et al. 2001; SIO Reference Series 01-06 |
 | NOAA GML / PSL / NCEI | US Government, public domain; cite the product |
@@ -549,10 +549,10 @@ this file. Cite the original providers when you use these data.
 | seacarb | cite Gattuso et al., R package |
 | Eide et al. 2017 oceanic ¹³C Suess field (PANGAEA) | CC-BY-3.0, as recorded in §2b |
 
-Licence **not yet recorded** for these sources (rows added 2026-10-15; citations are in
+License **not yet recorded** for these sources (rows added 2026-10-15; citations are in
 `MANIFEST.csv` or the section named):
 
-| Source | Licence |
+| Source | License |
 |---|---|
 | van Vuuren et al. 2026 CMIP7 ScenarioMIP markers (Zenodo 10.5281/zenodo.20713982 v1.1.1) | not yet recorded |
 | RCMIP emissions v5.1.0 | not yet recorded |
@@ -575,7 +575,7 @@ Licence **not yet recorded** for these sources (rows added 2026-10-15; citations
 
 ## 9. The bomb ¹⁴C source is a DELIVERY rate, not a production rate
 
-**Closed 2026-08-10.** The UNSCEAR 2000 Annex C digitisation listed in §8 was never
+**Closed 2026-08-10.** The UNSCEAR 2000 Annex C digitization listed in §8 was never
 needed. Two references supplied by Marcus resolved the gap, and in doing so exposed a
 physics error in the placeholder rather than merely a provenance gap.
 
@@ -621,7 +621,7 @@ interval total comes from Tans' independent compilation.
   quarter-on-quarter releases come out as `7, 48, 29, 17, 30, 42, 13, 0, 14, 5, 7, −2, 15,
   3` — the small ones are rounding. The `0` arises because "170" is reported twice in
   succession, and it produced **three months of exactly zero delivery**; that notch pinned
-  the modelled NH peak in every run of a `k_w`/`kz`/`h_ml`/`tau_ex` sweep spanning 2–4×.
+  the modeled NH peak in every run of a `k_w`/`kz`/`h_ml`/`tau_ex` sweep spanning 2–4×.
   Annual sums (1963: 101, 1964: 85, 1965: 24 units) sit far above the noise floor. So we
   do not in practice have sub-annual *emission* data, and the concentration record supplies
   the sub-annual pattern throughout.
@@ -682,7 +682,7 @@ essentially no information about the event it was supposed to represent.
 A **−118 ‰ mean bias** remains at uncalibrated defaults. That is a level, not a shape,
 and is left for calibration.
 
-### Judgement calls, and how much they matter
+### Judgment calls, and how much they matter
 
 Both are exposed as environment overrides so they can be measured, not argued:
 
@@ -707,7 +707,7 @@ Both are exposed as environment overrides so they can be measured, not argued:
   test of sub-annual ocean exchange.
 - A −118 ‰ mean bias survives at uncalibrated defaults; it is a level, not a shape.
 - `bomb_total` remains a **calibrated** parameter with the Naegler & Levin prior; the
-  stored series is normalised to unit integral, so it still cannot set the amplitude.
+  stored series is normalized to unit integral, so it still cannot set the amplitude.
 
 
 ### 9c. What isotopic data actually exists for the bomb window (audit, 2026-09-09)
@@ -739,7 +739,7 @@ scores. The entire isotopic constraint for 1950–1980 is Δ¹⁴C, from three s
 2. **`obs_d14c_zonal` is both input and target.** Documented above and confined to sub-annual
    timescales, but it means the bomb window cannot independently test sub-annual ocean exchange.
 3. **The "56–60 % still aloft" reading is the RAW, UNRAISED point.** It recomputes exactly as
-   `59.12 / [99.3, 104.9]` = 56.4–59.5 %. The two judgement calls then push in opposite
+   `59.12 / [99.3, 104.9]` = 56.4–59.5 %. The two judgment calls then push in opposite
    directions and neither combination lands back in it: `DROP_FIRST` alone gives 62.8–66.4 %
    (above), de-biasing alone 47.0–49.6 % (below), both together 52.4–55.3 % (below).
 4. **Graven and Hua disagree by up to 11× Hua's own stated sd, antisymmetrically.**
@@ -784,7 +784,7 @@ rescores the de-biasing's cost at a range of bomb-window representation errors:
 ⇒ **the penalty shrinks by only 21–25 %. It does not vanish and does not change sign.** Ruling 4's
 −92.7 is **NOT** an artifact of an over-tight target. ⚠ Why so robust: the cost is dominated by the
 SH (−69.5). ~~The de-biasing acts through the pre-1963 dump, a level shift sustained across many
-years.~~ ⛔ **CORRECTED 2026-09-09e — "the pre-1963 dump" WAS WRONG, and the correction matters.** Localised per year (`diag_debias_penalty_by_year.R`, self-checked against `ccx_loglik`s own stream totals): the dump years 1955–62 carry only **−22.0** of the −92.7, and just **−5.5** of the SH’s −69.5. **POST-1970 carries −49.9 (54 %), of which the SH is −45.4 (65 % of its total)** — *outside* the bomb window, at **σ ≈ 7 ‰, not 25 ‰**, in the years where Graven and Hua agree to 2–3 ‰. The worst SH years are 1971 (−9.50), 1972 (−8.09), 1973 (−6.60), and the model was **already z +4.31 / +3.14 / +1.81 too LOW there BEFORE the de-biasing**, going to **+6.13 / +5.10 / +4.06** after. ⇒ the de-biasing **deepens a pre-existing post-peak SH deficit** in the BEST-observed part of the record — not, as this text said, a level shift in the least-observed one.
+years.~~ ⛔ **CORRECTED 2026-09-09e — "the pre-1963 dump" WAS WRONG, and the correction matters.** Localized per year (`diag_debias_penalty_by_year.R`, self-checked against `ccx_loglik`s own stream totals): the dump years 1955–62 carry only **−22.0** of the −92.7, and just **−5.5** of the SH’s −69.5. **POST-1970 carries −49.9 (54 %), of which the SH is −45.4 (65 % of its total)** — *outside* the bomb window, at **σ ≈ 7 ‰, not 25 ‰**, in the years where Graven and Hua agree to 2–3 ‰. The worst SH years are 1971 (−9.50), 1972 (−8.09), 1973 (−6.60), and the model was **already z +4.31 / +3.14 / +1.81 too LOW there BEFORE the de-biasing**, going to **+6.13 / +5.10 / +4.06** after. ⇒ the de-biasing **deepens a pre-existing post-peak SH deficit** in the BEST-observed part of the record — not, as this text said, a level shift in the least-observed one.
 ⚠ **47 is an upper bound, not an estimate:** the Graven−Hua difference is ANTISYMMETRIC and is
 itself a PARTITION disagreement, i.e. the same KIND of error the 25 was calibrated for, so treating
 them as independent double-counts.

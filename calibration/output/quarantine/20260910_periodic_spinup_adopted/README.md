@@ -11,7 +11,7 @@ guard, has to say so):
 
 | date | commit | change | what it moved |
 |---|---|---|---|
-| 2026-09-09w | (prior re-centring) | `ent_seas_amp_SH` centre 10.95 → 6.5525, `h_ml` 83.94 → 59.69 m | the PRIOR: −0.811 at `hilda31` |
+| 2026-09-09w | (prior re-centering) | `ent_seas_amp_SH` center 10.95 → 6.5525, `h_ml` 83.94 → 59.69 m | the PRIOR: −0.811 at `hilda31` |
 | 2026-09-09x | `50f0105` | the PERIODIC spinup adopted as `CCX_OBJECTIVE_SPINUP` (Marcus's ruling) | the LIKELIHOOD: −10.158 at `hilda31` (SPO −16.73, MLO +8.28) |
 
 ⇒ `hilda31` was fitted under the ASEASONAL spinup and the pre-09-09w priors. Its stored

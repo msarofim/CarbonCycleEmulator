@@ -78,7 +78,7 @@ pulse lab's "Release the pulse" drew both of its plots 4.0 s after the click (10
 Nothing is precomputed, so no cached figure can fall out of date with the model.
 **The "Known issues" tab adds three runs the app does not otherwise make** (a gate
 run to 2025, an ENSO knockout, a 1000-year pulse pair; the card that spun up a second mode was
-retired 2026-10-01). They are memoised and computed on FIRST VIEW of that tab, not
+retired 2026-10-01). They are memoized and computed on FIRST VIEW of that tab, not
 at start-up — measured at about 6 s in total, contended (before 10-15) — so a visitor who never
 opens the tab never pays for it.
 

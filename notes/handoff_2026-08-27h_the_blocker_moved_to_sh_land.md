@@ -70,7 +70,7 @@ tolerance; P4 landed between its own two gates. Both are reported as they scored
 ### The one-line result
 
 **The channel does exactly what it was built to do, and the fit declined to use it that way.**
-Given the freedom, the optimiser spent the new limb on *permission to double the wrong-phase
+Given the freedom, the optimizer spent the new limb on *permission to double the wrong-phase
 solubility limb* rather than on replacing it.
 
 | | mode | incumbent (control) | challenger |
@@ -81,7 +81,7 @@ solubility limb* rather than on replacing it.
 | SPO ocean component | 0.236 ppm @ 3.35 | — | **0.124 ppm @ 3.45** |
 | vs observed 0.522 @ 8.52 | 0.45× | — | **0.23×** |
 
-**THE INCUMBENT CONTROL IS THE LOAD-BEARING PART.** Re-optimising the identical slice WITHOUT the
+**THE INCUMBENT CONTROL IS THE LOAD-BEARING PART.** Re-optimizing the identical slice WITHOUT the
 channel moves the amplitude 0.360 → 0.371. **The doubling is the channel's doing**, which is
 exactly what the matched design (`match_incumbents_optim`) existed to separate.
 
@@ -114,8 +114,8 @@ because of the exact ridge). But:
   SH-local channel at SPO, **1.390 ppm** against `resp SH`'s 0.092.
 - **`tau_ex` IS fittable, carries the 0.821 ppm NH import, and I FROZE IT.**
 
-**So P3's failure may be an artefact of the slice rather than of the physics.** That is a
-hypothesis for a NEW pre-registered test — **NOT a licence to re-run 27g's P2 with `tau_ex` added
+**So P3's failure may be an artifact of the slice rather than of the physics.** That is a
+hypothesis for a NEW pre-registered test — **NOT a license to re-run 27g's P2 with `tau_ex` added
 and relabel the result.**
 
 **This does not contradict 27e.** That exonerated `tau_ex` as a **PARTITION** lever (the SPO
@@ -127,8 +127,8 @@ second is the one that applies. Do not cite the exoneration to skip this test.
 
 - **(a) THE WIDER SLICE — RECOMMENDED.** Pre-register and run the seasonal block **plus `tau_ex`**,
   both arms, same matched design. Direct test of "the slice, not the physics, scored P3 FAILED".
-  Cost: one script edit (`RF_BLOCK`) and ~2 optimiser runs. **`diag_so_entrainment_refit.R` is
-  already parameterised by `RF_BLOCK`, so this is a constant, not a rewrite.**
+  Cost: one script edit (`RF_BLOCK`) and ~2 optimizer runs. **`diag_so_entrainment_refit.R` is
+  already parameterized by `RF_BLOCK`, so this is a constant, not a rewrite.**
 - **(b) 4b, the second SH ocean column.** **This residual does NOT point at it.** A second ocean
   column would not shrink an SH land component that is 2× too big with 60 % imported. Not a case
   *against* 4b — a case for doing (a) first and deciding 4b on a residual that has had the land
@@ -141,7 +141,7 @@ second is the one that applies. Do not cite the exoneration to skip this test.
 ## 5. HOW TO RUN WHAT EXISTS
 
     Rscript calibration/diag_so_entrainment_power.R          # P1, ~3 min, 21 model runs
-    Rscript calibration/diag_so_entrainment_refit.R          # P2, ~40 min, two optimiser arms
+    Rscript calibration/diag_so_entrainment_refit.R          # P2, ~40 min, two optimizer arms
     CCX_ENT_AMP=10 Rscript calibration/diag_seas_signature_inversion.R
     CCX_PAR_RDS=<overrides.rds> Rscript calibration/diag_seas_channel_decomp.R
 

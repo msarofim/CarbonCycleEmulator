@@ -18,7 +18,7 @@ Read this one; the other two are provenance.
    **cancellation, not strength**. §4's own advice applies: **STOP, and do NOT buy the
    Takahashi climatology.**
 4. **`prior_z()` was wrong by up to 1.3 sd** and had mis-ranked the whole week's work.
-   Fixed, tested, and two of six |z| > 3 flags were artefacts.
+   Fixed, tested, and two of six |z| > 3 flags were artifacts.
 5. **The app runs on UNCALIBRATED DEFAULTS** because `app/global.R` looks for a file that
    does not exist. This is the single highest-value fix in the repo and it is nearly a
    one-liner. **§6.**
@@ -56,7 +56,7 @@ Read this one; the other two are provenance.
 ### 2a. Confirmed
 
 `seas_T_amp_NH` × ln(`q10`) holds to **2.2609–2.2663** across q10 = 1.09 → 2.0 (PAIRSH
-tier), and the re-optimised `A_T` at q10 = 2.0 is **3.2695 K** against the analytic
+tier), and the re-optimized `A_T` at q10 = 2.0 is **3.2695 K** against the analytic
 2.2513/ln 2 = **3.2479**. Four significant figures. The Hessian agrees independently:
 **cor(q10, `seas_T_amp_NH`) = −0.972** — strong, and NOT degenerate.
 
@@ -72,7 +72,7 @@ conditional.
 - **I read a frozen-block profile as bounding the posterior.** BLOCK freezes `beta_max`,
   `fert_k`, `luc_scale` — and β–γ compensation is exactly the repair it forbids.
   `match_incumbents_optim`, applied to myself. **This bit twice: §4's frozen tier is also
-  ~2× its re-optimised one.**
+  ~2× its re-optimized one.**
 - **A pure-likelihood objective lets the NUISANCE parameters escape.** The first `land` run
   put `seas_T_amp_SH` at 1e-23 and `sst_seas_amp_NH` at 1e-31 in every row — both channels
   off at z = −37.5 — and reported a spread of 15.9. Internally consistent, and a profile of
@@ -90,7 +90,7 @@ No model runs.
 | **1.35** | **7.81** | −20.2 | **+19.7** |
 | 2.00 (literature) | 3.45 | **−63.7** | +4.0 |
 
-Damping **both** land amplitude priors by 0.2838 (NH centre 14.32 → 4.06 K, SH 5.05 → 1.43 K).
+Damping **both** land amplitude priors by 0.2838 (NH center 14.32 → 4.06 K, SH 5.05 → 1.43 K).
 **The sign flips; the landing is q10 ≈ 1.35–1.5, not 2.0.** And the decisive lever is the
 **SH** prior as much as the NH — §2 as written only argued the NH case.
 
@@ -99,7 +99,7 @@ Damping **both** land amplitude priors by 0.2838 (NH centre 14.32 → 4.06 K, SH
 1. **Get a soil-temperature damping factor with provenance.** Respiration-weighted depth.
    **If it comes back far from 0.28, that is the falsification and the refit should not be
    run at all.** The 0.2838 above is DERIVED to put the mode's product at the literature q10
-   — the most favourable value the hypothesis could have, and not a measurement.
+   — the most favorable value the hypothesis could have, and not a measurement.
 2. Only then: re-anchor **both** land amplitude priors, keep the bracket-derived widths,
    refit (~15 h, warm-started).
 3. **Pre-register `q10` → 1.35–1.5, `A_T` → 6–8 K.** Not "q10 back near 2.0".
@@ -137,7 +137,7 @@ both), and **it wrote its result back over the mode file**. Both fixed.
 
 `diag_seas_T_amp_q10_ridge.R sst`, 0.05 → the observed 2.2374, `partial`.
 
-**Re-optimisation halves the veto:** mode → observed costs **223.2** frozen, **108.5** with
+**Re-optimization halves the veto:** mode → observed costs **223.2** frozen, **108.5** with
 the seasonal block free. Half of every earlier "the ocean channel is rejected" reading was
 home-ground advantage.
 
@@ -169,7 +169,7 @@ respiration, now in the ocean limb.
 STRENGTH of a channel whose problem is its SIGN relative to everything else. The next move,
 if there is one, is structural: the model's seasonal cycle is built from two channels that
 mostly cancel, and a third one is being asked to fit into a residual it is antiphase to.
-That is a modelling question for Marcus, not a data acquisition.
+That is a modeling question for Marcus, not a data acquisition.
 
 ---
 
@@ -187,7 +187,7 @@ grid. For `seas_T_amp_NH` at x = 25.94: **one grid point inside the entire prior
 | `seas_T_amp_SH` | −3.71 | **−3.99** |
 | `sst_seas_amp_NH` | −5.97 | **−6.27** |
 
-The |z| > 3 list loses two of six. Also: **the prior CENTRE for `seas_T_amp_NH` is
+The |z| > 3 list loses two of six. Also: **the prior CENTER for `seas_T_amp_NH` is
 14.3215 K** (the geometric mean of the bracket), not the LO end 11.445 — the joint prior
 implies **4.41×**, not 3.52×.
 
@@ -228,7 +228,7 @@ to reject a stale 18-parameter fit.
    tab the project exists for.
 5. **Cold start unverified.** `global.R` took 79 s here (under load; `DEPLOY.md` claims
    ~20 s). shinyapps.io has startup timeouts. **Do a timed real deploy before announcing.**
-6. **Two millennial-run labelling issues, both benign and both currently silent:** non-CO₂
+6. **Two millennial-run labeling issues, both benign and both currently silent:** non-CO₂
    ERF is held flat past 2500, and the CO₂→forcing curve extrapolates above 1687 ppm (SSP5-8.5
    pulse runs already trip that warning).
 
@@ -326,12 +326,12 @@ explain all three.
   sst: `frozen`/`seas`/`land`. **Default to `partial`.** `lik` exists only to reproduce the
   first pass and lets the nuisance parameters escape.
 - **Never read the `pair` tier alone.** It freezes `seas_T_amp_SH` while q10 — which both
-  hemispheres SHARE — moves. On the amp axis that artefact is 217.6 vs 111.8 of spread.
-- **One bad optimiser cell:** q10 = 2.3, BLOCK tier, `lik` objective — non-monotonic
+  hemispheres SHARE — moves. On the amp axis that artifact is 217.6 vs 111.8 of spread.
+- **One bad optimizer cell:** q10 = 2.3, BLOCK tier, `lik` objective — non-monotonic
   (`d13c_seasonal_MLO` −36.7 against −3.4 at q10 = 2.0). A different local optimum. Read
   PAIRSH there.
 - **`calibration/diag_phi_eff_profile.R` still carries a double-`luc_scale` bug** in its
-  `by_stream`/`gcb_land_sink` column. Its optimisation went through `ccx_make_logpost()` and
+  `by_stream`/`gcb_land_sink` column. Its optimization went through `ccx_make_logpost()` and
   its seasonal-row conclusions never touch LUC, so its published findings stand — but do not
   copy that idiom. `ccx_forcing_eluc_annual()` reads the forcing's `e_luc` columns, so the
   annual series must be taken **before** the `luc_scale` column multiply.
@@ -349,7 +349,7 @@ cd ~/Documents/2026/CodeProjects/CarbonCycleEmulator && claude --remote-control 
 
 > Read `notes/handoff_2026-08-21c_three_closed_app_next.md`. All three items from the
 > 2026-08-21 handoff are CLOSED — do not re-open them. **The science is at a natural
-> stopping point and §4 ends in a modelling question for Marcus, not more computation.**
+> stopping point and §4 ends in a modeling question for Marcus, not more computation.**
 >
 > **Default next move is §6, the app**: `app/global.R` resolves a parameter file that does
 > not exist, so the app ships on uncalibrated defaults and is 14.6 ppm low at 2024 instead of

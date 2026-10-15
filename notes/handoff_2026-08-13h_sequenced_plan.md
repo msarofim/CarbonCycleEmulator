@@ -88,15 +88,15 @@ of its Suess forcing switched off. The fix moves the 1900→2020 Suess decline
 decisions must not be settled on the old numbers**, and this is what makes (c) and PHASE 3
 decidable.
 
-**(e) Re-centre the default `beta`.** At 0.38 the model now runs **+17.5 ppm high at 2024**
-— that default was re-centred on 2026-08-12 *against the bug*. The CO₂ record's 1-D
+**(e) Re-center the default `beta`.** At 0.38 the model now runs **+17.5 ppm high at 2024**
+— that default was re-centered on 2026-08-12 *against the bug*. The CO₂ record's 1-D
 preferred value is **0.50**. This is an app and test fixture, not a calibrated value, and
 DESIGN's app panels should not be built on it as it stands.
 
 **(f) Re-derive the two remaining suite failures rather than inheriting them.**
 `test-climate.R:122` (0.092 against a 0.1 threshold) and `test-mechanisms.R:32` (0.29
 against 0.5). **The precedent is today's:** two of the four "pre-existing, unrelated"
-failures turned out to be the suite correctly reporting a real bias, mislabelled a stale
+failures turned out to be the suite correctly reporting a real bias, mislabeled a stale
 AR(1) fixture across five handoffs. Carry the *evidence*, not the label.
 
 **(g) Merge or tag `luc-veg-debit` before spending 4 h against it.** It has been unmerged
@@ -161,7 +161,7 @@ memory; a mode-find is not a posterior and the app cannot ship on one.
   **false and silent** — −0.915 ‰ of spurious δ¹³C drift, nearly twice the misfit the
   conveyor was proposed to fix, and 13c's own words are that *it would have looked like a
   result*. Assume the pump needs a spinup solve and budget for it.
-- **+2 parameters** (export production, remineralisation depth scale) on a model the expert
+- **+2 parameters** (export production, remineralization depth scale) on a model the expert
   panel has just concluded is at the right complexity.
 
 ### 4.2 Why it is nonetheless the right third step

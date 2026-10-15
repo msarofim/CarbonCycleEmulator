@@ -14,7 +14,7 @@ bit-reproducible; nothing is adopted here.**
   satellite NPP (CbPM) confirms the HS shape. The O5 build gives the HS pump the LS sine at amp ≤ 1 — a known mis-specification.
 - **O5b = the HS pump on the data's shape.** `s_hs,h(t) = 1 + pump_hs_seas_amp × (F_h(t − pump_hs_seas_lag/12) − 1)`, where `F_h` is the
   6-harmonic Fourier interpolant of the hemisphere's unit-mean HS median shape (`ccx_mld_fourier()`, the round-6 idiom: exact at the month
-  centres, continuous mean EXACTLY 1). `amp ∈ [0, 1]`: 1 = the CMIP6 shape, 0 = OFF. The interpolant's continuous minimum is +0.0165 (NH) /
+  centers, continuous mean EXACTLY 1). `amp ∈ [0, 1]`: 1 = the CMIP6 shape, 0 = OFF. The interpolant's continuous minimum is +0.0165 (NH) /
   +0.0089 (SH) — READ — so the export never reverses at amp ≤ 1. Zero-mean anomaly ⇒ the annual-mean HS export is unchanged. Lag in months,
   same sign convention as `pump_seas_lag` (positive = later). The LS pump keeps O5's sine (`pump_seas_amp` / `pump_seas_lag`, one pair for
   both hemispheres — the NH LS at 0.5 / −1 instead of its 0.38 / −1.8 is a stated mis-specification, unchanged from the 2×2).
@@ -25,7 +25,7 @@ bit-reproducible; nothing is adopted here.**
 
 **P0 contracts (test-pump-hs-seas.R, gated before any probe number is read):** (a) absent vs present-at-0 BIT-EXACT in both cores, the
 canonical's 25 streams reproduce, inert with `seas_drivers` 0; (b) the whole-year integral of the HS pump flux at amp 1 equals the constant
-HS export (mean-1 shape; ≤ 1e-9 relative on month-centre samples, ≤ 1e-6 on the transient's annual mean); (c) R/C++ parity ≤ 1e-10 at
+HS export (mean-1 shape; ≤ 1e-9 relative on month-center samples, ≤ 1e-6 on the transient's annual mean); (c) R/C++ parity ≤ 1e-10 at
 amp {0.5, 1} × lag {0, 2} × `pump_seas_amp` {0, 0.5}; (d) conservation; (e) guards by name (amp outside [0, 1], non-finite lag, amp > 0
 with the HS pump OFF are refused, never clamped); (f) MUTATION: lag 6 moves the SH HS export minimum from July to January (the shape's
 power); the factor's continuous minimum at amp 1 is > 0; the LS pump is UNTOUCHED by `pump_hs_seas_amp` (its tendency identical at 0 and 1).

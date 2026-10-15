@@ -85,7 +85,7 @@ deepening brings high-DIC water up and drives outgassing in the same season the 
 is taking CO2 in. The model has no such term.
 
 ⚠ **The mechanism is my reading; the PHASE is the measurement.** I have no citation to hand for
-the Southern-Ocean seasonal flux decomposition and am not labelling it established. What is
+the Southern-Ocean seasonal flux decomposition and am not labeling it established. What is
 measured here is that the observed ocean-signatured component peaks at 8.52 [7.82, 9.20] and the
 model's solubility channel peaks at 4.16. The named test is §1 of the next-step list below.
 
@@ -99,7 +99,7 @@ at "SH land" now read differently:
 - The **SH ocean is 0.45× in size AND 5.17 months out of phase.** Adding amplitude to a channel
   with the wrong phase makes the cycle worse, which is exactly why the fit suppressed
   `sst_seas_amp_SH` to **21 % of its observed value**. **The fit was right to.** The −6.32 σ prior
-  flag on that parameter is the model being penalised for correctly refusing a broken channel —
+  flag on that parameter is the model being penalized for correctly refusing a broken channel —
   not evidence that the SH ocean amplitude is the problem.
 
 ---
@@ -143,7 +143,7 @@ standing memory for this class.
    own amplitude, which the fit has pinned near MLO's 6.6 ppm while a hemispheric mean should
    plausibly be larger. **The second is checkable against station data and is not checked** —
    NOAA's network covers the NH latitude range and the hemispheric-mean seasonal amplitude is a
-   measurable number, not a modelled one.
+   measurable number, not a modeled one.
 3. **Only then** decide whether any structural land change is owed. On this table the SH land
    excess is mostly imported, so the SH land box has lost its motivation and the two candidates
    above have gained it.

@@ -28,12 +28,12 @@ that have nothing to do with the physics it was built to test.
 
 ## 0. WHAT WAS ASKED, AND WHY IT WAS PRE-CHECKED INSTEAD OF RUN
 
-Handoff 27h §4 argued that 27g's **P3 FAILED** may be an artefact of the SLICE, not of the model:
+Handoff 27h §4 argued that 27g's **P3 FAILED** may be an artifact of the SLICE, not of the model:
 the P2 slice froze `tau_ex`, the only *fittable* lever on the **0.821 ppm** of SPO's seasonal cycle
 that arrives from the NH, and SH land at SPO is ~2× observed. Good hypothesis.
 
 But its null was at risk of being **structurally guaranteed**. If the interhemispheric rows pin
-`tau_ex` to a few per cent, "we freed `tau_ex` and P3 still failed" and "we never freed it" produce
+`tau_ex` to a few percent, "we freed `tau_ex` and P3 still failed" and "we never freed it" produce
 the same output, and neither is evidence. So the POWER was measured first. [[no_power_null]]
 
 **THIS IS THE SECOND HALF OF 27e, NOT A RE-DERIVATION OF IT.**
@@ -59,7 +59,7 @@ plus the existing inversion re-run at two `tau_ex` values via `CCX_PAR_RDS`.
 
 ### (i) PRICE — `tau_ex` is pinned to ~2.6 % per log-unit
 
-The profile (every other parameter at the mode, the two gradient OFFSETS re-optimised at each
+The profile (every other parameter at the mode, the two gradient OFFSETS re-optimized at each
 point, since those exist precisely to absorb the station-latitude representation constant):
 
 | τ/τ₀ | τ_ex | Δlogpost | NH import at SPO |
@@ -89,7 +89,7 @@ likelihood):
 right model of it.
 
 **A PROFILE IS ONLY A LOWER BOUND, so it was checked conditionally.** [[profile_beats_optimum]]
-`diag_tau_ex_conditional_power.R` fixes `tau_ex` and re-optimises the WHOLE 27h slice around it —
+`diag_tau_ex_conditional_power.R` fixes `tau_ex` and re-optimizes the WHOLE 27h slice around it —
 the six 27g seasonal parameters plus both gradient offsets, eight free, warm-started by
 continuation and restarted until the improvement dies (all points converged, last gain 0.0000):
 
@@ -162,7 +162,7 @@ mode. Both runs here report 0.676–0.683. The ratios above use the measured val
 was written 2026-08-15, *as the justification for adding* the interhemispheric-gradient term. It is
 now only half true, and the half that fails is the half that matters here.
 
-Cost decomposition at 1.26 τ₀ (offsets re-optimised), the direction that would shrink the import:
+Cost decomposition at 1.26 τ₀ (offsets re-optimized), the direction that would shrink the import:
 
 | row | Δ |
 |---|---|

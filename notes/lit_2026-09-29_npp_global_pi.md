@@ -60,7 +60,7 @@ Numbers only.
 - Direction (both from verified numbers, no magnitude claimed):
   (a) Moving from actual to potential vegetation *raises* NPP: 59.22 → 65.51 in Haberl, +6.29.
   (b) Moving from year-2000 CO₂ back to 1750 *lowers* NPP: Krausmann Fig 1B treats CO₂
-  fertilisation as changing NPP_pot. The size of that change is not stated in the paper as a
+  fertilization as changing NPP_pot. The size of that change is not stated in the paper as a
   number, and I have not derived one. A 1750 potential NPP therefore falls **below 65.5** by an
   amount no source opened here quantifies.
 - **Vintage.** The most recent verified totals are MOD17 (data to 2023; 52.7) and Ito 2011 (56.2).
@@ -68,7 +68,7 @@ Numbers only.
   and Haberl 2007. Recency as a tie-breaker leans toward the mid-50s for present-day actual NPP.
   None of these recent numbers is a preindustrial or potential estimate, though, so they do not
   bear directly on NPP₀.
-- **Model consistency, recorded only.** With NPP₀ = 60 and CO₂ fertilisation making modern NPP
+- **Model consistency, recorded only.** With NPP₀ = 60 and CO₂ fertilization making modern NPP
   higher than NPP₀, the model's modern NPP will sit above 60. That is above every verified modern
   total except TAR MRS (62.6) and Haberl NPP₀ (65.5). This matches the existing comment in
   `R/calibrate.R:659`. Whether that matters depends on the actual-vs-potential choice flagged above.

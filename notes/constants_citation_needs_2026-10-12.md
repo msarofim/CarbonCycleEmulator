@@ -38,12 +38,12 @@
 | 4 | `ALPHA_AS_FCO3` | 0.082 | yes | **yes** | Zhang 1995 p5: 7–13 % | no |
 | 5 | `OCEAN_DEPTH` | 3700 m | yes | **yes** | none on disk | (the registry's own off-disk source gives 3690) |
 | 6 | `NPP_GLOBAL_PI` | 60 GtC/yr | yes | **yes** | Bastos 2016 T4: 54 (1700, a model setting); Naegler 2006: 60 (a model setting); MOD17 52.7 (modern) | **yes** (Bastos 54) → refit if adopted |
-| 7 | `NPP_FRAC_NH_ANCHOR_1750` | 0.5986 | yes (prior centre) | **yes** | `obs_npp_hemispheric.rds` 0.5942 (its input) | n/a (model-derived by design) |
+| 7 | `NPP_FRAC_NH_ANCHOR_1750` | 0.5986 | yes (prior center) | **yes** | `obs_npp_hemispheric.rds` 0.5942 (its input) | n/a (model-derived by design) |
 | 8 | `ENT_SEAS_BAND_AREA_FRAC` | 0.369 | **no** (pin 0) | no | SOM-FFN mask via `diag_so_pco2_phase.R` | not recomputed |
 | 9 | `ALPHA_AS_DOWN_LEGACY` | −2 ‰ | **no** | no | Zhang 1995 kinetic −0.81 / −0.95 | yes (already documented); no refit |
 | 10 | `ALPHA_AS_UP_LEGACY` | −10 ‰ | **no** | no | Quay 2003 T3: −10.9 ± 0.3 | yes; no refit |
 | 11 | `ALPHA_PHOTO_EPS` (registry) | 18 ‰ | **no** | no | Quay 2003 T3: −17 ± 5 | yes (−1) |
-| 12 | `CCX_ALPHA_PHOTO_EPS_BIOSPHERE` | 15.6 ‰ | yes | **yes** | Quay 2003 T3: −17 ± 5 | centre differs by 1.4, inside its ±5 → refit if adopted |
+| 12 | `CCX_ALPHA_PHOTO_EPS_BIOSPHERE` | 15.6 ‰ | yes | **yes** | Quay 2003 T3: −17 ± 5 | center differs by 1.4, inside its ±5 → refit if adopted |
 | 13 | obliquity | −23.44° | yes | **yes** | none | — |
 | 14 | declination phase offset | +10 days | yes | **yes** | none | — |
 | 15 | `CCX_SEAS_PHI_EFF` | NH 75°, SH −30° | yes | **yes** | `obs_npp_seasonal_shape.rds` (other estimators); the CHANGELOG argmin record | not like-for-like |
@@ -54,7 +54,7 @@
 | 20 | `FORC_NUC_NH_SHARE` | 0.95 | yes | **yes** | `nuclear14c/*.csv` → 0.993 pooled (my aggregation) | **yes** → refit if adopted |
 | 21 | `P_canon` production | 2.04 atoms cm⁻² s⁻¹ | diagnostic only | no | Naegler 2006 p5: 0.48–0.55 kmol/yr (a total) | no (0.545 kmol/yr is inside) |
 | 22 | Earth area in `P_canon`, plus re-typed `.SEC_PER_YR` / `.AVOGADRO` | 5.1e14 m² | diagnostic only | no | none | — |
-| 23 | `CCX_BOMB_REF` and the prior-centre literal | 102 kmol | yes; `CCX_BOMB_REF` cancels | the **prior-centre literal: yes** | Naegler 2006 p1/p8: 99.3–104.9 | no (midpoint 102.1) |
+| 23 | `CCX_BOMB_REF` and the prior-center literal | 102 kmol | yes; `CCX_BOMB_REF` cancels | the **prior-center literal: yes** | Naegler 2006 p1/p8: 99.3–104.9 | no (midpoint 102.1) |
 | 24 | `JOOS_PPM_PER` | 2.123 GtC/ppm | app card and diagnostics | no | Joos 2013 p6: 2.123 | no |
 | 25 | `.ENT_PCO2_REF` | 370 µatm | **no** | no | `obs_tr_box` global 367.3 | yes (scope mismatch); no refit |
 | 26 | `.ENT_REVELLE` | 13 | **no** | no | Quay 2003 T3: 10.5 ± 1 (global) | yes (scope mismatch); no refit |
@@ -173,19 +173,19 @@
      - Vintage 2016, which is newer than TAR (2001).
    - **Naegler & Levin 2006** (JGR 111, D12311), PDF p5 ("5 of 14"): their GRACE model is configured with a global total NPP of 60 PgC/yr. That is a model setting.
    - **`data/obs_npp_hemispheric.rds`** `$global_mean_PgC` = 52.7 (MOD17A3HGF C6.1, 2001–2023).
-   - **`data/obs_npp_modern_target.rds`** centre 56.1 (products 52.7 / 56.2 / 59.2).
+   - **`data/obs_npp_modern_target.rds`** center 56.1 (products 52.7 / 56.2 / 59.2).
    - **`notes/lit_2026-09-29_npp_global_pi.md`** has the full literature table (TAR, Haberl 2007 potential 65.51 at year-2000 CO₂, Ito 2011, AR5/AR6). None of those PDFs are on disk.
-7. **Value check:** Bastos Table 4 gives **54 for 1700**, 10 % below 60, and it is the only on-disk number labelled preindustrial. It is a model input whose cited source is modern. **If adopted, the value changes and a refit is needed.** Naegler's 60 agrees, as a model setting.
+7. **Value check:** Bastos Table 4 gives **54 for 1700**, 10 % below 60, and it is the only on-disk number labeled preindustrial. It is a model input whose cited source is modern. **If adopted, the value changes and a refit is needed.** Naegler's 60 agrees, as a model setting.
 
 ## 7. `NPP_FRAC_NH_ANCHOR_1750` = 0.5986
 
-1. **Where.** `R/constants.R:595-601`. Read at `R/calibrate.R:680-682` as the prior centre for `npp_frac_NH`, with sd `NPP_FRAC_NH_SD` = 0.04.
+1. **Where.** `R/constants.R:595-601`. Read at `R/calibrate.R:680-682` as the prior center for `npp_frac_NH`, with sd `NPP_FRAC_NH_SD` = 0.04.
 2. **Live:** yes; `npp_frac_NH` is fitted at 0.59415. **In objective:** yes, as the prior term. A change means a refit.
-3. **Controls:** the prior centre of the 1750 NH share of NPP.
+3. **Controls:** the prior center of the 1750 NH share of NPP.
 4. **Source now:** "NPP_FRAC_NH_OBS inverted through the model's own hemispheric clearing to 1750, as a fixed point. The PRIOR CENTRE for the fitted `npp_frac_NH` (Marcus 2026-08-20k), NOT the value it takes. Derived by calibration/diag_npp_frac_anchor.R at the arm-N mode." **Status: provisional (model-inverted by design).** The underlying observation (MOD17A3HGF C6.1) is cited.
 5. **What it needs:** no literature citation. It needs a **ruling on status**. Either:
    - re-derive it at hilda29e (whose `luc_scale` is 0.914) and register it as "derived" with script, mode and commit; or
-   - centre the prior on `NPP_FRAC_NH_OBS` directly.
+   - center the prior on `NPP_FRAC_NH_OBS` directly.
 6. **On disk:** `data/obs_npp_hemispheric.rds$nh_share_mean` = 0.5942 (sd 0.0135, 2001–2023), which is the input. The script is `calibration/diag_npp_frac_anchor.R`.
 7. **Value check:** not applicable. It was derived at the 08-20 "arm-N" mode, not at hilda29e, and was not re-measured here.
 
@@ -199,7 +199,7 @@
    - `ent_seas_amp_SH` is pinned at 0. The channel needs a non-zero amplitude to run (`R/model.R:2909-2913`, `src/ccx_core.cpp:733-736`).
    - The pinned name's prior leaves the table, so this is evaluated only at source time.
    - It would be live in any arm that frees `ent_seas_amp_SH` (e.g. `hilda31p`).
-3. **Controls:** it dilutes the 40–90°S in-band entrainment amplitude onto the SH box. It sets both the prior centre and the width.
+3. **Controls:** it dilutes the 40–90°S in-band entrainment amplitude onto the SH box. It sets both the prior center and the width.
 4. **Source now:** "LIVE GEOGRAPHIC RATIO: the ocean area of the 40-90 S band as a fraction of TOTAL SH ocean area, from the 2026-08-27g entrainment pre-check's own area weighting. … ⚠ PROVISIONAL: a GEOGRAPHIC area ratio that NEEDS a cited source, exactly as OCEAN_AREA_NH/SH do." **Status: provisional.**
 5. **A citation must give:** a land/ocean mask or hypsometry product (version, access date) for the 40–90°S ocean area and the SH ocean area. Or a ruling to register it as "data" computed from the product mask already on disk, stating whether unreported or ice cells count.
 6. **On disk:** `data-raw/downloads/MPI-ULB-SOM_FFN_clim.nc` via `calibration/diag_so_pco2_phase.R:159-172` (`ocean_area()` over the product's reported cells) is where 0.369 came from. `ersst_v5_sst_mnmean.nc` is an alternative mask. Not recomputed here. No literature on disk.
@@ -381,18 +381,18 @@
 1. **Where.**
    - `R/constants.R:1149`.
    - Re-typed as defaults at `R/forcing.R:400, 407, 438, 603`.
-   - `R/calibrate.R:870` (init) and **`R/calibrate.R:871`, where the prior centre is `log(102)`. That is a separate literal, not `CCX_BOMB_REF`.**
+   - `R/calibrate.R:870` (init) and **`R/calibrate.R:871`, where the prior center is `log(102)`. That is a separate literal, not `CCX_BOMB_REF`.**
 2. **Live:**
    - `CCX_BOMB_REF` **cancels** in the objective: the forcing is built at `CCX_BOMB_REF` and scaled by `bomb_total / CCX_BOMB_REF` (`R/calibrate.R:2061, 3025`).
-   - **The prior-centre literal is in the objective.** A change means a refit.
-3. **Controls:** the reference bomb total, and separately the centre of the `bomb_total` prior.
+   - **The prior-center literal is in the objective.** A change means a refit.
+3. **Controls:** the reference bomb total, and separately the center of the `bomb_total` prior.
 4. **Source now:**
    - `R/constants.R:1145-1148` gives none.
    - `R/calibrate.R:864-869` says "Calibrated (as DESIGN intended), with a CITABLE prior: Naegler & Levin (2006) give 99.3-104.9 kmol."
 5. **A citation must give:**
-   - the centre stated as N&L's range midpoint, with the citation;
+   - the center stated as N&L's range midpoint, with the citation;
    - the prior reading `CCX_BOMB_REF`, not a second literal;
-   - a flag on the like-for-like question already logged: the model's source is a delivery-to-troposphere, centred on N&L's production total (CHANGELOG ~21118-21130, ~21441, 09-15 f ~9443). That is a methodological choice.
+   - a flag on the like-for-like question already logged: the model's source is a delivery-to-troposphere, centered on N&L's production total (CHANGELOG ~21118-21130, ~21441, 09-15 f ~9443). That is a methodological choice.
 6. **On disk:** Naegler & Levin 2006, PDF p1 (abstract) and p8 ("8 of 14"). Total bomb ¹⁴C production 1945–1980 runs from 99.3 kmol (598 × 10²⁶ atoms, scenario YANGM5) to 104.9 kmol (632 × 10²⁶, RATH). The midpoint is 102.1 (my arithmetic).
 7. **Value check:** it agrees.
 
@@ -400,17 +400,17 @@
 
 1. **Where.** `R/joos_irf.R:19`. Used at `R/joos_irf.R:110, 157` (`ccx_irf`, and `ccx_irf_pd` → `ccx_pd100`), by **`app/R/review.R:387`** (the app's PD100 card), by `test-fair-pd100.R:46` and `test-pd100-runner.R:71`, and by diagnostics.
 2. **Live:** in the app's review card and in diagnostics. **Not in the objective.**
-3. **Controls:** normalises the 100 GtC pulse to ppm in the Joos IRF protocol.
+3. **Controls:** normalizes the 100 GtC pulse to ppm in the Joos IRF protocol.
 4. **Source now:** "# GtC per ppm, the conversion Joos states". **Status: partial** (no page).
 5. **What it needs:** the page in Joos et al. 2013.
 6. **On disk:** Joos et al. 2013 (ACP 13:2793), PDF p6 (journal 2798).
    - The protocol converts the 100 GtC pulse to 47.10 ppm with **2.123 GtC ppm⁻¹**, citing Enting et al. 1994.
    - The same paragraph notes a revised factor of 2.120 (Prather et al. 2012).
-7. **Value check:** it agrees. The model's own ppm uses `GtC_PER_PPM` = 2.124, so the normalised IRF carries a 2.123/2.124 factor (−0.05 %). `test-pd100-runner.R:71` already accounts for it.
+7. **Value check:** it agrees. The model's own ppm uses `GtC_PER_PPM` = 2.124, so the normalized IRF carries a 2.123/2.124 factor (−0.05 %). `test-pd100-runner.R:71` already accounts for it.
 
 ## 25–27. `.ENT_PCO2_REF` = 370 µatm, `.ENT_REVELLE` = 13, `.ENT_DIC_SURF` = 2150 µmol/kg
 
-1. **Where.** `R/constants.R:130, 151, 144`. They are consumed only by `ENT_SEAS_AMP_SH_INBAND/_DERIV` (`R/constants.R:1007-1037`), which is the prior centre of `ent_seas_amp_SH` (`R/calibrate.R:808`).
+1. **Where.** `R/constants.R:130, 151, 144`. They are consumed only by `ENT_SEAS_AMP_SH_INBAND/_DERIV` (`R/constants.R:1007-1037`), which is the prior center of `ent_seas_amp_SH` (`R/calibrate.R:808`).
 2. **Live: NO at hilda29e** (pin 0; the prior is not evaluated).
 3. **Controls:** the conversion of the observed Southern Ocean pCO₂ and SST cycles into a DIC entrainment amplitude.
 4. **Source now:**
@@ -448,7 +448,7 @@
 
 ## 29. `FORC_FOSS_NH_SHARE` = 0.9201
 
-1. **Where.** `R/forcing.R:68`. Its comment continues at `R/forcing.R:88-99`, split from the assignment by the SST block (an edit artefact). Used at `R/forcing.R:712-718, 766-767` and `R/joos_irf.R:63-64`.
+1. **Where.** `R/forcing.R:68`. Its comment continues at `R/forcing.R:88-99`, split from the assignment by the SST block (an edit artifact). Used at `R/forcing.R:712-718, 766-767` and `R/joos_irf.R:63-64`.
 2. **Live:** yes. **In objective:** yes (the MLO–SPO gradient rows).
 3. **Controls:** the NH share of fossil CO₂ emissions.
 4. **Source now:** "MEASURED (Marcus, 2026-08-15, review item 5) by the EDGAR v4.3.2 country aggregation in data-raw/extract_emission_seasonality.py -- Crippa et al. 2020, Sci Data 7:121. …"
@@ -507,10 +507,10 @@ These are not in the table above. Each is live unless noted. Marcus to rule whet
   - `pump_grad` log-sd 0.25 (646-648);
   - `sigma_d14c` lognormal(5, 0.7) (966-967);
   - `grad_off_co2` and `grad_off_d13c` N(0, 0.5 / 0.15) (1021-1024);
-  - `NPP_FRAC_NH_SD` 0.04 and `SST_SEAS_LOGSD` 0.25 (`R/calibrate.R:29, 36`), both labelled "judgement";
+  - `NPP_FRAC_NH_SD` 0.04 and `SST_SEAS_LOGSD` 0.25 (`R/calibrate.R:29, 36`), both labeled "judgement";
   - the uniform boxes (`kz` [1161.6, 27808], `kz_deep_frac` [0.005, 1], `beta_max` [0, 3]).
   - There are also error-model σ's in `R/likelihood.R` (`LIK_D14C_REP_OTHER` 4 ‰, `LIK_D14C_REP_BOMB` 25 ‰, `LIK_CO2_REP_ERR` 1.0 ppm, `LIK_ICE_REP_ERR` 4 ppm, `LIK_GRAD_*_SD`, …).
-  - These are modelling or error-model choices, not physical constants. Listed only so the scope can be ruled.
+  - These are modeling or error-model choices, not physical constants. Listed only so the scope can be ruled.
 - **Conventions and numerics, probably out of scope:**
   - the 3.5-month zero-lag offset (`R/model.R:798, 2802, 2883`; recorded as `lag_zero_offset` in `obs_seasonal_clim.rds`);
   - the grid growth factor 1.4 (`R/model.R:1167`);

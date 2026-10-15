@@ -12,7 +12,7 @@ no refit is owed.** 26 points, all converged (1 restart, gain 0.0000), 83–241 
 
 ## 1. THE PROFILE
 
-`h_ml` fixed, `beta_max` / `fert_k` / `k_w` / `kz` / `pump_grad` re-optimised at every point, over
+`h_ml` fixed, `beta_max` / `fert_k` / `k_w` / `kz` / `pump_grad` re-optimized at every point, over
 the **SHIPPED** [30, 200] rather than the refit's [85, 120].
 
 | `h_ml` | rows | Δ logpost | `kz` (% up bracket) | `pump_grad` |
@@ -46,10 +46,10 @@ That measurement — argmax at the prior bound with a **236 log-unit** pull agai
 
     argmax 75 m (not 32) | pull beyond the cliff 0.09 (not 236) | 32 m is 4.57 WORSE than 75
 
-The refit had *suggested* the 236 was an artefact (h_ml landed interior at 96.47, not pinned at 85).
+The refit had *suggested* the 236 was an artifact (h_ml landed interior at 96.47, not pinned at 85).
 **It is now measured.** And because 5 free is conservative and one-way — the pull exists because
 `h_ml` patches a misfit the uptake set serves directly, so freeing more can only reduce it — **this
-generalises to the full 20.**
+generalizes to the full 20.**
 
 ## 3. THE CLIFF *IS* THE THREE ROWS, TO 0.3 %
 
@@ -61,7 +61,7 @@ generalises to the full 20.**
 
 **At the lower edge the rows sum to −7.275 against a measured cliff of −7.300 — 0.3 %.** The cliff
 is not *like* the free lunch; it **is** the free lunch, to within a rounding error. At the upper
-edge the rows sum −7.446 against a cliff of +8.426, so **~1.0 log-unit there is re-optimisation
+edge the rows sum −7.446 against a cliff of +8.426, so **~1.0 log-unit there is re-optimization
 freedom** (`pump_grad` jumps 273.4 → 324.0 once the rows stop constraining it) on top of the rows.
 
 **⇒ H2 FAILS AND THE BOUND IS LOAD-BEARING — BUT 7.30 OF THE 7.39 ADVANTAGE AT THE ARGMAX IS THREE
@@ -80,7 +80,7 @@ scored on less data**. That is defect (B), isolated and quantified.
   free. It says the "rows off ⇒ `pump_grad` unconstrained" effect **needs more freedom than the
   uptake set to appear**, and that within this slice the rows are not the only thing identifying it.
 
-## 5. WHAT IT MEANS FOR THE OPTION CHOICE — INCLUDING THE PART THAT DOES *NOT* FAVOUR OPTION 5
+## 5. WHAT IT MEANS FOR THE OPTION CHOICE — INCLUDING THE PART THAT DOES *NOT* FAVOR OPTION 5
 
 **It strengthens the case for σ-inflation and says exactly what inflation must do:** charge for the
 −7.275 the skip currently gives away free. A hard bound suppresses the symptom by making the region

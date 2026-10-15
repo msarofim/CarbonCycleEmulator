@@ -15,7 +15,7 @@
    and ensemble-internal — stated in the product's `bounds_note`. ⚠ `mask` 1 = WET (the file's attribute says the reverse).
 2. **Prereg written**, rulings stamped (§0). Correction to the scoping: `pump_field` is a NEW switch; `pump_mode` is the N/D law.
 3. **Built** (`714e6a2`): `MARTIN_B` (cited); the prescribed field in `ccx_pump_export()` (seafloor remainder in the bottom layer,
-   sum(S) = E exactly, `pump_grad` inert); the loop in `ccx_deriv()` + the C++ twin + marshalling; guards; `ccx_e_loop_eigbound()`;
+   sum(S) = E exactly, `pump_grad` inert); the loop in `ccx_deriv()` + the C++ twin + marshaling; guards; `ccx_e_loop_eigbound()`;
    the `pump_field` axis on `ccx_apply_structure()` / `ccx_mode_base()` / `ccx_mode_pump_field()` (env `CCX_MS_PUMP_FIELD`);
    table 33 → 36 (`pump_export`, `w_vent`, `gamma_vent`), migration 0 = OFF, `CCX_PARAM_ABSENT_OK` + three; four count
    assertions updated. Two amendments (prereg §7): the RENAME (`w_e` partial-matched `w_eq` — caught by the C++ index), and the

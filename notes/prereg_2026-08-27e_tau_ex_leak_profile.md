@@ -57,7 +57,7 @@ alike than their signatures say, and the decomposition in handoff 27d needs re-r
 ## P3 — the seasonal and gradient rows want OPPOSITE directions
 
 The leak and the SH-local part are 108° apart, so the SPO CO2 amplitude is
-`|L∠6.46 + 1.060∠10.07|`, which is **minimised at L = 0.331** and rises on both sides. At the
+`|L∠6.46 + 1.060∠10.07|`, which is **minimized at L = 0.331** and rises on both sides. At the
 fitted L = 0.821 it gives 1.140 against an observed 1.168 — **the CO2 row wants slightly MORE
 leak, i.e. a SHORTER `tau_ex`.**
 

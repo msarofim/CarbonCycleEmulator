@@ -6,9 +6,9 @@
 **State when written:** `main` at `58f23ca`. Nothing running. Suite **1205 pass / 2 skip / 1 FAIL**
 (`test-mode-file.R:57`, pre-existing from `b496b8a`, reported not fixed).
 
-## 0. AUTHORISATIONS ON THE RECORD (Marcus, 2026-08-29)
+## 0. AUTHORIZATIONS ON THE RECORD (Marcus, 2026-08-29)
 
-1. **A CMIP6 ENSEMBLE VALUE for `SEAS_NPP_AMP_SH` is AUTHORISED — for a DIAGNOSTIC ARM ONLY, never
+1. **A CMIP6 ENSEMBLE VALUE for `SEAS_NPP_AMP_SH` is AUTHORIZED — for a DIAGNOSTIC ARM ONLY, never
    as a shipped constant.** Same footing as the pedagogical-tool acceptance already recorded in
    [[sh_land_undercancels]]: model-derived and circular, and **it may not be called an observational
    constraint**. The shipped constant stays 0.5027 (`status="data"`).
@@ -35,7 +35,7 @@ WORSE, not better, under the pair's own premise: **if the gross roughly doubles 
 0.94, the floor scales with it to ≈1.19 ppm — ABOVE the observed 0.683.** The closure arithmetic
 `2.61 × 0.251 = 0.655` transfers CT2022's FLUX ratio to an SPO SIGNATURE, which
 [[sh_land_undercancels]] already flags as **an APPROXIMATION, not an identity**; this run tests
-whether the model can realise it.
+whether the model can realize it.
 
 **If the floor is above 0.683, then a (gross ↑, respiration ↑) 2×2 is a GUARANTEED NULL and must not
 be pre-registered as one** — the pair's second member has to be the **PHASE SEPARATION**, not the

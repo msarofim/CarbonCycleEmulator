@@ -65,8 +65,8 @@ The title, "plain", "detail" and "ask" all presuppose no band.
 
 **F2. "…well-behaved enough to quote individual standard errors…"**
 Sampled spread compared with the curvature's own marginal sd, in the fitting coordinates:
-- **Near 1× along CO₂ fertilisation:** `beta_max` 1.04×, `fert_k` 0.90×, `ndep_ret` 1.15×.
-- **5.2× for the mixed-layer depth `h_ml`**, with its centre shifted −4.4 curvature sds. `h_ml` sits against its 42.5 m floor (ruled 09-16 b, KEPT 10-09) in about 1 draw in 10.
+- **Near 1× along CO₂ fertilization:** `beta_max` 1.04×, `fert_k` 0.90×, `ndep_ret` 1.15×.
+- **5.2× for the mixed-layer depth `h_ml`**, with its center shifted −4.4 curvature sds. `h_ml` sits against its 42.5 m floor (ruled 09-16 b, KEPT 10-09) in about 1 draw in 10.
 - **1.4×** for `kz_deep_frac`, `h_hs` and `imb_share_ocean_rest`.
 
 **F3. "Running a real sampler is planned … no sampler has yet converged…"**

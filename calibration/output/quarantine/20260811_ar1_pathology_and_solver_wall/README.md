@@ -26,7 +26,7 @@ of less than one observation — and a **+50 ppm level bias cost 13.7 log-units*
 Nothing was holding the physics parameters, which is why the mode has `q10` = 0.280
 (Q10 < 1 means respiration *falls* with warming) and `kz` at the solver wall.
 
-Fixed by retiring AR(1) and `rho` entirely in favour of annual values with
+Fixed by retiring AR(1) and `rho` entirely in favor of annual values with
 independent errors plus an explicit per-year seasonal-harmonic statistic. Gated by
 `tests/testthat/test-likelihood.R`.
 

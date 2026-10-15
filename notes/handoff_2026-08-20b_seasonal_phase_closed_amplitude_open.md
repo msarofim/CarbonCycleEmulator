@@ -7,7 +7,7 @@ Everything else in that note stands unchanged — §1 (results), §2 (the operat
 
 ## 0. START HERE
 
-1. **The test named at the end of §3a ran, and it went against the hypothesis.** The modelled
+1. **The test named at the end of §3a ran, and it went against the hypothesis.** The modeled
    MLO CO2 seasonal cycle peaks **0.09 months (2.7 days) EARLY** against the observed cycle
    the likelihood scores. All four seasonal streams are inside half a month.
 2. **The shipped `CCX_SEAS_T_LAG = 2.0` is a clean interior optimum** and beats the
@@ -76,7 +76,7 @@ Seasonal-row logL at the mode, everything else frozen:
 this mode, which follows directly from `sst_seas_amp` sitting at ~0.09 K.
 
 **THE SLICE IS BIASED TOWARD THE INCUMBENT** and that has to be said with the numbers: the mode
-was fitted at (2.0, 2.5) and no challenger is re-optimised — the `match_incumbents_optim` trap,
+was fitted at (2.0, 2.5) and no challenger is re-optimized — the `match_incumbents_optim` trap,
 which bought 309 log-units of pure artifact last time. **19,000 is not 309**, and the profile is
 smooth and single-peaked exactly at the shipped value.
 
@@ -106,7 +106,7 @@ of 1.10 ppm — so the harmonic numbers are not an artifact of the estimator.
 **The `q10` × `seas_T_amp_NH` ladder (TEST 4), and it is counter-intuitive:** more respiration
 swing gives LESS MLO amplitude, because respiration is a COUNTER-cycle to NEP.
 
-| case | realised swing | MLO p2p | Δ phase | MLO cost |
+| case | realized swing | MLO p2p | Δ phase | MLO cost |
 |---|---|---|---|---|
 | mode (q10 1.26, A 48.07 K) | 9.3× | 5.242 | −0.09 | **309** |
 | q10 2.23, A 15 K (physical) | 11.1× | 4.494 | +0.17 | 453 |
@@ -124,7 +124,7 @@ it bought phase with amplitude, not the other way round.
    chase — SH seasonality is UNFITTED by construction (`R/model.R` ~line 197: "the offline work
    fitted MLO only"), and SPO's cycle is substantially oceanic, which the land-only term does
    not model. That comment predicted exactly this. Revisit it.
-2. **Where does MLO's missing 22 % live?** Decompose the modelled MLO harmonic by turning each
+2. **Where does MLO's missing 22 % live?** Decompose the modeled MLO harmonic by turning each
    seasonal channel off in turn (NEP/insolation, respiration, air-sea) and re-running the
    harmonic. The NEP term's amplitude "is not a knob — it is the model's own NPP", so if the
    deficit is there it is an NPP-magnitude statement, not a seasonal one.

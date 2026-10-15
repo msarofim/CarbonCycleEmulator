@@ -1,4 +1,4 @@
-# Handoff — CarbonCycleEmulator, 2026-08-15: the fertilisation form changed, and both failing gates now pass
+# Handoff — CarbonCycleEmulator, 2026-08-15: the fertilization form changed, and both failing gates now pass
 
 **Repo:** `~/Documents/2026/CodeProjects/CarbonCycleEmulator/`, branch `luc-veg-debit` at
 **`0cd9fbb`**, still **not merged**. Working tree clean. Suite **8 fail** (was 11).
@@ -17,7 +17,7 @@ wrong and WHY — but its §0 headline is now out of date, and this note says ho
    §6's own hard gates"* (7, sinks; 12, Joos IRF). **At the MAP mode both now pass**, along
    with the Pulse Lab's Revelle lesson. §3 below. Do not quote review §0's table as current.
 2. **The cause was structural, and the fix was structural.** `beta` is gone. The CO₂
-   fertilisation form is now Michaelis–Menten in (`beta_max`, `fert_k`). The log form is kept
+   fertilization form is now Michaelis–Menten in (`beta_max`, `fert_k`). The log form is kept
    and reachable — `p$fert_form <- CCX_FERT_LOG` — because every result before 2026-08-14 was
    produced under it.
 3. **Four test failures are FLAGGED FOR MARCUS AND DELIBERATELY NOT FIXED** (§5). Three are
@@ -61,13 +61,13 @@ against the 57 ‰ the bracket spans). Receipts: `calibration/diag_deep_d14c_ter
 
 **Why the bracket stayed, and where it and the term disagree.** On the bottom box the bracket
 [3830, 6200] is a hard box of half-width **28.4 ‰** — tighter than the σ — so deleting it
-would **loosen** `kz`. But it is centred **16.7 ‰ below** the sourced target: the term's own
+would **loosen** `kz`. But it is centered **16.7 ‰ below** the sourced target: the term's own
 optimum is `kz` 5525 against the shipped 5000, and it puts the bracket's lower end at −4.40 σ.
-`kz` was **not** re-centred by hand.
+`kz` was **not** re-centered by hand.
 
 ---
 
-## 2. The fertilisation form (`554b5c1`, `a9d74ce`)
+## 2. The fertilization form (`554b5c1`, `a9d74ce`)
 
 **The defect as arithmetic.** `NPP = NPP₀(1 + β ln(χ/χ₀))` locks the *enhancement* at today's
 CO₂ and the *slope* at today's CO₂ into the fixed ratio χ/χ₀. β slides along it. The CO₂
@@ -78,7 +78,7 @@ record wants 0.75; gate 12 and the Revelle lesson independently want ≤ 0.50.
 delivering half of it. Chosen over a bounded exponential because carboxylation **is** an
 enzyme reaction — the saturation has a one-sentence undergraduate explanation.
 
-**NOT a reparameterisation.** As `fert_k → ∞`, MM goes **linear**, not logarithmic. No
+**NOT a reparameterization.** As `fert_k → ∞`, MM goes **linear**, not logarithmic. No
 substitution carries a `beta` posterior across. Any pre-flip posterior belongs to a different
 model — which is why `mode_fit.rds` was quarantined (§6).
 
@@ -113,7 +113,7 @@ s/eval. Log-post **−3774.0 → −2221.3** (gain 1552.8, of which 1532 in rest
 **`fert_k` 120 → 153 did NOT break gate 12.** `beta_max` moved with it (0.4913 → 0.5087), so
 the marginal slope at 388 ppm went 0.0662 → **0.0669**. The fit slid *along* the decoupled
 direction the log form does not have. **The likelihood-vs-gate tension recorded at the flip
-was an artefact of scanning a one-parameter locus** and does not survive an 18-parameter fit.
+was an artifact of scanning a one-parameter locus** and does not survive an 18-parameter fit.
 
 Mode, natural scale: `beta_max` 0.5087, `fert_k` 153.1, `q10` 2.098, `k_w` 1648, `h_ml` 184.0,
 `kz` 6119, `tau_ex` 0.807, `npp_frac_NH` 0.464, `seas_amp_NH` 19.66, `seas_amp_SH` 4.64,
@@ -137,7 +137,7 @@ RMS to two decimals; at 1.0 it is squeezed to 0.05.
 than the assumed station-vs-box representation error.**
 
 *I initially called the 1.0 ppm constant "too large and needing re-deriving". The measurement
-does not support that.* Co-located independent programmes at MLO disagree by **0.39–0.59 ppm
+does not support that.* Co-located independent programs at MLO disagree by **0.39–0.59 ppm
 RMS** (MLO in-situ vs SIO flask, n = 702), a floor on measurement error alone; a
 station-vs-hemisphere term should exceed it. **1.0 ppm is plausible.**
 
@@ -159,7 +159,7 @@ Unchecked.
 mixed layer against an observed ~50–75 m). The deep-Δ¹⁴C term is overridden to get there —
 the bottom box lands at −157.8 ‰, **z +1.70** against its own target.
 
-**The cheapest competing hypothesis was tested and REFUTED.** `h_ml` is not a bound artefact:
+**The cheapest competing hypothesis was tested and REFUTED.** `h_ml` is not a bound artifact:
 profiling past its prior gives an **interior optimum at ~184 m**, log-post falling off on both
 sides (163 → −2209.9, 184 → −2194.0, 200 → −2201.8, 260 → −2384.9, 500 → −5350.4). The
 [30, 200] bound is not binding. The data genuinely want a deep mixed layer.
@@ -206,9 +206,9 @@ It is absorbing input uncertainty that would otherwise be assigned as **false co
 exactly, which it is not (±28 %). **Keep it.**
 
 The real cost is different: **r = −0.907 is a sampling hazard.** Manage it by
-reparameterising or by accepting slower mixing — not by dropping the parameter.
+reparameterizing or by accepting slower mixing — not by dropping the parameter.
 
-Independently, at *fixed* fertilisation parameters `luc_scale` does **not** help gate 7: at
+Independently, at *fixed* fertilization parameters `luc_scale` does **not** help gate 7: at
 0.70 the CO₂ bias goes +0.14 → **+15.5 ppm** and z_land gets *worse*. **The handoff's β 0.55 /
 `luc_scale` 0.70 settlement does not carry over to this form.**
 
@@ -244,7 +244,7 @@ better that fixtures assuming an unbiased start no longer hold.** MLO residual R
 - `:135` — the `sigma_co2` profile peaks near the residual RMS, which moved.
 
 **NONE was edited to pass.** They are stale fixtures on an improved model, but that is a
-judgement and Marcus's is the one that counts.
+judgment and Marcus's is the one that counts.
 
 `test-pulse.R:113` is worth a separate look: it is an *unbenchmarked* ballpark check on a
 declining SSP1-1.9 background, while gate 12 — the properly protocol-matched Joos comparison
@@ -304,7 +304,7 @@ could pour all the seasonality into one free parameter. The gain is that `seas_a
 means what its name says. **Do not expect 5c to raise the log-posterior.**
 
 Conservation exact: max |Δ annual total| **1.8e-15** GtC/yr. `cum_luc` is now integrated **per
-hemisphere from the seasonalised flux**.
+hemisphere from the seasonalized flux**.
 
 **Bonus, waiting for item 5:** the EDGAR aggregation measures the **NH fossil share at 0.9201**
 against `FORC_FOSS_NH_SHARE = 0.95`, which has carried a "PROVISIONAL" comment since it was
@@ -325,7 +325,7 @@ log-units, so it is item 5's decision.
 | **5b** | **time-varying LUC hemispheric share** | do it *with* 5 — 5 is what would score it |
 | ~~5c~~ | ~~sourced input seasonality~~ | **DONE** `0cd9fbb` |
 | **6** | `LIK_EXCESS_C14_TARGET` | **NOT a blocker** — see §9 |
-| ~~7~~ | ~~saturating fertilisation~~ | **DONE** `554b5c1` + `a9d74ce` |
+| ~~7~~ | ~~saturating fertilization~~ | **DONE** `554b5c1` + `a9d74ce` |
 | **8** | **THE REFIT**, 18 parameters | blocked on 5 + 5b. ~2 h wall-clock, 4 chains, 0.060 s/eval |
 | **9** | **pump** | test replaced — see §4.2. Do the cheap `h_ml` decomposition FIRST |
 
@@ -366,14 +366,14 @@ correction. **Consequence: item 6 is not a blocker on the refit.**
   while `app/global.R` overrides it to 0.5. Unchanged, still a live provenance hazard.
 - `calibration/output/recentre_beta_scan.rds` was overwritten on 2026-08-14 at then-current
   defaults; numbers quoted from the old file no longer correspond to it. Now doubly stale — it
-  is a log-form artefact.
+  is a log-form artifact.
 - New diagnostics: `diag_deep_d14c_term.R`, `diag_fert_saturating.R`, `diag_fert_pulse_gates.R`.
   `diag_joos_beta_scan.R` takes `CCX_FERT_FORM` / `CCX_FERT_BETA_MAX` / `CCX_FERT_K`.
   Raw outputs under `calibration/output/fert7/`.
 - New tests: `test-fertilisation.R` (25), `test-emission-seasonality.R` (41).
 - `DESIGN.md` §6 **gates 7, 10 and 12** now carry measured status lines. **Gate 12's was stale
   since β 0.38, which is why its failure at β 0.75 stayed invisible for two re-centrings** —
-  it now says to re-measure on any fertilisation default change.
+  it now says to re-measure on any fertilization default change.
 
 ---
 

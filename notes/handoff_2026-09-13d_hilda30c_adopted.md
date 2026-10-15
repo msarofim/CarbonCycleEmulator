@@ -16,7 +16,7 @@
 
 ## 2. Machinery a pinned canonical brought (know these before writing a diagnostic)
 - **A pinned name is HELD, not absent.** `ccx_mode_par_with_pins(md)`; `ccx_mode_params()` returns it; `ccx_mode_base(md)` stamps
-  `attr(p, "pins")` and `ccx_overlay_par()` honours it; `ccx_load_mode()`, `dg_vector()` (`$pins`), `sl_overlay(pins=)`, the app.
+  `attr(p, "pins")` and `ccx_overlay_par()` honors it; `ccx_load_mode()`, `dg_vector()` (`$pins`), `sl_overlay(pins=)`, the app.
 - **To ENCODE the canonical:** `rm <- ccx_apply_pins(ccx_mode_pins(md)); ...; ccx_unpin_params(rm)`. ⚠ `CCX_PINS` is process-global —
   a FREE file scored after an un-restored pin runs with the shim at its DEFAULT. `ccx_require_param_set()` now says "apply its pins".
 - **Need an encodable 31-name template** (ancestor construction, a free start)? `ccx_mode_params(ccx_mode_free_name())` = the parent.

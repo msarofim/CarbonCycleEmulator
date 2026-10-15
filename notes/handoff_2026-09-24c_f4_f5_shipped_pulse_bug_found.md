@@ -36,7 +36,7 @@ as causality requires. **It failed.**
 |---|---|
 | **cause** | `ccx_annual_to_monthly()` uses a **natural cubic spline** = a **GLOBAL** interpolant. Its additive per-year correction fixes each year's **MEAN** (exact to 2.7e-15 GtC/yr ⇒ **the pulse size is fine**) and does **nothing about the AMPLITUDE**. |
 | **emissions space** | within-year monthly swing **68.2 GtC/yr in 2049**, *larger* than the **34.2** in the pulse year itself; decays ~4× per year either side |
-| **the artefact** | **3.06 ppm CO₂ + 0.003 °C in the 26 years BEFORE the release**, 13 −ve / 13 +ve = **6.5 % of one pulse-ppm** |
+| **the artifact** | **3.06 ppm CO₂ + 0.003 °C in the 26 years BEFORE the release**, 13 −ve / 13 +ve = **6.5 % of one pulse-ppm** |
 | **the consequence** | vs a ring-free control: **−0.05 pp** airborne at +100 yr, **−0.01 pp** at +250 yr, **−0.1 %** warming ⇒ **the numbers the tab quotes STAND** |
 | **verdict** | a **causality violation** (bound = 0, from a law) with a **presentational** consequence |
 
@@ -46,7 +46,7 @@ through the sharply peaked bomb-¹⁴C series undershot either side of the 1962 
 not yet applied to the pulse.**
 
 ⚠ **The decay chart is clipped at the pulse year, so the reader never sees the bump.** The clip is
-doing the app a favour **by accident**. A docstring written earlier in the same session called the
+doing the app a favor **by accident**. A docstring written earlier in the same session called the
 pre-pulse difference "zero by construction"; it was **retracted in-session by its own gate**.
 
 ### ⛔ THE FIX IS NOT TAKEN — this is the decision waiting for Marcus
@@ -63,9 +63,9 @@ presentational and (1) cannot be done without a refit. But it is a methodologica
 standing rule says flag it, so it is flagged.
 
 ## 3. What is NEXT
-1. ⭐⭐ **Q3 + Q1 as ONE investigation** — forest regrowth vs CO₂ fertilisation. **The only open
+1. ⭐⭐ **Q3 + Q1 as ONE investigation** — forest regrowth vs CO₂ fertilization. **The only open
    item that could move a number.** Testable hypothesis unchanged: the model crosses land
-   source→sink in **1971** against the measured **1989**, and an over-strong single fertilisation
+   source→sink in **1971** against the measured **1989**, and an over-strong single fertilization
    term doing the work of both is exactly what makes the sink appear too early. ⛔ **Costs a new
    pool or flux, a new fitted name and a REFIT** — same freeze consideration as F3 and as the
    pulse fix above. **Do not start it without his go-ahead on the freeze.**
@@ -78,7 +78,7 @@ standing rule says flag it, so it is flagged.
 - ⚠ **Build-your-own's takeaway says "Note how little the temperature falls even when emissions
   stop"** — **false for the `rate` branch**, where emissions never stop and reach 4,926 GtC/yr.
   Pre-existing (equally wrong at 2100). Reader-facing copy ⇒ Marcus's call.
-- ⚠ **The fitted-range caveat is BEYOND F5's letter.** F5 took the stylised "+5 %/yr" case from
+- ⚠ **The fitted-range caveat is BEYOND F5's letter.** F5 took the stylized "+5 %/yr" case from
   **2.1× to 26.2×** outside the fitted CO₂→forcing range (3,516 ppm at 2100 → **44,172 ppm and
   +17.7 °C at 2150**; fitted 278–1,687 ppm). `ccx_run_coupled()` has always warned — **to the R
   console**, which is not where a student dragging a slider is looking. So a **conditional**

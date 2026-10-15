@@ -42,9 +42,9 @@
 
 ## 3. NEXT: PRICE THE REDESIGNED CUT (no build, no refit)
 All of it is at basin B, against #17 as landed. The redesign is the arithmetic of CHANGELOG (b): #17 + the DETRENDED ENSO index + a LOW-PASS `gcb_ocean_sink` row. The five rows' resistance to w would fall from −1.31 to about −0.14; that is untested as a design. Price:
-1. **The main objective's cost of the redesign at B, unrefitted**, then with a block re-optimised (as the 10-06 pricing did with `calibration/lib_block_reopt.R`, B1 / B2).
+1. **The main objective's cost of the redesign at B, unrefitted**, then with a block re-optimized (as the 10-06 pricing did with `calibration/lib_block_reopt.R`, B1 / B2).
    - The detrended index changes the land ENSO term's slow part too (the 09-29 d audit: a land source rising −0.26 → +0.31 GtC/yr under the shipped index).
-   - The split's detrend run is 7.2 log-units off the stored rows at stage 1's pins: that is the size to expect, before re-optimisation.
+   - The split's detrend run is 7.2 log-units off the stored rows at stage 1's pins: that is the size to expect, before re-optimization.
 2. **Stage 1 under the detrended index at B's vector.** Does the land answer (lag 5.84, ×1.30) hold, and where does w land?
    - `fit_iav_module.R` cannot do this as it stands. Its base must reproduce its stored rows (`IAV_REPRO_TOL`), and a base switched to the detrended index will not.
    - So it needs either a pricing driver that runs the module at a hand-switched base (as `diag_obj17_slope_attribution.R` switches names), or the new label first.

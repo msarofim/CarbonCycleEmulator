@@ -25,16 +25,16 @@ is the definition of a silent gate.**
 
 The first pass measured P2d on a **2-D SLICE** — `k_w` × `kz` with the other 24 parameters held —
 and got "0.0 ‰ within 2 logpost units, 1 cell of 25". ⛔ **That number cannot establish redundancy.**
-[[ccx_gates_priced]] measured that an iso-fit frontier which **re-optimises the others REVERSES**
+[[ccx_gates_priced]] measured that an iso-fit frontier which **re-optimizes the others REVERSES**
 what a one-at-a-time `kz` scan says; a slice through a correlated posterior **overstates** how
 pinned a quantity is.
 
 **Redone on the posterior's own directions**, using the Laplace covariance already stored in the
-mode file (26 × 26, `pd = TRUE`) — linearise the observable in the unconstrained coordinates and
+mode file (26 × 26, `pd = TRUE`) — linearize the observable in the unconstrained coordinates and
 take `sd = sqrt(gᵀ Σ g)`. **52 spinups, not 25 refits.**
 
 ⇒ **sd = 0.93 ‰**, and **the slice and the profile agree** — so the risk I flagged did not
-materialise this time. ⚠ **That is not the same as the slice having been fine**: it was still the
+materialize this time. ⚠ **That is not the same as the slice having been fine**: it was still the
 wrong measure, and it agreed by luck of a near-diagonal direction.
 
 ⭐ **AND AN INDEPENDENT ARITHMETIC CROSS-CHECK CLOSES IT.** The scan gives

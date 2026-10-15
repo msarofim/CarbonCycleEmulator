@@ -16,7 +16,7 @@
    **ONE latent defect FIXED:** `tr` WITHOUT the cell (licensed by `ccx_tr_on()`) shrank `a_ml` under `eq_on || tr_on` while three sites (ML/layer-1
    diffusion thickness, seasonal-ML excursion share, entrainment) read `eq_on` alone — 125 GtC/yr spurious at uniform conc, both cores,
    invisible to conservation. One flag `d1_on` (R `ccx_prepare()`, derived in C++ `unpack_aux()`); `test-tr-box.R` P0g-tr (fails 125 / passes
-   1.7e-13 / mutation 376). No registered mode affected. Cosmetic, recorded: `q_conv` mislabelled by (1 − f_hs) under HILDA; its deep leg on the
+   1.7e-13 / mutation 376). No registered mode affected. Cosmetic, recorded: `q_conv` mislabeled by (1 − f_hs) under HILDA; its deep leg on the
    annual-mean grid; `ent_seas_amp_SH` moves no tracer (pinned 0).
 4. **PREREG** `notes/prereg_2026-09-15d_o1_deep_return_probe.md` (`1287b2e`, before any core edit): the two arms with their physical
    mechanisms and depth ranges (STC k ≤ 4; THC any k), P0 contracts, the grid, the decision rule (a)–(d).
@@ -60,7 +60,7 @@ export 9.08 / 20 / 45.5 → `co2_seasonal_SPO` −252 / −137 / −6. τ_q × 0
 - **Torch DOWN Wed 09-16 07:00–19:00** (Marcus): submit nothing that must survive it; queue was empty 09-15.
 - The probe's stage-1 grid selected W = 10 (the smallest) and kz × 1 for EVERY (arm, k) — the limb is a cost at every point unrefitted, growing
   with W; the arm-C selection rule (best raw per arm × k) is therefore effectively "smallest W, canonical kz"; a scan below 10 Sv was only run
-  post hoc (A1, k = 1). The stage-2 optimiser: 1600–1700 evals/point, ~2 min each, no non-converged periodic spinup flagged.
+  post hoc (A1, k = 1). The stage-2 optimizer: 1600–1700 evals/point, ~2 min each, no non-converged periodic spinup flagged.
 - `INDEX_ccx_ocean_cell.md` is OVER its soft target (14.5 KB); merge before the next add. `w_thc` prior source owed before any array frees it.
 - Untracked: `outputs/diagnostics/o1_deep_return_scan_20260915_smoke.{log,rds}` (the 3-point smoke, disposable), `port_gate_id1_20260914.log`
   (the pre-split stray). Suite `suite_20260915e.log` 3492 / 4 / 2: the standing reds (GATE Q pair, `test-seas-lag-split:205`) + `test-tr-box:88`

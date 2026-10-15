@@ -55,7 +55,7 @@ so the reviewer meets first what a student would meet first.
 | **4 Year-to-year wobble is 60 % of observed** | detrended annual CO₂ growth rate, model vs obs, with the sd of each; beneath it ocean-uptake anomaly vs Niño3.4 with the slopes | sd 0.548 vs 0.933 ± 0.084 ppm/yr (0.59×); the ENSO SLOPE is 0.89× (+0.103 ± 0.042 vs +0.115 ± 0.025 GtC/yr per index) | the ENSO sensitivity is carried by a physical upwelling limb (13.7 ± 2.1 Sv per index, in the observed 14–25 bracket); the variance the record has beyond ENSO — volcanic, land — has no mechanism here | structural | the app's ENSO switch is a sensitivity, not a reconstruction: is that acceptable, or must a "what makes CO₂ wobble" tab reproduce the variance? |
 | **5 The pulse decays faster than the multi-model mean** | IRF 0–1000 yr with the Joos 2013 band; the 1000-yr partition bars vs the band | IRF(100) 0.283 vs 0.409; partition at 1000 yr 34 / 48 / 18 % vs 16 ± 14 / 59 ± 12 / 25 ± 9 (inside the band on every term) | a comparison, not a gate — nothing from Joos scores the model; where the difference lives (land share high, ocean low at 1000 yr) is stated, not tuned | comparison | the app teaches "how long it lasts": is a lifetime shorter than the multi-model mean, with the shape inside the band, acceptable to teach? |
 | **6 A simpler control fits better** | NH seasonal CO₂ and δ¹³C at MLO: canonical vs the seas_ml-0 control vs obs | ΔAIC +4.18 against `hilda31pe` (31 names beats 29 by 4.09 on 26 rows) | the seasonal mixed layer was kept over the fit because it is a real entrainment channel (`h_ml` 57.3 ± 3.7 m) and the shim it replaced was not | accounting | when a named mechanism loses to a shim by 4 AIC, keep the mechanism? |
-| **7 No uncertainty bands** | (no figure — the banner) | a single MAP; Hessian PD, cond 2.5e5 | no MCMC has been run; a Gaussian on a 29-dim MAP at that condition number is not a posterior | product gap | is a beta without bands acceptable, or is a Hessian band (labelled as such) better than none? |
+| **7 No uncertainty bands** | (no figure — the banner) | a single MAP; Hessian PD, cond 2.5e5 | no MCMC has been run; a Gaussian on a 29-dim MAP at that condition number is not a posterior | product gap | is a beta without bands acceptable, or is a Hessian band (labeled as such) better than none? |
 | **8 Stand-ins and provisional constants** | the parameter table with the five shims and the nine pins marked; the constants ledger | 5 shims (`rep_dC`, `grad_off_d13c`, `sst_seas_amp_NH/SH` 30 % under obs, `ent_seas_amp_SH` 0, the ocean ENSO pair 0); 11 constants provisional | each names a mechanism the design does not carry rather than hiding it | design | which of these would you want carried before you trusted the chain? |
 
 Cards 2–4 and 6 are the freeze record's four reds; 1, 5, 7, 8 are the flags a reviewer will
@@ -74,7 +74,7 @@ histories on this app, not two (`calibration/diag_app_cross_tab_step.R`; log at
 ⚠ The third history is the Futures tab's **“Build your own”** pill, **not** the “What if…?” tab
 (which runs the mechanism switches on the historical scenario and never had a step).
 `app_stylised_emissions()` takes fossil from the GCB history and land-use from the SSP background
-for EVERY year, so the hybrid past is under all four stylised pathways — the `kind` switch only
+for EVERY year, so the hybrid past is under all four stylized pathways — the `kind` switch only
 rewrites the future. The gap is **−91.4 GtC of land use**; verified to be the inventory and not a
 reading convention or a temperature difference.
 
@@ -112,7 +112,7 @@ This only works if the repo is public (§0 item 4a).
 
 | | decision | Marcus, 09-22 | built |
 |---|---|---|---|
-| **A** | feedback channel | **the Substack post on the model.** Comments public there; credit in the acknowledgements | `APP_FEEDBACK_URL` + a per-card deep link; a visible warning until it is set |
+| **A** | feedback channel | **the Substack post on the model.** Comments public there; credit in the acknowledgments | `APP_FEEDBACK_URL` + a per-card deep link; a visible warning until it is set |
 | **B** | the eight cards | **approved as drafted** | `RV_CARDS`, gated by `test-review-cards.R` |
 | **C** | the Keeling panel | **C2 + C3** | both model lines on the teaching tab; the residual pair on card 1 |
 | **D** | bands | **D1.** "D3 should wait until we have a final model, not a beta product" | banner only; card 7 states the posterior is deferred to the final model, and asks whether that is acceptable |
@@ -198,8 +198,8 @@ at −0.12 ppm mean, 0.73 ppm RMS (measured 09-22).
 
 | option | what the panel shows | for | against |
 |---|---|---|---|
-| **C1 leave it** (was current) | raw box vs station | nothing hidden; the gap is visible | the panel is not the comparison that was fitted; on an open launch the top comment becomes "your model is 3–4 ppm high", a display artefact that crowds out the eight real cards |
-| **C2 draw both lines** — box (light) **and** box − `rep_dC` labelled "model, as the station would measure it" (solid), caption naming the fitted offset and its 3.5σ | the scored comparison, plus the raw box beside it | like-for-like with the calibration; the strain is stated, not hidden; card 1 still owns the accounting | a reader who skips the caption sees a good fit and misses that the offset is fitted, not measured |
+| **C1 leave it** (was current) | raw box vs station | nothing hidden; the gap is visible | the panel is not the comparison that was fitted; on an open launch the top comment becomes "your model is 3–4 ppm high", a display artifact that crowds out the eight real cards |
+| **C2 draw both lines** — box (light) **and** box − `rep_dC` labeled "model, as the station would measure it" (solid), caption naming the fitted offset and its 3.5σ | the scored comparison, plus the raw box beside it | like-for-like with the calibration; the strain is stated, not hidden; card 1 still owns the accounting | a reader who skips the caption sees a good fit and misses that the offset is fitted, not measured |
 | **C3 residual panel** — keep the box line, add model − MLO underneath with `rep_dC` as a horizontal line | the gap as the subject | most informative for a reviewer | costs vertical space on the default tab and asks a general audience to read a residual plot |
 
 **Recommendation: C2 on the Keeling tab, C3 on card 1.** The undergraduate tab shows the
@@ -224,8 +224,8 @@ a true sentence**, and that matters for how card 7 is phrased.
 
 | option | what ships | for | against |
 |---|---|---|---|
-| **D1 banner only** (current) | single lines; the banner says no bands and why | honest; zero work; zero chance of a mislabelled band travelling as "the uncertainty" | a reviewer's reflex first question on a calibrated model is "with what uncertainty" — unanswered, it will absorb a share of the feedback that should have gone to the eight cards |
-| **D2 a Laplace band** — draw N from MVN(MAP, stored cov), run each, plot the envelope, labelled "parameter uncertainty at the mode, Gaussian approximation, **not** a posterior" | something to look at on every historical panel | cheap (the covariance is stored; N ≈ 200 runs); makes the tightly- vs loosely-constrained parts of the record visibly different | ⚠ a quadratic approximation at cond 2.4e5 means the band's **width is dominated by the directions the data constrains least — exactly where the Gaussian is worst**; draws in the transformed coordinates can land where the carbonate-range warning fires; and a band on a public chart *reads as* the uncertainty no matter what the label says |
+| **D1 banner only** (current) | single lines; the banner says no bands and why | honest; zero work; zero chance of a mislabeled band traveling as "the uncertainty" | a reviewer's reflex first question on a calibrated model is "with what uncertainty" — unanswered, it will absorb a share of the feedback that should have gone to the eight cards |
+| **D2 a Laplace band** — draw N from MVN(MAP, stored cov), run each, plot the envelope, labeled "parameter uncertainty at the mode, Gaussian approximation, **not** a posterior" | something to look at on every historical panel | cheap (the covariance is stored; N ≈ 200 runs); makes the tightly- vs loosely-constrained parts of the record visibly different | ⚠ a quadratic approximation at cond 2.4e5 means the band's **width is dominated by the directions the data constrains least — exactly where the Gaussian is worst**; draws in the transformed coordinates can land where the carbonate-range warning fires; and a band on a public chart *reads as* the uncertainty no matter what the label says |
 | **D3 run the MCMC** | the posterior DESIGN §5.3 calls for; real ribbons | answers card 7 rather than asking it; the blockers above are gone | **0.2712 s/eval** on the canonical arm ⇒ ~200k evals ≈ **15 h per chain**, 4 chains ≈ 15 h at 4-wide on the M4 or a Torch array — but the project has **never had a sampler converge**, so the risk is convergence in 29 dimensions, not compute. Weeks, not days. It changes no number in the model (same objective #13) |
 
 **Recommendation: D1 for the beta, and make D3 the actual question on card 7** — "would you

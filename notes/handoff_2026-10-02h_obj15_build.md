@@ -29,7 +29,7 @@
 - **D3, how the lag is identified.**
   - A conditional probe by a subagent (not yet reproduced) says the current rows prefer **2–3 months**, via the GCB
     land sink and the seasonal-coefficient rows. The growth timing says **5**.
-  - **After W1–W3, profile the NEW objective over L in a committed script, with the ENSO amplitude re-optimised.**
+  - **After W1–W3, profile the NEW objective over L in a committed script, with the ENSO amplitude re-optimized.**
   - The growth-rate row was declined 09-26 (memory `ccx_growth_objective_declined`: "needs a NEW reason"). This may be
     that reason; its three objections still stand.
 - **D4, the σ of the ice δ¹³C row** (W2). Also check whether the PI δ¹³C anchor already uses Law Dome (circularity),
@@ -42,7 +42,7 @@
 ## 3. Suggested order
 1. **W1, the lag build.** It is the largest piece and touches the C++ core.
    - Give the land term its own input. `N_FORCING` stays 19.
-   - Generalise the label gate to several gates.
+   - Generalize the label gate to several gates.
    - Use C¹ (Catmull-Rom) interpolation, init 6 months.
    - Absent = bit-identical.
    - Parity, exactness, segment-history and switch tests; mutation-test them.

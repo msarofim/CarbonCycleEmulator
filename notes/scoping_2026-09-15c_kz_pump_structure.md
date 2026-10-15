@@ -41,7 +41,7 @@ A−B contrast collapses) and the CO₂ rows −57; the E refit bought it with `
   column's only way to hold a prescribed field. That is the structural gap, and it is the same gap T-A0 / T-A2 met from the other
   side (a return limb's DEPTH decides its price: −135 on `d14c_profile_bd` at the bottom, +3 at layer 2).
 
-## 3. Options (priced where a measurement exists; none recommended over Marcus's judgement)
+## 3. Options (priced where a measurement exists; none recommended over Marcus's judgment)
 - **O1 — prescribed export WITH a mean deep return limb.** `pump_field = "martin"` (built) + a steady upwelling limb returning
   deep water through the thermocline (the real ocean's balance: export down, ~20–30 Sv up). The design axis is the RETURN DEPTH
   (T-A2's lesson; the E loop returned from layers 1–3 and was inert at 0.065 /yr against kz's 3 /yr). Price unknown as a refit;
@@ -52,9 +52,9 @@ A−B contrast collapses) and the CO₂ rows −57; the E refit bought it with `
   no scored row constrains it, that the model has no advective deep return, and that the warm-box excess follows. Price 0; the cell
   / T5 arcs continue on their own terms with this as a known limitation of the reservoir they read.
 - **O3 — make the one row that sees the export bite.** `excess_c14_ocean`'s σ (10.7 kmol) — if it is the product's own, nothing to
-  do; if it is a judgement width, re-deriving it is legitimate, re-weighting a row to force a structure is not. Not recommended as
+  do; if it is a judgment width, re-deriving it is legitimate, re-weighting a row to force a structure is not. Not recommended as
   a lever; recorded because it is the only observational handle on the export inside the objective.
-- **O4 — the K(h_ml) = kz anchor.** `d14c_profile_level`'s charge along kz is the parametrisation (K_deep = kz·f); freeing `f`
+- **O4 — the K(h_ml) = kz anchor.** `d14c_profile_level`'s charge along kz is the parametrization (K_deep = kz·f); freeing `f`
   removes it (arm C). A note for any future kz frontier, not a build.
 
 ## 4. Rulings owed

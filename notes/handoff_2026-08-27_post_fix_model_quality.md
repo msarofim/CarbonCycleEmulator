@@ -4,7 +4,7 @@
 **Repo:** `~/Documents/2026/CodeProjects/CarbonCycleEmulator/`, trunk `main`, clean at `ea920e1`.
 **Nothing is running.** Machine rebooted 2026-08-26 ~22:42.
 **Supersedes** `notes/handoff_2026-08-26_seas_isotope_fix_and_refit.md` (still accurate; this one
-adds the landed refit, the reparametrisation null, and the next phase).
+adds the landed refit, the reparametrization null, and the next phase).
 
 ---
 
@@ -19,7 +19,7 @@ adds the landed refit, the reparametrisation null, and the next phase).
 5. **Gate 4 and gate 12 move the right way at the posterior's OWN preferred free mode**, for the
    first time. §4.
 6. `rep_dC` fell **5.566 → 3.378**; **P4 falsified** too. §4.
-7. The ridge **reparametrisation is a NULL** with power (n = 8, p = 0.81). §5.
+7. The ridge **reparametrization is a NULL** with power (n = 8, p = 0.81). §5.
 8. **NEXT PHASE: assess the whole model post-fix.** 15 diagnostics + `ccx_load_mode()` still point
    at the quarantined path, and DESIGN §6's status blocks assert PRE-FIX verdicts as current. §7.
 
@@ -72,7 +72,7 @@ mover at 1.73 prior sd, nothing else above 0.58; the d13C LEVEL streams had been
 **`gcb_land_sink` −7.94** — the exact inverse of the pre-fix decomposition. **The land sink is the
 objection that survives, outvoted rather than decisive.**
 
-## 5. The reparametrisation is a NULL, and it corrects earlier advice
+## 5. The reparametrization is a NULL, and it corrects earlier advice
 
 8 paired races over two campaigns: combined mean **+0.059 ± 0.673, t(7) = 0.25, p = 0.812**, sign
 split 4:4, 95 % CI **[−0.50, +0.62]**. Campaign A was blind (all runs stopped 1.0–2.3 short of the
@@ -124,7 +124,7 @@ diag_stream_neff  seed_fert_ridge_arms
 
 **Recommended:** give `ccx_load_mode()` a single named constant for the canonical mode, point it at
 `from90`, and convert the 15 to use it. That is one decision and one edit, not sixteen. The failures
-are currently LOUD (file-not-found), which is the intended quarantine behaviour — do not "fix" them
+are currently LOUD (file-not-found), which is the intended quarantine behavior — do not "fix" them
 by pointing at the quarantine.
 
 ### 7b. THE CENTREPIECE: `diag_design_gates_at_mode.R` over DESIGN §6
@@ -136,7 +136,7 @@ DESIGN §6 is 13 numbered gates ("all must pass before headline claims"), and th
 e.g. gate 4 reads *"STATUS AT THE SHIPPED MODE (2026-08-22) … decadal spread sd 0.019 against the
 observations' 0.051 — 2.7× too smooth"*, where `from90` gives **sd 0.0259 and trend +0.0080**. Every
 §6 status block is owed a re-measurement and a re-write. **This is the single most misleading
-artefact in the repo right now**: a reader takes those blocks as the model's current standing.
+artifact in the repo right now**: a reader takes those blocks as the model's current standing.
 
 ### 7c. Then the assessment proper
 
@@ -165,7 +165,7 @@ artefact in the repo right now**: a reader takes those blocks as the model's cur
   **temperature-independent under a seasonal SST cycle**. Exonerated as the seasonal culprit
   (zeroing the ocean seasonal driver moves SPO δ¹³C by 2 % while moving CO₂ by 29 %) but not
   verified.
-- **The Hessian condition number in both parametrisations** — the measurement that would EXPLAIN
+- **The Hessian condition number in both parametrizations** — the measurement that would EXPLAIN
   §5's null. ~5 min, but [[ccx_hess_step_sd]] warns this plane needs per-direction step sizing.
 - **The sampler.** Still the project's oldest open item, and the post-fix posterior may be
   differently conditioned.

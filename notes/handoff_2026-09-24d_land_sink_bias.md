@@ -17,7 +17,7 @@ arm was read.
 
 Marcus ruled Q3 ("separate forest regrowth from CO₂ fertilisation") worth pursuing on the strength
 of a testable hypothesis: the model crosses land net-source→net-sink in 1971 vs the measured 1989,
-and an over-strong single fertilisation term doing the work of both would make the sink appear too
+and an over-strong single fertilization term doing the work of both would make the sink appear too
 early. **Measured, the hypothesis does not hold.**
 
 | prediction | result |
@@ -53,7 +53,7 @@ that a defect or a convention?"** In rough order:
    a land sink that is absolutely too strong. **Measure atmosphere growth first**: if the model
    reproduces observed CO₂ growth, the total is right by construction and only the split is wrong.
    `dg_annual_sinks()` already returns `growth_ppm` — use it.
-3. **Only then consider structure.** If the split IS wrong, the candidates are the fertilisation
+3. **Only then consider structure.** If the split IS wrong, the candidates are the fertilization
    strength, the ocean uptake, and `rep_dC`/the LUC scale — all of which are **already fitted
    names**, so re-pricing them is cheaper than a new pool.
 4. ⛔ **Do NOT start with a regrowth pool.** §1 is the reason.

@@ -52,7 +52,7 @@ gate's whole registered CI [7.82, 9.20]. `ent26`'s own limb, **8.871**, is insid
 **25 % of the circle**, so a random phase passes with p = 0.25; a corroboration that could not
 fail would be worth nothing. It **excludes both readings of the model's pre-fix SH ocean limb**
 (4.16 on the channel decomposition, 3.35 on `lib_seas_limbs.R`). ⇒ **The defect gate S was built
-to catch is independently confirmed to be a defect** — not an artefact of inverting through the
+to catch is independently confirmed to be a defect** — not an artifact of inverting through the
 model's own δ¹³C signatures.
 
 **A3 — and it says WHICH regime SPO samples.** The SH **area-mean** bracket [1.54, 4.54] excludes
@@ -89,7 +89,7 @@ neither an atmospheric field — this product has none — nor a reference year 
 | Southern Ocean 40–90 °S | 364.29 | −2.98 |
 
 Both inequalities hold. Widening the longitude mask to 140 °E–70 °W moves the contrast **−12 %**,
-so the declared judgement is not carrying the result.
+so the declared judgment is not carrying the result.
 
 **B2 — the model cannot represent any of it, and this is a SOURCE reading, not a run.** The ocean
 is **two hemispheric mixed layers** (`ml_C_NH`, `ml_C_SH`); `R/model.R` computes one `pco2_ml` per
@@ -158,9 +158,9 @@ verdict**. Both now have a gate, and **both gates were mutation-tested against t
    with "asked for 120.0 deg, selected 20.0", and a non-wrapping control still passes.
 2. ⛔ **`forcing_enso.rds` IS MONTHLY AND GCB IS ANNUAL.** Merging on `year` alone silently
    replicated each GCB row **twelve times**: n **66 → 792**, and the slope's t inflated by ≈√12 to
-   a meaningless **+11.30**. ⇒ Annualised: slope **+0.1153**, t **+4.69**.
+   a meaningless **+11.30**. ⇒ Annualized: slope **+0.1153**, t **+4.69**.
    `stopifnot(nrow == n_years)` now guards it; mutation test: the fanned-out merge **errors**, the
-   annualised control passes.
+   annualized control passes.
 
 ⭐ **B3's VERDICT INVERTED on bug 1** — "1.78× the reservoir, **FALSIFIED**, Fix B is
 mis-specified" became "**0.24×**, CONFIRMED". A wrong mask produced a *coherent, publishable,

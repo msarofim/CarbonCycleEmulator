@@ -58,7 +58,7 @@ single-arm gaps are **not** comparable to 27j's line for line, and this note doe
 
 **⚠ THE BRACKET END IS A METHODOLOGICAL CHOICE, SO IT IS MEASURED, NOT PICKED.** `seas_T_amp_SH`'s
 measured bracket is [3.5915 (all SH land), 7.1012 (SH land >30S)]. 27j used the FAR end of its
-bracket; 27n's prior centre is the geometric mean 5.0502. **Both LAND and JOINT are therefore run at
+bracket; 27n's prior center is the geometric mean 5.0502. **Both LAND and JOINT are therefore run at
 BOTH `a_t = 5.0502` (`_mid`) and `a_t = 7.1012` (`_hi`)**, giving two independently balanced
 interactions. INCUMBENT and OCEAN_only are shared. **Six arms. If the two interactions disagree in
 sign or gate verdict, that is the finding and neither is quoted alone.**
@@ -111,7 +111,7 @@ are the ones most likely to repeat that; they are stated so the record shows whi
 
 **P1 FAILS ⇒** the channel cannot supply what the ADMISSIBLE lever vacates, although it could supply
 what the inadmissible one vacated. Since the two vacate within 15 % of the same ppm at within 7 % of
-the same marginal price (§0), **that difference would localise the coupling in the SHAPE of the
+the same marginal price (§0), **that difference would localize the coupling in the SHAPE of the
 vacancy, not its size** — a productivity cut removes NEP amplitude, a cancellation increase adds
 antiphase respiration, and only the first is replaceable by an ocean channel. That is a real result
 and 4b becomes the live question on a residual that has now had three levers.

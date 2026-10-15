@@ -73,7 +73,7 @@ not move.** 17 further restarts at ~20,000 evals each were priced at **≈23 h**
 
 ### Two errors in the original ETA, both now corrected
 
-1. ⛔ **I generalised restart length from restart 1 alone.** Its 10,545 evals was the EXCEPTION (it
+1. ⛔ **I generalized restart length from restart 1 alone.** Its 10,545 evals was the EXCEPTION (it
    started from an already-polished point and converged on `reltol`); restarts 2–3 used 17,503 and
    **20,001** — i.e. maxit. The "halves cycle 1" claim was wrong.
 2. ⛔ **CONTENTION, not a slow run** ([[eta_in_days_is_not_a_slow_run]]). Eval rate degraded

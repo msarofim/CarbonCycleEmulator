@@ -49,7 +49,7 @@ Written on Marcus's request ("Yes, write the handoff note"), 2026-10-12.
 - `PUMP_EPS13_ORG` −20 → **−22 ‰**, one constant, surface-DIC reference. Anchor: Claret, Sonnerup & Quay 2021's deep δ¹³C–PO₄ slope −1.01, giving −20.07 vs deep DIC (checked against the PDF).
 - **FITTED (+2 names → 31 fitted):**
   - the bomb ¹⁴C NH delivery share, prior **U[0.77, 0.98]**, then an identifiability check (posterior sd and correlation with `tau_ex` / `bomb_total`), with a fixed proxy as the fallback;
-  - `CCX_SEAS_T_LAG`, prior **U[0, 6] months** (logit on the box), NOT centred on the old 2.0.
+  - `CCX_SEAS_T_LAG`, prior **U[0, 6] months** (logit on the box), NOT centered on the old 2.0.
 - **IntCal σ:** use the published Δ¹⁴C σ (column 5) of `data-raw/downloads/intcal20/intcal20.14c` (sha256 `974a6664…168e`). Add the `download_data.R` / `MANIFEST.csv` entry and rebuild `data/obs_d14c_intcal20.rds`. ⚠ `rintcal` is NOT installed; read the file.
 - **Diagnostic only, no refit:** `P_canon` 2.04 → **1.88** (Kovaltsov 2012, verified; note 1.75 Roth & Joos 2013); area 5.10066e14 m² (Moritz 2000); Avogadro and seconds-per-year READ from the registry.
 
@@ -58,7 +58,7 @@ Written on Marcus's request ("Yes, write the handoff note"), 2026-10-12.
 - the `bomb_total` prior sd 0.10, as a ruled 3.6× inflation;
 - `PUMP_EPS13_CARB` +1 (bracket 0 to +2);
 - `CCX_SEAS_PHI_EFF`: NH 75 stored in a product with a reproduction test; SH −30 RULED with its 08-20r record;
-- the cite-as-is sweep: FCO3, FOSS share, rep δ¹³C, the bomb prior centre reading `CCX_BOMB_REF`, obliquity, the +10 days, `JOOS_PPM_PER`, the NPP NH anchor, the ENT peak month;
+- the cite-as-is sweep: FCO3, FOSS share, rep δ¹³C, the bomb prior center reading `CCX_BOMB_REF`, obliquity, the +10 days, `JOOS_PPM_PER`, the NPP NH anchor, the ENT peak month;
 - the not-live rows, marked "not live".
 - **Scope:** physical constants only. Priors, error σ's and the pool structure become explicit "judgement" / "ruled" entries; R13_VPDB / R14_STD citations completed; `sst_hs` sourced.
 - Caveats stated with the approvals: the FOSS share is EDGAR's 1970–2012 value held constant from 1750; FCO3 was measured at an ancestral mode; rep δ¹³C is a midpoint, not a flux weighting.

@@ -38,11 +38,11 @@ as a mechanism when it is only an arithmetic."*
 **H2 passed on the number (82 % ≥ 40 %). H3 FAILED: `rep_dC` moved −0.01 prior-sd.**
 ⇒ **the level-offset story is REFUTED, and H2's printed verdict "LEVEL OFFSET CONFIRMED" is WRONG.**
 
-**THE ACTUAL ABSORBER IS THE FERTILISATION PAIR**, moving along its ρ = +0.998 ridge:
+**THE ACTUAL ABSORBER IS THE FERTILIZATION PAIR**, moving along its ρ = +0.998 ridge:
 
     gamma_diff 0 -> 0.97 :  fert_k +28.90 %   beta_max +11.59 %   q10 +0.04 %   rep_dC -1.14 %
 
-Adding episodic volcanic uptake is compensated by **re-tuning the SECULAR fertilisation**, not by
+Adding episodic volcanic uptake is compensated by **re-tuning the SECULAR fertilization**, not by
 shifting the level.
 
 ## 3. ⚠ SO "CHEAP" NEEDS A CAVEAT, AND IT IS NOT A SMALL ONE

@@ -1,6 +1,6 @@
 # WTC landing tools: dry run on a SYNTHETIC file (2026-10-12, CHANGELOG ff)
 
-**Not a result.** The file is `hilda29e` relabelled under `hilda_csl3v0kaidgbemwtc` at bomb_share_NH 0.90 / seas_T_lag 2.0.
+**Not a result.** The file is `hilda29e` relabeled under `hilda_csl3v0kaidgbemwtc` at bomb_share_NH 0.90 / seas_T_lag 2.0.
 Its logpost is the wave's port target (−1062.9494406). Its stored rows were set to the pricing's `streams_all` before
 `check2`. This tests the PLUMBING of the tools that need only a mode file, at `c3514fb`, in `~/ccx_frozen/20261012ff_wtc_dryrun`.
 

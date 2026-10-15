@@ -18,7 +18,7 @@ Seeded at `fert_k` = 90, the FREE arm landed at **154.85**. P3 predicted > 400; 
 < 200. **And `from90` beats `ref` by +15.43 log-units**, both free, same objective, like for like.
 
 **The identical experiment on 2026-08-25 returned `fert_k` = 554.98** and killed the
-fertilisation-shape programme ([[fert_shape_is_the_common_cause]]). The only thing that changed
+fertilization-shape program ([[fert_shape_is_the_common_cause]]). The only thing that changed
 since is the seasonal-NEP isotope fix (commit `6bda464`). **The sign of the ridge verdict has
 flipped: pre-fix the posterior rejected `fert_k` = 90 by −86.66; post-fix it prefers saturation.**
 
@@ -93,7 +93,7 @@ SPO 1.06× → 0.95×).
   set when the two diverged. `ref` is a worse local optimum.
 - **`kz` still rails**: 6140 / 6332 / 6431 against a bracket top of 6528 (94–98 % up). Unchanged as
   an open problem by any of this.
-- **`pump_grad` lands 267–272** against a 233.1 prior centre, at every arm.
+- **`pump_grad` lands 267–272** against a 233.1 prior center, at every arm.
 - The `enh(420)` invariant is **no longer shared**: 0.212 / 0.245 / 0.288 across the three arms. The
   ridge has genuinely moved rather than slid along itself, which is why the arms separate at all.
 
@@ -101,17 +101,17 @@ SPO 1.06× → 0.95×).
 
 1. **`ref` to finish**, then P1, and a re-run of §1–§4 with `ref` FINAL rather than RUNNING.
 2. **A DESIGN §6 sweep** — these are four gates of many, and the objective changed under all of them.
-3. **The ridge reparametrisation race**, redesigned: the 2026-08-25g smoke used starts at lp
+3. **The ridge reparametrization race**, redesigned: the 2026-08-25g smoke used starts at lp
    −26,000 to −150,000, i.e. 1.4–8× WORSE than the driver's cold init (−18,634), so it measured
    gross descent rather than the near-optimum ridge-crawling that actually costs 332k evals. The
    right start scale is sd ≈ 0.02–0.03 (median lp −1,672), the right statistic is evals-to-threshold,
-   and the race parallelises — ~50 min on four free cores.
+   and the race parallelizes — ~50 min on four free cores.
 4. **No posterior.** All of this is mode-finding; the sampler has still never converged, so "the
    posterior prefers" means "the mode is higher", not a probability.
 
 ---
 
-# ADDENDUM 2026-08-27 — the ridge reparametrisation is a NULL
+# ADDENDUM 2026-08-27 — the ridge reparametrization is a NULL
 
 `calibration/diag_ridge_reparam.R`. **Two campaigns, 8 paired races, no effect.**
 
@@ -158,10 +158,10 @@ final log-post is the statistic.
 **Decorrelating this one pair does not reduce the evaluation count.** A plausible reason — NOT
 tested here — is that ρ = +0.997 is a 2-parameter feature of a 20-parameter problem, and the
 conditioning is dominated by other directions. **The measurement that would settle it is the Hessian
-condition number in both parametrisations**, and memory `ccx_hess_step_sd` warns that the Hessian in
+condition number in both parametrizations**, and memory `ccx_hess_step_sd` warns that the Hessian in
 exactly this plane is numerically delicate, so it needs per-direction step sizing.
 
-**⇒ IT ALSO CORRECTS THE TORCH ADVICE.** On 2026-08-26 I recommended trying this reparametrisation
+**⇒ IT ALSO CORRECTS THE TORCH ADVICE.** On 2026-08-26 I recommended trying this reparametrization
 BEFORE investigating Torch, on the grounds that it might make the throughput question moot. **It
 does not.** The per-arm evaluation count is not reducible by this route, Nelder-Mead remains
 strictly serial, and so Torch's arm-parallelism (and the MCMC, `cs` partition or checkpointed) is

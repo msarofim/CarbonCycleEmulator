@@ -26,7 +26,7 @@ document HILDA's numbers as caveats."* Then: *"Move forward with your recommenda
 - **The contrast measurement** — the finding: se(B − deep) = 3.5–4 ‰, observed −0.4. Columns and
   bottom-attached arms rejected at 3–5σ; HILDA's attachment inside 2σ. With `hs_asx_frac` 0.8,
   HILDA's configuration solves at K_deep 309 with every interior row inside 1σ and the best
-  matched-parameter transient of the arc (−193 to −255, mostly the recoverable pump-δ¹³C artefact).
+  matched-parameter transient of the arc (−193 to −255, mostly the recoverable pump-δ¹³C artifact).
 
 ## 2. ⭐⭐ THE ANSWER
 - **Through the bomb rows: one** — `hs_asx_frac` (0.65–0.8, marginal sd ≤ 0.10 wherever free).
@@ -40,7 +40,7 @@ document HILDA's numbers as caveats."* Then: *"Move forward with your recommenda
 1. The first identifiability run measured curvature at a non-optimum and reported marginal sds off an
    indefinite matrix ⇒ [[hessian_at_non_optimum_is_not_a_count]].
 2. I predicted the slabs' n_eff would differ from 20 by > 2×; it is 21 / 20.
-3. I over-generalised 09-05b's steady-state "h_hs is not a term" to the transient.
+3. I over-generalized 09-05b's steady-state "h_hs is not a term" to the transient.
 4. The 09-05f departure to bottom attachment, which I argued from CCX's structure, is rejected by
    the contrast at −3σ; the level-based "control-dependent, second-order" reading of 09-06 was the
    wrong statistic. Both memories carry the supersession in place and the indexes were updated in
@@ -72,7 +72,7 @@ document HILDA's numbers as caveats."* Then: *"Move forward with your recommenda
 ## 6. ⇒ STANDING RULES THIS SESSION ADDED
 * ⭐⭐ **WHEN A FIT TRADES AN OBSERVATION AWAY FOR FREE, ASK WHICH STATISTIC CARRIES ITS INFORMATION.**
   Correlated means carry their CONTRAST; independent rows discard it.
-* ⭐⭐ **A HESSIAN AT A NON-OPTIMUM IS NOT A COUNT.** Optimise the coupled block first; read the
+* ⭐⭐ **A HESSIAN AT A NON-OPTIMUM IS NOT A COUNT.** Optimize the coupled block first; read the
   conditionals and correlations even so.
 * ⭐ **"HOW MANY CAN WE AFFORD" IS ANSWERED PER STATISTIC**, not per parameter: the same parameter can
   be unidentified by the levels and pinned by the contrast.

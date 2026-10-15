@@ -136,10 +136,10 @@ verbatim ([Biogeosciences 17:4173](https://bg.copernicus.org/articles/17/4173/20
 | two-pool land | −57.6 GtC/K | −0.25 σ |
 | four-pool land | −19.6 GtC/K | **+0.50 σ** |
 
-**Both inside 1 σ.** "At the low edge" was an artefact of a spread misremembered by 2.5×.
+**Both inside 1 σ.** "At the low edge" was an artifact of a spread misremembered by 2.5×.
 CMIP6 does not constrain γ_L tightly enough to call the four-pool land a regression *or* a
 correction. **Consequence: temperature-dependent NPP (12c §9(i)) loses its motivation** — still
-a real structural gap, but a modelling choice, not a defect. *Caveat:* Arora's protocol is
+a real structural gap, but a modeling choice, not a defect. *Caveat:* Arora's protocol is
 4×CO₂/BGC−COU; ours is q10-on/off on coupled SSP5-8.5. Not protocol-matched; do not present it
 as such.
 
@@ -201,7 +201,7 @@ bounded to the range that keeps it in the observed bracket, and the bomb window 
 cost.
 
 Bisected **at default parameters**: kz 3828.8 → −200.00 ‰, kz 5000 → −170.1, kz 6200.7 →
-−150.00. Rounded inward to **[3830, 6200]**, `init` 5000. `ccx_default_params()$kz` re-centred
+−150.00. Rounded inward to **[3830, 6200]**, `init` 5000. `ccx_default_params()$kz` re-centered
 **4000 → 5000** to track the table init (the β precedent).
 
 **This is implemented and it LEAKS. See §8 before relying on it.**
@@ -222,14 +222,14 @@ q10 = 0.1686        (-7.03 sigma)
 **q10 < 1 means respiration FALLS as the world warms** — the land gains carbon *because* of
 warming. `run_modefind.R`'s own header records this exact failure from 2026-08-10 ("q10 = 0.28
 means respiration FALLS with warming"). This is that pathology, deeper, against a tight
-physical prior centred on 2.0.
+physical prior centered on 2.0.
 
 It does not stand alone. Read the mode together:
 
 | | value | prior-tail | reading |
 |---|---|---|---|
 | `q10` | 0.1686 | **−7.03 σ** | warming *increases* land uptake |
-| `beta` | 0.0877 | −1.57 σ | CO₂ fertilisation nearly off |
+| `beta` | 0.0877 | −1.57 σ | CO₂ fertilization nearly off |
 | `sigma_co2` | 0.301 | −2.13 σ | CO₂ errors declared tiny |
 | `sigma_d13c` | 0.440 | +2.20 σ | δ¹³C errors declared large |
 
@@ -278,7 +278,7 @@ Measured at the mode, across the full `h_ml` range (rows kz, columns h_ml):
 (`k_w` went 1500 → 1697, and the land changed underneath it). So **`kz` sat obediently inside
 its bound and the deep ocean still came out at −145.0 ‰, outside the bracket.**
 
-**The lesson generalises: do not bound a parameter as a proxy for an observable.** Deep Δ¹⁴C is
+**The lesson generalizes: do not bound a parameter as a proxy for an observable.** Deep Δ¹⁴C is
 observed; constrain it where observations live. Hence §0 step 2.
 
 ---
@@ -330,8 +330,8 @@ that the deep-Δ¹⁴C likelihood term is present).
 - The older quarantine dirs still apply as 12c described; `20260811b_pre_excess_c14/` remains
   the dangerous one because it *looks* current.
 - **`profile_kz_ventilation.R` is 2/7 complete**, on the superseded two-pool land, hard-gated on
-  `mode_fit.rds` at line 51, and its `PROF_KZ_GRID` is centred on the *old* mode's kz = 8354.
-  It needs re-centring before it is worth the ~2.5 h. Two cautions: the bomb-window RMS is
+  `mode_fit.rds` at line 51, and its `PROF_KZ_GRID` is centered on the *old* mode's kz = 8354.
+  It needs re-centering before it is worth the ~2.5 h. Two cautions: the bomb-window RMS is
   **non-monotonic** in kz (42.1 at 500, 46.3 at 1000), and the profile is a **conditional
   maximum, not a marginal**.
 - **The ocean is pure diffusion.** `R/model.R` interior transport is `add_diffusion` and nothing

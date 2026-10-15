@@ -60,7 +60,7 @@ Transcribed from the PDF text layer of
 `https://scope.dge.carnegiescience.edu/SCOPE_16/SCOPE_16_1.4.5_Tans_131-157.pdf`
 (Tans, P.P., "A Compilation of Bomb 14C Data for Use in Global Carbon Model
 Calculations", in Bolin, B. (ed.) *Carbon Cycle Modelling*, SCOPE 16, Wiley,
-pp. 131–157). Reference supplied by Marcus. **No figure digitising** — both are
+pp. 131–157). Reference supplied by Marcus. **No figure digitizing** — both are
 printed tables and both extracted cleanly with `pdftotext -layout`.
 
 | File | Contents | Used for |
@@ -69,7 +69,7 @@ printed tables and both extracted cleanly with `pdftotext -layout`.
 | `tans1981_scope16_table1_tropospheric_d14c.csv` | Table 1, p. 136: tropospheric Δ¹⁴C, NH / SH / global, December 1954–1977 | Pre-1963 time shape; independent check on the Hua zonal aggregate |
 
 Both feed `data-raw/build_bomb_c14_source.R` → `data/forcing_bomb_c14.rds`. The
-derivation, its two judgement calls and its residual caveats are in **DATA.md §9**.
+derivation, its two judgment calls and its residual caveats are in **DATA.md §9**.
 
 Two transcription traps are recorded in the file headers: Table 2's ninth quarter
 label renders as `0/64-11/64` in the text layer (it is 9/64–11/64), and Table 1's

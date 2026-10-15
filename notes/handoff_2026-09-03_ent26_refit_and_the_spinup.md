@@ -44,7 +44,7 @@ Measured at a converged task of `16837149`; **39 of 40 tasks agree to 4e-4**.
 partition error and the land limb's excess **at once**, and it landed at a physically plausible
 amplitude inside its own prior — not at a fudge-factor value.
 
-⭐ **AND THE PRE-REGISTERED RISK DID NOT MATERIALISE.** A conditional profile (everything else held)
+⭐ **AND THE PRE-REGISTERED RISK DID NOT MATERIALIZE.** A conditional profile (everything else held)
 put the optimum at ent ≈ 2, prior-z −3.41, and warned the strain might simply MOVE onto the new
 coordinate. It did not. **That is the third time on this project a frozen slice has overstated a
 cost** — treat conditional slices as hypotheses about a refit, never as predictions of one.
@@ -75,7 +75,7 @@ reference points moved too (−1764.55 / −1812.23). The case rests on P1/P2/P3
 
 ## 3. ⛔ TWO BASINS, NOT ONE — AND I HAD IT BACKWARDS
 
-Round 1's outlier **id 12 at −1508.7786** was labelled `CONVERGED` while its last restarts were
+Round 1's outlier **id 12 at −1508.7786** was labeled `CONVERGED` while its last restarts were
 **wall-shortened with gain 0.0000**, so I flagged the label as overstating and leaned "budget
 artifact". **Resumed with a 300 min budget (`16905918`) it ran cycle 3 with two FULL-LENGTH restarts
 — 4,521 and 8,634 evals — both gaining exactly 0.0000, finishing in 44 of 300 min.**
@@ -129,14 +129,14 @@ finite-difference columns each. That would remove ~66 of the remaining calls.
 
 1. ⛔ **`ENT_SEAS_AMP_SH_INBAND` said `"derived"` with a TYPED `value = 30`**, arithmetic in prose
    only — the exact `LAMBDA_C14` bug `constants.R`'s own header warns about. Computing it from named
-   inputs gives **29.68**, and the prior centre **10.9524** rather than 11.07: **the typed pair had
+   inputs gives **29.68**, and the prior center **10.9524** rather than 11.07: **the typed pair had
    already drifted from its own chain.**
 2. **`0.369` was a free literal in three files** → registered as `ENT_SEAS_BAND_AREA_FRAC`,
    **provisional** (a geographic ratio with no cited source), and a test guards the *label*.
 3. ⭐ **The prior width was re-derived, 0.45 → `ENT_SEAS_LOGSD` = 0.49848.** The approved 0.45 read
    the recorded "5–30" band at 2σ, but **the number 5 has no derivation anywhere**. It now comes from
    a geometric ceiling: the box mean cannot exceed the in-band amplitude, so the no-dilution limit
-   sits at `log(1/area fraction)` above the centre. **The in-band value lands at +2.000σ by
+   sits at `log(1/area fraction)` above the center. **The in-band value lands at +2.000σ by
    construction**, and the recorded band corroborates at z −1.57 / +2.02.
 4. **Invented test tolerances** (`z ∈ (1.5, 2.5)`, `|z| > 10`, `< 0.05 mo`) replaced by exact
    predictable quantities or **propagated typed precision**.
@@ -153,7 +153,7 @@ above the GLODAP value GATE G scores against — worth a measured **0.11 σ**, s
 ## 6. ⚠ NON-OBVIOUS STATE
 
 * **Torch: nothing running.** Outdirs on `/scratch`: `multistart_20260903_ent26` (round 1, 40 tasks)
-  and `multistart_20260903_ent26_sd0p5` (5). Jobs `16837149` (ids 40–45 **cancelled deliberately**),
+  and `multistart_20260903_ent26_sd0p5` (5). Jobs `16837149` (ids 40–45 **canceled deliberately**),
   `16905918` (id 12 resume), `16905919` (half dispersion). `port_targets.csv` is at commit `80f212f`,
   **26 parameters, regenerated under the fast spinup** — shipped.
 * ⭐ **`ccx_seed_unencodable()` (R/calibrate.R) is new and it is SEPARATE from the migration ON

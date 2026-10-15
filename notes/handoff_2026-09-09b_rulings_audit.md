@@ -56,7 +56,7 @@ DATA.md §9c, CHANGELOG 09-09 and `ccx_graven_vs_hua` all said Hua's 3.6 ‰ und
 
 Rescoring at wider σ: **25 → −92.74 | 32 → −80.37 | 40 → −73.13 | 47 → −69.51.** **Only 21–25 % comes off.** ⇒ **the penalty is NOT an artifact of an over-tight target**, so the overfitting worry does not undermine applying the correction.
 
-### 2d. ⭐⭐ AND THEN THE LOCALISATION CUT THE OTHER WAY (`c955620`)
+### 2d. ⭐⭐ AND THEN THE LOCALIZATION CUT THE OTHER WAY (`c955620`)
 | era | NH | SH | both |
 |---|---|---|---|
 | 1955–62 (the "dump") | −16.53 | −5.48 | **−22.02** |
@@ -71,7 +71,7 @@ Rescoring at wider σ: **25 → −92.74 | 32 → −80.37 | 40 → −73.13 | 4
 ⇒ **This is the strongest observational argument against ruling 4 yet found.** ⚠ Still fixed-vector; a refit is owed either way.
 
 ### 2e. ⛔ THE METHOD LESSON OF THE DAY
-**Twice in one session the penalty's mechanism was asserted from where the FORCING CHANGED rather than from where the COST LANDED, and both times it was wrong.** Localise before explaining.
+**Twice in one session the penalty's mechanism was asserted from where the FORCING CHANGED rather than from where the COST LANDED, and both times it was wrong.** Localize before explaining.
 
 ### 2f. The gate-5 trough, for completeness
 Under ruling 1's own derived bound: **pre-de-biasing trough 50.5, z −1.80 = PASS; de-biased 24.9, z −2.55 = FAIL.** ⚠ A **SOFT** flip (same side of obs; a 30 %/4-draw tolerance). Graven is **annual** and cannot arbitrate a within-year trough. First-peak z is +0.0008 in BOTH arms.
@@ -94,7 +94,7 @@ The stack carries explicit allowances almost everywhere, each with a receipt (`c
 | `calibration/diag_gate5_bimodal.R`, `diag_tg_gradient_level_gate.R` | delegate to the promoted kernels; GL arms swapped roles |
 | `calibration/diag_debias_ocean_inventory_power.R` | **new** — the N&L power measurement |
 | `calibration/diag_bomb_rep_sensitivity.R` | **new** — the σ sensitivity + the 3–11× retraction |
-| `calibration/diag_debias_penalty_by_year.R` | **new** — the localisation, self-checked against `ccx_loglik` |
+| `calibration/diag_debias_penalty_by_year.R` | **new** — the localization, self-checked against `ccx_loglik` |
 | `DATA.md`, `CHANGELOG.md` | retractions propagated in-pass |
 
 ## 6. What I would do first next session

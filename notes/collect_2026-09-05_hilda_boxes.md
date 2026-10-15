@@ -13,7 +13,7 @@ Scores `notes/prereg_2026-09-05_hilda_boxes.md`. `calibration/diag_hilda_boxes.R
 |---|---|---|
 | **P0** | no-op, conservation, parity | ✅ `hs_frac = 0` **bit-exact, 32 boxes**; 0.16 bites (deep −156.145 → −110.287); closure **1.33e-15**; R-vs-C++ **5.70e-14**, *smaller than the incumbent's own 1.14e-13* |
 | **P1** | HS under-equilibrates on its own, ∈ [−160, −80] | ✅ **−80.3 ‰** against an LS mixed layer at −29.8 — a **50.5 ‰ split**, and the falsifier (< 20 ‰) is survived. ⚠ **BUT SEE §2: it clears the pre-registered window by 0.3 ‰ and sits OUTSIDE HILDA's own −120 ± 30.** |
-| **P2** | a `kz` exists at HILDA's own `u` = 38 | ✅ **kz = 1900.** The 09-04k2 ceiling was an artefact of the missing box, exactly as pre-registered |
+| **P2** | a `kz` exists at HILDA's own `u` = 38 | ✅ **kz = 1900.** The 09-04k2 ceiling was an artifact of the missing box, exactly as pre-registered |
 | **P3** | `kz` falls below the shim's 3177 | ✅ **1900 = 0.299×** the incumbent, against the shim's 0.500× |
 | **P4** | scored mean \|z\| below the shim's 1.81 | ⛔ **2.05.** Better than the incumbent's 2.55, **worse than the reduced form** |
 | **P5** | HD near −136, and not warmer than the LS ML | −109.2; the falsifier is survived. Model-to-model, reported not gated |
@@ -113,7 +113,7 @@ upper-band mean |z| is **4.54**, essentially all missing bomb spike (67 m: model
 observed +50.5). This is the ⚠⚠ TRAP that `handoff_2026-09-04_ocean_structure_arc.md` §5 states in
 so many words, and I walked into it while writing the control.
 ✅ **The DELTA is still interpretable** — the bomb deficit is common to every arm — and it improves
-(4.54 → 3.98). **The LEVEL is not, and the "< 1 z" threshold was measuring an artefact.**
+(4.54 → 3.98). **The LEVEL is not, and the "< 1 z" threshold was measuring an artifact.**
 ⇒ **A control band must be chosen where the comparison is valid, not where the defect is.**
 
 ## 5. ⭐ AN UNPLANNED OUT-OF-SAMPLE CHECK THAT DISCRIMINATES ARMS
@@ -135,7 +135,7 @@ pre-registered, and reported as such.**
   boxes exist: (a) **HS at HILDA's 75 m** (choice C2's declared alternative), which §2 predicts
   deepens HS toward −120, ages HD, and pushes `q`'s crossover DEEPER; (b) **the attachment depth of
   `q`**, which §3 identifies as the thing costing the scored band. ⚠ (b) is a departure from HILDA's
-  Fig. 1 and must be labelled as one.
+  Fig. 1 and must be labeled as one.
   > **BOTH HALVES OF (a) ARE NOW RUN — see `collect_2026-09-05bc_hs_endmember.md`.** Thickness is
   > **not a term** (0.2 ‰ over 2.7×, analytically), and the endmember reached through the gas
   > exchange **does** move the crossover 1160 → 1622 m but **buys 0.025 of mean |z| while giving

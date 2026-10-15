@@ -1,4 +1,4 @@
-# Handoff — 2026-09-11 (b). **THE ROUND-6 "REFUTATION" WAS AN OBSERVABLE ARTEFACT. Ruled and shipped: concentration observables are ANNUAL MEANS over the box's mass AT THE TIME. Round 6b (the same arm, corrected objective) is RUNNING on Torch as job 17367892. Option B's four (+2) rulings are taken; its build is PAUSED at the R side until round 6b is read.**
+# Handoff — 2026-09-11 (b). **THE ROUND-6 "REFUTATION" WAS AN OBSERVABLE ARTIFACT. Ruled and shipped: concentration observables are ANNUAL MEANS over the box's mass AT THE TIME. Round 6b (the same arm, corrected objective) is RUNNING on Torch as job 17367892. Option B's four (+2) rulings are taken; its build is PAUSED at the R side until round 6b is read.**
 
 > Self-contained. Read CHANGELOG 2026-09-11 (3) → (5) for every number. Memory: [[seasonal_box_observable_artefact]],
 > [[ccx_option_b_rulings]], [[ccx_round6_result]] (retraction banner), [[ccx_hilda31p_adopted]].
@@ -11,14 +11,14 @@
 | data task | poleward Holte shapes (57°+, 40°+, 40–57) + per-cap ERSST SST amps; every shipped row bit-identical |
 | rulings 5–6 (Marcus) | GATE S re-cut to 57–90 °S for `ml_hi`; `h_hs` under the HS Holte prior as 09-08d |
 | build, R side | `seas_ml = 2` geometry/entrainment/guard written, UNREACHABLE (parser refuses 2), 0/1 bit-exact — commit `5ed31cf` |
-| ⛔ FOUND | the gradient row reads instant carbon / annual-mean mass → round 6's P7 was the artefact (09-11 (4)) |
+| ⛔ FOUND | the gradient row reads instant carbon / annual-mean mass → round 6's P7 was the artifact (09-11 (4)) |
 | RULED (Marcus) | "annual mean of the concentration" → shipped `c0bf185`, priced −0.0957, files restamped, 15-test guard mutation-tested |
 | round 6b | Torch **17367892**, 24 starts %24, port gate PASSED on the nodes, ~1.7 s/eval, 6 h wall |
 
 ## 2. THE FINDING, in one table (`calibration/diag_seasonal_box_observable_artefact.R`)
 surface DIC at the GLODAP epoch, `hilda31p` → round 6: objective (instant/mean mass) **−156.9**; instant/instant +43.6;
 annual mean **+0.9**. Gradient under the corrected read: 300 → **227** (target 233) — the recorded 385 was the
-artefact; the δ¹³C half (−0.300 → +0.031) is the DEEP box the fit moved (`pump_grad` 255 → 280) to cancel it.
+artifact; the δ¹³C half (−0.300 → +0.031) is the DEEP box the fit moved (`pump_grad` 255 → 280) to cancel it.
 ⇒ round 6's likelihood, P7, P2/P12 reads are properties of a fit to a corrupted objective. Same construction was in
 `dg_gateG` and `ccx_model_hs_surface` — all three now go through `ccx_box_annual_conc()`.
 
@@ -32,7 +32,7 @@ artefact; the δ¹³C half (−0.300 → +0.031) is the DEEP box the fit moved (
   `test-hs-surface-rows`, `test-gate-p7` (−0.300 → +0.031, 300 → 227 — the UNREFIT record; re-pin after 6b).
 - `calibration/torch/port_targets.csv` regenerated at `seas_ml = 1` (incumbent −1634.68 → −1614.01); `multistart.sbatch`
   outdir `multistart_20260911_round6b_seasml1_sd1.0452`.
-- Data: `data/obs_mld.rds` (+`seasonal_hs/so/40_57`), `data/obs_so_sst_seas_amp.rds` (+`caps`); builders generalised.
+- Data: `data/obs_mld.rds` (+`seasonal_hs/so/40_57`), `data/obs_so_sst_seas_amp.rds` (+`caps`); builders generalized.
 - `R/model.R` (paused B): `ccx_mld_shape(box)`, `ccx_seas_ml_ls_on/hs_on`, `ccx_seas_ml_hs_guard`, HS block time-varying.
 - Notes: prereg §2a/2b (rulings), §2c (amendment). CHANGELOG 09-11 (3)(4)(5). Suite last: **13,028/406, 2 F / 1 E / 4 S** (the pair).
 

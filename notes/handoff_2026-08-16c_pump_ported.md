@@ -171,7 +171,7 @@ suite is the gate.
   observed DIC shape an exact steady state of the model's own diffusion operator. The shape is
   now a build product (`obs_glodap_deep.rds$dic_profile`; **25 m bins to 300 m**, 50 m to 500,
   250 m below) integrated onto whatever layers a draw asks for.
-- **`pump_grad` is RE-NORMALISED on each grid's own layers**, so it delivers exactly the
+- **`pump_grad` is RE-NORMALIZED on each grid's own layers**, so it delivers exactly the
   gradient it names. Without that step 233.109 landed at 235.7, because a model layer averages
   several observed bins and the bottom layer's mean shape is 1.011, not 1.
 - **Emitted through `add_flux()`, not by touching `dy`** — conservative by the same construction
@@ -231,7 +231,7 @@ CHANGELOG, and memory. Nothing the likelihood scores is affected.
 | `R/likelihood.R` | `alk` target, `ccx_steady_profile_from_source()`, `ccx_model_ocean_alk_gradient()`, the third Gaussian, the `length(v) == 1L` guard, pump read off `spin$aux$pump` |
 | `R/model.R` | `pump_grad` / `pump_carb_frac` / `pump_mode`; `ccx_pump_shape()`, `ccx_pump_export()`; `aux$pump`, `aux$ml_C0`; the pump flux in `ccx_deriv()` |
 | `R/spinup.R` | Newton gate now fires on the pump as well as the conveyor |
-| `R/cpp.R` | pump marshalling (flat 2×NL, zero-filled when off), `pump_mode` in the par contract |
+| `R/cpp.R` | pump marshaling (flat 2×NL, zero-filled when off), `pump_mode` in the par contract |
 | `R/constants.R` | `PUMP_EPS13_ORG`, `PUMP_EPS13_CARB` |
 | `R/fluxes.R` | `pump` channel |
 | `src/ccx_core.cpp` | `Aux.pump_*`/`ml_C0`/`alpha_pump_*`, `Par.pump_mode`, the flux |

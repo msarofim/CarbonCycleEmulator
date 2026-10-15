@@ -12,7 +12,7 @@
   `a_ls`; range checks by name; the D1 guard covers `tr`; aux fields `tr_on, a_tr, h_tr, tr_mass_kg, asx_tr, sst_tr, sst_tr_enso, alk_tr,
   tr_q_share, ml_pump_share, kz_tr, dic0_tr, revelle0_tr, tr_C0`. Deriv: the loop re-routed `oc[k] → eq → tr → oc[k]` (with `tr` off the
   09-13g limbs, bit for bit); `tr`'s own air–sea (cell idiom, `sst_tr + sst_anom_h + sst_tr_enso·enso`); the diffusive `tr`–layer-1
-  interface at `kz_tr = kz_tr_frac × kz_int[1]` in the effective-thickness form (`dz_1·a_ls/a_tr`, centre `(h_tr + dz_1)/2`); `q_tr`
+  interface at `kz_tr = kz_tr_frac × kz_int[1]` in the effective-thickness form (`dz_1·a_ls/a_tr`, center `(h_tr + dz_1)/2`); `q_tr`
   lateral limbs (channel `tr_ml`); **D2** — `tr` supplies `1 − ml_pump_share` of the LS pump export (its own DIC-limited scale). Recorder
   `.ptr`; `ccx_tr_box_eigbound()` folded into `ccx_substeps_for()` at each seasonal grid extreme (exactly 0 off).
 - **Outputs / readers**: `CCX_OCEAN_BOX_COLS` 14 per hemisphere (`tr_C_, tr_C13_, tr_pco2_` added; C++ `out` 39 wide, `pco2_rec[8]`,
@@ -27,7 +27,7 @@
   dispatch** (`ccx_apply_structure`, `run_dispersed_multistart.R`'s banner, `test-mode-file`). sbatch: label named; a `hilda_tr` launch
   line exists but is ⚠ NOT to be run before R5/R6.
 - **C++ (`src/ccx_core.cpp`)**: `ITR` runtime (after `IEQ`; `NPH` = after_eq + tr_on); Aux/Par fields by name; the block beside the cell's.
-  `R/cpp.R`: marshalling by name, `q_tr` default 0, `tr_on` in `ccx_run_prepare`.
+  `R/cpp.R`: marshaling by name, `q_tr` default 0, `tr_on` in `ccx_run_prepare`.
 - **Tests (`tests/testthat/test-tr-box.R`, 238/238)**: P0a (bit-exact with `hilda_eq` at `tr_frac` 0, both cores, substeps unchanged;
   hilda30c's 25 streams reproduce), P0b, P0c (R/C++ < 1e-12, pump N and D), P0d, P0e, P0f, P0g (loop + interface + `q_tr` 3 Sv on a
   uniform column: 0 to 1e-12; power), N-T1 (bit-exact form), 7 mutations (loop, interface, `q_tr`, `sst_tr_enso`, D2, bound, channels).

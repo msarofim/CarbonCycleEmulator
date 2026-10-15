@@ -1,5 +1,5 @@
 # Handoff — 2026-09-08d. RULED: `u_hs` FREED under the observed overturning and `h_ml` under the Holte mean/max prior — ROUND 4 (31 par) PREPARED; the SEASONAL mixed layer SCOPED as the round-5 candidate (it is the mechanistic successor of `ent_seas_amp_SH`); the WHOLE-MODEL SCORECARD says the ocean arc bought the deep and nothing on the pedagogical chain, and added a gate-Q failure.
-# **⛔ Canonical `ent26`. Every model number is GENERATED (`diag_whole_model_scorecard.R`, `diag_u_hs_h_ml_tests.R`, the build scripts); the one recollection (Martin b) is labelled. LAUNCH STATUS: see §6.**
+# **⛔ Canonical `ent26`. Every model number is GENERATED (`diag_whole_model_scorecard.R`, `diag_u_hs_h_ml_tests.R`, the build scripts); the one recollection (Martin b) is labeled. LAUNCH STATUS: see §6.**
 
 Read first: `notes/handoff_2026-09-08c_u_hs_h_ml_tests.md`, `notes/prereg_2026-09-08d_round4_u_hs_freed.md` (binding),
 `notes/options_2026-09-08d_seasonal_h_ml.md`, CHANGELOG 2026-09-08d. Memory: [[ccx_round4_prepared]],
@@ -81,5 +81,5 @@ ssh torch 'sacct -j <JOBID> -X --format=JobID,State,ExitCode,Elapsed | tail -50'
 rsync -a torch:/scratch/ms17839/CarbonCycleEmulator/calibration/output/multistart_20260908d_hilda31/ calibration/output/multistart_20260908d_hilda31/
 CCX_MS_STRUCT=hilda CCX_MS_OUTDIR=calibration/output/multistart_20260908d_hilda31 Rscript calibration/collect_dispersed_multistart.R
 ```
-Then a scorer modelled on `diag_hilda30_predictions.R` (edit `HP_DIR`, `HP_N_EXPECTED`; add R1's `u_hs` read and the
+Then a scorer modeled on `diag_hilda30_predictions.R` (edit `HP_DIR`, `HP_N_EXPECTED`; add R1's `u_hs` read and the
 ≥ 33 / ≤ 27 verdict; compare on LIKELIHOOD to −1438.64). Still owed: a SOURCED Martin exponent; the `INDEX_ccx` split.

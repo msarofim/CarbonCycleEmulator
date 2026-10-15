@@ -32,7 +32,7 @@ handoff"). Self-contained.
   - promoted → `calibration/output/refit_20261005_kw1446_hilda_csl3v0kaidgbe/`;
   - read by `calibration/diag_kw1446_price_read.R`.
   - **On likelihood 1446 fits BETTER (+2.75).** The −20 posterior price is all `hs_asx_frac`'s prior (z +6.5),
-    whose log-sd 0.15 is a stated JUDGEMENT. So `k_w` ≈ 1903 is a prior compromise, not a data verdict.
+    whose log-sd 0.15 is a stated JUDGMENT. So `k_w` ≈ 1903 is a prior compromise, not a data verdict.
   - Hessian PD, but `h_hs` sits at 472.6 of its 500-m bracket, so the arm's own Laplace sds are not usable.
   - The scorecard: no gate verdict flips.
 - **Option A BUILT** (10-05 b; `92b5756`): the multistart's in-restart deadline (`calibration/lib_ms_deadline.R`).
@@ -69,7 +69,7 @@ handoff"). Self-contained.
   - `calibration/diag_kw1446_price_read.R`.
 - **New library:** `calibration/lib_ms_deadline.R`.
 - **Changed driver:** `calibration/run_dispersed_multistart.R` (option A).
-- **Model:** `R/model.R` (`ccx_hs_sst_frac()` and the HS SST line), `R/cpp.R` (marshalling), `src/ccx_core.cpp`
+- **Model:** `R/model.R` (`ccx_hs_sst_frac()` and the HS SST line), `R/cpp.R` (marshaling), `src/ccx_core.cpp`
   (`Par.hs_sst_anom_frac`).
 - **Spec:** `DESIGN.md` §3.4a T (new); §3.4a S's benchmark line updated.
 - **Tests (new):** `tests/testthat/test-ms-deadline.R`, `tests/testthat/test-hs-sst-frac.R`.
@@ -140,7 +140,7 @@ handoff"). Self-contained.
 - It still cannot reach GCB's −0.8: that needs a decadal soil pool, a structural question beyond #16.
 - It discards even a weak signal that a later structure might firm up.
 
-## 5. Open items, in order (each is Marcus's to prioritise)
+## 5. Open items, in order (each is Marcus's to prioritize)
 1. **Objective #16.** ~~It waits ONLY on (a), P0 vs P4 (§4).~~ **(a) RULED P4 (10-05)**: the ten pins are the nine
    plus `npp_tsens=0`, leaving 33 free names.
    - ⭐ **LAUNCHED 10-05 09:01 on the Mac** ("Mac, today"; "Neither: launch as ruled"). The tree is
@@ -154,7 +154,7 @@ handoff"). Self-contained.
    - Option A is now in the driver. Regenerate `calibration/torch/port_targets.csv` for the arm first: the repo's
      copy is a stale 32-parameter set from 09-21.
    - Two questions Marcus may want to fold in or defer:
-     - `hs_asx_frac`'s judgement width, which decides `k_w` (§1);
+     - `hs_asx_frac`'s judgment width, which decides `k_w` (§1);
      - H2 (item 2).
 2. **H2, the ocean thermal excess in the low-latitude column.**
    - The candidates:
@@ -181,7 +181,7 @@ handoff"). Self-contained.
 - **The CO₂-prescription technique** (`match_co2()` in that driver), reusable:
   - an output row is the START-of-month state, so lead by one row;
   - the NH−SH difference needs a SUSTAINED flux kh (dG/dt + 2G/`tau_ex`).
-- **A frozen tree from BEFORE `92b5756`** still has the old multistart overrun behaviour.
+- **A frozen tree from BEFORE `92b5756`** still has the old multistart overrun behavior.
 - **Carried:**
   - the coupled futures hold the 1850 GMST (−0.052 K) back to 1750 (pre-existing, noted);
   - MAGICC is restricted (cite M11).

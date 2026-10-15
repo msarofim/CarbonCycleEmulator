@@ -6,7 +6,7 @@ it.** The precedent is 10-02 (v), where card 6's facts were drafted for your wor
 
 ## The facts (each with its source)
 1. **The model's CO₂ growth peaks about 1 month after the Niño 3.4 index; the measured record peaks about 5 months
-   after.** The estimator is the centred 12-month difference of monthly global CO₂, spline-detrended, 1980–2024 (NOAA MBL).
+   after.** The estimator is the centered 12-month difference of monthly global CO₂, spline-detrended, 1980–2024 (NOAA MBL).
    - Model at hilda34g: +1 (CHANGELOG 10-03 b; re-measured 10-04 i). Observed: +5, r 0.50 (10-02 x).
 2. **The land's El Niño response is FITTED to arrive 2.64 ± 0.39 months after the index** (`lag_enso_land`, DESIGN's
    `L_MEI`, objective #15; adopted 10-03 h). The ocean's response is not lagged.

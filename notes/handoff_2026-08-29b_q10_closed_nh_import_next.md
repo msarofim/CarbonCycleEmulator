@@ -55,7 +55,7 @@ P1 falsified at both ends again (+6.24 vs a 14.88 gate; +7.41 vs 21.80).
   `sigma_eff` on the ocean-gradient rows); 27j/27p/27q all ran 08-27. **The same defect the previous
   handoff §5 flags in `test-mode-file.R`, reproduced in a driver whose header cites it.** Amended
   the prereg to **GAP form before any arm result** (`0e4f9b3`). C2-as-registered then printed
-  ⚠ OPTIMISER FAILURE on the two arms that were perfectly correct, by exactly −0.082 and −0.049.
+  ⚠ OPTIMIZER FAILURE on the two arms that were perfectly correct, by exactly −0.082 and −0.049.
 - ✅ **The shift is an ADDITIVE CONSTANT, measured at four points spanning 60 log units of gap:
   −0.082, −0.082, −0.080, −0.080.** That is what licenses gap form, and it is a measurement.
   In gap form the reproduction of three other drivers is exact: **+12.57, −29.75, −43.60**.
@@ -97,7 +97,7 @@ cheap), but not as a repair candidate.
 
 **⇒ WHAT I RECOMMEND INSTEAD: the SH land box's OWN INTERNAL CANCELLATION.** That is where the
 arc's own evidence points and it is the one thing never attacked. [[sh_land_undercancels]]:
-**CT2022 has SH land cancelling 74.9 % of its gross swing against NH's 31.8 % — a 2.72× asymmetry —
+**CT2022 has SH land canceling 74.9 % of its gross swing against NH's 31.8 % — a 2.72× asymmetry —
 and the model UNDER-CANCELS**; and the SIZE is exonerated, with CMIP6 saying SH productivity should
 roughly DOUBLE (A = 0.94 vs MOD17's 0.50, the opposite way from the assumed bracket). A model whose
 gross SH swing is right and whose cancellation is 2.7× too weak lands at ~1.9× observed — **which
@@ -167,7 +167,7 @@ reason. Then the (gross, lag) 2×2. [[gross_phase_not_amplitude]]
 
 ## THE DECISIONS
 
-1. **CMIP6 ensemble value for `SEAS_NPP_AMP_SH`: AUTHORISED, diagnostic arms only.** Never shipped,
+1. **CMIP6 ensemble value for `SEAS_NPP_AMP_SH`: AUTHORIZED, diagnostic arms only.** Never shipped,
    never an observational constraint. Shipped stays 0.5027 `status="data"`. (prereg 29c §0)
 2. **A diagnostic arm may leave a bracket for MEASUREMENT, not adoption.** (prereg 29c §0)
 3. **RATIFIED: do NOT adopt `refit_20260828_sigma_eff`**; `ccx_mode_file()` stays on `from90` and the
@@ -175,7 +175,7 @@ reason. Then the (gross, lag) 2×2. [[gross_phase_not_amplitude]]
    README. ⚠ **The pinned-96 successor is NOT a config change and was NOT launched** — three
    blockers, all checked: `ARM_HML_BOUND` is marked PROVENANCE ONLY since `2153bd6` and the driver's
    unbounded block is unconditional (needs a reviewed NEW constant); a BOUND with prior
-   renormalisation is a DIFFERENT OBJECT from a PIN and which is wanted is itself a decision; and
+   renormalization is a DIFFERENT OBJECT from a PIN and which is wanted is itself a decision; and
    four Julia workers were at ~99 % CPU (load 6.32). **QUEUED.**
 4. **`test-mode-file.R`: the suite is GREEN — 1210 pass / 2 skip / 0 fail** (was 1205 / 1 fail). (a) declared exemption for the two-mode comparison;
    (b) the trap restated in GAP form — stored ordering **+0.113** kept as the TRAP, load-bearing

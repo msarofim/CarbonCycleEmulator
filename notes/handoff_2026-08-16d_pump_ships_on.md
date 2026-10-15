@@ -82,7 +82,7 @@ the two comparable.
   +13.9, `d13c_level_MLO` +4.4, `d13c_level_SPO` +3.5. Gradient rows are +211.2.
 - **The pinned carbonate share survives an independent check**: scanning `pump_carb_frac` at fixed
   `pump_grad` = 280 gives a quadratic vertex **0.214 ± 0.026** against the **0.23** GLODAP's
-  alkalinity gradient pinned — **0.61 σ**. Not a licence to fit the share.
+  alkalinity gradient pinned — **0.61 σ**. Not a license to fit the share.
 
 **READ THE OFF-TO-OPTIMUM MARGIN AS AN UPPER BOUND.** Every arm including OFF sits at the same
 unrefitted mode; the no-pump incumbent never gets the refit `beta_max`/`kz`/`h_ml` would give it.
@@ -142,7 +142,7 @@ condition under which a new parameter always looks best.
 | `R/model.R` | `pump_grad = ccx_const("PUMP_GRAD_OBS")` (was `0`). **`pump_grad = 0` still turns the pump fully off and bit-reproduces every pre-2026-08-16 result** — the `is.null(aux$pump)` guard is untouched. |
 | `R/calibrate.R` | `pump_grad = list(tr = "log", init = 233.109, prior = dlnorm(log(PUMP_GRAD_OBS), 0.25))` |
 
-**THE PRIOR MILDLY DOUBLE-COUNTS GLODAP, DELIBERATELY AND IN WRITING.** Its centre is the same
+**THE PRIOR MILDLY DOUBLE-COUNTS GLODAP, DELIBERATELY AND IN WRITING.** Its center is the same
 observation `ocean_grad_dic` scores. The ±25 % width is ~4.5× the likelihood's own 13.1 µmol/kg, so
 the data dominate and the prior only excludes absurd magnitudes. **Check the posterior against the
 prior before quoting a pump magnitude as "constrained."** A `dunif` on a generous bracket is the

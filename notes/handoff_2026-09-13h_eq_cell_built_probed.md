@@ -61,5 +61,5 @@ untouched original. My prereg-time "4 % of the excursion" was wrong by (excursio
 - `w_eq`/`gamma_eq` are BASE parameters today (defaults 0). `ccx_cpp_par()` defaults them to 0 for older lists.
 - `ccx_box_annual_conc()`'s return is unchanged (a bare named pair); the sums live in `.ccx_box_annual_sums()`.
 - The eq-cell tests run the aseasonal `ccx_spinup()` under `seas_ml = 1` only where the assertion is parity/conservation; the
-  instant-read contracts use `seas_ml = 0` (the aseasonal spinup is not a point on the seasonal orbit — a KNOWN artefact).
+  instant-read contracts use `seas_ml = 0` (the aseasonal spinup is not a point on the seasonal orbit — a KNOWN artifact).
 - Scratch diagnostics for the bug hunt (not committed) reproduced the isolation: `w_eq = 0` alone raised the ML p2p to 110.

@@ -79,7 +79,7 @@ the no-power gate.
 
 ⚠ **(a)'s closing line is struck**, with a pointer to (b) §3. It had said that changing the default
 would "re-mean every past gate-12 number". **Overstated** — `JOOS_SRC` already wrote the arm into
-every log, so past runs were labelled and nothing retroactive was ever at stake. The ruling was
+every log, so past runs were labeled and nothing retroactive was ever at stake. The ruling was
 cheaper than it had been presented as being. Pushed to `origin/main`.
 
 ⭐ **Marcus's standing frame is intact: Joos and FaIR remain COMPARISONS, not targets to meet**

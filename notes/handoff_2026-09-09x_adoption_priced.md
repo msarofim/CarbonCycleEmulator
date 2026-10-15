@@ -100,7 +100,7 @@ Both are gated inert in `test-spinup-diagnostics.R`.
 ## 5. ⭐ A DEAD PARAMETER, AND HOW IT WAS FOUND
 `seas_amp_NH = 12` / `seas_amp_SH = 2` in the canonical mode's base list are **DEAD** at
 `seas_drivers = 1`. `R/model.R:1291-1296` says so ("THE SINE'S KNOBS, live only at
-`seas_drivers = 0`") and nothing tested it. Now gated **both ways**: symmetrising to 7/7 moves the
+`seas_drivers = 0`") and nothing tested it. Now gated **both ways**: symmetrizing to 7/7 moves the
 objective by **exactly 0** at `seas_drivers = 1` and by **−1854.94** at `seas_drivers = 0`.
 ⚠ **And `seas_drivers = 0` is NOT an aseasonal control** — it hands seasonality to the sine at those
 amplitudes ⇒ [[ccx_seas_amp_dead_at_drivers]].
@@ -112,7 +112,7 @@ quantity intended* — and both were caught by their own printed output, not by 
    solve timing against a **WARM** per-evaluation average. Fixed: one warm-first timing helper, and
    an assertion that a part cannot exceed its whole.
 2. **A NULL WITH NO POWER, read as a result.** The first CHECK 4 "tested" the hemispheric asymmetry
-   by symmetrising `seas_amp_*` and got a figure **identical in every printed digit** to the
+   by symmetrizing `seas_amp_*` and got a figure **identical in every printed digit** to the
    as-fitted arm; I first read that as "100 % of it". It was a dead parameter
    ⇒ [[no_power_null]]. ⚠ The corrected arm then failed its OWN first identity — `seas_drivers = 0`
    does not remove seasonality — and that failure is how the "seasonality itself" finding in §2 was

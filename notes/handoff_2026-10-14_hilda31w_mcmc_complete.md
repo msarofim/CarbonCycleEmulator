@@ -44,7 +44,7 @@
 - **"Do 1, 2, 4 and 3; run 5 overnight"**; the `k_w` arm: **"Two-start profile, Mac (Recommended)"**.
 - **"Yes, copy the results and compute the prior ledger"**.
 - **Mine, stated:**
-  - `run_price_profile.R` RESTATES the wave's optimiser recipe and constants rather than calling the wave's driver. The wave's reference machinery has no slot for a warm start from another objective's mode. Said in its header.
+  - `run_price_profile.R` RESTATES the wave's optimizer recipe and constants rather than calling the wave's driver. The wave's reference machinery has no slot for a warm start from another objective's mode. Said in its header.
   - `diag_mcmc_identifiability.R`'s bins (1 / 2 / 5 m; the outer 1 % / 5 % of a band) are descriptive, not thresholds.
   - `diag_pulse_vs_tcre.R`'s screen-read anchor was re-read off the live app: 1.36 → 1.35.
   - Smoke runs used Laplace draws dressed as a pooled file, in scratch only, never committed.

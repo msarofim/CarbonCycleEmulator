@@ -52,7 +52,7 @@ I first wrote its absence up as blocked on the quarantined `diag_landed_gap_stre
 
 **ARM GAP (Marcus's 08-30 ruling 3, discharged):** refitted **−21.19** vs incumbent-arms −19.86.
 Refitting BOTH arms did not close it — it WIDENED. `PIN_PRIOR_CREDIT` is γ-independent, so the
-excess **−9.52 is a likelihood differential re-optimisation cannot recover.** ⇒ `test-mode-file.R`'s
+excess **−9.52 is a likelihood differential re-optimization cannot recover.** ⇒ `test-mode-file.R`'s
 premise is **permanently** false, not transiently; it needs rewriting, not re-tolerancing.
 
 ---
@@ -80,7 +80,7 @@ objective to **−0.0** over 21 streams; the incumbent's is **−40.6** off.
 
 ## 3. ⚠ THE PRICING TEST (`5050df1`) — THE SESSION'S MAIN RESULT
 
-Two iso-fit frontiers from the new mode, each **re-optimising the other parameters at every step**
+Two iso-fit frontiers from the new mode, each **re-optimizing the other parameters at every step**
 (a raw one-at-a-time scan manufactures the answer — `match_incumbents_optim`, 309 log-units of
 artifact in this very model).
 
@@ -89,7 +89,7 @@ artifact in this very model).
 sigmas and dropped `luc`/`deep`/`ocean_grad`, reading −1748.09. **253 log-units of pure construction
 artifact**, the same trap wearing a new hat. Any future frontier must carry this gate.
 
-**OCEAN AXIS** (`kz` forced down, `beta_max`/`fert_k`/`q10` re-optimised):
+**OCEAN AXIS** (`kz` forced down, `beta_max`/`fert_k`/`q10` re-optimized):
 
     kz     d loglik   z_land   z_ocean   IRF100
     6400        0     +2.37     -0.82    0.284
@@ -97,16 +97,16 @@ artifact**, the same trap wearing a new hat. Any future frontier must carry this
     3000    -1212     +4.20     -2.99    0.274
     500    -19141     +7.27     -5.94    0.228
 
-⇒ **EVERYTHING GETS WORSE.** As `kz` falls the optimiser raises `beta_max` 0.554 → 0.977 and the
+⇒ **EVERYTHING GETS WORSE.** As `kz` falls the optimizer raises `beta_max` 0.554 → 0.977 and the
 **LAND takes over the drawdown the ocean stops doing**. The CO₂ record pins the TOTAL and the two
 substitute almost perfectly, so the pulse decays just as fast.
 
 ⚠ **THIS REFUTES THE FRAMING I GAVE ON 08-30** — that the railed `kz` and the fast pulse were "the
 same finger pointing at the same thing". **`kz` is not the lever.** `ccx_kz_joos_cost`'s own caveat
 ("NOT an argument for lowering `kz`", one-at-a-time at package defaults) is vindicated and
-quantified: its kz = 500 row gives IRF 0.410; re-optimised it gives **0.228**.
+quantified: its kz = 500 row gives IRF 0.410; re-optimized it gives **0.228**.
 
-**LAND AXIS** (`beta_max` forced down, `kz`/`fert_k`/`q10` re-optimised):
+**LAND AXIS** (`beta_max` forced down, `kz`/`fert_k`/`q10` re-optimized):
 
     beta_max  d loglik   z_land   z_ocean   IRF100
     0.5552          0     +2.35     -0.78    0.283
@@ -121,7 +121,7 @@ IRF(100) improves alongside, so the land-sink excess and the fast pulse ARE coup
 overshooting the other way; the axis would need `beta_max` ≈ 0.01 to reach 0.409.
 
 **VERDICT.** Not weighting (−232 is a real fit cost). **Two coupled but distinct defects**: gate 7 is
-closable on the land axis at a price that is **Marcus's judgement call**, and gate 12a is closable on
+closable on the land axis at a price that is **Marcus's judgment call**, and gate 12a is closable on
 **neither** axis. The latter is an **EQUILIBRIUM** statement, not a rate one — the model sits at
 0.200 airborne at 300 yr, already **below Joos's asymptote a₀ = 0.2173** — so it points at ocean
 CAPACITY (buffer / Revelle / alkalinity), which no uptake RATE can fix. **That is the diagnostic to
@@ -239,7 +239,7 @@ h_ml-gate precedent: `test-likelihood.R`'s 21→22 count, and the parameter-name
    ⚠ **`CCX_ARM_MAXIT` is the knob that makes a smoke cheap** — leaving it at 20000 while cutting
    restarts/cycles produced a run still inside its FIRST restart at 23 min.
 2. **Then the 6 failures resolve**, and `PIN_PRIOR_CREDIT` can be re-derived from comparable arms.
-3. **Marcus's judgement call on the land axis**: gate 7 closes for −232 log-units. Is a correct sink
+3. **Marcus's judgment call on the land axis**: gate 7 closes for −232 log-units. Is a correct sink
    partition worth that much CO₂/isotope fit? The model currently buys CO₂ accuracy with partition
    error, and the partition target is an INDEPENDENT observation.
 4. **The gate-12a equilibrium diagnostic** — ocean buffer/Revelle capacity, not rates. Nothing on

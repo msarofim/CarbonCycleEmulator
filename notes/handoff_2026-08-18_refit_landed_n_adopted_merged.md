@@ -20,9 +20,9 @@ below.
 2. **§5.3 TOOK THE GOOD BRANCH.** The CO₂-level streams recovered hugely (`co2_level_SPO`
    −255.94 → **−62.87**), so the bound was cheap and the N-vs-D comparison is readable. §2.1.
 3. **`h_ml` LANDED INTERIOR IN BOTH ARMS (94.36 / 91.16), ROWS LIVE.** Nobody pre-registered this and
-   it is the cleanest result of the run: **16g's 236-log-unit pull was an artefact of freezing the
+   it is the cleanest result of the run: **16g's 236-log-unit pull was an artifact of freezing the
    other 19 parameters.** §2.2.
-4. **ARM N ADOPTED, PROVISIONALLY** (Marcus 2026-08-18). Evidence favours N by **5.62**, but read
+4. **ARM N ADOPTED, PROVISIONALLY** (Marcus 2026-08-18). Evidence favors N by **5.62**, but read
    §2.4 before quoting that — the driver itself says *indicative, not a Bayes factor*. §3.
 5. **THE PER-STREAM READING REVERSED.** "D's gain is entirely the CO₂ record" is **wrong**: CO₂ ties,
    and the contest is δ¹³C levels vs sinks + ¹⁴C. §2.3.
@@ -77,7 +77,7 @@ everything below.
 **Had the 236-log-unit pull survived a refit, `h_ml` would sit pinned at the 85 bound. It does not, in
 either arm.** This confirms 16g §3's reading directly: with 19 parameters frozen, `h_ml` was merely
 the cheapest patch for a CO₂-level misfit that `kz`/`k_w`/`beta_max` absorb on their own. **The 236
-was an artefact of the freeze, and it is now retired as a live concern for the mode-find.**
+was an artifact of the freeze, and it is now retired as a live concern for the mode-find.**
 
 **`pump_grad` is CONSTRAINED in both arms** — 289.60 / 282.26, against **963.6 / 1431.0** in 16f's
 rows-off truncated arms. Both near the old mode's 1-D optimum (274.5), above the observed 233.11.
@@ -116,7 +116,7 @@ a setting the argument was not fitted to.
 | **Laplace log-evidence** | | | **−5.62** |
 
 Both Hessians **PD** (cond 6.8e5 / 5.5e5) ⇒ **`recompute_hessian.R` was needed for neither arm.**
-`(d/2)log2π` cancels (same 20 parameters) and 16g §4's prior renormalisation constant (+1.5805) is
+`(d/2)log2π` cancels (same 20 parameters) and 16g §4's prior renormalization constant (+1.5805) is
 identical in both arms, so it cancels too.
 
 **⚠️ THE DRIVER'S OWN VERDICT: "READ THIS AS INDICATIVE, NOT AS A BAYES FACTOR."** `kz` is pinned near
@@ -132,7 +132,7 @@ tolerance. They are **plateaus, not climbs** (N moved 0.7 log-units over restart
 
 ## 3. THE DECISION — arm N, PROVISIONALLY (Marcus 2026-08-18)
 
-**The case for N:** favoured on evidence (5.62), on MAP height, and it wins the **δ¹³C levels
+**The case for N:** favored on evidence (5.62), on MAP height, and it wins the **δ¹³C levels
 (+17.04)** — the stream class the gradient rows and the pump exist to constrain.
 
 **What "provisional" is carrying, and it is not a formality:**
@@ -226,10 +226,10 @@ DERIVED at the protocol it should have been stated at; none was re-baselined.**
 | 4 | `test-luc-permanence.R:104` | 0.074 vs < 0.02 | **stale premise** — needs **both** `f_luc_perm = 0` **and** `f_luc_wood = 1`. With both: af@100 = **−0.0032**, af@150 = −0.0026, reproducing the recorded old signature and passing. |
 
 **A REAL DEFECT FOUND ALONGSIDE (4), minor but load-bearing:** `R/cpp.R:104-105` asserts *"this default
-IS the old behaviour, because `f_luc_wood` = 1 is the incumbent decision"* while **`R/model.R:159` sets
+IS the old behavior, because `f_luc_wood` = 1 is the incumbent decision"* while **`R/model.R:159` sets
 `CCX_F_LUC_WOOD_DEFAULT <- 0`** — a comment claiming a default the code does not have, **in the block
 whose stated purpose is stopping the R and C++ cores from silently running different models** ("which
-is exactly what `gamma_enso` did"). Behaviour is correct; the comment misleads.
+is exactly what `gamma_enso` did"). Behavior is correct; the comment misleads.
 
 **ON JOOS, FRAMING CORRECTED (Marcus 2026-08-18).** The re-measurement was the *evidence* that the
 failing numbers are right, and an earlier draft over-promoted it. On the **integrated** IRF the model
@@ -288,7 +288,7 @@ rather than inherited.
 4. **THE PILOT MCMC**, and whether 16f §5.4's barrier is what has been breaking it. **The `h_ml`
    bound question RE-OPENS here** — a hard bound is defensible for a mode-find and is a **weaker
    claim for a sampler**. §2.2 removes much of the motivation for the bound (the pull was a freeze
-   artefact), so a posterior run may not need it at all. **That is the single most consequential open
+   artifact), so a posterior run may not need it at all. **That is the single most consequential open
    question in the project.**
 5. **`kz` pinned near its bracket top in both arms** (96.6 % / 88.9 %) — is this a blocker or does the
    bracket need re-deriving? It is also what makes the evidence "indicative". (carried, 16g item 8)
@@ -345,7 +345,7 @@ cd ~/Documents/2026/CodeProjects/CarbonCycleEmulator && claude --remote-control 
 
 > Read `notes/handoff_2026-08-18_refit_landed_n_adopted_merged.md`. **The refit LANDED**: §5.3 took
 > the good branch (`co2_level_SPO` −256 → −63), **`h_ml` went INTERIOR in both arms (94.4 / 91.2)** so
-> 16g's 236-log-unit pull was a freeze artefact, and **arm N is ADOPTED PROVISIONALLY** (evidence
+> 16g's 236-log-unit pull was a freeze artifact, and **arm N is ADOPTED PROVISIONALLY** (evidence
 > +5.62, but *indicative, not a Bayes factor* — `kz` pinned, both arms capped, 0.7 noise floor).
 > `luc-veg-debit` is **merged; trunk is `main`**. **Job B is DONE**: all 4 test failures diagnosed and
 > **none is a code bug** — three mis-specified bars, one stale premise needing `f_luc_wood = 1` as well

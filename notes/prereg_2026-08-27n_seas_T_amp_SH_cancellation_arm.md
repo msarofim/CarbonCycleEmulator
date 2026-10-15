@@ -2,9 +2,9 @@
 # Written and committed BEFORE `calibration/diag_seas_T_amp_sh_power.R` exists. No gate may move.
 
 **Hypothesis (27m).** The model's SH land seasonal signal at SPO is 1.92× the observed **not because
-its productivity is too big, but because too little of it is CANCELLED.** CT2022 says SH land nets
+its productivity is too big, but because too little of it is CANCELED.** CT2022 says SH land nets
 only **25.1 %** of its gross productivity swing to the atmosphere (NH: 68.2 %). The model's
-cancelling channel is soil respiration, scaled by **`seas_T_amp_SH`**, which the fit has driven to
+canceling channel is soil respiration, scaled by **`seas_T_amp_SH`**, which the fit has driven to
 **1.0391 K = 28.9 % of the LOW end** of its measured bracket [3.5915, 7.1012] — while cranking
 `seas_T_amp_NH` to **131 % of its HIGH end**. [[seas_amps_hemispheric_inversion]]
 
@@ -14,7 +14,7 @@ cancelling channel is soil respiration, scaled by **`seas_T_amp_SH`**, which the
 
 ⚠ **BOUNDARY.** Everything in this section is a measurement of **channels that already exist at the
 incumbent mode**, from the existing `calibration/diag_seas_signature_inversion.R` plus closed-form
-arithmetic. **No arm has been run and no parameter has been re-optimised.** The gates in sec.3 are
+arithmetic. **No arm has been run and no parameter has been re-optimized.** The gates in sec.3 are
 predictions about a run that has not happened. This mirrors 27h, whose pre-check *killed* its test
 before a prereg was written; this one survives its pre-check, which is why this file exists.
 
@@ -64,7 +64,7 @@ mode. Grid = the **MEASURED bracket plus the two geometry points**:
 ⚠ **The last two are OUTSIDE the observed bracket and are reported FOR THE GEOMETRY ONLY — they are
 not proposed values.** [[threshold_from_obs_or_law]]
 
-**STAGE 2 — CONDITIONAL REFIT.** The whole 8-parameter seasonal slice re-optimised at each fixed
+**STAGE 2 — CONDITIONAL REFIT.** The whole 8-parameter seasonal slice re-optimized at each fixed
 `seas_T_amp_SH`, continuation warm-start + BFGS polish + restart-until-still, **with restart count
 and last gain PRINTED**. ⚠ An under-converged optimum at a fixed parameter OVERSTATES that
 parameter's cost and manufactures an "unaffordable" verdict — 27h's first conditional run hit `maxit`
@@ -128,7 +128,7 @@ so it cannot be back-fitted:
 `seas_npp_amp_SH` raised to CMIP6's 0.94 AND `seas_T_amp_SH` free, the fit should land
 `seas_T_amp_SH` INSIDE its observed bracket and net SH-local land within 15 % of 0.683.**
 
-⚠ **NOT AUTHORISED YET.** It changes `SEAS_NPP_AMP_SH` to a **CMIP6 ensemble** value — models, not
+⚠ **NOT AUTHORIZED YET.** It changes `SEAS_NPP_AMP_SH` to a **CMIP6 ensemble** value — models, not
 observation — and that is Marcus's call, exactly as the GPP end was. **Do not run C1 until it is
 made.** ⚠ And the ratio transfer is an **approximation**: 0.251 is a hemispheric FLUX ratio and the
 SPO signature is a particular weighting of it, so the 4 % agreement must not be quoted as an identity.

@@ -22,7 +22,7 @@ been.**
    ocean inventory at 190 ‰ of atmospheric misfit. §4.
 4. **A ¹⁴C source nobody declared:** land-use-change emissions inject ~28 kmol of ¹⁴C ex nihilo,
    14–16 % of the system excess. Found by checking the budget closes, not by looking for it.
-   **Not fixed — it is a modelling decision.** §5.
+   **Not fixed — it is a modeling decision.** §5.
 5. **Production MCMC is still not launched**, for the same reason as before, now better
    evidenced: two independent ¹⁴C constraints indict the same structural defect. §7.
 
@@ -94,7 +94,7 @@ takes that rather than concede anything atmospheric.
 ## 4. Why no setting of the constraint can win
 
 `calibration/profile_bomb_total.R` (91.7 min): `bomb_total` ∈ {102, 120, 135, 150, 165} kmol with
-every other parameter re-optimised at each point, under **both** target sets.
+every other parameter re-optimized at each point, under **both** target sets.
 
 | `bomb_total` | logpost | ocean term | ocean excess 1975/1995 | bomb-win Δ¹⁴C rms | CO₂ rms |
 |---|---|---|---|---|---|
@@ -109,9 +109,9 @@ every other parameter re-optimised at each point, under **both** target sets.
 **A framing error worth not repeating.** The target-set choice was flagged as worth ~130
 log-units. That estimate assumed **per-year quadrature**, which the term does not use. The model
 overshoots *both* years in the same direction — exactly the direction a common method bias is
-allowed to explain — so once the shared error is modelled as the rank-one term it actually is,
-the two sets differ by **0.7 log-units**. The lesson generalises: when observations share a
-method, whether their error is modelled as independent or as a common bias changes the leverage
+allowed to explain — so once the shared error is modeled as the rank-one term it actually is,
+the two sets differ by **0.7 log-units**. The lesson generalizes: when observations share a
+method, whether their error is modeled as independent or as a common bias changes the leverage
 by more than an order of magnitude, and the *sign of the residuals* tells you which regime you
 are in before you compute anything.
 
@@ -152,7 +152,7 @@ ratio** while the vegetation box is never debited. 273 GtC of LUC carbon at a la
 Two independent estimates agree to ~1 %: the closure residual above, and integrating the LUC flux
 against the run's own vegetation ratio (24.0 / 27.9 kmol).
 
-**NOT FIXED — this is a modelling decision for Marcus.** The case that it is a bug: the ¹⁴C
+**NOT FIXED — this is a modeling decision for Marcus.** The case that it is a bug: the ¹⁴C
 leaving a cleared forest was taken up from the atmosphere earlier and is already inside the bomb
 budget, so injecting it again double-counts, and the model's own veg/soil pools have separately
 absorbed their share. The case that it is defensible: LUC is exogenous to two *responsive* pools,
@@ -177,7 +177,7 @@ the veg box, so no post-bomb ¹⁴C enters.
 
 **(i) The LUC ¹⁴C injection** (§5). Bug or acceptable consequence? Blocks nothing, but step 3
 (`tau_veg`) sits directly on it: freeing `tau_veg` against a land ¹⁴C inventory that is ~40 %
-undeclared source would calibrate a pool turnover to absorb a bookkeeping artefact.
+undeclared source would calibrate a pool turnover to absorb a bookkeeping artifact.
 
 **(ii) `LIK_EXCESS_C14_REP_FRAC = 0.15`** (§2c). Measured from a +4.8 % / +18.0 % spread, but
 only two comparisons stand behind it and one of them is against N&L's *modelled* stratosphere.
@@ -202,7 +202,7 @@ Steps renumbered from the previous handoff's §7, with step 1 struck out.
    the ocean inventory by 46–83 % at the total it prefers (§3 here). A wrong *amount* cannot
    produce both.
 3. **Free `tau_veg`** into `CCX_PARAM_TABLE` — but **settle decision 6(i) first**, or the
-   calibration absorbs the LUC artefact. It is fixed at 10 yr, is not calibrated, and trades CO₂
+   calibration absorbs the LUC artifact. It is fixed at 10 yr, is not calibrated, and trades CO₂
    against ¹⁴C directly (3 yr: bomb rms 59.5 but CO₂ rms 11.98; 10 yr: 69.1 and 0.99). Consider
    also whether the two-pool land survives at all: no (`tau_veg`, `tau_soil`) keeps both the CO₂
    fit and a defensible land ¹⁴C inventory. N&L's biosphere has four pools and 2200 PgC; a third,

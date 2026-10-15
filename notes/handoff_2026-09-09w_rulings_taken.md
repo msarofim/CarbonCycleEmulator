@@ -1,4 +1,4 @@
-# Handoff — 2026-09-09w. **ALL FIVE RULINGS TAKEN AND THE SUITE IS GREEN AT 2397/3/4. ⭐⭐ THE PERIODIC SPINUP RETURNS 99.6 % OF P12's −514, SO THAT PENALTY WAS THE SEED AND "P12 IS PHYSICS" IS RETRACTED. BOTH PRIOR LEGS RE-CENTRED FROM data/ PRODUCTS; EVERY STORED LOGPOST IS STALE BY −0.811 AND THE LIKELIHOOD IS UNTOUCHED. ⛔ THE REFIT IS NEXT AND ONE RULING GATES IT.**
+# Handoff — 2026-09-09w. **ALL FIVE RULINGS TAKEN AND THE SUITE IS GREEN AT 2397/3/4. ⭐⭐ THE PERIODIC SPINUP RETURNS 99.6 % OF P12's −514, SO THAT PENALTY WAS THE SEED AND "P12 IS PHYSICS" IS RETRACTED. BOTH PRIOR LEGS RE-CENTERED FROM data/ PRODUCTS; EVERY STORED LOGPOST IS STALE BY −0.811 AND THE LIKELIHOOD IS UNTOUCHED. ⛔ THE REFIT IS NEXT AND ONE RULING GATES IT.**
 
 > ⚠ This header states what is DONE. For live state read `CHANGELOG.md` **09-09w** and **09-09w (2)**
 > and **`INDEX_ccx_seas_ml.md`** (new — the round-6 arc, split off `INDEX_ccx_seas` today), not this
@@ -14,7 +14,7 @@ section), `INDEX_ccx_seas_ml.md` (new), `INDEX_diag.md`.
 ## 0. WHAT THE NEXT SESSION SHOULD DO
 1. ⛔⛔ **RULE §6 FIRST — it GATES THE REFIT and it is Marcus's.** Should the periodic spinup become
    **the OBJECTIVE's** spinup? Marcus ruled *build it*; adoption is a separate, larger step that
-   changes what every future fit optimises. **A refit under the aseasonal seed and one under the
+   changes what every future fit optimizes. **A refit under the aseasonal seed and one under the
    periodic seed are NOT comparable — pick BEFORE launching, not after.**
 2. Then the refit: **31 par** (`ent_seas_amp_SH` KEPT — ruled), **LIKELIHOOD-only**, a **TORCH
    ARRAY** not a laptop job ⇒ [[consider_torch_first]].
@@ -80,11 +80,11 @@ same defect at a better number ⇒ [[derived_must_mean_computed]].
 
 | | was | now |
 |---|---|---|
-| `.ENT_SO_SST_AMP` | 3.0 (the band **P2P** labelled "half-amplitude") | **1.499498** K |
+| `.ENT_SO_SST_AMP` | 3.0 (the band **P2P** labeled "half-amplitude") | **1.499498** K |
 | `.ENT_SO_PCO2_AMP` | 19.45 (the **per-cell** reduction) | **16.258289** µatm |
 | `ENT_SEAS_AMP_SH_INBAND` | 29.68 | **17.7574** |
-| `ENT_SEAS_AMP_SH_DERIV` (**the prior centre**) | 10.95 | **6.5525** |
-| `h_ml` prior centre | 83.94 m | **59.69 m**; P8 exposure 61.3 % → **23.8 %** |
+| `ENT_SEAS_AMP_SH_DERIV` (**the prior center**) | 10.95 | **6.5525** |
+| `h_ml` prior center | 83.94 m | **59.69 m**; P8 exposure 61.3 % → **23.8 %** |
 
 ⭐ `data-raw/build_so_sst_seas_amp.R`'s **GATE 1 is the point**: it reproduces the already-registered
 `SST_SEAS_AMP_SH_OBS` (1.74644) from the same product, mask, window and estimator to **1.9e−05**,
@@ -128,7 +128,7 @@ all five, and KEEP the transcription.** Each was re-pointed with its POWER prese
 mutation-tested.
 
 - ✅ **THE REAL BUG, and its guard worked exactly as designed.** `test-ent-seas-fitted.R:27` ties
-  `CCX_PARAM_TABLE$ent_seas_amp_SH$init` to the derived centre at the TYPED PRECISION. The centre
+  `CCX_PARAM_TABLE$ent_seas_amp_SH$init` to the derived center at the TYPED PRECISION. The center
   moved and `init` did not: **drift 4.3999**, caught the same day ⇒ [[derived_must_mean_computed]].
   **FIXED IN THE CODE** (10.952353 → **6.552465**), not in the test. ⚠ It stays a literal because
   `CCX_PARAM_TABLE` is built in `calibrate.R`, which the alphabetical bootstrap sources BEFORE
@@ -146,7 +146,7 @@ mutation-tested.
   precision a 6-decimal literal can actually deliver.
 - `test-u-hs-fitted.R:32,36` — asserted the **retired** geometric-mean encoding. Replaced by the
   ruled contract plus the **P8 exposure**, which is what the ruling was actually about;
-  mutation-tested so that the retired centre is *rejected*. The unchanged WIDTH is now asserted too,
+  mutation-tested so that the retired center is *rejected*. The unchanged WIDTH is now asserted too,
   so a future re-derivation is a deliberate act rather than a drift.
 
 ## 6. ⛔⛔ THE ONE RULING OWED — AND IT GATES THE REFIT

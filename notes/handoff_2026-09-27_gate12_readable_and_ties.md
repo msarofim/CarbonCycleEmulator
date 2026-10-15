@@ -63,7 +63,7 @@ not assume a pin is doing work. ⇒ [[free_set_is_not_the_parameter_set]].
 canonical needs **no migration at all**. The overlay additionally **errors** on an absent name rather
 than deleting it, so the guarantee does not rest on the line above staying correct.
 
-⭐⭐ **MARCUS'S CONSTRAINT WAS HONOURED — nothing here scores anything.** No band, no threshold, no
+⭐⭐ **MARCUS'S CONSTRAINT WAS HONORED — nothing here scores anything.** No band, no threshold, no
 pass/fail; the script's own *"reported, not gated"* framing is untouched. **Joos and FaIR remain
 comparisons, not targets.**
 
@@ -91,7 +91,7 @@ Marcus: *"I like 'influenced about equally by X and Y'."*
 | CO₂ level | mostly influenced by Land uptake (25 %) |
 | Δ¹⁴C in the air (bomb) | **influenced about equally by** High-latitude structure (30 %) **and** Input scalings & reporting (29 %) |
 
-⭐ **THE THRESHOLD IS MEASURED.** Across all 12 rows the behaviours separate with a gap and nothing
+⭐ **THE THRESHOLD IS MEASURED.** Across all 12 rows the behaviors separate with a gap and nothing
 in it:
 
 | | margins |
@@ -100,7 +100,7 @@ in it:
 | winner **STABLE** | 3.02, 4.94, 6.78, 6.94, 24.4, … pp |
 
 The cut is the **geometric mean of the two endpoints, 1.597 pp** — equidistant in RATIO (1.9× either
-way), the right centring for a separation spanning two orders of magnitude. **Both endpoints are
+way), the right centering for a separation spanning two orders of magnitude. **Both endpoints are
 stored beside it** (`APP_CMAP_TIE_FLIP_MAX`, `APP_CMAP_TIE_STABLE_MIN`) so the cut can be
 **re-derived rather than trusted**.
 

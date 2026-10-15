@@ -1,5 +1,5 @@
 # Handoff — 2026-09-08b. THE TWO DECLARED-OR-RAILED QUANTITIES ROUND 3 LEFT: `u_hs` (declared 38 m/yr = a 70 Sv flush) and `h_ml` (40 m in every HILDA round). What the literature says each should be, how far the model is from it, and the tests that decide the fix before a round 4.
-# **⛔ Design note for a ruling. Nothing built, nothing launched. Canonical `ent26`. Every number below is either GENERATED (the R one-liners are quoted) or CITED; recollections are labelled.**
+# **⛔ Design note for a ruling. Nothing built, nothing launched. Canonical `ent26`. Every number below is either GENERATED (the R one-liners are quoted) or CITED; recollections are labeled.**
 
 Read first: `handoff_2026-09-08_round3_result.md` (the result), CHANGELOG 2026-09-08. Related memory:
 [[ccx_round3_result]], [[ccx_hs_pump_probe]], [[ccx_hs_endmember_probe]], [[overturning_and_mld_literature]].
@@ -36,10 +36,10 @@ the model's HS export leaves a box `h_hs` = 400 m thick, so the literature-equiv
 100–500 m ANCP the prior was built on: F(400)/F(100) = 0.30, F(1000)/F(100) = 0.14. Of Nowicki 2022's 10.2 PgC/yr global
 export that is **3.1 GtC/yr at 400 m, 1.4 at 1000 m**; of Liniger 2025's 2.69 PgC/yr Southern-Ocean export, 0.8 / 0.4.
 The model's 7.94 GtC/yr from the cold box alone is therefore **2.6× the WHOLE ocean's 400 m flux and 5.6× its 1000 m
-flux** — i.e. the HS pump is standing in for the global remineralisation loop that the real deep ocean accumulates
+flux** — i.e. the HS pump is standing in for the global remineralization loop that the real deep ocean accumulates
 along a ~1000-yr path, and it does so through a 1.5–2× too-strong flush. The two factors multiply to ~4.
 **Hypotheses, ranked:** H1 the flush (`u_hs`); H2 the horizon (`h_hs` 400 m makes "export" a deep flux — the prior's
-meaning shifted with the fitted thickness); H3 the LS pump's remineralised carbon does not reach HD at the right rate
+meaning shifted with the fitted thickness); H3 the LS pump's remineralized carbon does not reach HD at the right rate
 (the conduit exchanges interior↔HD at τ_q 538 yr and the export shape is GLODAP's shallow profile), so HD's enrichment
 must be made locally. ⚠ H3 is the one where "implausible = bug" applies: check the sign and magnitude of the
 interior→HD carbon flux at the winner before invoking physics.
@@ -52,16 +52,16 @@ interior→HD carbon flux at the winner before invoking physics.
   [[ccx_hs_endmember_is_kw]] says thickness cancels in the steady ratio, so predict NO first-order change; a large
   change would mean the horizon is doing work the algebra says it cannot.
 - **T3 (H3):** at the winner, read the flux trace: net carbon interior → HD through the conduit, GtC/yr, and the LS
-  pump's remineralisation below 1000 m. If interior→HD is small or reversed, the model's deep water cannot inherit the
+  pump's remineralization below 1000 m. If interior→HD is small or reversed, the model's deep water cannot inherit the
   low-latitude loop's carbon and the HS pump is compensating for a missing path — that is a structure question, not a
   prior question.
-- **T4 (the observable the model has never been compared with):** the model's total remineralisation below 1000 m (LS +
+- **T4 (the observable the model has never been compared with):** the model's total remineralization below 1000 m (LS +
   HS) vs the literature 1.4 GtC/yr (Nowicki × Martin). A single number, generated, that says whether the deep carbon
   budget is right for the wrong reason.
 
 **Ruling options for `u_hs`:** (a) DECLARE it at the observation, 22 ± 4 m/yr (34–47 Sv), and refit (cheapest, one
-declared value moves); (b) FREE it with a prior centred there (log-sd ~0.3) — HILDA fitted it too; (c) leave 38 and
-re-centre the export prior on the 400 m/1000 m flux meaning (H2 accounting) — weakest, because it moves the prior to
+declared value moves); (b) FREE it with a prior centered there (log-sd ~0.3) — HILDA fitted it too; (c) leave 38 and
+re-center the export prior on the 400 m/1000 m flux meaning (H2 accounting) — weakest, because it moves the prior to
 meet the model. **Recommendation: (b), with T1 and T3 run first** so the round-4 prereg can predict the export.
 
 ## 2. `h_ml` — 40 m against the mixed-layer climatologies
@@ -96,7 +96,7 @@ the same at the annual-maximum variant. **T7** re-run the 09-07c family comparis
 see whether the lever is still `ocean_grad_d13c` now that the HS pump carries the deep.
 
 **Ruling options for `h_ml`:** (a) observation-pin it (declared, from the climatology, with the mean-vs-max choice made
-explicitly); (b) free it with a prior centred there; (c) leave it fitted and accept 40 m as the model's annual-mean
+explicitly); (b) free it with a prior centered there; (c) leave it fitted and accept 40 m as the model's annual-mean
 reading — defensible ONLY if T5 shows nothing physical is being bought. **Recommendation: compute the observation first
 (the download), then (b).**
 

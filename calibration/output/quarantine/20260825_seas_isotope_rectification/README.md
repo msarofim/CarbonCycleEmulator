@@ -39,8 +39,8 @@ Every directory holding a FITTED PARAMETER VECTOR as of 2026-08-25:
 | directory | what it was |
 |---|---|
 | `pump_arms/` | **the adopted arm-N mode** (`mode_fit_pumpN.rds`), its Hessian and arm D |
-| `ridge_free_from90/`, `ridge_pin120/`, `ridge_pin90/`, `ridge_pin60/` | the 2026-08-25 pre-registered 4-arm fertilisation-ridge refit |
-| `luc_arm_pinluc/`, `luc_arm_pin2/` | the pinned `luc` arms (08-24c; `pin2` was STOPPED at 1 h 25 and was already labelled so) |
+| `ridge_free_from90/`, `ridge_pin120/`, `ridge_pin90/`, `ridge_pin60/` | the 2026-08-25 pre-registered 4-arm fertilization-ridge refit |
+| `luc_arm_pinluc/`, `luc_arm_pin2/` | the pinned `luc` arms (08-24c; `pin2` was STOPPED at 1 h 25 and was already labeled so) |
 | `pump_arms_SINK25/`, `pump_arms_SINK25_PINLUC/` | the artificial-mid-century-sink arms |
 | `pump_arms_SMOKE/`, `pump_arms_SMOKE_20260822/` | smoke runs |
 
@@ -55,7 +55,7 @@ any δ¹³C-sensitive number in them is affected.
 not exist until a refit is run (~9 h; `calibration/run_modefind_pump_arms.R`). Until then:
 
 - **the Shiny app and every diagnostic that resolves a mode file will FAIL, loudly.** That is the
-  intended behaviour. A pre-fix mode silently reused under a post-fix objective would be worse.
+  intended behavior. A pre-fix mode silently reused under a post-fix objective would be worse.
 - **the ridge question is REOPENED.** Under the patch, at pre-fix parameters, the pin90-vs-reference
   likelihood gap goes −90.07 → −25.28 and what remains is `gcb_land_sink` −24.00, a carbon-budget
   objection rather than an isotopic one. **That is not a result** — both arms move under a refit and

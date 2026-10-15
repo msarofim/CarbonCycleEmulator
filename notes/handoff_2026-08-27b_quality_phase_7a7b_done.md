@@ -4,7 +4,7 @@
 **Repo:** `~/Documents/2026/CodeProjects/CarbonCycleEmulator/`, trunk `main`.
 **Nothing is running.** **Supersedes** `notes/handoff_2026-08-27_post_fix_model_quality.md`
 for §7a/§7b/§7c-1/§7c-2; that file's §0–§6 (the bug, the guard, the quarantine, the refit,
-the reparametrisation null, the non-obvious state) all still stand and are NOT repeated here.
+the reparametrization null, the non-obvious state) all still stand and are NOT repeated here.
 
 Detail: `notes/collect_2026-08-27_post_fix_model_quality.md`. CHANGELOG entry 2026-08-27.
 Commits `aa1c5e1` (7a), `2779463` (7b), `b5d482d` (7c.1–2).
@@ -62,7 +62,7 @@ already-absolute path.
 | 12b tail ratio | 0.707 | 0.709 | 0.716 | Joos 0.787 |
 
 **Gate 12b moved 0.002 while 12a went from 0-of-3 to 2-of-3.** That is exactly the
-division of labour 12b was added for: 12a reads the CALIBRATION, 12b reads the STRUCTURE,
+division of labor 12b was added for: 12a reads the CALIBRATION, 12b reads the STRUCTURE,
 which the isotope fix did not touch. Do not read 12a's improvement as structural.
 
 Superseded blocks are kept in `<details>`, marked not-comparable, rather than deleted.
@@ -124,7 +124,7 @@ seasonal amplitudes. That is independent corroboration of the previous handoff's
 effective latitude is the obvious suspect.** It also puts a live flag on §7d's
 `alpha_as_up`/`alpha_as_down` item: two of the four amplitude flags sit on the ocean limb.
 
-**CARRY THE CAVEAT.** `SST_SEAS_LOGSD` = 0.25 is a **stated JUDGEMENT** width (DESIGN §5.2:
+**CARRY THE CAVEAT.** `SST_SEAS_LOGSD` = 0.25 is a **stated JUDGMENT** width (DESIGN §5.2:
 "no bracket for it exists"), so the ocean pair's z is partly a statement about that width —
 **the RATIO is the robust half.** The land pair's width IS a measured bracket.
 
@@ -158,7 +158,7 @@ for 2024, differently.** Dropping it gives 3.514 / **+2.31σ**. The verdict does
 
 ### 6b. `test-fluxes.R:99/100` — diagnose, or re-baseline against the fixed model?
 See §5. My reading is that the fix changed the truth those two lines assert and the test is
-now measuring the OLD behaviour — but that is a hypothesis, and the discipline says
+now measuring the OLD behavior — but that is a hypothesis, and the discipline says
 diagnose before re-baselining ([[stale_fixture_repair]]).
 
 ### 6c. Does §7c-3 become the SH LAND BOX, on the strength of §4?

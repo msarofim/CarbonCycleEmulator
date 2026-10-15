@@ -14,7 +14,7 @@
   - the SPO seasonal rows (+4.43), which see ENSO only where an anomaly projects onto a year's fit (10-02 dd).
 - The atmosphere's own timing is in **no row**. Observed global CO₂ growth peaks **5 months** after Niño 3.4 (r 0.50,
   10-02 x); the model's peaks **1 month** after.
-- At a lag of 5 months, with the 8-name land block re-optimised (10-04 e, D):
+- At a lag of 5 months, with the 8-name land block re-optimized (10-04 e, D):
   - the existing rows lose **12.2** log-units;
   - the growth peak moves to +4 months, and the detrended correlation with the observed growth rises 0.57 → 0.67;
   - SSP5-8.5 2300 moves +7 ppm.
@@ -47,7 +47,7 @@ That is a reason that did not exist on 09-26. Whether it is ENOUGH is the ruling
 - **Definition:** regress the observed detrended growth on the model's, with a free slope and a free variance. The
   row is that regression's profile log-likelihood, **−(n_eff / 2) · log(1 − r₊²)**:
   - r = the correlation of the two detrended series, and r₊ = max(r, 0), so a wrong-signed model earns nothing;
-  - the growth is the centred 12-month difference of the monthly global CO₂, 1980–2024, detrended by a natural spline,
+  - the growth is the centered 12-month difference of the monthly global CO₂, 1980–2024, detrended by a natural spline,
     df 5. That is the 10-02 x / refit-read §6 estimator, which the What-if diagnosis already uses.
 - **The observation:** NOAA's MBL global reference (manifest key `mbl_zonal_gl`, already downloaded).
   - A MONTHLY processed product is needed. `data/mbl_global_growth.rds` is annual (the app's 09-26 estimator); a monthly
@@ -59,13 +59,13 @@ That is a reason that did not exist on 09-26. Whether it is ENOUGH is the ruling
   - It is like-for-like with the What-if readout and has twice the n_eff.
   - It blurs the sub-annual timing that the lag is about.
 - **Alternatives rejected:**
-  - the lag of the peak cross-correlation (a discrete argmax, not smooth for the optimiser);
+  - the lag of the peak cross-correlation (a discrete argmax, not smooth for the optimizer);
   - the full growth row (all three objections, as declined).
   - The cross-spectral phase in the ENSO band is a smooth, timing-only option. It needs more machinery and has no
     precedent here; it can be built if the shape row is ruled out.
 
-## 5. What the row would do (the preview; conditional, land block re-optimised WITHOUT the row)
-**The lag profile** at hilda34g's base, the 8-name land block re-optimised at each lag. L = 0 / 2.644 / 5 come from the
+## 5. What the row would do (the preview; conditional, land block re-optimized WITHOUT the row)
+**The lag profile** at hilda34g's base, the 8-name land block re-optimized at each lag. L = 0 / 2.644 / 5 come from the
 10-04 (e) run, where two starts agreed; the rest are this run's.
 
 | lag (months) | 0 | 1 | 2 | **2.644** | 3 | 4 | 5 | 6 | 8 |
@@ -80,7 +80,7 @@ That is a reason that did not exist on 09-26. Whether it is ENOUGH is the ruling
 - The slope gate failed at L = 1, 6 and 8 (single starts; the gate is curvature-blind off the base, memory
   `whitened_slope_gate_blind_off_base`). Read those three as points on a smooth profile, not certified optima.
 
-**Where the row would put the lag** (the lag maximising the existing rows + the row, on a spline through the profile):
+**Where the row would put the lag** (the lag maximizing the existing rows + the row, on a spline through the profile):
 
 | estimator | weight | lag | existing rows lose | row gains | SSP5-8.5 2300 |
 |---|---|---|---|---|---|

@@ -20,7 +20,7 @@ in the 13 note stands, including **§5, which is still open and still blocking**
    (0.45 ‰, documented as model-structural error) and is now better supported, because the
    ventilation gap has been shown to be *not cheaply removable*.
 2. **Do not re-propose "just add advection".** It is built, gated, measured, and it does
-   not work — §§1–3. The reason is a symmetry, not a tuning failure, so re-parameterising
+   not work — §§1–3. The reason is a symmetry, not a tuning failure, so re-parameterizing
    it will not help.
 3. **The one live structural idea is the CONVEYOR** — NH sinking, deep interhemispheric
    flow, SH upwelling (Marcus, 2026-08-13). It is the *first* configuration that escapes
@@ -117,7 +117,7 @@ Marcus, 2026-08-13: *"sinking in northern hemisphere, deep water interaction bet
 hemispheres, upwelling in southern hemisphere."* **Not built. Not decided.** This section
 is what a next session needs to decide it.
 
-### 4.1 Why it is not just a third parameterisation
+### 4.1 Why it is not just a third parameterization
 
 §2's theorem has two premises, and the conveyor **breaks both**:
 
@@ -134,7 +134,7 @@ is what a next session needs to decide it.
 
 ### 4.2 The four limbs, and why volume still conserves
 
-Parameterise by the **volume flux Q (Sv)**, not a velocity: the two hemispheres have
+Parameterize by the **volume flux Q (Sv)**, not a velocity: the two hemispheres have
 different ocean areas (NH 1.55e14, SH 2.06e14 m²), so one velocity would not conserve
 volume across the basin.
 
@@ -179,7 +179,7 @@ not deliver: the deep age would come from *circulation* (a number a reader can b
 "the deep ocean has not touched the surface for about 1500 years") and `kz` would be freed
 to be a small, honest eddy diffusivity instead of a fiction standing in for ventilation.
 
-**Do not quote −170 at 27 Sv as if it were the answer.** It is idealised plug flow: it
+**Do not quote −170 at 27 Sv as if it were the answer.** It is idealized plug flow: it
 ignores the source water's own preindustrial Δ¹⁴C (≈ −50 ‰, which alone would take 27 Sv
 to about −211 ‰ and move the −170 point to ~37 Sv) and it ignores diffusion, which mixes
 the profile the other way. The honest claim is **order-right: the transit-time arithmetic
@@ -260,7 +260,7 @@ then — **do not block the σ decision on the conveyor.**
   `unpack_par` in the C++ — same silent-garbage risk as `CCX_FORCING_COLS`). They are
   **not** in `CCX_PARAM_TABLE`, so the parameter count is still 16 and nothing samples them.
 - **`ccx_advection_eigbound()`** is a Gershgorin *bound*, not a spectrum — the non-local
-  limb makes the operator non-symmetrisable, so the `ccx_diffusion_eigmax()` trick does not
+  limb makes the operator non-symmetrizable, so the `ccx_diffusion_eigmax()` trick does not
   transfer. It returns exactly 0 when every velocity is 0, which is what keeps the substep
   count identical to its pre-2026-08-13 value.
 - **`test-ocean-advection.R` is 6 tests / 26 assertions**, including an inertness gate, its

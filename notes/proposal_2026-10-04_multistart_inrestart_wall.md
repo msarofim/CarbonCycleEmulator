@@ -47,7 +47,7 @@ multistart under `seas_ml` = 1 (memory `ccx_substep_fix_slows_nearwall_starts`).
   - BFGS's line-search points are evaluated points too.
 - **Bookkeeping:**
   - log "STOPPED AT THE DEADLINE after k evals" on the restart line;
-  - normalise `restart_min` by the evaluations actually done, not the planned `mx`;
+  - normalize `restart_min` by the evaluations actually done, not the planned `mx`;
   - set `out_of_time`;
   - write the start file as today: NOT converged, with the reason.
 - **The polish's size** should use `max(restart_min)` when restarts exist, like `maxit_for_budget()` does,

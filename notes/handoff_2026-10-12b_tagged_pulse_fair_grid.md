@@ -84,7 +84,7 @@ Written on Marcus's request ("Yes, write the handoff note"), 2026-10-12. **Nothi
   - the section heading "Where the extra carbon ends up", which now sits over both panels.
 - **Card 5a's caption:** "nothing from this source" is singular, and the card now has two sources. The facts are in the note: FaIR 0.483 / 0.364 / 0.291, band 0.453–0.515 / 0.307–0.413 / 0.223–0.369.
   - ⚠ The card's "decays faster here than in the multi-model mean" is true against Joos but the REVERSE against FaIR.
-- **The early drawdown: what next.** About 3 GtC of the first-year ocean excess is unexplained. Candidates: the provisional alkalinity, the SH winter mixed-layer depth, the high-latitude box. Fertilisation is about 25 % strong, and its strength has not been checked against FACE.
+- **The early drawdown: what next.** About 3 GtC of the first-year ocean excess is unexplained. Candidates: the provisional alkalinity, the SH winter mixed-layer depth, the high-latitude box. Fertilization is about 25 % strong, and its strength has not been checked against FACE.
   - CCX is pedagogical, not an emulator ([[ccx_pedagogical_not_emulator]]), so whether to chase any of this is his call.
 - **The tie spread rests on ONE pair of basins.** A third basin can only widen it.
 - **FaIR's temperature response to the pulse** is in the grid (`d_gmst_mean`) but NOT drawn on the pulse lab's temperature view. Not asked.

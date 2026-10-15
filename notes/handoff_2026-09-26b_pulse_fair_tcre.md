@@ -92,7 +92,7 @@ to the **marginal** response, which is consistent — the scenario level is pinn
 the model is fitted to, and the pulse marginal is not.
 
 ⚠ **Two caveats carried, NOT resolved**: the FaIR arm is on **RCMIP-native** ssp245 emissions, not
-the CMIP7-harmonised set the 1.6.0 posterior was jointly conditioned on (deliberate — it is what the
+the CMIP7-harmonized set the 1.6.0 posterior was jointly conditioned on (deliberate — it is what the
 CCX module was built from; expected to largely cancel in a MARGINAL, **not measured**). And FaIR's
 per-config marginal is **right-skewed**: `median(pulse−base)` runs ~5 % BELOW the mean, so the median
 would NARROW this gap, not widen it.
@@ -164,7 +164,7 @@ inside a `renderText`). Mutation-tested: the old clause fails **37 of 45**.
   labels: it tested the HELPER's contract, not the CALLER's.** Fixed (`1e962ff`) and the gate now
   drives the server's own expression AND reads the call site (mutation: 2 fail).
   ⚠ **The rendered PNG in the previous handoff was NOT independent evidence** -- it was built from my
-  own call with the ids, so it reproduced the wrong assumption faithfully and in colour
+  own call with the ids, so it reproduced the wrong assumption faithfully and in color
   ⇒ [[gate_tested_the_helper_not_the_caller]].
 - **Unchanged deploy blockers, all Marcus's**: the two `SET-BEFORE-DEPLOY` URLs (⚠ update
   `test-review-cards.R`, don't delete it), the idle start-up re-time, the hosting plan's limits.
@@ -183,4 +183,4 @@ inside a `renderText`). Mutation-tested: the old clause fails **37 of 45**.
 5. If the carbon-cycle gap is ever to be CHASED rather than reported: it is the **marginal** response
    that is wrong, not the scenario level, so the target is the pulse decay, and gate 12 needs a
    working implementation first (§1a). ⚠ Marcus ruled 09-04 that the long lifetime *should be an
-   emergent behaviour*, so this is a deliberate open question, not a bug queue item.
+   emergent behavior*, so this is a deliberate open question, not a bug queue item.

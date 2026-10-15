@@ -1,7 +1,7 @@
 # PRE-REGISTRATION — is the SPO seasonal partition ONE fix?
 # The land reduction and the ocean channel, scored as a 2×2 with an INTERACTION term
 
-**Written 2026-08-27, BEFORE a line of the driver existed.** Authorised by Marcus 2026-08-27 after
+**Written 2026-08-27, BEFORE a line of the driver existed.** Authorized by Marcus 2026-08-27 after
 `collect_2026-08-27i_the_land_and_ocean_fix_is_one_fix.md`. Slice, mode and matched design are
 27g's, unchanged, so the arms are comparable to that run.
 
@@ -67,7 +67,7 @@ below the stored mode logpost, pre-existing and undiagnosed. No absolute logpost
 The INCUMBENT arm at its starting vector must reproduce 27h/27i's measured numbers on this harness:
 SPO total **1.141**, SH-local land **1.308**, NH-origin **0.821**, δ¹³C-per-ppm **1.930**, and the
 harness offset **−3.3223 ± 0.5**. All four arms must use the same `ccx_prepare_obs()` and the same
-window. Every optimiser arm must report `converged` with its restart count and last gain — 27h had
+window. Every optimizer arm must report `converged` with its restart count and last gain — 27h had
 to discard a run for a silent `maxit`.
 
 ## P1 — THE INTERACTION IS POSITIVE AND LARGE  ← the test
@@ -127,6 +127,6 @@ SH result is contaminated and is not read.
 - **Not a verdict on `phi_eff`.** `seas_npp_amp_SH` is half of a (shape, size) unit with
   `CCX_SEAS_PHI_EFF['SH'] = −30`, and `R/constants.R` says the pair must be re-derived together.
   Nothing here moves phi, so every number is CONDITIONAL on it.
-- **Not a licence to adopt the GPP end.** Even a clean P1 pass shows only that the two corrections
+- **Not a license to adopt the GPP end.** Even a clean P1 pass shows only that the two corrections
   interact as predicted. Whether the model may use that end of the PsnNet–GPP disagreement is
   Marcus's call, on the measurement's terms, not on the fit's.

@@ -31,7 +31,7 @@ run. This has less effect on the projections: bands computed from each chain sep
 at most about a fifth of the band's width. The depth of the ocean's mixed layer is cut off at about 75 m by a limit in
 the model's time-stepping, so its sampled range may be narrower than the data allow. A faster method, which treats the
 fit as a bell curve around the best fit, was tried first and failed its check: along the direction that trades the
-strength of CO₂ fertilisation against its shape, the fit falls off much faster than a bell curve assumes. In an
+strength of CO₂ fertilization against its shape, the fit falls off much faster than a bell curve assumes. In an
 earlier version of the model, that method gave a CO₂ band more than twice as wide as the sampler's.
 
 **Ask:** Does a band that covers only the carbon-cycle parameters help you read the projections, or would you want

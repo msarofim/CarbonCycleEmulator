@@ -57,7 +57,7 @@ so the SH-mean ΔpCO2 phase **+3 months** is the implied peak of the ocean-signa
 component. **PREDICT: that lands ≥ 3.0 months later than the model's SH air-sea channel at month
 4.16.** **FALSIFIER: within 2.0 months of 4.16.**
 
-⚠ **P4 IS THE WEAKEST OF THE FOUR AND IS LABELLED SO IN ADVANCE.** The +3 months assumes a pure
+⚠ **P4 IS THE WEAKEST OF THE FOUR AND IS LABELED SO IN ADVANCE.** The +3 months assumes a pure
 first harmonic and NO loss from the SH box; real loss (interhemispheric exchange, sinks) makes the
 true lag SHORTER than 3 months, so P4's conversion is biased toward LATER and its margin should be
 read as generous. P1–P3 carry no such conversion and are where the weight sits.

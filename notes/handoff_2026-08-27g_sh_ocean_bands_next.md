@@ -1,5 +1,5 @@
 # Handoff — CarbonCycleEmulator, 2026-08-27g: **THE NEXT STEP IS SH OCEAN BANDS**
-# (authorised by Marcus, 2026-08-27) — the target, the design, and the four traps
+# (authorized by Marcus, 2026-08-27) — the target, the design, and the four traps
 
 **Repo:** `~/Documents/2026/CodeProjects/CarbonCycleEmulator/`, trunk `main`, clean.
 **Nothing is running.** **Suite: 1122 pass / 0 fail** — no `R/` change since `9d866ca`.
@@ -61,7 +61,7 @@ this evidence.**
   the NH**, more than the entire observed SPO land component of 0.683.
 - **`seas_T_amp_SH`** — moves the SPO cycle by **0.092 ppm** against `NEP SH`'s 1.390. Its −4.64 σ
   flag is not set by the SPO seasonal rows.
-- **The CO2 seasonal rows as a test** — no power; already matched, by two errors cancelling.
+- **The CO2 seasonal rows as a test** — no power; already matched, by two errors canceling.
 - **NH land latitude banding** — tested and REJECTED (`diag_npp_twobox.R`, `R/model.R:218`: every
   multi-box fit deletes its own low-latitude boxes). **Different limb, different hemisphere —
   that is NOT precedent for the ocean, in either direction. Do not cite it as one.**
@@ -80,7 +80,7 @@ is now **measured, not asserted** — south of 40 S, pCO2 peaks month 7.50, **5.
 (prereg 27f P2, confirmed; method control P3 passed at 0.78; NH control 0.30).
 
 ⇒ **The band and the mechanism must land together.** That is what makes this a structural change
-rather than a reparametrisation, and it is why §4 exists.
+rather than a reparametrization, and it is why §4 exists.
 
 ## 4. ⇒ THE DECISION OWED BEFORE ANY CODE: two versions, and they are not equivalent
 

@@ -20,7 +20,7 @@
 4. **Whole-model status re-measured**: CO₂ excellent, the defects are all structure. §3
 5. **AOD series acquired** (CMIP7, hemispheric, 1850–2024). §4
 6. **ENSO is a dead end for variability** — r flat across an 11× range. §4
-7. **Diffuse-light fertilisation BUILT and PRICED: CHEAP (−7.4), and r 0.571 → 0.624.** §5
+7. **Diffuse-light fertilization BUILT and PRICED: CHEAP (−7.4), and r 0.571 → 0.624.** §5
 8. ⇒ **ONE CHECK GATES ADOPTION: `fert_k` +29 % vs the FACE range.** §6
 
 ## 1. THE `q10` TEST (item 1 of the old queue) — CLOSED
@@ -85,7 +85,7 @@ for like-for-like with the FaIR calib 1.6.0 drivers. Gates pass (Pinatubo 0.1070
 ZERO: Laki 1783, 1808/09 and TAMBORA 1815 are ABSENT** — the biggest event in the model's window is
 **Krakatau 1884**, and "the year without a summer" needs eVolv2k. Provenance in `MANIFEST.csv`.
 
-## 5. DIFFUSE-LIGHT FERTILISATION — BUILT, TESTED, PRICED
+## 5. DIFFUSE-LIGHT FERTILIZATION — BUILT, TESTED, PRICED
 
 `NPP_h = npp0_h * capacity * fert * (1 + gamma_diff * AOD_h)` (Gu 2003; Mercado 2009). Six sites,
 R+C++ twins, `tests/testthat/test-volcanic-diffuse.R`. **`gamma_diff` defaults to 0** so every
@@ -150,16 +150,16 @@ hemisphere" means) → ⑥ gate 7 → ⑦ ENSO shape (lowest).
 - ⚠ **`N_FORCING` (`ccx_core.cpp:52`) must match `length(CCX_FORCING_COLS)`, now 17.** I appended two
   columns without bumping it: `f[15]`/`f[16]` read past the buffer, effect **−0.0004 ppm instead of
   −4.1**, nothing errored. `test-forcing.R:127` pins it and would have caught it — I had not run the
-  suite. **Run the suite before characterising what a guard did or did not catch.**
+  suite. **Run the suite before characterizing what a guard did or did not catch.**
 - ⚠ **FOUR of my gate verdict STRINGS over-claimed a mechanism today.** The fix that worked is
   [[pair_the_inference_gate_with_a_mechanism_gate]]: gate the NUMBER and the MECHANISM separately.
   H3 (on `rep_dC`'s own movement) caught a false "LEVEL OFFSET CONFIRMED".
 - **`refit_20260828_sigma_eff` — RATIFIED "do not adopt"** (Marcus). Outputs committed as provenance;
   adoption stages never run. ⚠ **The pinned-96 successor is NOT a config change**: `ARM_HML_BOUND` is
-  PROVENANCE-ONLY since `2153bd6`, a BOUND (with prior renormalisation) ≠ a PIN, and both are undecided.
+  PROVENANCE-ONLY since `2153bd6`, a BOUND (with prior renormalization) ≠ a PIN, and both are undecided.
 - **`diag_landed_gap_streams.R` is QUARANTINED** — kept in place and HARD-STOPS; output in
   `outputs/quarantine/20260829_preadoption_landed_gap/`. No replacement by design.
-- **Two DIAGNOSTIC-ONLY authorisations (Marcus)**: a CMIP6 ensemble value for `SEAS_NPP_AMP_SH` may
+- **Two DIAGNOSTIC-ONLY authorizations (Marcus)**: a CMIP6 ensemble value for `SEAS_NPP_AMP_SH` may
   be USED but never shipped; a diagnostic arm may leave a bracket for MEASUREMENT, never adoption.
 - **Run drivers from a FROZEN COPY** ([[never_edit_a_running_script]]).
 - ⚠ **`MEMORY.md` root ~19 KB (soft 12)**, over for a fifth session. `INDEX_ccx.md` 17.8 KB (soft 14,

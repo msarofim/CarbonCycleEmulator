@@ -46,7 +46,7 @@ add("gcb_land_sink",
 ```
 
 This is the **same net-vs-gross trap** fixed in the diagnostics at `cc3abd5` — but here it
-is **inside the objective the MCMC will optimise**. The model is being asked to make its
+is **inside the objective the MCMC will optimize**. The model is being asked to make its
 NET land flux equal GCB's GROSS sink, i.e. to over-absorb by exactly E_LUC (~1.37 GtC/yr
 recently).
 
@@ -80,7 +80,7 @@ moves only ~9 log-units across β 0.38 → 0.75, against the CO₂ streams' ~12,
 GtC/yr the "partition constraint" this model claims to have is **nearly decorative**. That
 belongs under §2(a).
 
-`gcb_ocean_sink` has no E_LUC analogue and is **not** affected.
+`gcb_ocean_sink` has no E_LUC analog and is **not** affected.
 
 ---
 
@@ -114,7 +114,7 @@ two are not double-counted. The NEP seasonality is a prescribed sinusoid,
 
 **Hemispheric pattern.** Two boxes, exchange time `tau_ex` (1.3 yr default). Scored only
 through MLO-vs-SPO in each stream — **there is no interhemispheric-gradient statistic**.
-Known open mismatch: modelled MLO−SPO δ¹³C gradient **−0.210 ‰ vs observed −0.074**, and a
+Known open mismatch: modeled MLO−SPO δ¹³C gradient **−0.210 ‰ vs observed −0.074**, and a
 ~1.1 ppm CO₂ gradient error visible in the residual (MLO mean −0.54, SPO +0.55).
 
 **Isotopic pattern.** δ¹³C and Δ¹⁴C as above. Not in the likelihood but measured and
@@ -158,7 +158,7 @@ citable: **Quay et al. 2003** mixed-layer Suess rate (0.160 ± 0.020 ‰/dec), *
   contains regrowth and legacy soil loss — which is the argument that decided the pro-rata
   debit — yet the model also has its own regrowth dynamics. Where is the boundary, and is
   anything double-counted? (`404d66d` fixed one instance of exactly this.)
-- ENSO's non-zero future mean: is the forcing right, or is it an artefact of how the index
+- ENSO's non-zero future mean: is the forcing right, or is it an artifact of how the index
   is extended past the observational record?
 - Does the bomb-¹⁴C **shape** need to stop being provisional before Δ¹⁴C can be trusted to
   constrain ventilation?
@@ -172,7 +172,7 @@ This is the substance of the review. **Current structure**, all verified:
 | **Atmosphere** | 2 well-mixed boxes, `tau_ex` gross both ways | — | no stratosphere (v2 backlog) |
 | **Land** | **4 pools** — leaf 1 yr, wood 20, soil_fast 2, soil_slow 500; equilibrium shares 1.7 / 22.5 / 5.4 / **70.4 %** | `npp_veg_frac` (capacity), `ra_ratio` (gross GPP/Ra loop, **default 0 = no gross loop**) | no nutrient limitation; no phenology |
 | **Land–LUC coupling** | converted-land term: `c = f_luc_perm·cumLUC/land0` scales `npp0` *and* `veg0` | `f_luc_perm` (1 = permanent), `f_luc_wood` (**0 = pro rata**, decided 2026-08-14) | no timing-resolved debit (fast veg / slow soil) — **logged, not built** |
-| **Fertilisation** | `NPP = NPP0(1 + β ln(χ/χ0))`, **unsaturated** | β only | **no saturation** — see §2(d), this is now a known failure mode |
+| **Fertilization** | `NPP = NPP0(1 + β ln(χ/χ0))`, **unsaturated** | β only | **no saturation** — see §2(d), this is now a known failure mode |
 | **Temperature** | `q10` on heterotrophic respiration; `sst_scale` on ocean solubility | `warming_feedback` mechanism switch | no separate NPP temperature response |
 | **ENSO** | `gamma_enso · enso` transfer soil_fast → atm | `enso` switch | does not interact with `q10` or with NPP |
 | **Ocean** | box-diffusion column per hemisphere: mixed layer + **10 interior layers**, `kz` diffusivity, full carbonate chemistry | `w_up`, `w_out_NH/SH` (advection), **conveyor `q_conv`/`conv_sink`/`conv_descent`/`conv_reverse` — BUILT, OFF**, `revelle_frozen` | **NO biological pump**; interior carries no carbonate chemistry |
@@ -199,7 +199,7 @@ make physical sense, and which are load-bearing for the targets in (a)?*
 - **Land pools:** is 4 right? The four-pool layout was chosen to fix the bomb-¹⁴C partition
   and it did (biosphere +51 % → +0 % at 1975). Does anything in (a) still need more, or
   fewer?
-- **Fertilisation:** the unsaturated log form is now a **known defect** (§2d). Options:
+- **Fertilization:** the unsaturated log form is now a **known defect** (§2d). Options:
   saturating (e.g. a Michaelis–Menten / β with a ceiling), nutrient-limited, or keep the
   log and cap the app's scenario range. This is the highest-value structural question in
   (c) because it is the one with a demonstrated failure.
@@ -221,7 +221,7 @@ Marcus' own framing: **pulse lifetime is expected to be the weakest test.** Curr
   pulse persists *less* long on a high-CO₂ background, the opposite of what the tab
   teaches. ssp585 − ssp119 airborne fraction at 2150: **+0.204 (β 0.38), +0.085 (0.50),
   −0.011 (0.60), −0.109 (0.75)**. The LUC debit is irrelevant to it. Cause: unsaturated
-  log-fertilisation gives **2.48× preindustrial NPP at 1998 ppm**. The current default β is
+  log-fertilization gives **2.48× preindustrial NPP at 1998 ppm**. The current default β is
   **0.75** — on the wrong side of this.
 - Joos et al. (2013) IRF: the model sat **inside the 5–95 % range** when last checked
   (`project_ccx_pedagogy_spec_panel`) — **that check predates β 0.60/0.75 and must be re-run.**
@@ -229,7 +229,7 @@ Marcus' own framing: **pulse lifetime is expected to be the weakest test.** Curr
 
 **Questions to answer:**
 - What β can the app actually ship with, and is that compatible with any calibration
-  criterion? If not, the fertilisation form has to change — which makes (d) feed straight
+  criterion? If not, the fertilization form has to change — which makes (d) feed straight
   back into (c).
 - Re-run the Joos IRF gate at the current default before anything else in (d).
 - Pedagogy: the spec's own test is *"can each mechanism be explained in one sentence?"*

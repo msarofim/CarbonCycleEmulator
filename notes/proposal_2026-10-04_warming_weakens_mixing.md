@@ -54,7 +54,7 @@ K(z, t) = kz·[f + (1−f)·g(t)·exp(−(z−h_ml)/z_K)] = K_int(z) − (1 − 
    - The spinup sees GMST = 0 (`ccx_hold_climate(F, value = 0)`). g(0) = 1 leaves the spinup, the solved pump and
      every registered mode's spinup bit-identical.
    - IGCC GMST dips to −0.24 K (1904). An uncapped factor would RAISE K above the held value the substep controller
-     bounds (`ccx_substeps_for()`, 10-04 a). Near the P8 wall that is the 10-03 (j) artefact again, silently.
+     bounds (`ccx_substeps_for()`, 10-04 a). Near the P8 wall that is the 10-03 (j) artifact again, silently.
    - So the key enters as max(T, 0).
 2. **The solved export must be rescaled with the same factor.**
    - The canonical's pump (mode "N") is solved ONCE per run as the divergence of K × the observed DIC profile
@@ -69,7 +69,7 @@ K(z, t) = kz·[f + (1−f)·g(t)·exp(−(z−h_ml)/z_K)] = K_int(z) − (1 − 
      falling in proportion to mixing is what "nutrient-limited" means. So the rescaling follows from the mode, not an
      ad-hoc patch.
    - ⚠ What it leaves out: changes in the biological pump's own efficiency, whose sign ESMs disagree on. Stated, not
-     modelled.
+     modeled.
 
 **Closing the loop in the futures.** `ccx_run_coupled()` computes future temperature from the model's own CO₂ (plus
 FaIR non-CO₂ forcing), iterated to 1e-4 °C (`R/climate.R:192-292`). A K(T) feedback is closed automatically: CO₂ → T
@@ -93,7 +93,7 @@ FaIR non-CO₂ forcing), iterated to 1e-4 °C (`R/climate.R:192-292`). A K(T) fe
   - Central (s 4.4 %/K, q = 1): **−2.2 %/K**. Range over q ½–2 and s 4.4–6.0: **−1.1 to −6 %/K**.
   - At SSP5-8.5's coupled +4.6 K (2100) and +7.6 K (2300), g = 0.91 and 0.87 at the central value.
 - ⚠ **The scale caveat.** CCX's K (~1e4 m²/yr ≈ 3.2 cm²/s) is about 30× the measured diapycnal diffusivity of the
-  upper kilometre (~0.1 cm²/s; Gargett 1984 p. 383). It is an EFFECTIVE ventilation coefficient: it also does the job
+  upper kilometer (~0.1 cm²/s; Gargett 1984 p. 383). It is an EFFECTIVE ventilation coefficient: it also does the job
   of subduction along density surfaces, which the box model has no channel for.
   - Applying the N-law to all of the upper K assumes ventilation weakens in proportion. CMIP6's large ventilation term
     (below) supports the direction; nothing observed fixes the proportion.
@@ -212,7 +212,7 @@ FaIR non-CO₂ forcing), iterated to 1e-4 °C (`R/climate.R:192-292`). A K(T) fe
   timescale, 195 yr; FaIR 2.2.4 calib 1.6.0, model-derived and named). Stratification is a surface-minus-deep
   contrast, so it relaxes as the deep ocean catches up: CMIP6's SSP1-2.6 stratification falls after 2050 at roughly
   flat GMST (Cheng 2025). At the 2300 horizon this roughly halves the effect against (b). RECOMMENDED.
-- (b) GMST alone. Simplest, already in both cores. It overstates the effect after stabilisation.
+- (b) GMST alone. Simplest, already in both cores. It overstates the effect after stabilization.
 
 **Q4. Where does it apply?**
 - (a) **History and futures,** with the price measured on every registered mode, and packaged with the greening

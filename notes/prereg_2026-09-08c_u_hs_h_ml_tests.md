@@ -7,7 +7,7 @@ this; canonical `ent26`; the ruling (free / pin / leave) stays Marcus's.**
 
 ## What was ALREADY READ before this note (reported as results, not predictions)
 Honesty line. Three of the seven are single reads of stored state, and they were taken while assembling this note:
-- **T3** (conduit net interior→HD carbon flux at the round-3 winner's spinup) and **T4** (LS remineralisation below
+- **T3** (conduit net interior→HD carbon flux at the round-3 winner's spinup) and **T4** (LS remineralization below
   1000 m) were computed from the winner's spinup state (`calibration/output/multistart_20260907f_hilda30/`, id 24,
   logpost −1481.27) while timing the run. They are reported in the diag log with no prediction attached.
 - **T7** (the 40 m vs 180–200 m family per stream) is a diff of the round-3 scorer's own saved streams
@@ -38,9 +38,9 @@ optimum in log(`pump_hs_gcm2`) on [0.5, 200] with everything else held at the wi
 | P7 | T6: pinning at 118.1 costs more than T5 but **< 30**; the sink and bomb rows (`gcb_ocean_sink`, `d14c_NH/SH`) each move < 2 | cost ≥ 30, OR a sink/bomb row moves ≥ 2 |
 
 ## What each verdict means for the ruling (written now so the reading is not fitted to the result)
-- P1 ∧ P4 ⇒ H1 holds (the flush is the lever): option (b) for `u_hs` — free it with a prior centred on the
+- P1 ∧ P4 ⇒ H1 holds (the flush is the lever): option (b) for `u_hs` — free it with a prior centered on the
   observation (18–26 m/yr, [[overturning_and_mld_literature]]) — and expect the export to land near 60–90 at the
-  prior's centre. P4's cost says what the profile rows will charge for it.
+  prior's center. P4's cost says what the profile rows will charge for it.
 - ¬P5 ⇒ the horizon (H2) is doing work; re-state the export prior at the 400 m-flux meaning before round 4.
 - P6 ⇒ the 40 m buys the δ¹³C gradient row only: `h_ml` can be observation-pinned at the annual mean at small cost;
   ¬P6 with a bomb/seasonal row paying ⇒ the 40 m is a real capacity statement and the mean-vs-max choice matters.
@@ -56,4 +56,4 @@ P6–P7 tested the CO₂ rows' sensitivity to the perturbation, not the hypothes
   on P5's failure).
 - **P1b** (post-hoc): the deep-rows-only optimum at `u_hs` 24 lies in P1's band [74, 100] and the ratio
   g_opt/`u_hs` is constant to ±10 % across {38, 30, 24, 18}. Falsified if either fails. ⚠ Written after the T1(ii)
-  scratch run had been seen; it is a REGISTRATION of the reading, not a prediction, and is labelled so in the log.
+  scratch run had been seen; it is a REGISTRATION of the reading, not a prediction, and is labeled so in the log.

@@ -24,7 +24,7 @@ through it; the gross sets the scale. A driver that reported only the net would 
 everything else at the mode: logpost, by-stream decomposition, θ, SH-land net, SPO total, and the
 SPO d13C-per-ppm ratio.
 
-**Conditional arms** at lag ∈ {1.7677 = INCUMBENT, 2.00, 2.25, 2.50}, re-optimising
+**Conditional arms** at lag ∈ {1.7677 = INCUMBENT, 2.00, 2.25, 2.50}, re-optimizing
 
     SLICE = c("sst_seas_amp_NH", "sst_seas_amp_SH", "seas_T_amp_NH", "seas_T_amp_SH")
 
@@ -36,9 +36,9 @@ value. **`seas_T_amp_SH` is FREE**: the arm is allowed to buy the geometry if it
 "the refit recovered 15-19× more than the frozen scan predicted" (handoff 08-25b §7). The
 conditional is the load-bearing measurement; the frozen profile is shape, not price.
 
-**Secondary block, DIAGNOSTIC-ONLY** (Marcus's authorisation 1, 2026-08-29): the same conditional
+**Secondary block, DIAGNOSTIC-ONLY** (Marcus's authorization 1, 2026-08-29): the same conditional
 arms at the **CMIP6 gross `seas_npp_amp_SH` = 0.94**. That is the configuration in which the target
-is actually reachable, and it is labelled as diagnostic everywhere it appears. The shipped constant
+is actually reachable, and it is labeled as diagnostic everywhere it appears. The shipped constant
 stays **0.5027**.
 
 ## 2. THE GATES

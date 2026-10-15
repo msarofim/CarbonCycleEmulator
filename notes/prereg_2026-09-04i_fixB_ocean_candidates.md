@@ -83,7 +83,7 @@ because `w_up`'s upward limb is distributed box-to-box and re-equilibrates on th
 
 **PREDICT: `w_out` reduces the gate-H contrast** (`R_d13c − R_co2`, currently **+1.056**, z +6.55).
 **FALSIFIER: it does not move it, or moves it the wrong way.**
-⚠ **WEAKEST OF THE FOUR AND LABELLED SO IN ADVANCE:** gate H is one day old, its target is a
+⚠ **WEAKEST OF THE FOUR AND LABELED SO IN ADVANCE:** gate H is one day old, its target is a
 hemispheric contrast, and `w_up`/`w_out` are configured per hemisphere here only in the crude
 NH=SH form. A null on P4 is weak evidence, a hit is suggestive, and neither decides anything alone.
 
@@ -92,9 +92,9 @@ NH=SH form. A null on P4 is weak evidence, a hit is suggestive, and neither deci
 ## What is NOT claimed
 
 - **Nothing is implemented, fitted or adopted.** Every scan holds the other 25 parameters at
-  `ent26` and re-optimises nothing. ⚠ That means every row is a **CONDITIONAL** price, and the
+  `ent26` and re-optimizes nothing. ⚠ That means every row is a **CONDITIONAL** price, and the
   standing rule says a conditional price has been ~100 % wrong twice
-  ([[ccx_solar_aerosol_declined]]). **A promising conditional row licenses a re-optimised follow-up,
+  ([[ccx_solar_aerosol_declined]]). **A promising conditional row licenses a re-optimized follow-up,
   never an adoption.**
 - **No claim about `z_K`** (candidate A, depth-dependent `kz`). It is **not built** — it was
   measured in a diagnostic only — so it is out of scope here.

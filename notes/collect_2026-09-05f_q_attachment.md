@@ -39,7 +39,7 @@ ocean and the deep, so giving the deep its own pathway should let `kz` **fall** 
 | attach layer 10 — **BOTTOM ONLY** | **2686** | 0.423 | −72.5 | −98.7 | −32.6 | **1.739** |
 
 ⇒ **Bottom attachment gets LESS `kz` relief, not more.** The reason is the design choice made
-deliberately and pinned by a test: **`tau_q` is NOT renormalised over the subset**, so attaching to
+deliberately and pinned by a test: **`tau_q` is NOT renormalized over the subset**, so attaching to
 one layer instead of ten is **less total exchange**, not the same exchange concentrated. Less
 ventilation ⇒ `kz` must do more, not less.
 
@@ -65,7 +65,7 @@ GLODAP at those depths: **−165.2 / −175.6 / −177.6**.
 ⭐ **At MATCHED `kz` the bottom attachment dominates at BOTH values** (0.377 vs 2.048; 1.739 vs
 3.092). So the P2 gain **is** the attachment — the prereg's "if P2 improves while P1 fails the gain
 came from somewhere else" clause does **not** apply here, and the decomposition is what shows it.
-⛔ **But the two italicised scores are OFF the iso-deep control and are NOT comparable scores** —
+⛔ **But the two italicized scores are OFF the iso-deep control and are NOT comparable scores** —
 they are reported to decompose, never to quote.
 
 ⇒ **THE MECHANISM, RESTATED FROM THE MEASUREMENT.** Removing the youngening ages the whole column
@@ -113,7 +113,7 @@ HD should AGE once it loses the young upper interior — is **wrong**: at matche
 the true effect is ~1–3 ‰ and has no robust sign. The test now asserts the thing that *is* robust:
 **attachment ≪ `kz`/3**.
 ⇒ ⭐⭐ **THE ISO-DEEP CONTROL LICENSES EXACTLY ONE COMPARISON — the intermediate PROFILE, which is
-what it equalises the deep age FOR. Every quantity it does not pin must be read at MATCHED `kz`.**
+what it equalizes the deep age FOR. Every quantity it does not pin must be read at MATCHED `kz`.**
 
 ## 5. WHAT IS OWED BEFORE THIS COULD BE ADOPTED
 

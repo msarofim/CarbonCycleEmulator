@@ -54,7 +54,7 @@ Mutation-tested: the original bug fails 2.
 
 ⚠⚠ **AND THE RENDERED PNG WAS NOT INDEPENDENT EVIDENCE.** Rendering the plot to a file and inspecting
 it FEELS like looking at the thing; it was driven from my own call with the ids, so it reproduced the
-wrong assumption faithfully and in colour. **A picture built from the same wrong input proves
+wrong assumption faithfully and in color. **A picture built from the same wrong input proves
 nothing.** The defect surfaced in the first thirty seconds of the app actually running
 ⇒ [[gate_tested_the_helper_not_the_caller]].
 
@@ -74,7 +74,7 @@ nothing.** The defect surfaced in the first thirty seconds of the app actually r
 - `app_stylised_tail_clause()`'s **`to_zero`** branch — his own sentence, flagged and left verbatim
   last round — said *"even when emissions stop"*. Only **fossil** emissions stop:
   `app_stylised_emissions()` always takes land use from the background scenario, so the pathway's
-  TOTAL CO₂ emissions never reach zero. The slider is already labelled *"Fossil emissions after
+  TOTAL CO₂ emissions never reach zero. The slider is already labeled *"Fossil emissions after
   today"*, so the sentence now matches its own control.
 - The futures tab's *"Where the future temperature comes from"* box said the pulse lab and
   build-your-own *"only allow changes to carbon emissions"*. Both change **fossil** CO₂ only, so it
@@ -133,4 +133,4 @@ Six straddlers named in `_inputs`'s header. Conservation 29/29; orphan sweep 0/0
    ⚠ It is the **marginal** response that is wrong, not the scenario level (the emulator tracks FaIR
    to ~0.05 °C on ssp245 at 2100), so the target is the pulse decay — and gate 12 needs a working
    implementation first (§1a). Marcus ruled 09-04 that the long lifetime *should be an emergent
-   behaviour*, so this is a deliberate open question, **not a bug queue item**.
+   behavior*, so this is a deliberate open question, **not a bug queue item**.

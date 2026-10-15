@@ -17,7 +17,7 @@ frozen; canonical `hilda29l` (29 fitted + 9 pins, likelihood −1391.8051 on 26 
 1. **`02861de` — the beta's seventh tab, "Known issues."** Eight cards (`app/R/review.R`,
    `app/R/plots_review.R`), each putting one flaw as *deal-breaker / fixable / acceptable*.
    **Every number is MEASURED by the running model** through the scorecard's own gate kernels
-   (`calibration/lib_design_gates.R`, sourced lazily, memoised in `RV_CACHE`, computed on first
+   (`calibration/lib_design_gates.R`, sourced lazily, memoized in `RV_CACHE`, computed on first
    view ≈ 6 s). All eight reproduce the 09-21 scorecard to the printed digit. Also: **C2** — the
    Keeling panel now draws BOTH the raw box and `box − rep_dC` (the comparison the likelihood
    actually scored); **C3** — the residual pair is card 1; **D1** — no bands, and card 7 asks
@@ -37,7 +37,7 @@ frozen; canonical `hilda29l` (29 fitted + 9 pins, likelihood −1391.8051 on 26 
 
 ## 3. Marcus's four rulings, 2026-09-22
 - **R1 — the budget convention: plot the GCB convention.** ✅ DONE, §4.
-- **R2 — `rep_dC`'s prior centre:** research first. ⏳ first result in §5; **not ruled**.
+- **R2 — `rep_dC`'s prior center:** research first. ⏳ first result in §5; **not ruled**.
 - **R3 — the rename: "rename everything."** ❌ NOT STARTED. App title, repo, deployed URL.
 - **R4 — affiliation:** *"Marron Institute is for professional output (posters, talks, papers),
   but not for Substack output, comments on rules, or other less official output."* ⇒ **drop it
@@ -91,7 +91,7 @@ observations make NH the larger offset; the model has SH ≥ NH). The surface �
 correction is **negative** (stratospheric lag, mean age ~5 yr, Andrews et al. 2001,
 doi:10.1029/2001JD000465), so it **widens** the gap. ⇒ the evidence so far says `rep_dC` is **not
 a representation offset** but a constant ~3.5 ppm **level bias** (~7.4 GtC of excess airborne
-carbon) against an ice-core-anchored preindustrial. **Re-centring the prior would relocate the
+carbon) against an ice-core-anchored preindustrial. **Re-centering the prior would relocate the
 bias, not fix it.**
 
 ⚠ **NOT established — do not quote as measured.** The **hemispheric** figures (~+0.9 NH / ~+0.3
@@ -120,7 +120,7 @@ then a restamp of every mode.
      (`tau_ex`), not the deep ocean — that is the honest sentence. The tropical box was explored
      and **NOT adopted**.
    - **N12** card 8 conflates the **9 PINS** with the **named SHIMS** — two different lists, only
-     `ent_seas_amp_SH` + the ENSO pair in both. Must show both, labelled.
+     `ent_seas_amp_SH` + the ENSO pair in both. Must show both, labeled.
    - **U1** `output$h_params` maps **38** parameter names through a **~22-name-era** `desc`/`unit`
      table, so most render **NA** (carries retired `beta`, `sigma_co2`; lacks every HILDA/pump/
      seasonal-ML/limb name).

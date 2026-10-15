@@ -19,7 +19,7 @@
 | 13 | Obliquity (−23.44°) | **23.439279°** at J2000.0 (= 84381.406″) | IERS Conventions (2010), TN 36, Ch. 5 (version of 10 Aug 2012), §5.6.2, p. 20; mean-obliquity series Eq. 5.40, p. 22 | **Yes** for the quantity. The epoch is J2000.0. It is 23.472° in 1750 and 23.436° in 2024 (my arithmetic). | No (rounds to 23.44). |
 | 14 | +10-day phase in −23.44° cos(2π(N+10)/365.25) | **10 days** (Dec solstice → Jan 1 0h UT). Observed spacing is **9.85–10.43 d** (my arithmetic). | Formula form: Wikipedia "Position of the Sun" (**secondary**, no primary cited for this form). PVEducation attributes the cos(d+10) form to Cooper 1969 (**not read**). Solstice times: USNO seasons API. | **Partly.** Wikipedia counts N = 0 at Jan 1 0h UT, as the code does. PVEducation/Cooper count d = 1 on Jan 1, a 1-day shift. Both use 365, not 365.25. | No. |
 | 16 | `CCX_SEAS_T_LAG` (2.0 months after mid-July) | **Not found** | — | No observational source for a respiration-weighted soil-temperature (or respiration-driver) phase. Soil heat conduction puts the lag at the respiring depth at about 0.2 months (my arithmetic). | n/a |
-| 19 | `FORC_BOMB_NH_SHARE` (0.90, NH share of bomb-¹⁴C **delivery to the troposphere**) | **No direct value.** Published proxies give **0.77–0.98** (my arithmetic). | UNSCEAR 2000 Annex C: Table 6 p. 209 (fission-debris injection, NH 0.894); Table 7 pp. 210–211 (measured ⁹⁰Sr hemispheric deposition, NH 0.768); Table 2 p. 205 (fusion yield by test site, NH 0.932–0.982 depending on how equatorial sites are split). | **None are like-for-like.** ⁹⁰Sr deposition is the closest physical analogue (stratospheric debris reaching the surface by hemisphere), but it is fission-weighted and particulate, while ¹⁴C is fusion-weighted and gaseous. | 0.90 sits inside the proxy range. ⚠ The fusion-yield proxy with Christmas Island split 50/50 gives 0.953, which collides with `FORC_NUC_NH_SHARE` = 0.95. |
+| 19 | `FORC_BOMB_NH_SHARE` (0.90, NH share of bomb-¹⁴C **delivery to the troposphere**) | **No direct value.** Published proxies give **0.77–0.98** (my arithmetic). | UNSCEAR 2000 Annex C: Table 6 p. 209 (fission-debris injection, NH 0.894); Table 7 pp. 210–211 (measured ⁹⁰Sr hemispheric deposition, NH 0.768); Table 2 p. 205 (fusion yield by test site, NH 0.932–0.982 depending on how equatorial sites are split). | **None are like-for-like.** ⁹⁰Sr deposition is the closest physical analog (stratospheric debris reaching the surface by hemisphere), but it is fission-weighted and particulate, while ¹⁴C is fusion-weighted and gaseous. | 0.90 sits inside the proxy range. ⚠ The fusion-yield proxy with Christmas Island split 50/50 gives 0.953, which collides with `FORC_NUC_NH_SHARE` = 0.95. |
 | 21 | `P_canon` production (2.04 atoms cm⁻² s⁻¹) | Preindustrial (1750–1900): **1.88** (cosmic-ray model) or **1.75** (carbon-cycle budget) | Kovaltsov, Mishev & Usoskin 2012, EPSL 337–338:114 (arXiv v1 p. 5, lines 126–128). Roth & Joos 2013, Clim. Past 9:1879, p. 1894. | **Yes** for epoch and definition: global mean per cm² of Earth's surface, averaged over 1750–1900. | **Yes.** 2.04 is +8.5 % over 1.88 and +16.6 % over 1.75 (my arithmetic). It matches the Masarik & Beer values (2.02 in 1999; 2.05 at Φ = 550 MeV in 2009), seen **only secondarily**, which both newer papers call too high. |
 | 22 | Earth surface area (5.1e14 m²) | **5.10066e14 m²** (my arithmetic from R₂) | Moritz 2000, "Geodetic Reference System 1980", J. Geodesy 74:128–133, §4 "Numerical Values", p. 131: R₂ = 6 371 007.1810 m | **Yes.** Area of the GRS80 ellipsoid = 4πR₂². | −0.013 % (negligible). |
 
@@ -47,7 +47,7 @@
    - **Locator:** §3.2.2, Eq. (14) and the sentence after it. Δphoto, "the carbon isotope fractionation during marine photosynthesis", is set to **−19 ‰**, citing Eide et al. (2017b), with R_C:P = 122 (Takahashi et al. 1985).
    - The same section says that in reality Δphoto varies in space with CO₂(aq), and that using a constant has limited quantitative impact on their comparison.
    - **URL:** https://bg.copernicus.org/articles/18/4389/2021/bg-18-4389-2021.html (WebFetch extraction of the HTML; check by eye).
-   - **Definition:** Eq. 14 is a Broecker & Maier-Reimer-type decomposition: δ¹³C_DIC,bio = δ¹³C_DIC,MO + (Δphoto/DIC_MO)·R_C:P·(PO₄ − PO₄,MO). From that structure Δphoto is the offset of remineralised organic carbon from DIC, so it has the **same definition and sign as the code's ε** (my reading of the equation; the text does not name the reference pool).
+   - **Definition:** Eq. 14 is a Broecker & Maier-Reimer-type decomposition: δ¹³C_DIC,bio = δ¹³C_DIC,MO + (Δphoto/DIC_MO)·R_C:P·(PO₄ − PO₄,MO). From that structure Δphoto is the offset of remineralized organic carbon from DIC, so it has the **same definition and sign as the code's ε** (my reading of the equation; the text does not name the reference pool).
    - **Check:** −19 × 122 / 2200 = −1.05 ‰ per µmol kg⁻¹ PO₄ (my arithmetic, DIC ≈ 2200 assumed), close to the classic δ¹³C–PO₄ slope.
    - **Status:** an adopted constant for a diagnostic, not a measurement. Its stated origin, **Eide, M., Olsen, A., Ninnemann, U. S. & Johannessen, T. (2017b), GBC 31:515–534, doi:10.1002/2016GB005473, was NOT read** (Wiley returned 403). Vintage 2021, citing 2017.
    - Same paper, model output (not observations): global-mean surface δ¹³C_POC −22.5 ‰ (Hist_Popp, 1960–1991 climatology; §3.1, Fig. 3a) and surface δ¹³C_DIC 1.64 ‰ (1990–2005; §3.2.1, Fig. 5a). The difference is about −24.1 ‰ (my arithmetic; the two periods differ).
@@ -56,7 +56,7 @@
 2. **Schmittner, A., Gruber, N., Mix, A. C., Key, R. M., Tagliabue, A. & Westberry, T. K. (2013).** Biology and air–sea gas exchange controls on the distribution of carbon isotope ratios (δ¹³C) in the ocean. *Biogeosciences* 10, 5793–5816. doi:10.5194/bg-10-5793-2013.
    - **Locators (pdftotext of the Copernicus PDF):**
      - p. 5794, Introduction: typical bulk marine organic matter is about −21 ‰ against a mean surface δ¹³C_DIC near +2 ‰. That is an offset of about **−23 ‰** (my arithmetic). It is an introductory statement with no table.
-     - p. 5796, §2.2, Eq. (7): their εp parameterisation (Popp et al. 1989, relative to CO₂(aq)).
+     - p. 5796, §2.2, Eq. (7): their εp parameterization (Popp et al. 1989, relative to CO₂(aq)).
      - p. 5799, text after Eqs. 15–16: they fix δ¹³C_org = −21 ‰ (absolute) for their decomposition.
      - p. 5806, §5.2.1: the observed δ¹³C_POC meridional pattern (Goericke & Fry 1994 compilation) runs from about −20 ‰ at low latitudes to −25 to −30 ‰ at high latitudes.
    - **URL:** https://bg.copernicus.org/articles/10/5793/2013/bg-10-5793-2013.pdf
@@ -124,7 +124,7 @@
 ## 14. The +10-day declination phase
 
 **What the code means by it.**
-- Model time is decimal years, with month centres at year + (m − 0.5)/12 (`R/forcing.R:339, 620`). So `tt·365.25` is **days since Jan 1, 0h**.
+- Model time is decimal years, with month centers at year + (m − 0.5)/12 (`R/forcing.R:339, 620`). So `tt·365.25` is **days since Jan 1, 0h**.
 - The cosine reaches its minimum (December solstice) at tt·365.25 = −10, which is **Dec 22, 0h**.
 - The code uses a 365.25-day period in both places, so the shape is exactly periodic in model years (the worklist's question iii).
 
@@ -200,7 +200,7 @@
    - Previously derived: 460 / 144 → 0.762.
    - Calculated: 499 / 111 → 0.818. (All shares are my arithmetic.)
    - ¶32 (p. 166) says the model attributes about 90 % of deposited ⁹⁰Sr to stratospheric debris.
-   - **Closest physical analogue** of stratosphere→troposphere delivery by hemisphere, because tropospheric residence is short compared with interhemispheric mixing. But it is fission-weighted and particulate; bomb ¹⁴C is fusion-weighted CO₂.
+   - **Closest physical analog** of stratosphere→troposphere delivery by hemisphere, because tropospheric residence is short compared with interhemispheric mixing. But it is fission-weighted and particulate; bomb ¹⁴C is fusion-weighted CO₂.
 3. **Table 2, p. 205**, yields by test site.
    - Fission, fusion and total yield are given per site.
    - Southern-hemisphere sites are Fangataufa, Mururoa, Monte Bello, Emu, Maralinga, Malden Island and "Atlantic" (Argus). Everything else is northern.

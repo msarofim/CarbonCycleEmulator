@@ -85,7 +85,7 @@ Gates at `ent26`: ✅ 7 (ocean z −0.32), Q (1.27), G (−0.06), S (+1.00). ⛔
    `character(0)`, `cat()` prints nothing — **and the `*** UNSTABLE` step-stability verdict was in
    that row.** Both branches now mutation-tested.
 2. ⛔ **Its "condition number" was the RECIPROCAL** — `max/min` over all-negative eigenvalues, the
-   two signs cancelling into a plausible 1.352e-05 for a true 7.394e+04. **Wrong for every mode this
+   two signs canceling into a plausible 1.352e-05 for a true 7.394e+04. **Wrong for every mode this
    script ever produced.** (`run_modefind_pump_arms.R` used `abs()` and is unaffected.) `21x21` was
    also a typed label in a 26-par build.
 3. ⛔ **Retiring an arm silently UN-LINTS its path.** The hardcode lint builds its directory list
@@ -97,7 +97,7 @@ Gates at `ent26`: ✅ 7 (ocean z −0.32), Q (1.27), G (−0.06), S (+1.00). ⛔
 
 ---
 
-## 4. ⭐ THE `kz` RULING — AND IT GENERALISES
+## 4. ⭐ THE `kz` RULING — AND IT GENERALIZES
 
 **Marcus: "the only tests that matter are the ones against observations or physics."**
 Applied to the one standing failure it dissolved it: **`kz` is not directly observed; the deep-ocean
@@ -165,7 +165,7 @@ Adoption cleared six; the rest were repaired **at the PREMISE, never at the tole
   arms scored by its own objective against a prior this project chose. ⚠ **Cost stated:** the
   free-vs-pinned check now has **NO POWER** (one arm) and reports DARK. **A 26-par PINNED refit is
   what restores it.**
-* ⚠ **`ccx_default_params()$ent_seas_amp_SH` is now 10.9524**, the derived prior centre — NOT the
+* ⚠ **`ccx_default_params()$ent_seas_amp_SH` is now 10.9524**, the derived prior center — NOT the
   fitted 19.029. `R/model.R`'s guard is `!= 0`, so zero SHORT-CIRCUITS the whole entrainment path.
 * ⚠ **`tau_ex_seas_amp` is STILL implemented, defaulted 0 and unfitted.** Freeing it next reruns the
   whole 26 → 27 migration story.

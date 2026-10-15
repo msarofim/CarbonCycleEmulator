@@ -18,12 +18,12 @@ Written on Marcus's request ("Yes, write the handoff note"), 2026-10-11. Nothing
 |---|---|
 | **"I get an error when selecting warming, ENSO, volcanoes, and ocean sink. Check all combinations"** | **FIXED** (`4e819ad`). 16 of 127 switch combinations crashed: `ocean_sink` with `warming_feedback` or `revelle`. The ocean switch acted inside the spin-up; the periodic Newton never converged (negative SH deep carbon) and the ¹³C solve was singular. Now RUN-ONLY: `CCX_MECH_RUN_ONLY` and `ccx_mechanism_spinup()` in `R/mechanisms.R`. 127 combinations: 0 errors; the 63 without the ocean switch are bit-identical; the others move ≤ 0.098 ppm. Regression test with a power check in `test-mechanisms.R` (105 / 105). |
 | "…and perturbations" | `shiny::testServer` sweep of the real server, every tab's controls at their extremes, 6490 renders. Found ONE more crash: the regrowth chart with "Years shown" ending before 1959, now a `validate()` message. **Final sweep: 0 errors.** |
-| "without Warming … 0.00 (100% less)": lower case | Done: `app_mech_inline()`; "El Niño", "CO₂" and "Revelle" keep their capitals; the one sentence-start use is capitalised. |
+| "without Warming … 0.00 (100% less)": lower case | Done: `app_mech_inline()`; "El Niño", "CO₂" and "Revelle" keep their capitals; the one sentence-start use is capitalized. |
 | "That math doesn't work: there's still noise" | **Measured, not changed.** With the four switches off, model growth is ~1e-12 ppm/yr, so "0.00" is right. The noise he saw is in the residual strip (model − measured = −measured). Rewording it is his call. |
 | "GCB doesn't add up" said 3×, "only need two" | Cut MY paragraph in the "Why a bigger sink can be the closer one" box. His two are kept: the paragraph under the heading and `IMB_BAND_NOTE`. |
 | "These 2 switches do not add up" → his sentence | Done, verbatim. |
 | Keeling "it only adjusts" | Done. |
-| Delete the harmonisation sentence | Done; `APP_SPLICE_STEP` removed with it. |
+| Delete the harmonization sentence | Done; `APP_SPLICE_STEP` removed with it. |
 | Pulse box: two "Change"s, and his replacement paragraph | Done. His paragraph replaces three old ones; "form" → "from" and "dC" → °C; numbers come from the named constants. **RULED "Temperature only (Recommended)"**: "on temperature" (the CO₂ response spreads 6.4–7.0 %, ~3× the temperature figure). |
 | "start the line at zero when the pulse starts" | Done: `pulse_from_release()`, an exact 0 at the release with annual means at mid-year. **RULED "Re-pin both (Recommended)"**: `test-future-yvar` and `test-app-review-copy` A2 are re-pinned (`76f6bf4`). |
 | ⛔ Found on the way: the pulse numbers were **hilda33p's** | `test-pulse-linearity.R` read the newest CSV without its mode. Re-measured at hilda29e: spread **2.3 %**, horizons 1.44 / 1.37 / 1.35 / 1.40. The gate now requires the canonical's CSV and is mutation-tested (`fa6bb86`). An audit of the other gates was spun off (§5). |
@@ -37,9 +37,9 @@ Commits: `4e819ad`, `fa6bb86`, `fb8ceba`, `76f6bf4` (all pushed), plus this note
 ## 2. Decisions and their rationale
 
 - **Ocean switch = run-only, not "fix the solver".** The switch's own blurb asks what happens when the ocean stops absorbing *our* carbon. A spin-up with the ocean closed built a different 1750: 268 GtC moved within the ocean, and ¹⁴C production fell to 7 %.
-  - Every other switch leaves 1750 bit-identical (ENSO, volcanic, emissions) or within 1 GtC (fertilisation, warming, Revelle), so it was left as it was.
+  - Every other switch leaves 1750 bit-identical (ENSO, volcanic, emissions) or within 1 GtC (fertilization, warming, Revelle), so it was left as it was.
   - The CO₂ effect is ≤ 0.1 ppm on combinations that already worked. Below the app's resolution, so no ruling was sought; it was reported.
-- **The regrowth guard uses `validate()`, not `stop()`**: its message survives the error sanitising shinyapps.io applies.
+- **The regrowth guard uses `validate()`, not `stop()`**: its message survives the error sanitizing shinyapps.io applies.
 - **A pulse-line point sits at mid-year**: the rows are annual means (0.446 in the release year, 0.903 the next), so drawing them at their integer year would start the rise a year early.
 
 ## 3. NEXT: card 5's FaIR PD100 line (ruled 10-11)
@@ -67,7 +67,7 @@ Commits: `4e819ad`, `fa6bb86`, `fb8ceba`, `76f6bf4` (all pushed), plus this note
 - The template is `FaIRtoFrEDI/run_fair_pulse_for_ccx.py` (`a7e92ce`). ⚠ It exists ONLY on FaIRtoFrEDI's **`heat-ed-morbidity`** branch, not `main`.
 - That branch is 27 commits ahead of origin and carries Marcus's UNCOMMITTED docx edits (`deliverables/egu_sprm/*.docx`). Do not touch, stash or commit those.
 - **Ask Marcus which branch the new script goes on** (heat-ed-morbidity, beside its sibling, or a new branch).
-- Python: `source ~/climate-env/bin/activate`. Torch verdict, said out loud: the laptop. Three runs × 841 configs × ~300 yr is minutes, with no licence or substrate blocker.
+- Python: `source ~/climate-env/bin/activate`. Torch verdict, said out loud: the laptop. Three runs × 841 configs × ~300 yr is minutes, with no license or substrate blocker.
 
 **Import (this repo's hard rule 3):**
 - Outputs go to `data-raw/downloads/fair_v160_pulse/` with `MANIFEST.csv` (sha256) and a `_provenance.csv` (script, commit, FaIR version, calibration files, n_configs, protocol), following the 09-26 pulse file. Then a versioned `.rds` in `data/`.

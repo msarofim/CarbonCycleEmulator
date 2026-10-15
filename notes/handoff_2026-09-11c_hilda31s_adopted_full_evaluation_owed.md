@@ -1,4 +1,4 @@
-# Handoff — 2026-09-11 (c). **`hilda31s` IS CANONICAL — the HILDA space with the SEASONAL MIXED LAYER ON, refitted under corrected observables (a round-6 "refutation" turned out to be an artefact of how a seasonal box's concentration was read). FIRST TASK NEXT SESSION: A FULL MODEL EVALUATION of `hilda31s` against the pedagogical standard — every gate, the chain, the assessment note, the blocker list — before any new mechanism is built.**
+# Handoff — 2026-09-11 (c). **`hilda31s` IS CANONICAL — the HILDA space with the SEASONAL MIXED LAYER ON, refitted under corrected observables (a round-6 "refutation" turned out to be an artifact of how a seasonal box's concentration was read). FIRST TASK NEXT SESSION: A FULL MODEL EVALUATION of `hilda31s` against the pedagogical standard — every gate, the chain, the assessment note, the blocker list — before any new mechanism is built.**
 
 > Self-contained. Read CHANGELOG **2026-09-11 (3) → (8)** for every number. Memory (Read the sub-index first —
 > `INDEX_ccx.md`, now 9 KB with a LIVE STATE block): [[ccx_hilda31s_adopted]], [[ccx_round6b_result]],
@@ -15,7 +15,7 @@
 | option B rulings 1–6 (Marcus) | `ml_hi` = the HS box (57.14°, NOT 40°); Niño3.4 LIMB on `ml_lo` first; `ml_lo` fitted SST sines, `ml_hi` `seas_ml` + PINNED SST amp; `ent_seas_amp_SH` fitted; GATE S re-cut 57–90 °S for `ml_hi`; `h_hs` under the HS Holte prior (09-08d idiom) |
 | data | poleward Holte MLD shapes + per-cap ERSST SST amps built; every shipped row bit-identical |
 | B build | R side of `seas_ml = 2` written, UNREACHABLE (parser refuses 2); C++/parser/prior/tests NOT built |
-| ⛔ FOUND | the gradient row read INSTANT carbon / ANNUAL-MEAN mass → round 6's P7 "302 → 385" was 157 µmol/kg of artefact; its δ¹³C half was the deep compensating; round 6 was FITTED against it |
+| ⛔ FOUND | the gradient row read INSTANT carbon / ANNUAL-MEAN mass → round 6's P7 "302 → 385" was 157 µmol/kg of artifact; its δ¹³C half was the deep compensating; round 6 was FITTED against it |
 | RULED (Marcus) | "annual mean of the concentration" → `ccx_box_annual_conc()` (per hemisphere, mass at the time, fixed weights), priced −0.0957 at `hilda31p`, files restamped WITH history (`restamp_mode_objective.R`), 15-test guard mutation-tested |
 | round 6b | Torch 17367892 + 17379055: mode **−1475.4579** (h_ml 64.8), second basin −1475.8811 (49.8); likelihood EQUAL to `hilda31p` (−0.61 / +0.23), priors +5.8, **P7 PASS**, P2 inside 2σ, P12 1.25× |
 | RULED (Marcus) | **"Promote 1 and clean memory"** → promoted (5 gates), Hessian PD cond 3.4e5 NOTHING step-unstable, repointed; `hilda31p` = `CCX_MODE_SEASML0_CONTROL`; `INDEX_ccx` split → `INDEX_ccx_arch_modes` |
@@ -44,8 +44,8 @@ WHOLE model since. Do that before building anything. Concretely, in this order:
    by emissions, ENSO, volcanic aerosol, GMST. For each link: does the model teach the RIGHT physics? The new
    link — the seasonal mixed layer entraining real water — needs its own paragraph: what a reader sees in the
    SPO/MLO seasonal cycles, in the ML DIC cycle (now ±40 µmol/kg), in the surface δ¹³C; and whether `ent_seas_amp_SH`
-   at 8.16 (1.25× centre) is still a shim the reader would be told about.
-4. **The blocker list** — is the ENSO ocean sign still wrong-signed and cancelled (r −0.43 at `ent26`; measure at
+   at 8.16 (1.25× center) is still a shim the reader would be told about.
+4. **The blocker list** — is the ENSO ocean sign still wrong-signed and canceled (r −0.43 at `ent26`; measure at
    `hilda31s`, `gamma_enso_ocn_SH` halved to 0.045)? `rep_dC` +3.11? `q10` −2.11, `kz_deep_frac` −2.38,
    `pump_hs_gcm2` +2.39? The σ-audit's three open items (`INDEX_ccx`)?
 5. **Write `notes/assessment_2026-09-1x_hilda31s.md`** in the 09-08 five-line form (verdict; what the arc taught;
@@ -80,7 +80,7 @@ WHOLE model since. Do that before building anything. Concretely, in this order:
   canonical compares ON with ON and feels nothing (test-seas-ml-label's own trap, fixed 09-11 (8)).
 - ⚠ **Every stored logpost older than 09-11 (5) is in another objective's units** — the annual-mean read moved
   the canonical family by −0.096; `hilda31p`/`hilda31` were restamped (history inside), the 09-10 round-6 start
-  files were NOT (they are the artefact record). Compare on likelihood or re-score.
+  files were NOT (they are the artifact record). Compare on likelihood or re-score.
 - ⚠ **The next Torch array needs its reference set re-ruled** — the driver's references are `hilda31p`/`hilda31`;
   add `hilda31s`; regenerate `port_targets.csv` at the array's `seas_ml` (`CCX_MS_STRUCT=hilda CCX_MS_SEAS_ML=<v>
   Rscript calibration/make_port_targets.R`); at `seas_ml = 1` the P8 wall (h_ml ≈ 75–76 m) still makes some

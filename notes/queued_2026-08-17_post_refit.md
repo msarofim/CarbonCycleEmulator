@@ -90,7 +90,7 @@ derive it properly or demonstrate the failure is real. Any bar that cannot be de
 **WRITTEN THIS SESSION: [`spec_2026-08-17_sigma_inflation.md`](spec_2026-08-17_sigma_inflation.md).**
 Spec only — nothing implemented, nothing proposed for the objective, and it stays Marcus's call.
 
-What it now contains that the decision was previously missing: the form and why the normalisation
+What it now contains that the decision was previously missing: the form and why the normalization
 term is load-bearing; the **quadrature assumption stated rather than buried** (`σ_rep` is a bias, not
 a random error); why bias-correction is not the alternative (the like-for-like target rewards a large
 `h_ml` and was already rejected for it); the build/PCHIP design; and six named gates including a

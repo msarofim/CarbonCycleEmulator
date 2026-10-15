@@ -17,7 +17,7 @@ Commits **`5309195`, `5a95341`, `13eb0ad`, `2d29eff` (4)**. No remote.
 > *"We don't need to stay true to HILDA, but we should stay true to the conceptual way that the
 > simplified model's ocean works."*
 
-⇒ The departure from HILDA is **authorised**; the constraint is coherence with **CCX's** ocean. That
+⇒ The departure from HILDA is **authorized**; the constraint is coherence with **CCX's** ocean. That
 ruled out the cheap version of the move — attaching `q` low *because it scores better* would be
 tuning geometry to the residual. The prereg's §1 therefore argues from CCX's structure alone, and
 §3 declares the attachment set from a **non-score criterion** with **no free boundary**.
@@ -29,8 +29,8 @@ Also decided: **LICENSE = MIT** (`13eb0ad`). Rank 3 of the previous handoff, now
 **`q_attach_from`** — the shallowest interior layer HD exchanges with — in **both cores**.
 **1 = every layer = HILDA's depth-independent `q` = the 09-05 structure BIT FOR BIT**; absence means
 1, so nothing written earlier changes model. `hs_frac` still ships **0**; `ent26` untouched.
-⚠ **`tau_q` is NOT renormalised over the subset** — a smaller set is *less* total exchange, not the
-same exchange repacked. Deliberate and pinned by a test: renormalising would smuggle a rate change
+⚠ **`tau_q` is NOT renormalized over the subset** — a smaller set is *less* total exchange, not the
+same exchange repacked. Deliberate and pinned by a test: renormalizing would smuggle a rate change
 in with a geometry change and neither could then be read.
 
 ## 2. THE RESULT
@@ -78,7 +78,7 @@ mutation fires (−113.20 → −116.07) · out-of-range **errors by name on bot
    the predicted *direction* is wrong too. **The test caught it, not me:** the assertion FAILED at
    `ccx_default_params()` (−94.57 vs −94.14) because the effect is ~1–3 ‰ with **no robust sign**.
    ⇒ ⭐⭐ **AN ISO-DEEP CONTROL LICENSES EXACTLY ONE COMPARISON — the intermediate PROFILE, which is
-   what it equalises the deep age FOR. Read every quantity it does not pin at MATCHED `kz`.**
+   what it equalizes the deep age FOR. Read every quantity it does not pin at MATCHED `kz`.**
 
 ## 5. ⚠⚠ NON-OBVIOUS STATE — THE SUITE IS NOT GREEN AND THAT IS NOT NEW
 
