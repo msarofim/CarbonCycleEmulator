@@ -104,7 +104,8 @@ KEY_GROWTH_OBS  <- "Measured (NOAA global marine reference)"
 # PANEL TITLES AND NOTES BELOW ARE DRAFTS FOR MARCUS'S WORDING: drafted so the slots are not empty;
 # the numbers they sit beside are the model's.
 KEY_PULSE_EXTRA  <- "The extra CO\u2082 (with the pulse, minus without)"
-KEY_PULSE_TAGGED <- "The pulse's own carbon atoms (tagged)"
+# 2026-10-15: "own" cut -- Marcus's style notes name this phrase ("the pulse's own atoms" -> "the pulse's carbon atoms")
+KEY_PULSE_TAGGED <- "The pulse's carbon atoms (tagged)"
 # 2026-10-15 review: the temperature view's model key, shown only beside FaIR (plot_pulse_warming(fair = ...)); a draft
 KEY_PULSE_WARM_MODEL <- "This model (with the pulse, minus without)"
 PANEL_PULSE_EXTRA  <- "The extra carbon"
