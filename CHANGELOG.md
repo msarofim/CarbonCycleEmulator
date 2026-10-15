@@ -2,6 +2,11 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-15 (i) — **Full suite @ `02d4297` (frozen, LINKED): 8125 passed, 0 failed, 1 skipped (the standing `l2-enso-limb` skip), 20.5 min.** Log: `outputs/diagnostics/suite_20261015_02d4297.log`. It covers (e)–(g); since then (h) and this entry changed only Markdown, which no test reads. The +30 over `6278482`'s 8095 is `test-futures-ribbons` +22 and `test-app-us-spelling` +8. No "No nuclear" line in the log. README's test line cites it.
+
+- ⚠ **The first run, @ `5250df8`, was UNLINKED by mistake:** 8110 / 0 / 6. `ln -s <dir>` into the worktree's existing `data-raw/downloads/` (3 tracked files) nested the link as `downloads/downloads`, so five raw-provenance tests skipped. Its log is kept as `suite_20261015_5250df8_unlinked.log`, with a note. The launch script now refuses unless the links are per file. The guard was mutation-tested: it refuses the broken tree and passes the fixed one. Memory [[ccx_worktree_needs_downloads_linked]] records the trap; it is the fourth time it was hit.
+- Both suite worktrees are removed: their links were deleted first (`find -type l -delete`, which never follows a link), then `git worktree remove`.
+
 ## 2026-10-15 (h) — **The docs in U.S. spelling** (Marcus: "Convert the docs to U.S. spelling too"). **2,626 words in 389 of the 484 tracked Markdown files** (README, DESIGN, DATA, CLAUDE, CHANGELOG, `app/DEPLOY.md`, `notes/`, and the READMEs under `calibration/` and `outputs/`). The other 95 had nothing to change.
 
 - **The map:** the comments' 167 forms (g) plus 67 found only in the docs (characterise, favours, realise, kilometre, behavioural, labour, licences …). The commonest: fertilization 327, center 244, artifact 187, optimized 128, labeled 125.
