@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-15 (y) — **Handoff `notes/handoff_2026-10-15c_deploy.md`** (Marcus: "Yes, write the handoff and stop both servers"). It supersedes 10-15b, which now points to it. Both local app servers (:7788, :7791) are stopped. Memory: new `ccx_connect_cloud_deploy`; `ccx_app_beta_blockers` gains a top "STATE 2026-10-15 LATE" paragraph; `INDEX_ccx_app` now points to both, and its stale "deploy never done / tag still v1.0-hilda29l" clause is corrected. Next: the repo goes public (his pre-public decisions first), the post, then `APP_FEEDBACK_URL` and a redeploy with `appId`.
+
 ## 2026-10-15 (x) — **Connect Cloud is the host: Basic plan, 1 GB, and the URL is in the post** (Marcus upgraded to Basic and set the app's memory to 1 GB). The first change didn't reach the app: the API still showed 4096 MB after one republish. The second, made on the CarboTope content's own settings page and republished, did: 1 CPU / 1024 MB, 1.0 usage credit per hour of serving (Posit's formula), about 100 hours a month on Basic.
 
 - **Re-checked at 1 GB:** every tab and plot draws, no disconnects; pulse 11.8 s (unchanged, so memory is not what limits speed), Build your own 4.6 s, Known issues first view 4.2 s (30.7 s at 4 GB; two samples, cause not separated).

@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-15b: BETA v1.0 tagged; next are the Substack formatting and the deploy
 
+> **Superseded by `notes/handoff_2026-10-15c_deploy.md`** (same evening): the app is deployed on Posit Connect Cloud, the `.doc` is removed, and post 1 is formatted with the live link.
+
 **Supersedes** `notes/handoff_2026-10-15_prepublic_review.md`. Written on Marcus's request ("Yes, write the handoff
 note"), 2026-10-15 evening.
 
