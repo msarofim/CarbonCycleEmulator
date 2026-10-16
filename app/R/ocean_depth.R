@@ -53,6 +53,9 @@ OCEAN_DEPTH_LABEL_ROUND_M <- 100
 # is that law times the run's step count -- months x substeps -- RELATIVE to each total. Measured
 # 2026-10-15 (scratch tagged_tail/02_runs.R): 4.3e-15, against ~1e-11 from this law.
 OCEAN_DEPTH_CHAIN_EPS <- .Machine$double.eps
+# The pulse lab releases its pulse within ONE calendar year (app/server.R adds it to one year's
+# emissions). It sets the tagged panel's closure law, lambda^2 Delta^2 / 8 (R/c14_tag.R).
+PULSE_RELEASE_WIDTH_YR <- 1
 
 #' Each box's top and bottom, in meters, for the ocean boxes the depth split knows
 #'
@@ -260,7 +263,11 @@ app_pulse_depth_runs <- function(spin, runs, pulse_year) {
 #' at the injection-weighted mean time, / the tagged GtC -- ccx_tag_partition()'s arithmetic
 #' (R/c14_tag.R) at these instants. A state at instant t carries its own time t, so the undo is
 #' exp(lambda (t - s_mid)) with no half-month shift.
-#' @return data.frame(t, panel, where, frac); `where` has the keys in stack order
+#' @return data.frame(t, panel, where, frac); `where` has the keys in stack order. Its attribute
+#'   `closure_bound` is each panel's LAW bound on |sum of shares - 1| after the release, which
+#'   plot_pulse_partition() enforces: the restart chain's roundoff (2 runs x nsteps x eps x the
+#'   inventory, in units of the pulse) and, for the tagged panel, the decay undo's second-order
+#'   term lambda^2 Delta^2 / 8 (R/c14_tag.R).
 app_pulse_partition_table <- function(dr, pulse_gtc) {
   b <- dr$base; p <- dr$pulse; g <- dr$tagged
   stopifnot(identical(b$t, p$t), identical(b$t, g$t))
@@ -276,5 +283,12 @@ app_pulse_partition_table <- function(dr, pulse_gtc) {
   d <- rbind(long(extra, PANEL_PULSE_EXTRA), long(tagd, PANEL_PULSE_TAGGED))
   d$where <- factor(d$where, levels = where)
   d$panel <- factor(d$panel, levels = c(PANEL_PULSE_EXTRA, PANEL_PULSE_TAGGED))
+  rel <- max(vapply(dr[c("base", "pulse", "tagged")], function(x) attr(x, "mismatch")$bound, numeric(1)))
+  inv_C   <- max(p$atm_C + p$land_C + p$ocean_C)
+  inv_C14 <- max(g$atm_C14 + g$land_C14 + g$ocean_C14)
+  attr(d, "closure_bound") <- stats::setNames(c(
+    2 * rel * inv_C / pulse_gtc,
+    ccx_const("LAMBDA_C14")^2 * PULSE_RELEASE_WIDTH_YR^2 / 8 + 2 * rel * inv_C14 * max(undo) / dr$tag$gtc),
+    c(PANEL_PULSE_EXTRA, PANEL_PULSE_TAGGED))
   d
 }

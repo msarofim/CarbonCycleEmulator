@@ -121,34 +121,40 @@ KEY_PULSE_TAGGED <- "The pulse's carbon atoms (tagged)"
 KEY_PULSE_WARM_MODEL <- "This model (with the pulse, minus without)"
 PANEL_PULSE_EXTRA  <- "The extra carbon"
 PANEL_PULSE_TAGGED <- "The pulse's carbon atoms"   # Marcus 2026-10-15
+# the partition bands' opacity; the palette gate scores the fills composited at THIS value over white
+PULSE_PARTITION_ALPHA <- 0.9
 # The partition panels' five bands (2026-10-16: the ocean split by depth, app/R/ocean_depth.R).
 # Air and land keep the wording the panel already had. ⚠⚠ THE THREE OCEAN KEYS ARE DRAFTS FOR
 # MARCUS'S WORDING; each `%s` is a boundary read off the run's own grid and rounded to
 # OCEAN_DEPTH_LABEL_ROUND_M (295 m -> 300, 914 m -> 900 at hilda31w), so the numbers are the model's.
-# the bands' opacity; the palette gate scores the fills composited at THIS value over white
-PULSE_PARTITION_ALPHA <- 0.9
 KEY_PULSE_AIR  <- "Still in the air"
 KEY_PULSE_LAND <- "Taken up by land"
-KEY_OCEAN_UPPER_FMT <- "Upper ocean (0\u2013%s m)"
-KEY_OCEAN_MID_FMT   <- "Intermediate ocean (%s\u2013%s m)"
+KEY_OCEAN_UPPER_FMT <- "Upper ocean (0–%s m)"
+KEY_OCEAN_MID_FMT   <- "Intermediate ocean (%s–%s m)"
 KEY_OCEAN_DEEP_FMT  <- "Deep ocean (below %s m)"
-# ⚠⚠ PLACEHOLDERS FOR MARCUS (2026-10-16): the panel's one-sentence takeaway (house rule 7) and a
-# tooltip on the ocean groups. Shown on screen in brackets so they cannot be mistaken for copy;
-# app/make_deploy_bundle.sh refuses to build while its PLACEHOLDER_MARK appears anywhere in app/.
-PULSE_DEPTH_TAKEAWAY <- "[MARCUS: one-sentence takeaway for the two partition panels]"
-PULSE_DEPTH_GLOSS     <- "[MARCUS: the three ocean groups]"
-PULSE_DEPTH_GLOSS_TIP <- "[MARCUS: tooltip on the upper / intermediate / deep groups]"
+# The takeaway over the two partition panels: Marcus's wording, 2026-10-16, verbatim except "CO2" set
+# as CO₂ (the app's form). A paragraph rather than house rule 7's one sentence, by his choice. He
+# judged the three ocean bands to need no separate explanation, so the line and tooltip that were
+# placeholders under the panels are gone.
+PULSE_DEPTH_TAKEAWAY <- paste(
+  "Carbon is emitted directly into the atmosphere, but plants take up CO₂ out of the air and",
+  "carbon also mixes into the surface ocean.",
+  "The left panel shows how much excess carbon stays in each reservoir",
+  "(the rate of decline in the atmosphere in this box informs the “perturbation lifetime”).",
+  "The right panel shows where the individual carbon atoms from the pulse end up",
+  "(the rate of decline in the atmosphere in this box informs the “residence lifetime”).",
+  "While the land and surface ocean equilibrate quickly, mixing into the deep ocean is a slow process.")
 # 2026-10-15 review: "leave the air within years" -> measured 49 % of the tagged atoms still in the air at +5 yr, 20 % at +20
 PULSE_TAG_DECAY_NOTE <- paste("Most of the tagged atoms leave the air within a couple of decades, because the air swaps",
-                              "carbon with land and ocean every year. The extra CO\u2082 stays far",
+                              "carbon with land and ocean every year. The extra CO₂ stays far",
                               "longer, because carbonate chemistry limits how much EXTRA carbon",
                               "the ocean can take up.")
-PULSE_TAG_PARTITION_NOTE <- paste("Right: the same pulse, with its own carbon atoms tagged and",
-                                  "followed wherever they go.")
-PULSE_PARTITION_NOTE <- paste("This is how much extra carbon each reservoir holds because of",
-                              "the pulse \u2014 the difference between running with it and",
-                              "without. It is not a trace of where those particular molecules",
-                              "went, which is a different question with a different answer.")
+# Marcus 2026-10-16: "with its carbon atoms" (was "its own"), and "and followed wherever they go" deleted.
+PULSE_TAG_PARTITION_NOTE <- "Right: the same pulse, with its carbon atoms tagged."
+# Marcus 2026-10-16: the clause "the difference between running with it and without" and the sentence
+# "It is not a trace of where those particular molecules went..." deleted. The distinction that sentence
+# drew is now drawn by the tagged panel beside it and by his takeaway above both.
+PULSE_PARTITION_NOTE <- "This is how much extra carbon each reservoir holds because of the pulse."
 # \u26d4 THIS CAPTION USED TO BE FALSE OF HALF ITS OWN CHART. It said "annual
 # means differenced" while the MEASURED series was GCB's `atm_growth` -- NOAA's
 # published Jan-to-Jan `co2_gr_gl`, a different estimator. Fixed 2026-09-26; the
@@ -1344,6 +1350,10 @@ GROWTH_RESID_MIN_YEARS <- 12L
 #' ([[pulse_label_vs_perturb]]). A caption that says "where the molecules went"
 #' over this chart would be wrong by that factor, and it is exactly the phrasing
 #' a reader reaches for.
+#' ⚠ 2026-10-16 (Marcus): the caption's explicit denial ("It is not a trace of where those
+#' particular molecules went...") is DELETED, by his ruling. The distinction is now drawn by the
+#' tagged panel beside this one and by his takeaway above both. The rule above still binds: no
+#' caption may say "where the molecules went" over the LEFT panel.
 #'
 #' ⚠ THE LAND-USE CONVENTION DOES NOT ARISE HERE, and that is worth stating
 #' because it dominates the OTHER partition panel (plot_partition(), review R1).
@@ -1380,9 +1390,24 @@ plot_pulse_partition <- function(tab, pulse_gtc, pulse_year, yr_max = NULL) {
   # The EXTRA panel's closure is conservation of carbon; the TAGGED panel's is conservation of the
   # tag with decay undone (~1e-9 from first principles, R/c14_tag.R), so it is a check and not a
   # normalization, exactly as the left panel's.
+  # ⛔ 2026-10-16: THE CAPTION NO LONGER STATES THE CLOSURE (Marcus deleted "The shares add to
+  # 100%..."), so a leak would no longer show on screen. The panel now REFUSES to draw instead, at
+  # each panel's law bound (app_pulse_partition_table()'s `closure_bound`). Measured over the
+  # sliders' extremes (vvVL/vvM/vvH, 2030-2100, 10-500 GtC): the residual is at most 0.22 of its
+  # bound, so an ordinary setting cannot trip it.
   kc <- d$t >= pulse_year + 1
-  closure <- tapply(d$frac[kc], list(d$panel[kc], d$t[kc]), sum)
-  resid <- if (any(kc)) 100 * max(abs(closure - 1), na.rm = TRUE) else NA_real_
+  if (any(kc)) {
+    closure <- tapply(d$frac[kc], list(d$panel[kc], d$t[kc]), sum)
+    bound <- attr(tab, "closure_bound")
+    if (is.null(bound) || !all(rownames(closure) %in% names(bound)))
+      stop("plot_pulse_partition(): the table carries no closure bound for each panel ",
+           "(build it with app_pulse_partition_table())")
+    resid <- apply(abs(closure - 1), 1, max, na.rm = TRUE)
+    bad <- resid > bound[rownames(closure)]
+    if (any(bad))
+      stop(sprintf("plot_pulse_partition(): the shares of '%s' miss 100%% by %.3g, above the bound %.3g",
+                   rownames(closure)[bad][1], resid[bad][1], bound[rownames(closure)][bad][1]))
+  }
   ocean <- setdiff(levels(d$where), c(KEY_PULSE_AIR, KEY_PULSE_LAND))
   fills <- c(PAL[["atm"]], PAL[["land"]], PAL[["ocean_upper"]], PAL[["ocean_mid"]], PAL[["ocean_deep"]])
   stopifnot(length(ocean) == 3L, nlevels(d$where) == length(fills))
@@ -1391,14 +1416,7 @@ plot_pulse_partition <- function(tab, pulse_gtc, pulse_year, yr_max = NULL) {
     scale_fill_manual(values = stats::setNames(fills, levels(d$where))) +
     guides(fill = guide_legend(nrow = app_legend_nrow(levels(d$where)))) +
     labs(x = LAB_YEAR, y = sprintf("Share of the %g GtC pulse (%%)", pulse_gtc),
-         caption = app_provenance_caption(paste(
-           paste("Left:", PULSE_PARTITION_NOTE, PULSE_TAG_PARTITION_NOTE),
-           if (is.na(resid))
-             "The window is too short to check that the shares add up."
-           else sprintf(paste("The shares add to 100%% of the pulse to within",
-                              "%.2f%% at every step after it is released \u2014",
-                              "carbon is conserved, so this is a partition and",
-                              "not an estimate."), resid)))) +
+         caption = app_provenance_caption(paste("Left:", PULSE_PARTITION_NOTE, PULSE_TAG_PARTITION_NOTE))) +
     expand_limits(y = c(0, 100)) +   # 2026-10-02: a pulse share runs 0-100 % (Marcus, card 5: "zero to 1")
     facet_wrap(~ panel, nrow = 1) +
     theme_ccx()

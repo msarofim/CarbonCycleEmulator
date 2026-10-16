@@ -247,14 +247,34 @@ test_that("the legend keys derive from the grid, and move when a boundary moves 
   expect_identical(levels(.tab$where), c(odf("KEY_PULSE_AIR"), odf("KEY_PULSE_LAND"), unname(keys)))
 })
 
-test_that("the panel RENDERS: two facets, five fills in stack order, the closure sentence", {
+test_that("the panel RENDERS: two facets, five fills in stack order, Marcus's caption", {
   g <- odf("plot_pulse_partition")(.tab, OD_PULSE[["gtc"]], OD_PULSE[["year"]])
   b <- ggplot2::ggplot_build(g)
   expect_length(unique(b$layout$layout$PANEL), 2L)
   pal <- odf("PAL")
   want <- unname(pal[c("atm", "land", "ocean_upper", "ocean_mid", "ocean_deep")])
   expect_setequal(toupper(unique(b$data[[1]]$fill)), toupper(want))
-  expect_match(paste(g$labels$caption, collapse = " "), "add to 100%", fixed = TRUE)
+  cap <- gsub("\\s+", " ", paste(g$labels$caption, collapse = " "))
+  expect_match(cap, odf("PULSE_PARTITION_NOTE"), fixed = TRUE)
+  expect_match(cap, odf("PULSE_TAG_PARTITION_NOTE"), fixed = TRUE)
+  # Marcus 2026-10-16 deleted the closure sentence from the caption
+  expect_false(grepl("add to 100%", cap, fixed = TRUE))
+})
+
+test_that("with the closure sentence gone, a LEAK refuses to draw (MUTATION: one band off by 1e-6)", {
+  # the bounds the table carries sit above the measured residuals ...
+  kc <- .tab$t >= OD_PULSE[["year"]] + 1
+  cl <- tapply(.tab$frac[kc], list(.tab$panel[kc], .tab$t[kc]), sum)
+  bnd <- attr(.tab, "closure_bound")
+  expect_true(all(apply(abs(cl - 1), 1, max) <= bnd[rownames(cl)]))
+  # ... and far below a leak a reader could see: 1e-6 of the pulse is 0.0001 percentage points
+  expect_true(all(bnd < 1e-6))
+  leak <- .tab
+  i <- which(leak$panel == odf("PANEL_PULSE_TAGGED") & leak$where == odf("KEY_PULSE_LAND") & kc)
+  leak$frac[i] <- leak$frac[i] + 1e-6
+  expect_error(odf("plot_pulse_partition")(leak, OD_PULSE[["gtc"]], OD_PULSE[["year"]]), "miss 100%")
+  nob <- .tab; attr(nob, "closure_bound") <- NULL
+  expect_error(odf("plot_pulse_partition")(nob, OD_PULSE[["gtc"]], OD_PULSE[["year"]]), "no closure bound")
 })
 
 # ---- the palette, as drawn ----------------------------------------------------------------
