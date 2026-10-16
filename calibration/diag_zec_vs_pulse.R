@@ -18,8 +18,11 @@
 #   pulse remaining   annual mean of d(global CO2) over year ZP_PULSE_YEAR + h, divided by the pulse in ppm
 #                     (centered h years after the release-year midpoint, as FaIR's annual mean)
 # GATES: G1 a zeroing that starts after the run reproduces base bit-identically; G3 every arm equals base before
-# T0 to ZP_CAUSAL_TOL_PPM (see its note); G4 the emissions tables differ from base exactly where intended. No RNG. Run from the repo root:
-#   Rscript calibration/diag_zec_vs_pulse.R
+# T0 to ZP_CAUSAL_TOL_PPM (see its note); G4 the emissions tables differ from base exactly where intended; G5 the
+# run without the history splice equals the app's spliced run for the base arm; G6 the zeroing and the pulse both
+# reach the run in their first year. No RNG. Run from the repo root:
+#   Rscript calibration/diag_zec_vs_pulse.R                          (stop in 2030)
+#   CCX_ZP_ZERO_YEAR=2017 Rscript calibration/diag_zec_vs_pulse.R    (Schwartz's stop year)
 t_start <- Sys.time()
 ROOT <- normalizePath(getwd())
 stopifnot(file.exists(file.path(ROOT, "app", "global.R")))
@@ -29,8 +32,12 @@ invisible(capture.output(suppressMessages(suppressWarnings(
 setwd(ROOT)
 
 ZP_DRIVER     <- "calibration/diag_zec_vs_pulse.R"
-ZP_ZERO_YEAR  <- 2030L
-ZP_PULSE_YEAR <- 2030L
+# The stop year (default 2030, Marcus's question). CCX_ZP_ZERO_YEAR overrides it, and the pulse moves with it, so a
+# run can match another study's stop year: 2017 is Schwartz's (ACPD 2021, acp-2021-924, "hypothetical abrupt
+# cessation of emissions commencing in 2017"). The year is in the output's file name.
+ZP_ZERO_YEAR  <- as.integer(Sys.getenv("CCX_ZP_ZERO_YEAR", "2030"))
+stopifnot(!is.na(ZP_ZERO_YEAR), ZP_ZERO_YEAR > APP_PULSE_YEARS[1], ZP_ZERO_YEAR + 100L <= APP_PULSE_YEARS[2])
+ZP_PULSE_YEAR <- ZP_ZERO_YEAR
 ZP_HORIZON    <- 100L
 ZP_EXTRA      <- c(20L, 50L, 200L, 270L)
 ZP_PULSE_GTC  <- 100                      # the pulse lab's default and FaIR's grid size
@@ -56,17 +63,28 @@ cat(sprintf("CO2 emissions zero from %d; pulse %g GtC over %d; horizon %d yr; Gt
             ZP_ZERO_YEAR, ZP_PULSE_GTC, ZP_PULSE_YEAR, ZP_HORIZON, GTC_PER_PPM, ZP_TOL))
 
 yrs <- APP_PULSE_YEARS
-emis_for <- function(bg, zero_year = NULL, pulse = 0) {
+# THE SPLICE COMES FIRST (fixed 2026-10-16 k). app_run_coupled() replaces every year up to APP_SPLICE_YEAR with the
+# observed GCB record, so a zeroing or a pulse applied BEFORE it is silently overwritten for years <= that year. A
+# 2017 stop ran with emissions to 2024 and an erased pulse (quarantined: outputs/quarantine/20261016_zec2017_history_splice/).
+# Each table is now spliced here, then modified, and run by run() with the splice switched off, so the table a gate
+# checks is the table the model runs. For a stop after APP_SPLICE_YEAR the two orders give the same table (G5).
+emis_raw <- function(bg) {
   e <- APP_SCEN_EMIS[APP_SCEN_EMIS$scenario == bg, ]; y <- seq(yrs[1], yrs[2])
-  d <- data.frame(year = y,                                  # the pulse lab's own table (server.R pulse_runs)
-                  fossil_GtC = stats::approx(e$year, e$fossil_GtC, xout = y, rule = 2)$y,
-                  luc_GtC    = stats::approx(e$year, e$luc_GtC,    xout = y, rule = 2)$y)
+  data.frame(year = y,                                       # the pulse lab's own table (server.R pulse_runs)
+             fossil_GtC = stats::approx(e$year, e$fossil_GtC, xout = y, rule = 2)$y,
+             luc_GtC    = stats::approx(e$year, e$luc_GtC,    xout = y, rule = 2)$y)
+}
+emis_for <- function(bg, zero_year = NULL, pulse = 0) {
+  d <- app_splice_history(emis_raw(bg), bg); rownames(d) <- NULL
   if (!is.null(zero_year)) d[d$year >= zero_year, c("fossil_GtC", "luc_GtC")] <- 0
   d$fossil_GtC[d$year == ZP_PULSE_YEAR] <- d$fossil_GtC[d$year == ZP_PULSE_YEAR] + pulse
   d
 }
-run <- function(bg, em) app_run_coupled(APP_SPIN, bg, yrs, bg, emissions = em, interp_method = APP_PULSE_EMIS_METHOD,
-                                        tol = ZP_TOL)$out
+# app_run_coupled() with its defaults (bomb total, LUC scale) kept in one place and only the splice removed
+run_presliced <- app_run_coupled
+environment(run_presliced) <- list2env(list(app_splice_history = function(em, scenario) em), parent = globalenv())
+run <- function(bg, em) run_presliced(APP_SPIN, bg, yrs, bg, emissions = em, interp_method = APP_PULSE_EMIS_METHOD,
+                                      tol = ZP_TOL)$out
 glob <- function(o) (o$co2_NH + o$co2_SH) / 2
 centred <- function(o, T) mean(glob(o)[o$t >= T - 0.5 & o$t < T + 0.5])     # 12 months centered on T
 annual  <- function(o, Y) mean(glob(o)[o$t >= Y & o$t < Y + 1])
@@ -85,6 +103,14 @@ for (bg in unname(APP_SCENARIOS)) {
   b <- run(bg, em_b); z <- run(bg, em_z); zp <- run(bg, em_zp); bp <- run(bg, em_bp)
   # G1: a zeroing that starts after the run is the base, bit for bit
   stopifnot(identical(run(bg, emis_for(bg, ZP_NOOP_YEAR))$co2_NH, b$co2_NH))
+  # G5: switching the splice off changes nothing else -- the base arm equals the app's own spliced run, bit for bit
+  stopifnot(identical(app_run_coupled(APP_SPIN, bg, yrs, bg, emissions = emis_raw(bg), interp_method = APP_PULSE_EMIS_METHOD,
+                                      tol = ZP_TOL)$out$co2_NH, b$co2_NH))
+  # G6: each modification reaches the run -- the zero arm leaves base within its first year, and the pulse arm
+  # leaves the zero arm (an ORDERING, no threshold; it fails on the 10-16 splice bug, where both were overwritten)
+  yr0 <- b$t >= ZP_ZERO_YEAR & b$t < ZP_ZERO_YEAR + 1
+  if (!(max(abs(z$co2_NH[yr0] - b$co2_NH[yr0])) > 0 && max(zp$co2_NH[yr0] - z$co2_NH[yr0]) > 0))
+    stop(sprintf("G6 FAIL: %s, the zeroing or the pulse in %d did not reach the run", bg, ZP_ZERO_YEAR))
   # G3: causality -- every arm equals base before T0 (the pulse and the zeroing both start on 1 Jan T0)
   pre <- b$t < ZP_ZERO_YEAR
   g3 <- max(vapply(list(z, zp, bp), function(a) max(abs(c(a$co2_NH[pre] - b$co2_NH[pre], a$co2_SH[pre] - b$co2_SH[pre]))), 0))
@@ -110,6 +136,6 @@ out$provenance <- sprintf("%s @ %s%s; canonical %s (%s); APP_PULSE_EMIS_METHOD %
                           ZP_DRIVER, commit, if (isTRUE(dirty)) " (dirty)" else "", CCX_MODE_CANONICAL,
                           basename(dirname(ccx_mode_file())), APP_PULSE_EMIS_METHOD, GTC_PER_PPM, ZP_TOL, format(Sys.Date()))
 utils::write.csv(out, file.path(ZP_OUT_DIR, paste0(ZP_STEM, ".csv")), row.names = FALSE)
-cat(sprintf("gates G1 G3 G4 passed; wrote %s.csv | %.1f min\n", file.path(ZP_OUT_DIR, ZP_STEM),
+cat(sprintf("gates G1 G3 G4 G5 G6 passed; wrote %s.csv | %.1f min\n", file.path(ZP_OUT_DIR, ZP_STEM),
             as.numeric(difftime(Sys.time(), t_start, units = "mins"))))
 sink()
