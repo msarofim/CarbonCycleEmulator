@@ -189,13 +189,52 @@ RV_REP_OBS_D13C_SH <- -0.011  # permil, hemispheric mean minus SPO
 # ---------------------------------------------------------------------
 RV_CACHE <- new.env(parent = emptyenv())
 
+# ---- the PRECOMPUTED values (Marcus 2026-10-15: "Precompute the known issues") ----
+# The tab's first view ran the canonical's gate run, the ENSO knockout and the pulse (PD100 + the
+# 1000-year partition) live: 30.7 s once on Connect Cloud's 1 CPU. calibration/build_review_precompute.R
+# stores the results of the keys below at the canonical; rv_memo() takes a stored value on a cache miss.
+# The product is REFUSED (and the tab computes live, as before) unless it was built for this canonical's
+# mode file (name and md5). A code change that moves a value is caught by test-review-precompute.R, which
+# recomputes every key live and compares; options(ccx.rv_precompute = FALSE) turns the stored values off.
+RV_PRE_FILE <- c("data", "review_precompute.rds")
+# key -> the function whose rv_memo() value is stored (cards 2, 3, 4 and 4b, 5)
+RV_PRE_KEYS <- c(gradients = "rv_gradients", gateD = "rv_gateD", variability = "rv_variability",
+                 enso_slope = "rv_enso_slope", pulse = "rv_pulse")
+RV_PRE <- new.env(parent = emptyenv())
+
+#' Why a precompute product cannot be used (character(0) if it can)
+rv_pre_problems <- function(x, mode_file) {
+  bad <- character(0)
+  if (!identical(x$provenance$mode, CCX_MODE_CANONICAL))
+    bad <- c(bad, sprintf("it was built for %s, not the canonical %s", x$provenance$mode, CCX_MODE_CANONICAL))
+  if (!identical(x$provenance$mode_md5, unname(tools::md5sum(mode_file))))
+    bad <- c(bad, "its mode file is not the canonical's (md5)")
+  missing <- setdiff(names(RV_PRE_KEYS), names(x$values))
+  if (length(missing)) bad <- c(bad, paste("it lacks", paste(missing, collapse = ", ")))
+  bad
+}
+
+#' The stored values, read and checked once per process; NULL when absent, refused or switched off
+rv_precomputed <- function() {
+  if (!isTRUE(getOption("ccx.rv_precompute", TRUE))) return(NULL)
+  if (!exists("values", envir = RV_PRE, inherits = FALSE)) {
+    v <- tryCatch({
+      x <- readRDS(do.call(ccx_path, as.list(RV_PRE_FILE)))
+      if (length(rv_pre_problems(x, ccx_mode_file()))) NULL else x$values
+    }, error = function(e) NULL)
+    assign("values", v, envir = RV_PRE)
+  }
+  get("values", envir = RV_PRE, inherits = FALSE)
+}
+
 #' Memoize one expensive review computation under `key`
 #'
 #' Errors are cached too, as a `rv_failed` object, so a kernel that cannot run
 #' is reported once and does not re-throw on every re-render.
 rv_memo <- function(key, fn) {
   if (!exists(key, envir = RV_CACHE, inherits = FALSE)) {
-    v <- tryCatch(fn(), error = function(e)
+    pre <- if (key %in% names(RV_PRE_KEYS)) rv_precomputed()
+    v <- if (!is.null(pre[[key]])) pre[[key]] else tryCatch(fn(), error = function(e)
       structure(list(msg = conditionMessage(e)), class = "rv_failed"))
     assign(key, v, envir = RV_CACHE)
   }
