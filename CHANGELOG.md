@@ -2,6 +2,27 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-16 (f) — **Substack post 2 ("CarboTope II: CarboTope vs. Bad Science") reviewed, with figures** (Marcus: "Review the next substack post (attached), and make suggestions for improvements, as well as making the appropriate figures (and suggesting new figures if appropriate)"). Draft: `CarboTopeSubstack.contrarians.docx` saved 14:52. Review: `outputs/substack_20261016/REVIEW.md`. Figures: `outputs/substack_20261016/make_figures.R` (`18b2776`).
+
+- **Figures** (1456 px, the app's palette and plot functions):
+  - fig1: the Pulse lab partition, with the ocean by depth.
+  - fig2: a buffer-chemistry diagram with the corrected mechanism, using CarboTope's numbers (carbonate ion 245 → 199 µmol/kg, Revelle factor 8.9 → 10.0, warm surface water 1750 → 2024).
+  - fig3: Law Dome and Mauna Loa CO₂.
+  - fig4: GCB 2025 emissions against the atmospheric increase (2.04× over 2015–2024).
+  - Suggested fig5: CarboTope with and without human emissions (2024: 425 vs 281 ppm; δ¹³C −8.9 vs −6.4 ‰; the model's δ¹³C ends ~0.15 ‰ below Mauna Loa's −8.72).
+  - Suggested fig6: the Schwartz test, from `zec_vs_pulse_20261015`.
+- **Main science finding:** the draft's buffer mechanism (Ca²⁺ pairing with bicarbonate, aragonite "used up") is wrong. The buffer consumes dissolved carbonate ion (CO₂ + CO₃²⁻ + H₂O → 2 HCO₃⁻), and dissolving CaCO₃ raises uptake rather than lowering it.
+- **Fact-check** (a subagent, primary sources). It verified the DOE authors, the 2011 and 2023 Curry quotes, the Spencer posts, Dengler & Reid's 42-yr half-life, Jacobson's 30–95 yr, the ACP referee quotes, Appendix F, the 800-kyr maximum and the Revelle & Suess phrase. It found:
+  - Curry did add caveats and evaluation: in 2011 a no-expertise disclaimer, and in 2016 a van der Werf rebuttal post two days later (verified here); both Salby quotes are from 2011.
+  - A fifth Curry post (Dengler 2025).
+  - Dengler & Reid accept the human cause.
+  - Essenhigh is a single author, in mechanical engineering.
+  - Humlum 2013 is the phase-relation argument.
+  - The Segalstad link and year don't match.
+  - Schwartz's later Biogeosciences papers (2024, 2025).
+  - The Holocene was not flat at 280 ppm (about 260 to 285).
+  - AR4 and AR6 figures are likely ranges.
+
 ## 2026-10-16 (e) — **The ocean's buffer chemistry, measured: `calibration/diag_revelle_buffer.R`** (Marcus: "Save the Revelle analysis as a diagnostic. Also calculate the numbers for this statement: 'This property alone changes the 2% human addition to total carbon to an equilibrium X% increase in atmospheric concentration (or Y ppm).'"). Output `outputs/diagnostics/revelle_buffer_20261016_hilda31w.{rds,log}`, run at `e405637`; two runs identical; no RNG.
 
 - **Part A, the four air-facing boxes** (annual means, pH on the total scale, one alkalinity 2303.4 µmol/kg): Revelle factor 1750 → 2024 is 8.9 → 10.0 (NH mixed layer), 9.4 → 10.7 (SH mixed layer), 12.4 → 14.6 (both cold boxes); pH 8.17–8.21 → 8.03–8.05. Jiang et al. (2019, *Sci. Rep.* 9:18624) imply a 2000 global mean Revelle factor of 10.7–10.9 (from their +3.7 ≈ 34 % and +1.5 ≈ 14 % to 2100) and give pH_T 8.07 (60°N–60°S) in 2000.
