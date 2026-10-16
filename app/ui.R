@@ -604,9 +604,11 @@ navbarPage(
         # N2 (Marcus 2026-09-22) applies here too: the "measured by the running
         # model, not quoted from a note" claim is cut from BOTH places it was
         # made (RV_TAB_LEAD was the other). What is left is the part a reader
-        # needs -- why the tab pauses on first view.
-        p(tags$small(paste("The first time you open this tab, some issues run the",
-                           "model again, which takes a few seconds."))),
+        # needs -- why the tab pauses on first view. 2026-10-16, wording chosen by Marcus: "some issues run the
+        # model again" went false with the precompute (CHANGELOG 2026-10-15 bb); the first view on Connect Cloud
+        # took 4.0 s with the stored values served.
+        p(tags$small(paste("The first time you open this tab, the charts take a few",
+                           "seconds to appear."))),
         hr(),
         review_card(1, "rv_repdc",   "320px"),
         review_card(2, "rv_gradient", "300px"),
