@@ -124,8 +124,8 @@ PANEL_PULSE_TAGGED <- "The pulse's carbon atoms"   # Marcus 2026-10-15
 # the partition bands' opacity; the palette gate scores the fills composited at THIS value over white
 PULSE_PARTITION_ALPHA <- 0.9
 # The partition panels' five bands (2026-10-16: the ocean split by depth, app/R/ocean_depth.R).
-# Air and land keep the wording the panel already had. ⚠⚠ THE THREE OCEAN KEYS ARE DRAFTS FOR
-# MARCUS'S WORDING; each `%s` is a boundary read off the run's own grid and rounded to
+# Air and land keep the wording the panel already had. The three ocean keys: Marcus 2026-10-16, "Keys
+# are fine as drafted". Each `%s` is a boundary read off the run's own grid and rounded to
 # OCEAN_DEPTH_LABEL_ROUND_M (295 m -> 300, 914 m -> 900 at hilda31w), so the numbers are the model's.
 KEY_PULSE_AIR  <- "Still in the air"
 KEY_PULSE_LAND <- "Taken up by land"

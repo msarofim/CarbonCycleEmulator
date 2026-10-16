@@ -243,7 +243,11 @@ AC_CHECKS_1016 <- list(
   c("P takeaway: surface ocean",          NA, "carbon also mixes into the surface ocean."),
   c("P takeaway: residence lifetime",     NA, "(the rate of decline in the atmosphere in this box informs the “residence lifetime”)."),
   c("P takeaway: deep ocean slow",        NA, "While the land and surface ocean equilibrate quickly, mixing into the deep ocean is a slow process."),
-  c("P no ocean-groups placeholder",      "[MARCUS:", NA)
+  c("P no ocean-groups placeholder",      "[MARCUS:", NA),
+  # "Keys are fine as drafted" (Marcus 2026-10-16)
+  c("P key: upper ocean",                 NA, "Upper ocean (0–%s m)"),
+  c("P key: intermediate ocean",          NA, "Intermediate ocean (%s–%s m)"),
+  c("P key: deep ocean",                  NA, "Deep ocean (below %s m)")
 )
 
 test_that("all of Marcus's 2026-10-16 copy rulings are still applied", {

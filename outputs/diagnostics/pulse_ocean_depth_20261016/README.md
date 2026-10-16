@@ -2,7 +2,8 @@
 
 The Pulse lab's two partition panels (the extra carbon; the pulse's tagged carbon atoms) now split the
 ocean into three groups built from the model's existing boxes. Display only: no model, parameter or
-calibration change. Code: `app/R/ocean_depth.R`, `app/R/plots.R` `plot_pulse_partition()`; commit `db0d5c4`.
+calibration change. Code: `app/R/ocean_depth.R`, `app/R/plots.R` `plot_pulse_partition()`; commits `db0d5c4`
+(build) and `cd7a1c9` (Marcus's copy). The numbers below were made at `db0d5c4`; `cd7a1c9` changed copy only.
 
 ## Marcus's rulings (2026-10-16)
 
@@ -58,7 +59,7 @@ intermediate at +20 is 21.95 + 0.1827 × 6.94 = 23.22, against 23.21 here. Its o
 ocean, which is why its quoted intermediate and deep figures (22 / 33 / 26 and 8 / 26 / 44) differ from
 the table here.
 
-## Checks (all in `tests/testthat/test-pulse-ocean-depth.R`, 60 expectations)
+## Checks (all in `tests/testthat/test-pulse-ocean-depth.R`, 66 expectations)
 
 - The weights partition the ocean: every ocean box's weights sum to 1 and no other box has one.
   A box left out is refused by name.
@@ -69,7 +70,10 @@ the table here.
   (months × substeps × machine epsilon). An off-by-one instant (1.5e-3) and a stale T_deep (4.5e-4) both
   fail the bound. `app_pulse_depth_runs()` refuses to draw a chain that fails it.
 - The plotted shares close to 100 % after the release: the tagged panel within the decay undo's
-  second-order term (λ²Δ²/8 = 1.85e-9), the extra panel within roundoff.
+  second-order term (λ²Δ²/8 = 1.85e-9), the extra panel within roundoff. Since Marcus cut the closure
+  sentence from the caption, the panel refuses to draw when a panel misses its bound. Over the sliders'
+  extremes (vvVL / vvM / vvH, 2030–2100, 10–500 GtC) the residual is at most 0.22 of its bound; a
+  1e-6 leak is refused.
 - The five fills, composited at the bands' 0.9 alpha over white, clear `tools/palette_check.py`'s
   target of 8. The worst pair is 14.1 (intermediate / deep) and ColorBrewer's Blues triple fails (3.4).
 - The legend's row count is chosen by measuring the keys against the panel width. It has 1 row at
@@ -79,17 +83,17 @@ the table here.
 ## Screenshots
 
 `screenshot_1440x900_pulse_partition.png` and `screenshot_768x1024_pulse_partition.png`: the app at
-`db0d5c4`, Pulse lab defaults, captured with `shoot_app.py` (headless Chrome through the DevTools
-protocol, Python standard library only). The partition panel appeared 4.0 s after the click at both
-widths. The bracketed lines are placeholders for Marcus.
+`cd7a1c9` (with Marcus's copy), Pulse lab defaults, captured with `shoot_app.py` (headless Chrome through
+the DevTools protocol, Python standard library only). The partition panel appeared 4.0 s after the click
+at both widths.
 
-## Owed by Marcus (placeholders, `app/R/plots.R`)
+## Copy (Marcus, 2026-10-16)
 
-- `PULSE_DEPTH_TAKEAWAY`: the one-sentence takeaway over the two panels.
-- `PULSE_DEPTH_GLOSS` and `PULSE_DEPTH_GLOSS_TIP`: the line under the panels and its tooltip.
-- `KEY_OCEAN_UPPER_FMT`, `KEY_OCEAN_MID_FMT`, `KEY_OCEAN_DEEP_FMT`: the three legend keys (drafts).
-
-`app/make_deploy_bundle.sh` refuses to build a bundle while any placeholder is in `app/`.
+His takeaway paragraph sits over both panels (`PULSE_DEPTH_TAKEAWAY`). The caption is cut to "Left: This
+is how much extra carbon each reservoir holds because of the pulse. Right: the same pulse, with its carbon
+atoms tagged." He judged the three ocean bands to need no separate line, so the placeholder line and its
+tooltip are gone. The three legend keys (`KEY_OCEAN_*_FMT`) stay as drafted ("Keys are fine as drafted").
+No bracketed placeholder remains, so `app/make_deploy_bundle.sh` no longer refuses.
 
 ## Reproduce
 
