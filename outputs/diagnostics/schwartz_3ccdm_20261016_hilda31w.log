@@ -1,0 +1,29 @@
+calibration/diag_schwartz_3ccdm.R @f43dcedb | canonical hilda31w | 2026-10-16 16:05
+
+TEST A -- ocean uptake under CarboTope's own atmosphere (GtC)
+                1750-2024    1959-2024 2015-2024/yr         2024
+  CarboTope         224.4        147.2         3.13         3.35
+  S25 base          185.4        125.1         2.77         2.97
+  S25 vp_x0.5        118.5         79.7         1.73         1.87
+  S25 vp_x2         290.6        196.8         4.42         4.72
+  S25 vp_x2.9        362.6        246.1         5.57         5.94
+  S25 T_2C          146.2         98.1         2.16         2.33
+  S25 T_22C         193.7        130.9         2.91         3.12
+  S25 kam_x2        192.7        129.4         2.85         3.09
+  GCB                  --        146.0         3.22         3.39   (GCB 2025 ocean sink)
+  CHECK the re-implementation: S25 base in 2022 2.75 PgC/yr vs his published 2.84 (+-0.6); GCB 2025 gives 3.12, CarboTope 2.66
+
+TEST B -- ocean uptake of a 100 GtC pulse in 2050 (vvM), same atmosphere for both, % of the pulse
+  +years              20     50    100    250
+  CarboTope         20.0   23.7   26.6   33.1
+  S25 base          11.2   17.9   26.6   44.9
+  S25 vp_x0.5        7.8   10.8   15.4   26.7
+  S25 vp_x2         17.7   30.5   45.1   68.4
+  S25 vp_x2.9       22.9   40.4   58.2   80.4
+  S25 T_2C           8.6   13.7   20.3   34.4
+  S25 T_22C         11.9   19.0   28.3   47.8
+  S25 kam_x2        11.3   18.0   26.6   44.8
+  (CarboTope's air share of the pulse: 59.7 / 52.9 / 50.4 / 41.2)
+  piston velocity at which S25 matches CarboTope (m/yr; his 7.5): +20: 17.9; +50: 10.8; +100: 7.5; +250: 4.9
+
+wrote outputs/diagnostics/schwartz_3ccdm_20261016_hilda31w.{rds,log}

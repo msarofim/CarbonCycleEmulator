@@ -84,8 +84,13 @@ the ACP discussion pages). Most quotes are verbatim. These need changes:
      (judithcurry.com/2016/08/12/broad-consistency-between-patterns-of-fossil-fuel-emissions-and-atmospheric-co2/),
      with a JC note: "This is exactly the sort of thing that I hoped my post would elicit (but didn't expect)." (Verified here.)
    - Her evaluations were favourable, not absent. "Never offered a critical evaluation" fits the record better.
-   - A fifth post: Joachim Dengler, "Temperature – a driver of the carbon cycle", 2025-07-16, with no
-     Curry text, 13 days before the DOE report. With it the count is five posts over 14 years.
+   - A further post, Joachim Dengler, "Temperature – a driver of the carbon cycle" (2025-07-16, no Curry text),
+     does NOT fit the draft's category (corrected 2026-10-16 on Marcus's reading, checked against the post): it
+     states no lifetime and accepts the anthropogenic mass balance; its topic is temperature-driven variability
+     in the growth rate. Its sink model (sink = a·C + b·T + c) does carry a 5 %/yr absorption rate that it says
+     matches the bomb-¹⁴C decline. That equates gross exchange with net uptake (the residence-time confusion),
+     and a linear sink at 5 %/yr implies a ~20-year e-folding for a pulse, but the post never says so. Leave it
+     out of the count unless the post discusses that implication.
    - Climate Etc. announced it is closing (2026-06-23). The links work today; Wayback links would last longer.
 2. **Both Salby quotes are from the 2011 post.** Neither appears in the 2016 post. Her 2016 "JC reflections" call the talk well crafted and well worth listening to.
 3. **Dengler & Reid do not deny that humans caused the rise.** Their paper calls emissions a key control
@@ -101,8 +106,12 @@ the ACP discussion pages). Most quotes are verbatim. These need changes:
 8. **Schwartz**
    - The 2012 quotes are both from his review of Joos et al. (ACPD 2012); attribute the "second order" sentence to that review.
    - The ESSOAr item looks like his AGU 2021 poster rather than a second submitted paper.
-   - "Neither was published" is true of those two items, but he has since published simple-model papers in
-     Biogeosciences (2024, bg-21-5045; 2025, bg-22-2979). Leaving them out could look selective.
+   - "Neither was published" is true of those two items. His later Biogeosciences papers (2024, bg-21-5045;
+     2025, bg-22-2979) make NO short-lifetime claim (corrected 2026-10-16 on Marcus's reading, checked): 2024
+     argues the models' ocean and land uptake rates are anticorrelated, so their spread understates the
+     uncertainty; 2025 is a three-compartment ocean model fitted to heat uptake that matches the GCB ocean sink.
+     How that model compares with CarboTope: `outputs/diagnostics/schwartz_3ccdm_20261016_hilda31w.log`
+     (CHANGELOG 2026-10-16 g).
    - RC1 on the ACP paper was David Archer (signed), who recommended against publication: "highly critical" holds.
    - RC2 disclaimed ocean carbon-cycle expertise only, so "isn't a carbon cycle expert" overstates it.
    - His own 2021 abstract says carbon-cycle models leave 0.55–0.85 of the excess 100 years after emissions

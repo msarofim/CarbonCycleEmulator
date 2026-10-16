@@ -2,6 +2,19 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-16 (g) — **Schwartz's 2025 ocean model compared with CarboTope's ocean: they agree at about a century and differ in time shape, for a structural reason** (Marcus: "On Schwartz's 2024 & 2025 papers ... I can't actually find any claims in either of them for a short lifetime. Maybe we can determine whether his simple model matches CarboTope or not, and if not, why not."). `calibration/diag_schwartz_3ccdm.R` at `f43dced`; output `outputs/diagnostics/schwartz_3ccdm_20261016_hilda31w.{rds,log}`.
+
+- **Marcus's reading confirmed** against the papers. Schwartz (2024, BG 21:5045) is about the anticorrelation of model uptake rates (the spread understates the uncertainty). Schwartz (2025, BG 22:2979) is a diagnostic ocean model (atmosphere → 100 m mixed layer ↔ one well-mixed deep ocean; piston velocity 7.5 m/yr from heat uptake; full chemistry at 18 °C). Neither claims a short lifetime. Dengler's 2025 Climate Etc. post states no lifetime either; its 5 %/yr absorption rate, matched to bomb ¹⁴C, implies one. REVIEW.md items 4.1 and 4.8 are corrected (the fact-check had listed the post and the papers as fitting the draft's argument).
+- **Re-implemented** from the paper's text, not his code. The net air-sea flux uses the exact equilibrium pCO₂ in place of his linearized K′_ma; the chemistry is CarboTope's code at his T and alkalinity. It reproduces his published 2022 uptake: 2.75 vs 2.84 ± 0.6 PgC/yr.
+- **Like for like:** both oceans are driven by CarboTope's own atmosphere.
+  - History, 1959–2024 cumulative: Schwartz 125 GtC, CarboTope 147, GCB 2025 146. His calibration matched GCB 2023, and GCB 2025 gives 3.12 for 2022.
+  - Ocean share of a 100 GtC pulse in 2050 (vvM) at +20/50/100/250 yr: CarboTope 20.0/23.7/26.6/33.1 %, Schwartz 11.2/17.9/26.6/44.9 %.
+- **Why they differ, by test.**
+  - The piston velocity at which his model matches CarboTope falls with the horizon: 17.9 (+20) → 10.8 → 7.5 → 4.9 m/yr (+250), within a few percent of t^−½, the signature of a diffusive interior. His 7.5 m/yr, fitted to 60 years of heat uptake, is CarboTope's effective value at about +100 yr.
+  - No single piston velocity fits every horizon (×0.5, ×2 and the AR6-implied ×2.9 were all tried), so the difference is the structure (one well-mixed deep box behind a constant exchange velocity), not the parameter.
+  - Ruled out: air-sea exchange (k_am ×2 moves nothing) and the single 18 °C chemistry (2 °C or 22 °C moves the level by up to ~25 %, not the time shape).
+- **Consequence, not run:** used prognostically, his ocean would take up a pulse more slowly for decades and faster after a century, so its multi-century tail would likely be lower than CarboTope's. That reason is unrelated to his 2021 budget argument.
+
 ## 2026-10-16 (f) — **Substack post 2 ("CarboTope II: CarboTope vs. Bad Science") reviewed, with figures** (Marcus: "Review the next substack post (attached), and make suggestions for improvements, as well as making the appropriate figures (and suggesting new figures if appropriate)"). Draft: `CarboTopeSubstack.contrarians.docx` saved 14:52. Review: `outputs/substack_20261016/REVIEW.md`. Figures: `outputs/substack_20261016/make_figures.R` (`18b2776`).
 
 - **Figures** (1456 px, the app's palette and plot functions):
