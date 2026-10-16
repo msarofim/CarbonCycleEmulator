@@ -1,0 +1,20 @@
+driver: outputs/diagnostics/carbon_spread_20261015/fair_vv_co2_spread.py @56ec8464
+model: FaIR 2.2.4 (calib 1.6.0); configs: 841 (calibrated_constrained_parameters_1.6.0.csv sha256 ece5cd6c19decaf26537fa829eed566b175da02cef089f3ccb3732e3f011bd36)
+runs: FaIRtoFrEDI/scripts/run_fair_vv_for_ccx.py @5e956d4 (uncommitted changes: no), imported read-only; run_one() body repeated to f.run()
+emissions: FaIRtoFrEDI/data/vanvuuren/spliced_ext_zenodo; forcing: calibration_v160_prod/volcanic_solar_<M>.csv
+span: 1750-2300 (timebounds); GMST baseline 1850-1900
+statistics across configs: mean, percentiles (5, 50, 95) (numpy default linear), sd (ddof 1); units ppm
+rng: none in this script; FaIR stochastic_run as the exporter leaves it (per-config seed column)
+gate G1 (tol 1e-09): config mean CO2 and GMST equal the exporter's stored CSVs in data-raw/downloads/fair_v160_vv/
+gate G1m: the same comparison against the next marker's file must exceed the tolerance
+gate G2: p05 <= p50 <= p95 and p05 <= mean <= p95 at every year
+platform: macOS-26.5.1-arm64-arm-64bit-Mach-O; python 3.14.3; numpy 2.4.2; pandas 2.3.3
+
+marker  max_abs_co2_ppm  max_abs_gmst_K mutation_vs  mutation_max_abs_co2_ppm
+    VL     5.684342e-14    2.220446e-16          LN                101.887845
+    LN     5.684342e-14    2.220446e-16           L                102.781956
+     L     5.684342e-14    2.220446e-16          ML                 51.530947
+    ML     5.684342e-14    4.440892e-16           M                282.829928
+     M     5.684342e-14    4.440892e-16          HL                280.622094
+    HL     5.684342e-14    4.440892e-16           H                765.146784
+     H     2.273737e-13    8.881784e-16          VL                762.815089

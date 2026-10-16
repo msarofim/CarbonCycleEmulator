@@ -2,6 +2,16 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-15 (t) — **CarboTope's carbon-cycle uncertainty vs FaIR's, MEASURED** (Marcus: "How does CarboTope's carbon uncertainty compare to FaIR's?", then "Run both, 200 draws for the pulse band"). Record: `outputs/diagnostics/carbon_spread_20261015/` (README, drivers at `56ec846`, outputs, log).
+
+- **Why it needed runs.** CarboTope had a CO₂ band on the scenarios (`data/futures_ribbons.rds`) and none on the pulse. FaIR had a pulse band (`data/fair_pulse_grid.rds`) and only the mean CO₂ on the scenarios: `FaIRtoFrEDI/scripts/run_fair_vv_for_ccx.py:162` writes `co2.mean` only.
+- **Pulse (100 GtC in 2050, 200 of the 17 000 hilda31w MCMC draws, 50 per chain, no RNG):** CarboTope's 5–95 % band is 3–7 points wide and FaIR's is 12–66, a ratio of 4–10. Medium 2100: 50.9–54.6 % vs 40.4–64.0 %. Medium 2300: 39.0–43.1 % vs 23.9–66.6 %. CarboTope's band sits inside FaIR's at every key year on Low, Medium and High. Its 95th percentile falls below FaIR's mean from 2200 (Medium) and 2150 (High).
+- **Scenario CO₂ (FaIR's 841-config spread, now stored):** 5–95 % widths in 2100 are 3.5–10 ppm (CarboTope) vs 14–99 ppm (FaIR); in 2150, Medium is 10.4 vs 128 and High is 23 vs 229. Both are narrow in 2024 (1.1 vs 1.7 ppm). The one reversal is Low-to-negative in 2150 (10.2 vs 7.1 ppm).
+- **Not like-for-like.** CarboTope varies only the 31 fitted carbon-cycle parameters, with the climate response fixed. FaIR's configurations also vary climate and forcing parameters. No split was run.
+- **Gates.** GC: the decoded best fit reproduces the app's central pulse, 1.4e-9 ppm (tol 1e-6). GCm: `beta_max` × 1.01 fails it (0.090 ppm). 200 / 200 draws ran. FaIR's config mean equals the exporter's stored CSVs to ≤ 2.3e-13 ppm (G1), and the next marker's file fails that comparison (G1m). Two runs of each driver are byte-identical (the band's CSVs apart from the provenance column, which names the file).
+- **A correction to my chat estimate.** Before running, I inferred a CarboTope pulse band of about ±1 point from the scenario band. The measured Medium 2100 band is 3.7 points wide (about ±1.9).
+- The FaIR spread script lives here, not in FaIRtoFrEDI: it imports the exporter read-only, so neither FaIRtoFrEDI (on another branch, with uncommitted edits) nor `data-raw/downloads/fair_v160_vv/` changed. CLAUDE.md's Python count is updated (14).
+
 ## 2026-10-15 (s) — **Handoff `notes/handoff_2026-10-15b_release_tagged.md`** (Marcus: "Yes, write the handoff note"). It supersedes the morning's `handoff_2026-10-15_prepublic_review.md`, which now points to it. Next: Substack post 1 formatting (when his draft is final), the deploy, `APP_FEEDBACK_URL`, and the repo-public decisions.
 
 ## 2026-10-15 (r) — **TAGGED `v1.0-beta-hilda31w`** (Marcus, verbatim: "Yes, tag it."). An annotated tag on `16bd431`, pushed: CarboTope BETA v1.0, the first public release. Suite @ `e1c9d10` 8166 / 0 / 1 (q); after it, only one legend string, the Substack figures, the Essenhigh PDF and docs. ⚠ Not in the tag: `APP_FEEDBACK_URL`, which is set after the Substack post, followed by a redeploy. The earlier `v1.0-hilda29l` (09-22) was an internal freeze.

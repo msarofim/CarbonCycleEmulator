@@ -40,8 +40,8 @@ fitted to FaIR 2.2.4 (calib 1.6.0) runs, and those runs, like the other FaIR-der
 ## Environment
 
 - R: system R 4.5-arm64 (arm64 Mac), same as FaIRtoFrEDI R work.
-- Model, calibration, app and tests are R. No Julia. 13 tracked Python files (2026-10-15,
-  `git ls-files '*.py'`): five data-preparation scripts in `data-raw/`, seven one-off
+- Model, calibration, app and tests are R. No Julia. 14 tracked Python files (2026-10-15,
+  `git ls-files '*.py'`): five data-preparation scripts in `data-raw/`, eight one-off
   mutation/diagnostic scripts under `outputs/diagnostics/`, and `tools/palette_check.py`.
 - Deployment target: shinyapps.io (public). Keep app memory small; precompute posterior
   ribbons, live-run only the central parameter set.
