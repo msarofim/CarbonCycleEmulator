@@ -2,6 +2,11 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-16 (c) — **Redeployed to Connect Cloud from `7f2204b` (the ocean-by-depth pulse lab)** (Marcus: "redeploy to Connect Cloud"). The bundle came from `app/make_deploy_bundle.sh` at `7f2204b` (111 files, 4.3 MB; the placeholder guard passed) and was published with `rsconnect::deployApp()` and the content's `appId` (25 s). New revision `01a144cc-69f2-e5ee-99c0-e34d25125f3c`: published, 1024 MB, connection / read timeouts 1200 / 1800 s, unchanged from `01a14484`.
+
+- **Pulse lab, live** (headless Chrome, 1440 × 900, `shoot_app.py`): the partition panels drew 15.1 s after "Release the pulse", with five bands, Marcus's takeaway and caption, and no output errors. 10-15 (w) measured 11.8 s for the release before the split. Screenshot: `outputs/diagnostics/pulse_ocean_depth_20261016/screenshot_live_1440x900_rev01a144cc.png`.
+- **Every tab, live:** 25 plots drawn and no output errors. Keeling 2; Where does the carbon go? 5; What if…? 3; Isotopes 2; Futures 1; Known issues 9 plus 2 tables, in 5.0 s; What pins down what? 2; Under the hood 1 plus 3 tables. This matches the 25 plots of 10-15 (w).
+
 ## 2026-10-16 (b) — **Pulse partition copy: Marcus's edits; the panel now refuses to draw a leak; suite @ `cd7a1c9` 8055 passed, 0 failed, 1 skipped; merged to main** (Marcus: the caption cuts and "New text: …"; "Keys are fine as drafted"; "merge it to main once the suite passes"; "push it too").
 
 - **Caption** (`PULSE_PARTITION_NOTE`, `PULSE_TAG_PARTITION_NOTE`): his cuts. It now reads "Left: This is how much extra carbon each reservoir holds because of the pulse. Right: the same pulse, with its carbon atoms tagged." The "difference between running…" clause, the "It is not a trace…" sentence, "own", "and followed wherever they go" and the closure sentence are gone. The roxygen of `plot_pulse_partition()` records that the explicit denial was cut by his ruling; the rule against captioning the left panel "where the molecules went" still stands.
