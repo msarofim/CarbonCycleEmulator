@@ -1,0 +1,35 @@
+calibration/diag_revelle_buffer.R @e4056376 | canonical hilda31w (calibration/output/refit_20261013_hilda31w_wtc_hilda_csl3v0kaidgbemwtc/mode_fit_pumpN.rds, md5 53ee816ac48cea0f1c1fad244651c5fd) | 2026-10-16 14:49
+
+PART A -- surface boxes exchanging with the air (annual means; alkalinity 2303.4 umol/kg, salinity 34.76)
+  NH mixed layer                     1750  T  22.32 C  pCO2  281.2  DIC  1953.6  pH 8.170  Revelle  8.898
+  NH mixed layer                     2024  T  23.61 C  pCO2  418.2  DIC  2026.2  pH 8.030  Revelle 10.048
+  NH cold high-latitude box          1750  T   2.00 C  pCO2  257.5  DIC  2107.4  pH 8.206  Revelle 12.449
+  NH cold high-latitude box          2024  T   3.29 C  pCO2  392.5  DIC  2165.0  pH 8.046  Revelle 14.611
+  SH mixed layer                     1750  T  18.72 C  pCO2  280.1  DIC  1984.8  pH 8.175  Revelle  9.392
+  SH mixed layer                     2024  T  19.82 C  pCO2  415.2  DIC  2055.1  pH 8.034  Revelle 10.717
+  SH cold high-latitude box          1750  T   2.00 C  pCO2  258.7  DIC  2108.2  pH 8.204  Revelle 12.474
+  SH cold high-latitude box          2024  T   3.09 C  pCO2  390.0  DIC  2165.3  pH 8.048  Revelle 14.632
+
+PART B -- through 2024: fossil 504.7 GtC; land use 272.4 GtC (luc_scale 0.9417); the land's net change -38.6 GtC
+  GATE the system's carbon change 1750 -> end of 2024 (504.6735 GtC) vs fossil (504.6735): +3.66e-11 GtC (tolerance 1e-06)
+  GATE spin-up at c0 = 276.88 ppm reproduces the canonical's ocean: 0.000e+00 GtC
+  ocean steady state vs atmospheric CO2: 277 ppm 37361.2 GtC; 302 ppm 37636.9 GtC; 327 ppm 37883.5 GtC; 377 ppm 38307.8 GtC; 477 ppm 38963.5 GtC
+
+  preindustrial exchanging carbon 39788 GtC (total 40080 less inert soil 292); air + ocean 37949 GtC
+
+  [fossil] E 504.7 GtC = 1.27 % of exchanging carbon (1.33 % of air + ocean)
+    UNBUFFERED (E spread by mass over air + ocean): +1.33 % = +3.7 ppm
+    BUFFERED equilibrium (the model's chemistry): 316.3 ppm = +39.4 ppm = +14.2 %; air 83.7 GtC (16.6 % of E), ocean 421.0 GtC
+    ratio buffered / unbuffered 10.7; whole-ocean effective Revelle factor (dc/c)/(dO/O) 12.63
+
+  [fossil_netland] E 543.3 GtC = 1.37 % of exchanging carbon (1.43 % of air + ocean)
+    UNBUFFERED (E spread by mass over air + ocean): +1.43 % = +4.0 ppm
+    BUFFERED equilibrium (the model's chemistry): 319.5 ppm = +42.7 ppm = +15.4 %; air 90.6 GtC (16.7 % of E), ocean 452.7 GtC
+    ratio buffered / unbuffered 10.8; whole-ocean effective Revelle factor (dc/c)/(dO/O) 12.72
+
+  [all_emissions] E 777.1 GtC = 1.95 % of exchanging carbon (2.05 % of air + ocean)
+    UNBUFFERED (E spread by mass over air + ocean): +2.05 % = +5.7 ppm
+    BUFFERED equilibrium (the model's chemistry): 340.1 ppm = +63.2 ppm = +22.8 %; air 134.3 GtC (17.3 % of E), ocean 642.8 GtC
+    ratio buffered / unbuffered 11.2; whole-ocean effective Revelle factor (dc/c)/(dO/O) 13.27
+
+wrote outputs/diagnostics/revelle_buffer_20261016_hilda31w.{rds,log}

@@ -2,6 +2,17 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-16 (e) — **The ocean's buffer chemistry, measured: `calibration/diag_revelle_buffer.R`** (Marcus: "Save the Revelle analysis as a diagnostic. Also calculate the numbers for this statement: 'This property alone changes the 2% human addition to total carbon to an equilibrium X% increase in atmospheric concentration (or Y ppm).'"). Output `outputs/diagnostics/revelle_buffer_20261016_hilda31w.{rds,log}`, run at `e405637`; two runs identical; no RNG.
+
+- **Part A, the four air-facing boxes** (annual means, pH on the total scale, one alkalinity 2303.4 µmol/kg): Revelle factor 1750 → 2024 is 8.9 → 10.0 (NH mixed layer), 9.4 → 10.7 (SH mixed layer), 12.4 → 14.6 (both cold boxes); pH 8.17–8.21 → 8.03–8.05. Jiang et al. (2019, *Sci. Rep.* 9:18624) imply a 2000 global mean Revelle factor of 10.7–10.9 (from their +3.7 ≈ 34 % and +1.5 ≈ 14 % to 2100) and give pH_T 8.07 (60°N–60°S) in 2000.
+- **Part B, the equilibrium.** The model's own steady-state ocean (the canonical's spin-up at `chi0` = c) is solved for the c at which air + ocean hold the added carbon. Land, climate (preindustrial), alkalinity, circulation and biology are fixed; there are no carbonate sediments.
+  - ⚠ **Land-use emissions are not an addition to the system's carbon.** They move carbon from land to air. The closure gate found it: the system's carbon grew by exactly the fossil emissions (504.6735 GtC, closure 3.7e-11 GtC; the gate mutation-tested against fossil + land use, which it rejects). Land use was 272.4 GtC, but the land's net change was −38.6 GtC. On 2026-10-15 Claude had called 777 GtC (fossil + land use) "emitted ... 1.95 % of the exchanging carbon"; as emissions to the air that is right, as an addition to the total it is not.
+  - **fossil** (the addition to total carbon): 504.7 GtC = 1.27 % of the 39,788 GtC exchanging carbon. Unbuffered: +1.33 % (+3.7 ppm). Buffered: **+14.2 % (+39.4 ppm, 316.3 ppm)**; the air keeps 16.6 %.
+  - **fossil + the land's net loss** (what air + ocean received): 543.3 GtC. Buffered: +15.4 % (+42.7 ppm).
+  - **all emissions** (fossil + gross land use, the "2 %"): 777.1 GtC = 1.95 %. Buffered: +22.8 % (+63.2 ppm).
+  - In each reading the buffer chemistry multiplies the atmospheric increase by 10.7–11.2. The whole-ocean effective Revelle factor is 12.6–13.3. Check: 588 / (588 + 37,361 / 12.6) = 16.5 % airborne, against the model's 16.6 %.
+- Which reading the statement uses is Marcus's choice. "Addition to total carbon" is the fossil reading.
+
 ## 2026-10-16 (d) — **Post-merge check of the live app** (Marcus: "Check that everything is working properly"). Everything works.
 
 - **Repo:** local `main` = `origin/main` = `cfb5d0c`; the ocean-depth branch is merged (`7f2204b`); the tree is clean.
