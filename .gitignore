@@ -28,11 +28,11 @@ tests/testthat/testthat-problems.rds
 # Word lock files -- transient, never content (2026-09-24)
 ~$*
 
-# Marcus's own drafting, kept in the repo root but NOT repo content
-# (2026-09-24, his instruction). `git add -A` was staging it; this stops that.
-# ⚠ The docx REVIEW files he sends IN are tracked on purpose
-# (CarboTopecomments.*.docx) -- this excludes only the draft he is writing.
-CarboTopeSubstack.docx
+# Marcus's Word files in the repo root (drafts and the review comments he sends
+# in) are NOT repo content. 2026-09-24 excluded only the post draft; 2026-10-15,
+# before the repository went public, he ruled the review .docx untracked as well
+# (the three tracked ones were removed with `git rm --cached`, still on disk).
+/*.docx
 
 # ⛔ R's DEFAULT GRAPHICS DEVICE FILE, never repo content (2026-09-25).
 # Any code that draws without opening a device first -- a test, a driver, a
