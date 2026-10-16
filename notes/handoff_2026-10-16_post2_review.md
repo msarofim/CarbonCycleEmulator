@@ -51,10 +51,10 @@
    Then, when he asks, format it for Substack (skill `substack-formatting`) with a README, as post 1.
 2. **Figures for post 2** are drafts in `outputs/substack_20261016/` (fig1–4 for his slots, fig5–6 suggested). Renumber
    once he settles the order (the XKCD image is his Figure 3).
-3. **App copy (Marcus's):** the Known-issues lead still says the first opening "run[s] the model again, which takes a few
+3. ✅ **DONE 2026-10-16 (j)**, Marcus's wording, deployed (revision `01a1467e…`). Was: **App copy (Marcus's):** the Known-issues lead still says the first opening "run[s] the model again, which takes a few
    seconds". It no longer does.
 4. **Optional:**
-   - the "Comment on issue N" links end in `#card-N`, which Substack ignores (they open the top of the post);
+   - ✅ DONE 2026-10-16 (i)/(j), deployed: the links now end in `#discussion` (the comment box). Was: the "Comment on issue N" links end in `#card-N`, which Substack ignores;
    - an 800,000-year ice-core figure (Bereiter et al. 2015) needs a download into `data-raw/`; ask first;
    - a vanity URL (it would change the address in post 1).
 5. **At every adoption:** re-run `calibration/build_review_precompute.R` (as for `data/ocean_climate_card.rds`).
