@@ -250,7 +250,7 @@ is rejected by 12a — so both are retained and the pair is pinned by a test.
 # Part 4 — Sarofim's unsubmitted Essenhigh comment (2011), and the corrected timeline
 
 **Primary source, now IN THE REPO** (2026-08-25, at the author's request, for a historical-interest
-link from the app): the original at **`app/www/sarofim_essenhigh_comment_2011.doc`** and a
+link from the app): the original at **`app/www/sarofim_essenhigh_comment_2011.doc`** (removed 2026-10-15; the app serves the PDF beside it) and a
 transcription at **`notes/lit_2011_sarofim_essenhigh_comment.md`**. Marcus's
 drafted-but-never-submitted *Comment on "Potential Dependence of Global Warming on the Residence
 Time (RT) in the Atmosphere of Anthropogenically Sourced Carbon Dioxide"*. Its reference list is

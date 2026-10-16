@@ -1,6 +1,6 @@
 # Comment on Essenhigh (2009) — M. C. Sarofim, drafted 2011, never submitted
 
-**Transcription of `app/www/sarofim_essenhigh_comment_2011.doc`.** Author: Marcus C. Sarofim; the
+**Transcription of `app/www/sarofim_essenhigh_comment_2011.doc`** (removed from the tree 2026-10-15, Marcus: "Delete the .doc file: the pdf is good enough"; it is in git history before that commit, and `app/www/sarofim_essenhigh_comment_2011.pdf` is the copy the app serves). Author: Marcus C. Sarofim; the
 file's own metadata records **Company: MIT** and **Created 2011-04-15** (the filename says
 `1_10_2011`, so treat the drafting date as "early 2011" rather than either). Never submitted;
 Cawley (2011) covered Essenhigh in *Energy & Fuels* the same year. Added to the repo 2026-08-25 at

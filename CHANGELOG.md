@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-15 (v) — **`app/www/sarofim_essenhigh_comment_2011.doc` REMOVED** (Marcus: "Delete the .doc file: the pdf is good enough"). Everything in `app/www/` is served publicly once deployed, and nothing linked the `.doc`; the app links the PDF. No code or test referred to it. `app/DEPLOY.md` and the two notes that name it now say it was removed; older handoffs keep their wording as records. This settles one of the handoff's repo-public decisions (10-15b §3). The release tag `v1.0-beta-hilda31w` still contains the file, so the first bundle is built from this commit, not the tag.
+
 ## 2026-10-15 (u) — **Substack post 1 formatted** (Marcus: "Go ahead and format the attached for substack"). `outputs/substack_20261015/carbotope_substack.html` + `README.txt`, from his `CarboTopeSubstack.docx` saved 19:30 (substack-formatting skill: `[FN1]`–`[FN4]`, four `[INSERT IMAGE: …]` markers with the hero first, one subscribe marker). A word-level diff against the draft shows only the intended changes: labels dropped, link placeholders made links, Figure X1–X3 → 1–3, heading colons, sub/superscripts, two footnote periods.
 
 - The draft's two new numbers were checked on the live app: without CO₂ fertilization, 487 ppm in 2024 (vs 425); without our emissions, 281 ppm in 2024 against 277 in 1750.
