@@ -231,3 +231,13 @@ cat(sprintf("fig5: CarboTope %d CO2 %.1f ppm (without human emissions %.1f); d13
             tail(d5m$v[d5m$who == MOD5[["none"]] & d5m$var == VAR5[["co2"]]], 1),
             tail(d5m$v[d5m$who == MOD5[["full"]] & d5m$var == VAR5[["d13"]]], 1),
             tail(d5m$v[d5m$who == MOD5[["none"]] & d5m$var == VAR5[["d13"]]], 1)))
+
+# ---- provenance (2026-10-16, re-run for download): commit, canonical mode and inputs, beside the PNGs ------------
+# Kept out of the images, whose captions are short data credits for readers.
+figs <- sort(list.files(OUT_DIR, pattern = "^fig[0-9].*[.]png$"))
+writeLines(c(sprintf("make_figures.R @ %s%s | canonical %s (%s, md5 %s) | %s", ccx_git_stamp(),
+                     if (isTRUE(ccx_stamp_dirty(ccx_git_stamp()))) " (dirty)" else "", CCX_MODE_CANONICAL,
+                     basename(dirname(ccx_mode_file())), unname(tools::md5sum(ccx_mode_file())), format(Sys.time(), "%Y-%m-%d %H:%M")),
+             sprintf("inputs: %s; %s; pulse %s %g GtC in %d; no RNG", REVELLE_RDS, ZEC_DIR, PULSE_BG, PULSE_GTC, PULSE_YEAR),
+             sprintf("%s  %s", unname(tools::md5sum(file.path(OUT_DIR, figs))), figs)),
+           file.path(OUT_DIR, "figures_provenance.txt"))
