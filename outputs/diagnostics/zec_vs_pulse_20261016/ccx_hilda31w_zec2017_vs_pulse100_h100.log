@@ -1,4 +1,4 @@
-calibration/diag_zec_vs_pulse.R | commit bfc7ccc9+dirty (dirty) | canonical hilda31w (refit_20261013_hilda31w_wtc_hilda_csl3v0kaidgbemwtc) | 2026-10-16 17:10
+calibration/diag_zec_vs_pulse.R | commit c5f07130 | canonical hilda31w (refit_20261013_hilda31w_wtc_hilda_csl3v0kaidgbemwtc) | 2026-10-16 17:13
 CO2 emissions zero from 2017; pulse 100 GtC over 2017; horizon 100 yr; GtC/ppm 2.1240; coupled tol 1e-04 K
   vvVL  excess 131.0 ppm at 2017 -> 66.4 % left at +100; pulse 33.6 % (zero bg), 35.1 % (scenario bg)
   vvLN  excess 131.0 ppm at 2017 -> 64.3 % left at +100; pulse 33.4 % (zero bg), 34.8 % (scenario bg)
