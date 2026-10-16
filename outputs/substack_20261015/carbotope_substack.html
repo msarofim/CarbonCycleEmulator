@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The debut of CarboTope (beta)</title>
+</head>
+<body>
+
+<h1>The debut of CarboTope (beta), a new pedagogical carbon cycle model and website</h1>
+<p><em>Yes, Virginia, carbon dioxide does persist for millennia</em></p>
+<hr>
+
+<p>[INSERT IMAGE: hero_pulse_atoms_vs_excess.png]</p>
+
+<p><a href="https://carbotope.shinyapps.io/carbotope/">CarboTope</a><sup>[FN1]</sup> is designed to be a pedagogical tool helping people understand how the carbon cycle works, and how its behavior is constrained by observations.</p>
+
+<p>I&rsquo;ve wanted to build this for about 15 years, in large part because of the repeated confusion I&rsquo;ve seen that is prominent in the climate contrarian community (including at least 2 out of 5 DOE Climate Working Group authors), but that also extends to some more mainstream climate scientists (post about their misconceptions to come soon). This is an important topic because the <a href="https://climatemodels.uchicago.edu/geocarb/archer.2009.ann_rev_tail.pdf">millennial lifetime of carbon dioxide</a> is central to the concept that we need to eventually reach net-zero carbon dioxide emissions to stabilize the climate (in contrast to other gases, particularly methane, where reductions are important but net-zero is NOT necessary for stabilization).</p>
+
+<p>For several months I&rsquo;ve been working with Claude to tune this model.<sup>[FN2]</sup> My goal was to build the minimum complexity model that would capture observed hemispheric, seasonal, and isotopic patterns, while being driven with inputs of carbon dioxide emissions, global temperature, ENSO, nitrogen deposition, and volcanic eruptions. It would also include basic scientific constraints like the Revelle &amp; Suess ocean chemistry mechanism that was published in 1957 and was (along with Keeling&rsquo;s Mauna Loa observations) key to realizing that human emissions could actually materially change global concentrations<sup>[FN3]</sup>.</p>
+
+<p>I wanted the tool to allow users to understand the contributions of each of the individual drivers (see the What if? tab), to look at pulse responses (the Futures tab), and to see how isotopes behave (the Isotope Fingerprints tab). I was curious to what extent this minimum complexity set would replicate more complex models in terms of CO<sub>2</sub> lifetime (as represented by simple emulators that are tuned to those complex models). I am pleased with the current product, even if it is still in beta.</p>
+
+<h2>Science Findings</h2>
+
+<p>The website has 8 tabs. I&rsquo;ll highlight a couple here.</p>
+
+<p>The first tab shows off the Keeling Curve.</p>
+
+<p>[INSERT IMAGE: fig1_keeling.png]</p>
+<p><em>Figure 1: Monthly CO<sub>2</sub> at Mauna Loa (red dots) and the South Pole (blue dots), with CarboTope at each station (dark lines). Faint lines are the hemispheric boxes before the hemisphere-to-station offset.</em></p>
+
+<p>Figure 1 shows the classic seasonal pattern that represents the &ldquo;breathing&rdquo; of the hemispheric ecosystem. Because of the amount of land in the Northern Hemisphere, there is a much larger seasonal cycle there. Additionally, fossil emissions in the northern hemisphere lead to slightly higher concentrations as it takes about a year after emissions for the CO<sub>2</sub> to be fully mixed globally.</p>
+
+<p>The Futures tab lets you choose between the seven CMIP7 scenarios (<a href="https://wcrp-cmip.org/explainer-scenarios-for-cmip7/">van Vuuren et al. 2026</a>) to see how CO<sub>2</sub> concentrations would change in each in the future. It then lets you modify the CO<sub>2</sub> emissions pathway in each scenario (&ldquo;Build your own&rdquo;) to be held constant, to drop linearly to zero, or to change by plus or minus 5% a year. While CarboTope is a CO<sub>2</sub>-only model, it uses a climate response fitted to FaIR to also show future temperature effects. I encourage playing with the difference between holding CO<sub>2</sub> emissions constant versus dropping to net zero to see how that plays out in the subsequent decades.</p>
+
+<p>The pulse tab then lets you emit a pulse of CO<sub>2</sub> to see what happens, including a partition of how much of the change in carbon ends up in the land, ocean, or atmosphere.</p>
+
+<p>[INSERT IMAGE: fig2_pulse_airborne.png]</p>
+<p><em>Figure 2: Share of a 100 GtC pulse released in 2050 (Medium background) still in the air. Orange: the extra atmospheric CO<sub>2</sub> due to the pulse. Near-black: the pulse&rsquo;s tagged carbon atoms. Purple dashed: FaIR mean, 5&ndash;95% shaded.</em></p>
+
+<p>[INSERT IMAGE: fig3_pulse_warming.png]</p>
+<p><em>Figure 3: Temperature response to the same pulse. Orange: CarboTope. Purple dashed: FaIR mean.</em></p>
+
+<p>Three interesting things about the pulse in this model.</p>
+
+<ol>
+<li><p>Figure 2: A long lifetime of CO<sub>2</sub> emerges from the approach I used without selecting for it, and is comparable to the lifetime in FaIR (a model that has a simple carbon cycle but is calibrated to more complex models).</p></li>
+<li><p>Figure 2: Using &ldquo;tagged&rdquo; carbon, CarboTope can trace the carbon from the fossil fuel through the land, ocean, and atmosphere. There is a much faster decrease in the levels of this carbon than in the total added CO<sub>2</sub> to the atmosphere. This is a demonstration of the difference between &ldquo;residence lifetime&rdquo; and &ldquo;perturbation lifetime&rdquo;. What is a little surprising is that even the tagged atoms have a long tail in the model.</p></li>
+<li><p>Figure 3: an emission pulse for either the CarboTope or FaIR<sup>[FN4]</sup> leads to a maximum initial temperature peak about 18 years after emissions, but has a secondary rise that starts several decades after the pulse. The initial time to peak temperature is mainly governed by the surface ocean coming into equilibrium with the radiative heating source (like the time it takes for an oven to hit its designated temperature). Then, the reduction in CO<sub>2</sub> concentrations leads to a reduction in heating, so the temperature begins to decline. However, at the same time the deep ocean is coming into equilibrium with the surface ocean, reducing the ocean&rsquo;s rate of heat uptake. Because the rate of CO<sub>2</sub> concentration decline slows over time, eventually the rate of heat uptake decline surpasses it, so the net warming from the pulse begins to increase again.</p></li>
+</ol>
+
+<p>Note that the pulse response does change depending on the background scenario.</p>
+
+<p>Other tabs include &ldquo;Where does the carbon go?&rdquo; which shows how much of the carbon we&rsquo;ve dug out of the ground and burned from our forests ends up in the ocean versus land sinks. About 40% of what we&rsquo;ve emitted is still in the air, with the rest fairly evenly split between land and ocean. The land as a whole has switched from a net source to a net sink as forest regrowth outpaced continued deforestation &ndash; around 1970 in CarboTope versus 1990 in the Global Carbon Budget.</p>
+
+<p>&ldquo;What if&hellip;?&rdquo; that lets you turn drivers like ENSO on and off. In a counterfactual world without carbon fertilization we would already be at 487 ppm. On the other hand, in a counterfactual world without human emissions (even with observed temperature increase still existing) CO<sub>2</sub> concentrations stay basically constant.</p>
+
+<p>&ldquo;Isotope fingerprints&rdquo; shows the <sup>13</sup>C and <sup>14</sup>C time series. The reduction in <sup>13</sup>C levels is a key fingerprint of fossil carbon emissions, and the <sup>14</sup>C time series demonstrates how the atmosphere responded to all the atomic bomb tests of the mid-20<sup>th</sup> century.</p>
+
+<p>&ldquo;What pins down what?&rdquo; shows how perturbations to individual parameters influence observed variables. &ldquo;Under the hood&rdquo; expands on the structure of the model including all the parameters. Finally, &ldquo;Known issues&rdquo; lists some areas of the model where there are some discrepancies with observations or where improvements could be made, and I would love feedback on those.</p>
+
+<h2>Request for Feedback</h2>
+
+<p>From carbon cycle experts: are there improvements to the base model I should be making? Am I characterizing anything incorrectly in my text?</p>
+
+<p>From educators: are there additional aspects to the tool that would be useful for you in teaching your students?</p>
+
+<p>From the general public: does this help you understand the carbon cycle? What questions do you still have?</p>
+
+<h2>Conclusions</h2>
+
+<p>I like to think this is a useful model and web-application for pedagogical purposes. It achieved my goals of basically matching hemispheric, seasonal, and isotopic patterns. The biggest not yet resolved issues are the <sup>13</sup>C hemispheric gradient, insufficient year-to-year variability, and excess ocean uptake sensitivity to warming. I would love feedback on how important these issues are and suggestions on how to resolve them if they are considered relevant. I&rsquo;d also appreciate any insights into why I have found it so difficult to get a successful model that includes inter-hemispheric interaction in the ocean: do I need to make separate Pacific and Atlantic basins or something to get that to work?</p>
+
+<p>I deliberately minimized calibrating CarboTope to existing carbon models. Because of that, the close match to FaIR for future scenarios and pulse lifetimes was a really nice confirmation that physics and observations put together in the right way have to yield a very long CO<sub>2</sub> lifetime as an emergent property.</p>
+
+<p>Coming up next: CarboTope versus contrarian arguments, with the key contrarian weaknesses being confusion about residence versus perturbation time, assuming the relationship between ENSO and year-to-year variability means that temperature drives a large fraction of the observed CO<sub>2</sub> increase (it doesn&rsquo;t), and oversimplified models.</p>
+
+<p>[ADD SUBSCRIBE BUTTON HERE]</p>
+
+<hr>
+<h2>Footnotes &mdash; cut into Substack&rsquo;s native footnote tool at [FN1] / [FN2] / [FN3] / [FN4]</h2>
+
+<p><strong>FN1:</strong> The github for CarboTope can be found <a href="https://github.com/msarofim/CarbonCycleEmulator">here</a>.</p>
+
+<p><strong>FN2:</strong> Claude did create most of the original draft text for the app. I then made extensive revisions. At one point, I noted three statements that were contrary to my understanding of what CarboTope was doing, and Claude apologized, listing &ldquo;Three things the app said that weren&rsquo;t true.&rdquo; I also had to be alert to, e.g., my telling Claude to use historical ENSO index data in its analysis in order to match ENSO patterns, and while it downloaded the data and created a variable, it didn&rsquo;t actually inform the model. And then when it did include the ENSO index, Claude only used it to influence land uptake not ocean uptake. There were many more examples of such issues: so at least for now, while I couldn&rsquo;t have made CarboTope without Claude, Claude also couldn&rsquo;t have made CarboTope without a knowledgeable scientist in the review loop.</p>
+
+<p><strong>FN3:</strong> Before that, the assumption was that the ocean was so big that it would just swallow human CO<sub>2</sub> up&hellip; &ldquo;the solution to pollution is dilution.&rdquo; A great resource for some of these classic papers is <em>The Warming Papers</em> edited by David Archer and Raymond Pierrehumbert (also <a href="https://www.tandfonline.com/doi/full/10.1080/20430779.2011.637673">reviewed by Bram Bregman in 2011</a>).</p>
+
+<p><strong>FN4:</strong> For temperature, CarboTope relies on FaIR.</p>
+
+</body>
+</html>

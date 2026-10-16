@@ -2,6 +2,11 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-15 (u) — **Substack post 1 formatted** (Marcus: "Go ahead and format the attached for substack"). `outputs/substack_20261015/carbotope_substack.html` + `README.txt`, from his `CarboTopeSubstack.docx` saved 19:30 (substack-formatting skill: `[FN1]`–`[FN4]`, four `[INSERT IMAGE: …]` markers with the hero first, one subscribe marker). A word-level diff against the draft shows only the intended changes: labels dropped, link placeholders made links, Figure X1–X3 → 1–3, heading colons, sub/superscripts, two footnote periods.
+
+- The draft's two new numbers were checked on the live app: without CO₂ fertilization, 487 ppm in 2024 (vs 425); without our emissions, 281 ppm in 2024 against 277 in 1750.
+- ⚠ The "CarboTope" link is the EXPECTED shinyapps.io address (not yet deployed), and FN1's GitHub link 404s until the repository is public. README.txt puts the deploy and the repo first.
+
 ## 2026-10-15 (t) — **CarboTope's carbon-cycle uncertainty vs FaIR's, MEASURED** (Marcus: "How does CarboTope's carbon uncertainty compare to FaIR's?", then "Run both, 200 draws for the pulse band"). Record: `outputs/diagnostics/carbon_spread_20261015/` (README, drivers at `56ec846`, outputs, log).
 
 - **Why it needed runs.** CarboTope had a CO₂ band on the scenarios (`data/futures_ribbons.rds`) and none on the pulse. FaIR had a pulse band (`data/fair_pulse_grid.rds`) and only the mean CO₂ on the scenarios: `FaIRtoFrEDI/scripts/run_fair_vv_for_ccx.py:162` writes `co2.mean` only.
