@@ -6,7 +6,11 @@ handoff and stop both servers"), 2026-10-15 late evening.
 - ⭐ **Item 1 below is DONE (CHANGELOG 2026-10-15 z): the repository is PUBLIC**, with no history rewrite, the three
   review `.docx` untracked and both `claude/*` remote branches deleted.
 - ⭐ **Items 2 and 3 are DONE (CHANGELOG 2026-10-15 aa):** post 1 is published, `APP_FEEDBACK_URL` points to it, and the
-  app is redeployed from `7f069fa` (revision `01a1427c…`, still 1 GB). Open: items 4–6.
+  app is redeployed from `7f069fa` (revision `01a1427c…`, still 1 GB).
+- ⭐ **Item 4's precompute and item 6 are DONE (CHANGELOG 2026-10-15 bb):** Known issues first view 4.0 s on Connect
+  Cloud (was 30.7 s); live revision `01a14297…` from `b7928cd`; the old worktree is removed. The timeout change
+  waits on Marcus (the browser pane is not signed in to Posit). ⚠ Re-run `calibration/build_review_precompute.R`
+  at every adoption.
 - **Start here:** CHANGELOG **2026-10-15 (t)–(y)**, `app/DEPLOY.md` "Posit Connect Cloud", and memory
   `ccx_connect_cloud_deploy` + the top paragraph of `ccx_app_beta_blockers`.
 - **main = the commit that adds this note, pushed.** The tag `v1.0-beta-hilda31w` is unchanged (on `16bd431`).
