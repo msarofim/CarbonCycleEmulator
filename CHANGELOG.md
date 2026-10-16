@@ -2,6 +2,14 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-16 (d) — **Post-merge check of the live app** (Marcus: "Check that everything is working properly"). Everything works.
+
+- **Repo:** local `main` = `origin/main` = `cfb5d0c`; the ocean-depth branch is merged (`7f2204b`); the tree is clean.
+- **Suite:** `cd7a1c9` reports 8055 passed, 0 failed, 1 skipped. Recounted independently from the per-file marks in both logs: 7165 → 7285 passes since `e1c9d10`, with exactly five files changed (`pulse-ocean-depth` +66, `review-precompute` +29, `app-review-copy` +12, `review-cards` +8, `plot-text-fits` +5) and none losing a test. Code changed after `cd7a1c9`: one comment in `app/R/plots.R` and three copy pins in `test-app-review-copy.R`; the nine affected test files re-run at `cfb5d0c`: 412 expectations, 0 failed. The branch's `R/climate.R` change is an opt-in `keep_forcing` argument (default FALSE), so every other caller's result is unchanged.
+- **Deployment (API):** revision `01a144cc-69f2-e5ee-99c0-e34d25125f3c` published; public; 1 CPU, 1024 MB; connection 1200 s, read 1800 s, idle 5 s.
+- **Live app at 1440×900:** all eight tabs and the three Futures views draw with no output errors and no placeholder text. Plots: Keeling 2, Where 5, What if 3, Isotopes 2, Known issues 9 (+2 tables, 4.2 s first view), What pins 2, Under the hood 1 (+3 tables); Scenarios 0.5 s, Build your own 3.3 s, Pulse lab 11.3 s for both panels. Both partition panels show all five bands (air, land and the three ocean layers, sampled from the image). Eight "Comment on issue N" links point to the post; the repo link is present; the app, GitHub and Substack URLs return 200.
+- **Correction:** `app/DEPLOY.md` and entry (v) said the app links the Essenhigh PDF. No app code has ever linked it: it is served (200) for the contrarians post's "[link to github pdf]". DEPLOY.md is corrected; (v) is left as written.
+
 ## 2026-10-16 (c) — **Redeployed to Connect Cloud from `7f2204b` (the ocean-by-depth pulse lab)** (Marcus: "redeploy to Connect Cloud"). The bundle came from `app/make_deploy_bundle.sh` at `7f2204b` (111 files, 4.3 MB; the placeholder guard passed) and was published with `rsconnect::deployApp()` and the content's `appId` (25 s). New revision `01a144cc-69f2-e5ee-99c0-e34d25125f3c`: published, 1024 MB, connection / read timeouts 1200 / 1800 s, unchanged from `01a14484`.
 
 - **Pulse lab, live** (headless Chrome, 1440 × 900, `shoot_app.py`): the partition panels drew 15.1 s after "Release the pulse", with five bands, Marcus's takeaway and caption, and no output errors. 10-15 (w) measured 11.8 s for the release before the split. Screenshot: `outputs/diagnostics/pulse_ocean_depth_20261016/screenshot_live_1440x900_rev01a144cc.png`.

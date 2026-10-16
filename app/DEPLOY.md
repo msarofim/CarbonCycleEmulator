@@ -126,7 +126,7 @@ The app reads from the repository root, so the bundle is part of the tree, not j
 | Path | Why |
 |---|---|
 | `app.R` (bundle root, generated) | **shinyapps.io runs the app found at the bundle ROOT**, but the app lives in `app/`; this two-line file runs it with `shiny::shinyAppDir("app")` |
-| `app/` | the app. ⚠ Everything in `app/www/` is served publicly at the app's URL. Since 2026-10-15 that is only `sarofim_essenhigh_comment_2011.pdf`, which the app links to (the unlinked `.doc` was removed: Marcus, "Delete the .doc file: the pdf is good enough") |
+| `app/` | the app. ⚠ Everything in `app/www/` is served publicly at the app's URL. Since 2026-10-15 that is only `sarofim_essenhigh_comment_2011.pdf`. Nothing in the app links to it (corrected 2026-10-16; this line said it did): it is hosted for the Substack contrarians post's link to the 2011 comment (the unlinked `.doc` was removed: Marcus, "Delete the .doc file: the pdf is good enough") |
 | `R/` | the model |
 | `src/ccx_core.cpp` | compiled at startup |
 | `data/*.rds` | observations, forcings, the FaIR climate module, the nuclear ¹⁴C source |
