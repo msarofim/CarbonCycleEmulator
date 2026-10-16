@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-15c: CarboTope is DEPLOYED (Connect Cloud); next are the repo going public, the post, and the feedback link
 
+> **SUPERSEDED by `notes/handoff_2026-10-16_post2_review.md`** (2026-10-16: repo public, feedback link, precompute, timeouts, post 2 reviewed).
+
 **Supersedes** `notes/handoff_2026-10-15b_release_tagged.md`. Written on Marcus's request ("Yes, write the
 handoff and stop both servers"), 2026-10-15 late evening.
 

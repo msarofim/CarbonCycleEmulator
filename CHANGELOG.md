@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-16 (h) — **Handoff `notes/handoff_2026-10-16_post2_review.md`** (Marcus: "Write the handoff note"). It supersedes 10-15c, which now points to it. Open: post 2 is Marcus's to revise against `outputs/substack_20261016/REVIEW.md`, then Substack formatting; the Known-issues lead sentence; optional items.
+
 ## 2026-10-16 (g) — **Schwartz's 2025 ocean model compared with CarboTope's ocean: they agree at about a century and differ in time shape, for a structural reason** (Marcus: "On Schwartz's 2024 & 2025 papers ... I can't actually find any claims in either of them for a short lifetime. Maybe we can determine whether his simple model matches CarboTope or not, and if not, why not."). `calibration/diag_schwartz_3ccdm.R` at `f43dced`; output `outputs/diagnostics/schwartz_3ccdm_20261016_hilda31w.{rds,log}`.
 
 - **Marcus's reading confirmed** against the papers. Schwartz (2024, BG 21:5045) is about the anticorrelation of model uptake rates (the spread understates the uncertainty). Schwartz (2025, BG 22:2979) is a diagnostic ocean model (atmosphere → 100 m mixed layer ↔ one well-mixed deep ocean; piston velocity 7.5 m/yr from heat uptake; full chemistry at 18 °C). Neither claims a short lifetime. Dengler's 2025 Climate Etc. post states no lifetime either; its 5 %/yr absorption rate, matched to bomb ¹⁴C, implies one. REVIEW.md items 4.1 and 4.8 are corrected (the fact-check had listed the post and the papers as fitting the draft's argument).

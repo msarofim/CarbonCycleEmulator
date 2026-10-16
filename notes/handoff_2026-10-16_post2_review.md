@@ -80,6 +80,7 @@
 - **The Write tool** stores `\uXXXX` escapes in R strings as literal Unicode, so later string-match edits must use the
   actual characters.
 - **Scratchpad only** (session-specific, not needed): deploy bundles and logs (a log holds a short-lived upload token;
-  never paste it), the tagged-tail analysis (its numbers are in this conversation's answer, not committed), probe scripts.
+  never paste it), the tagged-atom tail analysis behind the 10-15 answer on the post's 'long tail' sentence (not committed; re-run
+  before a post quotes its numbers), probe scripts.
 - **The Ladrillo session** (`local_90b19e5b…`) was running `run_ic_arms.sh L27` on 9 Python workers earlier; check
   `uptime` before long jobs.
