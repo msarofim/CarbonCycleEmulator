@@ -204,6 +204,12 @@ ccx_climate_scenarios <- function() {
 #'   -0.121 K from 2024 to 2025 on vvM, because 2024 was a warm year). Set NULL to run the
 #'   modeled climate over the whole period, which is what the validation test
 #'   in test-climate.R does.
+#' @param keep_forcing TRUE adds `$forcing`: the forcing table the RETURNED run was integrated on,
+#'   i.e. the one handed to ccx_run_fast() on the final pass. ⚠ Not the loop's `F` after it ends:
+#'   that one has already had its gmst rewritten from this pass's result. Added 2026-10-16 for the
+#'   pulse lab's ocean-by-depth split (app/R/ocean_depth.R), which restarts the core from saved
+#'   states and must integrate exactly what this run did. Opt-in, so every other caller's return
+#'   is unchanged; no number moves either way.
 #' @param emissions optional data.frame(year, fossil_GtC, luc_GtC) overriding the
 #'   scenario's emissions entirely -- the app's stylized pathways and pulses.
 #' @param bomb_total_kmol,luc_scale forcing parameters, passed straight through
@@ -222,7 +228,7 @@ ccx_run_coupled <- function(spin, scenario = "ssp245", years = c(1750, 2100),
                             tol = CLIM_TOL, max_iter = CLIM_MAX_ITER,
                             substeps = "auto",
                             interp_method = CCX_EMIS_METHOD_DEFAULT,
-                            c14_tag_base = NULL) {
+                            c14_tag_base = NULL, keep_forcing = FALSE) {
   # c14_tag_base (2026-10-12, R/c14_tag.R): emissions of the run to tag AGAINST. When given, the
   # carbon by which `emissions` exceed it is tagged with 14C, month by month and hemisphere by
   # hemisphere, and the run returns `$tag`. The tag is passive: carbon and climate are unchanged.
@@ -276,6 +282,7 @@ ccx_run_coupled <- function(spin, scenario = "ssp245", years = c(1750, 2100),
   repeat {
     iter <- iter + 1L
     r <- ccx_run_fast(spin, F, substeps = substeps)
+    F_run <- F   # the table THIS pass integrates; `F$gmst` is rewritten below (keep_forcing)
     # global mean: each hemisphere holds half the atmosphere
     co2_g  <- (r$out$co2_NH + r$out$co2_SH) / 2
     co2_yr <- tapply(co2_g, floor(r$out$t), mean)
@@ -344,8 +351,10 @@ ccx_run_coupled <- function(spin, scenario = "ssp245", years = c(1750, 2100),
     warning(sprintf(paste0("ccx_run_coupled(): the climate loop did NOT converge in %d pass(es) ",
                            "(max |change| %.2g K, tolerance %.0e K); the result is the last pass."),
                     iter, delta, tol), call. = FALSE)
-  c(r, list(climate = data.frame(year = yrs, co2_ppm = co2_yr,
-                                 erf_co2 = ccx_erf_co2(co2_yr, mod),
-                                 erf_nonco2 = erf_nc, gmst = gmst_path),
-            iterations = iter, converged = delta < tol, tag = tag))
+  res <- c(r, list(climate = data.frame(year = yrs, co2_ppm = co2_yr,
+                                        erf_co2 = ccx_erf_co2(co2_yr, mod),
+                                        erf_nonco2 = erf_nc, gmst = gmst_path),
+                   iterations = iter, converged = delta < tol, tag = tag))
+  if (isTRUE(keep_forcing)) res$forcing <- F_run
+  res
 }

@@ -231,6 +231,38 @@ test_that("MUTATION: the 10-15 list fires when an old phrase returns or a new on
   for (ck in AC_CHECKS_1015) expect_true(!is.na(ck[[2]]) || !is.na(ck[[3]]), info = ck[[1]])
 })
 
+# Marcus 2026-10-16, on the pulse lab's partition panels after the ocean was split by depth: caption cuts,
+# his takeaway paragraph over both panels, and no separate line on the three ocean groups.
+AC_CHECKS_1016 <- list(
+  c("P caption: perturbation clause cut", "the difference between running with it and",
+    "This is how much extra carbon each reservoir holds because of the pulse."),
+  c("P caption: not-a-trace sentence cut", "It is not a trace of where those particular molecules", NA),
+  c("P caption: tagged note",             "and followed wherever they go", "Right: the same pulse, with its carbon atoms tagged."),
+  c("P caption: no 'own' atoms",          "with its own carbon atoms", NA),
+  c("P caption: closure sentence cut",    "The shares add to 100%", NA),
+  c("P takeaway: surface ocean",          NA, "carbon also mixes into the surface ocean."),
+  c("P takeaway: residence lifetime",     NA, "(the rate of decline in the atmosphere in this box informs the “residence lifetime”)."),
+  c("P takeaway: deep ocean slow",        NA, "While the land and surface ocean equilibrate quickly, mixing into the deep ocean is a slow process."),
+  c("P no ocean-groups placeholder",      "[MARCUS:", NA),
+  # "Keys are fine as drafted" (Marcus 2026-10-16)
+  c("P key: upper ocean",                 NA, "Upper ocean (0–%s m)"),
+  c("P key: intermediate ocean",          NA, "Intermediate ocean (%s–%s m)"),
+  c("P key: deep ocean",                  NA, "Deep ocean (below %s m)")
+)
+
+test_that("all of Marcus's 2026-10-16 copy rulings are still applied", {
+  problems <- ac_audit(.ac_src, AC_CHECKS_1016)
+  expect_equal(problems, character(0), info = paste(problems, collapse = " | "))
+})
+
+test_that("MUTATION: the 10-16 list fires when a cut phrase returns or his paragraph goes", {
+  m1 <- paste(.ac_src, '  note = paste("Right: the same pulse, with its own carbon atoms tagged and followed wherever they go.")', sep = "\n")
+  expect_true(any(grepl("P caption: tagged note", ac_audit(m1, AC_CHECKS_1016), fixed = TRUE)))
+  m2 <- gsub("mixing into the deep ocean is a slow process.", "mixing is slow.", .ac_src, fixed = TRUE)
+  expect_true(any(grepl("P takeaway: deep ocean slow", ac_audit(m2, AC_CHECKS_1016), fixed = TRUE)))
+  for (ck in AC_CHECKS_1016) expect_true(!is.na(ck[[2]]) || !is.na(ck[[3]]), info = ck[[1]])
+})
+
 test_that("all of Marcus's 2026-10-06 copy rulings are still applied", {
   problems <- ac_audit(.ac_src, AC_CHECKS_1006)
   expect_equal(problems, character(0), info = paste(problems, collapse = " | "))
