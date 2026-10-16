@@ -1,0 +1,7 @@
+calibration/build_review_precompute.R @60cfcd16 | canonical hilda31w (calibration/output/refit_20261013_hilda31w_wtc_hilda_csl3v0kaidgbemwtc/mode_fit_pumpN.rds, md5 53ee816ac48cea0f1c1fad244651c5fd) | 2026-10-15 22:40
+  gradients    rv_gradients        2.4 s       8.2 kB
+  gateD        rv_gateD            0.1 s       4.2 kB
+  variability  rv_variability      0.0 s      14.3 kB
+  enso_slope   rv_enso_slope       0.7 s      20.6 kB
+  pulse        rv_pulse           13.6 s      73.9 kB
+wrote data/review_precompute.rds (50.0 kB on disk; 16.9 s of computation stored)

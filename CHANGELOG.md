@@ -2,6 +2,14 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-15 (bb) — **The Known-issues tab's expensive values are PRECOMPUTED** (Marcus: "Precompute the known issues"). `data/review_precompute.rds` (50 kB) stores the `rv_memo()` value of five keys at the canonical: `gradients`, `gateD`, `variability` (cards 2–4; they share the canonical's 1750–2025 gate run), `enso_slope` (card 4b; the ENSO knockout re-run) and `pulse` (card 5; PD100 + the 1000-year partition). Built by `calibration/build_review_precompute.R` at `60cfcd1` with `options(ccx.rv_precompute = FALSE)`, so it never reads the product it replaces.
+
+- **Measured locally:** 18.5 s of computation (pulse 15.4 s, gradients 2.3 s, ENSO knockout 0.7 s) now takes 0.01 s. Card 7's `rv_stand_ins()` stays live (0.34 s: it loads the gate kernels and reads the mode file). On Connect Cloud's 1 CPU the tab's first view took 30.7 s once and 4.2 s once (10-15 w).
+- **Refusal.** `rv_pre_problems()` refuses a product built for another mode name or mode-file md5, or missing a key. The app then computes live, as before, so a stale product costs time and never shows a wrong number.
+- **Gate** `tests/testthat/test-review-precompute.R` (29 expectations): (1) the product is the canonical's, holds no failure, and stores a repo-relative mode path (it ships publicly); (2) every key is recomputed live and must be IDENTICAL to the stored value, and a 1e-12 relative change to one stored number is caught; (3) mutation: another mode, another md5, a missing key are each refused; (4) mutation: `rv_memo()` serves a stored value without calling the function, and computes when the product is absent or refused, for a key outside the list, and with the option off.
+- **Reproducible:** two builds give identical values (`identical()` and identical serialization). No RNG on these paths (`rng = "none"`).
+- ⚠ **At each adoption, re-run the builder** (as for `data/ocean_climate_card.rds`); test 1 fails until it is.
+
 ## 2026-10-15 (aa) — **`APP_FEEDBACK_URL` set to the published post 1** (Marcus: "Published!", then sent the link). The value is `https://thesaraphreport.substack.com/p/the-debut-of-carbotope-beta-a-new`, the post's `og:url`. The share link he sent carried his referral code (`r=`) and `utm_*` parameters, which were removed.
 
 - **Why now.** Until this, the live app's Known issues tab showed every reader "This build has no comment link set. Set APP_FEEDBACK_URL in app/global.R before deploying."
