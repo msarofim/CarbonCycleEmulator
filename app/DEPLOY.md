@@ -32,11 +32,13 @@ asks whether it is a deal-breaker, fixable or acceptable.
 **The posting plan (Marcus 2026-10-15):** (1) make the GitHub repo public; (2) post on Substack with
 the CarboTope link; (3) push CarboTope with the Substack link. Before the link is posted:
 
-1. **The repository must be public.** `APP_REPO_URL` is set (2026-10-15) to
+1. **The repository must be public.** ✅ Public since 2026-10-15 (CHANGELOG 2026-10-15 z). `APP_REPO_URL` is set (2026-10-15) to
    `https://github.com/msarofim/CarbonCycleEmulator`, which 404s for everyone else until it is.
    The pre-public scan's decisions (CHANGELOG 2026-10-15 (a)) are Marcus's to make first.
 2. **`APP_FEEDBACK_URL` must be set in `app/global.R`** to the Substack post the
-   comments live under. Until it is, every card renders a visible "the comment
+   comments live under. ✅ Set 2026-10-15 to
+   `https://thesaraphreport.substack.com/p/the-debut-of-carbotope-beta-a-new` (the bare post address;
+   the share link's referral and utm_* parameters were removed, and the test now rejects them). Until it is, every card renders a visible "the comment
    link is not set in this build" warning instead of a link, and the tab's header
    says so too — deliberately, because a dead link costs exactly the feedback
    this release exists to collect. `tests/testthat/test-review-cards.R` asserts the
@@ -161,6 +163,13 @@ rsconnect::connectCloudUser()      # once, by the account owner (browser sign-in
 ```bash
 app/make_deploy_bundle.sh /tmp/carbotope_bundle
 Rscript -e 'rsconnect::deployApp("/tmp/carbotope_bundle", appName = "carbotope", appTitle = "CarboTope", account = "saraphreport", server = "connect.posit.cloud")'
+```
+
+**Redeploying to the SAME content** from a fresh bundle directory (it has no deployment record, so name
+the content or rsconnect creates a second app):
+
+```bash
+Rscript -e 'rsconnect::deployApp("<bundle_dir>", appId = "01a14244-5cc3-1951-7b06-9e2fb07beae3", account = "saraphreport", server = "connect.posit.cloud", forceUpdate = TRUE)'
 ```
 
 - ⚠ **Set up the account in the browser BEFORE `connectCloudUser()`.** With a Posit login that has no

@@ -2,6 +2,13 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-15 (aa) — **`APP_FEEDBACK_URL` set to the published post 1** (Marcus: "Published!", then sent the link). The value is `https://thesaraphreport.substack.com/p/the-debut-of-carbotope-beta-a-new`, the post's `og:url`. The share link he sent carried his referral code (`r=`) and `utm_*` parameters, which were removed.
+
+- **Why now.** Until this, the live app's Known issues tab showed every reader "This build has no comment link set. Set APP_FEEDBACK_URL in app/global.R before deploying."
+- **Test updated, not deleted** (`tests/testthat/test-review-cards.R`). The placeholder-guard test is kept. Two tests are added: the link must be a bare `https://<name>.substack.com/p/<slug>` address (no query, no fragment), and a mutation test rejects the placeholder, the tracked share link, `http://` and a bare domain. A live mutation (the share link's parameters put back into `global.R`) failed exactly the new test; the file was then restored. The five app-text test files: 166 expectations, 0 failed.
+- **Not changed:** each card's "Comment on issue N" link is the post address plus `#card-N`. Substack has no such anchor, so it opens the top of the post.
+- `app/DEPLOY.md`: steps 1 and 2 marked done; the redeploy-with-`appId` command added.
+
 ## 2026-10-15 (z) — **Pre-public rulings: no history rewrite; the review `.docx` untracked; both `claude/*` remote branches deleted; the NetID stays** (Marcus chose the recommended option on all four questions: "No rewrite; flip public", "Untrack + gitignore", "Delete both", "Leave it").
 
 - **What the scan found before the flip.** No credentials in the tracked tree, and none ever added (no `.Renviron`, `.dcf`, key or token files in any commit). The "password" hits describe the Torch login steps; the UCSD addresses are in the published Scripps data headers. `msarofim@gmail.com` is on one commit, `3abbb3a` (GitHub's web merge of PR #1); the other 1,605 use the noreply address. The NetID appears 1,065 times in 354 files, almost all as `/scratch/ms17839/...` (323 of the files are Torch job logs).

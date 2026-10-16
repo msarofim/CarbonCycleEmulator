@@ -123,7 +123,9 @@ APP_WARMUP_NOTE  <- paste("First load compiles the model and runs a 1750 spin-up
 # renders a visible warning instead of a link when it fails.
 # APP_FEEDBACK_URL is the Substack post the review comments live under
 # (Marcus 2026-09-22: the feedback channel is the Substack post on the model).
-APP_FEEDBACK_URL <- "SET-BEFORE-DEPLOY"
+# Set 2026-10-15 to the published post 1 (Marcus sent the link). Its share link carried
+# his referral code and utm_* parameters; this is the post's og:url, without them.
+APP_FEEDBACK_URL <- "https://thesaraphreport.substack.com/p/the-debut-of-carbotope-beta-a-new"
 # Marcus 2026-10-15: the repository goes PUBLIC before the app is deployed (his posting plan, step 1),
 # so this is its GitHub address. It 404s for anyone else until that switch is made.
 APP_REPO_URL     <- "https://github.com/msarofim/CarbonCycleEmulator"

@@ -80,6 +80,36 @@ test_that("the feedback link is a placeholder until it is deliberately set", {
   expect_true(grepl("app_link_ok\\(APP_FEEDBACK_URL\\)", .rv_ui_text))
 })
 
+# UPDATED 2026-10-15, when the URL was set to the published post 1 (Marcus sent the link). The guard
+# above stays; this adds what a SET link must look like. A share link copied from Substack carries the
+# author's referral code and utm_* tracking, so a bare post address is required: https, a Substack
+# post path, no query string, no fragment (rv_card_url() appends its own "#card-N").
+rv_feedback_url_ok <- function(u)
+  grepl("^https://[a-z0-9-]+\\.substack\\.com/p/[a-z0-9-]+$", u)
+
+rv_feedback_url <- function(global_lines)
+  sub('^\\s*APP_FEEDBACK_URL\\s*<-\\s*"([^"]*)".*$', "\\1",
+      grep("^\\s*APP_FEEDBACK_URL\\s*<-", global_lines, value = TRUE))
+
+test_that("the feedback link is SET, to a bare Substack post address", {
+  skip_if_no_review()
+  u <- rv_feedback_url(readLines(file.path(.rv_app_dir, "global.R"), warn = FALSE))
+  expect_length(u, 1L)
+  expect_false(identical(u, "SET-BEFORE-DEPLOY"))
+  expect_true(rv_feedback_url_ok(u), info = u)
+})
+
+test_that("MUTATION: the set-link check rejects the placeholder and a tracked share link", {
+  skip_if_no_review()
+  expect_false(rv_feedback_url_ok("SET-BEFORE-DEPLOY"))
+  expect_false(rv_feedback_url_ok(paste0(
+    "https://thesaraphreport.substack.com/p/the-debut-of-carbotope-beta-a-new",
+    "?r=ywmw&utm_campaign=post&utm_medium=web&showWelcomeOnShare=true")))
+  expect_false(rv_feedback_url_ok("http://thesaraphreport.substack.com/p/the-debut-of-carbotope-beta-a-new"))
+  expect_false(rv_feedback_url_ok("https://thesaraphreport.substack.com/"))
+  expect_identical(rv_feedback_url('APP_FEEDBACK_URL <- "SET-BEFORE-DEPLOY"'), "SET-BEFORE-DEPLOY")
+})
+
 # EVERY link constant, not just the comment link (2026-10-06, Marcus: "Go ahead and fix the repo link").
 # The repo link rendered UNGUARDED, a live <a> to "SET-BEFORE-DEPLOY", while global.R's comment said ui.R
 # guards its links: the test above named one URL, so the other was never checked. This one is generated
