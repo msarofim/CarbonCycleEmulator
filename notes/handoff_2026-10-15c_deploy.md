@@ -4,7 +4,9 @@
 handoff and stop both servers"), 2026-10-15 late evening.
 
 - ⭐ **Item 1 below is DONE (CHANGELOG 2026-10-15 z): the repository is PUBLIC**, with no history rewrite, the three
-  review `.docx` untracked and both `claude/*` remote branches deleted. Next is item 2, publishing post 1.
+  review `.docx` untracked and both `claude/*` remote branches deleted.
+- ⭐ **Items 2 and 3 are DONE (CHANGELOG 2026-10-15 aa):** post 1 is published, `APP_FEEDBACK_URL` points to it, and the
+  app is redeployed from `7f069fa` (revision `01a1427c…`, still 1 GB). Open: items 4–6.
 - **Start here:** CHANGELOG **2026-10-15 (t)–(y)**, `app/DEPLOY.md` "Posit Connect Cloud", and memory
   `ccx_connect_cloud_deploy` + the top paragraph of `ccx_app_beta_blockers`.
 - **main = the commit that adds this note, pushed.** The tag `v1.0-beta-hilda31w` is unchanged (on `16bd431`).

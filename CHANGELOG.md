@@ -8,6 +8,7 @@ Project log: what was done, what was tried and abandoned, and why.
 - **Test updated, not deleted** (`tests/testthat/test-review-cards.R`). The placeholder-guard test is kept. Two tests are added: the link must be a bare `https://<name>.substack.com/p/<slug>` address (no query, no fragment), and a mutation test rejects the placeholder, the tracked share link, `http://` and a bare domain. A live mutation (the share link's parameters put back into `global.R`) failed exactly the new test; the file was then restored. The five app-text test files: 166 expectations, 0 failed.
 - **Not changed:** each card's "Comment on issue N" link is the post address plus `#card-N`. Substack has no such anchor, so it opens the top of the post.
 - `app/DEPLOY.md`: steps 1 and 2 marked done; the redeploy-with-`appId` command added.
+- **Redeployed** from `7f069fa` (`app/make_deploy_bundle.sh`, 109 files) to the same content with `appId` and `forceUpdate = TRUE`. New revision `01a1427c-fdc9-1e05-287a-f026f580e418`: published, 1 CPU, **1024 MB** (the memory setting survived). On the live app: no "comment link" warning, all eight "Comment on issue N" links point to the post, the repo link is present, and the first tab draws with no output errors.
 
 ## 2026-10-15 (z) — **Pre-public rulings: no history rewrite; the review `.docx` untracked; both `claude/*` remote branches deleted; the NetID stays** (Marcus chose the recommended option on all four questions: "No rewrite; flip public", "Untrack + gitignore", "Delete both", "Leave it").
 
