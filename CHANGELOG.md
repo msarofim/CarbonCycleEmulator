@@ -2,6 +2,15 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-15 (w) — **CarboTope DEPLOYED to Posit Connect Cloud (free plan, test) and it RUNS** (Marcus: "Prepare the Connect Cloud files and try the free plan"). Account `saraphreport` (his choice), public, at `https://01a14244-5cc3-1951-7b06-9e2fb07beae3.share.connect.posit.cloud/`. The bundle was built from `187a6da` by `app/make_deploy_bundle.sh` and published with `rsconnect::deployApp()` (1.11.2). Results table and commands: `app/DEPLOY.md` "Posit Connect Cloud".
+
+- **Why Connect Cloud.** Posit's 2026-07-21 post: shinyapps.io apps auto-migrate to Connect Cloud from early 2027, with URL redirects and plan prices held until 2029.
+- **No repo files after all.** I had proposed a root `app.R` + `manifest.json` in the repository for a GitHub deploy. rsconnect publishes the local bundle and writes its own manifest, so the repository stays private and nothing was added.
+- **Works:** the C++ core compiles at start-up; all eight tabs and 25 plots draw with no output errors; 701 ppm (Build your own) and 50 % / 41 % (pulse) match the laptop; provenance is the posterior mode; the PDF is served and the `.doc` 404s; sub/superscripts and plot glyphs render.
+- **Slower on 1 CPU:** pulse release 11.8 s; Known issues first view 30.7 s. Cold start after idle shutdown not measured (3.0 s to the first plot was possibly a warm app).
+- **An rsconnect 1.11.2 failure, diagnosed:** `connectCloudUser()` failed with "`serverName` must be a single string, not `NULL`" until the Connect Cloud account existed in the browser. A token-refresh handler intercepts the refused account-list request ahead of the new-user branch. Workaround in DEPLOY.md.
+- Steps 1 and 3–4 of the shinyapps.io walkthrough also ran: `rsconnect` installed; the bundle (109 files) passed the local check on :7791, apart from a 0×0 hidden-pane artifact.
+
 ## 2026-10-15 (v) — **`app/www/sarofim_essenhigh_comment_2011.doc` REMOVED** (Marcus: "Delete the .doc file: the pdf is good enough"). Everything in `app/www/` is served publicly once deployed, and nothing linked the `.doc`; the app links the PDF. No code or test referred to it. `app/DEPLOY.md` and the two notes that name it now say it was removed; older handoffs keep their wording as records. This settles one of the handoff's repo-public decisions (10-15b §3). The release tag `v1.0-beta-hilda31w` still contains the file, so the first bundle is built from this commit, not the tag.
 
 ## 2026-10-15 (u) — **Substack post 1 formatted** (Marcus: "Go ahead and format the attached for substack"). `outputs/substack_20261015/carbotope_substack.html` + `README.txt`, from his `CarboTopeSubstack.docx` saved 19:30 (substack-formatting skill: `[FN1]`–`[FN4]`, four `[INSERT IMAGE: …]` markers with the hero first, one subscribe marker). A word-level diff against the draft shows only the intended changes: labels dropped, link placeholders made links, Figure X1–X3 → 1–3, heading colons, sub/superscripts, two footnote periods.

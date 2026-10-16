@@ -140,7 +140,55 @@ bundle built from this line ran with the industrial ¹⁴C source silently at ZE
 `outputs/diagnostics/deploy_nuclear_absent_20261014/`). The source is now `data/forcing_nuclear_c14.rds`
 (covered by `data/*.rds` above), and the loader STOPS without it, so an incomplete bundle fails at start-up.
 
-## How to deploy (never done yet as of 2026-10-15)
+## Posit Connect Cloud (test deploy 2026-10-15)
+
+Posit is moving shinyapps.io apps to Connect Cloud: automatic migration begins in early 2027, old URLs
+redirect, and existing plans keep their price until 2029 (Posit blog, 2026-07-21, "Migrating to Connect
+Cloud"). So Connect Cloud was tried first, on the free plan (Marcus: "Prepare the Connect Cloud files and
+try the free plan").
+
+**No repository files are needed.** `rsconnect` (≥ 1.11.2 here) publishes the same bundle directly and
+writes its own manifest (47 packages, R 4.5.3). Nothing is deployed from GitHub, so the repository can
+stay private.
+
+```r
+rsconnect::connectCloudUser()      # once, by the account owner (browser sign-in)
+```
+
+```bash
+app/make_deploy_bundle.sh /tmp/carbotope_bundle
+Rscript -e 'rsconnect::deployApp("/tmp/carbotope_bundle", appName = "carbotope", appTitle = "CarboTope", account = "saraphreport", server = "connect.posit.cloud")'
+```
+
+- ⚠ **Set up the account in the browser BEFORE `connectCloudUser()`.** With a Posit login that has no
+  Connect Cloud account yet, rsconnect 1.11.2 fails with "`serverName` must be a single string, not
+  `NULL`". The account-list request is refused, and the token-refresh handler in `connectCloudClient()`
+  intercepts that before `selectCloudAccount()`'s new-user branch, then calls `registerAccount()` with
+  no server name.
+- Test deploy: account `saraphreport`, content `01a14244-5cc3-1951-7b06-9e2fb07beae3`, built from
+  `187a6da` (the release tag minus the `.doc`). Public, because the free plan has no private content.
+  The app URL is `https://01a14244-5cc3-1951-7b06-9e2fb07beae3.share.connect.posit.cloud/` (no vanity
+  name set). The management page is `connect.posit.cloud/saraphreport/content/<id>`.
+- The deploy took about 20 s, with no package compilation visible.
+
+**Results (free plan, 1 CPU / 4 GB; checked in a 1440×900 browser window):**
+
+| check | Connect Cloud free | laptop bundle, 10-15 |
+|---|---|---|
+| C++ core compiles at start-up | yes | yes |
+| first plot after opening | 3.0 s (app possibly already running after publish; cold start NOT measured) | 6–8 s cold |
+| all eight tabs, all plots, no output errors | yes (25 plots incl. nine Known-issues cards) | yes |
+| Build your own, "Run it" | 5.0 s; 701 ppm in 2150 | 5.4 s (load ~30) |
+| Pulse lab, "Release the pulse" | 11.8 s; 50 % at +100 yr, 41 % at +250 yr | 14.6 s (load ~30); 4.0 s (10-15, idle) |
+| Known issues, first view | 30.7 s | memoized in the test; ~6 s contended (pre-10-15) |
+| provenance line | posterior mode, 31 fitted, 14 held | same |
+| page sub/superscripts; plot δ¹³C and ‰ glyphs | render | render |
+| `/sarofim_essenhigh_comment_2011.pdf`; the `.doc` | 200; 404 | 200; 404 |
+
+Not yet known: the cold start after Connect Cloud's idle shutdown (its timeout was not checked), the
+free plan's monthly usage limit, and how many R processes serve simultaneous visitors.
+
+## How to deploy (shinyapps.io; never done as of 2026-10-15)
 
 `carbotope.shinyapps.io/carbotope` returned 404 on 2026-10-11: the app has never been deployed.
 The account and token are Marcus's; nobody else should type the token.
