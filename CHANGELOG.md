@@ -2,7 +2,15 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
-## 2026-10-16 (i) — **The "Comment on issue N" links now land on the post's comment box** (handoff 10-16 open item 4: the `#card-N` links opened the top of the post). Not yet deployed.
+## 2026-10-16 (j) — **Known-issues lead corrected and redeployed with the comment-link fix** (Marcus chose the recommended option on both questions: the wording "the charts take a few seconds to appear", and "Redeploy with the copy fix").
+
+- **Copy** (`507d0a2`): "The first time you open this tab, some issues run the model again, which takes a few seconds" became "The first time you open this tab, the charts take a few seconds to appear." The model runs stopped with the precompute (10-15 bb). Handoff 10-16 open item 3.
+- **Tests before the bundle:** nine app-facing files (review-cards, app-review-copy, app-us-spelling, ui-year-bounds-lint, app-version, git-stamp-lint, plot-text-fits, review-precompute, review-card-numbers): 372 passed, 0 failed.
+- **Redeployed** from `507d0a2` (`app/make_deploy_bundle.sh`, 111 files, 4.3 MB; placeholder guard passed) with `deployApp(appId = …)`. New revision `01a1467e-5ce1-ac9b-5297-f630d7f6dab1`: active, 1024 MB, timeouts 1200 / 1800 s, idle 5 s (the API, after the publish).
+- **Live check** (browser pane): all eight "Comment on issue N" links end in `#discussion`; the new sentence is on the page and the old phrase is gone; the Known-issues tab's first view drew 9 of 9 plots and 2 tables in 4.0 s with no output errors.
+- `app/DEPLOY.md`: its "Nothing is precomputed" paragraph was stale since 10-15 (bb); it now describes the precompute and the rebuild-at-adoption rule.
+
+## 2026-10-16 (i) — **The "Comment on issue N" links now land on the post's comment box** (handoff 10-16 open item 4: the `#card-N` links opened the top of the post). Deployed in (j).
 
 - **Measured** on post 1, each URL loaded fresh in the browser pane: `#card-1` left the page at scrollY 0 (no element has that id); `#discussion` (the comments section; Substack sets the id) scrolled to scrollY 6857 with the comment box in view; `#%C2%A7request-for-feedback` (Substack's heading anchor, `§` + slug) scrolled to the "Request for Feedback" heading. `/comments` redirects to the post without scrolling.
 - **Change:** `rv_card_url()` appends `RV_FEEDBACK_ANCHOR = "discussion"` (`app/R/review.R`). All eight cards share one target; the issue number stays in the link text, and `APP_FEEDBACK_HOW` already asks commenters to name it. The heading anchor was the alternative; the link text says "Comment", so the comment box fits it.

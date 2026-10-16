@@ -80,12 +80,13 @@ a fresh process each time, so the C++ compile is cold; M4, load average 2.8–3.
 Everything after start-up is live: a counterfactual rerun is ~60 ms, three
 coupled SSP futures ~0.5 s, a matched pulse pair over 1750–2300 ~0.65 s (older measurements). The
 pulse lab's "Release the pulse" drew both of its plots 4.0 s after the click (10-15, bundle).
-Nothing is precomputed, so no cached figure can fall out of date with the model.
-**The "Known issues" tab adds three runs the app does not otherwise make** (a gate
+**The "Known issues" tab needs three runs the app does not otherwise make** (a gate
 run to 2025, an ENSO knockout, a 1000-year pulse pair; the card that spun up a second mode was
-retired 2026-10-01). They are memoized and computed on FIRST VIEW of that tab, not
-at start-up — measured at about 6 s in total, contended (before 10-15) — so a visitor who never
-opens the tab never pays for it.
+retired 2026-10-01). Since 2026-10-15 (bb) their results are PRECOMPUTED in `data/review_precompute.rds`,
+which is refused unless built at the canonical's mode-file md5 (the tab then computes them live, as before).
+**Rebuild it at every adoption** with `calibration/build_review_precompute.R`; `test-review-precompute.R`
+fails until it is. First view on Connect Cloud: 30.7 s live, 4.0 s precomputed (10-15 bb; again 10-16 j).
+Everything else on that tab is still computed on first view, not at start-up.
 
 ## Hosting limits (shinyapps.io; checked 2026-10-15)
 
@@ -192,7 +193,7 @@ Rscript -e 'rsconnect::deployApp("<bundle_dir>", appId = "01a14244-5cc3-1951-7b0
 | all eight tabs, all plots, no output errors | yes (25 plots incl. nine Known-issues cards) | yes |
 | Build your own, "Run it" | 5.0 s; 701 ppm in 2150 | 5.4 s (load ~30) |
 | Pulse lab, "Release the pulse" | 11.8 s; 50 % at +100 yr, 41 % at +250 yr | 14.6 s (load ~30); 4.0 s (10-15, idle) |
-| Known issues, first view | 30.7 s (4 GB); 4.2 s (1 GB revision) | memoized in the test; ~6 s contended (pre-10-15) |
+| Known issues, first view | 30.7 s (4 GB); 4.2 s (1 GB revision); 4.0 s precomputed (10-15 bb, 10-16 j) | memoized in the test; ~6 s contended (pre-10-15) |
 | provenance line | posterior mode, 31 fitted, 14 held | same |
 | page sub/superscripts; plot δ¹³C and ‰ glyphs | render | render |
 | `/sarofim_essenhigh_comment_2011.pdf`; the `.doc` | 200; 404 | 200; 404 |
