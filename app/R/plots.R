@@ -38,7 +38,18 @@ PAL <- c(
   # chosen with margin (memory `palette_check_unreproduced`: choose with margin and
   # score it, rather than arbitrating a receipt after the fact).
   pull_up    = "#b2182b",
-  pull_down  = "#2166ac"
+  pull_down  = "#2166ac",
+  # ⭐ THE OCEAN BY DEPTH (Marcus 2026-10-16: "Blues, light at top"; app/R/ocean_depth.R). One
+  # sequential hue, lightest = upper ocean, darkest = deep, for the pulse lab's partition panels.
+  # Scored with tools/palette_check.py on the colors AS DRAWN (PULSE_PARTITION_ALPHA over white,
+  # composited in sRGB) against the panels' other two fills, `atm` and `land`: the worst pair over
+  # normal / protan / deutan / tritan is 14.1 (ocean_mid / ocean_deep), against the >= 8 target;
+  # the panel's floor is the existing atm / land pair at 13.7. ⚠ The first candidates (mid L 0.58,
+  # nearer `land`'s lightness) scored 8.6 on land / mid under tritanopia, i.e. on the line, so the
+  # mid blue was moved darker. Gate: test-pulse-ocean-depth.R.
+  ocean_upper = "#a6c6f9",
+  ocean_mid   = "#03409c",
+  ocean_deep  = "#0e2345"
 )
 
 # ⭐ THE PREFIX NAMES THE SLOT, and that is load-bearing rather than tidy.
@@ -110,6 +121,23 @@ KEY_PULSE_TAGGED <- "The pulse's carbon atoms (tagged)"
 KEY_PULSE_WARM_MODEL <- "This model (with the pulse, minus without)"
 PANEL_PULSE_EXTRA  <- "The extra carbon"
 PANEL_PULSE_TAGGED <- "The pulse's carbon atoms"   # Marcus 2026-10-15
+# The partition panels' five bands (2026-10-16: the ocean split by depth, app/R/ocean_depth.R).
+# Air and land keep the wording the panel already had. ⚠⚠ THE THREE OCEAN KEYS ARE DRAFTS FOR
+# MARCUS'S WORDING; each `%s` is a boundary read off the run's own grid and rounded to
+# OCEAN_DEPTH_LABEL_ROUND_M (295 m -> 300, 914 m -> 900 at hilda31w), so the numbers are the model's.
+# the bands' opacity; the palette gate scores the fills composited at THIS value over white
+PULSE_PARTITION_ALPHA <- 0.9
+KEY_PULSE_AIR  <- "Still in the air"
+KEY_PULSE_LAND <- "Taken up by land"
+KEY_OCEAN_UPPER_FMT <- "Upper ocean (0\u2013%s m)"
+KEY_OCEAN_MID_FMT   <- "Intermediate ocean (%s\u2013%s m)"
+KEY_OCEAN_DEEP_FMT  <- "Deep ocean (below %s m)"
+# ⚠⚠ PLACEHOLDERS FOR MARCUS (2026-10-16): the panel's one-sentence takeaway (house rule 7) and a
+# tooltip on the ocean groups. Shown on screen in brackets so they cannot be mistaken for copy;
+# app/make_deploy_bundle.sh refuses to build while its PLACEHOLDER_MARK appears anywhere in app/.
+PULSE_DEPTH_TAKEAWAY <- "[MARCUS: one-sentence takeaway for the two partition panels]"
+PULSE_DEPTH_GLOSS     <- "[MARCUS: the three ocean groups]"
+PULSE_DEPTH_GLOSS_TIP <- "[MARCUS: tooltip on the upper / intermediate / deep groups]"
 # 2026-10-15 review: "leave the air within years" -> measured 49 % of the tagged atoms still in the air at +5 yr, 20 % at +20
 PULSE_TAG_DECAY_NOTE <- paste("Most of the tagged atoms leave the air within a couple of decades, because the air swaps",
                               "carbon with land and ocean every year. The extra CO\u2082 stays far",
@@ -324,6 +352,32 @@ app_wrap_px <- function(txt, px, pt) {
     else cur <- trial
   }
   paste(c(lines, cur), collapse = "\n")
+}
+
+#' How many rows a legend needs so its keys fit the panel, by MEASURING them (2026-10-16)
+#'
+#' ggplot sets a legend's keys side by side and CLIPS a row that does not fit; it never wraps one.
+#' The pulse partition's five keys measure 776 px in one row at SUBTITLE_PT, against a 504 px
+#' budget at the 768 px floor (one row fits at 1440 px, two at 1024, three at the floor). So the
+#' row count is chosen per render from the live width, as the captions are wrapped.
+#' ⚠ Measured at SUBTITLE_PT, the size test-plot-text-fits.R gate 3b measures keys at; theme_ccx()
+#' draws legend text at 10.4 pt, so this is conservative. APP_LEGEND_KEY_PAD_PX is the glyph and
+#' padding allowance per key, the approximation gate 3b also makes.
+#' With no graphics device to measure on, every key gets its own row (always fits).
+APP_LEGEND_KEY_PAD_PX <- 34
+app_legend_nrow <- function(keys, panel = "full", pt = SUBTITLE_PT) {
+  measure <- function(s) tryCatch(
+    grid::convertWidth(grid::grobWidth(grid::textGrob(s, gp = grid::gpar(fontsize = pt))),
+                       "in", valueOnly = TRUE) * 72,
+    error = function(e) NA_real_)
+  w <- vapply(as.character(keys), measure, numeric(1)) + APP_LEGEND_KEY_PAD_PX
+  if (anyNA(w)) return(length(keys))
+  budget <- app_text_px(panel)
+  for (n in seq_along(w)) {
+    cols <- split(w, ceiling(seq_along(w) / n))   # a legend with nrow = n fills column by column
+    if (sum(vapply(cols, max, numeric(1))) <= budget) return(n)
+  }
+  length(keys)
 }
 
 #' Standard annotation carried by every plot that uses model output
@@ -1296,86 +1350,58 @@ GROWTH_RESID_MIN_YEARS <- 12L
 #' Both runs carry identical land-use forcing, so the LUC transfer cancels
 #' exactly in the difference. No term is added back.
 #'
-#' The closure residual is COMPUTED and shown rather than assumed: the three
-#' shares must add to 100 %, and a panel that silently did not would be
-#' reporting a leak as physics.
-plot_pulse_partition <- function(base, pulse, pulse_gtc, pulse_year,
-                                 yr_max = NULL, tag = NULL) {
-  gp <- ccx_const("GtC_PER_PPM")
-  t  <- base$t
-  # ⛔ `co2_global` IS NOT A COLUMN OF EVERY RUN. `ccx_run_fast()` and
-  # `ccx_run_coupled()` return `co2_NH` / `co2_SH`; global.R ADDS `co2_global`
-  # by hand to the historical run and to `app_run_mechanisms()` output, and the
-  # PULSE runs never go through either. Reading it here returned NULL, so the
-  # atmosphere series was numeric(0), `rbind` silently dropped its rows, and the
-  # panel drew land and ocean stacking to ~80 % with no air band and no error.
-  # Found 2026-09-22 by looking at the rendered chart. Derive it here instead of
-  # trusting a column somebody else may or may not have attached.
-  d_atm   <- (ccx_global_co2(pulse) - ccx_global_co2(base)) * gp
-  d_land  <- pulse$land_C  - base$land_C
-  d_ocean <- pulse$ocean_C - base$ocean_C
-  k <- t >= pulse_year
-  if (!is.null(yr_max)) k <- k & t <= yr_max
-  sh <- function(v) 100 * v[k] / pulse_gtc
-  long <- rbind(
-    data.frame(t = t[k], pct = sh(d_atm),   where = "Still in the air"),
-    data.frame(t = t[k], pct = sh(d_land),  where = "Taken up by land"),
-    data.frame(t = t[k], pct = sh(d_ocean), where = "Taken up by the ocean"))
-  long$where <- factor(long$where, levels = c("Still in the air",
-                                              "Taken up by land",
-                                              "Taken up by the ocean"))
-  # THE CLOSURE IS A GATE, NOT A DECORATION. The three shares must add to 100 %;
-  # a panel that silently did not would be reporting a leak as physics. It is
-  # also what would have caught the missing-air-band bug above on its own --
-  # with the atmosphere dropped it is nowhere near 1.
+#' The closure residual is COMPUTED and shown rather than assumed: the shares
+#' must add to 100 %, and a panel that silently did not would be reporting a
+#' leak as physics.
+#'
+#' ⭐ THE OCEAN BY DEPTH (Marcus 2026-10-16; app/R/ocean_depth.R). Both panels split the ocean
+#' into upper / intermediate / deep, so `tab` is app_pulse_partition_table()'s: every band at the
+#' depth split's instants (the pulse year's start, then each mid-year), from the restarted runs.
+#' ⚠ So the panel is drawn at ONE INSTANT PER YEAR, where it used to draw every month: the ocean
+#' split exists only at the restart instants, and a stack needs every band at the same x. The
+#' release therefore shows as two steps (0 at the pulse year's start, about half at mid-year).
+#'
+#' @param tab app_pulse_partition_table(app_pulse_depth_runs(...), pulse_gtc)
+plot_pulse_partition <- function(tab, pulse_gtc, pulse_year, yr_max = NULL) {
+  k <- tab$t >= pulse_year
+  if (!is.null(yr_max)) k <- k & tab$t <= yr_max
+  d <- tab[k, ]
+  d$pct <- 100 * d$frac
+  # THE CLOSURE IS A GATE, NOT A DECORATION. The shares must add to 100 %; a panel that silently
+  # did not would be reporting a leak as physics. It is also what would have caught the
+  # missing-air-band bug of 2026-09-22 on its own ([[ccx_co2_global_not_a_column]]: the air band
+  # was silently dropped) -- with the atmosphere dropped it is nowhere near 1.
   #
-  # ⚠ MEASURED FROM AFTER THE PULSE HAS LANDED, and the first version was not.
-  # The pulse is released over a single year, so at t = pulse_year none of it is
-  # in yet, all three differences are 0, and closure is 0 -- which the check
-  # faithfully reported as a "100 % closure error". That is the RAMP, not a
-  # leak. The ramp still belongs on the CHART (a reader should see the pulse
-  # arrive); it does not belong in a conservation check. Hence two windows.
-  stopifnot(length(d_atm) == length(t), length(d_land) == length(t),
-            length(d_ocean) == length(t))
-  kc <- k & t >= pulse_year + 1
-  closure <- (d_atm + d_land + d_ocean)[kc] / pulse_gtc
-  resid <- if (any(kc)) 100 * max(abs(closure - 1)) else NA_real_
-  # ⭐ THE TAGGED PANEL (Marcus 2026-10-12, "Side by side in pulse lab"): the SAME pulse, its own
-  # atoms tagged with 14C (R/c14_tag.R), on the same axes, so the two answers sit side by side.
-  # Its closure is CONSERVATION of the tag with decay undone (~1e-9 from first principles), so it
-  # is a check and not a normalization, exactly as the left panel's.
-  resid_tag <- NA_real_
-  if (!is.null(tag)) {
-    tp <- ccx_tag_partition(tag$out, pulse, tag$tag)
-    long$panel <- PANEL_PULSE_EXTRA
-    lt <- rbind(
-      data.frame(t = t[k], pct = 100 * tp$air[k],   where = "Still in the air"),
-      data.frame(t = t[k], pct = 100 * tp$land[k],  where = "Taken up by land"),
-      data.frame(t = t[k], pct = 100 * tp$ocean[k], where = "Taken up by the ocean"))
-    lt$where <- factor(lt$where, levels = levels(long$where)); lt$panel <- PANEL_PULSE_TAGGED
-    long <- rbind(long, lt)
-    long$panel <- factor(long$panel, levels = c(PANEL_PULSE_EXTRA, PANEL_PULSE_TAGGED))
-    resid_tag <- if (any(kc)) 100 * max(abs(tp$total[kc] - 1)) else NA_real_
-  }
-  g <- ggplot(long, aes(t, pct, fill = where)) +
-    geom_area(alpha = 0.9) +
-    scale_fill_manual(values = c("Still in the air" = PAL[["atm"]],
-                                 "Taken up by land" = PAL[["land"]],
-                                 "Taken up by the ocean" = PAL[["ocean"]])) +
+  # ⚠ MEASURED FROM AFTER THE PULSE HAS LANDED, and the first version was not. The pulse is
+  # released over a single year, so at t = pulse_year none of it is in yet and every share is 0,
+  # which the check faithfully reported as a "100 % closure error". That is the RAMP, not a leak.
+  # The ramp still belongs on the CHART (a reader should see the pulse arrive); it does not belong
+  # in a conservation check. Hence two windows.
+  # The EXTRA panel's closure is conservation of carbon; the TAGGED panel's is conservation of the
+  # tag with decay undone (~1e-9 from first principles, R/c14_tag.R), so it is a check and not a
+  # normalization, exactly as the left panel's.
+  kc <- d$t >= pulse_year + 1
+  closure <- tapply(d$frac[kc], list(d$panel[kc], d$t[kc]), sum)
+  resid <- if (any(kc)) 100 * max(abs(closure - 1), na.rm = TRUE) else NA_real_
+  ocean <- setdiff(levels(d$where), c(KEY_PULSE_AIR, KEY_PULSE_LAND))
+  fills <- c(PAL[["atm"]], PAL[["land"]], PAL[["ocean_upper"]], PAL[["ocean_mid"]], PAL[["ocean_deep"]])
+  stopifnot(length(ocean) == 3L, nlevels(d$where) == length(fills))
+  ggplot(d, aes(t, pct, fill = where)) +
+    geom_area(alpha = PULSE_PARTITION_ALPHA) +
+    scale_fill_manual(values = stats::setNames(fills, levels(d$where))) +
+    guides(fill = guide_legend(nrow = app_legend_nrow(levels(d$where)))) +
     labs(x = LAB_YEAR, y = sprintf("Share of the %g GtC pulse (%%)", pulse_gtc),
          caption = app_provenance_caption(paste(
-           if (!is.null(tag)) paste("Left:", PULSE_PARTITION_NOTE, PULSE_TAG_PARTITION_NOTE)
-           else PULSE_PARTITION_NOTE,
+           paste("Left:", PULSE_PARTITION_NOTE, PULSE_TAG_PARTITION_NOTE),
            if (is.na(resid))
-             "The window is too short to check that the three shares add up."
-           else sprintf(paste("The three add to 100%% of the pulse to within",
+             "The window is too short to check that the shares add up."
+           else sprintf(paste("The shares add to 100%% of the pulse to within",
                               "%.2f%% at every step after it is released \u2014",
                               "carbon is conserved, so this is a partition and",
-                              "not an estimate."), max(resid, resid_tag, na.rm = TRUE))))) +
+                              "not an estimate."), resid)))) +
     expand_limits(y = c(0, 100)) +   # 2026-10-02: a pulse share runs 0-100 % (Marcus, card 5: "zero to 1")
+    facet_wrap(~ panel, nrow = 1) +
     theme_ccx()
-  if (!is.null(tag)) g <- g + facet_wrap(~ panel, nrow = 1)
-  g
 }
 
 # ---------------------------------------------------------------------

@@ -29,6 +29,14 @@ MODE=$(cd "$TMP" && Rscript -e '
 SHIP=(R src/ccx_core.cpp data DESIGN.md app
       calibration/lib_design_gates.R calibration/lib_seas_limbs.R calibration/lib_glodap_obs.R
       "$MODE")
+# ⛔ NO PLACEHOLDER COPY SHIPS (2026-10-16). Slots awaiting Marcus's wording are shown on screen in
+# brackets that open with this marker (app/R/plots.R PULSE_DEPTH_*); a bundle carrying one is refused.
+PLACEHOLDER_MARK='[MARCUS:'
+# (this script holds the marker itself, so it is excluded from its own search)
+if git -C "$ROOT" grep -n -F "$PLACEHOLDER_MARK" "$REV" -- app ':!app/make_deploy_bundle.sh' \
+     >"$TMP/placeholders" 2>/dev/null; then
+  echo "refusing: placeholder copy at $REV (replace it first):" >&2; cat "$TMP/placeholders" >&2; exit 1
+fi
 mkdir -p "$OUT"
 git -C "$ROOT" archive "$REV" "${SHIP[@]}" | tar -x -C "$OUT"
 printf '%s\n' '# shinyapps.io runs the app at the bundle ROOT; the app lives in app/ and reads the repo root.' \

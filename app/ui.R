@@ -553,7 +553,13 @@ navbarPage(
           "input.f_mode == 'Pulse lab'",
           hr(),
           h5("Where the extra carbon ends up"),
-          plotOutput("f_partition", height = "300px"),
+          # 2026-10-16: the ocean split by depth; both slots are PLACEHOLDERS for Marcus (plots.R)
+          takeaway(PULSE_DEPTH_TAKEAWAY),
+          # 300 -> 380 px (2026-10-16): at the 768 px floor the five-key legend takes three rows
+          # (plots.R app_legend_nrow()), and at 300 px the panels were ~80 px tall with the y title
+          # running into the caption (screenshot, 768 x 1024).
+          plotOutput("f_partition", height = "380px"),
+          helpText(class = "small", gloss(PULSE_DEPTH_GLOSS, PULSE_DEPTH_GLOSS_TIP)),
           # Marcus 2026-09-25: "Add text for the pulse radio button about the
           # relationship between cumulative carbon and temperature (e.g., each
           # ton of CO2 emitted adds effectively permanent temperature)."

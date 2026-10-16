@@ -786,19 +786,21 @@ function(input, output, session) {
       # ⚠ BOTH arms carry APP_PULSE_EMIS_METHOD, or the pair would differ by the
       # interpolation as well as by the pulse -- which is the one thing this
       # tab's difference is not allowed to contain.
+      # keep_forcing (2026-10-16): the partition panels restart each run from saved states to
+      # split the ocean by depth (app/R/ocean_depth.R), so they need the table it integrated
       base  = app_run_coupled(APP_SPIN, input$p_bg, yrs, input$p_bg,
                               emissions = base_em,
-                              interp_method = APP_PULSE_EMIS_METHOD),
+                              interp_method = APP_PULSE_EMIS_METHOD, keep_forcing = TRUE),
       pulse = app_run_coupled(APP_SPIN, input$p_bg, yrs, input$p_bg,
                               emissions = pulse_em,
-                              interp_method = APP_PULSE_EMIS_METHOD),
+                              interp_method = APP_PULSE_EMIS_METHOD, keep_forcing = TRUE),
       # Marcus 2026-10-12 ("Side by side in pulse lab"): the SAME pulse run with the pulse's own
       # carbon tagged by 14C (R/c14_tag.R). Passive, so its carbon and climate are the pulse run's;
       # only where the tagged atoms are differs. ~0.6 s.
       tagged = app_run_coupled(APP_SPIN, input$p_bg, yrs, input$p_bg,
                                emissions = pulse_em,
                                interp_method = APP_PULSE_EMIS_METHOD,
-                               c14_tag_base = base_em),
+                               c14_tag_base = base_em, keep_forcing = TRUE),
       gtc = input$p_gtc, year = input$p_year, bg = input$p_bg)
   })
 
@@ -950,11 +952,17 @@ function(input, output, session) {
   # F2 (Marcus 2026-09-22): the second pulse panel. Rendered only in the pulse
   # lab, and only after the user has run one -- pulse_runs() is an eventReactive
   # on the button, so it does not fire on tab entry.
+  # ⭐ THE OCEAN BY DEPTH (Marcus 2026-10-16, app/R/ocean_depth.R): the three runs restarted
+  # once a year from saved states, ~0.7 s each. Its own reactive, so the pulse chart above
+  # draws without waiting for it.
+  pulse_depth <- reactive({
+    pr <- pulse_runs()
+    app_pulse_depth_runs(APP_SPIN, pr[c("base", "pulse", "tagged")], pr$year)
+  })
   output$f_partition <- renderPlotFit("f_partition", {
     req(identical(input$f_mode, "Pulse lab"))
     pr <- pulse_runs()
-    plot_pulse_partition(pr$base$out, pr$pulse$out, pr$gtc, pr$year,
-                         tag = list(out = pr$tagged$out, tag = pr$tagged$tag))
+    plot_pulse_partition(app_pulse_partition_table(pulse_depth(), pr$gtc), pr$gtc, pr$year)
   })
 
   # ---- CUMULATIVE CARBON AND TEMPERATURE (Marcus 2026-09-25) ---------
