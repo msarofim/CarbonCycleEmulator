@@ -2,6 +2,12 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-16 (m) — **Post 2, third review (the 19:41 save): `outputs/substack_20261016/REVIEW3.md`; all six figures regenerated** (Marcus: "Review the latest version (attached) and suggest any improvements. Then regenerate all the figures for download.").
+
+- **Review:** his revisions fixed the Holocene line (now Law Dome's 2,000 years), the X7 and X8 captions, the Curry count and closing line, and the Schwartz quote. Still to fix: the buffer paragraph's "where did that carbonate come from? … aragonite" sentence; four typos; "[sic]" for Schwartz's "emissions atmospheric"; "lead author" for Archer et al. 2009 (11 authors, Crossref).
+- **Checked:** no Curry text on the van der Werf post beyond her note (0 of 352 saved comments); her four comments on the 2016 Salby thread withhold judgement; the extended 2012 quote is verbatim; Schwartz's 2021 reply says he adopted Archer et al. 2009's definition of adjustment time.
+- **Figures:** `make_figures.R` now writes `figures_provenance.txt` (commit, canonical mode + md5, inputs, PNG md5s). Re-run at `777a2fc`: all six PNGs byte-identical to the 15:03 set (nothing they read has changed). A download zip named by the draft's labels (Figure1, Figure2, FigureX5–X8) was sent to Marcus, not committed.
+
 ## 2026-10-16 (l) — **Post 2 re-reviewed (the 16:06 save): `outputs/substack_20261016/REVIEW2.md`; the three old local branches deleted** (Marcus: "Delete the three old local branches. Review the updated substack (attached). Consider the updated Curry discussion and the Schwartz discussions to make sure they are still accurate. Consider whether we should add in a discussion of Schwartz's 2025 model or if it is too indirect to qualify for this post.").
 
 - **Branches:** `claude/bold-einstein-47f001` (merged), `claude/compassionate-chatelet-52df58` (both commits patch-equivalent in main) and `claude/inspiring-albattani-62a97b` (one commit not in main, `2a079bf`: the `aa6e1b9` suite log, already recorded as superseded in 10-15) deleted.
