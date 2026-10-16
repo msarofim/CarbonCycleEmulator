@@ -8,8 +8,8 @@ handoff and stop both servers"), 2026-10-15 late evening.
 - ⭐ **Items 2 and 3 are DONE (CHANGELOG 2026-10-15 aa):** post 1 is published, `APP_FEEDBACK_URL` points to it, and the
   app is redeployed from `7f069fa` (revision `01a1427c…`, still 1 GB).
 - ⭐ **Item 4's precompute and item 6 are DONE (CHANGELOG 2026-10-15 bb):** Known issues first view 4.0 s on Connect
-  Cloud (was 30.7 s); live revision `01a14297…` from `b7928cd`; the old worktree is removed. The timeout change
-  waits on Marcus (the browser pane is not signed in to Posit). ⚠ Re-run `calibration/build_review_precompute.R`
+  Cloud (was 30.7 s); the old worktree is removed. Timeouts: connection 20 min, read 30 min (Marcus's settings),
+  live after a republish of `b7928cd` as revision `01a14484…`. ⚠ Re-run `calibration/build_review_precompute.R`
   at every adoption.
 - **Start here:** CHANGELOG **2026-10-15 (t)–(y)**, `app/DEPLOY.md` "Posit Connect Cloud", and memory
   `ccx_connect_cloud_deploy` + the top paragraph of `ccx_app_beta_blockers`.
