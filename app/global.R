@@ -43,8 +43,8 @@ ccx_load_cpp()
 # TITLE and the DEPLOYED URL; the repo name and the `ccx_` code prefix stay).
 # Was "The Carbon Cycle, Assembled". ⭐ THE URL MOVES WITH IT and that is the
 # part that is expensive to undo -- renaming after the post circulates breaks
-# every link anyone has shared. Deploy target: carbotope.shinyapps.io/carbotope
-# (app/DEPLOY.md). Nothing else in the app types a name: every label derives
+# every link anyone has shared. Deployed on Posit Connect Cloud (account saraphreport,
+# 2026-10-15); the URL is in app/DEPLOY.md. Nothing else in the app types a name: every label derives
 # from APP_TITLE.
 APP_TITLE        <- "CarboTope"
 APP_SUBTITLE     <- "A calibrated carbon-cycle model you can take apart"

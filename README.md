@@ -1,7 +1,7 @@
 # CarbonCycleEmulator
 
 The model behind **CarboTope**, an interactive R Shiny app for teaching how the carbon cycle
-works. App: https://carbotope.shinyapps.io/carbotope (not yet deployed).
+works. App: https://01a14244-5cc3-1951-7b06-9e2fb07beae3.share.connect.posit.cloud/
 
 A simple, observationally calibrated global carbon cycle model: two hemispheres, monthly
 time steps, a four-pool land biosphere (leaves, wood, fast and slow soil) plus an inert soil

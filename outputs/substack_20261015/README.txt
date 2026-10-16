@@ -10,9 +10,11 @@ Files in this folder
   make_figures.R, provenance.txt     how the four PNGs were made (re-render is byte-identical)
 
 Before posting (order matters)
-  a. Deploy the app first. The post links "CarboTope" to
-     https://carbotope.shinyapps.io/carbotope/ which is the EXPECTED address and does not
-     exist until the first deploy. If the deployed address differs, fix the link (step 8).
+  a. The app is deployed on Posit Connect Cloud (account saraphreport, Basic plan). The post
+     links "CarboTope" to
+     https://01a14244-5cc3-1951-7b06-9e2fb07beae3.share.connect.posit.cloud/
+     which is live. Republishing keeps this address; a vanity name or custom domain would
+     change it, so fix the link (step 8) if one is set before posting.
   b. Make the GitHub repository public. FN1 links to
      https://github.com/msarofim/CarbonCycleEmulator which is still private, so readers
      would get a 404.
@@ -48,7 +50,7 @@ Paste and redistribute (Chrome)
   7. Search for "ADD SUBSCRIBE BUTTON HERE" (after "Coming up next") and replace it with a
      Substack subscribe button.
   8. Check every link in the preview:
-       CarboTope                          https://carbotope.shinyapps.io/carbotope/  (step a)
+       CarboTope                          https://01a14244-5cc3-1951-7b06-9e2fb07beae3.share.connect.posit.cloud/  (step a)
        millennial lifetime of carbon dioxide
                                           https://climatemodels.uchicago.edu/geocarb/archer.2009.ann_rev_tail.pdf
        van Vuuren et al. 2026             https://wcrp-cmip.org/explainer-scenarios-for-cmip7/

@@ -9,7 +9,10 @@ Rscript -e 'shiny::runApp("app", launch.browser = TRUE)'
 The app is **CarboTope**. `APP_TITLE` in `app/global.R` is the one constant every
 label derives from, so the rename is that line and nothing else in the code.
 
-⭐ **The deployed URL moves with it: `carbotope.shinyapps.io/carbotope`.** This is the
+⭐ **The deployed URL (2026-10-15): https://01a14244-5cc3-1951-7b06-9e2fb07beae3.share.connect.posit.cloud/** on Posit Connect Cloud, account `saraphreport`
+(Marcus chose Connect Cloud Basic over shinyapps.io; see "Posit Connect Cloud" below). The URL is
+tied to the content id and survives republishing; a vanity name or custom domain would change it. The
+shinyapps.io target `carbotope.shinyapps.io/carbotope` (ruling R3) is now the documented fallback. This is the
 part that is expensive to undo — renaming after the post circulates breaks every link
 anyone has shared — so set the account/app name at the FIRST deploy, not after.
 
@@ -39,8 +42,8 @@ the CarboTope link; (3) push CarboTope with the Substack link. Before the link i
    this release exists to collect. `tests/testthat/test-review-cards.R` asserts the
    placeholder machinery is wired; **update that test when you set the URL, do not delete it.**
    ⚠ **Steps (2) and (3) need each other's URL.** The app's URL is fixed in advance
-   (`carbotope.shinyapps.io/carbotope`, below), so the post can link it before the app is up — but
-   then the post's first readers hit a 404. Either deploy FIRST with the placeholder (the cards say
+   (Connect Cloud, above; it is live since 2026-10-15), so the post can link it now. On shinyapps.io
+   the URL was fixed in advance but the post's first readers would have hit a 404 until the deploy. Either deploy FIRST with the placeholder (the cards say
    "comment link not set" until step 3) and check it live, then post, then redeploy with
    `APP_FEEDBACK_URL`; or, if Substack shows the post's final URL before publishing, set it and
    deploy before posting.
@@ -176,19 +179,27 @@ Rscript -e 'rsconnect::deployApp("/tmp/carbotope_bundle", appName = "carbotope",
 | check | Connect Cloud free | laptop bundle, 10-15 |
 |---|---|---|
 | C++ core compiles at start-up | yes | yes |
-| first plot after opening | 3.0 s (app possibly already running after publish; cold start NOT measured) | 6–8 s cold |
+| first plot after opening | 3.0 s (probably already running after publish); **27.0 s cold** (first visit to the 1 GB revision) | 6–8 s cold |
 | all eight tabs, all plots, no output errors | yes (25 plots incl. nine Known-issues cards) | yes |
 | Build your own, "Run it" | 5.0 s; 701 ppm in 2150 | 5.4 s (load ~30) |
 | Pulse lab, "Release the pulse" | 11.8 s; 50 % at +100 yr, 41 % at +250 yr | 14.6 s (load ~30); 4.0 s (10-15, idle) |
-| Known issues, first view | 30.7 s | memoized in the test; ~6 s contended (pre-10-15) |
+| Known issues, first view | 30.7 s (4 GB); 4.2 s (1 GB revision) | memoized in the test; ~6 s contended (pre-10-15) |
 | provenance line | posterior mode, 31 fitted, 14 held | same |
 | page sub/superscripts; plot δ¹³C and ‰ glyphs | render | render |
 | `/sarofim_essenhigh_comment_2011.pdf`; the `.doc` | 200; 404 | 200; 404 |
 
-Not yet known: the cold start after Connect Cloud's idle shutdown (its timeout was not checked), the
-free plan's monthly usage limit, and how many R processes serve simultaneous visitors.
+**Plan and settings (Marcus, 2026-10-15): upgraded to Basic ($190/yr: 8 GB / 2 CPU max, 100 usage credits a
+month, 25 apps, private-repo deploys); memory set to 1 GB on the app's own settings page, then republished.**
+The API confirms 1 CPU / 1024 MB on the live revision. Credits per hour = 0.75 × CPU + 0.25 × GB
+(docs.posit.co/connect-cloud/user/usage.html), so 1.0 credit an hour of serving, about 100 hours a
+month. A setting change applies only after a republish, and only if made on the content itself. At 1 GB
+everything ran with no disconnects: pulse 11.8 s, Build your own 4.6 s. Paid-plan credit limits are not
+enforced until 2027; Free-plan limits start with the first period beginning on or after 2026-11-01.
 
-## How to deploy (shinyapps.io; never done as of 2026-10-15)
+Still not known: how many R processes serve simultaneous visitors, and whether the connection timeout
+(3600 s, the Posit Connect default) keeps an abandoned browser tab billing for an hour.
+
+## How to deploy to shinyapps.io (the fallback; never done)
 
 `carbotope.shinyapps.io/carbotope` returned 404 on 2026-10-11: the app has never been deployed.
 The account and token are Marcus's; nobody else should type the token.

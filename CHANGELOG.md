@@ -2,6 +2,12 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-15 (x) — **Connect Cloud is the host: Basic plan, 1 GB, and the URL is in the post** (Marcus upgraded to Basic and set the app's memory to 1 GB). The first change didn't reach the app: the API still showed 4096 MB after one republish. The second, made on the CarboTope content's own settings page and republished, did: 1 CPU / 1024 MB, 1.0 usage credit per hour of serving (Posit's formula), about 100 hours a month on Basic.
+
+- **Re-checked at 1 GB:** every tab and plot draws, no disconnects; pulse 11.8 s (unchanged, so memory is not what limits speed), Build your own 4.6 s, Known issues first view 4.2 s (30.7 s at 4 GB; two samples, cause not separated).
+- **Cold start measured: 27.0 s** to the first plot on the first visit to the new revision (laptop 6–8 s). The app's warm-up note ("allow up to a minute") covers it, so it is unchanged.
+- **The URL** `https://01a14244-5cc3-1951-7b06-9e2fb07beae3.share.connect.posit.cloud/` (tied to the content id, kept across both republishes) now appears in the Substack HTML and its README, `README.md`, `app/DEPLOY.md` and the `app/global.R` comment. shinyapps.io is the documented fallback. Older handoffs and worklists keep the shinyapps.io address as records.
+
 ## 2026-10-15 (w) — **CarboTope DEPLOYED to Posit Connect Cloud (free plan, test) and it RUNS** (Marcus: "Prepare the Connect Cloud files and try the free plan"). Account `saraphreport` (his choice), public, at `https://01a14244-5cc3-1951-7b06-9e2fb07beae3.share.connect.posit.cloud/`. The bundle was built from `187a6da` by `app/make_deploy_bundle.sh` and published with `rsconnect::deployApp()` (1.11.2). Results table and commands: `app/DEPLOY.md` "Posit Connect Cloud".
 
 - **Why Connect Cloud.** Posit's 2026-07-21 post: shinyapps.io apps auto-migrate to Connect Cloud from early 2027, with URL redirects and plan prices held until 2029.
