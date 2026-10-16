@@ -991,7 +991,14 @@ rv_card <- function(id) {
 
 #' The per-card link into the feedback channel. Returns NULL when the channel
 #' URL has not been set, which ui.R renders as a visible warning.
+#'
+#' The fragment is an anchor Substack itself serves. Until 2026-10-16 it was "#card-N", which matches nothing on a
+#' Substack post, so every "Comment on issue N" link opened the top of post 1. Measured that day on a fresh load of
+#' post 1 in a browser: "#card-1" left the page at scrollY 0; "#discussion" (the comments section, id set by
+#' Substack) scrolled to it with the comment box in view. Every card now shares one target; the issue number is in
+#' the link text, and APP_FEEDBACK_HOW asks commenters to name it.
+RV_FEEDBACK_ANCHOR <- "discussion"
 rv_card_url <- function(id) {
   if (!app_link_ok(APP_FEEDBACK_URL)) return(NULL)
-  sprintf("%s#card-%d", APP_FEEDBACK_URL, id)
+  sprintf("%s#%s", APP_FEEDBACK_URL, RV_FEEDBACK_ANCHOR)
 }

@@ -83,7 +83,7 @@ test_that("the feedback link is a placeholder until it is deliberately set", {
 # UPDATED 2026-10-15, when the URL was set to the published post 1 (Marcus sent the link). The guard
 # above stays; this adds what a SET link must look like. A share link copied from Substack carries the
 # author's referral code and utm_* tracking, so a bare post address is required: https, a Substack
-# post path, no query string, no fragment (rv_card_url() appends its own "#card-N").
+# post path, no query string, no fragment (rv_card_url() appends its own, RV_FEEDBACK_ANCHOR).
 rv_feedback_url_ok <- function(u)
   grepl("^https://[a-z0-9-]+\\.substack\\.com/p/[a-z0-9-]+$", u)
 
@@ -97,6 +97,46 @@ test_that("the feedback link is SET, to a bare Substack post address", {
   expect_length(u, 1L)
   expect_false(identical(u, "SET-BEFORE-DEPLOY"))
   expect_true(rv_feedback_url_ok(u), info = u)
+})
+
+# ADDED 2026-10-16: the per-card links ended in "#card-N", which no Substack post serves, so each
+# "Comment on issue N" opened the top of the post. The allowed fragments are the ones MEASURED that day on a
+# fresh load of post 1 (rv_card_url()'s comment in review.R): "discussion" scrolled to the comment box;
+# "card-1" did not move the page. rv_card_url() is called with the shipped APP_FEEDBACK_URL from global.R.
+RV_SUBSTACK_ANCHORS_MEASURED <- "discussion"
+rv_comment_fragment_ok <- function(url)
+  grepl("#", url, fixed = TRUE) && sub("^[^#]*#", "", url) %in% RV_SUBSTACK_ANCHORS_MEASURED
+
+rv_card_url_with <- function(feedback_url, fn = .rv_env$rv_card_url) {
+  environment(fn) <- list2env(list(
+    APP_FEEDBACK_URL = feedback_url,
+    app_link_ok = function(u) is.character(u) && length(u) == 1L && nzchar(u) &&
+      !identical(u, "SET-BEFORE-DEPLOY")), parent = .rv_env)
+  fn
+}
+
+test_that("each card's comment link lands on the post's comment box", {
+  skip_if_no_review()
+  u <- rv_feedback_url(readLines(file.path(.rv_app_dir, "global.R"), warn = FALSE))
+  f <- rv_card_url_with(u)
+  for (id in vapply(.rv_env$RV_CARDS, `[[`, numeric(1), "id")) {
+    url <- f(id)
+    expect_true(startsWith(url, paste0(u, "#")), info = url)
+    expect_true(rv_comment_fragment_ok(url), info = url)
+  }
+  expect_null(rv_card_url_with("SET-BEFORE-DEPLOY")(1L))
+})
+
+test_that("MUTATION: the fragment check rejects the old #card-N link and a bare post address", {
+  skip_if_no_review()
+  u <- "https://thesaraphreport.substack.com/p/the-debut-of-carbotope-beta-a-new"
+  old <- rv_card_url_with(u, function(id) {
+    if (!app_link_ok(APP_FEEDBACK_URL)) return(NULL)
+    sprintf("%s#card-%d", APP_FEEDBACK_URL, id)
+  })
+  expect_false(rv_comment_fragment_ok(old(1L)))
+  expect_false(rv_comment_fragment_ok(u))
+  expect_false(rv_comment_fragment_ok(paste0(u, "#")))
 })
 
 test_that("MUTATION: the set-link check rejects the placeholder and a tracked share link", {

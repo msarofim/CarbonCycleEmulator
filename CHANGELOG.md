@@ -2,6 +2,12 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-16 (i) — **The "Comment on issue N" links now land on the post's comment box** (handoff 10-16 open item 4: the `#card-N` links opened the top of the post). Not yet deployed.
+
+- **Measured** on post 1, each URL loaded fresh in the browser pane: `#card-1` left the page at scrollY 0 (no element has that id); `#discussion` (the comments section; Substack sets the id) scrolled to scrollY 6857 with the comment box in view; `#%C2%A7request-for-feedback` (Substack's heading anchor, `§` + slug) scrolled to the "Request for Feedback" heading. `/comments` redirects to the post without scrolling.
+- **Change:** `rv_card_url()` appends `RV_FEEDBACK_ANCHOR = "discussion"` (`app/R/review.R`). All eight cards share one target; the issue number stays in the link text, and `APP_FEEDBACK_HOW` already asks commenters to name it. The heading anchor was the alternative; the link text says "Comment", so the comment box fits it.
+- **Gate:** `test-review-cards.R` calls `rv_card_url()` with the shipped `APP_FEEDBACK_URL` for every card and requires a fragment from the measured list. Mutation: restoring `#card-%d` in `review.R` fails it 8 times (one per card). File: 76 passed, 0 failed. The local app renders all eight hrefs with `#discussion`.
+
 ## 2026-10-16 (h) — **Handoff `notes/handoff_2026-10-16_post2_review.md`** (Marcus: "Write the handoff note"). It supersedes 10-15c, which now points to it. Open: post 2 is Marcus's to revise against `outputs/substack_20261016/REVIEW.md`, then Substack formatting; the Known-issues lead sentence; optional items.
 
 ## 2026-10-16 (g) — **Schwartz's 2025 ocean model compared with CarboTope's ocean: they agree at about a century and differ in time shape, for a structural reason** (Marcus: "On Schwartz's 2024 & 2025 papers ... I can't actually find any claims in either of them for a short lifetime. Maybe we can determine whether his simple model matches CarboTope or not, and if not, why not."). `calibration/diag_schwartz_3ccdm.R` at `f43dced`; output `outputs/diagnostics/schwartz_3ccdm_20261016_hilda31w.{rds,log}`.
