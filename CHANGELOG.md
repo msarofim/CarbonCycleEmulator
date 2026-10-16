@@ -2,6 +2,14 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-16 (l) — **Post 2 re-reviewed (the 16:06 save): `outputs/substack_20261016/REVIEW2.md`; the three old local branches deleted** (Marcus: "Delete the three old local branches. Review the updated substack (attached). Consider the updated Curry discussion and the Schwartz discussions to make sure they are still accurate. Consider whether we should add in a discussion of Schwartz's 2025 model or if it is too indirect to qualify for this post.").
+
+- **Branches:** `claude/bold-einstein-47f001` (merged), `claude/compassionate-chatelet-52df58` (both commits patch-equivalent in main) and `claude/inspiring-albattani-62a97b` (one commit not in main, `2a079bf`: the `aa6e1b9` suite log, already recorded as superseded in 10-15) deleted.
+- **Curry:** quotes verbatim. "Never included critical evaluation" holds; the closing "without ever providing any evaluation" contradicts it and the van der Werf paragraph; Dengler & Reid accept the mass balance (short-lifetime claim, not a denial); the van der Werf sentence is unfinished and its quote is Curry's JC note.
+- **Schwartz:** the 2012 document is signed "(Referee)"; it also cited Allen et al. (2009, no decline over 100 years) to widen the range upward. His own implied number there is 40 % left. Figure X8's caption has the wrong layout (one panel) and the wrong base (66–71 % is of the excess, which is 26 % of what was emitted in CarboTope). The 2021 paragraph omits his claim (78–140 yr; 110 ± 40 yr); like for like at his 2017 stop CarboTope gives 224 yr (k).
+- **Schwartz 2025:** recommended out of the post's argument (no lifetime claim; the comparison is indirect and its tail consequence was not run); a fairness footnote optional; better material for a post on calibration and long tails.
+- **Other:** the buffer text still has the carbonate coming from solid aragonite (the figure has it right); the Holocene 271–285 ppm is Law Dome 154–1750 CE; Figure X7's δ¹³C covers fossil and land-use carbon together.
+
 ## 2026-10-16 (k) — **Stop-vs-pulse at Schwartz's own stop year (2017): CarboTope keeps 64 % of the excess after 100 years, an equivalent lifetime of 224 yr; his 2021 estimate is 78–140 yr. A history-splice bug in the first 2017 run was caught, quarantined and gated.** For the post 2 re-review (l). `calibration/diag_zec_vs_pulse.R`; output `outputs/diagnostics/zec_vs_pulse_20261016/ccx_hilda31w_zec2017_vs_pulse100_h100.{csv,log}`.
 
 - **Why 2017:** Schwartz's ACP preprint (acp-2021-924) evaluates the adjustment time from "abrupt cessation of emissions commencing in 2017". The 10-15 (c) runs stop in 2030. `CCX_ZP_ZERO_YEAR` now sets the stop year (default 2030; the pulse moves with it; the year is in the file name).

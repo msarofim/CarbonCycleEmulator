@@ -1,5 +1,7 @@
 # Review: "CarboTope II: CarboTope vs. Bad Science"
 
+**Second review of the 16:06 save: `REVIEW2.md`** (Curry, Schwartz, Schwartz 2025, and the revisions).
+
 Draft reviewed: `CarboTopeSubstack.contrarians.docx`, saved 2026-10-16 14:52. Figures: this folder,
 made by `make_figures.R` at the canonical model (hilda31w). Numbers below come from the repo's data or
 from committed diagnostics, named in each item.
