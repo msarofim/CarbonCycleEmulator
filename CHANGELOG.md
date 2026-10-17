@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-17 (a) — **Post 2 hero image: `hero_with_without_emissions.png`** (Marcus: "What should i use as my hero figure for the email?"; recommended Figure 6's CO₂ panel alone; "Yes"). Post 1's hero format: 1456×762 (1.91:1), base size 17, direct labels ("With human emissions: 425 ppm", "Without human emissions: 281 ppm"), measured CO₂ dashed (Law Dome, Mauna Loa), a shorter credit (Figure 6's clipped at this size). Built in `make_figures.R` from Figure 6's data; Figures 1–7 byte-identical. Added at the top of the post's HTML (no caption) and to the README.
+
 ## 2026-10-16 (n) — **Post 2 built for Substack (`outputs/substack_20261016/carbotope2_substack.html` + `README.txt`); Figure 7 carries Schwartz's 40 % marker; figures renamed to the post's numbering** (Marcus: "Add Schwartz's 40% marker to Figure X8 and regenerate it. I think the Revelle & Suess Wiley link is open access. [...] Review again, and if it looks good build the substack formatted version with appropriate figure numbering and other fixes.").
 
 - **Figure 7 (was X8):** a diamond at 40 % left at +100 yr, labelled "Schwartz (2012): 40% of the excess left after 100 years" (his referee report: "something like 60% of the excess CO2 ... to disappear within 100 years"). Values are constants at the top of `make_figures.R`. A caption credit naming it clipped at 1456 px and was dropped; the in-plot label carries it.

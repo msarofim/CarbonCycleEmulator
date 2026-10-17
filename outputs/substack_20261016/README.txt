@@ -5,6 +5,7 @@ Built 2026-10-16 from CarboTopeSubstack.contrarians.docx saved 20:17.
 
 Files in this folder
   carbotope2_substack.html           the whole post, one paste
+  hero_with_without_emissions.png    hero image (top of the post, no caption): Figure 6's CO2 panel alone
   fig1_pulse_ocean_depth.png         Figure 1
   fig2_buffer_chemistry.png          Figure 2
   fig3_xkcd_physicists.png           Figure 3 (your XKCD image, copied out of the Word file, 358 x 540 px)
@@ -13,7 +14,7 @@ Files in this folder
   fig6_with_without_emissions.png    Figure 6
   fig7_stop_vs_pulse.png             Figure 7 (now with Schwartz's 40% marker)
   make_figures.R, figures_provenance.txt
-                                     how Figures 1-2 and 4-7 were made (re-render is byte-identical)
+                                     how the hero and Figures 1-2 and 4-7 were made (re-render is byte-identical)
   REVIEW.md, REVIEW2.md, REVIEW3.md  the three review passes
 
 Check first (my edits to your wording; everything else is formatting)
@@ -65,7 +66,8 @@ Paste and redistribute (Chrome)
   5. Delete the whole Footnotes section at the bottom: its horizontal rule, heading and the 17 FN
      paragraphs.
   6. Images: search for "INSERT IMAGE". For each marker, delete the line and upload the named PNG
-     with Substack's image tool at that spot (fig1 ... fig7, in order). Each image is followed by
+     with Substack's image tool at that spot (the hero first, then fig1 ... fig7, in order). The hero
+     has no caption; optionally also set it as the post's social/cover image in post settings. Each image is followed by
      an italic "Figure N: ..." line. Cut it into the image's caption field, or leave it in place as
      an italic line (Figure 2's must stay in place; see FN6).
   7. Search for "ADD SUBSCRIBE BUTTON HERE" (after the Conclusions) and replace it with a

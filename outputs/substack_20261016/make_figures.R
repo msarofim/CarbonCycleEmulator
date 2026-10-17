@@ -40,6 +40,14 @@ CF_YEARS <- c(1850L, 2024L)                            # fig5 window
 FIG_FILE <- c(fig1 = "fig1_pulse_ocean_depth.png", fig2 = "fig2_buffer_chemistry.png", fig3 = "fig4_co2_record.png",
               fig4 = "fig5_emissions_vs_increase.png", fig5 = "fig6_with_without_emissions.png",
               fig6 = "fig7_stop_vs_pulse.png")
+# The email/social HERO (Marcus 2026-10-17: "What should i use as my hero figure for the email?" -> Figure 6's CO2
+# panel alone, "Yes"): post 1's hero size and type scale, direct labels, no legend.
+HERO_FILE <- "hero_with_without_emissions.png"
+HERO_W_PX <- 1456L; HERO_H_PX <- 762L                 # 1.91:1, the link-preview ratio (post 1's hero)
+HERO_BASE <- 17; HERO_LAB_SIZE <- 6.2
+HERO_SUB  <- "CarboTope with and without human emissions; dashed: measured"
+HERO_LAB  <- c(full = "With human emissions: %.0f ppm", none = "Without human emissions: %.0f ppm")
+HERO_CREDIT <- "Model: CarboTope (beta v1.0). Data: Law Dome ice core; Mauna Loa."   # fig5's credit clipped at this size
 XKCD_FILE <- "fig3_xkcd_physicists.png"               # the post's Figure 3, Marcus's image (not drawn here)
 XKCD_NOTE <- "xkcd 793 \"Physicists\" by Randall Munroe, CC BY-NC 2.5; from Marcus's draft (word/media/image1.png)"
 CREDIT <- c(
@@ -209,6 +217,24 @@ p5 <- ggplot() +
   theme_ccx() + theme(legend.position = "top")
 save_png(p5, FIG_FILE[["fig5"]], FIG_H_PX[["fig5"]])
 
+# ---- hero: Figure 6's CO2 panel alone, direct-labeled -------------------------------------------------------------
+hm <- d5m[d5m$var == VAR5[["co2"]], ]; ho <- d5o[d5o$var == VAR5[["co2"]], ]
+hv <- function(w, yr = CF_YEARS[2]) { d <- hm[hm$who == MOD5[[w]], ]; d$v[which.min(abs(d$year - yr))] }
+HERO_LAB_YR <- CF_YEARS[2] - 12L                       # the "with" label ends here, above its curve
+hero_lab <- data.frame(x = c(HERO_LAB_YR, CF_YEARS[2]), y = c(hv("full", HERO_LAB_YR) + 12, hv("none") - 9),
+  vj = c(0, 1), col = c(PAL[["model"]], PAL[["off"]]),
+  lab = vapply(c(sprintf(HERO_LAB[["full"]], hv("full")), sprintf(HERO_LAB[["none"]], hv("none"))), app_plotmath_str, ""))
+hero <- ggplot() +
+  geom_line(data = ho, aes(year, v, group = who), colour = "grey20", linewidth = 0.8, linetype = "22") +
+  geom_line(data = hm, aes(year, v, colour = I(ifelse(who == MOD5[["full"]], PAL[["model"]], PAL[["off"]])),
+                           group = who), linewidth = 1.6) +
+  geom_text(data = hero_lab, aes(x, y, label = lab, colour = I(col), vjust = vj), hjust = 1,
+            size = HERO_LAB_SIZE, fontface = "bold", parse = TRUE) +
+  scale_y_continuous(limits = c(255, NA)) +
+  labs(x = NULL, y = app_plotmath("CO₂ (ppm)"), subtitle = HERO_SUB, caption = HERO_CREDIT) +
+  theme_ccx(base_size = HERO_BASE) + theme(plot.margin = margin(14, 22, 10, 12))
+save_png(hero, HERO_FILE, HERO_H_PX, HERO_W_PX)
+
 # ---- fig6 (suggested): the Schwartz test ------------------------------------------------------------------------
 cz <- utils::read.csv(file.path(ZEC_DIR, "ccx_hilda31w_zec2030_vs_pulse100_h100.csv"))
 fz <- utils::read.csv(file.path(ZEC_DIR, "fair_v160_zec2030_vs_pulse100_h100.csv"))
@@ -251,7 +277,7 @@ cat(sprintf("fig5: CarboTope %d CO2 %.1f ppm (without human emissions %.1f); d13
 
 # ---- provenance (2026-10-16, re-run for download): commit, canonical mode and inputs, beside the PNGs ------------
 # Kept out of the images, whose captions are short data credits for readers.
-figs <- sort(list.files(OUT_DIR, pattern = "^fig[0-9].*[.]png$"))
+figs <- sort(list.files(OUT_DIR, pattern = "^(fig[0-9]|hero).*[.]png$"))
 writeLines(c(sprintf("make_figures.R @ %s%s | canonical %s (%s, md5 %s) | %s", ccx_git_stamp(),
                      if (isTRUE(ccx_stamp_dirty(ccx_git_stamp()))) " (dirty)" else "", CCX_MODE_CANONICAL,
                      basename(dirname(ccx_mode_file())), unname(tools::md5sum(ccx_mode_file())), format(Sys.time(), "%Y-%m-%d %H:%M")),
