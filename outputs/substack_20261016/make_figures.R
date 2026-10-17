@@ -17,6 +17,8 @@
 #   fig6  SUGGESTED, the Schwartz test: share left 20-270 yr after CO2 emissions stop in 2030 vs share of a 100 GtC
 #         pulse left, CarboTope and FaIR 2.2.4 (calib 1.6.0), from outputs/diagnostics/zec_vs_pulse_20261015/.
 # Every chart's caption is a short data credit; the post's captions are Marcus's. No RNG.
+# FILE NAMES carry the POST's figure numbers (2026-10-16, the Substack build): the post's Figure 3 is Marcus's XKCD
+# image, so keys fig3-fig6 here are the post's Figures 4-7. FIG_FILE is the one place the mapping lives.
 # Usage (repo root):  Rscript outputs/substack_20261016/make_figures.R
 # =====================================================================
 OUT_DIR  <- normalizePath(file.path("outputs", "substack_20261016"))
@@ -35,6 +37,11 @@ SCHWARTZ_LAB  <- sprintf("Schwartz (2012): %d%% of the excess\nleft after %d yea
 ZOOM_FROM <- 1900L                                    # fig3: the zoomed panel's start
 GCB_RATIO_YEARS <- c(2015L, 2024L)                     # fig4: the decade the ratio annotation averages
 CF_YEARS <- c(1850L, 2024L)                            # fig5 window
+FIG_FILE <- c(fig1 = "fig1_pulse_ocean_depth.png", fig2 = "fig2_buffer_chemistry.png", fig3 = "fig4_co2_record.png",
+              fig4 = "fig5_emissions_vs_increase.png", fig5 = "fig6_with_without_emissions.png",
+              fig6 = "fig7_stop_vs_pulse.png")
+XKCD_FILE <- "fig3_xkcd_physicists.png"               # the post's Figure 3, Marcus's image (not drawn here)
+XKCD_NOTE <- "xkcd 793 \"Physicists\" by Randall Munroe, CC BY-NC 2.5; from Marcus's draft (word/media/image1.png)"
 CREDIT <- c(
   fig1 = "Source: CarboTope (beta v1.0).",
   fig2 = "Numbers: CarboTope (beta v1.0), northern warm surface water, annual means.",
@@ -70,7 +77,7 @@ runs <- list(base = run(base_em), pulse = run(pulse_em), tagged = run(pulse_em, 
 depth <- app_pulse_depth_runs(APP_SPIN, runs[c("base", "pulse", "tagged")], PULSE_YEAR)
 p1 <- plot_pulse_partition(app_pulse_partition_table(depth, PULSE_GTC), PULSE_GTC, PULSE_YEAR) +
   labs(caption = CREDIT[["fig1"]])
-save_png(p1, "fig1_pulse_ocean_depth.png", FIG_H_PX[["fig1"]])
+save_png(p1, FIG_FILE[["fig1"]], FIG_H_PX[["fig1"]])
 
 # ---- fig2: the buffer mechanism -------------------------------------------------------------------------------
 rb <- readRDS(REVELLE_RDS); A <- rb$partA
@@ -116,7 +123,7 @@ p2 <- ggplot() + xlim(0, 100) + ylim(0, 70) + theme_void() +
   txt(50, 4.3, nums[2], 3.5, colour = accent, parse = FALSE) +
   labs(caption = CREDIT[["fig2"]]) +
   theme(plot.caption = element_text(size = 8, colour = "grey40", hjust = 1), plot.margin = margin(4, 8, 4, 8))
-save_png(p2, "fig2_buffer_chemistry.png", FIG_H_PX[["fig2"]])
+save_png(p2, FIG_FILE[["fig2"]], FIG_H_PX[["fig2"]])
 
 # ---- fig3: the CO2 record -------------------------------------------------------------------------------------
 ice <- readRDS(file.path("data", "obs_icecore.rds"))
@@ -145,7 +152,7 @@ p3 <- ggplot(d3, aes(year, co2, colour = src)) +
   scale_colour_manual(values = COL3, name = NULL) +
   labs(x = LAB_YEAR, y = app_plotmath(LAB_CO2), caption = CREDIT[["fig3"]]) +
   theme_ccx() + theme(legend.position = "top")
-save_png(p3, "fig3_co2_record.png", FIG_H_PX[["fig3"]])
+save_png(p3, FIG_FILE[["fig3"]], FIG_H_PX[["fig3"]])
 
 # ---- fig4: emissions vs the atmospheric increase ---------------------------------------------------------------
 g <- as.data.frame(APP_OBS$gcb)
@@ -168,7 +175,7 @@ p4 <- ggplot() +
   scale_y_continuous(limits = c(0, NA), expand = expansion(mult = c(0, 0.08))) +
   labs(x = LAB_YEAR, y = "Carbon (GtC per year)", caption = CREDIT[["fig4"]]) +
   theme_ccx() + theme(legend.position = "top")
-save_png(p4, "fig4_emissions_vs_increase.png", FIG_H_PX[["fig4"]])
+save_png(p4, FIG_FILE[["fig4"]], FIG_H_PX[["fig4"]])
 
 # ---- fig5 (suggested): with and without human emissions --------------------------------------------------------
 alt <- app_run_mechanisms(off = "emissions")
@@ -200,7 +207,7 @@ p5 <- ggplot() +
   guides(colour = guide_legend(nrow = 2, override.aes = list(linetype = c("solid", "solid", "22", "22")))) +
   labs(x = LAB_YEAR, y = NULL, caption = CREDIT[["fig5"]]) +
   theme_ccx() + theme(legend.position = "top")
-save_png(p5, "fig5_with_without_emissions.png", FIG_H_PX[["fig5"]])
+save_png(p5, FIG_FILE[["fig5"]], FIG_H_PX[["fig5"]])
 
 # ---- fig6 (suggested): the Schwartz test ------------------------------------------------------------------------
 cz <- utils::read.csv(file.path(ZEC_DIR, "ccx_hilda31w_zec2030_vs_pulse100_h100.csv"))
@@ -232,7 +239,7 @@ p6 <- ggplot(d6, aes(h, 100 * v, colour = case, linetype = model, shape = model)
   labs(x = "Years after 2030", y = "Share still in the air (%)", caption = CREDIT[["fig6"]]) +
   guides(colour = guide_legend(nrow = 2, order = 1), linetype = guide_legend(order = 2), shape = guide_legend(order = 2)) +
   theme_ccx() + theme(legend.position = "top")
-save_png(p6, "fig6_stop_vs_pulse.png", FIG_H_PX[["fig6"]])
+save_png(p6, FIG_FILE[["fig6"]], FIG_H_PX[["fig6"]])
 
 cat(sprintf("fig2 numbers: %s\nfig3: Mauna Loa %d = %.2f ppm\nfig4: %d-%d emissions / increase = %.3f\n",
             paste(nums, collapse = " "), last$year, last$v, GCB_RATIO_YEARS[1], GCB_RATIO_YEARS[2], ratio))
@@ -249,5 +256,6 @@ writeLines(c(sprintf("make_figures.R @ %s%s | canonical %s (%s, md5 %s) | %s", c
                      if (isTRUE(ccx_stamp_dirty(ccx_git_stamp()))) " (dirty)" else "", CCX_MODE_CANONICAL,
                      basename(dirname(ccx_mode_file())), unname(tools::md5sum(ccx_mode_file())), format(Sys.time(), "%Y-%m-%d %H:%M")),
              sprintf("inputs: %s; %s; pulse %s %g GtC in %d; no RNG", REVELLE_RDS, ZEC_DIR, PULSE_BG, PULSE_GTC, PULSE_YEAR),
+             sprintf("%s: %s", XKCD_FILE, XKCD_NOTE),
              sprintf("%s  %s", unname(tools::md5sum(file.path(OUT_DIR, figs))), figs)),
            file.path(OUT_DIR, "figures_provenance.txt"))
