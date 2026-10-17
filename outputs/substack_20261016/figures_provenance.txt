@@ -1,4 +1,4 @@
-make_figures.R @ d1a60147 | canonical hilda31w (refit_20261013_hilda31w_wtc_hilda_csl3v0kaidgbemwtc, md5 53ee816ac48cea0f1c1fad244651c5fd) | 2026-10-17 08:43
+make_figures.R @ 7097ff20 | canonical hilda31w (refit_20261013_hilda31w_wtc_hilda_csl3v0kaidgbemwtc, md5 53ee816ac48cea0f1c1fad244651c5fd) | 2026-10-17 08:44
 inputs: outputs/diagnostics/revelle_buffer_20261016_hilda31w.rds; outputs/diagnostics/zec_vs_pulse_20261015; pulse vvM 100 GtC in 2050; no RNG
 fig3_xkcd_physicists.png: xkcd 793 "Physicists" by Randall Munroe, CC BY-NC 2.5; from Marcus's draft (word/media/image1.png)
 a7453943c80e3c4ec5502de842ba4073  fig1_pulse_ocean_depth.png
