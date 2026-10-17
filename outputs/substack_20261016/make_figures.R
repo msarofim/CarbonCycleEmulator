@@ -26,6 +26,12 @@ PULSE_BG <- "vvM"; PULSE_YEAR <- 2050L; PULSE_GTC <- 100
 REVELLE_RDS <- file.path("outputs", "diagnostics", "revelle_buffer_20261016_hilda31w.rds")
 ZEC_DIR  <- file.path("outputs", "diagnostics", "zec_vs_pulse_20261015")
 ZEC_SCEN <- "vvM"                                      # the Medium background, as the pulse figures
+# fig6's marker (Marcus 2026-10-16: "Add Schwartz's 40% marker"). Schwartz's 2012 referee report on Joos et al.
+# (ACPD 12, C5982, p. 3): if emissions stopped, "one could expect something like 60% of the excess CO2 and associated
+# forcing to disappear within 100 years" -- 40 % left, read off the models' pulse response (0.41 at 100 years).
+SCHWARTZ_H    <- 100L
+SCHWARTZ_LEFT <- 0.40
+SCHWARTZ_LAB  <- sprintf("Schwartz (2012): %d%% of the excess\nleft after %d years", round(100 * SCHWARTZ_LEFT), SCHWARTZ_H)
 ZOOM_FROM <- 1900L                                    # fig3: the zoomed panel's start
 GCB_RATIO_YEARS <- c(2015L, 2024L)                     # fig4: the decade the ratio annotation averages
 CF_YEARS <- c(1850L, 2024L)                            # fig5 window
@@ -214,6 +220,10 @@ p6 <- ggplot(d6, aes(h, 100 * v, colour = case, linetype = model, shape = model)
   geom_errorbar(data = d6[!is.na(d6$lo), ], aes(ymin = 100 * lo, ymax = 100 * hi), width = 4, linewidth = 0.4,
                 linetype = "solid", show.legend = FALSE) +
   geom_line(linewidth = 0.8) + geom_point(size = 2.4) +
+  annotate("point", x = SCHWARTZ_H, y = 100 * SCHWARTZ_LEFT, shape = 23, size = 4.2, fill = "white", colour = "black",
+           stroke = 1.1) +
+  annotate("text", x = SCHWARTZ_H + 6, y = 100 * SCHWARTZ_LEFT + 3, label = SCHWARTZ_LAB, hjust = 0, vjust = 0,
+           size = 3.5, colour = "grey15", lineheight = 0.9) +
   scale_colour_manual(values = COL6, breaks = unname(CASE6), labels = app_plotmath_labels(CASE6), name = NULL) +
   scale_x_continuous(breaks = sort(unique(d6$h))) +
   scale_linetype_manual(values = c(CarboTope = "solid", FaIR = "22"), name = NULL) +

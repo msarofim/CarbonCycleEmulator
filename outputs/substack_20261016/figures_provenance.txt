@@ -1,8 +1,8 @@
-make_figures.R @ 777a2fc1 | canonical hilda31w (refit_20261013_hilda31w_wtc_hilda_csl3v0kaidgbemwtc, md5 53ee816ac48cea0f1c1fad244651c5fd) | 2026-10-16 19:45
+make_figures.R @ d2c7c2ce | canonical hilda31w (refit_20261013_hilda31w_wtc_hilda_csl3v0kaidgbemwtc, md5 53ee816ac48cea0f1c1fad244651c5fd) | 2026-10-16 20:20
 inputs: outputs/diagnostics/revelle_buffer_20261016_hilda31w.rds; outputs/diagnostics/zec_vs_pulse_20261015; pulse vvM 100 GtC in 2050; no RNG
 a7453943c80e3c4ec5502de842ba4073  fig1_pulse_ocean_depth.png
 d000be75c0a0175275680f0c626eba63  fig2_buffer_chemistry.png
 c40baa470d071bfb0ab796998df6964a  fig3_co2_record.png
 0ebd5889b8020ba81b577f0c00cf58db  fig4_emissions_vs_increase.png
 8144f3a793d9ad6f897e98a4475bbeb3  fig5_with_without_emissions.png
-9a37d3b1bb66c8ee245066078e0b5815  fig6_stop_vs_pulse.png
+e77b039f4e523d56c8fe43853340564a  fig6_stop_vs_pulse.png
