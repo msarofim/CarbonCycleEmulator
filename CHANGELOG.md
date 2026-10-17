@@ -2,6 +2,14 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-16 (n) — **Post 2 built for Substack (`outputs/substack_20261016/carbotope2_substack.html` + `README.txt`); Figure 7 carries Schwartz's 40 % marker; figures renamed to the post's numbering** (Marcus: "Add Schwartz's 40% marker to Figure X8 and regenerate it. I think the Revelle & Suess Wiley link is open access. [...] Review again, and if it looks good build the substack formatted version with appropriate figure numbering and other fixes.").
+
+- **Figure 7 (was X8):** a diamond at 40 % left at +100 yr, labelled "Schwartz (2012): 40% of the excess left after 100 years" (his referee report: "something like 60% of the excess CO2 ... to disappear within 100 years"). Values are constants at the top of `make_figures.R`. A caption credit naming it clipped at 1456 px and was dropped; the in-plot label carries it.
+- **Numbering:** files now carry the post's figure numbers (`FIG_FILE`); Figure 3 is Marcus's XKCD image (xkcd 793 "Physicists", CC BY-NC 2.5), copied out of the docx. Rename + re-run: every PNG byte-identical.
+- **Review of the 20:17 save:** his revisions cleared nearly everything. Still wrong: "where did that carbonate come from? It was probably living its life as ... aragonite". The build changes it to "Mostly it was already dissolved in seawater, where it is the raw material for calcium carbonate aka aragonite" and flags it first in the README. Also restored the parentheses in the Schwartz 2012 quote (verbatim), and fixed "Köhler et al (2018).", "responsae", a stray comma.
+- **Revelle & Suess:** Wiley's page returned a Cloudflare bot check, so its access could not be tested. The DOI now redirects to tellusjournal.org, whose PDF downloads without a login (10 pages, contains "peculiar buffer mechanism"); the build links the DOI, README says so.
+- **Checks:** 17 footnotes in reading order, each word-identical to the draft's; a word-level diff of the body against the draft shows only the intended changes; 30 of 47 links load from a script, the other 17 are publisher bot walls (listed in the README to click by hand). Crossref-verified for Marcus's questions: Feely et al. 2008 (Science 320:1490), Orr et al. 2005 (Nature 437:681), Bednaršek et al. 2012 (Nat. Geosci. 5:881); Starr 1993 (Energy 18:1297).
+
 ## 2026-10-16 (m) — **Post 2, third review (the 19:41 save): `outputs/substack_20261016/REVIEW3.md`; all six figures regenerated** (Marcus: "Review the latest version (attached) and suggest any improvements. Then regenerate all the figures for download.").
 
 - **Review:** his revisions fixed the Holocene line (now Law Dome's 2,000 years), the X7 and X8 captions, the Curry count and closing line, and the Schwartz quote. Still to fix: the buffer paragraph's "where did that carbonate come from? … aragonite" sentence; four typos; "[sic]" for Schwartz's "emissions atmospheric"; "lead author" for Archer et al. 2009 (11 authors, Crossref).
