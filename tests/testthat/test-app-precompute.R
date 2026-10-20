@@ -1,5 +1,5 @@
 # =====================================================================
-# Gate: the app's PRECOMPUTED start-up runs and pulse-lab default (2026-10-20; CHANGELOG 2026-10-20 b).
+# Gate: the app's PRECOMPUTED start-up runs and pulse-lab default (2026-10-20; CHANGELOG 2026-10-20 c).
 #
 # data/app_startup_precompute.rds (the spin-up, the historical run, the flux trace) and
 # data/pulse_default_precompute.rds (the default pulse's three runs and its ocean-by-depth split) store

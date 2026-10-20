@@ -52,11 +52,15 @@ function(input, output, session) {
   # matches its output.
   # `height` (2026-10-15): the box diagram's height FOLLOWS its width, so the diagram keeps one shape and its
   # text scales with it (plot_box_diagram's `scale`); every other plot keeps renderPlot's default ("auto").
+  # 2026-10-20: every chart's plot function is ALSO kept by id, for its CSV and PNG downloads
+  # (app/R/downloads.R), so a download draws the same expression the chart does.
+  dl_plots <- new.env(parent = emptyenv())
   # 2026-10-20 (phones): the finished plot goes through app_fit_plot() (plots.R), which at narrow widths gives
   # an overflowing legend more rows and wraps an axis title too long for its panel. It runs while the width is
   # still published, and only on a visible result: a base-graphics plot returns invisibly and is passed through.
   renderPlotFit <- function(id, expr, env = parent.frame(), quoted = FALSE, height = "auto") {
     fn <- shiny::exprToFunction(expr, env, quoted)
+    assign(id, fn, envir = dl_plots)
     shiny::renderPlot({
       app_set_panel_px(session$clientData[[paste0("output_", id, "_width")]])
       on.exit(app_clear_panel_px(), add = TRUE)
@@ -1427,5 +1431,10 @@ function(input, output, session) {
                      "The ocean's interior carbon and \u03b4\u00b9\u00b3C"),
       check.names = FALSE)
   }, striped = TRUE, width = "100%")
+
+  # ---- deep links and downloads (2026-10-20; app/R/links.R, app/R/downloads.R) ----
+  links <- app_links_server(input, session)
+  app_dl_server(output, session, dl_plots, link = links$url,
+                futures = function() list(mode = input$f_mode, yvar = input$f_yvar))
 }
 

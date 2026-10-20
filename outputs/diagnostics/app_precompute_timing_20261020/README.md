@@ -1,6 +1,6 @@
 # A first visit to CarboTope, timed before and after the precompute (2026-10-20)
 
-CHANGELOG 2026-10-20 (b). Before: deploy bundle built from `9cb7701b`. After: deploy bundle built from `1838885e`
+CHANGELOG 2026-10-20 (c). Before: deploy bundle built from `9cb7701b`. After: deploy bundle built from `1838885e`
 (products built at `bff29ab3`). Both bundles were made with `app/make_deploy_bundle.sh` (after: 113 files, 7.2 MB;
 before: 111 files, 4.3 MB). All numbers are from the M4 laptop (load average 2.5–3.5 on 10 cores). Connect Cloud
 was not touched: no redeploy, no load test.
@@ -44,7 +44,7 @@ first page. The largest stages left are `library(ggplot2)` 0.21 s, `ccx_prepare_
 - **Peak memory during start-up** is ~140 MB higher, for the first ~2.5 s: the compiler now runs while the app process
   holds its data (~230 MB), plus the background R process. Before, it ran at the top of `global.R`.
 
-## The pulse lab's display (CHANGELOG 2026-10-20 c, measured on the worktree after `0176015`)
+## The pulse lab's display (CHANGELOG 2026-10-20 d, measured on the worktree after `0176015`)
 
 Marcus ruled the default is drawn with no click and the result grays out when a pulse setting changes.
 `pulse_display_check.py` (three fresh processes; `pulse_display_check.csv`):

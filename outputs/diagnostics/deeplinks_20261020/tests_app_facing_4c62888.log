@@ -1,0 +1,35 @@
+files: 14 
+test-app-downloads.R
+test-app-links.R
+test-app-params-table.R
+test-app-review-copy.R
+test-app-us-spelling.R
+test-app-version.R
+test-plot-text-fits.R
+test-pulse-linearity.R
+test-pulse-ocean-depth.R
+test-review-0916-fixes.R
+test-review-card-numbers.R
+test-review-cards.R
+test-review-precompute.R
+test-ui-year-bounds-lint.R
+Test passed with 10 successes 🥇.
+run-time inputs present: 14/14. OK
+                       file  nb failed skipped error warning
+       test-app-downloads.R 423      0       0     0       0
+           test-app-links.R  35      0       0     0       0
+    test-app-params-table.R  55      0       0     0       0
+     test-app-review-copy.R  88      0       0     0       0
+     test-app-us-spelling.R   9      0       0     0       0
+         test-app-version.R  10      0       0     0       0
+      test-plot-text-fits.R 110      0       0     0       0
+     test-pulse-linearity.R  21      0       0     0       0
+   test-pulse-ocean-depth.R  66      0       0     0       0
+   test-review-0916-fixes.R  24      0       0     0       2
+ test-review-card-numbers.R  26      0       0     0       0
+        test-review-cards.R  76      0       0     0       0
+   test-review-precompute.R  29      0       0     0       0
+ test-ui-year-bounds-lint.R  18      0       0     0       0
+
+TOTAL: 14 files, 990 expectations, 0 failed, 0 errors, 0 skipped, 2 warnings, 1.1 min
+exit 0

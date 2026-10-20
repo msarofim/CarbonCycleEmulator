@@ -41,5 +41,8 @@ mkdir -p "$OUT"
 git -C "$ROOT" archive "$REV" "${SHIP[@]}" | tar -x -C "$OUT"
 printf '%s\n' '# shinyapps.io runs the app at the bundle ROOT; the app lives in app/ and reads the repo root.' \
               'shiny::shinyAppDir("app")' > "$OUT/app.R"
+# The bundle has no .git, so the commit is written down for ccx_git_stamp() (R/provenance.R), which
+# reads this file's first line: the CSV downloads print it (app/R/downloads.R, 2026-10-20).
+git -C "$ROOT" rev-parse "$REV" > "$OUT/FROZEN_FROM_COMMIT.txt"
 echo "bundle: $OUT  (commit $(git -C "$ROOT" rev-parse --short "$REV"); mode file $MODE)"
 echo "files: $(find "$OUT" -type f | wc -l | tr -d ' ')  size: $(du -sh "$OUT" | cut -f1)"

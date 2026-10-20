@@ -1,0 +1,76 @@
+files: 21 
+test-cmap-tie.R
+test-constraint-map-panel.R
+test-constraint-map.R
+test-fair-overlay.R
+test-future-yvar.R
+test-future-span.R
+test-fair-pulse-grid.R
+test-git-stamp-lint.R
+test-git-stamp.R
+test-futures-ribbons.R
+test-imbalance-panel.R
+test-growth-residuals.R
+test-luc-scale.R
+test-mode-file.R
+test-mode-struct-lint.R
+test-luc-regrowth-panel.R
+test-overlay-idiom-lint.R
+test-ocean-climate-card.R
+test-takeaway-arithmetic.R
+test-stylised-takeaway.R
+test-pulse.R
+Test passed with 10 successes 🥳.
+run-time inputs present: 14/14. OK
+fatal: :(exclude)/var/folders/v2/ms445cpj20171v9g678ngbw80000gn/T//RtmpHYAOXU/elsewhere.rds: '/var/folders/v2/ms445cpj20171v9g678ngbw80000gn/T//RtmpHYAOXU/elsewhere.rds' is outside repository at '/private/var/folders/v2/ms445cpj20171v9g678ngbw80000gn/T/RtmpHYAOXU/git stamp (scratch) 760068a22720'
+error: bad signature 0x5a5a5a5a
+fatal: index file corrupt
+fatal: Needed a single revision
+SEEDING w_eq for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_thc for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_enso_l2 for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 18.7.
+     The ancestor held no opinion about this coordinate.
+
+  [test-mode-file] PINNED canonical hilda31w: likelihood -989.3824 on 24 common rows; parent hilda32f -1124.3448 (price +134.9624, RECORDED not gated); control hilda31pe -1123.1607 (+133.7782)
+                        file  nb failed skipped error warning
+             test-cmap-tie.R  47      0       0     0       0
+ test-constraint-map-panel.R  63      0       0     0       0
+       test-constraint-map.R 145      0       0     0       0
+         test-fair-overlay.R  29      0       0     0       0
+      test-fair-pulse-grid.R  35      0       0     0       0
+          test-future-span.R  21      0       0     0       0
+          test-future-yvar.R  35      0       0     0       0
+      test-futures-ribbons.R  87      0       0     0       0
+       test-git-stamp-lint.R   6      0       0     0       0
+            test-git-stamp.R  63      0       0     0       0
+     test-growth-residuals.R  27      0       0     0       0
+      test-imbalance-panel.R  38      0       0     0       0
+   test-luc-regrowth-panel.R  36      0       0     0       0
+            test-luc-scale.R  63      0       0     0       2
+            test-mode-file.R 238      0       0     0       0
+     test-mode-struct-lint.R   5      0       0     0       0
+   test-ocean-climate-card.R  25      0       0     0       0
+   test-overlay-idiom-lint.R   8      0       0     0       0
+                test-pulse.R  28      0       0     0       0
+    test-stylised-takeaway.R  63      0       0     0       0
+  test-takeaway-arithmetic.R  26      0       0     0       0
+
+TOTAL: 21 files, 1088 expectations, 0 failed, 0 errors, 0 skipped, 2 warnings, 0.5 min
+exit 0

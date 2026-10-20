@@ -174,7 +174,7 @@ phone_tab_js <- sprintf("
     sync();
   });", jsonlite::toJSON(APP_TAB_MENU_LABEL, auto_unbox = TRUE))
 
-navbarPage(
+function(request) navbarPage(   # a function of the request: deep links (app/R/links.R, 2026-10-20)
   title = APP_TITLE,
   id = "tabs",
   theme = bs_theme(version = 5, bootswatch = "flatly", base_font = font_google("Inter")),

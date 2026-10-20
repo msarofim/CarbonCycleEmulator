@@ -119,7 +119,7 @@ APP_RELEASE_MODE <- "hilda31w"   # Marcus 2026-10-15: "Beta v1.0 is fine, becaus
 # Marcus 2026-10-15 ("Apply all the app text suggestions"): "three minutes" -> "a minute". Measured 6-8 s cold start for the
 # deploy bundle on the Mac (CHANGELOG 2026-10-15 a); shinyapps.io is NOT measured -- a fresh container also
 # compiles the C++ core. ⚠ Re-time after the first deploy.
-# ⚠ STALE SINCE 2026-10-20 (CHANGELOG 2026-10-20 b), LEFT FOR MARCUS'S WORDING: the first load no longer
+# ⚠ STALE SINCE 2026-10-20 (CHANGELOG 2026-10-20 c), LEFT FOR MARCUS'S WORDING: the first load no longer
 # compiles the model or runs the spin-up before the page appears (the spin-up is read from
 # APP_PRE_FILES$startup, the compile runs in the background), and the pulse lab's default is a stored
 # run of the same model. Laptop cold start to first plot: 6.2-6.5 s before, see CHANGELOG for after.
@@ -474,7 +474,7 @@ app_run_coupled <- function(spin, scenario, years, ...) {
 # 2026-10-20, READ from a product built at the canonical (below).
 # ---------------------------------------------------------------------
 
-# ---- ⭐ PRECOMPUTED AT THE CANONICAL (2026-10-20; CHANGELOG 2026-10-20 b) ----
+# ---- ⭐ PRECOMPUTED AT THE CANONICAL (2026-10-20; CHANGELOG 2026-10-20 c) ----
 # A visitor arriving from a post waited 18-27 s on Connect Cloud's loading page and ~17 s for the
 # pulse lab's default release (CHANGELOG 2026-10-20 a). calibration/build_app_precompute.R stores, at
 # the canonical, the values of the start-up stages below (the spin-up, the historical run, the flux

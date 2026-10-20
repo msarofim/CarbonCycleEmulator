@@ -1,5 +1,5 @@
 # =====================================================================
-# Gate: the C++ core's BACKGROUND BUILD (R/cpp.R ccx_cpp_prebuild(); 2026-10-20, CHANGELOG 2026-10-20 b).
+# Gate: the C++ core's BACKGROUND BUILD (R/cpp.R ccx_cpp_prebuild(); 2026-10-20, CHANGELOG 2026-10-20 c).
 #
 # app/global.R starts the compile in a separate R process and the first run that needs the core waits
 # for it. What must hold:

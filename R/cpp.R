@@ -27,7 +27,7 @@ ccx_load_cpp <- function(quiet = TRUE) {
   invisible(TRUE)
 }
 
-# ---- THE BACKGROUND BUILD (2026-10-20; CHANGELOG 2026-10-20 b) ----
+# ---- THE BACKGROUND BUILD (2026-10-20; CHANGELOG 2026-10-20 c) ----
 # The app compiled the core at every start (1.7-1.8 s of the 4.7 s start-up on the M4, measured
 # 2026-10-20), before the first page could be served. The start-up runs that needed it are now
 # precomputed (app/global.R APP_PRE_*), so global.R starts the compile in a separate R process

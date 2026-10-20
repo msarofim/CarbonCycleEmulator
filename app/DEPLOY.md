@@ -58,10 +58,10 @@ the CarboTope link; (3) push CarboTope with the Substack link. Before the link i
 Until 2026-10-20, start-up compiled the C++ core, ran the 1750 spin-up, one historical
 integration and the box diagram's one-year flux trace, all before the first page was served.
 
-⭐ **Since 2026-10-20 (CHANGELOG 2026-10-20 b) none of that is on the path to the first page:**
+⭐ **Since 2026-10-20 (CHANGELOG 2026-10-20 c) none of that is on the path to the first page:**
 - the spin-up, the historical run and the flux trace are READ from `data/app_startup_precompute.rds`;
 - the pulse lab's default (vvM, 100 GtC, 2050) is read from `data/pulse_default_precompute.rds` and drawn when the
-  tab is opened, with no click (Marcus 2026-10-20, CHANGELOG 2026-10-20 c); changing a pulse setting grays the result
+  tab is opened, with no click (Marcus 2026-10-20, CHANGELOG 2026-10-20 d); changing a pulse setting grays the result
   out until "Release the pulse" computes the new one live;
 - the C++ core compiles in a background R process started by `global.R` (`ccx_cpp_prebuild()`, `R/cpp.R`); the
   first live run waits for it, and any failure falls back to compiling in the app's own process.
