@@ -1,0 +1,12 @@
+PASS  Keeling: _inputs_&tabs="The Keeling Curve"&k_years=[1980,2010]&k_hemi="NH"&k_obs=false  
+PASS  Where does the carbon go: _inputs_&tabs="Where does the carbon go?"&w_years=[1900,2000]  
+PASS  What if, two switches: _inputs_&tabs="What if…?"&c_years=[1950,2020]&c_mech=["enso","volcanic"]  
+PASS  What if, nothing switched off: _inputs_&tabs="What if…?"&c_years=[1850,2024]&c_mech=null  
+PASS  Isotopes: _inputs_&tabs="Isotope fingerprints"&i_years=[1950,2000]&i_hemi="SH"  
+PASS  Futures, Scenarios: _inputs_&tabs="Futures"&f_mode="Scenarios"&f_yvar="gmst"&f_scen=["vvVL","vvH"]&f_fair=true  
+PASS  Futures, Build your own: _inputs_&tabs="Futures"&f_mode="Build your own"&s_kind="to_zero"&s_bg="vvH"&s_zero_year=2080&s_rate=1&f_yvar="co2_ppm"&f_fair=false  
+PASS  Futures, Pulse lab: _inputs_&tabs="Futures"&f_mode="Pulse lab"&p_bg="vvH"&p_gtc=200&p_year=2070&f_yvar="gmst"&f_fair=false  
+PASS  Known issues: _inputs_&tabs="Known issues"  
+PASS  What pins down what: _inputs_&tabs="What pins down what?"&cm_level="parameter"  
+PASS  Under the hood: _inputs_&tabs="Under the hood"  
+11/11 views passed; wrote /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/.claude/worktrees/kind-raman-b05386/outputs/diagnostics/deeplinks_20261020/roundtrip_results.csv
