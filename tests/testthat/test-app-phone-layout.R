@@ -64,7 +64,13 @@ test_that("1. an overflowing legend is refitted until it fits, its guide setting
 test_that("2. above APP_FIT_MAX_PX, and with no live width, the plot comes back untouched", {
   skip_if_no_fit(); e <- .pf_env
   p <- pf_legend_plot(e)
-  pf_at(e, e$APP_FIT_MAX_PX + 1, 380, expect_identical(e$app_fit_plot(p), p))
+  # a legend that overflows even just above the threshold: left alone there, because wide layouts are not
+  # touched (mutation-tested: without the threshold this refits it)
+  wide <- p + guides(colour = guide_legend(nrow = 1))
+  pf_at(e, e$APP_FIT_MAX_PX + 1, 380, {
+    expect_gt(pf_geo(e, wide)$legend_over, 0.5)
+    expect_identical(e$app_fit_plot(wide), wide)
+  })
   e$app_clear_panel_px()
   expect_identical(e$app_fit_plot(p), p)
   expect_identical(e$app_fit_plot("not a plot"), "not a plot")
@@ -90,6 +96,23 @@ test_that("3. a plain y title taller than its panel wraps; a plotmath one is lef
     pm <- mk(e$app_plotmath("CO₂ above the annual mean (ppm)"))
     expect_identical(ggplot2::ggplot_build(e$app_fit_plot(pm))$plot$labels$y,
                      ggplot2::ggplot_build(pm)$plot$labels$y)
+  })
+})
+
+test_that("3b. a subtitle no wrapper handled is wrapped to the plot; one app_subtitle() wrapped is left alone", {
+  skip_if_no_fit(); e <- .pf_env
+  # a What-if driver chart's subtitle: a mechanism's label, drawn as is (plot_driver()); this one reached the
+  # right edge of the 351 px panel on 2026-10-20
+  sub <- "El Ni\u00f1o / La Ni\u00f1a: the Ni\u00f1o 3.4 sea-surface temperature anomaly"
+  mk <- function(s) ggplot(data.frame(x = 1:3, y = 1:3), aes(x, y)) + geom_line() + labs(subtitle = s) +
+    e$theme_ccx()
+  pf_at(e, 351, 300, {
+    expect_gt(e$.fit_text_px(sub, e$SUBTITLE_PT), e$app_text_px("full"))   # the fixture really overflows
+    got <- ggplot2::ggplot_build(e$app_fit_plot(mk(sub)))$plot$labels$subtitle
+    expect_identical(gsub("\n", " ", got, fixed = TRUE), sub)
+    expect_lte(e$.fit_text_px(got, e$SUBTITLE_PT), e$app_text_px("full"))
+    pre <- e$app_subtitle(paste(sub, sub))                                   # already wrapped to this width
+    expect_identical(ggplot2::ggplot_build(e$app_fit_plot(mk(pre)))$plot$labels$subtitle, pre)
   })
 })
 
@@ -122,6 +145,14 @@ test_that("6. the tension chart puts its names above the bars only when they do 
   pf_at(e, 744, 320, expect_false(e$cmap_tension_names_above(d)))
   e$app_clear_panel_px()
   expect_false(e$cmap_tension_names_above(d))     # no live width: the desktop layout
+  # ...and the chart itself follows the rule: thinner bars, names above, on the phone only
+  tn <- list(par = d$par[1:3], up = d$fam[1:3], down = d$fam[4:6], up_pull = d$v[1:3], down_pull = d$v[4:6])
+  local({
+    assign("APP_CMAP_NOTE", "A stand-in note.", envir = e)
+    bar_w <- function() with(ggplot2::ggplot_build(e$plot_constraint_tension(tn))$data[[1]], max(ymax - ymin))
+    pf_at(e, 351, 320, expect_equal(bar_w(), 0.45))
+    pf_at(e, 744, 320, expect_equal(bar_w(), 0.62))
+  })
 })
 
 test_that("7. renderPlotFit() sends every visible plot through app_fit_plot()", {

@@ -399,8 +399,9 @@ app_legend_nrow <- function(keys, panel = "full", pt = SUBTITLE_PT) {
 # mobile_layout_20261020/) 15 of the 25 plots drawn by default clipped one of them -- legends cut at both
 # edges (k_plot, w_partition, i_d14c, f_plot, rv_irf ...), y titles running off the panel (w_af, k_seasonal).
 # ⇒ app_fit_plot() MEASURES THE PLOT AS IT WILL BE DRAWN (ggplotGrob on the device renderPlot has open) and
-# changes only what overflows: legend keys go onto more rows, several legend boxes stack, and a plain-text
-# axis title wraps to the room its panel gives it. A plot that fits comes back untouched.
+# changes only what overflows: legend keys go onto more rows, several legend boxes stack, a plain-text axis
+# title wraps to the room its panel gives it, a title or subtitle no wrapper handled wraps to the plot, and
+# colliding category labels turn on end. A plot that fits comes back untouched.
 # ⚠ It runs only at or below APP_FIT_MAX_PX, the full panel at the 768 px floor where every slot was audited
 # (above): wider layouts are not touched and pay no measuring cost. Called by renderPlotFit() (server.R).
 # ⚠ A plotmath title (CO₂, δ¹³C ...) is an expression and cannot be wrapped; one that overflows is left as is.
@@ -438,6 +439,7 @@ APP_FIT_KEY_GAP_PT <- 2    # vertical gap between legend rows once a legend is r
   # ⚠ The axis-title grobs report a null size, so what a title NEEDS is measured from its text (.fit_text_px).
   ix <- match("xlab-b", lay$name); iy <- match("ylab-l", lay$name)
   list(legend_over = legend_over, legend_room = legend_room,
+       plot_room = x0[nc + 1] - cols[1] - cols[nc],     # titles are placed against the whole plot
        x_room = if (!is.na(ix)) room(lay$l[ix], lay$r[ix]),
        y_room = if (!is.na(iy)) sum(rows[lay$t[iy]:lay$b[iy]]))
 }
@@ -516,18 +518,19 @@ app_fit_plot <- function(p) {
   px <- app_live_panel_px()
   if (is.null(px) || px > APP_FIT_MAX_PX || !inherits(p, "ggplot")) return(p)
   tryCatch({
-    b <- ggplot_build(p)
-    geo <- .fit_geometry(ggplot_gtable(b))
+    b <- ggplot_build(p); g <- ggplot_gtable(b)
+    geo <- .fit_geometry(g)
     # 1. legends: centered on the whole plot rather than the panel, several boxes stacked, keys a little
     #    closer, and as many columns as fit -- estimated from the labels, then checked by rebuilding
+    #    ⚠ The first guess is made without rebuilding: centered on the plot, a legend's room is the plot's
+    #    width inside its margins. Every rebuild costs a full ggplot_build (~0.35 s for the partition chart).
     if (geo$legend_over > 0.5) {
       p <- p + theme(legend.box = "vertical", legend.location = "plot",
                      legend.key.spacing.y = grid::unit(APP_FIT_KEY_GAP_PT, "pt"))
-      b <- ggplot_build(p); geo <- .fit_geometry(ggplot_gtable(b))
-      lay <- if (geo$legend_over > 0.5) .fit_legend_layout(p, b, geo$legend_room)
+      lay <- .fit_legend_layout(p, b, geo$plot_room)
       while (!is.null(lay) && lay$n >= 1L) {
         q <- .fit_legend_cols(p, b, lay$n, lay$byrow); if (is.null(q)) break
-        p <- q; b <- ggplot_build(p); geo <- .fit_geometry(ggplot_gtable(b))
+        p <- q; b <- ggplot_build(p); g <- ggplot_gtable(b); geo <- .fit_geometry(g)
         if (geo$legend_over <= 0.5) break
         lay$n <- lay$n - 1L
       }
@@ -541,8 +544,17 @@ app_fit_plot <- function(p) {
       if (.fit_text_px(lab, pt) > rm_ * APP_TEXT_SAFETY)
         p <- p + do.call(labs, stats::setNames(list(app_wrap_px(lab, rm_ * APP_TEXT_SAFETY, pt)), ax))
     }
+    # 2b. a title or subtitle not already wrapped by app_subtitle() (the What-if driver chart's subtitle is a
+    #     mechanism's label, CCX_MECHANISMS) is wrapped to the plot's width
+    for (sl in c("title", "subtitle")) {
+      lab <- labs_now[[sl]]
+      if (!is.character(lab) || length(lab) != 1L || !nzchar(lab)) next
+      pt <- .fit_axis_title_pt(p, paste0("plot.", sl))
+      if (.fit_text_px(lab, pt) > geo$plot_room * APP_TEXT_SAFETY)
+        p <- p + do.call(labs, stats::setNames(list(app_wrap_px(lab, geo$plot_room * APP_TEXT_SAFETY, pt)), sl))
+    }
     # 3. category labels that collide along a discrete x axis are turned on end
-    if (.fit_x_labels_collide(p, b, ggplot_gtable(b)))
+    if (.fit_x_labels_collide(p, b, g))
       p <- p + theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
     p
   }, error = function(e) {
