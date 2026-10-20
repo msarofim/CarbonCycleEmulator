@@ -1,0 +1,69 @@
+2026-10-20 15:11:53 target https://01a14244-5cc3-1951-7b06-9e2fb07beae3.share.connect.posit.cloud/
+warm-up (not scored): {'n': 1, 'vu': 1, 'connect_s': 1.0477240085601807, 'first_plot_s': 2.5690908432006836, 'pulse_s': 16.17709994316101, 'known_issues_s': 3.040034055709839, 'errors': 0, 'disconnected': False, 'failure': ''}
+N=  1: ok 1/1; first plot median 2.0 max 2.0 s; pulse median 16.7 max 16.7 s; known issues median 3.5 max 3.5 s; disconnects 0; wall 23 s
+N=  5: ok 5/5; first plot median 3.0 max 52.0 s; pulse median 39.9 max 64.7 s; known issues median 26.8 max 51.1 s; disconnects 0; wall 100 s
+N= 10: ok 0/10; first plot median nan max nan s; pulse median nan max nan s; known issues median nan max nan s; disconnects 9; wall 946 s
+   vu 10: RuntimeError: disconnected while waiting for first plot
+   vu 8: RuntimeError: disconnected while waiting for first plot
+   vu 4: RuntimeError: disconnected while waiting for first plot
+   vu 7: RuntimeError: disconnected while waiting for first plot
+   vu 1: RuntimeError: disconnected while waiting for first plot
+   vu 5: RuntimeError: disconnected while waiting for first plot
+   vu 3: RuntimeError: disconnected while waiting for first plot
+   vu 6: RuntimeError: disconnected while waiting for first plot
+   vu 2: RuntimeError: disconnected while waiting for first plot
+   vu 9: TimeoutError: connect not done in 900 s
+N= 20: ok 0/20; first plot median nan max nan s; pulse median nan max nan s; known issues median nan max nan s; disconnects 0; wall 905 s
+   vu 15: TimeoutError: connect not done in 900 s
+   vu 5: TimeoutError: connect not done in 900 s
+   vu 16: TimeoutError: connect not done in 900 s
+   vu 2: TimeoutError: connect not done in 900 s
+   vu 19: TimeoutError: connect not done in 900 s
+   vu 9: TimeoutError: connect not done in 900 s
+   vu 11: TimeoutError: connect not done in 900 s
+   vu 7: TimeoutError: connect not done in 900 s
+   vu 10: TimeoutError: connect not done in 900 s
+   vu 20: TimeoutError: connect not done in 900 s
+   vu 17: TimeoutError: connect not done in 900 s
+   vu 8: TimeoutError: connect not done in 900 s
+   vu 13: TimeoutError: connect not done in 900 s
+   vu 1: TimeoutError: connect not done in 900 s
+   vu 6: TimeoutError: connect not done in 900 s
+   vu 18: TimeoutError: connect not done in 900 s
+   vu 14: TimeoutError: connect not done in 900 s
+   vu 4: TimeoutError: connect not done in 900 s
+   vu 12: TimeoutError: connect not done in 900 s
+   vu 3: TimeoutError: connect not done in 900 s
+N= 30: ok 0/30; first plot median nan max nan s; pulse median nan max nan s; known issues median nan max nan s; disconnects 0; wall 906 s
+   vu 3: TimeoutError: connect not done in 900 s
+   vu 6: TimeoutError: connect not done in 900 s
+   vu 5: TimeoutError: connect not done in 900 s
+   vu 4: TimeoutError: connect not done in 900 s
+   vu 29: TimeoutError: connect not done in 900 s
+   vu 14: TimeoutError: connect not done in 900 s
+   vu 16: TimeoutError: connect not done in 900 s
+   vu 2: TimeoutError: connect not done in 900 s
+   vu 8: TimeoutError: connect not done in 900 s
+   vu 19: TimeoutError: connect not done in 900 s
+   vu 24: TimeoutError: connect not done in 900 s
+   vu 22: TimeoutError: connect not done in 900 s
+   vu 13: TimeoutError: connect not done in 900 s
+   vu 30: TimeoutError: connect not done in 900 s
+   vu 23: TimeoutError: connect not done in 900 s
+   vu 18: TimeoutError: connect not done in 900 s
+   vu 15: TimeoutError: connect not done in 900 s
+   vu 25: TimeoutError: connect not done in 900 s
+   vu 28: TimeoutError: connect not done in 900 s
+   vu 27: TimeoutError: connect not done in 900 s
+   vu 10: TimeoutError: connect not done in 900 s
+   vu 20: TimeoutError: connect not done in 900 s
+   vu 7: TimeoutError: connect not done in 900 s
+   vu 12: TimeoutError: connect not done in 900 s
+   vu 26: TimeoutError: connect not done in 900 s
+   vu 1: TimeoutError: connect not done in 900 s
+   vu 21: TimeoutError: connect not done in 900 s
+   vu 17: TimeoutError: connect not done in 900 s
+   vu 9: TimeoutError: connect not done in 900 s
+   vu 11: TimeoutError: connect not done in 900 s
+wrote /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/loadtest_20261020/loadtest_results.csv
+exit 0

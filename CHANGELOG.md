@@ -2,6 +2,13 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-20 (a) — **Load test of the live app: 5 students at once work (served in turn, last pulse 65 s); 10 at once crash it, and it stayed down ~45 min** (Marcus: "Run the load test."). Record: `outputs/diagnostics/loadtest_20261020/` (README, `loadtest.py`, CSVs, memory traces).
+
+- **Live (revision `01a1467e`, 1 CPU, 1024 MB):** 1 student: first plot 2.0 s, pulse 16.7 s, Known issues 3.5 s. 5: all complete; pulses 18–65 s (one R process, in turn). 10: all connected, then disconnected. 20 and 30: none connected in 900 s; the app came back by 16:03 EDT.
+- **Cause (likely, not read from logs): memory.** Locally the R process goes 281 MB at start-up → ~600 MB after the first full session → 1,128 MB with 10 students → 1,144 MB after all closed; a second pass ends at 1,305 MB (peak 1,500). About 30 MB per active student, plus memory that is not released. Connect Cloud may also start a second R process at 10 connections (`sched_max_conns` 20 × load factor 0.5) in the same 1 GB.
+- **Not separated:** retained session objects vs R's allocator high-water mark (the app has no explicit caches).
+- **Options for Marcus:** more memory and CPUs on the content's settings (Basic allows 8 GB / 2 CPU), then re-test; in code, compute the default pulse once per process (every student's default "Release the pulse" is the same run) and find the per-session growth.
+
 ## 2026-10-17 (a) — **Post 2 hero image: `hero_with_without_emissions.png`** (Marcus: "What should i use as my hero figure for the email?"; recommended Figure 6's CO₂ panel alone; "Yes"). Post 1's hero format: 1456×762 (1.91:1), base size 17, direct labels ("With human emissions: 425 ppm", "Without human emissions: 281 ppm"), measured CO₂ dashed (Law Dome, Mauna Loa), a shorter credit (Figure 6's clipped at this size). Built in `make_figures.R` from Figure 6's data; Figures 1–7 byte-identical. Added at the top of the post's HTML (no caption) and to the README.
 
 ## 2026-10-16 (n) — **Post 2 built for Substack (`outputs/substack_20261016/carbotope2_substack.html` + `README.txt`); Figure 7 carries Schwartz's 40 % marker; figures renamed to the post's numbering** (Marcus: "Add Schwartz's 40% marker to Figure X8 and regenerate it. I think the Revelle & Suess Wiley link is open access. [...] Review again, and if it looks good build the substack formatted version with appropriate figure numbering and other fixes.").
