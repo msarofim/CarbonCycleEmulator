@@ -1,7 +1,9 @@
 # Deep links and downloads: browser check, 2026-10-20
 
-The local app at commit `4c62888` (preview config `ccx-app`, `http://127.0.0.1:7788/`, started from this
-worktree). Not the live app. CHANGELOG 2026-10-20 (b) describes the feature.
+The local app (preview config `ccx-app`, `http://127.0.0.1:7788/`, started from this worktree), first at `4c62888`
+and rerun on the code committed with this file, after the auto-run was removed (Marcus 2026-10-20: a link restores
+the tab and settings and presses no button). The tables are the rerun's. Not the live app. CHANGELOG 2026-10-20 (b)
+describes the feature.
 
 ## Method (`roundtrip.py`, stdlib Python over the Chrome DevTools protocol)
 
@@ -14,8 +16,8 @@ and settings. In the second context it also checks:
 - the address is unchanged after the restore;
 - the first chart's CSV, fetched through its own download link, has the line `# Link to this view: <address>`
   and at least one data row;
-- which button the restored link presses. As drafted (`APP_LINK_AUTORUN`, Marcus's call): "Run it" on Build
-  your own yes, "Release the pulse" no.
+- that a restored link presses no button: "Run it" and "Release the pulse" are both unpressed and their charts
+  are empty (Marcus 2026-10-20).
 
 Three controls show that the comparison can fail. Each opens an altered link and requires a mismatch on exactly
 the settings that were altered: `k_hemi` changed by hand from NH to SH; the What-if link with its `c_mech=null`
@@ -33,7 +35,7 @@ removed; and the bare address with no settings, against the Pulse lab view.
 | What if, nothing switched off | `tabs="What if…?"&c_years=[1850,2024]&c_mech=null` | 3 | 2088 |
 | Isotopes | `tabs="Isotope fingerprints"&i_years=[1950,2000]&i_hemi="SH"` | 3 | 1448 |
 | Futures, Scenarios | `tabs="Futures"&f_mode="Scenarios"&f_yvar="gmst"&f_scen=["vvVL","vvH"]&f_fair=true` | 5 | 1004 |
-| Futures, Build your own | `…&f_mode="Build your own"&s_kind="to_zero"&s_bg="vvH"&s_zero_year=2080&s_rate=1&f_yvar="co2_ppm"&f_fair=false` | 8 | 502 (pressed, chart drawn) |
+| Futures, Build your own | `…&f_mode="Build your own"&s_kind="to_zero"&s_bg="vvH"&s_zero_year=2080&s_rate=1&f_yvar="co2_ppm"&f_fair=false` | 8 | not pressed, chart empty |
 | Futures, Pulse lab | `…&f_mode="Pulse lab"&p_bg="vvH"&p_gtc=200&p_year=2070&f_yvar="gmst"&f_fair=false` | 7 | not pressed, chart empty |
 | Known issues | `tabs="Known issues"` | 1 | 1594 |
 | What pins down what | `tabs="What pins down what?"&cm_level="parameter"` | 2 | 372 |
@@ -58,7 +60,9 @@ link. Any other control opens at its default.
 - The live host. On Connect Cloud, check after the next deploy that the address bar updates. If the app is
   served inside a frame, `updateQueryString()` changes the frame's address, not the visible one.
 - The merged branches. "CarboTope phone layout" replaces the navbar on narrow screens, and `STATE_JS` reads the
-  active tab from `.navbar`. Rerun this check after the merge.
+  active tab from `.navbar`. "CarboTope first visit" shows the precomputed default pulse without a press and greys
+  it when the settings change; the Pulse lab row here (non-default settings) expects an empty chart and may need
+  "greyed default" instead. Rerun this check after both merges.
 - Real downloads through a browser's save dialog. The CSV was fetched by the page's own `fetch()` and by curl.
 
 ## Rerun
@@ -68,10 +72,12 @@ link. Any other control opens at its default.
 python3 -I outputs/diagnostics/deeplinks_20261020/roundtrip.py 9333 http://127.0.0.1:7788/ outputs/diagnostics/deeplinks_20261020/roundtrip_results.csv outputs/diagnostics/deeplinks_20261020/screenshots
 ```
 
-## Tests at `4c62888`
+## Tests
 
-- `tests_app_facing_4c62888.log`: `test-review-*`, `test-app-*`, `test-pulse-*`, `test-plot-text-fits`,
-  `test-ui-year-bounds-lint`: 14 files, 990 passed, 0 failed, 0 skipped, 2 warnings (both in
-  `test-review-0916-fixes.R`, present before this change).
-- `tests_other_app_readers_4c62888.log`: the 21 other files that read the app's code: 1088 passed, 0 failed,
-  2 warnings (the model's start-up-transient warning in `test-luc-scale.R`).
+- `tests_app_facing_no_autorun.log` (the code committed with this file): `test-review-*`, `test-app-*`,
+  `test-pulse-*`, `test-plot-text-fits`, `test-ui-year-bounds-lint`: 14 files, 987 passed, 0 failed, 0 skipped,
+  2 warnings (both in `test-review-0916-fixes.R`, present before this change).
+- `tests_app_facing_4c62888.log`: the same files at `4c62888`, with the auto-run still in: 990 passed, 0 failed.
+- `tests_other_app_readers_4c62888.log`: the 21 other files that read the app's code, at `4c62888`: 1088 passed,
+  0 failed, 2 warnings (the model's start-up-transient warning in `test-luc-scale.R`). None of them reads
+  `app/R/links.R`, the only file the removal changed beyond one line of `app/R/downloads.R`.

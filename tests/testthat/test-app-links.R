@@ -106,7 +106,7 @@ test_that("1. every input in ui.R travels in a link or is listed as not carried;
   })
 })
 
-test_that("2. a link carries the open tab's settings and its pill's, and nothing else", {
+test_that("2. a link carries the open tab's settings and its pill's, and nothing else; it presses no button", {
   skip_if_no_app_lk()
   app <- suppressMessages(shiny::shinyAppDir(.lk_app_dir))
   shiny::testServer(app, {
@@ -122,15 +122,15 @@ test_that("2. a link carries the open tab's settings and its pill's, and nothing
                     c("tabs", "f_mode", "f_yvar", "f_fair", "s_kind", "s_zero_year", "s_rate", "s_bg"))
     expect_setequal(keep(list(tabs = A("RV_TAB_TITLE"))), "tabs")
     expect_setequal(keep(list()), "tabs")
-    # the buttons a restored link presses follow APP_LINK_AUTORUN, and only on the Futures tab
-    pr <- A("app_link_presses")
-    expect_identical(pr(list(tabs = "Futures", f_mode = "Pulse lab"), c(build = TRUE, pulse = FALSE)), character(0))
-    expect_identical(pr(list(tabs = "Futures", f_mode = "Pulse lab"), c(build = TRUE, pulse = TRUE)), "p_go")
-    expect_identical(pr(list(tabs = "Futures", f_mode = "Build your own"), c(build = TRUE, pulse = FALSE)), "s_go")
-    expect_identical(pr(list(tabs = "The Keeling Curve", f_mode = "Pulse lab"), c(build = TRUE, pulse = TRUE)), character(0))
-    # the buttons are never carried: a click count is not a setting
+    # the buttons are never carried: a click count is not a setting, and a link never presses one
+    # (Marcus 2026-10-20). Every button ui.R draws is in APP_LINK_NOT_CARRIED.
     expect_false(any(names(A("APP_LINK_NOT_CARRIED")) %in% unlist(A("app_link_inputs")())))
-    expect_setequal(names(A("APP_LINK_NOT_CARRIED")), A("APP_LINK_BUTTON"))
+    btn <- unlist(lapply(.lk_calls(.lk_ui), function(e)
+      if (.lk_fn(e) %in% c("actionButton", "actionLink") && is.character(e[[2]])) e[[2]]))
+    expect_setequal(names(A("APP_LINK_NOT_CARRIED")), btn)
+    # ...and no code path presses one: the server half sends no message and the page has no handler
+    lk_src <- paste(readLines(file.path(.lk_app_dir, "R", "links.R"), warn = FALSE), collapse = "\n")
+    expect_false(grepl("sendCustomMessage|\\.click\\(", lk_src))
   })
 })
 

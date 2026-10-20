@@ -571,7 +571,7 @@ APP_DL_CSS <- "
 #' The two links under a chart
 app_dl_links <- function(id) {
   tagList(
-    singleton(tags$head(tags$style(HTML(APP_DL_CSS)), app_link_head())),
+    singleton(tags$head(tags$style(HTML(APP_DL_CSS)))),
     div(class = "ccx-dl", APP_DL_LEAD, " ",
         downloadLink(paste0(id, "_csv"), APP_DL_LABEL_CSV), " · ",
         downloadLink(paste0(id, "_png"), APP_DL_LABEL_PNG)))

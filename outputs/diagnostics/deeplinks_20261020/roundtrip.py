@@ -5,7 +5,7 @@ pill and the radio/checkboxes; the sliders' and menus' own JavaScript APIs), wai
 and record what the page shows. Then open that address in a FRESH browser context (own cookies and storage,
 like a second person) and require the same tab, pill and settings. Also checked there: the address stays the
 same after the restore; the chart's CSV download carries the link in its header; which button a restored link
-presses (APP_LINK_AUTORUN as drafted: "Build your own" yes, "Pulse lab" no).
+presses: none (Marcus 2026-10-20: a link restores the tab and settings only).
 CONTROLS give the comparison its power: a link with one setting changed by hand, and the bare address with no
 settings, must each come back DIFFERENT from the view that was set, on exactly the settings changed. Stdlib only.
 
@@ -131,7 +131,7 @@ VIEWS = [
      ["tab", "pill", "f_scen", "f_yvar", "f_fair", "f_fair_label"], "f_plot", None),
     ("Futures, Build your own", [click_tab("Futures"), click_pill("Build your own"), select("s_kind", "to_zero"),
                                  slider("s_zero_year", 2080), select("s_bg", "vvH"), radio("f_yvar", "co2_ppm")],
-     ["tab", "pill", "s_kind", "s_zero_year", "s_bg", "f_yvar"], "f_plot", ("s_go", True)),
+     ["tab", "pill", "s_kind", "s_zero_year", "s_bg", "f_yvar"], None, ("s_go", False)),
     ("Futures, Pulse lab", [click_tab("Futures"), click_pill("Pulse lab"), select("p_bg", "vvH"), slider("p_gtc", 200),
                             slider("p_year", 2070), radio("f_yvar", "gmst")],
      ["tab", "pill", "p_bg", "p_gtc", "p_year", "f_yvar", "f_fair_label"], None, ("p_go", False)),
