@@ -1,0 +1,148 @@
+"stage","line","s","label","total_since_R_start"
+"library(shiny)",15,0.119,"before1",4.777
+"library(bslib)",16,0.037,"before1",4.777
+"library(ggplot2)",17,0.188,"before1",4.777
+"APP_ROOT <- normalizePath(file.path(dirname(getwd()), basename(getwd()",19,0,"before1",4.777
+".find_root <- function() {",23,0,"before1",4.777
+"CCX_ROOT <- .find_root()",31,0.001,"before1",4.777
+"for (f in list.files(file.path(CCX_ROOT, ""R""), pattern = ""\\.R$"", full",32,0.037,"before1",4.777
+"ccx_load_cpp()",35,1.801,"before1",4.777
+"APP_TITLE        <- ""CarboTope""",49,0,"before1",4.777
+"APP_SUBTITLE     <- ""A calibrated carbon-cycle model you can take apar",50,0,"before1",4.777
+"APP_HIST_YEARS   <- c(1750, max(readRDS(file.path(CCX_ROOT, ""data"",",57,0.00099999999999989,"before1",4.777
+"APP_FUTURE_YEARS <- c(1750, 2150)",69,0,"before1",4.777
+"APP_FUTURE_VIEW  <- c(1900, 2150)",70,0,"before1",4.777
+"APP_PULSE_YEARS  <- c(1750, 2300)",71,0,"before1",4.777
+"APP_AUTHOR       <- ""Marcus C. Sarofim""",76,0,"before1",4.777
+"APP_VERSION      <- ""v1.0""",91,0,"before1",4.777
+"APP_STAGE        <- ""beta""",92,0,"before1",4.777
+"APP_RELEASE_NAME <- paste(toupper(APP_STAGE), APP_VERSION, APP_TITLE)",93,0,"before1",4.777
+"APP_RELEASE_MODE <- ""hilda31w""",94,0,"before1",4.777
+"APP_WARMUP_NOTE  <- paste(""First load compiles the model and runs a 17",115,0,"before1",4.777
+"APP_FEEDBACK_URL <- ""https://thesaraphreport.substack.com/p/the-debut-",128,0,"before1",4.777
+"APP_REPO_URL     <- ""https://github.com/msarofim/CarbonCycleEmulator""",131,0,"before1",4.777
+"APP_FEEDBACK_HOW <- paste(""Comments are public on Substack. Be specifi",133,0,"before1",4.777
+"app_link_ok <- function(u) is.character(u) && length(u) == 1L &&",139,0,"before1",4.777
+"APP_SCENARIOS <- c(",149,0,"before1",4.777
+"APP_SCENARIO_COMPARE <- c(""vvL"", ""vvM"", ""vvH"")",158,0,"before1",4.777
+"APP_SCENARIO_BG      <- ""vvM""",159,0,"before1",4.777
+"APP_SCENARIO_SRC <- paste(",160,0,"before1",4.777
+"APP_LUC_SMOOTH_YR <- 11",176,0,"before1",4.777
+"APP_PULSE_EMIS_METHOD <- ""constant""",197,0,"before1",4.777
+"APP_PULSE_GtC_DEFAULT <- 100",198,0,"before1",4.777
+"APP_PULSE_GTC_RANGE   <- c(10, 500, 10)",199,0,"before1",4.777
+"APP_PULSE_YEAR_RANGE  <- c(2030, 2100, 10)",200,0,"before1",4.777
+"APP_PULSE_YEAR_DEFAULT <- 2050",201,0,"before1",4.777
+"APP_FUTURE_YVARS <- c(""CO₂"" = ""co2_ppm"", ""Temperature"" = ""gmst"")",211,0,"before1",4.777
+"APP_FUTURE_YVAR_DEFAULT <- ""co2_ppm""",212,0,"before1",4.777
+"app_params <- local({",217,0.103,"before1",4.777
+"APP_PARAMS     <- app_params$p",387,0,"before1",4.777
+"APP_BOMB_TOTAL <- app_params$bomb_total",388,0,"before1",4.777
+"APP_LUC_SCALE  <- app_params$luc_scale",389,0,"before1",4.777
+"APP_REP_DC     <- app_params$rep_dC",391,0,"before1",4.777
+"APP_SPINUP_LABEL <- app_params$spinup_label",396,0,"before1",4.777
+"APP_GATED_FIT  <- app_params$gated_fit",398,0,"before1",4.777
+"APP_IMB_SHARES <- app_params$imb_shares",399,0,"before1",4.777
+"APP_LIK_ONLY   <- app_params$lik_only",400,0,"before1",4.777
+"APP_FITTED_NAMES <- app_params$fitted_names",402,0,"before1",4.777
+"APP_HELD_NAMES   <- app_params$held_names",403,0,"before1",4.777
+"app_spinup <- ccx_spinup_from_label(APP_SPINUP_LABEL)",404,0,"before1",4.777
+"app_build_forcing <- function(scenario, years, ...) {",413,0,"before1",4.777
+"app_run_coupled <- function(spin, scenario, years, ...) {",441,0,"before1",4.777
+"APP_SPIN <- app_spinup(APP_PARAMS)",456,0.729,"before1",4.777
+"APP_OBS  <- ccx_prepare_obs()",457,0.093,"before1",4.777
+"app_hist <- local({",459,0.093,"before1",4.777
+"APP_HIST <- app_hist",466,0,"before1",4.777
+"APP_FLUX <- local({",480,1.373,"before1",4.777
+"APP_FLUX_NOW <- APP_FLUX[nrow(APP_FLUX), ]",490,0,"before1",4.777
+"APP_GCB <- as.data.frame(readRDS(file.path(CCX_ROOT, ""data"", ""gcb_budg",492,0,"before1",4.777
+"APP_OBS_GROWTH <- local({",503,0,"before1",4.777
+"APP_EMIS_HIST <- as.data.frame(",508,0,"before1",4.777
+"APP_SCEN_EMIS <- as.data.frame(",510,0.00100000000000033,"before1",4.777
+"stopifnot(setequal(unique(APP_SCEN_EMIS$scenario), APP_SCENARIOS))",512,0,"before1",4.777
+"APP_RIBBONS_FILE <- file.path(CCX_ROOT, ""data"", ""futures_ribbons.rds"")",522,0,"before1",4.777
+"APP_RIBBONS_HOLD <- NULL",544,0,"before1",4.777
+"APP_RIBBONS <- local({",545,0.0139999999999993,"before1",4.777
+"APP_RIBBON_NOTE <- if (isTRUE(APP_RIBBONS$ok)) with(APP_RIBBONS$proven",562,0.00100000000000033,"before1",4.777
+"APP_RIBBON_YVARS <- ""co2_ppm""",576,0,"before1",4.777
+"APP_RIBBON_NOTE_TEMP <- paste(",580,0,"before1",4.777
+"app_ribbon_note <- function(yvar)",584,0,"before1",4.777
+"app_future_bands <- function(scen_ids, yvar) {",589,0,"before1",4.777
+"APP_CMAP_TAB      <- ""What pins down what?""",621,0,"before1",4.777
+"APP_CMAP_HEADING  <- ""Which parts of the model have the most influence",622,0,"before1",4.777
+"APP_CMAP_TENSION_HEADING <- ""Where the measurements disagree""",623,0,"before1",4.777
+"APP_REGROWTH_HEADING  <- ""Forest regrowth, on its own""",624,0,"before1",4.777
+"REGROWTH_LEVEL_TOL    <- 0.15",629,0,"before1",4.777
+"REGROWTH_DECADE_MIN_N <- 5L",630,0,"before1",4.777
+"APP_IMBALANCE_HEADING <- ""Is the model's land sink too high?""",631,0,"before1",4.777
+"takeaway <- function(...) div(class = ""takeaway"", ...)",638,0,"before1",4.777
+"MECH_LABEL_KEEP_CASE <- c(""El Niño"", ""CO₂"", ""Revelle"")",655,0,"before1",4.777
+"app_mech_inline <- function(lb) {",656,0,"before1",4.777
+"app_mech_list <- function(off, sentence_start = FALSE) {",664,0,"before1",4.777
+"TAKEAWAY_PPM_RESOLUTION <- 0.5",677,0,"before1",4.777
+"app_mech_key <- function(off) {",680,0,"before1",4.777
+"info_box <- function(title, ...) {",686,0,"before1",4.777
+"APP_CMAP_FILE <- file.path(CCX_ROOT, ""data"", ""constraint_map.rds"")",701,0,"before1",4.777
+"APP_CMAP_LOAD <- local({",702,0.00599999999999934,"before1",4.777
+"APP_CMAP     <- APP_CMAP_LOAD$cm",713,0,"before1",4.777
+"APP_CMAP_WHY <- APP_CMAP_LOAD$why",714,0,"before1",4.777
+"APP_CMAP_NOTE <- paste(",721,0,"before1",4.777
+"APP_CMAP_STEP_DETAIL <- paste(",725,0,"before1",4.777
+"APP_CMAP_MODULE_ROW_TEXT <- c(gcb_ocean_enso_slope = ""how strongly the",734,0,"before1",4.777
+"app_cmap_module_note <- function(cm = APP_CMAP) {",735,0,"before1",4.777
+"APP_CMAP_OF_PAR <- if (is.null(APP_CMAP)) NULL else {",751,0,"before1",4.777
+"app_cmap_tensions <- function(cm = APP_CMAP, n = 6L) {",764,0,"before1",4.777
+"APP_LUC_SPLIT <- local({",784,0,"before1",4.777
+"APP_LUC_SPLIT_OBS <- if (is.null(APP_LUC_SPLIT)) NULL else APP_LUC_SPL",797,0,"before1",4.777
+"APP_LUC_SPLIT_NOTE <- if (is.null(APP_LUC_SPLIT)) NULL else paste(",804,0,"before1",4.777
+"APP_SPLICE_YEAR <- max(APP_EMIS_HIST$year)",814,0,"before1",4.777
+"stopifnot(APP_HIST_YEARS[2] == APP_SPLICE_YEAR)",816,0,"before1",4.777
+"APP_SPLICE_NOTE <- sprintf(paste(",821,0,"before1",4.777
+"app_splice_history <- function(em, scenario) {",842,0,"before1",4.777
+"APP_FAIR <- tryCatch(",863,0.00199999999999978,"before1",4.777
+"APP_FAIR_PULSE_FILE <- ""fair_pulse_grid.rds""",874,0,"before1",4.777
+"APP_FAIR_PULSE_LOAD <- local({",875,0.00300000000000011,"before1",4.777
+"APP_FAIR_PULSE <- APP_FAIR_PULSE_LOAD$d",886,0,"before1",4.777
+"app_fair_pulse_why <- function(bg, year, gtc) {",888,0,"before1",4.777
+"app_fair_pulse <- function(bg, year, gtc) {",899,0,"before1",4.777
+"APP_PULSE_SHAPE_NOTE <- paste(",914,0,"before1",4.777
+"APP_FAIR_PULSE_LAB_FMT <- c(band = ""%s, %d-configuration mean (5\u2013",925,0,"before1",4.777
+"APP_FAIR_PULSE_OFFGRID_FMT <- c(",928,0,"before1",4.777
+"APP_FAIR_CHECK_LAB_SCEN  <- ""Compare with standard FaIR""",935,0,"before1",4.777
+"APP_FAIR_CHECK_LAB_PULSE <- ""Compare with FaIR (%g GtC pulse only)""",936,0,"before1",4.777
+"app_fair_check_label <- function(mode) {",937,0,"before1",4.777
+"APP_FAIR_PULSE_NOTE <- paste(""FaIR is shown for the same pulse on the ",943,0,"before1",4.777
+"APP_CMAP_TIE_LOST_MAX <- 0.05",975,0,"before1",4.777
+"APP_CMAP_TIE_SRC <- ""share of 100 MCMC posterior draws (hilda31w, 4 ch",976,0,"before1",4.777
+"APP_CMAP_STAB_FILE <- file.path(CCX_ROOT, ""data"", ""constraint_map_stab",977,0,"before1",4.777
+"APP_CMAP_STAB <- local({",978,0.00400000000000045,"before1",4.777
+"app_cmap_holder_phrase <- function(row, lost_share, lost_max = APP_CMA",993,0,"before1",4.777
+"APP_FAIR_LAB  <- ""standard FaIR (dashed)""",1020,0,"before1",4.777
+"APP_FAIR_NOTE <- paste(",1029,0,"before1",4.777
+"app_fair_overlay <- function(scenarios, yvar) {",1055,0,"before1",4.777
+"app_run_mechanisms <- function(off = character(), years = APP_HIST_YEA",1080,0,"before1",4.777
+"app_year_mask <- function(t, year) {",1108,0,"before1",4.777
+"app_annual_mean_of <- function(t, v, year) mean(v[app_year_mask(t, yea",1114,0,"before1",4.777
+"app_scenario_span <- function(rs) {",1119,0,"before1",4.777
+"app_keeling_numbers <- function(out, obs_mlo, rep_dC, start_year = 195",1135,0,"before1",4.777
+"TAIL_DT_FLAT  <- 0.05",1154,0,"before1",4.777
+"TAIL_ERF_FLAT <- 0.05",1155,0,"before1",4.777
+"app_stylised_emissions <- function(kind, years, to_zero_year = 2060,",1163,0,"before1",4.777
+"APP_PULSE_LIN_SIZES   <- c(10, 500)",1223,0,"before1",4.777
+"APP_PULSE_LIN_SPREAD  <- 2.1",1224,0,"before1",4.777
+"APP_PULSE_LIN_HORIZON <- 100L",1225,0,"before1",4.777
+"APP_PULSE_LIN_SRC     <- ""calibration/diag_pulse_vs_tcre.R, 2026-10-13",1226,0,"before1",4.777
+"APP_PULSE_PER1000_BY_HORIZON <- c(`20` = 1.43, `50` = 1.36, `100` = 1.",1245,0,"before1",4.777
+"APP_PULSE_PER1000_ABOUT <- 1.4",1250,0,"before1",4.777
+"APP_PULSE_PER1000_ABOUT_TOL <- 0.1",1255,0,"before1",4.777
+"app_stylised_tail_clause <- function(kind, rate_pct, emissions, e0, cl",1258,0,"before1",4.777
+"APP_ERF_RANGE <- ccx_climate_module()$co2_erf_range",1346,0,"before1",4.777
+"app_erf_range_note <- function(cls, rng = APP_ERF_RANGE,",1356,0,"before1",4.777
+"app_cumulative_emissions <- function(F) {",1384,0,"before1",4.777
+"source R/ocean_depth.R",NA,0.00100000000000033,"before1",4.777
+"source R/params_meta.R",NA,0.00100000000000033,"before1",4.777
+"source R/plots_review.R",NA,0.000999999999999446,"before1",4.777
+"source R/plots.R",NA,0.0330000000000004,"before1",4.777
+"source R/review.R",NA,0.00199999999999978,"before1",4.777
+"source ui.R",NA,0.0439999999999996,"before1",4.777
+"source server.R",NA,0.00200000000000067,"before1",4.777

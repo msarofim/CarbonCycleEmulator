@@ -2,9 +2,11 @@
 # global.R -- app startup. Runs ONCE per R process, before any session.
 #
 # Deployment target is shinyapps.io, so this has to stay lean: no plotly, no DT,
-# no shinyWidgets. shiny + bslib + ggplot2 only. The C++ core is compiled here at
-# startup (~20 s cold), which buys a 479x speedup and makes every interaction a
-# live model run rather than a lookup into precomputed output.
+# no shinyWidgets. shiny + bslib + ggplot2 only. The C++ core is compiled at
+# startup, which buys a 479x speedup and makes every interaction a live model run.
+# Since 2026-10-20 it compiles in a BACKGROUND process (ccx_cpp_prebuild(), R/cpp.R)
+# and the start-up runs and the pulse lab's default are read from products built at
+# the canonical (APP_PRE_* below), so the first page no longer waits for either.
 #
 # THE PARAMETER SET IS NOT A DETAIL. Whatever this app draws, it draws with one
 # specific parameter vector, and the honest thing is to say which and how far it
@@ -32,7 +34,12 @@ CCX_ROOT <- .find_root()
 for (f in list.files(file.path(CCX_ROOT, "R"), pattern = "\\.R$", full.names = TRUE))
   source(f)
 
-ccx_load_cpp()
+# ⭐ THE C++ CORE COMPILES IN THE BACKGROUND (2026-10-20). Nothing at start-up needs it once the
+# start-up runs are read from APP_PRE_FILES$startup (below), so its 1.7-1.8 s compile (M4) runs in a
+# separate R process while the first page is served; the first live run waits for it, and any
+# failure falls back to the in-process compile (R/cpp.R). options(ccx.cpp_prebuild = FALSE) compiles
+# on first use instead (the precompute builder and the tests set it).
+if (isTRUE(getOption("ccx.cpp_prebuild", TRUE))) ccx_cpp_prebuild()
 
 # ---------------------------------------------------------------------
 # Labels and framing constants. Every title, caption and axis label in the app
@@ -112,7 +119,11 @@ APP_RELEASE_MODE <- "hilda31w"   # Marcus 2026-10-15: "Beta v1.0 is fine, becaus
 # Marcus 2026-10-15 ("Apply all the app text suggestions"): "three minutes" -> "a minute". Measured 6-8 s cold start for the
 # deploy bundle on the Mac (CHANGELOG 2026-10-15 a); shinyapps.io is NOT measured -- a fresh container also
 # compiles the C++ core. ⚠ Re-time after the first deploy.
-APP_WARMUP_NOTE  <- paste("First load compiles the model and runs a 1750 spin-up:",
+# ⚠ STALE SINCE 2026-10-20 (CHANGELOG 2026-10-20 b), LEFT FOR MARCUS'S WORDING: the first load no longer
+# compiles the model or runs the spin-up before the page appears (the spin-up is read from
+# APP_PRE_FILES$startup, the compile runs in the background), and the pulse lab's default is a stored
+# run of the same model. Laptop cold start to first plot: 6.2-6.5 s before, see CHANGELOG for after.
+APP_WARMUP_NOTE  <-paste("First load compiles the model and runs a 1750 spin-up:",
                           "allow up to a minute. After that every panel is a",
                           "live model run, not a stored picture.")
 
@@ -199,6 +210,14 @@ APP_PULSE_GtC_DEFAULT <- 100
 APP_PULSE_GTC_RANGE   <- c(10, 500, 10)   # the pulse-size slider: min, max, step (ui.R)
 APP_PULSE_YEAR_RANGE  <- c(2030, 2100, 10) # the release-year slider: min, max, step (ui.R); the FaIR grid covers it
 APP_PULSE_YEAR_DEFAULT <- 2050
+# ⭐ THE PULSE LAB'S INPUTS, by ui.R id, at the values its controls open on (2026-10-20). This list is
+# the ONE place the tab's inputs are named: server.R reads exactly these (app_pulse_inputs()), the
+# computation sees only them (app_pulse_runs()), and the precomputed default is served only when
+# every one of them equals its value here (app_pulse_is_default()). A new control added to the
+# computation therefore has to be added here, and the default-match check then covers it.
+# test-app-precompute.R checks all three and that ui.R opens on these values.
+APP_PULSE_DEFAULTS <- list(p_bg = APP_SCENARIO_BG, p_year = APP_PULSE_YEAR_DEFAULT,
+                           p_gtc = APP_PULSE_GtC_DEFAULT)
 
 # F4 (Marcus 2026-09-22): "the temperature/CO2 radio button should be present
 # for the Build your own and Pulse lab too." ONE list of choices, named here,
@@ -451,19 +470,79 @@ app_run_coupled <- function(spin, scenario, years, ...) {
 
 # ---------------------------------------------------------------------
 # Startup state. The spinup and the historical run are the same for every
-# session and every default view, so they are computed once here.
+# session and every default view, so they are computed once here -- or, since
+# 2026-10-20, READ from a product built at the canonical (below).
 # ---------------------------------------------------------------------
-APP_SPIN <- app_spinup(APP_PARAMS)
-APP_OBS  <- ccx_prepare_obs()
 
-app_hist <- local({
-  F <- app_build_forcing("historical", APP_HIST_YEARS, prod_c14 = APP_SPIN$prod_c14)
-  r <- ccx_run_fast(APP_SPIN, F)
+# ---- ⭐ PRECOMPUTED AT THE CANONICAL (2026-10-20; CHANGELOG 2026-10-20 b) ----
+# A visitor arriving from a post waited 18-27 s on Connect Cloud's loading page and ~17 s for the
+# pulse lab's default release (CHANGELOG 2026-10-20 a). calibration/build_app_precompute.R stores, at
+# the canonical, the values of the start-up stages below (the spin-up, the historical run, the flux
+# trace) and of the default pulse (app_pulse_lab()), computed by these same functions with the
+# product switched off; the app reads them instead of computing them. The Known-issues tab has done
+# the same since 2026-10-15 (app/R/review.R RV_PRE_*).
+# ⛔ REFUSED, and the app then computes live as before, unless the product was built for this
+# canonical's mode file (name and md5) AND at this build's run inputs (app_pre_inputs(), compared
+# IDENTICAL: the parameter vector, the two forcing parameters, the spin-up, the years, the pulse
+# settings). A code or data change that moves a value at the same inputs is caught by
+# tests/testthat/test-app-precompute.R, which recomputes every value live and requires identity:
+# rebuild the products at every adoption, and whenever that test fails.
+# options(ccx.app_precompute = FALSE) turns the stored values off.
+APP_PRE_FILES <- list(startup = c("data", "app_startup_precompute.rds"),
+                      pulse   = c("data", "pulse_default_precompute.rds"))
+APP_PRE_KEYS  <- list(startup = c("spin", "hist", "flux"), pulse = c("runs", "depth"))
+
+#' The run inputs a product must have been built at, compared identical
+app_pre_inputs <- function(product) {
+  startup <- list(params = APP_PARAMS, bomb_total = APP_BOMB_TOTAL, luc_scale = APP_LUC_SCALE,
+                  spinup_label = APP_SPINUP_LABEL, hist_years = APP_HIST_YEARS)
+  switch(product, startup = startup,
+         pulse = c(startup, list(pulse_inputs = APP_PULSE_DEFAULTS, pulse_years = APP_PULSE_YEARS,
+                                 pulse_emis_method = APP_PULSE_EMIS_METHOD)),
+         stop("app_pre_inputs(): no product '", product, "'"))
+}
+
+#' Why a precompute product cannot be used (character(0) if it can)
+app_pre_problems <- function(x, product, mode_file = ccx_mode_file()) {
+  bad <- character(0)
+  if (!identical(x$provenance$mode, CCX_MODE_CANONICAL))
+    bad <- c(bad, sprintf("it was built for %s, not the canonical %s", format(x$provenance$mode),
+                          CCX_MODE_CANONICAL))
+  if (!identical(x$provenance$mode_md5, unname(tools::md5sum(mode_file))))
+    bad <- c(bad, "its mode file is not the canonical's (md5)")
+  missing <- setdiff(APP_PRE_KEYS[[product]], names(x$values))
+  if (length(missing)) bad <- c(bad, paste("it lacks", paste(missing, collapse = ", ")))
+  want <- app_pre_inputs(product)
+  moved <- names(want)[!vapply(names(want), function(n) identical(x$inputs[[n]], want[[n]]), logical(1))]
+  if (length(moved)) bad <- c(bad, paste("it was built at other run inputs:", paste(moved, collapse = ", ")))
+  bad
+}
+
+#' The stored values of one product; NULL (compute live) when absent, refused or switched off
+app_pre_read <- function(product, file = do.call(file.path, c(list(CCX_ROOT), as.list(APP_PRE_FILES[[product]])))) {
+  if (!isTRUE(getOption("ccx.app_precompute", TRUE))) return(NULL)
+  if (!file.exists(file)) {
+    message("app: no precomputed ", product, " values in this build; computing them live")
+    return(NULL)
+  }
+  x <- tryCatch(readRDS(file), error = function(e) NULL)
+  bad <- if (is.null(x)) "it cannot be read" else app_pre_problems(x, product)
+  if (length(bad)) {
+    message("app: precomputed ", product, " values refused (", paste(bad, collapse = "; "),
+            "); computing them live")
+    return(NULL)
+  }
+  x$values
+}
+
+#' The historical run every tab draws (computed at start-up when the product is refused)
+app_hist_run <- function(spin) {
+  F <- app_build_forcing("historical", APP_HIST_YEARS, prod_c14 = spin$prod_c14)
+  r <- ccx_run_fast(spin, F)
   r$out$co2_global <- (r$out$co2_NH + r$out$co2_SH) / 2
   r$forcing <- F              # F1: the driver panel's unswitched line
   r
-})
-APP_HIST <- app_hist
+}
 
 # Annual flux trace for the box diagram and the turnover-time readout -- the only
 # place the app learns that photosynthesis is ~70 GtC/yr against ~11 GtC/yr of
@@ -477,16 +556,22 @@ APP_HIST <- app_hist
 # month, so the C++ core runs to the traced year and the R core continues from its
 # state, carrying the ENSO history and T_deep -- the continuation test-enso-lag.R
 # SEGMENT proves equal to the unsplit run, and test-flux-trace-exact.R runs.
-APP_FLUX <- local({
-  F <- app_build_forcing("historical", APP_HIST_YEARS, prod_c14 = APP_SPIN$prod_c14)
+app_flux_trace <- function(spin) {
+  F <- app_build_forcing("historical", APP_HIST_YEARS, prod_c14 = spin$prod_c14)
   k <- which(floor(F$t + 1e-9) == APP_HIST_YEARS[2])[1] - 1L
   F1 <- F[seq_len(k), ]; F2 <- F[(k + 1L):nrow(F), ]
-  sp <- APP_SPIN
-  sp$y <- ccx_run_fast(APP_SPIN, F1)$state
-  sp$enso_hist <- ccx_enso_hist_after(F1$enso, APP_SPIN$enso_hist)
-  if (ccx_mix_on(sp$params)) sp$tdeep0 <- ccx_mix_tdeep_after(F1$gmst, F1$t, sp$params, APP_SPIN$tdeep0)
+  sp <- spin
+  sp$y <- ccx_run_fast(spin, F1)$state
+  sp$enso_hist <- ccx_enso_hist_after(F1$enso, spin$enso_hist)
+  if (ccx_mix_on(sp$params)) sp$tdeep0 <- ccx_mix_tdeep_after(F1$gmst, F1$t, sp$params, spin$tdeep0)
   ccx_flux_annual(ccx_run(sp, F2, fluxes = TRUE, flux_method = "rk4")$fluxes)
-})
+}
+
+APP_STARTUP_PRE <- app_pre_read("startup")
+APP_SPIN <- if (is.null(APP_STARTUP_PRE)) app_spinup(APP_PARAMS) else APP_STARTUP_PRE$spin
+APP_OBS  <- ccx_prepare_obs()
+APP_HIST <- if (is.null(APP_STARTUP_PRE)) app_hist_run(APP_SPIN) else APP_STARTUP_PRE$hist
+APP_FLUX <- if (is.null(APP_STARTUP_PRE)) app_flux_trace(APP_SPIN) else APP_STARTUP_PRE$flux
 APP_FLUX_NOW <- APP_FLUX[nrow(APP_FLUX), ]
 
 APP_GCB <- as.data.frame(readRDS(file.path(CCX_ROOT, "data", "gcb_budget.rds"))$budget)
@@ -510,6 +595,108 @@ APP_EMIS_HIST <- as.data.frame(
 APP_SCEN_EMIS <- as.data.frame(
   readRDS(file.path(CCX_ROOT, "data", "vv_emissions.rds")))
 stopifnot(setequal(unique(APP_SCEN_EMIS$scenario), APP_SCENARIOS))
+
+# ---- THE PULSE LAB'S RUNS (moved here from server.R 2026-10-20, unchanged) ----------------------
+# The three runs "Release the pulse" makes. ⛔ `inp` is the ONLY way an input reaches them: this file
+# has no `input`, so the computation cannot read a control that APP_PULSE_DEFAULTS does not name.
+#' The pulse lab's inputs from a Shiny `input`, by APP_PULSE_DEFAULTS' names; numbers as doubles, so
+#' a slider's integer 100 and the default's 100 are the same input
+app_pulse_inputs <- function(input) {
+  lapply(stats::setNames(nm = names(APP_PULSE_DEFAULTS)), function(n) {
+    v <- input[[n]]
+    if (is.numeric(v)) as.numeric(v) else v
+  })
+}
+
+#' The base, pulse and tagged runs for one set of pulse-lab inputs, computed live
+app_pulse_runs <- function(inp) {
+  yrs <- APP_PULSE_YEARS
+  bg <- APP_SCEN_EMIS[APP_SCEN_EMIS$scenario == inp$p_bg, ]
+  y <- seq(yrs[1], yrs[2])
+  base_em <- data.frame(
+    year = y,
+    fossil_GtC = stats::approx(bg$year, bg$fossil_GtC, xout = y, rule = 2)$y,
+    luc_GtC    = stats::approx(bg$year, bg$luc_GtC,    xout = y, rule = 2)$y)
+  pulse_em <- base_em
+  # Released over a single year, so the pulse size is exactly what the slider
+  # says once the annual-mean-conserving interpolation has run.
+  pulse_em$fossil_GtC[pulse_em$year == inp$p_year] <-
+    pulse_em$fossil_GtC[pulse_em$year == inp$p_year] + inp$p_gtc
+  list(
+    # ⚠ BOTH arms carry APP_PULSE_EMIS_METHOD, or the pair would differ by the
+    # interpolation as well as by the pulse -- which is the one thing this
+    # tab's difference is not allowed to contain.
+    # keep_forcing (2026-10-16): the partition panels restart each run from saved states to
+    # split the ocean by depth (app/R/ocean_depth.R), so they need the table it integrated
+    base  = app_run_coupled(APP_SPIN, inp$p_bg, yrs, inp$p_bg,
+                            emissions = base_em,
+                            interp_method = APP_PULSE_EMIS_METHOD, keep_forcing = TRUE),
+    pulse = app_run_coupled(APP_SPIN, inp$p_bg, yrs, inp$p_bg,
+                            emissions = pulse_em,
+                            interp_method = APP_PULSE_EMIS_METHOD, keep_forcing = TRUE),
+    # Marcus 2026-10-12 ("Side by side in pulse lab"): the SAME pulse run with the pulse's own
+    # carbon tagged by 14C (R/c14_tag.R). Passive, so its carbon and climate are the pulse run's;
+    # only where the tagged atoms are differs. ~0.6 s.
+    tagged = app_run_coupled(APP_SPIN, inp$p_bg, yrs, inp$p_bg,
+                             emissions = pulse_em,
+                             interp_method = APP_PULSE_EMIS_METHOD,
+                             c14_tag_base = base_em, keep_forcing = TRUE),
+    gtc = inp$p_gtc, year = inp$p_year, bg = inp$p_bg)
+}
+
+#' Whether a set of pulse-lab inputs is EXACTLY the default: the same names as APP_PULSE_DEFAULTS
+#' and every value identical. Anything else (another value, a missing or an extra input) is not.
+app_pulse_is_default <- function(inp, defaults = APP_PULSE_DEFAULTS) {
+  setequal(names(inp), names(defaults)) && length(inp) == length(defaults) &&
+    all(vapply(names(defaults), function(n) identical(inp[[n]], defaults[[n]]), logical(1)))
+}
+
+APP_PRE_PULSE <- new.env(parent = emptyenv())
+#' The precomputed default pulse, read and checked once per process on first use (not at start-up:
+#' it is 2 MB and most visitors never open the tab); NULL when absent, refused or switched off
+app_pulse_precomputed <- function() {
+  if (!isTRUE(getOption("ccx.app_precompute", TRUE))) return(NULL)
+  if (!exists("values", envir = APP_PRE_PULSE, inherits = FALSE))
+    assign("values", app_pre_read("pulse"), envir = APP_PRE_PULSE)
+  get("values", envir = APP_PRE_PULSE, inherits = FALSE)
+}
+
+#' The stored default result in the shape app_pulse_runs() returns, plus its ocean-by-depth split as
+#' `depth` (which server.R's pulse_depth() takes instead of restarting the runs); NULL without a product
+app_pulse_default_result <- function() {
+  pre <- app_pulse_precomputed()
+  if (is.null(pre)) NULL else c(pre$runs, list(depth = pre$depth))
+}
+
+#' What "Release the pulse" shows: the stored default when the inputs are the default and the
+#' product is accepted, the live runs otherwise. The stored runs are the live ones bit for bit
+#' (test-app-precompute.R).
+app_pulse_lab <- function(inp) {
+  if (app_pulse_is_default(inp)) {
+    r <- app_pulse_default_result()
+    if (!is.null(r)) return(r)
+  }
+  app_pulse_runs(inp)
+}
+
+# ---- WHAT THE PULSE LAB SHOWS BEFORE AND BETWEEN CLICKS (Marcus 2026-10-20) -----------------------
+# "If we have the pre-calculated default pulse, I would automatically populate the graph rather than
+# waiting for a click. And then replace it if the pulse options change." Asked what "replace" means,
+# he chose "Grey out, wait for the click". So (server.R): opened at the default inputs, the tab draws
+# the stored result with no click; when any pulse input differs from the inputs of the result on
+# screen, that result is grayed out (APP_PULSE_RESULT_IDS) with APP_PULSE_STALE_NOTE under the
+# button; the click computes as before; set back to the defaults, the stored result is shown again.
+# The pulse inputs are APP_PULSE_DEFAULTS' names. The FaIR box and the CO2/temperature radio change
+# only the VIEW of the same runs, so they do not gray it.
+#' Whether the result on screen was run at other inputs than the controls now hold (FALSE: none shown)
+app_pulse_stale <- function(shown_inp, now_inp) !is.null(shown_inp) && !identical(shown_inp, now_inp)
+# The outputs that draw the pulse lab's result, grayed together (ui.R's ccx_pulse_stale handler): every
+# output that reads pulse_runs() (test-app-precompute.R 11 derives that set from server.R), f_notes for
+# its fitted-range caveat on the run.
+APP_PULSE_RESULT_IDS <- c("f_takeaway", "f_plot", "f_fair_note", "f_partition", "f_pulse_permanence", "f_notes")
+# ⚠ CLAUDE'S DRAFT, FOR MARCUS'S WORDING (2026-10-20).
+APP_PULSE_STALE_NOTE <- paste("These charts are for the previous settings. Press",
+                              "“Release the pulse” to update them.")
 
 # ---- THE FUTURES RIBBONS (Marcus 2026-10-01, review 10-01c B7: "Laplace first, MCMC as the check") ----
 # PRECOMPUTED by calibration/build_futures_ribbons.R and only READ here: the app

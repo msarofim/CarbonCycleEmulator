@@ -773,40 +773,34 @@ function(input, output, session) {
                     names(APP_SCENARIOS)[match(input$s_bg, APP_SCENARIOS)])
   })
 
-  pulse_runs <- eventReactive(input$p_go, {
-    yrs <- APP_PULSE_YEARS
-    bg <- APP_SCEN_EMIS[APP_SCEN_EMIS$scenario == input$p_bg, ]
-    y <- seq(yrs[1], yrs[2])
-    base_em <- data.frame(
-      year = y,
-      fossil_GtC = stats::approx(bg$year, bg$fossil_GtC, xout = y, rule = 2)$y,
-      luc_GtC    = stats::approx(bg$year, bg$luc_GtC,    xout = y, rule = 2)$y)
-    pulse_em <- base_em
-    # Released over a single year, so the pulse size is exactly what the slider
-    # says once the annual-mean-conserving interpolation has run.
-    pulse_em$fossil_GtC[pulse_em$year == input$p_year] <-
-      pulse_em$fossil_GtC[pulse_em$year == input$p_year] + input$p_gtc
-    list(
-      # ⚠ BOTH arms carry APP_PULSE_EMIS_METHOD, or the pair would differ by the
-      # interpolation as well as by the pulse -- which is the one thing this
-      # tab's difference is not allowed to contain.
-      # keep_forcing (2026-10-16): the partition panels restart each run from saved states to
-      # split the ocean by depth (app/R/ocean_depth.R), so they need the table it integrated
-      base  = app_run_coupled(APP_SPIN, input$p_bg, yrs, input$p_bg,
-                              emissions = base_em,
-                              interp_method = APP_PULSE_EMIS_METHOD, keep_forcing = TRUE),
-      pulse = app_run_coupled(APP_SPIN, input$p_bg, yrs, input$p_bg,
-                              emissions = pulse_em,
-                              interp_method = APP_PULSE_EMIS_METHOD, keep_forcing = TRUE),
-      # Marcus 2026-10-12 ("Side by side in pulse lab"): the SAME pulse run with the pulse's own
-      # carbon tagged by 14C (R/c14_tag.R). Passive, so its carbon and climate are the pulse run's;
-      # only where the tagged atoms are differs. ~0.6 s.
-      tagged = app_run_coupled(APP_SPIN, input$p_bg, yrs, input$p_bg,
-                               emissions = pulse_em,
-                               interp_method = APP_PULSE_EMIS_METHOD,
-                               c14_tag_base = base_em, keep_forcing = TRUE),
-      gtc = input$p_gtc, year = input$p_year, bg = input$p_bg)
+  # 2026-10-20: the runs moved to global.R (app_pulse_runs()), which sees only the inputs
+  # APP_PULSE_DEFAULTS names; the default settings are served from the precomputed product
+  # (app_pulse_lab()), anything else is computed live as before.
+  # ⭐ AND THE DEFAULT IS DRAWN WITHOUT A CLICK; A CHANGED SETTING GRAYS THE RESULT OUT (Marcus
+  # 2026-10-20; global.R app_pulse_stale()). `pulse_shown` is the result on screen and the inputs it
+  # was run at; every reader of the result goes through pulse_runs(), as before.
+  pulse_inputs <- reactive(app_pulse_inputs(input))
+  pulse_shown  <- reactiveVal(NULL)
+  observeEvent(input$p_go, {
+    inp <- pulse_inputs()
+    pulse_shown(list(pr = app_pulse_lab(inp), inp = inp))
   })
+  # opened (or set back) at the defaults: the stored result, with no click. Nothing is drawn when the
+  # product is absent or refused; the click then computes it, as before.
+  observe({
+    req(identical(input$f_mode, "Pulse lab"))
+    inp <- pulse_inputs()
+    if (app_pulse_is_default(inp)) {
+      r <- app_pulse_default_result()
+      if (!is.null(r)) pulse_shown(list(pr = r, inp = inp))
+    }
+  })
+  pulse_runs  <- reactive({ s <- pulse_shown(); req(s); s$pr })
+  pulse_stale <- reactive(identical(input$f_mode, "Pulse lab") &&
+                            app_pulse_stale(pulse_shown()$inp, pulse_inputs()))
+  observe(session$sendCustomMessage("ccx_pulse_stale",
+                                    list(stale = pulse_stale(), ids = as.list(APP_PULSE_RESULT_IDS))))
+  output$p_stale_note <- renderUI(if (pulse_stale()) div(class = "caveat", APP_PULSE_STALE_NOTE))
 
   output$f_plot <- renderPlotFit("f_plot", {
     if (identical(input$f_mode, "Pulse lab")) {
@@ -954,14 +948,16 @@ function(input, output, session) {
   })
 
   # F2 (Marcus 2026-09-22): the second pulse panel. Rendered only in the pulse
-  # lab, and only after the user has run one -- pulse_runs() is an eventReactive
-  # on the button, so it does not fire on tab entry.
+  # lab, and only once a result is on screen -- after a click, or (since 2026-10-20)
+  # on opening the tab at the default settings, from the stored result.
   # ⭐ THE OCEAN BY DEPTH (Marcus 2026-10-16, app/R/ocean_depth.R): the three runs restarted
   # once a year from saved states, ~0.7 s each. Its own reactive, so the pulse chart above
   # draws without waiting for it.
+  # The precomputed default carries its split as `depth` (2026-10-20, global.R app_pulse_lab()).
   pulse_depth <- reactive({
     pr <- pulse_runs()
-    app_pulse_depth_runs(APP_SPIN, pr[c("base", "pulse", "tagged")], pr$year)
+    if (!is.null(pr$depth)) pr$depth else
+      app_pulse_depth_runs(APP_SPIN, pr[c("base", "pulse", "tagged")], pr$year)
   })
   output$f_partition <- renderPlotFit("f_partition", {
     req(identical(input$f_mode, "Pulse lab"))

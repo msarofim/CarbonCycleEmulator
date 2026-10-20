@@ -55,8 +55,59 @@ the CarboTope link; (3) push CarboTope with the Substack link. Before the link i
 
 ## Start-up cost — the number a visitor actually pays
 
-Start-up compiles the C++ core, runs the 1750 spin-up, one historical
-integration and the box diagram's one-year flux trace.
+Until 2026-10-20, start-up compiled the C++ core, ran the 1750 spin-up, one historical
+integration and the box diagram's one-year flux trace, all before the first page was served.
+
+⭐ **Since 2026-10-20 (CHANGELOG 2026-10-20 b) none of that is on the path to the first page:**
+- the spin-up, the historical run and the flux trace are READ from `data/app_startup_precompute.rds`;
+- the pulse lab's default (vvM, 100 GtC, 2050) is read from `data/pulse_default_precompute.rds` and drawn when the
+  tab is opened, with no click (Marcus 2026-10-20, CHANGELOG 2026-10-20 c); changing a pulse setting grays the result
+  out until "Release the pulse" computes the new one live;
+- the C++ core compiles in a background R process started by `global.R` (`ccx_cpp_prebuild()`, `R/cpp.R`); the
+  first live run waits for it, and any failure falls back to compiling in the app's own process.
+
+Both products are refused unless built at the canonical's mode-file md5 AND at the build's run inputs (parameter
+vector, forcing parameters, spin-up, years, pulse settings; compared identical). A refused product is not an error:
+the app computes those values live, as before, and logs "precomputed ... values refused". Timed from deploy bundles
+on the M4 (`outputs/diagnostics/app_precompute_timing_20261020/`, three fresh processes each):
+
+| | before (`9cb7701`) | after (`1838885`) |
+|---|---|---|
+| process start → serving | 5.3–5.6 s | 1.5 s |
+| process start → first plot drawn | 6.0–6.3 s | 2.3 s |
+| default "Release the pulse", click → partition drawn | 3.7–3.8 s | 0.5 s |
+| a non-default pulse (200 GtC, live in both) | 3.8–4.0 s | 3.8–3.9 s |
+| Futures tab's first draw, opened right after the first plot | 1.8 s | 2.4–2.6 s (waits for the background compile) |
+| peak memory of the process tree, first 8 s | 458–485 MB | 616–623 MB (the compile overlaps the loaded app) |
+
+⚠ **Connect Cloud is not re-timed** (no redeploy was made). Its 18–27 s loading page also includes the container
+start and package loading, which this does not touch.
+⚠ **The products are computed on the Mac.** On Connect Cloud the live runs use Linux's compiler and libm, so a live
+value there can differ from a stored one at roundoff. `data/review_precompute.rds` has always been in the same
+position. Not measured.
+
+### ⛔ REBUILD AT EVERY ADOPTION (and whenever a precompute test fails)
+
+```bash
+Rscript calibration/build_app_precompute.R
+```
+
+```bash
+Rscript calibration/build_review_precompute.R
+```
+
+Run from the repo root, after the adoption's code is committed (the products record the commit), then commit the
+products. Then run the two gates; both recompute every stored value live and require identity, so they also catch a
+code or data change that moves a value at the same mode file:
+
+```bash
+Rscript -e 'testthat::test_file("tests/testthat/test-app-precompute.R"); testthat::test_file("tests/testthat/test-review-precompute.R")'
+```
+
+Run them before building a deploy bundle too: a stale product at an unchanged mode file is accepted by the app, and
+only these tests notice it.
+
+The rest of this section is the 2026-10-15 record.
 
 ⭐ **Re-timed 2026-10-15, from the deploy bundle itself** (`make_deploy_bundle.sh`, commit `556f4a4`,
 a fresh process each time, so the C++ compile is cold; M4, load average 2.8–3.0 on 10 cores):
@@ -77,15 +128,16 @@ a fresh process each time, so the C++ compile is cold; M4, load average 2.8–3.
 - ⚠ **`APP_WARMUP_NOTE` still says "allow up to three minutes"** — more than 20× the laptop number. Its
   wording is Marcus's; re-word it once the shinyapps.io number is known. The post should say the same.
 
-Everything after start-up is live: a counterfactual rerun is ~60 ms, three
+Everything after start-up is live, except the stored values named above: a counterfactual rerun is ~60 ms, three
 coupled SSP futures ~0.5 s, a matched pulse pair over 1750–2300 ~0.65 s (older measurements). The
-pulse lab's "Release the pulse" drew both of its plots 4.0 s after the click (10-15, bundle).
+pulse lab's "Release the pulse" drew both of its plots 4.0 s after the click (10-15, bundle). Since 2026-10-20 the
+default is drawn 0.5 s after the tab is opened, with no click; other settings take 3.7 s after the click (M4).
 **The "Known issues" tab needs three runs the app does not otherwise make** (a gate
 run to 2025, an ENSO knockout, a 1000-year pulse pair; the card that spun up a second mode was
 retired 2026-10-01). Since 2026-10-15 (bb) their results are PRECOMPUTED in `data/review_precompute.rds`,
 which is refused unless built at the canonical's mode-file md5 (the tab then computes them live, as before).
-**Rebuild it at every adoption** with `calibration/build_review_precompute.R`; `test-review-precompute.R`
-fails until it is. First view on Connect Cloud: 30.7 s live, 4.0 s precomputed (10-15 bb; again 10-16 j).
+**Rebuild it at every adoption** with `calibration/build_review_precompute.R` (see "REBUILD AT EVERY ADOPTION"
+above); `test-review-precompute.R` fails until it is. First view on Connect Cloud: 30.7 s live, 4.0 s precomputed (10-15 bb; again 10-16 j).
 Everything else on that tab is still computed on first view, not at start-up.
 
 ## Hosting limits (shinyapps.io; checked 2026-10-15)
@@ -98,7 +150,8 @@ From Posit's applications guide (docs.posit.co/shinyapps.io/guide/applications/)
 - **Memory:** the default "large" instance allows 1024 MB. Measured 2026-10-15: the app's R process
   held **204 MB** after one full session (every tab, all nine review-card plots, one pulse, one
   build-your-own run).
-- **Bundle:** at most 1 GB on Free/Starter. This bundle is 4.1 MB (108 files).
+- **Bundle:** at most 1 GB on Free/Starter. This bundle is 7.2 MB (113 files; `1838885`, with the two
+  2026-10-20 precompute products, 3 MB of it).
 - **Idle timeout:** 15 minutes by default, after which the next visitor pays a cold start.
 
 From Posit's support article on the Free plan (seen through a search summary; the page itself
@@ -129,8 +182,8 @@ The app reads from the repository root, so the bundle is part of the tree, not j
 | `app.R` (bundle root, generated) | **shinyapps.io runs the app found at the bundle ROOT**, but the app lives in `app/`; this two-line file runs it with `shiny::shinyAppDir("app")` |
 | `app/` | the app. ⚠ Everything in `app/www/` is served publicly at the app's URL. Since 2026-10-15 that is only `sarofim_essenhigh_comment_2011.pdf`. Nothing in the app links to it (corrected 2026-10-16; this line said it did): it is hosted for the Substack contrarians post's link to the 2011 comment (the unlinked `.doc` was removed: Marcus, "Delete the .doc file: the pdf is good enough") |
 | `R/` | the model |
-| `src/ccx_core.cpp` | compiled at startup |
-| `data/*.rds` | observations, forcings, the FaIR climate module, the nuclear ¹⁴C source |
+| `src/ccx_core.cpp` | compiled at startup, in a background R process since 2026-10-20 (`R/cpp.R` `ccx_cpp_prebuild()`) |
+| `data/*.rds` | observations, forcings, the FaIR climate module, the nuclear ¹⁴C source, and the three precompute products (`app_startup_precompute.rds`, `pulse_default_precompute.rds`, `review_precompute.rds`) |
 | the canonical mode file, wherever `ccx_mode_file()` points (`R/paths.R`, the ONE place its path is named) | **the parameter set the app runs on.** Omit it and the app falls back to uncalibrated defaults; the banner and the "Under the hood" provenance line are the only report |
 | `DESIGN.md` | `.find_root()` locates the repo by looking for this file |
 | `calibration/lib_design_gates.R` (+ `lib_seas_limbs.R`, `lib_glodap_obs.R`) | **the gate kernels the "Known issues" tab measures itself with.** Sourced lazily on first view of that tab, never at start-up. Omit them and the cards that need them render their reason in place of their number — a visible degradation, not a silent one, but the review tab is then half-useless. (`lib_glodap_obs.R` names a `data-raw/` file, but only `dg_gateG_obs()` reads it, and the app never calls that.) |

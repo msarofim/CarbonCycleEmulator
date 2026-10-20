@@ -1,0 +1,4 @@
+rep,futures_settle_s,pulse_auto_s,stale_at_open,stale_s,stale_ids,note,partition_unchanged_while_stale,pulse_nondefault_s,stale_after_click,note_after_click,back_s,stale_after_back,errors,failure
+1,2.338,0.512,[],0.328,"[""f_takeaway"",""f_plot"",""f_fair_note"",""f_partition"",""f_pulse_permanence"",""f_notes""]",These charts are for the previous settings. Press “Release the pulse” to update them.,True,3.705,[],,0.67,[],0,
+2,2.28,0.518,[],0.331,"[""f_takeaway"",""f_plot"",""f_fair_note"",""f_partition"",""f_pulse_permanence"",""f_notes""]",These charts are for the previous settings. Press “Release the pulse” to update them.,True,3.772,[],,0.665,[],0,
+3,2.395,0.514,[],0.334,"[""f_takeaway"",""f_plot"",""f_fair_note"",""f_partition"",""f_pulse_permanence"",""f_notes""]",These charts are for the previous settings. Press “Release the pulse” to update them.,True,3.738,[],,0.674,[],0,

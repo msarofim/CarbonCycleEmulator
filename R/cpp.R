@@ -12,13 +12,84 @@
 .ccx_cpp_env <- new.env(parent = globalenv())
 
 #' Compile the C++ core (once per session) and expose its functions
+#'
+#' If ccx_cpp_prebuild() started a background build, this waits for it and loads its library;
+#' otherwise (or if that build failed) it compiles here, as every start did before 2026-10-20.
+#' `.ccx_cpp_env$built_by` records which ("background" or "in-process").
 ccx_load_cpp <- function(quiet = TRUE) {
   if (isTRUE(.ccx_cpp_env$loaded)) return(invisible(TRUE))
   if (!requireNamespace("Rcpp", quietly = TRUE)) stop("Rcpp is required for the C++ core.")
-  Rcpp::sourceCpp(ccx_path("src", "ccx_core.cpp"), env = .ccx_cpp_env,
+  cache <- ccx_cpp_prebuild_wait()
+  Rcpp::sourceCpp(ccx_path("src", "ccx_core.cpp"), env = .ccx_cpp_env, cacheDir = cache,
                   verbose = FALSE, rebuild = FALSE, showOutput = !quiet)
+  .ccx_cpp_env$built_by <- if (identical(cache, tempdir())) "in-process" else "background"
   .ccx_cpp_env$loaded <- TRUE
   invisible(TRUE)
+}
+
+# ---- THE BACKGROUND BUILD (2026-10-20; CHANGELOG 2026-10-20 b) ----
+# The app compiled the core at every start (1.7-1.8 s of the 4.7 s start-up on the M4, measured
+# 2026-10-20), before the first page could be served. The start-up runs that needed it are now
+# precomputed (app/global.R APP_PRE_*), so global.R starts the compile in a separate R process
+# instead, and the first run that needs the core waits for it here. Rcpp keys its build cache on the
+# source file and reuses a build in `cacheDir` across processes (measured 2026-10-20: 0.04 s against
+# 2.0 s for a cold compile), so the parent loads the child's library without recompiling: the same
+# source, compiler and flags, so the same library as an in-process compile.
+# ANY FAILURE FALLS BACK to the in-process compile: the child errors, its process dies, or it
+# outlasts CCX_CPP_PREBUILD_WAIT_S. Liveness is read from the PID the child writes first, so a dead
+# child costs a poll, not the whole wait.
+CCX_CPP_PREBUILD_WAIT_S  <- 600    # the longest a run waits for a background build that is still alive
+CCX_CPP_PREBUILD_GRACE_S <- 30     # time the child has to write its PID before it is presumed dead
+CCX_CPP_PREBUILD_POLL_S  <- 0.05
+
+#' Start compiling the C++ core in a background R process; ccx_load_cpp() waits for it
+#'
+#' A no-op if the core is already loaded or a build was already started.
+#' @param dir the build's cache directory (also holds its PID file, result file and log)
+#' @param src the source file; an argument only so a test can make the build fail
+#' @return TRUE if a build was started, invisibly
+ccx_cpp_prebuild <- function(dir = file.path(tempdir(), "ccx_cpp_prebuild"),
+                             src = ccx_path("src", "ccx_core.cpp")) {
+  if (isTRUE(.ccx_cpp_env$loaded) || !is.null(.ccx_cpp_env$prebuild)) return(invisible(FALSE))
+  if (!requireNamespace("Rcpp", quietly = TRUE)) return(invisible(FALSE))
+  dir.create(dir, showWarnings = FALSE, recursive = TRUE)
+  pb <- list(dir = dir, pid = file.path(dir, "pid"), done = file.path(dir, "done"),
+             log = file.path(dir, "build.log"), started = Sys.time())
+  q <- function(x) deparse(x)
+  # the result is written under a temporary name and renamed, so the parent never reads half a file
+  code <- paste0(
+    "writeLines(as.character(Sys.getpid()), ", q(pb$pid), "); ",
+    "res <- tryCatch({ Rcpp::sourceCpp(", q(src), ", cacheDir = ", q(dir), ", env = new.env(), ",
+    "rebuild = FALSE); 'ok' }, error = function(e) { message(conditionMessage(e)); 'failed' }); ",
+    "writeLines(res, ", q(paste0(pb$done, ".tmp")), "); ",
+    "invisible(file.rename(", q(paste0(pb$done, ".tmp")), ", ", q(pb$done), "))")
+  system2(file.path(R.home("bin"), "Rscript"), c("-e", shQuote(code)),
+          stdout = pb$log, stderr = pb$log, wait = FALSE)
+  .ccx_cpp_env$prebuild <- pb
+  invisible(TRUE)
+}
+
+#' Wait for a background build; its cache directory if it succeeded, else tempdir() (Rcpp's default)
+ccx_cpp_prebuild_wait <- function() {
+  pb <- .ccx_cpp_env$prebuild
+  if (is.null(pb)) return(tempdir())
+  .ccx_cpp_env$prebuild <- NULL                  # waited for once, whatever the outcome
+  t0 <- Sys.time()
+  repeat {
+    if (file.exists(pb$done)) break
+    el <- as.numeric(difftime(Sys.time(), pb$started, units = "secs"))
+    pid <- if (file.exists(pb$pid)) suppressWarnings(as.integer(readLines(pb$pid, warn = FALSE)[1])) else NA
+    alive <- if (is.na(pid)) el < CCX_CPP_PREBUILD_GRACE_S else isTRUE(tools::pskill(pid, 0L))
+    if (!alive || el > CCX_CPP_PREBUILD_WAIT_S) break
+    Sys.sleep(CCX_CPP_PREBUILD_POLL_S)
+  }
+  .ccx_cpp_env$prebuild_wait_s <- as.numeric(difftime(Sys.time(), t0, units = "secs"))
+  # re-read after the loop: a child that finished between the two checks wrote its result first
+  res <- if (file.exists(pb$done)) readLines(pb$done, warn = FALSE)[1] else "not finished"
+  if (identical(res, "ok")) return(pb$dir)
+  message("ccx_load_cpp(): the background build ", if (identical(res, "failed")) "failed" else
+            "did not finish", " (log: ", pb$log, "); compiling here")
+  tempdir()
 }
 
 #' Flatten the R-side aux/grid/constants into the plain list the C++ unpacks
