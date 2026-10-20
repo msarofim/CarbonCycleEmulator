@@ -442,7 +442,26 @@ APP_FIT_KEY_GAP_PT <- 2    # vertical gap between legend rows once a legend is r
   list(legend_over = legend_over, legend_room = legend_room,
        plot_room = x0[nc + 1] - cols[1] - cols[nc],     # titles are placed against the whole plot
        x_room = if (!is.na(ix)) room(lay$l[ix], lay$r[ix]),
-       y_room = if (!is.na(iy)) sum(rows[lay$t[iy]:lay$b[iy]]))
+       y_room = if (!is.na(iy)) .fit_y_room(g, lay, iy, rows, x0))
+}
+# Room for the y title, which is centered on its panel and drawn unclipped: the panel's height, plus an equal
+# spill above and below into rows that are empty in the title's column -- never into the title, subtitle or
+# caption rows (left-aligned text), nor into a legend that reaches across the title's column. Without the
+# spill, titles that read fine at 768 px (they ran a little into the empty legend row) were being wrapped.
+.fit_y_room <- function(g, lay, iy, rows, x0) {
+  t <- lay$t[iy]; b <- lay$b[iy]; nr <- length(rows)
+  usable <- rows; usable[c(1L, nr)] <- 0                       # the plot margins
+  for (nm in c("guide-box-top", "guide-box-bottom")) {
+    i <- match(nm, lay$name)
+    if (is.na(i) || inherits(g$grobs[[i]], "zeroGrob")) next
+    lw <- .fit_px_w(gtable::gtable_width(g$grobs[[i]]))
+    if ((x0[lay$l[i]] + x0[lay$r[i] + 1]) / 2 - lw / 2 < x0[lay$r[iy] + 1]) usable[lay$t[i]:lay$b[i]] <- 0
+  }
+  top <- max(c(lay$b[lay$name %in% c("title", "subtitle")], 1L))
+  bot <- min(c(lay$t[lay$name == "caption"], nr))
+  above <- if (t - 1L > top) sum(usable[(top + 1L):(t - 1L)]) else 0
+  below <- if (bot - 1L > b) sum(usable[(b + 1L):(bot - 1L)]) else 0
+  sum(rows[t:b]) + 2 * min(above, below)
 }
 # Width of a title's longest line in px (a string or a plotmath expression).
 .fit_text_px <- function(lab, pt) .fit_px_w(grid::grobWidth(grid::textGrob(lab, gp = grid::gpar(fontsize = pt))))
