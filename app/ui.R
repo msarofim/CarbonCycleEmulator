@@ -100,7 +100,7 @@ review_card <- function(id, plot_id = NULL, plot_height = "330px",
                  sprintf("Comment on issue %d \u2192", c_$id))))
 }
 
-navbarPage(
+function(request) navbarPage(   # a function of the request: deep links (app/R/links.R, 2026-10-20)
   title = APP_TITLE,
   id = "tabs",
   theme = bs_theme(version = 5, bootswatch = "flatly", base_font = font_google("Inter")),
