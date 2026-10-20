@@ -1,0 +1,8 @@
+calibration/build_app_precompute.R @bff29ab3 | canonical hilda31w (calibration/output/refit_20261013_hilda31w_wtc_hilda_csl3v0kaidgbemwtc/mode_fit_pumpN.rds, md5 53ee816ac48cea0f1c1fad244651c5fd) | params: posterior mode | 2026-10-20 17:01
+  startup  spin     0.20 s      79.5 kB in memory
+  startup  hist     0.08 s    1718.0 kB in memory
+  startup  flux     1.15 s       4.0 kB in memory
+wrote data/app_startup_precompute.rds (gzip, 951.9 kB on disk; 1.4 s of computation stored)
+  pulse    runs     2.75 s   10186.6 kB in memory
+  pulse    depth    0.83 s      92.3 kB in memory
+wrote data/pulse_default_precompute.rds (xz, 2031.7 kB on disk; 3.6 s of computation stored)
