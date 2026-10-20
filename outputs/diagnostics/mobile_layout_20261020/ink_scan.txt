@@ -1,0 +1,108 @@
+# ink_scan.py over the plot images Shiny sent: before = commit 9cb7701 at 375 x 812; after = commit 6ffdb96d at 375 x 812, 768 x 1024 and 1440 x 900.
+# DPR 1 throughout, so image px = CSS px. EDGE = ink in the outermost 2 px: text cut at the image border.
+before_375_c_growth.png                  351   300  x    0- 350  y   18- 293  EDGE
+before_375_c_plot.png                    351   400  x    6- 328  y   18- 391  
+before_375_c_resid.png                   351   200  x    6- 340  y    9- 193  
+before_375_cm_map.png                    351   430  x    6- 338  y    6- 421  
+before_375_cm_tension.png                351   320  x    6- 350  y    6- 311  EDGE
+before_375_f_plot.png                    351   400  x    0- 350  y   18- 393  EDGE
+before_375_h_diagram.png                 351   273  x    4- 348  y   20- 262  
+before_375_i_d13c.png                    351   280  x    6- 350  y   18- 271  EDGE
+before_375_i_d14c.png                    351   300  x    0- 350  y   18- 291  EDGE
+before_375_k_plot.png                    351   380  x    0- 350  y   18- 371  EDGE
+before_375_k_seasonal.png                351   260  x    6- 334  y    6- 251  
+before_375_rv_diseq.png                  313   320  x    6- 302  y   13- 311  
+before_375_rv_enso.png                   313   320  x    6- 312  y   18- 313  EDGE
+before_375_rv_gradient.png               313   300  x    6- 294  y   12- 291  
+before_375_rv_irf.png                    313   400  x    0- 312  y   18- 391  EDGE
+before_375_rv_oclim.png                  313   380  x    6- 312  y   18- 372  EDGE
+before_375_rv_oclim_stake.png            313   280  x    6- 273  y   11- 273  
+before_375_rv_partition.png              313   300  x    6- 281  y   13- 293  
+before_375_rv_repdc.png                  313   320  x    6- 307  y   18- 311  
+before_375_rv_variance.png               313   300  x    6- 302  y   18- 293  
+before_375_w_af.png                      351   260  x    6- 328  y    0- 251  EDGE
+before_375_w_gcb.png                     351   260  x    6- 302  y    7- 253  
+before_375_w_imbalance_plot.png          351   330  x    0- 349  y    6- 323  EDGE
+before_375_w_partition.png               351   330  x    6- 350  y   13- 321  EDGE
+before_375_w_regrowth_plot.png           351   330  x    4- 350  y   18- 323  EDGE
+after_1440_c_driver_enso.png            1056   260  x    6-1000  y    6- 253  
+after_1440_c_growth.png                 1056   300  x    6-1002  y   18- 293  
+after_1440_c_plot.png                   1056   400  x    6-1000  y   18- 393  
+after_1440_c_resid.png                  1056   200  x    6-1045  y   18- 193  
+after_1440_cm_map.png                   1056   430  x    6-1033  y    6- 423  
+after_1440_cm_tension.png               1056   320  x    6- 930  y    6- 313  
+after_1440_f_partition.png              1056   380  x    6-1032  y   13- 373  
+after_1440_f_plot.png                   1056   400  x    6-1010  y   18- 395  
+after_1440_h_diagram.png                 815   635  x   20- 784  y   47- 570  
+after_1440_i_d13c.png                   1056   280  x    6-1001  y   18- 273  
+after_1440_i_d14c.png                   1056   300  x    6-1000  y   18- 293  
+after_1440_k_plot.png                   1056   380  x    6-1001  y   18- 371  
+after_1440_k_seasonal.png               1056   260  x    6-1045  y    6- 253  
+after_1440_rv_diseq.png                 1018   320  x    6-1007  y   13- 313  
+after_1440_rv_enso.png                  1018   320  x    6-1007  y   18- 313  
+after_1440_rv_gradient.png              1018   300  x    6- 944  y   12- 291  
+after_1440_rv_irf.png                   1018   400  x    6- 964  y   18- 393  
+after_1440_rv_oclim.png                 1018   380  x    6-1007  y   18- 373  
+after_1440_rv_oclim_stake.png           1018   280  x    6- 922  y   12- 273  
+after_1440_rv_partition.png             1018   300  x    6- 930  y   13- 293  
+after_1440_rv_repdc.png                 1018   320  x    6-1007  y   18- 311  
+after_1440_rv_variance.png              1018   300  x    6-1007  y   18- 293  
+after_1440_w_af.png                      516   260  x    6- 486  y   11- 251  
+after_1440_w_gcb.png                     516   260  x    6- 449  y    7- 253  
+after_1440_w_imbalance_plot.png         1056   330  x    6- 996  y    6- 323  
+after_1440_w_partition.png              1056   330  x    6-1000  y   13- 323  
+after_1440_w_regrowth_plot.png          1056   330  x    6-1045  y   18- 323  
+after_375_c_driver_enso.png              351   320  x    6- 327  y    6- 311  
+after_375_c_growth.png                   351   320  x    6- 329  y   18- 313  
+after_375_c_plot.png                     351   400  x    6- 328  y   18- 391  
+after_375_c_resid.png                    351   320  x    6- 340  y   18- 313  
+after_375_cm_map.png                     351   430  x    6- 338  y    6- 421  
+after_375_cm_tension.png                 351   320  x    6- 329  y    6- 311  
+after_375_f_partition.png                351   380  x    6- 344  y   13- 373  
+after_375_f_plot.png                     351   400  x    6- 337  y   18- 393  
+after_375_h_diagram.png                  565   440  x   15- 543  y   33- 395  
+after_375_i_d13c.png                     351   320  x    6- 328  y   18- 311  
+after_375_i_d14c.png                     351   320  x    6- 327  y   18- 311  
+after_375_k_plot.png                     351   380  x    6- 328  y   18- 371  
+after_375_k_seasonal.png                 351   320  x    6- 334  y    6- 311  
+after_375_rv_diseq.png                   313   320  x    6- 302  y   13- 311  
+after_375_rv_enso.png                    313   320  x    6- 293  y   18- 313  
+after_375_rv_gradient.png                313   320  x    6- 294  y   12- 311  
+after_375_rv_irf.png                     313   400  x    6- 294  y   18- 391  
+after_375_rv_oclim.png                   313   380  x    6- 302  y   18- 372  
+after_375_rv_oclim_stake.png             313   320  x    6- 273  y   13- 313  
+after_375_rv_partition.png               313   320  x    6- 282  y   13- 313  
+after_375_rv_repdc.png                   313   320  x    6- 302  y   18- 311  
+after_375_rv_variance.png                313   320  x    6- 302  y   18- 313  
+after_375_w_af.png                       351   320  x    6- 328  y   14- 311  
+after_375_w_gcb.png                      351   320  x    6- 302  y    7- 313  
+after_375_w_imbalance_plot.png           351   330  x    6- 326  y    6- 323  
+after_375_w_partition.png                351   330  x    6- 327  y   13- 321  
+after_375_w_regrowth_plot.png            351   330  x    6- 340  y   18- 323  
+after_768_c_driver_enso.png              552   260  x    6- 519  y    6- 253  
+after_768_c_growth.png                   552   300  x    6- 521  y   18- 293  
+after_768_c_plot.png                     552   400  x    6- 519  y   18- 393  
+after_768_c_resid.png                    552   200  x    6- 541  y   18- 193  
+after_768_cm_map.png                     552   430  x    6- 536  y    6- 423  
+after_768_cm_tension.png                 552   320  x    6- 525  y    6- 313  
+after_768_f_partition.png                552   380  x    6- 540  y   13- 373  
+after_768_f_plot.png                     552   400  x    6- 529  y   18- 395  
+after_768_h_diagram.png                  744   579  x   19- 716  y   43- 520  
+after_768_i_d13c.png                     552   280  x    6- 520  y   18- 273  
+after_768_i_d14c.png                     552   300  x    6- 519  y   18- 293  
+after_768_k_plot.png                     552   380  x    6- 522  y   18- 371  
+after_768_k_seasonal.png                 552   260  x    6- 541  y    6- 253  
+after_768_rv_diseq.png                   514   320  x    6- 503  y   13- 313  
+after_768_rv_enso.png                    514   320  x    6- 503  y   18- 313  
+after_768_rv_gradient.png                514   300  x    6- 474  y   12- 291  
+after_768_rv_irf.png                     514   400  x    6- 491  y   18- 391  
+after_768_rv_oclim.png                   514   380  x    6- 483  y   18- 373  
+after_768_rv_oclim_stake.png             514   280  x    6- 468  y   12- 273  
+after_768_rv_partition.png               514   300  x    6- 467  y   13- 293  
+after_768_rv_repdc.png                   514   320  x    6- 503  y   18- 311  
+after_768_rv_variance.png                514   300  x    6- 503  y   18- 293  
+after_768_w_af.png                       264   260  x    6- 245  y   11- 251  
+after_768_w_gcb.png                      264   260  x    6- 253  y    7- 253  
+after_768_w_imbalance_plot.png           552   330  x    6- 522  y    6- 323  
+after_768_w_partition.png                552   330  x    6- 519  y   13- 323  
+after_768_w_regrowth_plot.png            552   330  x    6- 541  y   18- 323  

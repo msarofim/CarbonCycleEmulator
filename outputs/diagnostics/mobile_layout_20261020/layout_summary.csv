@@ -1,0 +1,55 @@
+code,viewport,tab,nav_h,takeaway_top,first_plot_top,controls_top,page_w,plots_drawn,plots,output_errors
+9cb7701,375x812,The Keeling Curve,288,837,1208,385,375,2,2,0
+9cb7701,375x812,Where does the carbon go?,288,549,931,385,375,5,5,0
+9cb7701,375x812,What if…?,288,981,1119,385,375,3,3,0
+9cb7701,375x812,Isotope fingerprints,288,668,993,385,375,2,2,0
+9cb7701,375x812,Futures,288,1080,1217,385,375,1,1,0
+9cb7701,375x812,Known issues,288,,1367,,537,9,9,0
+9cb7701,375x812,What pins down what?,288,624,995,385,375,2,2,0
+9cb7701,375x812,Under the hood,288,,762,,401,1,1,0
+after,375x812,The Keeling Curve,72,258,629,1023,375,2,2,0
+after,375x812,Where does the carbon go?,72,169,452,796,375,5,5,0
+after,375x812,What if…?,72,169,306,720,375,3,3,0
+after,375x812,Isotope fingerprints,72,169,494,828,375,2,2,0
+after,375x812,Futures,72,169,306,720,375,1,1,0
+after,375x812,Known issues,72,,1151,,375,9,9,0
+after,375x812,What pins down what?,72,225,596,1382,375,2,2,0
+after,375x812,Under the hood,72,,546,,375,1,1,0
+after,375x812,pulse_partition,72,169,488,902,375,2,2,0
+after,375x812,whatif_driver_enso,72,169,384,798,375,4,4,0
+9cb7701,768x1024,The Keeling Curve,172,316,557,248,768,2,2,0
+9cb7701,768x1024,Where does the carbon go?,172,248,466,248,768,5,5,0
+9cb7701,768x1024,What if…?,172,248,334,248,768,3,3,0
+9cb7701,768x1024,Isotope fingerprints,172,248,495,248,768,2,2,0
+9cb7701,768x1024,Futures,172,248,334,248,768,1,1,0
+9cb7701,768x1024,Known issues,172,,913,,768,9,9,0
+9cb7701,768x1024,What pins down what?,172,304,571,248,768,2,2,0
+9cb7701,768x1024,Under the hood,172,,459,,768,1,1,0
+after,768x1024,The Keeling Curve,172,316,557,248,768,2,2,0
+after,768x1024,Where does the carbon go?,172,248,466,248,768,5,5,0
+after,768x1024,What if…?,172,248,334,248,768,3,3,0
+after,768x1024,Isotope fingerprints,172,248,495,248,768,2,2,0
+after,768x1024,Futures,172,248,334,248,768,1,1,0
+after,768x1024,Known issues,172,,913,,768,9,9,0
+after,768x1024,What pins down what?,172,304,571,248,768,2,2,0
+after,768x1024,Under the hood,172,,459,,768,1,1,0
+after,768x1024,pulse_partition,172,248,463,248,768,2,2,0
+after,768x1024,whatif_driver_enso,172,248,385,248,768,4,4,0
+9cb7701,1440x900,The Keeling Curve,74,176,314,129,1440,2,2,0
+9cb7701,1440x900,Where does the carbon go?,74,129,295,129,1440,5,5,0
+9cb7701,1440x900,What if…?,74,129,215,129,1440,3,3,0
+9cb7701,1440x900,Isotope fingerprints,74,129,273,129,1440,2,2,0
+9cb7701,1440x900,Futures,74,129,189,129,1440,1,1,0
+9cb7701,1440x900,Known issues,74,,629,,1440,9,9,0
+9cb7701,1440x900,What pins down what?,74,161,299,129,1440,2,2,0
+9cb7701,1440x900,Under the hood,74,,342,,1440,1,1,0
+after,1440x900,The Keeling Curve,74,176,314,129,1440,2,2,0
+after,1440x900,Where does the carbon go?,74,129,295,129,1440,5,5,0
+after,1440x900,What if…?,74,129,215,129,1440,3,3,0
+after,1440x900,Isotope fingerprints,74,129,273,129,1440,2,2,0
+after,1440x900,Futures,74,129,189,129,1440,1,1,0
+after,1440x900,Known issues,74,,629,,1440,9,9,0
+after,1440x900,What pins down what?,74,161,299,129,1440,2,2,0
+after,1440x900,Under the hood,74,,342,,1440,1,1,0
+after,1440x900,pulse_partition,74,129,241,129,1440,2,2,0
+after,1440x900,whatif_driver_enso,74,129,215,129,1440,4,4,0
