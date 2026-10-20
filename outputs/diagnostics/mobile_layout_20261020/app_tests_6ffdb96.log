@@ -1,0 +1,13 @@
+commit 6ffdb96d, 2026-10-20 17:39, R 4.5.3, testthat 3.3.2
+test-app-params-table.R                    pass   55  fail 0  skip 0  warn 0
+test-app-phone-layout.R                    pass   37  fail 0  skip 0  warn 0
+test-app-review-copy.R                     pass   88  fail 0  skip 0  warn 0
+test-app-us-spelling.R                     pass    9  fail 0  skip 0  warn 0
+test-app-version.R                         pass   10  fail 0  skip 0  warn 0
+test-plot-text-fits.R                      pass  110  fail 0  skip 0  warn 0
+test-review-0916-fixes.R                   pass   24  fail 0  skip 0  warn 2
+test-review-card-numbers.R                 pass   26  fail 0  skip 0  warn 0
+test-review-cards.R                        pass   76  fail 0  skip 0  warn 0
+test-review-precompute.R                   pass   29  fail 0  skip 0  warn 0
+test-ui-year-bounds-lint.R                 pass   18  fail 0  skip 0  warn 0
+TOTAL                                      pass  482  fail 0  skip 0  warn 2   (11 files, 0.4 min)

@@ -241,6 +241,10 @@ theme_ccx <- function(base_size = CCX_BASE_SIZE) {
 # the narrowest layout that still puts the sidebar beside the panel. Below it
 # sidebarLayout STACKS and the panel gets WIDER, so 768 is the worst case and not
 # merely a small number someone liked.
+# ⚠ ...UNTIL THE SCREEN ITSELF IS NARROWER (2026-10-20, phones). At 375 px the stacked panel is
+# 351 px wide and a review card 313 px, below every floor in this table. Captions and subtitles
+# follow the live width (below) and were fine; legends and axis titles were not, and are refitted
+# by app_fit_plot() further down.
 APP_PANEL_PX <- c(full = 552L, half = 264L, card = 514L, diagram = 424L)
 # ⛔ WHICH PLOT IS DRAWN AT WHICH WIDTH -- MEASURED FROM THE RUNNING APP
 # (2026-09-25, 768 px viewport), not inferred from ui.R's nesting. A regex over
@@ -384,6 +388,238 @@ app_legend_nrow <- function(keys, panel = "full", pt = SUBTITLE_PT) {
     if (sum(vapply(cols, max, numeric(1))) <= budget) return(n)
   }
   length(keys)
+}
+
+# ---------------------------------------------------------------------
+# ⭐ FITTING A FINISHED PLOT TO A PHONE-WIDTH PANEL (2026-10-20)
+# ---------------------------------------------------------------------
+# The live-width wrap above covers captions and subtitles. Three slots were wrapped by nothing: legend rows,
+# axis titles, and a y title longer than its panel is tall. At the 768 px floor they fit; on a phone the full
+# panel is 351 px (313 px in a review card), and at 375 x 812 (2026-10-20, outputs/diagnostics/
+# mobile_layout_20261020/) 15 of the 25 plots drawn by default clipped one of them -- legends cut at both
+# edges (k_plot, w_partition, i_d14c, f_plot, rv_irf ...), y titles running off the panel (w_af, k_seasonal).
+# ⇒ app_fit_plot() MEASURES THE PLOT AS IT WILL BE DRAWN (ggplotGrob on the device renderPlot has open) and
+# changes only what overflows: legend keys go onto more rows, several legend boxes stack, a plain-text axis
+# title wraps to the room its panel gives it, a title or subtitle no wrapper handled wraps to the plot,
+# colliding category labels turn on end, and crowded tick labels get fewer breaks. A plot that fits comes back
+# untouched.
+# ⚠ It runs only at or below APP_FIT_MAX_PX, the full panel at the 768 px floor where every slot was audited
+# (above): wider layouts are not touched and pay no measuring cost. Called by renderPlotFit() (server.R).
+# ⚠ A plotmath title (CO₂, δ¹³C ...) is an expression and cannot be wrapped; one that overflows is left as is.
+APP_FIT_MAX_PX <- APP_PANEL_PX[["full"]]
+APP_FIT_KEY_GAP_PT <- 2    # vertical gap between legend rows once a legend is refitted (theme_ccx()'s default: 6.5)
+
+.fit_px_w <- function(u) grid::convertWidth(u, "in", valueOnly = TRUE) * 72
+.fit_px_h <- function(u) grid::convertHeight(u, "in", valueOnly = TRUE) * 72
+# A gtable's column widths (or row heights) in px, the leftover shared among the null units as gtable does.
+.fit_tracks <- function(u, total, conv) {
+  v <- vapply(seq_along(u), function(i) conv(u[i]), numeric(1))
+  nul <- grid::unitType(u) == "null"
+  if (any(nul)) v[nul] <- max(total - sum(v[!nul]), 0) * as.numeric(u[nul]) / sum(as.numeric(u[nul]))
+  v
+}
+# The geometry fit decisions need: track sizes, and how far each slot overruns the plot's margins.
+.fit_geometry <- function(g) {
+  W <- .fit_px_w(grid::unit(1, "npc")); H <- .fit_px_h(grid::unit(1, "npc"))
+  cols <- .fit_tracks(g$widths, W, .fit_px_w); rows <- .fit_tracks(g$heights, H, .fit_px_h)
+  x0 <- c(0, cumsum(cols)); nc <- length(cols)
+  # Room for a slot centered on columns l..r: it may spill evenly into the columns either side, but not into
+  # the plot margin (the first and last columns).
+  room <- function(l, r) {
+    left <- x0[l] - cols[1]; right <- x0[nc + 1] - cols[nc] - x0[r + 1]
+    (x0[r + 1] - x0[l]) + 2 * max(min(left, right), 0)
+  }
+  lay <- g$layout
+  legend_over <- 0; legend_room <- Inf
+  for (nm in c("guide-box-top", "guide-box-bottom")) {
+    i <- match(nm, lay$name)
+    if (is.na(i) || inherits(g$grobs[[i]], "zeroGrob")) next
+    legend_room <- min(legend_room, room(lay$l[i], lay$r[i]))
+    legend_over <- max(legend_over, .fit_px_w(gtable::gtable_width(g$grobs[[i]])) - room(lay$l[i], lay$r[i]))
+  }
+  # ⚠ The axis-title grobs report a null size, so what a title NEEDS is measured from its text (.fit_text_px).
+  ix <- match("xlab-b", lay$name); iy <- match("ylab-l", lay$name)
+  list(legend_over = legend_over, legend_room = legend_room,
+       plot_room = x0[nc + 1] - cols[1] - cols[nc],     # titles are placed against the whole plot
+       x_room = if (!is.na(ix)) room(lay$l[ix], lay$r[ix]),
+       y_room = if (!is.na(iy)) .fit_y_room(g, lay, iy, rows, x0))
+}
+# Room for the y title, which is centered on its panel and drawn unclipped: the panel's height, plus an equal
+# spill above and below into rows that are empty in the title's column -- never into the title, subtitle or
+# caption rows (left-aligned text), nor into a legend that reaches across the title's column. Without the
+# spill, titles that read fine at 768 px (they ran a little into the empty legend row) were being wrapped.
+.fit_y_room <- function(g, lay, iy, rows, x0) {
+  t <- lay$t[iy]; b <- lay$b[iy]; nr <- length(rows)
+  usable <- rows; usable[c(1L, nr)] <- 0                       # the plot margins
+  for (nm in c("guide-box-top", "guide-box-bottom")) {
+    i <- match(nm, lay$name)
+    if (is.na(i) || inherits(g$grobs[[i]], "zeroGrob")) next
+    lw <- .fit_px_w(gtable::gtable_width(g$grobs[[i]]))
+    if ((x0[lay$l[i]] + x0[lay$r[i] + 1]) / 2 - lw / 2 < x0[lay$r[iy] + 1]) usable[lay$t[i]:lay$b[i]] <- 0
+  }
+  top <- max(c(lay$b[lay$name %in% c("title", "subtitle")], 1L))
+  bot <- min(c(lay$t[lay$name == "caption"], nr))
+  above <- if (t - 1L > top) sum(usable[(top + 1L):(t - 1L)]) else 0
+  below <- if (bot - 1L > b) sum(usable[(b + 1L):(bot - 1L)]) else 0
+  sum(rows[t:b]) + 2 * min(above, below)
+}
+# Width of a title's longest line in px (a string or a plotmath expression).
+.fit_text_px <- function(lab, pt) .fit_px_w(grid::grobWidth(grid::textGrob(lab, gp = grid::gpar(fontsize = pt))))
+# Every legend guide of the built plot, re-laid out in `ncol` columns, all else kept.
+.fit_legend_cols <- function(p, b, ncol, byrow = TRUE) {
+  gl <- list()
+  for (s in b$plot$scales$non_position_scales()$scales) {
+    a <- s$aesthetics[1]
+    gd <- p$guides$guides[[a]] %||% s$guide
+    if (is.character(gd)) gd <- if (identical(gd, "legend")) guide_legend() else NULL
+    if (!inherits(gd, "GuideLegend")) next
+    pr <- gd$params; pr$nrow <- NULL; pr$ncol <- ncol
+    # guide_legend(byrow = TRUE) is stored in the guide's own theme, where it would outrank the plot's
+    if (!is.null(pr$theme)) pr$theme$legend.byrow <- NULL
+    gl[[a]] <- ggproto(NULL, gd, params = pr)
+  }
+  if (!length(gl)) return(NULL)
+  p + do.call(guides, gl) + theme(legend.byrow = byrow)
+}
+# The most legend columns that fit `room`, and the fill order that gets there: each key measured as its label
+# at the legend's text size plus APP_LEGEND_KEY_PAD_PX (app_legend_nrow()'s allowance). Row by row is tried
+# first; column by column can fit one more column when the long labels share a row (the Keeling legend's two
+# "Model, ... Hemisphere" keys). A first guess, checked by a rebuild.
+.fit_legend_layout <- function(p, b, room) {
+  pt <- .fit_axis_title_pt(p, "legend.text")
+  w <- NULL
+  for (s in b$plot$scales$non_position_scales()$scales) {
+    gd <- p$guides$guides[[s$aesthetics[1]]] %||% s$guide
+    if (is.character(gd)) gd <- if (identical(gd, "legend")) guide_legend() else NULL
+    if (!inherits(gd, "GuideLegend")) next
+    lab <- s$get_labels()
+    wk <- vapply(seq_along(lab), function(i) .fit_text_px(lab[i], pt), numeric(1)) + APP_LEGEND_KEY_PAD_PX
+    if (length(wk) > length(w)) w <- wk     # the legend with the most keys sets the layout
+  }
+  if (!length(w)) return(NULL)
+  width <- function(n, byrow) {
+    col <- if (byrow) (seq_along(w) - 1L) %% n else (seq_along(w) - 1L) %/% ceiling(length(w) / n)
+    sum(tapply(w, col, max))
+  }
+  for (n in rev(seq_along(w))) for (byrow in c(TRUE, FALSE))
+    if (n == 1L || width(n, byrow) <= room) return(list(n = n, byrow = byrow))
+}
+# Do a discrete x axis's labels run into each other? Each category gets the panel's width over its x range (one
+# unit per category); a label's widest line wider than that collides with its neighbor (the review card on the
+# ocean's disequilibrium: "North, mixed layer" in a 28 px slot at 313 px). Panels are matched to the gtable's
+# panel columns by their facet column.
+.fit_x_labels_collide <- function(p, b, g) {
+  el <- tryCatch(ggplot2::calc_element("axis.text.x.bottom", p$theme), error = function(e) NULL)
+  if (is.null(el) || (is.numeric(el$angle) && el$angle != 0)) return(FALSE)
+  W <- .fit_px_w(grid::unit(1, "npc")); cols <- .fit_tracks(g$widths, W, .fit_px_w)
+  pl <- sort(unique(g$layout$l[grepl("^panel", g$layout$name)]))
+  ll <- b$layout$layout
+  for (k in seq_len(nrow(ll))) {
+    x <- b$layout$panel_params[[k]]$x
+    if (is.null(x) || !isTRUE(x$is_discrete())) next
+    lab <- x$get_labels(); lab <- lab[!is.na(lab)]
+    if (!length(lab) || ll$COL[k] > length(pl)) next
+    band <- cols[pl[ll$COL[k]]] / diff(x$continuous_range)
+    widest <- max(vapply(unlist(strsplit(as.character(lab), "\n")), .fit_text_px, numeric(1), pt = el$size))
+    if (widest > band) return(TRUE)
+  }
+  FALSE
+}
+# Do a continuous x axis's tick labels run into each other -- inside a panel, or across the gap between two
+# facets, where one panel's last label meets the next one's first (the pulse lab's two panels at 351 px drew
+# "2300" and "2050" as one word)? Returns the most breaks any panel draws when they do, else 0.
+.fit_x_ticks_collide <- function(p, b, g) {
+  el <- tryCatch(ggplot2::calc_element("axis.text.x.bottom", p$theme), error = function(e) NULL)
+  if (is.null(el) || (is.numeric(el$angle) && el$angle != 0)) return(0L)
+  W <- .fit_px_w(grid::unit(1, "npc")); cols <- .fit_tracks(g$widths, W, .fit_px_w); x0 <- c(0, cumsum(cols))
+  pl <- sort(unique(g$layout$l[grepl("^panel", g$layout$name)]))
+  ll <- b$layout$layout; n_max <- 0L; hit <- FALSE; edges <- list()
+  for (cc in sort(unique(ll$COL))) {
+    k <- which(ll$COL == cc & ll$ROW == max(ll$ROW[ll$COL == cc]))[1]
+    x <- b$layout$panel_params[[k]]$x
+    if (is.null(x) || isTRUE(x$is_discrete()) || cc > length(pl)) return(0L)
+    pos <- x$break_positions(); lab <- x$get_labels()
+    ok <- is.finite(pos) & !is.na(lab) & pos >= 0 & pos <= 1
+    pos <- pos[ok]; lab <- lab[ok]; n_max <- max(n_max, length(pos))
+    if (!length(pos)) next
+    pw <- cols[pl[cc]]; ctr <- pos * pw
+    w <- vapply(seq_along(lab), function(i) .fit_text_px(lab[i], el$size), numeric(1))
+    if (length(ctr) > 1L && any(diff(ctr) < (utils::head(w, -1) + utils::tail(w, -1)) / 2 + 2)) hit <- TRUE
+    # where this panel's first label starts and its last label ends, in plot px
+    edges[[length(edges) + 1L]] <- c(first_l = x0[pl[cc]] + ctr[1] - w[1] / 2,
+                                     last_r  = x0[pl[cc]] + ctr[length(ctr)] + w[length(w)] / 2)
+  }
+  for (i in seq_len(length(edges) - 1L))
+    if (edges[[i + 1L]][["first_l"]] - edges[[i]][["last_r"]] < 2) hit <- TRUE
+  if (hit) n_max else 0L
+}
+.fit_axis_title_pt <- function(p, el) {
+  e <- tryCatch(ggplot2::calc_element(el, p$theme), error = function(err) NULL)
+  if (!is.null(e) && is.numeric(e$size)) e$size else CCX_BASE_SIZE
+}
+
+#' Fit a finished ggplot to the live panel width: legends onto more rows, plain axis titles wrapped
+#'
+#' Returns `p` unchanged when no live width is set, when the panel is wider than APP_FIT_MAX_PX, when `p` is
+#' not a ggplot, or when nothing overflows. Never fails a render: an error leaves the plot as it was.
+app_fit_plot <- function(p) {
+  px <- app_live_panel_px()
+  if (is.null(px) || px > APP_FIT_MAX_PX || !inherits(p, "ggplot")) return(p)
+  tryCatch({
+    b <- ggplot_build(p); g <- ggplot_gtable(b)
+    geo <- .fit_geometry(g)
+    # 1. legends: centered on the whole plot rather than the panel, several boxes stacked, keys a little
+    #    closer, and as many columns as fit -- estimated from the labels, then checked by rebuilding
+    #    ⚠ The first guess is made without rebuilding: centered on the plot, a legend's room is the plot's
+    #    width inside its margins. Every rebuild costs a full ggplot_build (~0.35 s for the partition chart).
+    if (geo$legend_over > 0.5) {
+      p <- p + theme(legend.box = "vertical", legend.location = "plot",
+                     legend.key.spacing.y = grid::unit(APP_FIT_KEY_GAP_PT, "pt"))
+      lay <- .fit_legend_layout(p, b, geo$plot_room)
+      while (!is.null(lay) && lay$n >= 1L) {
+        q <- .fit_legend_cols(p, b, lay$n, lay$byrow); if (is.null(q)) break
+        p <- q; b <- ggplot_build(p); g <- ggplot_gtable(b); geo <- .fit_geometry(g)
+        if (geo$legend_over <= 0.5) break
+        lay$n <- lay$n - 1L
+      }
+    }
+    # 2. axis titles: a plain-text title wider (x) or taller (y) than its panel is wrapped to it
+    labs_now <- b$plot$labels
+    for (ax in c("x", "y")) {
+      lab <- labs_now[[ax]]; rm_ <- geo[[paste0(ax, "_room")]]
+      if (is.null(rm_) || !is.character(lab) || length(lab) != 1L || !nzchar(lab)) next
+      pt <- .fit_axis_title_pt(p, if (ax == "x") "axis.title.x.bottom" else "axis.title.y.left")
+      if (.fit_text_px(lab, pt) > rm_ * APP_TEXT_SAFETY)
+        p <- p + do.call(labs, stats::setNames(list(app_wrap_px(lab, rm_ * APP_TEXT_SAFETY, pt)), ax))
+    }
+    # 2b. a title or subtitle not already wrapped by app_subtitle() (the What-if driver chart's subtitle is a
+    #     mechanism's label, CCX_MECHANISMS) is wrapped to the plot's width
+    for (sl in c("title", "subtitle")) {
+      lab <- labs_now[[sl]]
+      if (!is.character(lab) || length(lab) != 1L || !nzchar(lab)) next
+      pt <- .fit_axis_title_pt(p, paste0("plot.", sl))
+      if (.fit_text_px(lab, pt) > geo$plot_room * APP_TEXT_SAFETY)
+        p <- p + do.call(labs, stats::setNames(list(app_wrap_px(lab, geo$plot_room * APP_TEXT_SAFETY, pt)), sl))
+    }
+    # 3. category labels that collide along a discrete x axis are turned on end
+    if (.fit_x_labels_collide(p, b, g))
+      p <- p + theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+    # 4. tick labels that collide along a continuous x axis: the x scale (the plot's own, cloned, or a default
+    #    one) asks scales::breaks_extended() for about half as many breaks; checked once more and halved again
+    for (i in 1:2) {
+      n <- .fit_x_ticks_collide(p, b, g)
+      if (n < 3L) break
+      sc <- p$scales$get_scales("x")
+      sc <- if (is.null(sc)) scale_x_continuous() else sc$clone()
+      sc$breaks <- scales::breaks_extended(n = max(2L, n %/% 2L))
+      p <- suppressMessages(p + sc)
+      b <- ggplot_build(p); g <- ggplot_gtable(b)
+    }
+    p
+  }, error = function(e) {
+    message("app_fit_plot: left as drawn (", conditionMessage(e), ")")
+    p
+  })
 }
 
 #' Standard annotation carried by every plot that uses model output
@@ -1013,21 +1249,44 @@ plot_constraint_map <- function(cm, level = c("component", "parameter")) {
 #' ⚠ Each bar is the family's own total log-likelihood slope, so a pair is shown
 #' only when both signs are real; a parameter every family agrees about is absent
 #' by construction rather than by a threshold.
+#' ⚠ NARROW PANELS (2026-10-20, phones). Each measurement's name is drawn past the end of its bar, in the room
+#' the x expansion (CMAP_TENSION_EXPAND) leaves there. On a 351 px phone panel that room is about half a name, and
+#' the names were cut at the panel edge. When the longest name does not fit that room -- MEASURED, from the
+#' live width -- the names go above their bars instead, starting at zero, where each has half the panel.
+CMAP_TENSION_EXPAND   <- 0.35
+CMAP_TENSION_LABEL_MM <- 3       # geom_text size of the measurement names
+cmap_tension_names_above <- function(d) {
+  px <- app_live_panel_px()
+  if (is.null(px)) return(FALSE)
+  tryCatch({
+    pt_axis <- ggplot2::calc_element("axis.text.y.left", theme_ccx())$size
+    panel <- px - APP_PLOT_MARGIN_PX - max(vapply(as.character(d$par), .fit_text_px, numeric(1), pt = pt_axis))
+    lim <- range(c(d$v, 0)); lim <- lim + c(-1, 1) * CMAP_TENSION_EXPAND * diff(lim)
+    beside <- ifelse(d$v > 0, lim[2] - d$v, d$v - lim[1]) * panel / diff(lim)     # px past each bar's end
+    any(vapply(d$fam, .fit_text_px, numeric(1), pt = CMAP_TENSION_LABEL_MM * ggplot2::.pt) > beside)
+  }, error = function(e) FALSE)
+}
 plot_constraint_tension <- function(tn) {
   d <- rbind(
     data.frame(par = tn$par, fam = tn$up,   v = tn$up_pull,   dir = KEY_CMAP_UP),
     data.frame(par = tn$par, fam = tn$down, v = tn$down_pull, dir = KEY_CMAP_DOWN))
   d$par <- factor(d$par, levels = rev(tn$par))
   d$dir <- factor(d$dir, levels = c(KEY_CMAP_DOWN, KEY_CMAP_UP))
+  above <- cmap_tension_names_above(d)
+  names_layer <- if (above)
+    geom_text(aes(x = 0, label = fam, hjust = ifelse(v > 0, -0.04, 1.04)), vjust = 0,
+              position = position_nudge(y = 0.27), size = CMAP_TENSION_LABEL_MM, colour = PAL[["obs"]])
+  else
+    geom_text(aes(label = fam, hjust = ifelse(v > 0, -0.05, 1.05)), size = CMAP_TENSION_LABEL_MM,
+              colour = PAL[["obs"]])
   ggplot(d, aes(v, par, fill = dir)) +
-    geom_col(width = 0.62) +
+    geom_col(width = if (above) 0.45 else 0.62) +
     geom_vline(xintercept = 0, colour = PAL[["obs"]], linewidth = 0.5) +
-    geom_text(aes(label = fam, hjust = ifelse(v > 0, -0.05, 1.05)), size = 3,
-              colour = PAL[["obs"]]) +
+    names_layer +
     scale_fill_manual(values = stats::setNames(c(PAL[["pull_down"]], PAL[["pull_up"]]),
                                               c(KEY_CMAP_DOWN, KEY_CMAP_UP)),
                       name = NULL) +
-    scale_x_continuous(expand = expansion(mult = 0.35)) +
+    scale_x_continuous(expand = expansion(mult = if (above) 0.05 else CMAP_TENSION_EXPAND)) +
     labs(x = LAB_CMAP_PULL, y = NULL,
          subtitle = app_subtitle(paste(
            "Two measurements, pulling the same knob opposite ways. The fitted",
