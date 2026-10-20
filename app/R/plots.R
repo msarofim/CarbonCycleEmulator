@@ -400,8 +400,9 @@ app_legend_nrow <- function(keys, panel = "full", pt = SUBTITLE_PT) {
 # edges (k_plot, w_partition, i_d14c, f_plot, rv_irf ...), y titles running off the panel (w_af, k_seasonal).
 # ⇒ app_fit_plot() MEASURES THE PLOT AS IT WILL BE DRAWN (ggplotGrob on the device renderPlot has open) and
 # changes only what overflows: legend keys go onto more rows, several legend boxes stack, a plain-text axis
-# title wraps to the room its panel gives it, a title or subtitle no wrapper handled wraps to the plot, and
-# colliding category labels turn on end. A plot that fits comes back untouched.
+# title wraps to the room its panel gives it, a title or subtitle no wrapper handled wraps to the plot,
+# colliding category labels turn on end, and crowded tick labels get fewer breaks. A plot that fits comes back
+# untouched.
 # ⚠ It runs only at or below APP_FIT_MAX_PX, the full panel at the 768 px floor where every slot was audited
 # (above): wider layouts are not touched and pay no measuring cost. Called by renderPlotFit() (server.R).
 # ⚠ A plotmath title (CO₂, δ¹³C ...) is an expression and cannot be wrapped; one that overflows is left as is.
@@ -505,6 +506,34 @@ APP_FIT_KEY_GAP_PT <- 2    # vertical gap between legend rows once a legend is r
   }
   FALSE
 }
+# Do a continuous x axis's tick labels run into each other -- inside a panel, or across the gap between two
+# facets, where one panel's last label meets the next one's first (the pulse lab's two panels at 351 px drew
+# "2300" and "2050" as one word)? Returns the most breaks any panel draws when they do, else 0.
+.fit_x_ticks_collide <- function(p, b, g) {
+  el <- tryCatch(ggplot2::calc_element("axis.text.x.bottom", p$theme), error = function(e) NULL)
+  if (is.null(el) || (is.numeric(el$angle) && el$angle != 0)) return(0L)
+  W <- .fit_px_w(grid::unit(1, "npc")); cols <- .fit_tracks(g$widths, W, .fit_px_w); x0 <- c(0, cumsum(cols))
+  pl <- sort(unique(g$layout$l[grepl("^panel", g$layout$name)]))
+  ll <- b$layout$layout; n_max <- 0L; hit <- FALSE; edges <- list()
+  for (cc in sort(unique(ll$COL))) {
+    k <- which(ll$COL == cc & ll$ROW == max(ll$ROW[ll$COL == cc]))[1]
+    x <- b$layout$panel_params[[k]]$x
+    if (is.null(x) || isTRUE(x$is_discrete()) || cc > length(pl)) return(0L)
+    pos <- x$break_positions(); lab <- x$get_labels()
+    ok <- is.finite(pos) & !is.na(lab) & pos >= 0 & pos <= 1
+    pos <- pos[ok]; lab <- lab[ok]; n_max <- max(n_max, length(pos))
+    if (!length(pos)) next
+    pw <- cols[pl[cc]]; ctr <- pos * pw
+    w <- vapply(seq_along(lab), function(i) .fit_text_px(lab[i], el$size), numeric(1))
+    if (length(ctr) > 1L && any(diff(ctr) < (utils::head(w, -1) + utils::tail(w, -1)) / 2 + 2)) hit <- TRUE
+    # where this panel's first label starts and its last label ends, in plot px
+    edges[[length(edges) + 1L]] <- c(first_l = x0[pl[cc]] + ctr[1] - w[1] / 2,
+                                     last_r  = x0[pl[cc]] + ctr[length(ctr)] + w[length(w)] / 2)
+  }
+  for (i in seq_len(length(edges) - 1L))
+    if (edges[[i + 1L]][["first_l"]] - edges[[i]][["last_r"]] < 2) hit <- TRUE
+  if (hit) n_max else 0L
+}
 .fit_axis_title_pt <- function(p, el) {
   e <- tryCatch(ggplot2::calc_element(el, p$theme), error = function(err) NULL)
   if (!is.null(e) && is.numeric(e$size)) e$size else CCX_BASE_SIZE
@@ -556,6 +585,17 @@ app_fit_plot <- function(p) {
     # 3. category labels that collide along a discrete x axis are turned on end
     if (.fit_x_labels_collide(p, b, g))
       p <- p + theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+    # 4. tick labels that collide along a continuous x axis: the x scale (the plot's own, cloned, or a default
+    #    one) asks scales::breaks_extended() for about half as many breaks; checked once more and halved again
+    for (i in 1:2) {
+      n <- .fit_x_ticks_collide(p, b, g)
+      if (n < 3L) break
+      sc <- p$scales$get_scales("x")
+      sc <- if (is.null(sc)) scale_x_continuous() else sc$clone()
+      sc$breaks <- scales::breaks_extended(n = max(2L, n %/% 2L))
+      p <- suppressMessages(p + sc)
+      b <- ggplot_build(p); g <- ggplot_gtable(b)
+    }
     p
   }, error = function(e) {
     message("app_fit_plot: left as drawn (", conditionMessage(e), ")")

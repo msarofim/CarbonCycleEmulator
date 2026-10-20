@@ -126,6 +126,21 @@ test_that("4. colliding category labels are turned on end, and only when they co
   pf_at(e, e$APP_FIT_MAX_PX, 320, expect_equal(angle(e$app_fit_plot(p)), 0))   # 552 px: room enough
 })
 
+test_that("4b. crowded year ticks get fewer breaks, across a facet edge too; an uncrowded axis is untouched", {
+  skip_if_no_fit(); e <- .pf_env
+  # the pulse lab's two panels, 2050-2300: at 351 px "2300" and "2050" met across the gap
+  two <- ggplot(data.frame(x = rep(c(2050, 2300), 2), y = 1:4, g = rep(c("left", "right"), each = 2)),
+                aes(x, y)) + geom_line() + facet_wrap(~g, nrow = 1) + e$theme_ccx()
+  collide <- function(q) { b <- ggplot2::ggplot_build(q); e$.fit_x_ticks_collide(q, b, ggplot2::ggplot_gtable(b)) }
+  pf_at(e, 351, 320, {
+    expect_gte(collide(two), 3L)                      # the fixture really collides
+    expect_identical(collide(e$app_fit_plot(two)), 0L)
+  })
+  # a single panel of years is not crowded at phone width, and is left exactly as it was
+  one <- ggplot(data.frame(x = c(1850, 2024), y = 1:2), aes(x, y)) + geom_line() + e$theme_ccx()
+  pf_at(e, 351, 320, expect_identical(e$app_fit_plot(one), one))
+})
+
 test_that("5. a plot that fails to build is returned as it was, with a message", {
   skip_if_no_fit(); e <- .pf_env
   bad <- ggplot(data.frame(x = 1), aes(x, no_such_column)) + geom_point()
