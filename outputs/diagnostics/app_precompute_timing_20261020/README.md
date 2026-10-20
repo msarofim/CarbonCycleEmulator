@@ -44,6 +44,22 @@ first page. The largest stages left are `library(ggplot2)` 0.21 s, `ccx_prepare_
 - **Peak memory during start-up** is ~140 MB higher, for the first ~2.5 s: the compiler now runs while the app process
   holds its data (~230 MB), plus the background R process. Before, it ran at the top of `global.R`.
 
+## The pulse lab's display (CHANGELOG 2026-10-20 c, measured on the worktree after `0176015`)
+
+Marcus ruled the default is drawn with no click and the result grays out when a pulse setting changes.
+`pulse_display_check.py` (three fresh processes; `pulse_display_check.csv`):
+
+| step | seconds |
+|---|---|
+| open Pulse lab (Futures tab settled first) → partition drawn, no click | 0.51–0.52 |
+| pulse size slider to 200 → all six result outputs grayed and the note shown (old chart kept) | 0.33 |
+| "Release the pulse" → new chart drawn, gray and note gone | 3.70–3.77 |
+| slider back to 100 → the stored chart again | 0.66–0.67 |
+
+`pulse_display_stale_1440x900.png` is the grayed state. ⚠ Since this change `coldstart.py`'s default-pulse step
+(click at the default, wait for a NEW partition image) would time out: the default is already on screen and an
+identical result is not redrawn. The `coldstart_*` numbers are from `1838885`, before it.
+
 ## Method
 
 - `time_stages.R <bundle> <out_csv> <label>`: in a fresh `Rscript`, evaluates `app/global.R` expression by expression

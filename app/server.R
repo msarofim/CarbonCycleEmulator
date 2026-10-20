@@ -772,7 +772,31 @@ function(input, output, session) {
   # 2026-10-20: the runs moved to global.R (app_pulse_runs()), which sees only the inputs
   # APP_PULSE_DEFAULTS names; the default settings are served from the precomputed product
   # (app_pulse_lab()), anything else is computed live as before.
-  pulse_runs <- eventReactive(input$p_go, app_pulse_lab(app_pulse_inputs(input)))
+  # ⭐ AND THE DEFAULT IS DRAWN WITHOUT A CLICK; A CHANGED SETTING GRAYS THE RESULT OUT (Marcus
+  # 2026-10-20; global.R app_pulse_stale()). `pulse_shown` is the result on screen and the inputs it
+  # was run at; every reader of the result goes through pulse_runs(), as before.
+  pulse_inputs <- reactive(app_pulse_inputs(input))
+  pulse_shown  <- reactiveVal(NULL)
+  observeEvent(input$p_go, {
+    inp <- pulse_inputs()
+    pulse_shown(list(pr = app_pulse_lab(inp), inp = inp))
+  })
+  # opened (or set back) at the defaults: the stored result, with no click. Nothing is drawn when the
+  # product is absent or refused; the click then computes it, as before.
+  observe({
+    req(identical(input$f_mode, "Pulse lab"))
+    inp <- pulse_inputs()
+    if (app_pulse_is_default(inp)) {
+      r <- app_pulse_default_result()
+      if (!is.null(r)) pulse_shown(list(pr = r, inp = inp))
+    }
+  })
+  pulse_runs  <- reactive({ s <- pulse_shown(); req(s); s$pr })
+  pulse_stale <- reactive(identical(input$f_mode, "Pulse lab") &&
+                            app_pulse_stale(pulse_shown()$inp, pulse_inputs()))
+  observe(session$sendCustomMessage("ccx_pulse_stale",
+                                    list(stale = pulse_stale(), ids = as.list(APP_PULSE_RESULT_IDS))))
+  output$p_stale_note <- renderUI(if (pulse_stale()) div(class = "caveat", APP_PULSE_STALE_NOTE))
 
   output$f_plot <- renderPlotFit("f_plot", {
     if (identical(input$f_mode, "Pulse lab")) {
@@ -920,8 +944,8 @@ function(input, output, session) {
   })
 
   # F2 (Marcus 2026-09-22): the second pulse panel. Rendered only in the pulse
-  # lab, and only after the user has run one -- pulse_runs() is an eventReactive
-  # on the button, so it does not fire on tab entry.
+  # lab, and only once a result is on screen -- after a click, or (since 2026-10-20)
+  # on opening the tab at the default settings, from the stored result.
   # ⭐ THE OCEAN BY DEPTH (Marcus 2026-10-16, app/R/ocean_depth.R): the three runs restarted
   # once a year from saved states, ~0.7 s each. Its own reactive, so the pulse chart above
   # draws without waiting for it.

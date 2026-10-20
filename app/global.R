@@ -661,17 +661,42 @@ app_pulse_precomputed <- function() {
   get("values", envir = APP_PRE_PULSE, inherits = FALSE)
 }
 
+#' The stored default result in the shape app_pulse_runs() returns, plus its ocean-by-depth split as
+#' `depth` (which server.R's pulse_depth() takes instead of restarting the runs); NULL without a product
+app_pulse_default_result <- function() {
+  pre <- app_pulse_precomputed()
+  if (is.null(pre)) NULL else c(pre$runs, list(depth = pre$depth))
+}
+
 #' What "Release the pulse" shows: the stored default when the inputs are the default and the
 #' product is accepted, the live runs otherwise. The stored runs are the live ones bit for bit
-#' (test-app-precompute.R) and carry the ocean-by-depth split as `depth`, which server.R's
-#' pulse_depth() then takes instead of restarting the runs.
+#' (test-app-precompute.R).
 app_pulse_lab <- function(inp) {
   if (app_pulse_is_default(inp)) {
-    pre <- app_pulse_precomputed()
-    if (!is.null(pre)) return(c(pre$runs, list(depth = pre$depth)))
+    r <- app_pulse_default_result()
+    if (!is.null(r)) return(r)
   }
   app_pulse_runs(inp)
 }
+
+# ---- WHAT THE PULSE LAB SHOWS BEFORE AND BETWEEN CLICKS (Marcus 2026-10-20) -----------------------
+# "If we have the pre-calculated default pulse, I would automatically populate the graph rather than
+# waiting for a click. And then replace it if the pulse options change." Asked what "replace" means,
+# he chose "Grey out, wait for the click". So (server.R): opened at the default inputs, the tab draws
+# the stored result with no click; when any pulse input differs from the inputs of the result on
+# screen, that result is grayed out (APP_PULSE_RESULT_IDS) with APP_PULSE_STALE_NOTE under the
+# button; the click computes as before; set back to the defaults, the stored result is shown again.
+# The pulse inputs are APP_PULSE_DEFAULTS' names. The FaIR box and the CO2/temperature radio change
+# only the VIEW of the same runs, so they do not gray it.
+#' Whether the result on screen was run at other inputs than the controls now hold (FALSE: none shown)
+app_pulse_stale <- function(shown_inp, now_inp) !is.null(shown_inp) && !identical(shown_inp, now_inp)
+# The outputs that draw the pulse lab's result, grayed together (ui.R's ccx_pulse_stale handler): every
+# output that reads pulse_runs() (test-app-precompute.R 11 derives that set from server.R), f_notes for
+# its fitted-range caveat on the run.
+APP_PULSE_RESULT_IDS <- c("f_takeaway", "f_plot", "f_fair_note", "f_partition", "f_pulse_permanence", "f_notes")
+# ⚠ CLAUDE'S DRAFT, FOR MARCUS'S WORDING (2026-10-20).
+APP_PULSE_STALE_NOTE <- paste("These charts are for the previous settings. Press",
+                              "“Release the pulse” to update them.")
 
 # ---- THE FUTURES RIBBONS (Marcus 2026-10-01, review 10-01c B7: "Laplace first, MCMC as the check") ----
 # PRECOMPUTED by calibration/build_futures_ribbons.R and only READ here: the app

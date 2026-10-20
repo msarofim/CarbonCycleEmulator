@@ -138,6 +138,9 @@ navbarPage(
       .card-ask { background: #eef5fb; border-left: 4px solid #1b6ca8;
                   padding: 9px 13px; margin-top: 12px; border-radius: 3px; }
       .asklist { font-size: 0.95rem; }
+      /* 2026-10-20 (Marcus's ruling, quoted in global.R): the pulse lab's result once a pulse
+         setting has changed; server.R toggles it through the ccx_pulse_stale message below */
+      .pulse-stale { opacity: 0.35; filter: grayscale(100%); transition: opacity 0.2s; }
     ")),
     # ⚠ SUPERSCRIPT AND SUBSCRIPT DIGITS (Marcus 2026-10-15, comments 10.15.26b: "the 4 in Δ¹⁴C looks weird").
     # Google serves Inter in subsets, and none covers U+2070-209F, so the browser drew ⁴ (and the ₂ in CO₂) in a
@@ -185,6 +188,16 @@ navbarPage(
           }).observe(document.body, {childList: true, subtree: true, characterData: true});
         });
       })();
+    ")),
+    # The pulse lab's result grays out while its settings differ from the ones it was run at (server.R
+    # pulse_stale(); global.R APP_PULSE_RESULT_IDS). shiny.js is loaded in <head>, so Shiny exists here.
+    tags$script(HTML("
+      Shiny.addCustomMessageHandler('ccx_pulse_stale', function (m) {
+        (m.ids || []).forEach(function (id) {
+          var el = document.getElementById(id);
+          if (el) el.classList.toggle('pulse-stale', !!m.stale);
+        });
+      });
     "))),
     div(style = "padding: 0 14px;", provenance_banner())
   ),
@@ -498,6 +511,7 @@ navbarPage(
             sliderInput("p_year", "Release it in", APP_PULSE_YEAR_RANGE[1], APP_PULSE_YEAR_RANGE[2],
                         APP_PULSE_YEAR_DEFAULT, step = APP_PULSE_YEAR_RANGE[3], sep = ""),
             actionButton("p_go", "Release the pulse", class = "btn-primary btn-sm"),
+            uiOutput("p_stale_note"),   # 2026-10-20: shown while the result on screen is for other settings
             helpText("Runs the model twice — with and without the pulse — and",
                      "takes the difference. The difference is what the extra carbon does.")
           )

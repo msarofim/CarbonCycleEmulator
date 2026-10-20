@@ -60,8 +60,9 @@ integration and the box diagram's one-year flux trace, all before the first page
 
 ⭐ **Since 2026-10-20 (CHANGELOG 2026-10-20 b) none of that is on the path to the first page:**
 - the spin-up, the historical run and the flux trace are READ from `data/app_startup_precompute.rds`;
-- the pulse lab's default ("Release the pulse" at vvM, 100 GtC, 2050) is read from
-  `data/pulse_default_precompute.rds` on its first press; any other setting is computed live;
+- the pulse lab's default (vvM, 100 GtC, 2050) is read from `data/pulse_default_precompute.rds` and drawn when the
+  tab is opened, with no click (Marcus 2026-10-20, CHANGELOG 2026-10-20 c); changing a pulse setting grays the result
+  out until "Release the pulse" computes the new one live;
 - the C++ core compiles in a background R process started by `global.R` (`ccx_cpp_prebuild()`, `R/cpp.R`); the
   first live run waits for it, and any failure falls back to compiling in the app's own process.
 
@@ -129,8 +130,8 @@ a fresh process each time, so the C++ compile is cold; M4, load average 2.8–3.
 
 Everything after start-up is live, except the stored values named above: a counterfactual rerun is ~60 ms, three
 coupled SSP futures ~0.5 s, a matched pulse pair over 1750–2300 ~0.65 s (older measurements). The
-pulse lab's "Release the pulse" drew both of its plots 4.0 s after the click (10-15, bundle); 0.5 s at its default
-settings since 2026-10-20.
+pulse lab's "Release the pulse" drew both of its plots 4.0 s after the click (10-15, bundle). Since 2026-10-20 the
+default is drawn 0.5 s after the tab is opened, with no click; other settings take 3.7 s after the click (M4).
 **The "Known issues" tab needs three runs the app does not otherwise make** (a gate
 run to 2025, an ENSO knockout, a 1000-year pulse pair; the card that spun up a second mode was
 retired 2026-10-01). Since 2026-10-15 (bb) their results are PRECOMPUTED in `data/review_precompute.rds`,
