@@ -52,12 +52,16 @@ function(input, output, session) {
   # matches its output.
   # `height` (2026-10-15): the box diagram's height FOLLOWS its width, so the diagram keeps one shape and its
   # text scales with it (plot_box_diagram's `scale`); every other plot keeps renderPlot's default ("auto").
+  # 2026-10-20 (phones): the finished plot goes through app_fit_plot() (plots.R), which at narrow widths gives
+  # an overflowing legend more rows and wraps an axis title too long for its panel. It runs while the width is
+  # still published, and only on a visible result: a base-graphics plot returns invisibly and is passed through.
   renderPlotFit <- function(id, expr, env = parent.frame(), quoted = FALSE, height = "auto") {
     fn <- shiny::exprToFunction(expr, env, quoted)
     shiny::renderPlot({
       app_set_panel_px(session$clientData[[paste0("output_", id, "_width")]])
       on.exit(app_clear_panel_px(), add = TRUE)
-      fn()
+      res <- withVisible(fn())
+      if (res$visible) app_fit_plot(res$value) else invisible(res$value)
     }, height = height)
   }
 

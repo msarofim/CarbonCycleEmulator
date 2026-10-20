@@ -100,6 +100,80 @@ review_card <- function(id, plot_id = NULL, plot_height = "330px",
                  sprintf("Comment on issue %d \u2192", c_$id))))
 }
 
+# ---- PHONES (2026-10-20) ----------------------------------------------
+# Measured on the live app at 375 x 812: the eight-link navbar wrapped to 288 px, and sidebarLayout stacked
+# the sidebar ABOVE the main panel, so the first tab's takeaway started 837 px down and its first plot 1,208 px
+# down -- the whole first screen was navigation, the banner and the sidebar's controls. Below APP_PHONE_MAX_PX
+# (BS5's `sm` breakpoint, where sidebarLayout stacks):
+#   1. the links give way to one <select> built from them (the script in the header), showing the open tab;
+#   2. each tab's LEAD -- its takeaway and main plot, wrapped by main_panel() -- comes before the sidebar, and
+#      the rest of the main panel after it, so the controls sit directly under the plot they change;
+#   3. plots get a floor on their height (a 351 px wide panel has room for fewer words per line, so captions and
+#      legends take more lines out of the same height), and a word too long for the screen breaks rather than
+#      pushing the page sideways;
+#   4. the box diagram (Under the hood) keeps its tuned width and scrolls sideways inside its own frame.
+# The plots' own text is fitted to the narrow panel by app_fit_plot() (plots.R), called from renderPlotFit().
+# Above that width none of these rules applies: the two wrappers are plain blocks and the select is hidden.
+APP_PHONE_MAX_PX      <- 575.98
+APP_PHONE_PLOT_MIN_PX <- 320
+APP_TAB_MENU_LABEL    <- "Choose a tab"   # the select's accessible name (screen readers); never displayed
+
+#' A sidebarLayout main panel in two parts: `lead` (takeaway + main plot) and everything else
+main_panel <- function(lead, ...) {
+  mainPanel(width = 9, div(class = "ccx-lead", lead), div(class = "ccx-rest", ...))
+}
+
+phone_css <- sprintf("
+  #ccx-tab-select { display: none; }
+  @media (max-width: %1$.2fpx) {
+    .navbar .navbar-nav { display: none; }
+    .navbar > .container-fluid { flex-wrap: nowrap; }  /* brand and select on one row */
+    .navbar .navbar-header { width: auto; }            /* bs3compat makes it a full-width row */
+    .navbar .navbar-brand { margin-right: 10px; }
+    #ccx-tab-select { display: block; width: auto; flex: 0 1 auto; min-width: 0; }
+    .tab-content > .tab-pane { margin-top: 0; }      /* the banner's own margin already separates them */
+    .row > [role='main'] { display: contents; }
+    .row > [role='main'] > .ccx-lead, .row > [role='main'] > .ccx-rest {
+      flex: 0 0 100%%; max-width: 100%%;
+      padding-left: calc(var(--bs-gutter-x) * .5); padding-right: calc(var(--bs-gutter-x) * .5); }
+    .row > [role='main'] > .ccx-lead { order: -1; margin-bottom: 14px; }
+    .row > [role='main'] > .ccx-rest { order: 1; }
+    .readout { font-size: 1.2rem; }                  /* three across in a 351 px column */
+    .shiny-plot-output:not(#h_diagram) { min-height: %2$dpx; }
+    /* The box diagram: at 351 px its labels ran into each other (its text never shrinks below 0.9 of the tuned
+       size, DIAGRAM_SCALE_RANGE), so it is drawn at its tuned width and the reader scrolls it sideways. */
+    .ccx-diagram { overflow-x: auto; }
+    .ccx-diagram > #h_diagram { min-width: %3$dpx; }
+    /* a word wider than the screen breaks rather than pushing the page sideways: the review tables' code
+       names and the repository URL did (Known issues 537 px wide, Under the hood 401 px) */
+    .tab-content { overflow-wrap: anywhere; }
+  }", APP_PHONE_MAX_PX, APP_PHONE_PLOT_MIN_PX, as.integer(DIAGRAM_REF_PX))
+
+# The select: one option per navbar link, in the links' order and with their text, so a tab added, renamed or
+# reordered in navbarPage() below needs nothing here. Choosing an option clicks that link (Bootstrap shows the
+# tab and Shiny's `input$tabs` follows); a tab opened any other way moves the select with it.
+phone_tab_js <- sprintf("
+  document.addEventListener('DOMContentLoaded', function () {
+    var nav = document.querySelector('.navbar .navbar-nav');
+    if (!nav) return;
+    var links = Array.prototype.slice.call(nav.querySelectorAll('a[data-bs-toggle=tab]'));
+    var sel = document.createElement('select');
+    sel.id = 'ccx-tab-select'; sel.className = 'form-select form-select-sm';
+    sel.setAttribute('aria-label', %s);
+    links.forEach(function (a) {
+      var o = document.createElement('option');
+      o.value = a.getAttribute('data-value'); o.textContent = a.textContent.trim();
+      sel.appendChild(o);
+    });
+    function sync() { var a = nav.querySelector('a.active'); if (a) sel.value = a.getAttribute('data-value'); }
+    sel.addEventListener('change', function () {
+      links.forEach(function (a) { if (a.getAttribute('data-value') === sel.value) a.click(); });
+    });
+    $(document).on('shown.bs.tab', '.navbar a[data-bs-toggle=tab]', sync);
+    nav.parentNode.insertBefore(sel, nav);
+    sync();
+  });", jsonlite::toJSON(APP_TAB_MENU_LABEL, auto_unbox = TRUE))
+
 navbarPage(
   title = APP_TITLE,
   id = "tabs",
@@ -185,7 +259,9 @@ navbarPage(
           }).observe(document.body, {childList: true, subtree: true, characterData: true});
         });
       })();
-    "))),
+    ")),
+    tags$style(HTML(phone_css)),       # phones (2026-10-20): see APP_PHONE_MAX_PX above
+    tags$script(HTML(phone_tab_js))),
     div(style = "padding: 0 14px;", provenance_banner())
   ),
 
@@ -223,11 +299,11 @@ navbarPage(
                    "the world's land — and so most of its vegetation — is in",
                    "the north."))
       ),
-      mainPanel(
-        width = 9,
-        warmup_note(),
-        takeaway(textOutput("k_takeaway", inline = TRUE)),
-        plotOutput("k_plot", height = "380px"),
+      main_panel(
+        lead = tagList(
+          warmup_note(),
+          takeaway(textOutput("k_takeaway", inline = TRUE)),
+          plotOutput("k_plot", height = "380px")),
         # Marcus's own wording (2026-09-22, review K4), used as supplied.
         see_card(1, paste("Two model lines are drawn. The solid one shows the",
                           "model result including a fitted station offset. The",
@@ -272,19 +348,21 @@ navbarPage(
                    "or lack of change — in the airborne fraction should not be",
                    "attributed to one factor alone."))
       ),
-      mainPanel(
-        width = 9,
-        takeaway(textOutput("w_takeaway", inline = TRUE)),
-        fluidRow(
-          column(4, div(class = "readout-label", "Still in the air"),
-                 div(class = "readout", textOutput("w_atm", inline = TRUE))),
-          column(4, div(class = "readout-label", "Taken up by land"),
-                 div(class = "readout", textOutput("w_land", inline = TRUE))),
-          column(4, div(class = "readout-label", "Taken up by the ocean"),
-                 div(class = "readout", textOutput("w_ocean", inline = TRUE)))
-        ),
-        br(),
-        plotOutput("w_partition", height = "330px"),
+      main_panel(
+        lead = tagList(
+          takeaway(textOutput("w_takeaway", inline = TRUE)),
+          # `col-4` (2026-10-20): the three readouts stay side by side on a phone too, rather than stacking into
+          # ~170 px between the takeaway and the chart; at 576 px and up `col-sm-4` already set the same width
+          fluidRow(
+            column(4, class = "col-4", div(class = "readout-label", "Still in the air"),
+                   div(class = "readout", textOutput("w_atm", inline = TRUE))),
+            column(4, class = "col-4", div(class = "readout-label", "Taken up by land"),
+                   div(class = "readout", textOutput("w_land", inline = TRUE))),
+            column(4, class = "col-4", div(class = "readout-label", "Taken up by the ocean"),
+                   div(class = "readout", textOutput("w_ocean", inline = TRUE)))
+          ),
+          br(),
+          plotOutput("w_partition", height = "330px")),
         # W2 (Marcus 2026-09-22). Computed, not recalled -- and the computation
         # corrected the premise; see output$w_luc_note.
         div(class = "caveat", tags$strong("About land use: "),
@@ -351,10 +429,10 @@ navbarPage(
                     value = c(1850, APP_HIST_YEARS[2]), step = 1, sep = ""),
         uiOutput("c_blurb")
       ),
-      mainPanel(
-        width = 9,
-        takeaway(textOutput("c_takeaway", inline = TRUE)),
-        plotOutput("c_plot", height = "400px"),
+      main_panel(
+        lead = tagList(
+          takeaway(textOutput("c_takeaway", inline = TRUE)),
+          plotOutput("c_plot", height = "400px")),
         uiOutput("c_caveat"),
         # C1 + C2 + C3 (Marcus 2026-09-22). The level chart above cannot show
         # what ENSO does -- a 1-2 ppm wobble is invisible against a 130 ppm rise
@@ -439,11 +517,11 @@ navbarPage(
                  p(tags$small("Both are reported in ", gloss("‰", "per mil: parts per thousand"),
                               ", as small differences from a reference ratio.")))
       ),
-      mainPanel(
-        width = 9,
-        takeaway(textOutput("i_takeaway", inline = TRUE)),
-        h5("δ¹³C: the Suess effect"),
-        plotOutput("i_d13c", height = "280px"),
+      main_panel(
+        lead = tagList(
+          takeaway(textOutput("i_takeaway", inline = TRUE)),
+          h5("δ¹³C: the Suess effect"),
+          plotOutput("i_d13c", height = "280px")),
         see_card(2, paste("The model's north\u2013south \u03b4\u00b9\u00b3C difference is about",
                           "twice the measured one. The trend at each station is",
                           "right; the difference between them is not.")),
@@ -533,10 +611,10 @@ navbarPage(
                    "This model's carbon cycle is its own; only its CO₂-to-temperature",
                    "step is fitted to FaIR."))
       ),
-      mainPanel(
-        width = 9,
-        takeaway(textOutput("f_takeaway", inline = TRUE)),
-        plotOutput("f_plot", height = "400px"),
+      main_panel(
+        lead = tagList(
+          takeaway(textOutput("f_takeaway", inline = TRUE)),
+          plotOutput("f_plot", height = "400px")),
         # The splice caption (Marcus 2026-09-22). Every mode on this tab -- the
         # scenarios, build-your-own and the pulse lab -- used to carry the
         # SSP/LUH2 land-use history instead of the observed budget the Keeling
@@ -666,11 +744,11 @@ navbarPage(
                    "it — that measurement is", tags$em("pulling"), "on it."),
                  p(textOutput("cm_pin_note", inline = TRUE)))
       ),
-      mainPanel(
-        width = 9,
-        h5(APP_CMAP_HEADING),
-        takeaway(textOutput("cm_takeaway", inline = TRUE)),
-        uiOutput("cm_map_ui"),
+      main_panel(
+        lead = tagList(
+          h5(APP_CMAP_HEADING),
+          takeaway(textOutput("cm_takeaway", inline = TRUE)),
+          uiOutput("cm_map_ui")),
         hr(),
         h5(APP_CMAP_TENSION_HEADING),
         # Marcus 2026-10-02 (carbotopecomment), his sentence
@@ -709,7 +787,9 @@ navbarPage(
           "a cold high-latitude surface box and a deep box alongside it.",
           "Monthly steps from 1750. All exchanges include all three carbon",
           "isotopes — ¹²C, ¹³C and ¹⁴C."),
-        plotOutput("h_diagram", height = "auto"),   # the height follows the width (server.R, 2026-10-15)
+        # the height follows the width (server.R, 2026-10-15); on a phone the diagram keeps its tuned width and
+        # scrolls sideways inside this wrapper (2026-10-20, phone_css)
+        div(class = "ccx-diagram", plotOutput("h_diagram", height = "auto")),
         h4("Parameters"),
         # 2026-10-06 (Marcus: "Mark held rows (Recommended)"): "and the few it holds at a stated
         # value" added; the table's "Set" column says which (app/R/params_meta.R)
