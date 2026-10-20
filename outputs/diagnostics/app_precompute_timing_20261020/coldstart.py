@@ -2,8 +2,9 @@
 
 For each repetition: start a FRESH R process serving the bundle (so the C++ core compiles cold), time
 process start -> HTTP 200 ("serving"), then open the app in a new headless-Chrome browser context and time
-process start -> first plot drawn. Then Futures -> Pulse lab -> "Release the pulse" with the default settings
-(timed from the click to the partition panel drawn), then one NON-default pulse (pulse size set to
+process start -> first plot drawn. Then Futures -> Pulse lab, wait until the app is idle (the Futures tab's own
+scenario runs; futures_settle_s), and "Release the pulse" with the default settings (timed from the click to the
+partition panel drawn), then one NON-default pulse (pulse size set to
 NONDEFAULT_GTC through Shiny.setInputValue, same timing). Records the R process's resident memory at each
 point. Stdlib only; the DevTools client is the one in ../loadtest_20261020/loadtest.py.
 
@@ -14,6 +15,7 @@ import sys, json, time, socket, base64, os, struct, urllib.request, csv, subproc
 
 STEP_TIMEOUT_S = 300
 POLL_S = 0.05                 # fine polling: the numbers being measured are ~1 s
+IDLE_HOLD_S = 0.5             # "idle" must hold this long before the pulse is clicked
 NONDEFAULT_GTC = 200          # a pulse size off the default (100), so the live path runs
 chrome_port, bundle, app_port, reps, out_csv, label = (int(sys.argv[1]), sys.argv[2], int(sys.argv[3]),
                                                        int(sys.argv[4]), sys.argv[5], sys.argv[6])
@@ -81,6 +83,9 @@ PULSE_READY = ("(function(prev){var o=document.getElementById('f_partition'); if
                " return !!i && i.naturalWidth>0 && i.src!==prev && !o.classList.contains('recalculating')"
                " && !document.documentElement.classList.contains('shiny-busy');})")
 PULSE_SRC = "(function(){var o=document.getElementById('f_partition'); var i=o&&o.querySelector('img'); return i?i.src:'';})()"
+# VISIBLE outputs only: an output on a hidden tab keeps its `recalculating` class until it is shown
+IDLE = ("(function(){return !document.documentElement.classList.contains('shiny-busy') &&"
+        " [...document.querySelectorAll('.recalculating')].every(x=>x.offsetParent===null);})()")
 TAKEAWAY = "(function(){var o=document.getElementById('f_takeaway'); return o?o.textContent:'';})()"
 ERRORS = "document.querySelectorAll('.shiny-output-error:not(.shiny-output-error-validation)').length"
 
@@ -133,6 +138,18 @@ def one_rep(rep, browser):
              "pulse pill")
         js("document.querySelector('a[data-value=\"Pulse lab\"]').click(); true")
         wait("(function(){var b=document.getElementById('p_go'); return !!b && b.offsetParent!==null;})()", "pulse button")
+        # the Futures tab draws its own scenario runs first; the pulse is timed from an IDLE app, so it
+        # measures the pulse and not the queue in front of it (futures_settle_s records that queue)
+        ts = time.time(); calm = None
+        while True:                     # idle for IDLE_HOLD_S without a break: a click's busy flag can lag it
+            if js(IDLE):
+                calm = calm or time.time()
+                if time.time() - calm >= IDLE_HOLD_S: break
+            else:
+                calm = None
+            if time.time() - ts > STEP_TIMEOUT_S: raise TimeoutError("futures tab never settled")
+            time.sleep(POLL_S)
+        row["futures_settle_s"] = calm - ts
         row["since_start_at_click_s"] = time.time() - t0
         for kind, prep in (("default", None), ("nondefault", f"Shiny.setInputValue('p_gtc', {NONDEFAULT_GTC}); true")):
             if prep: js(prep); time.sleep(0.2)
@@ -167,7 +184,7 @@ for k in range(1, reps + 1):
     print({k: (round(v, 2) if isinstance(v, float) else v) for k, v in row.items() if not k.startswith("takeaway")},
           flush=True)
     time.sleep(2)
-fields = ["label", "rep", "serving_s", "connect_s", "first_plot_s", "since_start_at_click_s", "pulse_default_s",
+fields = ["label", "rep", "serving_s", "connect_s", "first_plot_s", "futures_settle_s", "since_start_at_click_s", "pulse_default_s",
           "pulse_nondefault_s", "rss_serving_mb", "rss_first_plot_mb", "rss_after_default_mb", "rss_after_nondefault_mb",
           "errors", "failure", "takeaway_default", "takeaway_nondefault"]
 with open(out_csv, "w", newline="") as f:
