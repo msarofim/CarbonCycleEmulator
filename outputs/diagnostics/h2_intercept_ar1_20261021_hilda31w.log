@@ -1,0 +1,42 @@
+calibration/diag_h2_intercept_ar1.R @fd6d09c3 | 2026-10-21 16:36
+input: outputs/diagnostics/h2_time_shape_20261013_hilda31w.rds (driver calibration/diag_h2_time_shape.R @6ddf4b2, 2026-10-13 12:00; CCX series outputs/diagnostics/ocean_climate_gobm_20261013_wtcid017.rds, mode md5 53ee816ac48cea0f1c1fad244651c5fd)
+66 years, 1959-2024; units GtC/yr (uptake positive) against K of SST warming vs the record's first decade
+
+GATE R: OLS reproduces the stored M3 (max |diff| 0.0e+00, tol 1e-12) -> PASS
+
+=== E1. INTERCEPT a (GtC/yr at no warming) AND SLOPE b (GtC/yr per K), three estimators ===
+  OLS residual lag-1 autocorrelation: gap 0.22, ccx 0.41, gcb 0.59
+ series              method       a   a_se       b   b_se   a_z
+    gap                 OLS -0.0619 0.0356 -0.2361 0.0744 -1.74
+    gap      Newey-West L=2 -0.0619 0.0404 -0.2361 0.0991 -1.53
+    gap      Newey-West L=4 -0.0619 0.0447 -0.2361 0.1001 -1.38
+    gap      Newey-West L=8 -0.0619 0.0488 -0.2361 0.0919 -1.27
+    gap GLS AR(1), phi 0.23 -0.0647 0.0441 -0.2236 0.0909 -1.47
+    ccx                 OLS -0.0144 0.0424 -0.5308 0.0887 -0.34
+    ccx      Newey-West L=2 -0.0144 0.0556 -0.5308 0.1170 -0.26
+    ccx      Newey-West L=4 -0.0144 0.0614 -0.5308 0.1222 -0.23
+    ccx      Newey-West L=8 -0.0144 0.0661 -0.5308 0.1197 -0.22
+    ccx GLS AR(1), phi 0.45 -0.0412 0.0651 -0.4448 0.1299 -0.63
+    gcb                 OLS  0.0476 0.0216 -0.2947 0.0451  2.20
+    gcb      Newey-West L=2  0.0476 0.0259 -0.2947 0.0434  1.84
+    gcb      Newey-West L=4  0.0476 0.0263 -0.2947 0.0444  1.81
+    gcb      Newey-West L=8  0.0476 0.0234 -0.2947 0.0408  2.03
+    gcb GLS AR(1), phi 0.67 -0.0034 0.0439 -0.1577 0.0793 -0.08
+  the per-K ratio CCX / GCB (delta method on each method's slope se):
+    OLS                    1.80 +/- 0.41
+    Newey-West L=2         1.80 +/- 0.48
+    Newey-West L=4         1.80 +/- 0.50
+    Newey-West L=8         1.80 +/- 0.48
+    GLS AR(1)              2.82 +/- 1.64
+
+=== E2. MATCHED MONTE CARLO (gap; AR(1) rho 0.22, innovation sd 0.1748; true a = 0, b = -0.2361; 20000 draws, seed 20261021) ===
+  the OLS intercept's sd across draws: 0.0437 GtC/yr (OLS's own se 0.0356: 1.23x too small)
+  observed a = -0.0619 -> -1.42 MC sd; two-sided p under H2 (a = 0) = 0.157
+  ⚠ the MC takes rho from the OLS residuals, which bias it LOW at n = 66; the GLS phi row is the check
+
+=== POWER: what the intercept can separate ===
+  with the MC se, a constant offset of |a| >= 0.087 GtC/yr would be detected at 2 sd; the GCB 2015-24 effect is -0.20.
+  ⚠ It separates a CONSTANT OFFSET from a response that GROWS WITH WARMING. Any too-large per-K response predicts
+   a = 0, so a = 0 cannot tell H2 (mixing defeats the surface's adjustment) from another cause of a too-large response.
+
+wrote outputs/diagnostics/h2_intercept_ar1_20261021_hilda31w.{log,rds}
