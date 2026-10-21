@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-20 (j) — **Cold first visit on the new revision: connect 7.7 s, first plot 10.2 s (was 18.4 / 20.9 s on the old revision earlier the same day; 27 s first plot on 10-15).** One headless-Chrome visit at 21:44 EDT after 45 min with no traffic (`outputs/diagnostics/loadtest_20261020/loadtest.py`'s unscored first visit; the warm repeat: first plot 2.6 s). One sample on each side: the container's own start time is Connect Cloud's and varies, so read it as roughly halved, not as a precise ratio. The remaining ~8 s is mostly before the app's code runs (the app's own start-up is ~1 s locally since (c)).
+
 ## 2026-10-20 (i) — **Redeployed to Connect Cloud from `a688a70`: phone layout, faster first visit, Pulse lab default, deep links, downloads, settled copy.** Revision `01a15bf5-dbc6-4801-4637-1bfda432ced5`: active, 1024 MB, timeouts 1200 / 1800 s, idle 5 s (the API, after the publish).
 
 - **Before publishing:** the bundle (`app/make_deploy_bundle.sh`, 116 files, 7.3 MB; ships both new precompute products and `FROZEN_FROM_COMMIT.txt`) served locally: first plot drawn, Pulse lab default drawn, CSV stamped `a688a70`, no output errors.
