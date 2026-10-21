@@ -1216,16 +1216,16 @@ function(input, output, session) {
                         "δ¹³C seasonal cycles against each other."),
                   nrow(seas)) else NULL,
         " The fitted phase and amplitude are a compromise between the two tracers.",
-        # Marcus's wording (2026-10-21), verbatim except "13C" set as ¹³C (the app's form). It replaced Claude's
-        # 2026-10-02 draft (carbotopecomment: "Can we change this to a theory about why the tracers seem to be
-        # inconsistent given our model structure?"), whose theory is the one MEASURED in [[ccx_sst_seas_veto]]
-        # (2026-08-21, an older mode): the ocean's seasonal channel is ANTIPHASE to the net cycle, so
-        # strengthening it SHRINKS the CO2 amplitude while the land's d13C swing stays, and the d13C rows veto
-        # it (72 % of the cost).
-        " A likely reason they disagree: the model's seasonal cycle is the sum of land",
-        " plants which have a strong ¹³C fingerprint, and the surface ocean without a",
-        " fingerprint. The two tracers respond differently to the seasonal pattern, and",
-        " the fit splits the difference."),
+        # 2026-10-21 (CHANGELOG v; Marcus chose this draft over his own 10-21 text, the land + ocean sum, after
+        # the seasonal-tracer tests at hilda31w, CHANGELOG 10-21 s, t): the conflict sits at MLO, where the
+        # model's cycle is ~92 % land (amplitude 7.09 land, 0.59 ocean); observed MLO d13C leads CO2's antiphase
+        # by 0.144 [0.107, 0.181] mo (4.4 [3.3, 5.5] days, 1980-2024 mean harmonics) while the model gives +0.01
+        # to +0.10 in every fit; holding eps at 18.35 leaves the d13C rows' loss at 17.2. "nearly all of the
+        # model's" because MLO has no observed land/ocean split.
+        " A likely reason they disagree: at Mauna Loa, where nearly all of the model's",
+        " seasonal cycle comes from land plants, the observed ¹³C cycle runs about four",
+        " days ahead of the CO₂ cycle. The model's land plants move the two tracers in",
+        " step, so the fit splits the difference."),
       p(tags$strong("The land's magnitude is well constrained; its shape is not. "),
         # 2026-10-15 review: "pinned hard" / "only pinned as a combination" -> "constrained" ("pinning" is the
         # sidebar's defined term for one kind of sensitivity, not a synonym for well constrained)

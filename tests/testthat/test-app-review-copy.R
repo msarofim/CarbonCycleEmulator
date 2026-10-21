@@ -213,8 +213,10 @@ AC_CHECKS_1015 <- list(
   c("K issue 8 title",        "loses uptake to warming", "uptake declines with warming about twice as fast in CarboTope"),
   c("K issue 8 first detail", "This is a comparison, not a test: those ocean models", "CarboTope was not tuned to this mechanism."),
   c("K issue 8 deleted",      "tested but not settled", NA),
-  c("K issue 8 carbon-rich",  "refilled with carbon-rich water", "surface keeps being refilled with water from below that has not"),
-  c("K issue 8 mixing",       "Mixing less is not the fix", "partly offset it. Mixing less would help this issue at the cost of"),
+  # The next two rows' present-halves were superseded 2026-10-21 (AC_CHECKS_1021C, Marcus: "Update the pins"):
+  # the mixing explanation they required was replaced after H2's test. Their absent-halves still hold.
+  c("K issue 8 carbon-rich",  "refilled with carbon-rich water", NA),
+  c("K issue 8 mixing",       "Mixing less is not the fix", NA),
   c("K issue 8 second chart", "The second chart says what it is worth", "climate effect. The second chart shows the implications of the"),
   c("K issue 8 SSP5-8.5 out", "SSP5-8.5 (older high scenario)", NA),
   c("F temperature shape",    NA, "FaIR shows the same shape for the same pulse; whether temperature rises again before 2300,")
@@ -275,6 +277,34 @@ test_that("MUTATION: the scan list fires when an old phrase returns or a new one
   m2 <- gsub("joined with flows;", "joined by flows;", .ac_src, fixed = TRUE)
   expect_true(any(grepl("H takeaway", ac_audit(m2, AC_CHECKS_1021B), fixed = TRUE)))
   for (ck in AC_CHECKS_1021B) expect_true(!is.na(ck[[2]]) || !is.na(ck[[3]]), info = ck[[1]])
+})
+
+# Marcus 2026-10-21, on the three held draft strings after the seasonal-tracer and H2 tests (CHANGELOG 10-21 v):
+# item 8 (What pins down what?'s seasonal paragraph) the timing draft, item 9 (the `response` gloss) "after
+# calibration", item 10 (card 8's detail) the decomposition draft; then "Update the pins".
+AC_CHECKS_1021C <- list(
+  c("S seasonal: timing at MLO",   "the surface ocean without a",
+    "seasonal cycle comes from land plants, the observed ¹³C cycle runs about four"),
+  c("S seasonal: in step",         NA, "step, so the fit splits the difference."),
+  c("Gloss: response",             "refitting the same model does not fix it",
+    "the process is in the model, but after calibration it still responds by"),
+  c("K issue 8: decomposition",    "Our leading explanation",
+    "temperature here matches the measured value. The larger part of the"),
+  c("K issue 8: share unexplained", "Mixing less would help this issue",
+    "vertical mixing is halved or doubled, so its cause is not yet known. The")
+)
+
+test_that("Marcus's 2026-10-21 rulings on the held draft strings are still applied", {
+  problems <- ac_audit(.ac_src, AC_CHECKS_1021C)
+  expect_equal(problems, character(0), info = paste(problems, collapse = " | "))
+})
+
+test_that("MUTATION: the 10-21 held-strings list fires when an old sentence returns or a new one goes", {
+  m1 <- paste(.ac_src, '  "temperature here matches the measured value. Our leading explanation",', sep = "\n")
+  expect_true(any(grepl("K issue 8: decomposition", ac_audit(m1, AC_CHECKS_1021C), fixed = TRUE)))
+  m2 <- gsub("after calibration it still responds by", "it reacts by", .ac_src, fixed = TRUE)
+  expect_true(any(grepl("Gloss: response", ac_audit(m2, AC_CHECKS_1021C), fixed = TRUE)))
+  for (ck in AC_CHECKS_1021C) expect_true(!is.na(ck[[2]]) || !is.na(ck[[3]]), info = ck[[1]])
 })
 
 test_that("all of Marcus's 2026-10-15 copy rulings are still applied", {

@@ -59,9 +59,11 @@ RV_CLASS_GLOSS <- c(
                      "property of having a physical model tuned to observed variables."),
   gap        = "something the product does not have yet.",
   # 2026-10-08 (j), card 8: neither "structural" (the hemispheres' separate oceans) nor "comparison" (written for the
-  # pulse) describes it. ⚠ CLAUDE'S DRAFT, FOR MARCUS'S WORDING.
-  response   = paste("the process is in the model, but it reacts by the wrong amount, and",
-                     "refitting the same model does not fix it."),
+  # pulse) describes it. 2026-10-21 (CHANGELOG v): Marcus chose "after calibration it still responds" over the
+  # draft's "refitting the same model does not fix it", which no refit aimed at this tested (H2 test 1 scaled
+  # one name, CHANGELOG 10-21 r); the calibrated canonical still has the issue, and calibration does not target it.
+  response   = paste("the process is in the model, but after calibration it still responds by",
+                     "the wrong amount."),
   design     = "a choice made when the model was specified.")
 
 # The horizons and windows the cards read. Named here so a caption cannot drift
@@ -880,7 +882,7 @@ RV_CARDS <- list(
        ask = paste("Which of these would you want carried by a real mechanism",
                    "before you would use the model to teach from?")),
   # 2026-10-08 (j) (Marcus: "go ahead with the card"): the ocean's climate effect and H2 are ONE issue (CHANGELOG
-  # 10-08 i). ⚠ CLAUDE'S DRAFT, FOR MARCUS'S WORDING -- the numbers are NOT typed here: they are printed live under
+  # 10-08 i). Wording settled 2026-10-21 (CHANGELOG v) -- the numbers are NOT typed here: they are printed live under
   # the two charts from data/ocean_climate_card.rds. The two qualitative claims ("about twice", "decades earlier")
   # are tied to that product by test-ocean-climate-card.R.
   # (2026-10-15 review: Marcus's 10-15 plain no longer says "decades earlier"; test-ocean-climate-card.R holds that
@@ -894,16 +896,19 @@ RV_CARDS <- list(
                      "as in the Global Carbon Budget models."),
        detail = paste("CarboTope was not tuned to this mechanism. The seawater",
                       "chemistry is not the cause \u2014 how fast CO\u2082 pressure rises with",
-                      # Marcus 2026-10-15: "tested but not settled," deleted; the mixing sentence and the
-                      # second-chart sentence are his ("in 2300" moved to the clause that names the year).
-                      # "carbon-rich" -> "has not adjusted to the warming": CLAUDE'S DRAFT answering his question
-                      # (H2 is that strong mixing defeats the surface's DIC adjustment, not deep-water richness).
-                      "temperature here matches the measured value. Our leading explanation",
-                      "is that this model's ocean mixes vertically so strongly that the",
-                      "surface keeps being refilled with water from below that has not",
-                      "adjusted to the warming, where real surface water would adjust and",
-                      "partly offset it. Mixing less would help this issue at the cost of",
-                      "matching radiocarbon and total carbon uptake. The model also has no wind",
+                      # Marcus 2026-10-15: "tested but not settled," deleted; the second-chart sentence is his
+                      # ("in 2300" moved to the clause that names the year).
+                      # 2026-10-21 (CHANGELOG v): Marcus chose this decomposition over the mixing explanation
+                      # (H2), which failed its discriminating test (CHANGELOG 10-21 r, CHECK 4): kz x1/2 / x1 / x2
+                      # gives a share of the CO2 effect of -13.37 / -13.53 / -14.03 % (GCB -7.1 %). The 10-protocol
+                      # ratio 2.17 = 1.28 (CO2-driven uptake, 3.59 vs 2.82 GtC/yr) x 1.70 (the share), so the share
+                      # is the larger factor; mixing moves only the uptake factor.
+                      "temperature here matches the measured value. The larger part of the",
+                      "difference is that this model loses a bigger fraction of its uptake per",
+                      "degree of warming, and that fraction stays the same when the model's",
+                      "vertical mixing is halved or doubled, so its cause is not yet known. The",
+                      "smaller part is that this model's ocean takes up more CO₂ overall than",
+                      "the ocean models do. The model also has no wind",
                       "effect, which in at least one ocean model is the largest part of the",
                       "climate effect. The second chart shows the implications of the",
                       "discrepancy between CarboTope ocean uptake and Global Carbon Budget",
