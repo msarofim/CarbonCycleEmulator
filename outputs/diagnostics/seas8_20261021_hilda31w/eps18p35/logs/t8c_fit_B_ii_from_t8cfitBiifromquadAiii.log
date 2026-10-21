@@ -1,0 +1,21 @@
+=== calibration/diag_seas8_split_fit_20261021.R @7c32d7c8, 2026-10-21 17:47: set B_ii, start fit:/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas8_20261021_hilda31w/t8c_fit_B_ii_from_quadA_iii.rds ===
+[ccx_adopt_mode_band] h_ml -> [42.5, 200] (mode 69.5414); kz -> [1161.6, 27808] (mode 13790.0802)
+GATE R1 (hilda31w): canonical logpost -1054.495920 vs stored -1054.495920 (diff 0.00e+00, tol 5e-05) -> PASS
+EPS OVERRIDE (CCX_SEAS8_EPS): alpha_photo_eps 16.20 -> 18.35 permil; the mode's values now score logpost -1051.635752 (+2.860 vs the canonical)
+BLOCK (8): npp_frac_NH, seas_T_amp_NH, seas_T_amp_SH, seas_lag_p_NH, seas_lag_p_SH, sst_seas_amp_NH, sst_seas_amp_SH, seas_T_lag
+ROWS (24): co2_level_MLO, co2_level_SPO, d13c_seasonal_MLO, d13c_seasonal_SPO, co2_icecore, d13c_icecore, d13c_level_MLO, d13c_level_SPO, co2_gradient, d13c_gradient, d14c_NH, d14c_SH, d14c_intcal, excess_c14_ocean, d14c_profile_level, d14c_profile_ab, d14c_profile_bd, ocean_grad_dic, ocean_grad_d13c, ocean_grad_alk, hs_surf_dic, hs_surf_d13c, gcb_ocean_sink, gcb_land_sink
+start objective -1096.751137 (log-prior -38.2531)
+alpha_photo_eps 18.35 permil (CCX_SEAS8_EPS override)
+  cycle 1 NM 1: obj -1084.971288 (gain 11.779849, 2511 evals, 17.2 CPU-min)
+  cycle 1 NM 2: obj -1084.970155 (gain 0.001133, 925 evals, 23.5 CPU-min)
+  cycle 1 NM 3: obj -1084.969885 (gain 0.000270, 1033 evals, 30.6 CPU-min)
+  cycle 1 BFGS: obj -1084.969647 (gain 0.000239, convergence 0, 32.6 CPU-min)
+  cycle 2 NM 1: obj -1084.969646 (gain 0.000001, 829 evals, 37.6 CPU-min)
+  cycle 2 BFGS: obj -1084.969646 (gain 0.000000, convergence 0, 37.8 CPU-min)
+cycle 2 gained 0.000001 < 0.01: CONVERGED
+
+RESULT B_ii_from_fit_B_ii_from_quadA_iii: objective -1084.969646 | log-prior -36.2562 | full logpost -1273.3753 | full likelihood -1237.1191
+  seasonal rows: co2_seasonal_MLO -214.587, co2_seasonal_SPO 26.182, d13c_seasonal_MLO 229.722, d13c_seasonal_SPO 251.515
+  block: npp_frac_NH 0.63096, seas_T_amp_NH 15.24, seas_T_amp_SH 3.7658, seas_lag_p_NH 1.2652, seas_lag_p_SH 2.6237, sst_seas_amp_NH 2.3327, sst_seas_amp_SH 1.3872, seas_T_lag 0.77007
+wrote /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas8_20261021_hilda31w/eps18p35/t8c_fit_B_ii_from_fit_B_ii_from_quadA_iii.rds
+=== DONE ===

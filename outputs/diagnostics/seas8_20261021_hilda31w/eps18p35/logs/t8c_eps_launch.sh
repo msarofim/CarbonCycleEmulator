@@ -1,0 +1,17 @@
+#!/bin/bash
+# T8c at alpha_photo_eps = 18.35 (Marcus 2026-10-21: "Run the ε test first"): 7 block fits from the frozen
+# worktree /Users/MarcusMarcus/ccx_frozen/seas8eps_20261021_7c32d7c8 (commit 7c32d7c8), then the collect step. Waits on its own children (wait), never a pgrep loop.
+cd /Users/MarcusMarcus/ccx_frozen/seas8eps_20261021_7c32d7c8
+export CCX_SEAS8_EPS=18.35 CCX_SEAS8_OUT=/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas8_20261021_hilda31w/eps18p35 CCX_SEAS8_SCREEN_DIR=/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas8_20261021_hilda31w OPENBLAS_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1 OMP_NUM_THREADS=1
+t0=$(date +%s)
+for spec in "B_iii mode" "B_iii fit:/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas8_20261021_hilda31w/t8c_fit_B_i_from_mode.rds" "B_iii fit:/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas8_20261021_hilda31w/t8c_fit_B_ii_from_quadA_iii.rds" \
+            "B_i mode" "B_i fit:/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas8_20261021_hilda31w/t8c_fit_B_ii_from_quadA_iii.rds" "B_ii mode" "B_ii fit:/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas8_20261021_hilda31w/t8c_fit_B_ii_from_quadA_iii.rds"; do
+  set -- $spec
+  tag="${1}_from_$(basename "$2" .rds | tr -d ':_')"
+  Rscript calibration/diag_seas8_split_fit_20261021.R --set=$1 --start=$2 --budget-min=75 > /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas8_20261021_hilda31w/eps18p35/logs/t8c_fit_${tag}.log 2>&1 &
+  echo "$! $1 $2" >> /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas8_20261021_hilda31w/eps18p35/logs/t8c_fits.pids
+done
+wait
+echo "fits done after $(( $(date +%s) - t0 )) s"
+Rscript calibration/diag_seas8_split_collect_20261021.R > /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas8_20261021_hilda31w/eps18p35/t8c_split_hilda31w.log 2>&1
+echo "collect rc=$? after $(( $(date +%s) - t0 )) s"
