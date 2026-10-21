@@ -1,5 +1,9 @@
 # HANDOFF 2026-10-21 (3): redeployed (scan + wording); the scan items built and tested (not yet deployed)
 
+**SUPERSEDED by `notes/handoff_2026-10-21_draft_strings_h2_seas8.md`** (later 2026-10-21): §3 item 1's suite passed
+(9,169 / 0 / 1), item 2 is answered (ENSO to the last full year; "list" kept), item 3's draft strings are ruled except
+9 and 10, and the H2 and seasonal tests ran. Still not deployed.
+
 **Supersedes** `notes/handoff_2026-10-21_carbotope_org_scan.md`. Written on Marcus's request ("Write the handoff
 note"), 2026-10-21.
 

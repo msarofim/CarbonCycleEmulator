@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-21 (u) — **Handoff `notes/handoff_2026-10-21_draft_strings_h2_seas8.md`** (Marcus: "Write the handoff note"). It supersedes `handoff_2026-10-21_scan_items_built.md`, which now points to it. Open: Marcus's wording calls on items 8, 9 and 10 in light of (r)–(t); then the full suite at the settling commit and the redeploy (not yet asked; Marcus runs the publish). Nothing deployed since `6cf56879`.
+
 ## 2026-10-21 (t) — **The ε test: holding the land's discrimination at 18.35 ‰ does NOT remove the seasonal conflict (δ¹³C rows still lose 17.2 log-units in the joint fit, against 18.7 at 16.2). ε fixes the MLO amplitude; what remains is timing: observed δ¹³C leads CO₂'s antiphase by 0.14 months at MLO, and the model's δ¹³C stays locked to CO₂ in every fit** (Marcus: "Run the ε test first").
 
 - **Design:** (s)'s T8c unchanged except `alpha_photo_eps` = 18.35 (the value at which (s)'s probe put the MLO δ¹³C-per-ppm on the observed), applied by `CCX_SEAS8_EPS` after GATE R1 passes at the canonical's 16.2 (`7c32d7c8`; the unchanged path was regression-tested: the 16.2 collect log reproduces line for line). Seven fits from a frozen worktree, 47.7 min wall, 30–47 CPU-min each. Outputs `outputs/diagnostics/seas8_20261021_hilda31w/eps18p35/`.
