@@ -1216,22 +1216,16 @@ function(input, output, session) {
                         "δ¹³C seasonal cycles against each other."),
                   nrow(seas)) else NULL,
         " The fitted phase and amplitude are a compromise between the two tracers.",
-        # ⚠ CLAUDE'S DRAFT, FOR MARCUS'S WORDING (2026-10-02, carbotopecomment: "Can we change
-        # this to a theory about why the tracers seem to be inconsistent given our model
-        # structure?"). It replaces "A judgment, not a measurement: ... one knob per hemisphere
-        # where two tracers want two different answers." The theory is the one MEASURED in
-        # [[ccx_sst_seas_veto]] (2026-08-21): the ocean's seasonal channel is ANTIPHASE to the net
-        # cycle, so strengthening it SHRINKS the CO2 amplitude while the land's d13C swing stays,
-        # and the d13C rows veto it (72 % of the cost). Stated STRUCTURALLY on purpose: that
-        # note's numbers are from an older mode, so no direction-at-this-fit is claimed.
-        " A likely reason they disagree, given how this model is built: it makes its",
-        " seasonal cycle from two channels that run in opposite directions — plants on",
-        " land, which take up and release carbon with a strong ¹³C fingerprint, and the",
-        " surface ocean, which gives off CO₂ as it warms in summer and carries almost no",
-        " ¹³C fingerprint. The ocean channel shrinks the seasonal CO₂ swing without",
-        " shrinking the δ¹³C swing in step, so the two tracers respond differently to",
-        " the same seasonal settings — and with one seasonal setting per hemisphere,",
-        " the fit can only split the difference."),
+        # Marcus's wording (2026-10-21), verbatim except "13C" set as ¹³C (the app's form). It replaced Claude's
+        # 2026-10-02 draft (carbotopecomment: "Can we change this to a theory about why the tracers seem to be
+        # inconsistent given our model structure?"), whose theory is the one MEASURED in [[ccx_sst_seas_veto]]
+        # (2026-08-21, an older mode): the ocean's seasonal channel is ANTIPHASE to the net cycle, so
+        # strengthening it SHRINKS the CO2 amplitude while the land's d13C swing stays, and the d13C rows veto
+        # it (72 % of the cost).
+        " A likely reason they disagree: the model's seasonal cycle is the sum of land",
+        " plants which have a strong ¹³C fingerprint, and the surface ocean without a",
+        " fingerprint. The two tracers respond differently to the seasonal pattern, and",
+        " the fit splits the difference."),
       p(tags$strong("The land's magnitude is well constrained; its shape is not. "),
         # 2026-10-15 review: "pinned hard" / "only pinned as a combination" -> "constrained" ("pinning" is the
         # sidebar's defined term for one kind of sensitivity, not a synonym for well constrained)

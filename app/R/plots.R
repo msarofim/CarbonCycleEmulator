@@ -114,13 +114,14 @@ LAB_PULSE_WARMING  <- "Extra warming caused by the pulse (°C)"
 # must say which it drew -- see plot_growth_rate().
 KEY_GROWTH_OBS  <- "Measured (NOAA global marine reference)"
 # ⛔ The sentence that keeps plot_pulse_partition() honest. See its roxygen.
-# ⭐ THE TAGGED PULSE (Marcus 2026-10-12, "Side by side in pulse lab"; R/c14_tag.R). ⚠⚠ THE KEYS,
-# PANEL TITLES AND NOTES BELOW ARE DRAFTS FOR MARCUS'S WORDING: drafted so the slots are not empty;
-# the numbers they sit beside are the model's.
+# ⭐ THE TAGGED PULSE (Marcus 2026-10-12, "Side by side in pulse lab"; R/c14_tag.R). The keys, panel
+# titles and notes below were drafted for Marcus's wording; all are now his or approved (Marcus 2026-10-21:
+# "Approve 1-3" covers KEY_PULSE_EXTRA / _TAGGED / _WARM_MODEL and PANEL_PULSE_EXTRA; PULSE_TAG_DECAY_NOTE
+# is his text). The numbers they sit beside are the model's.
 KEY_PULSE_EXTRA  <- "The extra CO\u2082 (with the pulse, minus without)"
 # 2026-10-15: "own" cut -- Marcus's style notes name this phrase ("the pulse's own atoms" -> "the pulse's carbon atoms")
 KEY_PULSE_TAGGED <- "The pulse's carbon atoms (tagged)"
-# 2026-10-15 review: the temperature view's model key, shown only beside FaIR (plot_pulse_warming(fair = ...)); a draft
+# 2026-10-15 review: the temperature view's model key, shown only beside FaIR (plot_pulse_warming(fair = ...))
 KEY_PULSE_WARM_MODEL <- "This model (with the pulse, minus without)"
 PANEL_PULSE_EXTRA  <- "The extra carbon"
 PANEL_PULSE_TAGGED <- "The pulse's carbon atoms"   # Marcus 2026-10-15
@@ -151,10 +152,11 @@ PULSE_DEPTH_TAKEAWAY <- paste(
   "(the rate of decline in the atmosphere in this box informs the “residence lifetime”).",
   "While the land and surface ocean equilibrate quickly, mixing into the deep ocean is a slow process.")
 # 2026-10-15 review: "leave the air within years" -> measured 49 % of the tagged atoms still in the air at +5 yr, 20 % at +20
-PULSE_TAG_DECAY_NOTE <- paste("Most of the tagged atoms leave the air within a couple of decades, because the air swaps",
-                              "carbon with land and ocean every year. The extra CO₂ stays far",
-                              "longer, because carbonate chemistry limits how much extra carbon",
-                              "the ocean can take up.")
+# Marcus 2026-10-21: his wording, verbatim except "CO2" set as CO₂ (the app's form).
+PULSE_TAG_DECAY_NOTE <- paste("Most of the tagged atoms leave the atmosphere within a couple of decades, because",
+                              "carbon in the air exchanges with the land and ocean every year. The increase in CO₂",
+                              "concentration lasts for longer, because carbonate chemistry limits how much extra",
+                              "carbon the ocean can take up.")
 # Marcus 2026-10-16: "with its carbon atoms" (was "its own"), and "and followed wherever they go" deleted.
 PULSE_TAG_PARTITION_NOTE <- "Right: the same pulse, with its carbon atoms tagged."
 # Marcus 2026-10-16: the clause "the difference between running with it and without" and the sentence

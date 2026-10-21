@@ -859,7 +859,7 @@ RV_CARDS <- list(
                       "seasonal sea-surface-temperature amplitude fitted well",
                       "under the observed one.",
                       # 2026-10-06 (Marcus: "Add a line about k_w to the known issues tab"): wording
-                      # DRAFTED for his review. The record: the k_w = 1446 price arm (CHANGELOG 10-05 a)
+                      # drafted for his review; approved 2026-10-21 ("Approve 11 & 12"). The record: the k_w = 1446 price arm (CHANGELOG 10-05 a)
                       # fits 2.75 BETTER on likelihood; its -20 posterior price is ONE prior,
                       # hs_asx_frac's judgment width (kept, 10-05 e). test-review-card-numbers.R ties
                       # "1,446" to KW_PRIOR_CENTRE and "about 1,850" to the canonical's fitted k_w.

@@ -164,7 +164,7 @@ app_link_ok <- function(u) is.character(u) && length(u) == 1L &&
 # five CMIP6 SSPs, whose land-use history ran 90 GtC short of the budget the
 # model is fitted to. The primary names are the paper's own, so a reader can look
 # them up; the parentheses describe each marker's NET CO2 path in the data
-# (fossil + land use, 2025-2100) and are drafts for Marcus's review.
+# (fossil + land use, 2025-2100). Marcus 2026-10-21: "Approve 1-3" (item 1, the parentheses).
 APP_SCENARIOS <- c(
   "Very low (net zero by mid-century)"         = "vvVL",
   "Low-to-negative (cuts, then net removal)"   = "vvLN",
@@ -970,7 +970,7 @@ APP_CMAP_STEP_DETAIL <- paste(
 # is the measurement that step scores. COMPUTED from the product's `module` record (gated by
 # diag_constraint_map.R's GATE MODULE against the likelihood itself), so a canonical without the cut prints
 # nothing. A module row with no plain-language text here is an ERROR, never a silent omission.
-# ⚠ CLAUDE'S DRAFT, FOR MARCUS'S WORDING.
+# Marcus 2026-10-21: "Approve 5-7" (item 7, this row text and the note's sentence below).
 APP_CMAP_MODULE_ROW_TEXT <- c(gcb_ocean_enso_slope = "how strongly the ocean sink follows El Niño")
 app_cmap_module_note <- function(cm = APP_CMAP) {
   m <- cm$module
@@ -1162,7 +1162,7 @@ APP_PULSE_SHAPE_NOTE <- paste(
   "FaIR shows the same shape for the same pulse; whether temperature rises again before 2300,",
   "and by how much, depends on the background scenario.")
 
-# ⚠ DRAFTS for Marcus's wording (2026-10-12)
+# Drafted 2026-10-12; Marcus 2026-10-21: "Approve 5-7" (item 5, both legend formats; item 6, APP_FAIR_PULSE_NOTE).
 # 2026-10-15 review: TWO keys from one constant -- `band` for the CO₂ view (mean + 5-95% band), `mean` for the
 # temperature view, where the grid has no band (d_gmst_mean only). "5–95%" without the space, as elsewhere.
 APP_FAIR_PULSE_LAB_FMT <- c(band = "%s, %d-configuration mean (5\u201395%% shaded)",

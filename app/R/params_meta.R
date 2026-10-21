@@ -119,7 +119,8 @@ APP_PARAM_META <- list(
 
   # ---- the GATED names (2026-10-01): fitted only under a structure that opens the gate
   # (R/calibrate.R CCX_PARAM_GATED; the D2 / D3 label, the canonical from hilda33d). Labels
-  # drafted 2026-10-01 for Marcus's review (app text is his).
+  # drafted 2026-10-01 for Marcus's review (app text is his); npp_tsens, imb_share_land and
+  # imb_share_ocean_rest approved 2026-10-21 (Marcus: "Approve 11 & 12").
   # ndep_ret: Marcus 2026-10-01 (review 10-01c B4): "If it is a gross rate, then
   # name it that." It is: the flux ndep_ret x deposition enters soil_slow and
   # part of it is respired back, so the fitted 10.19 is GROSS while the realized
@@ -131,7 +132,8 @@ APP_PARAM_META <- list(
                               unit = "—"),
   imb_share_ocean_rest = list(desc = "Ocean's share of the gap the land does not take", unit = "—"),
   # the land ENSO lag (2026-10-02, W1; R/calibrate.R CCX_PARAM_GATED_ENSO_LAG): fitted only under
-  # the label that opens the lag gate. Wording DRAFTED 2026-10-02 for Marcus's review.
+  # the label that opens the lag gate. Wording drafted 2026-10-02 for Marcus's review; approved 2026-10-21
+  # ("Approve 11 & 12").
   # 2026-10-15 review: "El Niño" -> "the ENSO index" (the app's name for what the lag is measured from)
   lag_enso_land        = list(desc = "Delay between the ENSO index and the land's carbon response",
                               unit = "months"),
