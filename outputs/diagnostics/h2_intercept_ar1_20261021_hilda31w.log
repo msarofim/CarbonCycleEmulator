@@ -1,4 +1,4 @@
-calibration/diag_h2_intercept_ar1.R @fd6d09c3 | 2026-10-21 16:36
+calibration/diag_h2_intercept_ar1.R @06eff707 | 2026-10-21 17:43
 input: outputs/diagnostics/h2_time_shape_20261013_hilda31w.rds (driver calibration/diag_h2_time_shape.R @6ddf4b2, 2026-10-13 12:00; CCX series outputs/diagnostics/ocean_climate_gobm_20261013_wtcid017.rds, mode md5 53ee816ac48cea0f1c1fad244651c5fd)
 66 years, 1959-2024; units GtC/yr (uptake positive) against K of SST warming vs the record's first decade
 
