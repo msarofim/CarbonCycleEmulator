@@ -79,7 +79,10 @@ PLOTMATH_SUB <- stats::setNames(as.character(0:9), intToUtf8(0x2080:0x2089, mult
 PLOTMATH_RX  <- "[⁰¹²³⁴-⁻₀-₉]"
 #' One label as a plotmath SOURCE string: text runs quoted and joined by `*`, a superscript run as ^"14" and a
 #' subscript run as ["2"] on the run before it. "Δ¹⁴C (‰)" -> "Δ"^"14"*"C (‰)".
+#' Vectorized (2026-10-21): one string per element. It read only the FIRST element, so a labeller given
+#' several labels at once (Known issue 2's facet_wrap via as_labeller) printed the first label on every panel.
 app_plotmath_str <- function(s) {
+  if (length(s) != 1L) return(vapply(as.character(s), app_plotmath_str, "", USE.NAMES = FALSE))
   ch <- strsplit(s, "")[[1]]
   if (!length(ch)) return('""')
   kind <- ifelse(ch %in% names(PLOTMATH_SUP), "sup", ifelse(ch %in% names(PLOTMATH_SUB), "sub", "txt"))

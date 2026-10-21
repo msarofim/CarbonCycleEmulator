@@ -2,6 +2,13 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-21 (a) — **Known issue 2's second panel is labelled "δ¹³C gradient (‰)" again (both read "CO₂ gradient (ppm)"); the three merged session branches and worktrees deleted** (Marcus: "Delete the branches and start the Known issue 2 fix").
+
+- **Cause:** `facet_wrap()`'s `as_labeller()` passes every panel's label at once, and `app_plotmath_str()` (`app/R/plots.R`) read only the first (`strsplit(s, "")[[1]]`), so one label was recycled onto both strips. Found by the phone-layout session (10-20 b), present at every width since the plotmath change of 10-15.
+- **Fix:** `app_plotmath_str()` is vectorized (one string per element), so a labeller given several labels cannot collapse them anywhere. Its other callers pass single strings and are unchanged.
+- **Test:** new `tests/testthat/test-review-gradient-labels.R` builds the card's chart from the stored gradients (`data/review_precompute.rds`) and requires one label per panel, CO₂ first and δ¹³C second; MUTATION: the first-element-only function gives one label recycled onto both panels and is caught. App-facing files (20, incl. `test-ocean-climate-card`, `test-figure-palette`): 1,203 expectations, 0 failed. Not redeployed.
+- **Branches:** `claude/angry-noyce-ae6017`, `claude/dazzling-nash-6c3551`, `claude/kind-raman-b05386` (all merged, 10-20 f) deleted with `git branch -d`, after removing their worktrees (no uncommitted work); their sessions archived.
+
 ## 2026-10-20 (j) — **Cold first visit on the new revision: connect 7.7 s, first plot 10.2 s (was 18.4 / 20.9 s on the old revision earlier the same day; 27 s first plot on 10-15).** One headless-Chrome visit at 21:44 EDT after 45 min with no traffic (`outputs/diagnostics/loadtest_20261020/loadtest.py`'s unscored first visit; the warm repeat: first plot 2.6 s). One sample on each side: the container's own start time is Connect Cloud's and varies, so read it as roughly halved, not as a precise ratio. The remaining ~8 s is mostly before the app's code runs (the app's own start-up is ~1 s locally since (c)).
 
 ## 2026-10-20 (i) — **Redeployed to Connect Cloud from `a688a70`: phone layout, faster first visit, Pulse lab default, deep links, downloads, settled copy.** Revision `01a15bf5-dbc6-4801-4637-1bfda432ced5`: active, 1024 MB, timeouts 1200 / 1800 s, idle 5 s (the API, after the publish).
