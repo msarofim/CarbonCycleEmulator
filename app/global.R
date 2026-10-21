@@ -615,11 +615,18 @@ APP_EMIS_HIST <- as.data.frame(
 # the span of the data file the model reads for that driver, so it moves with the next data update. Until today
 # only the emissions rows were read; the others were typed, and the SST row borrowed the emissions file's end.
 # The ¹⁴C row is the years either source is non-zero (the industrial file starts with two zero rows, 1950-51);
-# N deposition is the file's historical series (the scenarios extend it to 2300).
+# N deposition is the file's historical series (the scenarios extend it to 2300). ENSO counts only the years
+# with all twelve months of Niño 3.4 (Marcus 2026-10-21: "end ENSO at the last full year"): the record runs to
+# July 2026, so the row reads 1948–2025. The other monthly files (AOD, bomb ¹⁴C) end on a full year today.
 app_driver_span <- function(file, keep = NULL) {
   d <- as.data.frame(readRDS(file.path(CCX_ROOT, "data", file)))
   if (!is.null(keep)) d <- d[keep(d), , drop = FALSE]
   range(d$year)
+}
+#' A `keep` for app_driver_span(): the rows of years in which `col` has all twelve months
+app_full_years <- function(col) function(d) {
+  n <- tapply(!is.na(d[[col]]), d$year, sum)
+  d$year %in% as.integer(names(n)[n == 12])
 }
 app_span_label <- function(r) sprintf("%d–%d", as.integer(r[1]), as.integer(r[2]))
 APP_DRIVER_COVERS <- local({
@@ -629,7 +636,7 @@ APP_DRIVER_COVERS <- local({
     emissions = range(APP_EMIS_HIST$year),
     gmst      = app_driver_span("forcing_gmst.rds"),
     sst       = app_driver_span("forcing_sst.rds"),
-    enso      = app_driver_span("forcing_enso.rds"),
+    enso      = app_driver_span("forcing_enso.rds", app_full_years("nino34_anom")),
     aod       = app_driver_span("forcing_volcanic_aod.rds"),
     c14       = c14,
     ndep      = app_driver_span("forcing_ndep.rds", function(d) d$scenario == "historical")),

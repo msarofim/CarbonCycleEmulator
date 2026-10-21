@@ -141,7 +141,19 @@ test_that("4-6. the seasonal window, the drivers' spans and the growth note's ye
     cv <- A("APP_DRIVER_COVERS")
     expect_identical(cv[["sst"]], span("forcing_sst.rds"))
     expect_identical(cv[["gmst"]], span("forcing_gmst.rds"))
-    expect_identical(cv[["enso"]], span("forcing_enso.rds"))
+    # ENSO ends at the last year with all twelve months (Marcus 2026-10-21: "end ENSO at the last full year")
+    en <- as.data.frame(readRDS(file.path(root, "data", "forcing_enso.rds")))
+    nmo <- tapply(!is.na(en$nino34_anom), en$year, sum)
+    full <- as.integer(names(nmo)[nmo == 12])
+    expect_identical(cv[["enso"]], sprintf("%d–%d", min(full), max(full)))
+    fy <- A("app_full_years")("v")
+    si_m <- data.frame(year = rep(2001:2003, each = 12), v = c(rep(1, 24), rep(1, 7), rep(NA, 5)))
+    expect_identical(range(si_m$year[fy(si_m)]), c(2001L, 2002L))                         # a partial last year drops
+    si_m1 <- si_m[-1, ]
+    expect_identical(range(si_m1$year[fy(si_m1)]), c(2002L, 2002L))                      # so does a partial first year
+    # MUTATION: the file's full span counts the partial last year (the record runs into 2026 today)
+    if (max(en$year[!is.na(en$nino34_anom)]) > max(full))
+      expect_false(identical(cv[["enso"]], span("forcing_enso.rds", function(d) !is.na(d$nino34_anom))))
     expect_identical(cv[["aod"]], span("forcing_volcanic_aod.rds"))
     expect_identical(cv[["ndep"]], span("forcing_ndep.rds", function(d) d$scenario == "historical"))
     expect_identical(cv[["emissions"]], span("forcing_emissions_historical.rds"))
