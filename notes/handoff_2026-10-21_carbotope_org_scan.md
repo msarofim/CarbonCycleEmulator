@@ -1,5 +1,9 @@
 # HANDOFF 2026-10-21 (2): post 2 checked live; carbotope.org; the pre-redeploy scan and Marcus's wording (not yet deployed)
 
+**Update, later 2026-10-21:** §3 item 1 is done. Suite at `6cf56879`: 9,086 passed, 0 failed, 1 skipped; Marcus
+published the bundle (the session's permission check refused `deployApp()`); revision `01a15f80` from `6cf56879`;
+every live check passes. CHANGELOG 2026-10-21 (k), (l). §3 items 2–5 are still open.
+
 **Supersedes** `notes/handoff_2026-10-21_app_upgrade_post2.md`. Written on Marcus's request ("Write the handoff note"),
 2026-10-21, while the final full suite was still running.
 

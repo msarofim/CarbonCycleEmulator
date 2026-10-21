@@ -2,6 +2,15 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-21 (l) — **Redeployed from `6cf56879` (Marcus ran the publish after the permission check refused it in (k): "I ran it; do the live checks"). Revision `01a15f80-d82a-9d53-9961-205ebb3e47e5`: published 17:27 UTC, 1024 MB, timeouts 1200 / 1800 s. Every live check in the handoff passes.**
+
+- **Bundle:** the one (k) built: `6cf56879`, 116 files, 7.3 MB.
+- **carbotope.org:** 302 to the app URL; the page it opens has the new banner, so it reaches the new revision.
+- **Live at 1440 × 900 (Browser pane, opened through carbotope.org):** `lang="en"`; the banner ends "Short link: CarboTope.org", a link to `https://carbotope.org/` opening in a new tab with `rel="noopener"`. All eight tabs draw every plot, each with non-empty alt text, and no output errors: Keeling 2/2, Where 5/5, What if 3/3, Isotopes 2/2, Futures 1/1, Known issues 9/9 (+ 2 tables), What pins 2/2, Under the hood 1/1 (+ 3 tables). The Known-issues box reads "on Substack." (no stray space) and links to post 1's `#discussion`, as do the nine "Comment on issue N" links.
+- **Pulse-lab link at 200 GtC, through the forward** (`carbotope.org/?_inputs_&tabs="Futures"&f_mode="Pulse lab"&p_gtc=200`): opens Futures → Pulse lab with the slider at 200, takeaway "Release the pulse to see results at these settings.", nothing drawn, no errors. After the press both result charts drew in 12.0 s (alt "Futures", "Where the extra carbon ends up"); takeaway "Release 200 GtC in 2050 and 51% of it is still in the air a century later; 42% after 250 years. …"; the in-chart caption begins "CarboTope.org (beta), single best fit." (screenshot).
+- **Link preview:** `og:description` is Marcus's 6b text; `og:image` regenerated at this publish (`?v=21bb271b` → `6fb2947d`) and shows the Keeling tab with the new banner and takeaway.
+- **Noted, not changed:** f_plot's alt text is its registry name, "Futures", in all three Futures modes; `test-app-a11y.R` pins alt = registry name, so this is as designed but says little about the chart shown.
+
 ## 2026-10-21 (k) — **Full suite @ `6cf56879` (code = `7bca6a32`; frozen, linked): 9,086 passed, 0 failed, 1 skipped (the standing `l2-enso-limb` skip), 0 errored, 231 warnings, 26.3 min. Redeploy NOT done: the session's permission check refused the publish; the bundle is built and waits for Marcus.**
 
 - **Suite vs `ba898e25` (10-20 f):** +151, all app-facing: new files `test-app-a11y` 105, `test-app-short-link` 8, `test-review-gradient-labels` 7; `test-app-review-copy` +14, `test-review-cards` +10, `test-app-precompute` +6, `test-plot-text-fits` +1. Every other file has the same count. Inputs 14 / 14; no "No nuclear" line. Log and per-file counts: `outputs/diagnostics/suite_20261021_6cf56879{.log,_perfile.csv}`. README's test line cites it.
