@@ -35,7 +35,7 @@ Teaching software, not peer-reviewed.
 - **Uncertainty bands:** the Futures tab's CO₂ view shows the 5–95 % range of those draws
   (`data/futures_ribbons.rds`). It varies only the fitted carbon-cycle parameters, so temperature
   has no band. The app also shows FaIR 5–95 % ranges on Known issue 5 and in the pulse lab.
-- **Tests:** full suite 8,704 passed, 0 failed, 1 skipped (commit `ba898e25`, 2026-10-20).
+- **Tests:** full suite 9,086 passed, 0 failed, 1 skipped (commit `6cf56879`, 2026-10-21).
 - **Git tag `v1.0-hilda29l`** (2026-09-22) is an earlier internal freeze, not the app's
   BETA v1.0.
 

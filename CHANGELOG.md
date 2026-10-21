@@ -2,6 +2,14 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-21 (k) — **Full suite @ `6cf56879` (code = `7bca6a32`; frozen, linked): 9,086 passed, 0 failed, 1 skipped (the standing `l2-enso-limb` skip), 0 errored, 231 warnings, 26.3 min. Redeploy NOT done: the session's permission check refused the publish; the bundle is built and waits for Marcus.**
+
+- **Suite vs `ba898e25` (10-20 f):** +151, all app-facing: new files `test-app-a11y` 105, `test-app-short-link` 8, `test-review-gradient-labels` 7; `test-app-review-copy` +14, `test-review-cards` +10, `test-app-precompute` +6, `test-plot-text-fits` +1. Every other file has the same count. Inputs 14 / 14; no "No nuclear" line. Log and per-file counts: `outputs/diagnostics/suite_20261021_6cf56879{.log,_perfile.csv}`. README's test line cites it.
+- **Worktree:** `~/ccx_frozen/suite_20261021_6cf56879`, 78 download links + 3 tracked files (81, as in main); the launch guard refused an empty tree (rc 3) before the run. Removed after the run (links first).
+- **Bundle:** `app/make_deploy_bundle.sh` at `6cf56879` (not `7bca6a32` as the handoff wrote: the two differ only in `notes/` and `CHANGELOG.md`, and this way `FROZEN_FROM_COMMIT.txt` names the commit the suite ran on). 116 files, 7.3 MB, mode file `refit_20261013_hilda31w_…/mode_fit_pumpN.rds`; placeholder guard passed.
+- **Deploy refused:** `rsconnect::deployApp(…, appId = "01a14244-…", forceUpdate = TRUE)` was denied by Claude Code's auto-mode classifier ("Production Deploy") before it ran. The live app is still revision `01a15e0d` from `dfba0d3`.
+- **Link preview, checked before any redeploy:** `curl -A facebookexternalhit/1.1 -L https://carbotope.org/` gives `og:description` = Marcus's 6b text ("A carbon-cycle model calibrated to observations, built for students. Beta teaching software, not peer-reviewed."), `og:title` CarboTope. So 6b is live on the current revision.
+
 ## 2026-10-21 (j) — **Handoff `notes/handoff_2026-10-21_carbotope_org_scan.md`** (Marcus: "Write the handoff note"). It supersedes this morning's, which now points to it. Open: the redeploy Marcus approved ("Redeploy once the tests pass") waits on the full suite running on `7bca6a32`; scan items not acted on; iOS Safari needs an iOS simulator runtime (ask first).
 
 ## 2026-10-21 (i) — **Marcus's six: the chart caption names CarboTope.org, "the “Without” line", ENSO spelled out, one Known-issues progress message, a Pulse-lab prompt; the full suite after (h) found three of my own breaks** (Marcus: "1b, 2a, 3a, 4a, 5: 'Release the pulse to see results at these settings.' And I implemented 6b."; then "Redeploy once the tests pass").
