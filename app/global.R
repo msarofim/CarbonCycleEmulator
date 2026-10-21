@@ -128,6 +128,8 @@ APP_FEEDBACK_HOW <- paste("Comments are public on Substack. Be specific about wh
                           "model, and you would like to be included in the",
                           "acknowledgments to the model or any future publication,",
                           "please include your full name in the comments.")
+# Marcus 2026-10-21: the word in APP_FEEDBACK_HOW that links to the comment box (rv_feedback_how_ui(), app/R/review.R).
+APP_FEEDBACK_LINK_WORD <- "Substack"
 app_link_ok <- function(u) is.character(u) && length(u) == 1L &&
   nzchar(u) && !identical(u, "SET-BEFORE-DEPLOY")
 

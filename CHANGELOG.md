@@ -2,6 +2,13 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-21 (f) — **Known issues: "Substack" in the yellow box now links to the comment box** (Marcus: "Can we add a comment link in the yellow box on the Known Issues tab, perhaps linked from the word 'substack'?"). Not deployed.
+
+- **Code:** `rv_feedback_how_ui()` (`app/R/review.R`) draws `APP_FEEDBACK_HOW` with its first `APP_FEEDBACK_LINK_WORD` ("Substack", new in `app/global.R`) linked to `rv_card_url()`, the cards' target (post 1 `#discussion`), in a new tab. Plain text when the link is unset (ui.R's warning then shows). `ui.R`'s caveat div calls it. Marcus's wording unchanged.
+- **Caught by the test:** `tagList()` puts a newline on each side of a tag, which the page draws as a space ("on Substack ."); the link carries `.noWS = "outside"`.
+- **Test** (`test-review-cards.R`): on the shipped text, exactly one link, on the word, to a measured comment-box fragment, visible text identical; plain text when unset; an error if the word is missing; ui.R uses the helper. MUTATIONS: no link, a link on other words, the bare post address, altered text, and the first draft's spacing, each rejected. App-facing files (21): 1,241 expectations, 0 failed, 0 skipped.
+- **Local app:** the box reads "Comments are public on Substack." with the link to `…/the-debut-of-carbotope-beta-a-new#discussion`.
+
 ## 2026-10-21 (e) — **https://carbotope.org forwards to the app** (Marcus asked whether to buy thesaraphreport.org and hang CarboTope off it; recommended carbotope.org on its own unless the Substack moves to thesaraphreport.org, then "What is the annual cost and the best way to get carbotope.org?"). He registered it at Porkbun and set the forward; recorded in `app/DEPLOY.md` ("The short address").
 
 - **Cost:** Porkbun's pricing API (2026-10-21): .org $7.98 first year, $11.84 renewal. Registered 14:51 UTC for two years (registry RDAP).

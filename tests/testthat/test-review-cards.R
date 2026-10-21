@@ -356,3 +356,68 @@ test_that("the stand-in gate rejects an unnamed or empty entry", {
   expect_true(length(v(b2, CCX_PARAM_NAMES)) > 0)
   expect_true(length(v(list(), CCX_PARAM_NAMES)) > 0)
 })
+
+# ADDED 2026-10-21 (Marcus: "Can we add a comment link in the yellow box on the Known Issues tab, perhaps linked
+# from the word 'substack'?"). The yellow box is APP_FEEDBACK_HOW; rv_feedback_how_ui() (review.R) links its first
+# APP_FEEDBACK_LINK_WORD to the same comment box as the cards. Checked on the SHIPPED text and word, read from
+# global.R by evaluating only their two assignments (both are literals or paste() of literals).
+rv_global_consts <- function(names) {
+  env <- new.env(parent = baseenv())
+  for (e in parse(file.path(.rv_app_dir, "global.R"), keep.source = FALSE))
+    if (is.call(e) && identical(e[[1]], as.name("<-")) && is.name(e[[2]]) && as.character(e[[2]]) %in% names)
+      eval(e, env)
+  mget(names, envir = env)
+}
+rv_html_text <- function(html) gsub("<[^>]+>", "", html)
+rv_html_links <- function(html)
+  regmatches(html, gregexpr("<a [^>]*href=\"[^\"]*\"[^>]*>[^<]*</a>", html))[[1]]
+
+rv_check_feedback_box <- function(fn, how, word, url) {
+  html <- as.character(fn(how, word, url))
+  links <- rv_html_links(html)
+  c(one_link    = length(links) == 1L,
+    link_word   = length(links) == 1L && rv_html_text(links) == word,
+    link_target = length(links) == 1L && rv_comment_fragment_ok(sub('.*href="([^"]*)".*', "\\1", links)) &&
+                    startsWith(sub('.*href="([^"]*)".*', "\\1", links), sub("#.*$", "", url)),
+    same_text   = rv_html_text(html) == how)
+}
+
+test_that("the yellow box links its word to the comment box, and its text is unchanged", {
+  skip_if_no_review()
+  skip_if_not_installed("shiny")
+  k <- rv_global_consts(c("APP_FEEDBACK_HOW", "APP_FEEDBACK_LINK_WORD", "APP_FEEDBACK_URL"))
+  url <- rv_card_url_with(k$APP_FEEDBACK_URL)()
+  r <- rv_check_feedback_box(.rv_env$rv_feedback_how_ui, k$APP_FEEDBACK_HOW, k$APP_FEEDBACK_LINK_WORD, url)
+  expect_true(all(r), info = paste(names(r)[!r], collapse = ", "))
+  # No link set: the plain text, and ui.R's warning shows instead (the app_link_ok guard test above).
+  expect_identical(.rv_env$rv_feedback_how_ui(k$APP_FEEDBACK_HOW, k$APP_FEEDBACK_LINK_WORD, NULL), k$APP_FEEDBACK_HOW)
+  expect_error(.rv_env$rv_feedback_how_ui(k$APP_FEEDBACK_HOW, "a word not in it", url), "not in the text")
+  # ui.R renders the box through the helper, not the bare string.
+  expect_true(grepl('div(class = "caveat", rv_feedback_how_ui())', .rv_ui_text, fixed = TRUE))
+  expect_false(grepl('div(class = "caveat", APP_FEEDBACK_HOW)', .rv_ui_text, fixed = TRUE))
+})
+
+test_that("MUTATION: the yellow-box check rejects no link, the wrong word, the bare post and changed text", {
+  skip_if_no_review()
+  skip_if_not_installed("shiny")
+  k <- rv_global_consts(c("APP_FEEDBACK_HOW", "APP_FEEDBACK_LINK_WORD", "APP_FEEDBACK_URL"))
+  url <- rv_card_url_with(k$APP_FEEDBACK_URL)()
+  ok <- .rv_env$rv_feedback_how_ui
+  bad <- list(
+    one_link    = function(how, word, url) how,
+    link_word   = function(how, word, url) shiny::tagList(shiny::tags$a(href = url, "Comment here."), " ", how),
+    link_target = function(how, word, url) ok(how, word, sub("#.*$", "", url)),
+    same_text   = function(how, word, url) ok(sub("Be specific", "Please be specific", how, fixed = TRUE), word, url))
+  for (nm in names(bad)) {
+    r <- rv_check_feedback_box(bad[[nm]], k$APP_FEEDBACK_HOW, k$APP_FEEDBACK_LINK_WORD, url)
+    expect_false(r[[nm]], info = nm)
+  }
+  # The first draft: no .noWS, so tagList() put a newline on each side of the link and the page drew
+  # "on Substack ." with a space before the period.
+  ws <- function(how, word, url) {
+    at <- regexpr(word, how, fixed = TRUE)
+    shiny::tagList(substr(how, 1L, at - 1L), shiny::tags$a(href = url, target = "_blank", word),
+                   substr(how, at + nchar(word), nchar(how)))
+  }
+  expect_false(rv_check_feedback_box(ws, k$APP_FEEDBACK_HOW, k$APP_FEEDBACK_LINK_WORD, url)[["same_text"]])
+})

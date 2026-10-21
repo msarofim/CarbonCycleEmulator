@@ -683,7 +683,7 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
                    APP_RELEASE_NAME)),
         p(RV_TAB_LEAD),
         review_ask_block(),
-        div(class = "caveat", APP_FEEDBACK_HOW),
+        div(class = "caveat", rv_feedback_how_ui()),   # "Substack" links to the comment box (2026-10-21)
         if (!app_link_ok(APP_FEEDBACK_URL))
           div(class = "prov prov-warn",
               tags$strong("This build has no comment link set. "),

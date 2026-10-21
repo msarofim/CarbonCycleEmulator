@@ -998,7 +998,22 @@ rv_card <- function(id) {
 #' Substack) scrolled to it with the comment box in view. Every card now shares one target; the issue number is in
 #' the link text, and APP_FEEDBACK_HOW asks commenters to name it.
 RV_FEEDBACK_ANCHOR <- "discussion"
-rv_card_url <- function(id) {
+rv_card_url <- function(id = NULL) {
   if (!app_link_ok(APP_FEEDBACK_URL)) return(NULL)
   sprintf("%s#%s", APP_FEEDBACK_URL, RV_FEEDBACK_ANCHOR)
+}
+
+#' The tab's yellow box: APP_FEEDBACK_HOW with its first APP_FEEDBACK_LINK_WORD linked to the comment box
+#' (Marcus 2026-10-21: "Can we add a comment link in the yellow box on the Known Issues tab, perhaps linked from
+#' the word 'substack'?"). Same target as the cards' links. Plain text when the link is not set; ui.R then shows
+#' its warning. Tags are namespace-qualified so the test can call this without the app running.
+rv_feedback_how_ui <- function(how = APP_FEEDBACK_HOW, word = APP_FEEDBACK_LINK_WORD, url = rv_card_url()) {
+  at <- regexpr(word, how, fixed = TRUE)
+  if (at < 0) stop(sprintf("rv_feedback_how_ui(): the link word \"%s\" is not in the text", word))
+  if (is.null(url)) return(how)
+  shiny::tagList(substr(how, 1L, at - 1L),
+                 # .noWS: tagList() puts a newline on each side of a tag, which the page draws as a space
+                 # ("on Substack ." -- caught by the test's same_text check).
+                 shiny::tags$a(href = url, target = "_blank", word, .noWS = "outside"),
+                 substr(how, at + nchar(word), nchar(how)))
 }
