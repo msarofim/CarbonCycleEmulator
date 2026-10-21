@@ -29,6 +29,13 @@ S8_SEAS_ROWS <- list(co2 = c("co2_seasonal_MLO", "co2_seasonal_SPO"),
 S8_OUT_DIR   <- Sys.getenv("CCX_SEAS8_OUT",
                            file.path("outputs", "diagnostics",
                                      sprintf("seas8_20261021_%s", CCX_MODE_CANONICAL)))
+# The T8c screen (block, row sets, scales, quadratic starts) is read from here; an override run reuses the
+# canonical-epsilon screen rather than rebuilding it.
+S8_SCREEN_DIR <- Sys.getenv("CCX_SEAS8_SCREEN_DIR", S8_OUT_DIR)
+# 2026-10-21 (Marcus: "Run the ε test first"): CCX_SEAS8_EPS holds alpha_photo_eps at a stated value (permil)
+# in every run AFTER GATE R1 has passed at the canonical's own value. NA = unset = the canonical's own (16.2).
+# T8b's probe put the MLO station d13C-per-ppm on the observed value at 18.35.
+S8_EPS <- suppressWarnings(as.numeric(Sys.getenv("CCX_SEAS8_EPS", "")))
 
 s8_amp    <- function(v) 2 * sqrt(sum(v^2))                        # PEAK-TO-PEAK, always
 s8_ang_mo <- function(v) 12 * ((atan2(v[1], v[2]) / (2 * pi)) %% 1)
@@ -54,7 +61,17 @@ s8_setup <- function(who) {
               S8_MODE, as.numeric(v0), md$logpost, d, CCX_REPRO_TOL,
               if (abs(d) <= CCX_REPRO_TOL) "PASS" else "FAIL"))
   if (!(abs(d) <= CCX_REPRO_TOL)) stop("the canonical objective does not reproduce its mode")
-  list(md = md, pins = pins, spf = spf, bp0 = bp0, lp = lp, u0 = u0, v0 = v0,
+  eps <- bp0$alpha_photo_eps
+  if (is.finite(S8_EPS)) {
+    bp0$alpha_photo_eps <- S8_EPS
+    lp <- ccx_make_logpost(base_params = bp0, by_stream = TRUE, spinup_fn = spf)
+    v0 <- lp(u0)
+    cat(sprintf("EPS OVERRIDE (CCX_SEAS8_EPS): alpha_photo_eps %.2f -> %.2f permil; the mode's values now score logpost %.6f (%+.3f vs the canonical)\n",
+                eps, S8_EPS, as.numeric(v0), as.numeric(v0) - md$logpost))
+    if (abs(as.numeric(v0) - md$logpost) <= CCX_REPRO_TOL) stop("the epsilon override did not reach the objective")
+    eps <- S8_EPS
+  }
+  list(md = md, pins = pins, spf = spf, bp0 = bp0, lp = lp, u0 = u0, v0 = v0, eps = eps,
        mode_file = ccx_mode_file(S8_MODE),
        mode_md5 = unname(tools::md5sum(ccx_mode_file(S8_MODE))))
 }
@@ -65,6 +82,7 @@ s8_setup <- function(who) {
 #' the per-year tables, and the by-stream likelihood.
 s8_run <- function(L, spf, obs, mods = list(), yrs, emis_fn = NULL) {
   p <- L$p
+  if (is.finite(S8_EPS)) p$alpha_photo_eps <- S8_EPS      # an explicit mods$alpha_photo_eps (T8b's probe) still wins
   for (n in names(mods)) p[[n]] <- mods[[n]]
   if (!is.null(emis_fn)) {
     old <- get("ccx_emission_seasonality", envir = globalenv())

@@ -48,7 +48,7 @@ S8F_POLISH_MAXIT <- 300L
 S8F_NDEPS       <- 1e-3      # BFGS finite-difference step in scaled units: 1e-3 x 10 x S8F_SIMPLEX_SD sd = 0.01 sd
 S8F_SIMPLEX_SD  <- 1         # first NM simplex step, in block-marginal sd
 S8F_PENALTY_MULT <- 10; S8F_PENALTY_FLOOR <- 1e6
-S8F_SCREEN <- file.path(S8_OUT_DIR, sprintf("t8c_screen_%s.rds", S8_MODE))
+S8F_SCREEN <- file.path(S8_SCREEN_DIR, sprintf("t8c_screen_%s.rds", S8_MODE))
 stopifnot(nzchar(S8F_SET))
 S8F_TAG  <- sprintf("%s_from_%s", S8F_SET, gsub("[^A-Za-z0-9_]", "", sub("^fit:.*/t8c_fit_", "fit_", sub("[.]rds$", "", S8F_START))))
 S8F_STEM <- file.path(S8_OUT_DIR, sprintf("t8c_fit_%s", S8F_TAG))
@@ -90,7 +90,8 @@ if (is.null(p_st)) stop("the start is not finite")
 say("start objective %.6f (log-prior %.4f)\n", p_st$obj, p_st$logprior)
 PENALTY <- max(S8F_PENALTY_FLOOR, S8F_PENALTY_MULT * abs(p_st$obj))
 
-ID <- list(set = S8F_SET, start = S8F_START, mode_md5 = S$mode_md5, rows = ROWS, block = BLOCK)
+say("alpha_photo_eps %.2f permil%s\n", S$eps, if (is.finite(S8_EPS)) " (CCX_SEAS8_EPS override)" else " (the canonical's)")
+ID <- list(set = S8F_SET, start = S8F_START, mode_md5 = S$mode_md5, rows = ROWS, block = BLOCK, eps = S$eps)
 St <- if (file.exists(S8F_CKPT)) readRDS(S8F_CKPT) else
   list(x = x_start, best = -p_st$obj, cycle = 0L, n_eval = 0L,
        trace = data.frame(cycle = 0L, step = "start", obj = p_st$obj, cpu_min = 0), id = ID)
@@ -151,6 +152,7 @@ saveRDS(list(result = RES, converged = converged, trace = St$trace, n_eval = St$
              provenance = list(driver = S8F_DRIVER, lib = "calibration/lib_seas8_20261021.R",
                                commit = S8F_COMMIT, mode = S8_MODE, mode_file = S$mode_file,
                                mode_md5 = S$mode_md5, set = S8F_SET, rows = ROWS, block = BLOCK,
+                               alpha_photo_eps = S$eps, eps_override = is.finite(S8_EPS), screen = S8F_SCREEN,
                                start = S8F_START, start_x = x_start, scale = SCALE,
                                recipe = c(restarts = S8F_RESTARTS, cycles = S8F_CYCLES, nm_maxit = S8F_NM_MAXIT,
                                           nm_reltol = S8F_NM_RELTOL, tol = S8F_TOL, cycle_tol = S8F_CYCLE_TOL,
