@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-21 (n) — **Handoff `notes/handoff_2026-10-21_scan_items_built.md`** (Marcus: "Write the handoff note"). It supersedes `handoff_2026-10-21_carbotope_org_scan.md`, which now points to it. Open: the full suite on `42899ee8`, then the redeploy (not yet asked; Marcus runs the publish); two small questions ("list", ENSO's partial 2026); the draft-marked strings. Saved with it: `outputs/diagnostics/scan_items_20261021/check_scan_ui.py`, the headless check of the share link, the see-card scroll and the phone gloss tap (ALL OK on the local app at `42899ee8`), for reuse against the live app after the redeploy.
+
 ## 2026-10-21 (m) — **The scan items, done: tap-to-open unit glosses, Known-issue pointers that open their card, "Copy link to this view", the Under the hood takeaway, years read from the data, and five copy fixes.** Marcus, on the list: "Do 1–7 and the "own" fix. 8: "CarboTope is a set of carbon pools in each hemisphere, joined with flows; the tables below lists the parameters included, the inputs, and the observations that are used to fit and drive the model." 9: Do it. 10: End at the last observed year. 11: Do it." Not deployed.
 
 - **Stale comments (1):** `server.R`'s header said nothing is precomputed (untrue since 10-20); the permanence box's comment called its prose "A PLACEHOLDER FOR MARCUS" and said proportionality is "stated, not demonstrated" (his 10-11 comments rewrote it, and it now quotes the 10–500 GtC spread); `global.R` said the repository 404s (`gh repo view`: PUBLIC).
