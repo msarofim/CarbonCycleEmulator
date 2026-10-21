@@ -16,6 +16,17 @@ shinyapps.io target `carbotope.shinyapps.io/carbotope` (ruling R3) is now the do
 part that is expensive to undo — renaming after the post circulates breaks every link
 anyone has shared — so set the account/app name at the FIRST deploy, not after.
 
+**The short address (2026-10-21): https://carbotope.org** is a registrar FORWARD to the URL above, not
+a custom domain: Connect Cloud maps an owned domain only on Enhanced and up, and the account is on Basic.
+Registered by Marcus at Porkbun (2026-10-21, expires 2028-10-21; Porkbun nameservers). Apex and `www`
+send a 302 to the app over http and https (Let's Encrypt certificate for `carbotope.org` and
+`*.carbotope.org`, issued by Porkbun). Rules for the forward:
+- **302, never 301.** A browser caches a 301 indefinitely, so moving the app (say to the shinyapps.io
+  fallback) would strand every past visitor; with a 302, editing the forward moves everyone.
+- **Never masked or framed.** Inside a frame, `updateQueryString()` rewrites the frame's address, so a
+  copied link loses its view (`app/R/links.R`).
+- **To move the app:** edit the forward's destination at Porkbun. Nothing in the app names carbotope.org.
+
 **Deliberately NOT renamed** (Marcus's scoping of R3): the repository stays
 `CarbonCycleEmulator` and the code keeps its `ccx_` prefix. Neither is public-facing.
 

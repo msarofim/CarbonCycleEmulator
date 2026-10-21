@@ -2,6 +2,13 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-21 (e) — **https://carbotope.org forwards to the app** (Marcus asked whether to buy thesaraphreport.org and hang CarboTope off it; recommended carbotope.org on its own unless the Substack moves to thesaraphreport.org, then "What is the annual cost and the best way to get carbotope.org?"). He registered it at Porkbun and set the forward; recorded in `app/DEPLOY.md` ("The short address").
+
+- **Cost:** Porkbun's pricing API (2026-10-21): .org $7.98 first year, $11.84 renewal. Registered 14:51 UTC for two years (registry RDAP).
+- **Why a forward:** a custom domain on Connect Cloud needs Enhanced ($59/mo; Basic is $19/mo, Posit's June 2026 plan post). With a forward the reader lands on the posit.cloud address.
+- **Checked:** delegation visible ~15:00 UTC; the forward replaced Porkbun's parking page at 15:07; https from 15:13 (Let's Encrypt, `carbotope.org` + `*.carbotope.org`). http and https, apex and `www`, all 302 to the app on all three forwarder addresses. In the built-in browser, https://carbotope.org opens the app at top level (not framed) and the app writes the view into the address bar.
+- **Open:** the forward drops the path and query, so `carbotope.org/?tab=...` opens the app's front page. Links copied from the app carry the posit.cloud address and are unaffected. Marcus asked how to turn on Porkbun's "Include the requested URI path in the redirection"; not retested since.
+
 ## 2026-10-21 (d) — **Post 2 is live: `https://thesaraphreport.substack.com/p/carbotope-ii-carbotope-vs-bad-science`** (dated Oct 17, 2026; Marcus sent the share link, and this is its og:url without the `r=` and `utm_*` parameters). Checked against the build in `outputs/substack_20261016/` from the published page's DOM (built-in browser) and a scripted link check:
 
 - **Figures:** 7 in the body, in order, each at its file's pixel size (1456×900, 1456×980, 358×540, 1456×760, 1456×760, 1456×820, 1456×760), each followed by its italic "Figure N:" line. The hero (1456×762) is the post's social image (og:image) and is not in the body.
