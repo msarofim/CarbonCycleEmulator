@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-21 (p) — **Full suite @ `3d2dc9fb` (code = `42899ee8`; frozen, linked): 9,169 passed, 0 failed, 1 skipped (the standing `l2-enso-limb` skip), 0 errored, 233 warnings, 21.6 min.** The +83 over (k) are the scan items' new tests (74 in `test-app-scan-items.R`, 9 in `AC_CHECKS_1021B`). Log and per-file counts: `outputs/diagnostics/suite_20261021_3d2dc9fb{.log,_perfile.csv}`; README's test line cites it. Launch script `~/ccx_frozen/suite_20261021_3d2dc9fb.sh` kept; worktree removed. Linked per file (78 links + 3 tracked = 81, as in main; no "No nuclear" line). It predates (o) and the marker fix `f7c42da8`; draft-marked wording is with Marcus as one list (12 items, an audit against his recorded rulings), so the suite will be rerun at the commit that settles it, before any redeploy.
+
 ## 2026-10-21 (o) — **Drivers table: ENSO's Covers ends at the last full year, 1948–2025** (Marcus, on (n)'s two questions: ""list" is fine; end ENSO at the last full year"). Not deployed.
 
 - **Change:** `APP_DRIVER_COVERS[["enso"]]` counts only years with all twelve months of `nino34_anom` (`app_full_years()`, global.R). The record in `data/forcing_enso.rds` runs January 1948 to July 2026 (the file pads 2026 with NA rows to December), so the row read 1948–2026 under (m). The model still reads every month; only the label changes.
