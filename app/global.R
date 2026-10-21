@@ -121,6 +121,13 @@ APP_FEEDBACK_URL <- "https://thesaraphreport.substack.com/p/the-debut-of-carboto
 # Marcus 2026-10-15: the repository goes PUBLIC before the app is deployed (his posting plan, step 1),
 # so this is its GitHub address. It 404s for anyone else until that switch is made.
 APP_REPO_URL     <- "https://github.com/msarofim/CarbonCycleEmulator"
+# The short address (2026-10-21): a registrar forward to this app's Connect Cloud URL (app/DEPLOY.md, "The short
+# address"). The banner ends with it because post 1 and the first days of sharing used the long address. Marcus
+# chose the place (end of the banner) and the words ("Short link: CarboTope.org"). The link is built from the
+# label, so the address shown and the address linked cannot differ.
+APP_SHORT_LINK_LEAD  <- "Short link:"
+APP_SHORT_LINK_LABEL <- "CarboTope.org"
+APP_SHORT_URL        <- paste0("https://", tolower(APP_SHORT_LINK_LABEL))
 # Marcus 2026-10-15: his wording ("Substack" capitalized).
 APP_FEEDBACK_HOW <- paste("Comments are public on Substack. Be specific about what",
                           "issue your comment addresses (use the issue number if",

@@ -2,6 +2,12 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-21 (g) — **The banner on every tab ends "Short link: CarboTope.org"** (Marcus: "because the substack and my first several days of spreading the word used the raw html, can we make it clear somewhere on the app that 'CarboTope.org' will now take you there?"; he chose the end of the banner and the words "Short link: CarboTope.org"). Not deployed.
+
+- **Code:** `APP_SHORT_LINK_LEAD`, `APP_SHORT_LINK_LABEL` and `APP_SHORT_URL` in `app/global.R`; the URL is built from the label (`https://` + lower case), so the address shown and the address linked cannot differ. `provenance_banner()` (`app/ui.R`) adds the sentence under `app_link_ok(APP_SHORT_URL)` (the guard `test-review-cards.R` requires of every `APP_*URL`); the link opens a new tab, so a click cannot reset a reader's view.
+- **Test:** new `test-app-short-link.R` runs ui.R's banner on the shipped constants: one link, href equal to the label's address, new tab, text ending "Short link: CarboTope.org". MUTATIONS: the URL unset, a hand-typed URL that differs from the label, a different lead, a same-tab link, each rejected.
+- **Local app:** at 1440 × 900 the banner is one line ending with the link; at 375 × 812 it is 4 lines (97 px), the first takeaway starts at 190 px (169 px on 10-20), and nothing scrolls sideways. Connect Cloud's link-preview image is a screenshot of this page, so the next publish should show the short address there too (not checked).
+
 ## 2026-10-21 (f) — **Known issues: "Substack" in the yellow box now links to the comment box** (Marcus: "Can we add a comment link in the yellow box on the Known Issues tab, perhaps linked from the word 'substack'?"). Not deployed.
 
 - **Code:** `rv_feedback_how_ui()` (`app/R/review.R`) draws `APP_FEEDBACK_HOW` with its first `APP_FEEDBACK_LINK_WORD` ("Substack", new in `app/global.R`) linked to `rv_card_url()`, the cards' target (post 1 `#discussion`), in a new tab. Plain text when the link is unset (ui.R's warning then shows). `ui.R`'s caveat div calls it. Marcus's wording unchanged.

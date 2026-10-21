@@ -44,7 +44,10 @@ provenance_banner <- function() {
   div(class = cls,
       tags$strong(sprintf("%s \u2014 %s.", APP_RELEASE_NAME, app_params$status)),
       " Teaching software \u2014 not peer-reviewed.",   # "not for citation" cut, Marcus 2026-10-15
-      " ", tags$em(sprintf("Reviewers: see the \u201c%s\u201d tab.", RV_TAB_TITLE)))
+      " ", tags$em(sprintf("Reviewers: see the \u201c%s\u201d tab.", RV_TAB_TITLE)),
+      # 2026-10-21, Marcus's place and words. A new tab, so a click cannot reset the view the reader has set up.
+      if (app_link_ok(APP_SHORT_URL))
+        tagList(" ", APP_SHORT_LINK_LEAD, " ", tags$a(href = APP_SHORT_URL, target = "_blank", APP_SHORT_LINK_LABEL)))
 }
 
 # What the banner used to carry, kept whole and moved off the top of every tab.
