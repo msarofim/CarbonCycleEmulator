@@ -2,6 +2,13 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-20 (i) — **Redeployed to Connect Cloud from `a688a70`: phone layout, faster first visit, Pulse lab default, deep links, downloads, settled copy.** Revision `01a15bf5-dbc6-4801-4637-1bfda432ced5`: active, 1024 MB, timeouts 1200 / 1800 s, idle 5 s (the API, after the publish).
+
+- **Before publishing:** the bundle (`app/make_deploy_bundle.sh`, 116 files, 7.3 MB; ships both new precompute products and `FROZEN_FROM_COMMIT.txt`) served locally: first plot drawn, Pulse lab default drawn, CSV stamped `a688a70`, no output errors.
+- **Live, desktop 1440 × 900:** all eight tabs draw every plot with no output errors (Known issues 9/9 and 2 tables); the start-up note is gone; Futures → Pulse lab draws the stored default 1.5 s after opening (the same result took ~17 s after a click on the old revision); the partition CSV has 2,521 rows and its commit line; after the slider moves to 200 GtC the result is grayed and the CSV carries Marcus's note and no rows.
+- **Live, phone 375 × 812:** tab menu shown, navbar 72 px, takeaway 169 px, first plot 540 px (1,208 px before today), no sideways scroll.
+- **Warm visit (headless Chrome, right after the publish):** connect 0.5 s, first plot 2.0 s. The cold start (a visit after the app has idled) is timed separately.
+
 ## 2026-10-20 (h) — **App copy settled for the redeploy: the start-up note deleted; the download labels, the empty-chart message and "Choose a tab" approved as drafted; the Pulse lab's downloads carry the gray-out note while grayed** (Marcus: "Delete the start-up note; approve the rest as drafted (though for the Pulse lab, it should only happen when changing pulse size/date, not before the first run because now there's a default, right?)").
 
 - **Start-up note:** `APP_WARMUP_NOTE` ("First load compiles the model ... allow up to a minute ...") and its `warmup_note()` at the top of The Keeling Curve are gone (`app/global.R`, `app/ui.R`); comments in `app/R/review.R` and `app/DEPLOY.md` follow. The tab now opens on its takeaway (local check, no output errors).
