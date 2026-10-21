@@ -143,7 +143,8 @@ DLS <- list(
   review   = function() "Measured from this model and the observations named on the card.")
 
 # ---- one entry per chart ------------------------------------------------------------
-# stem: file name part; chart: the name in the CSV header (DRAFT copy); x / y / value:
+# stem: file name part; chart: the name in the CSV header and, since 10-21 (h), the chart's alt text (Marcus
+# 2026-10-20: "approve the rest as drafted"; CHANGELOG 2026-10-20 e, h); x / y / value:
 # DLC entries for the mapped aesthetics; sources: DLS keys; note: extra header line.
 # A function entry is evaluated per call (charts whose labels are built at run time).
 APP_DL_SPEC <- list(
