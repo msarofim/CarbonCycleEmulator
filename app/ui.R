@@ -21,9 +21,26 @@ gloss <- function(term, meaning) {
   # .noWS = "outside" (Marcus 2026-10-15, comments 10.15.26b: "ppm ." on the Keeling tab): htmltools put a
   # newline between this tag and the next child, so a period after a gloss rendered with a space before it.
   # Every gloss() call writes its own spaces ("The ", " is the unit"), so nothing loses a needed space.
-  tags$abbr(title = meaning, style = "text-decoration: underline dotted; cursor: help;",
-            term, .noWS = "outside")
+  # 2026-10-21 (Marcus: "Do 1-7"): a touch screen never shows a title tooltip, and a keyboard could not reach the
+  # term. Class `gloss` + tabindex: a tap toggles the meaning, and keyboard focus shows it (GLOSS_CSS, GLOSS_JS
+  # below). The title stays for the mouse. The meaning is a SIBLING span, hidden until then: as the abbr's ::after
+  # it carried the term's dotted underline, and as an inline-block (to shed it) it broke onto its own line at 375 px.
+  tagList(
+    tags$abbr(title = meaning, class = "gloss", tabindex = "0",
+              style = "text-decoration: underline dotted; cursor: help;",
+              term, .noWS = "outside"),
+    tags$span(class = GLOSS_MEANING_CLASS, paste0(" (", meaning, ")"), .noWS = "outside"))
 }
+GLOSS_OPEN_CLASS <- "gloss-open"
+GLOSS_MEANING_CLASS <- "gloss-meaning"
+GLOSS_CSS <- sprintf("
+  .%2$s { display: none; }
+  .gloss.%1$s + .%2$s, .gloss:focus-visible + .%2$s { display: inline; }", GLOSS_OPEN_CLASS, GLOSS_MEANING_CLASS)
+GLOSS_JS <- sprintf("
+  $(document).on('click', 'abbr.gloss', function () { this.classList.toggle('%1$s'); });
+  $(document).on('keydown', 'abbr.gloss', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.classList.toggle('%1$s'); }
+  });", GLOSS_OPEN_CLASS)
 # The two unit glosses, one wording each (Keeling's ppm line, 2026-10-15; Where's GtC gloss, 2026-09-22), so the
 # copies on other tabs cannot drift. 2026-10-21 (Marcus: "Mechanical fixes 1-9"): the tabs that showed ppm or GtC
 # with no gloss (What if, Futures, Where's readouts, Under the hood) get the same one-line note.
@@ -70,13 +87,33 @@ provenance_detail <- function() {
 
 # A pointer FROM a teaching tab TO the card that owns a flaw visible on it.
 # Written as a function so the card number cannot be typed twice.
+# 2026-10-21 (Marcus: "Do 1-7"): the pointer is a link that opens the Known issues tab at the card (SEE_CARD_JS
+# below; the card's id is rv_card_anchor(), set by review_card()).
 see_card <- function(id, what) {
   c_ <- rv_card(id)
   div(class = "caveat",
-      tags$strong(sprintf("Known issue %d: ", c_$id)), what,
-      sprintf(" See \u201c%s\u201d \u2192 issue %d, \u201c%s\u201d.",
-              RV_TAB_TITLE, c_$id, c_$title))
+      tags$strong(sprintf("Known issue %d: ", c_$id)), what, " See ",
+      tags$a(href = paste0("#", rv_card_anchor(c_$id)), class = "ccx-see-card",
+             sprintf("\u201c%s\u201d \u2192 issue %d, \u201c%s\u201d", RV_TAB_TITLE, c_$id, c_$title),
+             .noWS = "outside"),
+      ".")
 }
+rv_card_anchor <- function(id) sprintf("issue-%d", id)
+# Click: show the tab that holds the card (its navbar link, so the phone menu and `input$tabs` follow), then
+# scroll to the card once the tab is shown.
+SEE_CARD_JS <- "
+  $(document).on('click', 'a.ccx-see-card', function (e) {
+    var card = document.getElementById(this.getAttribute('href').slice(1));
+    if (!card) return;
+    e.preventDefault();
+    var pane = card.closest('.tab-pane');
+    var link = pane && Array.prototype.find.call(document.querySelectorAll('.navbar a[data-bs-toggle=tab]'),
+      function (a) { return a.getAttribute('href') === '#' + pane.id; });
+    var go = function () { card.scrollIntoView({block: 'start'}); };
+    if (!link || link.classList.contains('active')) { go(); return; }
+    $(link).one('shown.bs.tab', function () { setTimeout(go, 0); });
+    link.click();
+  });"
 
 # ---- the review tab's furniture -------------------------------------
 review_ask_block <- function() {
@@ -89,7 +126,7 @@ review_card <- function(id, plot_id = NULL, plot_height = "330px",
                         extra_plot_id = NULL, extra_height = "300px") {
   c_ <- rv_card(id)
   url <- rv_card_url(id)
-  div(class = "card-issue",
+  div(class = "card-issue", id = rv_card_anchor(c_$id),   # the target of see_card()'s link (2026-10-21)
       # "Issue N" (2026-10-15): Marcus's new comment text asks for "the issue number", so the number is labeled.
       h4(sprintf("Issue %d: %s", c_$id, c_$title)),
       div(class = "card-class",
@@ -285,6 +322,11 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
     ")),
     tags$style(HTML(phone_css)),       # phones (2026-10-20): see APP_PHONE_MAX_PX above
     tags$script(HTML(phone_tab_js)),
+    # 2026-10-21: unit glosses open on a tap; the Known-issue pointers open their card; "Copy link to this view"
+    tags$style(HTML(GLOSS_CSS)),
+    tags$script(HTML(GLOSS_JS)),
+    tags$script(HTML(SEE_CARD_JS)),
+    tags$script(HTML(APP_SHARE_JS)),
     # The pulse lab's result grays out while its settings differ from the ones it was run at (server.R
     # pulse_stale(); global.R APP_PULSE_RESULT_IDS). shiny.js is loaded in <head>, so Shiny exists here.
     tags$script(HTML("
@@ -609,8 +651,10 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
                         APP_PULSE_YEAR_DEFAULT, step = APP_PULSE_YEAR_RANGE[3], sep = ""),
             actionButton("p_go", APP_PULSE_GO_LABEL, class = "btn-primary btn-sm"),
             uiOutput("p_stale_note"),   # 2026-10-20: shown while the result on screen is for other settings
-            helpText("Runs the model twice — with and without the pulse — and",
-                     "takes the difference. The difference is what the extra carbon does."),
+            # 2026-10-21 (Marcus: "Do 1-7"): the one statement of the method; the "How this is computed" box under
+            # the chart said the same and is gone, and its one extra fact (identical starting conditions) is here.
+            helpText("Runs the model twice, with and without the pulse, from identical starting",
+                     "conditions, and takes the difference. The difference is what the extra carbon does."),
             unit_note_gtc()
           )
         ),
@@ -801,6 +845,7 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
   # ---- 6. Under the hood ---------------------------------------------
   tabPanel(
     "Under the hood",
+    takeaway(APP_HOOD_TAKEAWAY),   # Marcus 2026-10-21 ("8"): the one tab that had none
     fluidRow(
       # 2026-10-15: FULL width below 992 px (col-sm-12), side by side above it (col-lg-7 / col-lg-5; BS5 "lg"). As col-sm-7
       # the left column was 422 px at a 780 px window, too narrow for the box diagram to be legible.

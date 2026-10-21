@@ -119,7 +119,7 @@ APP_RELEASE_MODE <- "hilda31w"   # Marcus 2026-10-15: "Beta v1.0 is fine, becaus
 # his referral code and utm_* parameters; this is the post's og:url, without them.
 APP_FEEDBACK_URL <- "https://thesaraphreport.substack.com/p/the-debut-of-carbotope-beta-a-new"
 # Marcus 2026-10-15: the repository goes PUBLIC before the app is deployed (his posting plan, step 1),
-# so this is its GitHub address. It 404s for anyone else until that switch is made.
+# so this is its GitHub address. Public since 2026-10-15 (`gh repo view` reports PUBLIC, checked 2026-10-21).
 APP_REPO_URL     <- "https://github.com/msarofim/CarbonCycleEmulator"
 # The short address (2026-10-21): a registrar forward to this app's Connect Cloud URL (app/DEPLOY.md, "The short
 # address"). The banner ends with it because post 1 and the first days of sharing used the long address. Marcus
@@ -578,6 +578,17 @@ app_flux_trace <- function(spin) {
 APP_STARTUP_PRE <- app_pre_read("startup")
 APP_SPIN <- if (is.null(APP_STARTUP_PRE)) app_spinup(APP_PARAMS) else APP_STARTUP_PRE$spin
 APP_OBS  <- ccx_prepare_obs()
+# The Keeling tab's average seasonal cycle (plot_seasonal()). Marcus 2026-10-21 ("10: End at the last observed
+# year"): the window starts in APP_SEAS_START and ends at the last calendar year that Mauna Loa measured in all
+# twelve months and the historical run covers (its last year is APP_HIST_YEARS[2]). It was a typed 2000-2024.
+APP_SEAS_START <- 2000L
+app_seas_window <- function(co2, hist_end, start = APP_SEAS_START) {
+  m <- co2[co2$station == "MLO" & is.finite(co2$co2_ppm), ]
+  n <- tapply(m$month, m$year, function(x) length(unique(x)))
+  full <- as.integer(names(n)[n == 12L])
+  c(start, min(max(full), hist_end))
+}
+APP_SEAS_WINDOW <- app_seas_window(APP_OBS$co2, APP_HIST_YEARS[2])
 APP_HIST <- if (is.null(APP_STARTUP_PRE)) app_hist_run(APP_SPIN) else APP_STARTUP_PRE$hist
 APP_FLUX <- if (is.null(APP_STARTUP_PRE)) app_flux_trace(APP_SPIN) else APP_STARTUP_PRE$flux
 APP_FLUX_NOW <- APP_FLUX[nrow(APP_FLUX), ]
@@ -600,6 +611,30 @@ APP_OBS_GROWTH <- local({
 })
 APP_EMIS_HIST <- as.data.frame(
   readRDS(file.path(CCX_ROOT, "data", "forcing_emissions_historical.rds")))
+# Under the hood's "What drives the model" table, its Covers column (Marcus 2026-10-21, "11: Do it"): each row is
+# the span of the data file the model reads for that driver, so it moves with the next data update. Until today
+# only the emissions rows were read; the others were typed, and the SST row borrowed the emissions file's end.
+# The ¹⁴C row is the years either source is non-zero (the industrial file starts with two zero rows, 1950-51);
+# N deposition is the file's historical series (the scenarios extend it to 2300).
+app_driver_span <- function(file, keep = NULL) {
+  d <- as.data.frame(readRDS(file.path(CCX_ROOT, "data", file)))
+  if (!is.null(keep)) d <- d[keep(d), , drop = FALSE]
+  range(d$year)
+}
+app_span_label <- function(r) sprintf("%d–%d", as.integer(r[1]), as.integer(r[2]))
+APP_DRIVER_COVERS <- local({
+  c14 <- range(app_driver_span("forcing_bomb_c14.rds", function(d) d$shape_per_yr > 0),
+               app_driver_span("forcing_nuclear_c14.rds", function(d) d$GBq > 0))
+  vapply(list(
+    emissions = range(APP_EMIS_HIST$year),
+    gmst      = app_driver_span("forcing_gmst.rds"),
+    sst       = app_driver_span("forcing_sst.rds"),
+    enso      = app_driver_span("forcing_enso.rds"),
+    aod       = app_driver_span("forcing_volcanic_aod.rds"),
+    c14       = c14,
+    ndep      = app_driver_span("forcing_ndep.rds", function(d) d$scenario == "historical")),
+    app_span_label, character(1))
+})
 APP_SCEN_EMIS <- as.data.frame(
   readRDS(file.path(CCX_ROOT, "data", "vv_emissions.rds")))
 stopifnot(setequal(unique(APP_SCEN_EMIS$scenario), APP_SCENARIOS))
@@ -830,6 +865,10 @@ APP_IMBALANCE_HEADING <- "Is the model's land sink too high?"
 # function defined at the top level of ui.R is not reliably in scope inside the
 # server function. global.R is the one file both are guaranteed to see.
 takeaway <- function(...) div(class = "takeaway", ...)
+# Under the hood's takeaway (Marcus 2026-10-21, "8", his wording; "lists" -> "list" to agree with "tables").
+APP_HOOD_TAKEAWAY <- paste(APP_TITLE, "is a set of carbon pools in each hemisphere, joined with flows;",
+                           "the tables below list the parameters included, the inputs, and the observations",
+                           "that are used to fit and drive the model.")
 
 # ---- NAMING A SET OF MECHANISM SWITCHES (Marcus 2026-09-25) ---------
 # The "What if...?" tab went multi-select, so every sentence and legend key that
@@ -935,8 +974,11 @@ app_cmap_module_note <- function(cm = APP_CMAP) {
   n <- length(m$names)
   nw <- if (n <= 9L) c("one", "two", "three", "four", "five", "six", "seven", "eight", "nine")[n] else
     as.character(n)
+  # 2026-10-21 (Marcus: "Do 1-7"): "year-to-year", as card 4 says. The module scores the CENTERED 12-month growth
+  # (sampled monthly, detrended; data-raw/build_mbl_global_growth_monthly.R), which removes the seasonal cycle,
+  # so "month-to-month" misdescribed it.
   sprintf(paste(" Not on this map: the model's %s El Niño settings. They are fitted in a separate",
-                "step, to the month-to-month wobble in CO₂'s growth rate (%d–%d) and to %s, and",
+                "step, to the year-to-year wobble in CO₂'s growth rate (%d–%d) and to %s, and",
                 "are held fixed while everything shown here is fitted."),
           nw, m$growth_window[1], m$growth_window[2],
           paste(APP_CMAP_MODULE_ROW_TEXT[m$rows], collapse = " and "))

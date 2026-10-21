@@ -588,7 +588,8 @@ app_dl_links <- function(id) {
     div(class = "ccx-dl", APP_DL_LEAD, " ",
         # 2026-10-21: each link's accessible name carries the chart's name; thirty links all read "data (CSV)"
         downloadLink(paste0(id, "_csv"), APP_DL_LABEL_CSV, `aria-label` = app_dl_aria(id, APP_DL_LABEL_CSV)), " · ",
-        downloadLink(paste0(id, "_png"), APP_DL_LABEL_PNG, `aria-label` = app_dl_aria(id, APP_DL_LABEL_PNG))))
+        downloadLink(paste0(id, "_png"), APP_DL_LABEL_PNG, `aria-label` = app_dl_aria(id, APP_DL_LABEL_PNG)),
+        app_share_link(id)))   # 2026-10-21: "Copy link to this view", on each tab's first chart (links.R)
 }
 app_dl_aria <- function(id, label) {
   s <- app_dl_spec(id)

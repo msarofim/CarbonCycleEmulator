@@ -1,9 +1,12 @@
 # =====================================================================
 # server.R
 #
-# Every panel runs the model live -- a full 1750-2100 integration is ~40 ms and
-# a coupled future run ~170 ms, so there is nothing to precompute and no lookup
-# table to fall out of date with the model.
+# The panels run the model live -- a full 1750-2100 integration is ~40 ms and a
+# coupled future run ~170 ms. Since 2026-10-20 the start-up runs, the default
+# pulse and the Known-issues cards are read from precomputes instead
+# (data/app_startup_precompute.rds, pulse_default_precompute.rds,
+# review_precompute.rds), each md5-gated against the code and tested stored
+# against live (test-app-precompute.R, test-review-precompute.R).
 #
 # The takeaway lines are COMPUTED, not written. A hard-coded sentence saying
 # "the ocean has absorbed a quarter of our emissions" would silently become a
@@ -77,7 +80,7 @@ function(input, output, session) {
   output$k_plot <- renderPlotFit("k_plot", 
     plot_keeling(APP_HIST$out, APP_OBS, input$k_years, input$k_hemi, input$k_obs))
 
-  output$k_seasonal <- renderPlotFit("k_seasonal", plot_seasonal(APP_HIST$out, APP_OBS))
+  output$k_seasonal <- renderPlotFit("k_seasonal", plot_seasonal(APP_HIST$out, APP_OBS, APP_SEAS_WINDOW))
 
   output$k_takeaway <- renderText({
     # 2026-10-12 code review: the three numbers come from app_keeling_numbers() (global.R) -- the
@@ -523,13 +526,13 @@ function(input, output, session) {
     if (is.na(a) || is.na(ob)) return("")
     if (!length(off))
       return(sprintf(paste("Over %d–%d, the year-to-year scatter about the",
-                           "decadal trend is %.2f ppm/yr in the full model",
+                           "decadal trend is %.2f ppm per year in the full model",
                            "against %.2f in the measured record."),
                      yr[1], yr[2], a, ob))
     b <- scatter(mod_g(cf_alt()))
     if (is.na(b)) return("")
     txt <- sprintf(paste("Over %d–%d, the year-to-year scatter about the decadal trend is:",
-                         "full model %.2f ppm/yr, without %s %.2f (%s),",
+                         "full model %.2f ppm per year, without %s %.2f (%s),",
                          "and the measured record %.2f."),
                    yr[1], yr[2], a, app_mech_list(off), b,
                    if (b < a) sprintf("%.0f%% less", 100 * (1 - b / a))
@@ -562,7 +565,7 @@ function(input, output, session) {
     # volcanoes and El Nino — which is what this tab is for.
     # "Relative to" is Marcus's (2026-10-15); it was "Against".
     txt <- sprintf(paste("Relative to the measured record over the same %d years:",
-                         "the full model runs %+.2f ppm/yr on average (typical",
+                         "the full model runs %+.2f ppm per year on average (typical",
                          "miss %.2f), and its single worst year is %d at %+.2f."),
                    r$full$n, r$full$bias, r$full$rms, r$full$worst_year,
                    r$full$worst)
@@ -988,13 +991,11 @@ function(input, output, session) {
   # cumulative carbon and temperature (e.g., each ton of CO2 emitted adds
   # effectively permanent temperature)."
   #
-  # \u26a0\u26a0 THE PROSE IS A PLACEHOLDER FOR MARCUS. The pedagogy on this tab is
-  # his; this is drafted so the slot is not empty and the numbers are real, and
-  # it is listed as owed copy in the handoff exactly as the "Build your own"
-  # sentence is. Rewording it does not touch the arithmetic.
+  # The prose is Marcus's (his 2026-10-11 comments, CarboTopecomments.10.11.26, rewrote the 09-25 draft).
   #
-  # \u26d4 EVERY NUMBER IS MEASURED FROM THE RUN THE READER JUST TRIGGERED, not
-  # quoted from the literature. A textbook figure here would be a number this
+  # \u26d4 EVERY NUMBER IS MEASURED FROM THIS MODEL, not quoted from the literature: the first paragraph
+  # from the run the reader just triggered, the size-insensitivity paragraph from runs at the default
+  # settings measured by calibration/diag_pulse_vs_tcre.R (APP_PULSE_LIN_*, APP_PULSE_PER1000_*, global.R). A textbook figure here would be a number this
   # app cannot check, printed beside two panels drawn from a model that might
   # disagree with it.
   #
@@ -1005,8 +1006,8 @@ function(input, output, session) {
   # like-for-like rule exists to stop, so the copy says "warming per unit of
   # extra carbon" and leaves the acronym out.
   #
-  # \u26a0 PROPORTIONALITY IS STATED, NOT DEMONSTRATED HERE, and says so: showing
-  # it would need a second pulse size, i.e. a third model run on every click.
+  # Proportionality is shown from those measured runs (10 to 500 GtC at the default settings); the
+  # reader's run is not repeated at a second size, which would take a third model run on every click.
   output$f_pulse_permanence <- renderUI({
     req(identical(input$f_mode, "Pulse lab"))
     pr <- pulse_runs()
@@ -1020,7 +1021,7 @@ function(input, output, session) {
     per1000 <- at(y100) / pr$gtc * 1000
     info_box("What this says about carbon and temperature",
       p(sprintf(paste("This %d GtC pulse warms the world by %.3f \u00b0C a century",
-                      "later \u2014 %.2f \u00b0C per 1000 GtC \u2014 and by %s of its own peak",
+                      "later \u2014 %.2f \u00b0C per 1000 GtC \u2014 and by %s of its peak",
                       "warming still at %d, %d years after release."),
                 pr$gtc, at(y100), per1000, fmt_pct(keep), yend, yend - pr$year)),
       # Marcus 2026-10-11 (CarboTopecomments.10.11.26), his two "Change"s, verbatim.
@@ -1057,13 +1058,8 @@ function(input, output, session) {
   })
 
   output$f_notes <- renderUI({
-    how <- if (identical(input$f_mode, "Pulse lab")) {
-      div(class = "caveat",
-          tags$strong("How this is computed: "),
-          "the model runs twice — once with the pulse and once without, from ",
-          "identical starting conditions — and the difference between the two ",
-          "is the pulse's effect.")
-    } else NULL
+    # 2026-10-21 (Marcus: "Do 1-7"): the Pulse lab's "How this is computed" box is gone; the sidebar line under the
+    # button (ui.R) says the same, now with its "identical starting conditions".
     # F5 (2026-09-24): the runs now reach 2150, which puts the stylized "+5 %
     # per year" case 26x outside the range the CO2->forcing curve was fitted
     # over. ccx_run_coupled() has always warned about this to the console; on
@@ -1077,9 +1073,8 @@ function(input, output, session) {
                   "Build your own" = list(stylised_run()$climate),
                   lapply(future_runs(), `[[`, "climate"))
     note <- app_erf_range_note(cls)
-    if (is.null(note)) how
-    else tagList(how, div(class = "caveat",
-                          tags$strong("Outside the fitted range: "), note))
+    if (is.null(note)) NULL
+    else div(class = "caveat", tags$strong("Outside the fitted range: "), note)
   })
 
   # ---- 6. WHAT PINS DOWN WHAT? (Marcus 2026-09-25) -------------------
@@ -1398,7 +1393,6 @@ function(input, output, session) {
   # "detrend" at hilda31w), and (3) ends where the run ends instead of "present". New end years read APP_HIST_YEARS;
   # the ENSO start is CCX_DRIVERS$enso$since (R/mechanisms.R).
   output$h_drivers <- renderTable({
-    y_end <- APP_HIST_YEARS[2]
     enso_lab <- switch(ccx_enso_index_of(APP_PARAMS),
                        detrend = "ENSO index (detrended Ni\u00f1o 3.4)",
                        demean  = "ENSO index (Ni\u00f1o 3.4)",
@@ -1409,12 +1403,9 @@ function(input, output, session) {
                  enso_lab,
                  "Volcanic aerosol", "Bomb and industrial \u00b9\u2074C",
                  "Nitrogen deposition on land"),
-      # 2026-10-21: the two emissions rows are APP_HIST_YEARS's own file (forcing_emissions_historical.rds), so
-      # their span is read, not typed; the other rows are other products, still typed.
-      Covers = c(rep(sprintf("%d\u2013%d", APP_HIST_YEARS[1], APP_HIST_YEARS[2]), 2), "1850\u20132024",
-                 sprintf("1850\u2013%d", y_end),
-                 sprintf("%d\u2013%d", CCX_DRIVERS$enso$since, y_end), "1850\u20132024", "1952\u20132023",
-                 "1750\u20132024"),
+      # 2026-10-21 (Marcus, "11: Do it"): every row is the span of the file the model reads for it
+      # (APP_DRIVER_COVERS, global.R); the same order as Driver.
+      Covers = unname(APP_DRIVER_COVERS[c("emissions", "emissions", "gmst", "sst", "enso", "aod", "c14", "ndep")]),
       Source = c("Global Carbon Budget 2025",
                  "Global Carbon Budget 2025 (OSCAR v3.1 before 1850)",
                  "IGCC", "Met Office Hadley Centre HadSST.4.2.0.0", "NOAA PSL",

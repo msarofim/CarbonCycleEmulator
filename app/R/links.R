@@ -88,3 +88,38 @@ app_links_server <- function(input, session) {
   })
   list(url = function() state$url)
 }
+
+# ---- "Copy link to this view" (Marcus 2026-10-21: "9: Do it") -----------------------
+# The address bar already IS the link to the view (above), but nothing on the page said so. One link per tab,
+# beside the download links of the tab's first chart (app_dl_links(), downloads.R), copies the view's link.
+# ⭐ IT COPIES THE SHORT ADDRESS: APP_SHORT_URL plus the query string. The forward passes the query through
+# (app/DEPLOY.md, "The short address"), so the link opens the same view, and moving the app means editing the
+# forward rather than breaking every copied link.
+APP_SHARE_LABEL  <- "Copy link to this view"
+APP_SHARE_DONE   <- "Link copied"
+APP_SHARE_PROMPT <- "Copy this link:"     # where the browser refuses the clipboard
+APP_SHARE_DONE_MS <- 2000
+# the first chart of each tab, in navbar order (test-app-scan-items.R ties each to its tab)
+APP_SHARE_IDS <- c("k_plot", "w_partition", "c_plot", "i_d13c", "f_plot", "rv_repdc", "cm_map", "h_diagram")
+
+#' The link, or NULL for a chart that is not its tab's first
+app_share_link <- function(id) {
+  if (!id %in% APP_SHARE_IDS) return(NULL)
+  tagList(" · ", tags$a(href = "#", class = "ccx-share", role = "button", `data-base` = APP_SHORT_URL,
+                             APP_SHARE_LABEL, .noWS = "outside"))
+}
+APP_SHARE_JS <- sprintf("
+  $(document).on('click', 'a.ccx-share', function (e) {
+    e.preventDefault();
+    var a = this, url = a.getAttribute('data-base') + '/' + window.location.search;
+    var done = function () {
+      a.textContent = %s;
+      setTimeout(function () { a.textContent = %s; }, %d);
+    };
+    if (navigator.clipboard && window.isSecureContext)
+      navigator.clipboard.writeText(url).then(done, function () { window.prompt(%s, url); });
+    else window.prompt(%s, url);
+  });",
+  jsonlite::toJSON(APP_SHARE_DONE, auto_unbox = TRUE), jsonlite::toJSON(APP_SHARE_LABEL, auto_unbox = TRUE),
+  APP_SHARE_DONE_MS, jsonlite::toJSON(APP_SHARE_PROMPT, auto_unbox = TRUE),
+  jsonlite::toJSON(APP_SHARE_PROMPT, auto_unbox = TRUE))

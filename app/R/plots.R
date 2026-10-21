@@ -169,10 +169,22 @@ PULSE_PARTITION_NOTE <- "This is how much extra carbon each reservoir holds beca
 # reader-facing copy). It names the source because this series has two possible
 # ones and review card 4 uses the other -- that is a live disambiguation, not a
 # correction notice. The argument for the change is in the build script.
+# 2026-10-21 (Marcus: "Do 1-7"): the record's first year is read from the product (its `level`, the annual means
+# that are differenced), not typed. APP_OBS_GROWTH when global.R has run; the file itself when this file is
+# sourced alone (the plot tests); no year clause without either.
+GROWTH_OBS_FIRST_YEAR <- local({
+  g <- if (exists("APP_OBS_GROWTH") && !is.null(APP_OBS_GROWTH)) APP_OBS_GROWTH else {
+    f <- if (exists("ccx_path")) ccx_path("data", "mbl_global_growth.rds") else ""
+    if (nzchar(f) && file.exists(f)) readRDS(f) else NULL
+  }
+  if (is.null(g)) NA_integer_ else as.integer(min(g$level$year))
+})
 GROWTH_UNIT_NOTE <- paste("Annual means differenced, model and measurement alike.",
                           "Measured growth is the NOAA marine boundary layer global",
                           # 2026-10-15 review: readers see "issue N", not "card N"
-                          "reference, which begins in 1979. Known issue 4 scores the",
+                          if (is.na(GROWTH_OBS_FIRST_YEAR)) "reference. Known issue 4 scores the"
+                          else sprintf("reference, which begins in %d. Known issue 4 scores the",
+                                       GROWTH_OBS_FIRST_YEAR),
                           "Global Carbon Budget's January-to-January rate instead.")
 
 # ⭐ THE ONE FONT SIZE, and the ONLY place it is typed. `theme_ccx()` is called
@@ -721,7 +733,8 @@ plot_keeling <- function(out, obs, yr_range, hemi = "both", show_obs = TRUE,
 }
 
 #' The seasonal cycle on its own: one average year
-plot_seasonal <- function(out, obs, window = c(2000, 2024)) {
+#' @param window c(first, last) year averaged: APP_SEAS_WINDOW (global.R), read from the record since 2026-10-21
+plot_seasonal <- function(out, obs, window) {
   ms <- ccx_model_year_stats(out, "co2_NH")
   k <- ms$year >= window[1] & ms$year <= window[2]
   a <- mean(ms$a[k]); b <- mean(ms$b[k])
@@ -1341,7 +1354,8 @@ plot_counterfactual <- function(base, alt = NULL, yr_range, label) {
 # means the model grew faster than the record that year. The axis label says so,
 # because "difference" alone is exactly the kind of label a reader resolves the
 # wrong way round half the time.
-LAB_GROWTH_RESID <- "Model \u2212 measured (ppm/yr)"
+# 2026-10-21 (Marcus: "Do 1-7"): "ppm per year", as LAB_GROWTH on the chart above it
+LAB_GROWTH_RESID <- "Model \u2212 measured (ppm per year)"
 KEY_RESID_ZERO   <- "No difference"
 
 #' Model-minus-observed CO2 growth, for the full model and the counterfactual

@@ -251,6 +251,32 @@ test_that("MUTATION: the 10-21 list fires when an old phrase returns or a new on
   for (ck in AC_CHECKS_1021) expect_true(!is.na(ck[[2]]) || !is.na(ck[[3]]), info = ck[[1]])
 })
 
+# Marcus 2026-10-21, on the scan list: "Do 1-7 and the 'own' fix. 8: 'CarboTope is a set of carbon pools in each
+# hemisphere, joined with flows; the tables below lists [list] the parameters included, the inputs, and the
+# observations that are used to fit and drive the model.'" The behavior items (glosses, links, spans) are in
+# test-app-scan-items.R.
+AC_CHECKS_1021B <- list(
+  c("H takeaway",            NA, "is a set of carbon pools in each hemisphere, joined with flows;"),
+  c("H takeaway placed",     NA, "takeaway(APP_HOOD_TAKEAWAY)"),
+  c("F method said once",    "How this is computed: ", "with and without the pulse, from identical starting"),
+  c("C ppm per year",        "ppm/yr", "Model \\u2212 measured (ppm per year)"),
+  c("M ENSO year-to-year",   "month-to-month wobble", "to the year-to-year wobble in CO₂'s growth rate"),
+  c("F its peak",            "of its own peak", "and by %s of its peak")
+)
+
+test_that("Marcus's 2026-10-21 scan rulings are still applied", {
+  problems <- ac_audit(.ac_src, AC_CHECKS_1021B)
+  expect_equal(problems, character(0), info = paste(problems, collapse = " | "))
+})
+
+test_that("MUTATION: the scan list fires when an old phrase returns or a new one goes", {
+  m1 <- paste(.ac_src, '  "the full model runs %+.2f ppm/yr on average"', sep = "\n")
+  expect_true(any(grepl("C ppm per year", ac_audit(m1, AC_CHECKS_1021B), fixed = TRUE)))
+  m2 <- gsub("joined with flows;", "joined by flows;", .ac_src, fixed = TRUE)
+  expect_true(any(grepl("H takeaway", ac_audit(m2, AC_CHECKS_1021B), fixed = TRUE)))
+  for (ck in AC_CHECKS_1021B) expect_true(!is.na(ck[[2]]) || !is.na(ck[[3]]), info = ck[[1]])
+})
+
 test_that("all of Marcus's 2026-10-15 copy rulings are still applied", {
   problems <- ac_audit(.ac_src, AC_CHECKS_1015)
   expect_equal(problems, character(0), info = paste(problems, collapse = " | "))
