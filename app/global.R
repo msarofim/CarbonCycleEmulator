@@ -694,9 +694,8 @@ app_pulse_stale <- function(shown_inp, now_inp) !is.null(shown_inp) && !identica
 # output that reads pulse_runs() (test-app-precompute.R 11 derives that set from server.R), f_notes for
 # its fitted-range caveat on the run.
 APP_PULSE_RESULT_IDS <- c("f_takeaway", "f_plot", "f_fair_note", "f_partition", "f_pulse_permanence", "f_notes")
-# ⚠ CLAUDE'S DRAFT, FOR MARCUS'S WORDING (2026-10-20).
-APP_PULSE_STALE_NOTE <- paste("These charts are for the previous settings. Press",
-                              "“Release the pulse” to update them.")
+# Marcus 2026-10-20: his wording, verbatim.
+APP_PULSE_STALE_NOTE <- "Chart reflects previous settings. Release the pulse to update."
 
 # ---- THE FUTURES RIBBONS (Marcus 2026-10-01, review 10-01c B7: "Laplace first, MCMC as the check") ----
 # PRECOMPUTED by calibration/build_futures_ribbons.R and only READ here: the app

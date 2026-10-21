@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-20 (g) — **Pulse lab gray-out note: Marcus's wording** ("Chart reflects previous settings. Release the pulse to update."), replacing the draft in `APP_PULSE_STALE_NOTE` (`app/global.R`). `test-app-precompute`, `-us-spelling`, `-review-copy`, `-links`, `-downloads`, `-phone-layout`: 708 expectations, 0 failed. Still for his wording before a redeploy: the download and link labels (e), "Choose a tab" (b), and the stale `APP_WARMUP_NOTE` (c).
+
 ## 2026-10-20 (f) — **Phone layout (b), first visit (c, d) and deep links + downloads (e) MERGED into main; full suite @ `ba898e25`: 8,704 passed, 0 failed, 1 skipped (the standing skip), 231 warnings (as at `cd7a1c9`), 20.9 min** (Marcus: "Merge all three (Recommended)"). Not redeployed.
 
 - **Merges:** `0aa504d` phone (clean), `3f627ab` first visit, `ba898e2` links and downloads. Conflicts were additions at one spot each: `app/ui.R` (header scripts; then the phone section above `navbarPage`, wrapped in `function(request)` for bookmarking), `app/server.R` (`renderPlotFit()` keeps the download registry and `app_fit_plot()`; the merged body does both), `CHANGELOG.md`. All three branches had labelled their entry (b); renumbered here, with the cross-references in `R/cpp.R`, `app/global.R`, `app/DEPLOY.md`, `app/R/downloads.R`, two tests and two READMEs.
