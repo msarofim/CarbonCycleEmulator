@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-21 (c) — **Handoff `notes/handoff_2026-10-21_app_upgrade_post2.md`** (Marcus: "Write the handoff note"). It supersedes 10-16, which now points to it. Open: post 2 is Marcus's to paste (his calls on the carbonate sentence, FN1 on the subtitle, FN6 on a caption); the marketing list; capacity not re-tested after the first-visit change; phone layout unchecked on iOS Safari.
+
 ## 2026-10-21 (b) — **Redeployed from `dfba0d3` (Known issue 2's labels)** (Marcus: "Redeploy it"). Revision `01a15e0d-6e7a-4d3c-9c9b-040a0e979833`: active, 1024 MB, timeouts 1200 / 1800 s. Bundle 116 files, 7.3 MB. Live at 1440 × 900: all eight tabs draw every plot with no output errors (Keeling 2/2, Where 5/5, What if 3/3, Isotopes 2/2, Futures 1/1, Known issues 9/9, What pins 2/2, Under the hood 1/1); Known issue 2's strips read "CO₂ gradient (ppm)" and "δ¹³C gradient (‰)" (screenshot).
 
 ## 2026-10-21 (a) — **Known issue 2's second panel is labelled "δ¹³C gradient (‰)" again (both read "CO₂ gradient (ppm)"); the three merged session branches and worktrees deleted** (Marcus: "Delete the branches and start the Known issue 2 fix").

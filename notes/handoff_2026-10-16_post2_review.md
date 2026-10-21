@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-16: CarboTope is public and live with feedback links; post 2 reviewed with figures
 
+**SUPERSEDED by `notes/handoff_2026-10-21_app_upgrade_post2.md` (2026-10-21).**
+
 **Supersedes** `notes/handoff_2026-10-15c_deploy.md`. Written on Marcus's request ("Write the handoff note"),
 2026-10-16 afternoon.
 
