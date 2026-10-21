@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-21: post 2 built for Substack; the app upgraded (phone, first visit, deep links, downloads) and live
 
+> **Superseded by `notes/handoff_2026-10-21_carbotope_org_scan.md`** (later the same day).
+
 **Supersedes** `notes/handoff_2026-10-16_post2_review.md`. Written on Marcus's request ("Write the handoff note"),
 2026-10-21.
 

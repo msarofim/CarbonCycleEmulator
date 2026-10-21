@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-21 (j) — **Handoff `notes/handoff_2026-10-21_carbotope_org_scan.md`** (Marcus: "Write the handoff note"). It supersedes this morning's, which now points to it. Open: the redeploy Marcus approved ("Redeploy once the tests pass") waits on the full suite running on `7bca6a32`; scan items not acted on; iOS Safari needs an iOS simulator runtime (ask first).
+
 ## 2026-10-21 (i) — **Marcus's six: the chart caption names CarboTope.org, "the “Without” line", ENSO spelled out, one Known-issues progress message, a Pulse-lab prompt; the full suite after (h) found three of my own breaks** (Marcus: "1b, 2a, 3a, 4a, 5: 'Release the pulse to see results at these settings.' And I implemented 6b."; then "Redeploy once the tests pass").
 
 - **1b:** every chart's caption leads "CarboTope.org (beta), single best fit. Not peer-reviewed teaching software." (was "Model: posterior mode (single best fit)."). `CAPTION_CREDIT` is typed in plots.R, because many tests load plots.R without global.R; `test-app-short-link.R` requires it to equal `APP_SHORT_LINK_LABEL` + `APP_STAGE` from global.R (mutations: a moved stage, a moved address).
