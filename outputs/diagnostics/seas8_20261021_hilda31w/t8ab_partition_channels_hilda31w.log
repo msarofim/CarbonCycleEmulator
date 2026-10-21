@@ -1,0 +1,151 @@
+=== calibration/diag_seas8_partition_channels_20261021.R @84295883+dirty, 2026-10-21 17:01 ===
+[ccx_adopt_mode_band] h_ml -> [42.5, 200] (mode 69.5414); kz -> [1161.6, 27808] (mode 13790.0802)
+GATE R1 (hilda31w): canonical logpost -1054.495920 vs stored -1054.495920 (diff 0.00e+00, tol 5e-05) -> PASS
+mode hilda31w | /Users/MarcusMarcus/ccx_frozen/seas8_20261021/calibration/output/refit_20261013_hilda31w_wtc_hilda_csl3v0kaidgbemwtc/mode_fit_pumpN.rds | md5 53ee816ac48cea0f1c1fad244651c5fd
+years (CO2 x d13C intersection): MLO 1980-2024 (n 45), SPO 1979-2023 (n 44); window 1975-2024
+
+
+=== 0. THE SEASONAL VALUES THE RUN USES vs the mode file ===
+  npp_frac_NH      run     0.638494 | file     0.638494 (fitted) ok
+  seas_T_amp_NH    run      14.5361 | file      14.5361 (fitted) ok
+  seas_T_amp_SH    run      3.43708 | file      3.43708 (fitted) ok
+  seas_lag_p_NH    run      1.25853 | file      1.25853 (fitted) ok
+  seas_lag_p_SH    run      2.33791 | file      2.33791 (fitted) ok
+  sst_seas_amp_NH  run      1.41339 | file      1.41339 (fitted) ok
+  sst_seas_amp_SH  run      1.62382 | file      1.62382 (fitted) ok
+  seas_T_lag       run     0.275968 | file     0.275968 (fitted) ok
+  ent_seas_amp_SH  run            0 | file            0 (PINNED) ok
+  structure: seas_ml 1, ml_nh_cycle 0, alpha_as_tdep 1, seas_npp_amp NH/SH 0.4969/0.5027, tau_ex_seas_amp 0, pump_seas_amp 0
+
+GATE R0: run-path streams vs the mode file's, max |diff| 1.18e-05 over 26 rows (tol 5e-05) -> PASS
+16 runs in 0.1 min; periodic spinup unconverged or substep-retried: none
+
+
+=== 1. WHERE THE CANONICAL STANDS (peak-to-peak, mean vector over the intersection years) ===
+  stn    CO2 obs   CO2 mod   ratio  obs mo  mod mo |   d13 obs   d13 mod  obs mo  mod mo
+  MLO     6.8081    6.9244  1.017x    3.55    3.53 |   0.35668   0.32284    9.41    9.55
+  SPO     1.1684    1.1512  0.985x    8.96    9.04 |   0.03366   0.04061    3.24    3.11
+  seasonal rows (log-units): co2_seasonal_MLO -2.713, co2_seasonal_SPO 67.824, d13c_seasonal_MLO 211.045, d13c_seasonal_SPO 250.433 
+
+
+=== 2. T8a -- THE TYPE SPLIT (channel-sum route), like-for-like with ent26 ===
+  land  = NEP NH + NEP SH + resp NH + resp SH (vector sum of single knockouts)
+  ocean = SST NH + SST SH + SH mixed layer   (ent26's set was SST NH + SST SH + the shim;
+          the shim is pinned 0 here, so 'ocean, ent26 set' = SST NH + SST SH)
+
+  --- MLO (model total 6.9244 @ 3.53)
+  limb                        amp ppm peak mo | observed (95%) / ratio / phase err / inside?
+  land (channel sum)           7.0909    3.58 
+  ocean (channel sum, full)    0.5891   10.31 
+  ocean (ent26 set: SST only)   0.5388    9.63 
+  land (joint knockout)        7.0874    3.58 
+  ocean (joint knockout)       0.5835   10.31 
+  land + ocean (vector)        6.5483    3.51 
+  scalar |L|+|O| 7.6800 ; vector |L+O| 6.5483 ; cancellation 1-|L+O|/(|L|+|O|) = 14.7 % ; L-O phase gap 5.27 mo
+  scalar |L|+|O| vs model total: +10.9 % (ent26 record: -2.7 %)
+  residual (total - L - O) 0.3789 @ 3.75  [emission seasonality, ENSO, nonlinearity]
+  additivity: channel-sum vs joint knockout, land +0.0 %, ocean +1.0 %
+
+  --- SPO (model total 1.1512 @ 9.04)
+  limb                        amp ppm peak mo | observed (95%) / ratio / phase err / inside?
+  land (channel sum)           0.7556    8.83 | 0.683 [0.479, 0.905] @ 9.29 [8.78, 9.77] | 1.11x | -0.46 mo | amp IN, phase IN 
+  ocean (channel sum, full)    0.3913    9.27 | 0.522 [0.309, 0.728] @ 8.52 [7.82, 9.20] | 0.75x | +0.75 mo | amp IN, phase OUT 
+  ocean (ent26 set: SST only)   0.8368    4.19 | 0.522 [0.309, 0.728] @ 8.52 [7.82, 9.20] | 1.60x | -4.33 mo | amp OUT, phase OUT 
+  land (joint knockout)        0.7553    8.83 
+  ocean (joint knockout)       0.3613    9.33 
+  land + ocean (vector)        1.1400    8.98 
+  scalar |L|+|O| 1.1469 ; vector |L+O| 1.1400 ; cancellation 1-|L+O|/(|L|+|O|) = 0.6 % ; L-O phase gap 0.44 mo
+  scalar |L|+|O| vs model total: -0.4 % (ent26 record: -2.7 %)
+  residual (total - L - O) 0.0384 @ 11.44  [emission seasonality, ENSO, nonlinearity]
+  additivity: channel-sum vs joint knockout, land +0.0 %, ocean +8.3 %
+
+  OBSERVED SPO (registered points): |L|+|O| 1.205, |L+O| 1.181, cancellation 2.0 %, L-O gap 0.77 mo
+  ent26 SPO record: land 0.7153 @ 8.86 (1.05x), ocean 0.4046 @ 9.17 (0.78x), total 1.1513 @ 9.03
+  MLO has NO registered observed TYPE split (the inversion's MLO outputs were never registered).
+
+
+=== 3. T8b -- EVERY CHANNEL'S CO2 and d13C CONTRIBUTION and its EFFECTIVE SIGNATURE ===
+  dCO2, dd13C = base - knockout (vectors), peak-to-peak. sig_proj = (dd13 . dCO2)/|dCO2|^2,
+  permil per ppm, SIGNED (negative = d13C falls as CO2 rises: a depleted source). sig_mag =
+  |dd13|/|dCO2|. 'off-antiphase' = months between dd13 and -dCO2 (0 = a signed scalar).
+  d13C-only channels (|dCO2| < 1e-3) report the d13C vector alone.
+
+  --- MLO  (model mean CO2 over the years 380.4 ppm; first-principles land expectation
+        -eps_photo/C = -16.2/380.4 = -0.0426 permil/ppm; pure net air-sea invasion at -2 permil: -0.0053)
+  channel                    dCO2   peak |     dd13C   peak |  sig_proj  sig_mag off-anti |   dll CO2  dll d13C
+  NEP NH                   9.4431   3.53 |   0.39891   9.49 |  -0.04224  0.04224     0.04 |  -7327.04  -1393.56
+  NEP SH                   0.2211   1.30 |   0.00927   7.24 |  -0.04190  0.04192     0.06 |     +1.82    -12.66
+  resp NH                  2.4814   9.27 |   0.10268   3.23 |  -0.04137  0.04138     0.04 |   -486.31    -33.48
+  resp SH                  0.0544   5.90 |   0.00224  11.84 |  -0.04119  0.04121     0.06 |     -3.18     +2.10
+  SST NH                   0.5292  10.15 |   0.00337  10.65 |   0.00615  0.00637     5.50 |    -32.17     +1.37
+  SST SH                   0.1437   7.02 |   0.00096   7.57 |   0.00643  0.00671     5.45 |    -10.78     -1.07
+  SH mixed layer           0.2045   0.51 |   0.00063   6.21 |  -0.00306  0.00310     0.30 |     -1.13     -0.72
+  T-dep alphas             0.0000   0.00 |   0.00586  10.11 |        NA       NA       NA |     +0.00     +0.43
+  fossil seas              0.3387   3.55 |   0.01714   9.51 |  -0.05058  0.05059     0.04 |     -3.02     -5.58
+  fire seas                0.0436   4.54 |   0.00171  10.52 |  -0.03929  0.03929     0.02 |     -2.32     +0.53
+  emissions seas (both)    0.3772   3.66 |   0.01864   9.60 |  -0.04939  0.04941     0.06 |     -8.12     -5.64
+  land ENSO                0.0053   7.94 |   0.00026   2.12 |  -0.04915  0.04937     0.18 |     +0.70     -0.53
+  ALL land off             7.0874   3.58 |   0.30097   9.54 |  -0.04246  0.04247     0.04 |  -4248.24   -830.97
+  ALL ocean off            0.5835  10.31 |   0.00321   9.78 |   0.00530  0.00551     5.47 |    -42.52     -0.25
+  ALL 7 CO2 chans off      6.5512   3.52 |   0.30415   9.54 |  -0.04642  0.04643     0.03 |  -3475.23   -849.23
+  ADDITIVITY (7 CO2 channels): CO2 sum 6.5483 vs joint 6.5512 (-0.0 %); d13C sum 0.30475 vs joint 0.30415 (+0.2 %)
+  LAND LIMB signature: sig_proj -0.04252, sig_mag 0.04253 permil/ppm, off-antiphase 0.04 mo
+  OCEAN LIMB signature: sig_proj 0.00527, sig_mag 0.00548 permil/ppm, off-antiphase 5.46 mo
+
+  --- SPO  (model mean CO2 over the years 376.7 ppm; first-principles land expectation
+        -eps_photo/C = -16.2/376.7 = -0.0430 permil/ppm; pure net air-sea invasion at -2 permil: -0.0053)
+  channel                    dCO2   peak |     dd13C   peak |  sig_proj  sig_mag off-anti |   dll CO2  dll d13C
+  NEP NH                   1.4458   6.29 |   0.06199   0.22 |  -0.04285  0.04287     0.07 |   -842.67   -125.66
+  NEP SH                   1.3110  10.67 |   0.05606   4.65 |  -0.04276  0.04276     0.03 |   -687.35    -88.78
+  resp NH                  0.4010  11.92 |   0.01692   5.85 |  -0.04216  0.04218     0.07 |    -56.17    -12.14
+  resp SH                  0.3272   3.28 |   0.01376   9.25 |  -0.04207  0.04207     0.03 |    -37.48     -8.41
+  SST NH                   0.0868   0.78 |   0.00055   1.40 |   0.00600  0.00633     5.38 |     -0.77     +0.17
+  SST SH                   0.8594   4.37 |   0.00537   4.84 |   0.00607  0.00625     5.54 |   -290.65     -0.55
+  SH mixed layer           1.1977   9.90 |   0.00423   3.82 |  -0.00353  0.00353     0.08 |   -594.45     +0.54
+  T-dep alphas             0.0000   0.00 |   0.00492   4.74 |        NA       NA       NA |     +0.00     -0.43
+  fossil seas              0.0549   6.56 |   0.00283   0.50 |  -0.05149  0.05152     0.06 |     -2.78     +0.32
+  fire seas                0.0848  11.57 |   0.00336   5.54 |  -0.03959  0.03960     0.03 |     -1.83     -0.79
+  emissions seas (both)    0.0460  10.36 |   0.00162   3.63 |  -0.03268  0.03522     0.73 |     -1.56     +0.13
+  land ENSO                0.0055   8.97 |   0.00027   2.96 |  -0.04921  0.04921     0.01 |     -1.48     +0.46
+  ALL land off             0.7553   8.83 |   0.03162   2.77 |  -0.04184  0.04186     0.06 |   -253.13    -11.94
+  ALL ocean off            0.3613   9.33 |   0.00926   4.28 |  -0.02249  0.02564     0.96 |    -59.76     -0.86
+  ALL 7 CO2 chans off      1.1081   8.99 |   0.03868   3.09 |  -0.03485  0.03491     0.11 |   -528.40    -21.37
+  ADDITIVITY (7 CO2 channels): CO2 sum 1.1400 vs joint 1.1081 (+2.9 %); d13C sum 0.03872 vs joint 0.03868 (+0.1 %)
+  LAND LIMB signature: sig_proj -0.04183, sig_mag 0.04186 permil/ppm, off-antiphase 0.06 mo
+  OCEAN LIMB signature: sig_proj -0.02052, sig_mag 0.02374 permil/ppm, off-antiphase 1.01 mo
+
+
+=== 4. THE STATION d13C-PER-ppm SIGNATURE, model vs observed, with the observed bootstrap ===
+  Bootstrap over YEARS of the intersection set (paired CO2/d13C years), 2000 draws,
+  seed 20261021 applied immediately before the draws. The model series has no interannual
+  scatter in its harmonic beyond forcing, so its ratio is a point. Also the 'all years' reading
+  (each series over its own years, lib_seas_limbs.R's sl_ratio_at, the ent26 estimator).
+  MLO: observed 0.05239 [0.05036, 0.05450] permil/ppm; model 0.04662 -> ratio 0.89x [0.86, 0.93]; model inside obs CI: NO
+       off-antiphase: observed 0.14 mo, model 0.02 mo; all-years estimator: obs 0.05281, model 0.04713, ratio 0.89x (ent26 0.97x)
+  SPO: observed 0.02881 [0.02171, 0.03690] permil/ppm; model 0.03527 -> ratio 1.22x [0.96, 1.62]; model inside obs CI: YES
+       off-antiphase: observed 0.28 mo, model 0.07 mo; all-years estimator: obs 0.02877, model 0.03564, ratio 1.24x (ent26 1.21x)
+
+
+=== 5. HEADROOM: what each seasonal row would gain if the model's MEAN vector matched the observed ===
+  The model's per-year (a, b) shifted by (obs mean - model mean) over the row's own years,
+  scored with the row's own sigma (obs interannual sd). The scale for T8c's losses.
+  co2_seasonal_MLO   row    -2.713 (recomputed    -2.713) ; mean-matched     1.055 ; headroom   +3.768 ; n years 50 ; mean-vector bias 0.0862 (0.39 sd_a-equiv)
+  d13c_seasonal_MLO  row   211.045 (recomputed   211.045) ; mean-matched   229.468 ; headroom  +18.423 ; n years 45 ; mean-vector bias 0.0211 (0.90 sd_a-equiv)
+  co2_seasonal_SPO   row    67.824 (recomputed    67.824) ; mean-matched    68.308 ; headroom   +0.484 ; n years 49 ; mean-vector bias 0.0172 (0.14 sd_a-equiv)
+  d13c_seasonal_SPO  row   250.433 (recomputed   250.433) ; mean-matched   251.706 ; headroom   +1.273 ; n years 44 ; mean-vector bias 0.0037 (0.24 sd_a-equiv)
+
+
+=== 6. POWER OF THE SPO TYPE-SPLIT COMPARISON: the observed limbs are conditional on two signatures ===
+  NOT a new target and NOT the retired bootstrap: the closed-form two-signature split of the
+  OBSERVED mean vectors, L = (d13 - s_O CO2)/(s_L - s_O), O = CO2 - L, at four signature pairs.
+  Row 1 is the registered constants' basis (09-04g, alpha_as_tdep = 0: s_O = -0.00461; s_L at
+  eps 18 over the window's mean CO2). The others use hilda31w's OWN limb signatures (sec.3).
+  registered basis (eps 18, s_O tdep=0)    s_L -0.04779 s_O -0.00461 (sep 10.4x) -> obs land 0.656 @ 9.30, ocean 0.534 @ 8.55 | model/obs land 1.15x, ocean 0.73x
+  eps 16.2, s_O tdep=0                     s_L -0.04301 s_O -0.00461 (sep 9.3x) -> obs land 0.738 @ 9.30, ocean 0.460 @ 8.42 | model/obs land 1.02x, ocean 0.85x
+  hilda31w land limb, s_O tdep=0           s_L -0.04183 s_O -0.00461 (sep 9.1x) -> obs land 0.761 @ 9.30, ocean 0.439 @ 8.38 | model/obs land 0.99x, ocean 0.89x
+  hilda31w land AND ocean limbs            s_L -0.04183 s_O -0.02052 (sep 2.0x) -> obs land 0.495 @ 9.89, ocean 0.767 @ 8.38 | model/obs land 1.53x, ocean 0.51x
+
+wrote /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas8_20261021_hilda31w/t8ab_partition_channels_hilda31w.rds
+
+
+=== DONE ===

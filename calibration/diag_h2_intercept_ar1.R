@@ -31,7 +31,7 @@ H2A_SEED     <- 20261021L                  # set immediately before the Monte Ca
 H2A_GATE_TOL <- 1e-12
 H2A_OUT      <- file.path("outputs", "diagnostics", sprintf("h2_intercept_ar1_%s_%s", format(Sys.Date(), "%Y%m%d"),
                                                           CCX_MODE_CANONICAL))
-COMMIT <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "unknown")
+COMMIT <- ccx_git_stamp()
 
 LOGCON <- file(paste0(H2A_OUT, ".log"), open = "wt"); sink(LOGCON, split = TRUE)
 cat(sprintf("%s @%s | %s\n", H2A_DRIVER, COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M")))

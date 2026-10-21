@@ -1,0 +1,19 @@
+=== calibration/diag_seas8_split_fit_20261021.R @84295883+dirty, 2026-10-21 16:56: set B_iii, start quad:A_iii ===
+[ccx_adopt_mode_band] h_ml -> [42.5, 200] (mode 69.5414); kz -> [1161.6, 27808] (mode 13790.0802)
+GATE R1 (hilda31w): canonical logpost -1054.495920 vs stored -1054.495920 (diff 0.00e+00, tol 5e-05) -> PASS
+BLOCK (8): npp_frac_NH, seas_T_amp_NH, seas_T_amp_SH, seas_lag_p_NH, seas_lag_p_SH, sst_seas_amp_NH, sst_seas_amp_SH, seas_T_lag
+ROWS (26): co2_level_MLO, co2_level_SPO, co2_seasonal_MLO, co2_seasonal_SPO, d13c_seasonal_MLO, d13c_seasonal_SPO, co2_icecore, d13c_icecore, d13c_level_MLO, d13c_level_SPO, co2_gradient, d13c_gradient, d14c_NH, d14c_SH, d14c_intcal, excess_c14_ocean, d14c_profile_level, d14c_profile_ab, d14c_profile_bd, ocean_grad_dic, ocean_grad_d13c, ocean_grad_alk, hs_surf_dic, hs_surf_d13c, gcb_ocean_sink, gcb_land_sink
+start objective -1740.273613 (log-prior -37.5516)
+  cycle 1 NM 1: obj -1055.905860 (gain 684.367753, 2111 evals, 13.7 CPU-min)
+  cycle 1 NM 2: obj -1055.680288 (gain 0.225572, 1905 evals, 25.4 CPU-min)
+  cycle 1 NM 3: obj -1055.504444 (gain 0.175844, 1945 evals, 34.6 CPU-min)
+  cycle 1 BFGS: obj -1054.495940 (gain 1.008504, convergence 0, 38.0 CPU-min)
+  cycle 2 NM 1: obj -1054.495918 (gain 0.000022, 865 evals, 41.9 CPU-min)
+  cycle 2 BFGS: obj -1054.495918 (gain 0.000000, convergence 0, 42.1 CPU-min)
+cycle 2 gained 0.000022 < 0.01: CONVERGED
+
+RESULT B_iii_from_quadA_iii: objective -1054.495918 | log-prior -38.7933 | full logpost -1054.4959 | full likelihood -1015.7026
+  seasonal rows: co2_seasonal_MLO -2.714, co2_seasonal_SPO 67.825, d13c_seasonal_MLO 211.045, d13c_seasonal_SPO 250.432
+  block: npp_frac_NH 0.63851, seas_T_amp_NH 14.537, seas_T_amp_SH 3.4374, seas_lag_p_NH 1.2585, seas_lag_p_SH 2.3378, sst_seas_amp_NH 1.4134, sst_seas_amp_SH 1.6237, seas_T_lag 0.27574
+wrote /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas8_20261021_hilda31w/t8c_fit_B_iii_from_quadA_iii.rds
+=== DONE ===

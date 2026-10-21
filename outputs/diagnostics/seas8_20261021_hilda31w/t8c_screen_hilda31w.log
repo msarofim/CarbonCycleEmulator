@@ -1,0 +1,51 @@
+=== calibration/diag_seas8_split_screen_20261021.R @84295883+dirty, 2026-10-21 16:47 ===
+[ccx_adopt_mode_band] h_ml -> [42.5, 200] (mode 69.5414); kz -> [1161.6, 27808] (mode 13790.0802)
+GATE R1 (hilda31w): canonical logpost -1054.495920 vs stored -1054.495920 (diff 0.00e+00, tol 5e-05) -> PASS
+BLOCK (fitted seasonal names, 8): npp_frac_NH, seas_T_amp_NH, seas_T_amp_SH, seas_lag_p_NH, seas_lag_p_SH, sst_seas_amp_NH, sst_seas_amp_SH, seas_T_lag
+seasonal candidates NOT fitted at hilda31w: ent_seas_amp_SH (pinned), tau_ex_seas_amp (not a fitted name), pump_seas_amp (not a fitted name), pump_hs_seas_amp (not a fitted name)
+steps (u): npp_frac_NH 0.00421, seas_T_amp_NH 0.00285, seas_T_amp_SH 0.00956, seas_lag_p_NH 0.000865, seas_lag_p_SH 0.00451, sst_seas_amp_NH 0.00991, sst_seas_amp_SH 0.00402, seas_T_lag 0.0116
+129 evaluations in 33.4 s
+
+=== 1. GRADIENT AT THE MODE, per row (log-units per canonical marginal sd of the parameter) ===
+  Only rows with max |g x sd| > 0.01 are listed. A non-seasonal row listed here PULLS the block.
+  row                    npp_frac_Nseas_T_ampseas_T_ampseas_lag_pseas_lag_psst_seas_asst_seas_aseas_T_lag
+  logprior                   -0.717    -0.064     0.950     0.154    -0.023     1.167     0.163     0.990
+  co2_level_MLO              -0.280     0.001     0.001     0.004    -0.000     0.002    -0.029    -0.010
+  co2_level_SPO              -0.178    -0.011    -0.001    -0.007    -0.001    -0.001     0.053     0.027
+  co2_seasonal_MLO           -1.799     7.877     0.696    20.595     0.199    -0.591     0.919   -16.976
+  co2_seasonal_SPO            1.552    -1.390    -1.888     1.515    -2.986    -0.346    -0.674    -0.474
+  d13c_seasonal_MLO           2.198    -8.607    -0.648   -21.183    -0.155    -0.256     0.148    16.890
+  d13c_seasonal_SPO          -0.248     0.422     1.181    -0.961     1.512    -0.028    -0.050     0.490
+  co2_icecore                -0.975     0.780    -0.130     0.004     0.630     0.103    -0.684    -0.444
+  d13c_icecore               -1.270     0.988    -0.149    -0.031     0.801    -0.010     0.137    -0.516
+  d13c_level_MLO              1.814    -0.040     0.001    -0.002     0.001     0.019     0.020     0.007
+  d13c_level_SPO              0.570    -0.002     0.003    -0.001     0.002    -0.017    -0.023    -0.019
+  co2_gradient               -1.220     0.002     0.000    -0.000    -0.000     0.002     0.005    -0.002
+  d13c_gradient              -0.114    -0.004    -0.000     0.001     0.000    -0.000     0.000    -0.001
+  d14c_NH                     0.603    -0.000     0.000     0.002    -0.000     0.018     0.033    -0.006
+  d14c_SH                    -0.066    -0.004    -0.001     0.002    -0.000    -0.021    -0.047     0.006
+  d14c_intcal                 0.194    -0.018     0.003    -0.001     0.000    -0.025     0.001    -0.054
+  gcb_ocean_sink             -0.011     0.001    -0.000     0.000    -0.000    -0.014     0.026    -0.001
+  gcb_land_sink              -0.057     0.068    -0.017    -0.085     0.017    -0.000     0.003     0.080
+  SUM (full objective)        0.003    -0.002     0.000     0.007    -0.000    -0.001     0.001    -0.011
+  SUM seasonal+prior          0.986    -1.763     0.291     0.120    -1.452    -0.053     0.506     0.920
+  SUM non-seasonal           -0.983     1.761    -0.291    -0.112     1.451     0.052    -0.505    -0.931
+
+=== 2. QUADRATIC (NEWTON) PREDICTION of each fit, from the mode ===
+  A_i    neg-def FALSE gain       NA | du/marg_sd(own): npp_frac_NH NA, seas_T_amp_N NA, seas_T_amp_S NA, seas_lag_p_N NA, seas_lag_p_S NA, sst_seas_amp NA, sst_seas_amp NA, seas_T_lag NA
+  A_ii   neg-def FALSE gain       NA | du/marg_sd(own): npp_frac_NH NA, seas_T_amp_N NA, seas_T_amp_S NA, seas_lag_p_N NA, seas_lag_p_S NA, sst_seas_amp NA, sst_seas_amp NA, seas_T_lag NA
+  A_iii  neg-def TRUE  gain    2.048 | du/marg_sd(own): npp_frac_NH -1.64, seas_T_amp_N -1.86, seas_T_amp_S +0.75, seas_lag_p_N +1.61, seas_lag_p_S +0.70, sst_seas_amp -0.25, sst_seas_amp -0.74, seas_T_lag +1.56
+  B_i    neg-def TRUE  gain    4.748 | du/marg_sd(own): npp_frac_NH -0.02, seas_T_amp_N -0.27, seas_T_amp_S +0.16, seas_lag_p_N +1.34, seas_lag_p_S -0.32, sst_seas_amp +1.33, sst_seas_amp +0.08, seas_T_lag +0.22
+  B_ii   neg-def FALSE gain       NA | du/marg_sd(own): npp_frac_NH NA, seas_T_amp_N NA, seas_T_amp_S NA, seas_lag_p_N NA, seas_lag_p_S NA, sst_seas_amp NA, sst_seas_amp NA, seas_T_lag NA
+  B_iii  neg-def TRUE  gain    0.000 | du/marg_sd(own): npp_frac_NH +0.00, seas_T_amp_N +0.00, seas_T_amp_S +0.00, seas_lag_p_N -0.00, seas_lag_p_S -0.00, sst_seas_amp +0.00, sst_seas_amp +0.00, seas_T_lag -0.00
+
+  Predicted (iii) displacement from the mode, in its own marginal sd (gate tolerance 0.10):
+    A_iii  max |du/sd| 1.856 (seas_T_amp_NH) -> would NOT reproduce the mode
+    B_iii  max |du/sd| 0.003 (seas_T_lag) -> would REPRODUCE the mode
+
+=== 3. PREDICTED LOSSES (quadratic): each tracer's seasonal rows, joint fit vs its solo fit ===
+  variant A: a Hessian is not negative definite; no prediction
+  variant B: a Hessian is not negative definite; no prediction
+
+wrote /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas8_20261021_hilda31w/t8c_screen_hilda31w.rds
+=== DONE ===

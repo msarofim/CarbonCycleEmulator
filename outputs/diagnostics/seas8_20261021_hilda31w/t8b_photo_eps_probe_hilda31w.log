@@ -1,0 +1,28 @@
+=== calibration/diag_seas8_photo_eps_probe_20261021.R @84295883+dirty, 2026-10-21 16:57 ===
+[ccx_adopt_mode_band] h_ml -> [42.5, 200] (mode 69.5414); kz -> [1161.6, 27808] (mode 13790.0802)
+GATE R1 (hilda31w): canonical logpost -1054.495920 vs stored -1054.495920 (diff 0.00e+00, tol 5e-05) -> PASS
+
+=== 1. THE OBSERVED PHASE OFFSET: d13C peak minus (CO2 peak + 6 months), bootstrap over years ===
+  (positive = the d13C cycle LAGS the antiphase of CO2). 2000 draws, seed 20261022 applied immediately before.
+  MLO: observed offset -0.144 mo [-0.181, -0.107]; excludes 0: YES
+  SPO: observed offset +0.281 mo [-0.154, +0.633]; excludes 0: NO
+
+=== 2. alpha_photo_eps PROBE (unrefitted; every fitted value at the mode) ===
+  case                        eps | MLO sig (ratio) d13 amp/obs, off   | SPO sig (ratio) d13 amp/obs, off   |   co2 MLO   co2 SPO   d13 MLO   d13 SPO | other d13C
+  biosphere_15.6            15.60 | 0.04502 (0.86x) 0.874, +0.02       | 0.03423 (1.19x) 1.171, +0.07       |    -2.713    67.824   207.838   250.810 |    287.310
+  still2003_canonical       16.20 | 0.04662 (0.89x) 0.905, +0.02       | 0.03527 (1.22x) 1.206, +0.07       |    -2.713    67.824   211.045   250.433 |    293.016
+  lf1994_C3                 17.80 | 0.05091 (0.97x) 0.988, +0.02       | 0.03806 (1.32x) 1.302, +0.06       |    -2.713    67.824   209.161   249.106 |    302.483
+  ledger_C3                 18.00 | 0.05145 (0.98x) 0.999, +0.02       | 0.03841 (1.33x) 1.314, +0.06       |    -2.713    67.824   207.859   248.907 |    303.078
+  lf1994_cool_deciduous     19.60 | 0.05573 (1.06x) 1.082, +0.02       | 0.04120 (1.43x) 1.409, +0.06       |    -2.713    67.824   188.898   247.053 |    303.125
+
+  CHANGE vs the canonical (log-units): seasonal d13C rows | the other d13C rows | total likelihood
+  biosphere_15.6           d13c_seasonal   -2.830 | other d13C    -5.706 | all rows    -8.536
+  still2003_canonical      d13c_seasonal   +0.000 | other d13C    +0.000 | all rows    +0.000
+  lf1994_C3                d13c_seasonal   -3.210 | other d13C    +9.467 | all rows    +6.256
+  ledger_C3                d13c_seasonal   -4.712 | other d13C   +10.062 | all rows    +5.350
+  lf1994_cool_deciduous    d13c_seasonal  -25.526 | other d13C   +10.109 | all rows   -15.417
+
+  MLO station signature is linear in eps (15.60->0.04502, 16.20->0.04662, 17.80->0.05091, 18.00->0.05145, 19.60->0.05573); it equals the observed 0.05239 at eps = 18.35 permil
+
+wrote /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas8_20261021_hilda31w/t8b_photo_eps_probe_hilda31w.rds
+=== DONE ===

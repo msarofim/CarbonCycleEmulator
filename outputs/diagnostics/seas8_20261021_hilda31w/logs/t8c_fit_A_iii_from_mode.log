@@ -1,0 +1,19 @@
+=== calibration/diag_seas8_split_fit_20261021.R @84295883+dirty, 2026-10-21 16:56: set A_iii, start mode ===
+[ccx_adopt_mode_band] h_ml -> [42.5, 200] (mode 69.5414); kz -> [1161.6, 27808] (mode 13790.0802)
+GATE R1 (hilda31w): canonical logpost -1054.495920 vs stored -1054.495920 (diff 0.00e+00, tol 5e-05) -> PASS
+BLOCK (8): npp_frac_NH, seas_T_amp_NH, seas_T_amp_SH, seas_lag_p_NH, seas_lag_p_SH, sst_seas_amp_NH, sst_seas_amp_SH, seas_T_lag
+ROWS (4): co2_seasonal_MLO, co2_seasonal_SPO, d13c_seasonal_MLO, d13c_seasonal_SPO
+start objective 487.795097 (log-prior -38.7925)
+  cycle 1 NM 1: obj 488.725002 (gain 0.929906, 1449 evals, 9.5 CPU-min)
+  cycle 1 NM 2: obj 488.792204 (gain 0.067202, 1933 evals, 21.7 CPU-min)
+  cycle 1 NM 3: obj 488.792272 (gain 0.000068, 251 evals, 23.2 CPU-min)
+  cycle 1 BFGS: obj 488.792272 (gain 0.000000, convergence 0, 23.3 CPU-min)
+  cycle 2 NM 1: obj 488.792273 (gain 0.000000, 221 evals, 24.6 CPU-min)
+  cycle 2 BFGS: obj 488.792273 (gain 0.000000, convergence 0, 24.8 CPU-min)
+cycle 2 gained 0.000000 < 0.01: CONVERGED
+
+RESULT A_iii_from_mode: objective 488.792273 | log-prior -37.4708 | full logpost -1057.0213 | full likelihood -1019.5505
+  seasonal rows: co2_seasonal_MLO -2.544, co2_seasonal_SPO 68.020, d13c_seasonal_MLO 210.605, d13c_seasonal_SPO 250.183
+  block: npp_frac_NH 0.61415, seas_T_amp_NH 12.24, seas_T_amp_SH 4.1846, seas_lag_p_NH 1.3118, seas_lag_p_SH 2.2787, sst_seas_amp_NH 1.4257, sst_seas_amp_SH 1.6235, seas_T_lag 0.45333
+wrote /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas8_20261021_hilda31w/t8c_fit_A_iii_from_mode.rds
+=== DONE ===
