@@ -151,7 +151,8 @@ CCX_MECHANISMS <- list(
     # contradicted the caveat above ("The world still warms either way"): the temperature line goes to zero because
     # the model IGNORES temperature under this switch, not because the run is cooler.
     driver_note = paste("The model ignores temperature under this switch, so its temperature input",
-                        "is drawn as zero: the purple line is what the counterfactual ran with. The",
+                        # "Without" = the legend's word for this line (app/global.R APP_DRIVER_OFF_WORD), 2026-10-21
+                        "is drawn as zero: the “Without” line is what the counterfactual ran with. The",
                         "world in this run still warms; only the carbon cycle's response to that",
                         "warming is removed."),
     apply = function(p, F) {

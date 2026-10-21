@@ -43,7 +43,7 @@ APP_PARAM_META <- list(
   luc_scale     = list(desc = "Scale on the historical land-use emissions", unit = "—"),
 
   # ---- air-sea exchange and the upper ocean ---------------------------
-  k_w           = list(desc = "Air-sea gas transfer speed", unit = "m/yr"),
+  k_w           = list(desc = "Air\u2013sea gas transfer speed", unit = "m/yr"),
   h_ml          = list(desc = "Ocean mixed-layer depth", unit = "m"),
   kz            = list(desc = "Deep-ocean mixing rate, below the mixed layer",
                        unit = "m²/yr"),

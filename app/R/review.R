@@ -29,6 +29,7 @@
 
 # ---- named constants: every label on the tab derives from these -----
 RV_TAB_TITLE  <- "Known issues"
+RV_PROGRESS_MSG <- "Drawing the chart"   # every card's progress message (Marcus 2026-10-21, "4a"; server.R rv_render)
 # RV_TAB_LEAD is defined AFTER the ledger (below RV_CARDS): its count is the
 # ledger's length, not a typed word. It read "Eight things" as a literal and
 # would have kept saying eight when card 6 was retired (2026-10-01).
@@ -75,7 +76,7 @@ RV_FAIR_PD100_FILE <- "fair_pd100.rds"
 RV_FAIR_LAB_FMT    <- "%s, %d-configuration mean"   # legend: the file's own label and config count
 # the FaIR band (Marcus 2026-10-12, "Draw the band"): the file's own 5th-95th percentile across configs
 RV_FAIR_BAND_COLS  <- c(lo = "irf_p05", hi = "irf_p95")
-RV_FAIR_BAND_FMT   <- "%s, 5\u201395 %% of configurations"   # legend: label, then the percentiles above
+RV_FAIR_BAND_FMT   <- "%s, 5\u201395%% of configurations"   # no space before %, as elsewhere (2026-10-21);   # legend: label, then the percentiles above
 # 2026-10-15 review: RV_SEAS_WINDOW and RV_GRAD_WINDOW (both c(2000, 2024)) REMOVED -- nothing in app/, tests/,
 # R/ or calibration/ read them, and RV_GRAD_WINDOW was false: card 2 reads the gradients over every year the gate's
 # own observed record has (dg_gateH_obs(): CO2 from 1962, d13C from 1980), which its caption now prints.
@@ -557,7 +558,7 @@ RV_CARDS <- list(
                       "offset would have absorbed the Suess overshoot and reported",
                       # 2026-10-15 review: " -- " -> " — " throughout the card strings below (mechanical cleanup).
                       "a good fit. The prior is N(0, 1 ppm) — the repository's",
-                      "station-vs-box scale, itself larger than the 0.39-0.59 ppm",
+                      "station-vs-box scale, itself larger than the 0.39\u20130.59 ppm",
                       "RMS between co-located instruments at Mauna Loa. The fitted",
                       "value sits well outside that prior, which is the flag.",
                       # K3/N3 (Marcus 2026-09-22): "is there an OBSERVED offset we
@@ -632,7 +633,7 @@ RV_CARDS <- list(
   list(id = 3, key = "diseq", class = "structural",
        title = "The ocean's north–south isotopic disequilibrium is too symmetric",
        # 2026-10-15 review (Marcus: "Apply all"): "disequilibrium" defined at first use; GLODAP expanded once.
-       plain = paste("The measured air-sea δ¹³C disequilibrium (how far surface seawater's δ¹³C",
+       plain = paste("The measured air\u2013sea δ¹³C disequilibrium (how far surface seawater's δ¹³C",
                      "sits from balance with the air above it) is much larger in",
                      "the northern surface ocean than the southern. The model has",
                      "the right global size but far too little of the asymmetry —",
@@ -871,7 +872,7 @@ RV_CARDS <- list(
                       # -19.92 of the -22.56 prior cost (88 %); posterior price -15.40 (was -20.01). Both claims hold;
                       # whether "slightly" still fits +6.2 is Marcus's wording call.
                       "One fitted value is a compromise between two sources rather",
-                      "than a measurement: the air-sea gas transfer speed comes out at",
+                      "than a measurement: the air\u2013sea gas transfer speed comes out at",
                       "about 1,840 m per year, against the literature's 1,446 (Naegler",   # Marcus 2026-10-15 ("Apply all the app text suggestions"): 1,840 = the table
                       "2009). The data prefer the literature value; what holds",   # Marcus 2026-10-15 ("Apply all the app text suggestions"): "slightly" cut (+6.21 log-lik)
                       "it higher is the stated prior on how much gas exchange the cold",
@@ -998,6 +999,8 @@ rv_card <- function(id) {
 #' Substack) scrolled to it with the comment box in view. Every card now shares one target; the issue number is in
 #' the link text, and APP_FEEDBACK_HOW asks commenters to name it.
 RV_FEEDBACK_ANCHOR <- "discussion"
+# Appended to the accessible name of every link that opens a new tab (2026-10-21), here so the test can reach it.
+APP_NEW_TAB_NOTE <- " (opens in a new tab)"
 rv_card_url <- function(id = NULL) {
   if (!app_link_ok(APP_FEEDBACK_URL)) return(NULL)
   sprintf("%s#%s", APP_FEEDBACK_URL, RV_FEEDBACK_ANCHOR)
@@ -1014,6 +1017,7 @@ rv_feedback_how_ui <- function(how = APP_FEEDBACK_HOW, word = APP_FEEDBACK_LINK_
   shiny::tagList(substr(how, 1L, at - 1L),
                  # .noWS: tagList() puts a newline on each side of a tag, which the page draws as a space
                  # ("on Substack ." -- caught by the test's same_text check).
-                 shiny::tags$a(href = url, target = "_blank", word, .noWS = "outside"),
+                 shiny::tags$a(href = url, target = "_blank", rel = "noopener",
+                               `aria-label` = paste0(word, APP_NEW_TAB_NOTE), word, .noWS = "outside"),
                  substr(how, at + nchar(word), nchar(how)))
 }

@@ -56,7 +56,9 @@ AC_CHECKS <- list(
   # ⚠ K2 SUPERSEDED IN PART 2026-10-01 by Marcus's A7 ("add N deposition as a driver"): the list gained
   # nitrogen deposition, so the phrase it requires is the list up to the volcanic term; A7's own check
   # (AC_CHECKS_1001) requires the new term. Changed with the spec, not to turn a red test green.
-  c("K2 driver list in takeaway",        NA, "an ENSO index, volcanic aerosol"),
+  # ⚠ K2 SUPERSEDED IN PART 2026-10-21 by Marcus's "3a" (ENSO spelled out at first use): the phrase it requires
+  # moved with the spec; AC_CHECKS_1021 below requires the new list. Changed with the spec, not to turn a red test green.
+  c("K2 driver list in takeaway",        NA, "an index of El Niño and La Niña (ENSO), volcanic aerosol"),
   c("K4 see_card text",                  NA, "The solid one shows the"),
   # ⚠ W4 was SUPERSEDED 2026-09-24 by Marcus's C3, which replaced the 09-22
   # wording wholesale. The ratchet still ratchets: the PRE-09-22 phrasing must
@@ -217,6 +219,37 @@ AC_CHECKS_1015 <- list(
   c("K issue 8 SSP5-8.5 out", "SSP5-8.5 (older high scenario)", NA),
   c("F temperature shape",    NA, "FaIR shows the same shape for the same pulse; whether temperature rises again before 2300,")
 )
+
+# Marcus 2026-10-21: the pre-redeploy scan's wording ("Use 'Still in the air'", his takeaway sentence, the FaIR
+# label, drafts 10 and 11, and "1b, 2a, 3a, 4a, 5").
+AC_CHECKS_1021 <- list(
+  c("K takeaway sentence",   "not an abstract regression: it only adjusts quantities that",
+                             "not an abstract regression: with a couple exceptions, it is designed around"),
+  c("K takeaway SST + ENSO", "global temperature, an ENSO index",
+                             "sea-surface temperature, an index of El Niño and La Niña (ENSO)"),
+  c("W still in the air",    "Stayed in the air", "LAB_STILL_IN_AIR <- \"Still in the air\""),
+  c("F FaIR checkbox",       "Compare with standard FaIR", "Compare with FaIR, a widely used climate emulator."),
+  c("F build prompt",        NA, "Choose a pathway and press \\u201c%s\\u201d."),
+  c("I pulse lab pointer",   "(see the Pulse lab)", "(see Futures → Pulse lab)"),
+  c("C no colour reference", "the purple", "is drawn as zero: the “Without” line is what the counterfactual ran with."),
+  c("K progress message",    "Running the model with its ENSO mechanisms off", "RV_PROGRESS_MSG <- \"Drawing the chart\""),
+  c("F pulse prompt",        NA, "\"to see results at these settings.\""),
+  c("all caption lead",      "Model: %s (%s). Not peer-reviewed", "CAPTION_CREDIT <- \"CarboTope.org (beta)\""),
+  c("F EXTRA lower case",    "how much EXTRA carbon", "how much extra carbon")
+)
+
+test_that("all of Marcus's 2026-10-21 copy rulings are still applied", {
+  problems <- ac_audit(.ac_src, AC_CHECKS_1021)
+  expect_equal(problems, character(0), info = paste(problems, collapse = " | "))
+})
+
+test_that("MUTATION: the 10-21 list fires when an old phrase returns or a new one goes", {
+  m1 <- paste(.ac_src, '  "is drawn as zero: the purple line is what the counterfactual ran with."', sep = "\n")
+  expect_true(any(grepl("C no colour reference", ac_audit(m1, AC_CHECKS_1021), fixed = TRUE)))
+  m2 <- gsub("with a couple exceptions, it is designed around", "it only adjusts", .ac_src, fixed = TRUE)
+  expect_true(any(grepl("K takeaway sentence", ac_audit(m2, AC_CHECKS_1021), fixed = TRUE)))
+  for (ck in AC_CHECKS_1021) expect_true(!is.na(ck[[2]]) || !is.na(ck[[3]]), info = ck[[1]])
+})
 
 test_that("all of Marcus's 2026-10-15 copy rulings are still applied", {
   problems <- ac_audit(.ac_src, AC_CHECKS_1015)

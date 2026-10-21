@@ -93,8 +93,10 @@ DLC <- list(
   co2      = c("co2_ppm", "atmospheric CO₂, parts per million of dry air (ppm)"),
   co2_seas = c("co2_minus_annual_mean_ppm", "CO₂ above its annual mean, ppm"),
   month    = c("month", "months since 1 January (0-12)"),
-  cum_gtc  = c("cumulative_gtc", "carbon added since 1750, GtC (billion tonnes of carbon)"),
-  af       = c("airborne_fraction", "share of all carbon emitted since 1750 still in the air (0-1)"),
+  # 2026-10-21: the start year is APP_HIST_YEARS's (global.R is sourced before app/R/).
+  cum_gtc  = c("cumulative_gtc", sprintf("carbon added since %d, GtC (billion tonnes of carbon)", APP_HIST_YEARS[1])),
+  af       = c("airborne_fraction", sprintf("share of all carbon emitted since %d still in the air (0-1)",
+                                            APP_HIST_YEARS[1])),
   sink_lab = c("sink", "which sink"),
   gtc_yr   = c("gtc_per_year", "carbon flux, GtC per year"),
   growth   = c("co2_growth_ppm_per_year", "year-over-year change in the annual mean CO₂, ppm per year"),
@@ -584,8 +586,13 @@ app_dl_links <- function(id) {
   tagList(
     singleton(tags$head(tags$style(HTML(APP_DL_CSS)))),
     div(class = "ccx-dl", APP_DL_LEAD, " ",
-        downloadLink(paste0(id, "_csv"), APP_DL_LABEL_CSV), " · ",
-        downloadLink(paste0(id, "_png"), APP_DL_LABEL_PNG)))
+        # 2026-10-21: each link's accessible name carries the chart's name; thirty links all read "data (CSV)"
+        downloadLink(paste0(id, "_csv"), APP_DL_LABEL_CSV, `aria-label` = app_dl_aria(id, APP_DL_LABEL_CSV)), " · ",
+        downloadLink(paste0(id, "_png"), APP_DL_LABEL_PNG, `aria-label` = app_dl_aria(id, APP_DL_LABEL_PNG))))
+}
+app_dl_aria <- function(id, label) {
+  s <- app_dl_spec(id)
+  if (is.null(s)) label else paste0(s$chart, ": ", label)
 }
 
 #' shiny::plotOutput() with the chart's download links under it (when it has a spec)

@@ -28,6 +28,8 @@ sl_banner_html <- function(edit = identity) {
   assign("APP_RELEASE_NAME", "BETA v1.0 CarboTope", envir = env)
   assign("RV_TAB_TITLE", "Known issues", envir = env)
   for (e in .sl_assignments(file.path(.sl_app, "global.R"), .sl_consts)) eval(edit(e), env)
+  # the link's accessible-name note (review.R), read by the banner since the same day's accessibility pass
+  for (e in .sl_assignments(file.path(.sl_app, "R", "review.R"), "APP_NEW_TAB_NOTE")) eval(e, env)
   eval(.sl_assignments(file.path(.sl_app, "ui.R"), "provenance_banner")[[1]], env)
   as.character(env$provenance_banner())
 }
@@ -38,7 +40,7 @@ sl_check <- function(html) {
   c(one_link     = length(a) == 1L,
     href_matches = length(a) == 1L &&
                      identical(sub('.*href="([^"]*)".*', "\\1", a), paste0("https://", tolower(gsub("<[^>]+>", "", a)))),
-    new_tab      = length(a) == 1L && grepl('target="_blank"', a, fixed = TRUE),
+    new_tab      = length(a) == 1L && grepl('target="_blank"', a, fixed = TRUE) && grepl('rel="noopener"', a, fixed = TRUE),
     ends_with    = grepl("Short link: CarboTope\\.org\\s*$", text))
 }
 
@@ -47,6 +49,22 @@ test_that("the banner ends with the short address, linked to itself, in a new ta
   library(shiny)
   r <- sl_check(sl_banner_html())
   expect_true(all(r), info = paste(names(r)[!r], collapse = ", "))
+})
+
+# The chart caption's lead (plots.R CAPTION_CREDIT, Marcus 2026-10-21 "1b") is typed in plots.R, because many
+# tests load plots.R alone; it must say what global.R's constants say.
+sl_caption_credit <- function() {
+  env <- new.env(parent = baseenv())
+  for (e in .sl_assignments(file.path(.sl_app, "global.R"), c("APP_SHORT_LINK_LABEL", "APP_STAGE"))) eval(e, env)
+  for (e in .sl_assignments(file.path(.sl_app, "R", "plots.R"), "CAPTION_CREDIT")) eval(e, env)
+  c(credit = env$CAPTION_CREDIT, want = sprintf("%s (%s)", env$APP_SHORT_LINK_LABEL, env$APP_STAGE))
+}
+test_that("the chart caption names the short address and the stage, as global.R defines them", {
+  x <- sl_caption_credit()
+  expect_identical(x[["credit"]], x[["want"]])
+  # MUTATION: a stage or address that moved in global.R and not here is caught
+  expect_false(identical(x[["credit"]], sprintf("%s (%s)", "CarboTope.org", "release")))
+  expect_false(identical(x[["credit"]], sprintf("%s (%s)", "CarboTope.com", "beta")))
 })
 
 test_that("MUTATION: the check rejects a missing link, a label that differs from the link, and a same-tab link", {

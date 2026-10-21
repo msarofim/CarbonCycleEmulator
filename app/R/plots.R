@@ -130,7 +130,10 @@ PULSE_PARTITION_ALPHA <- 0.9
 # Air and land keep the wording the panel already had. The three ocean keys: Marcus 2026-10-16, "Keys
 # are fine as drafted". Each `%s` is a boundary read off the run's own grid and rounded to
 # OCEAN_DEPTH_LABEL_ROUND_M (295 m -> 300, 914 m -> 900 at hilda31w), so the numbers are the model's.
-KEY_PULSE_AIR  <- "Still in the air"
+# 2026-10-21 (Marcus: "Use 'Still in the air'"): one label for the air's share on the Where tab's chart, its
+# readouts (ui.R) and this key; the chart said "Stayed in the air".
+LAB_STILL_IN_AIR <- "Still in the air"
+KEY_PULSE_AIR  <- LAB_STILL_IN_AIR
 KEY_PULSE_LAND <- "Taken up by land"
 KEY_OCEAN_UPPER_FMT <- "Upper ocean (0–%s m)"
 KEY_OCEAN_MID_FMT   <- "Intermediate ocean (%s–%s m)"
@@ -150,7 +153,7 @@ PULSE_DEPTH_TAKEAWAY <- paste(
 # 2026-10-15 review: "leave the air within years" -> measured 49 % of the tagged atoms still in the air at +5 yr, 20 % at +20
 PULSE_TAG_DECAY_NOTE <- paste("Most of the tagged atoms leave the air within a couple of decades, because the air swaps",
                               "carbon with land and ocean every year. The extra CO₂ stays far",
-                              "longer, because carbonate chemistry limits how much EXTRA carbon",
+                              "longer, because carbonate chemistry limits how much extra carbon",
                               "the ocean can take up.")
 # Marcus 2026-10-16: "with its carbon atoms" (was "its own"), and "and followed wherever they go" deleted.
 PULSE_TAG_PARTITION_NOTE <- "Right: the same pulse, with its carbon atoms tagged."
@@ -630,9 +633,13 @@ app_fit_plot <- function(p) {
 #' ⚠ `panel` is NOT optional in spirit: a half-width panel handed the full-width
 #' budget is exactly the defect audited on 2026-09-25. `test-plot-text-fits.R`
 #' measures every call site against the width its plot is really drawn at.
+# The caption's lead (Marcus 2026-10-21, "1b"; it read "Model: posterior mode (single best fit)."): the short
+# address and the release stage, so a screenshot of a chart says where it came from. Typed here because many tests
+# load plots.R without global.R; test-app-short-link.R requires it to equal
+# sprintf("%s (%s)", APP_SHORT_LINK_LABEL, APP_STAGE) as global.R defines them.
+CAPTION_CREDIT <- "CarboTope.org (beta)"
 app_provenance_caption <- function(extra = NULL, panel = "full") {
-  base <- sprintf("Model: %s (%s). Not peer-reviewed teaching software.",
-                  app_params$source, app_params$status)
+  base <- sprintf("%s, %s. Not peer-reviewed teaching software.", CAPTION_CREDIT, app_params$status)
   txt <- if (is.null(extra)) base else paste(base, extra, sep = "  ")
   app_wrap_px(txt, app_text_px(panel), CAPTION_PT)
 }
@@ -784,10 +791,10 @@ plot_partition <- function(pt, yr_range) {
   k <- pt$t >= yr_range[1] & pt$t <= yr_range[2]
   d <- pt[k, ]
   long <- rbind(
-    data.frame(t = d$t, gtc = d$atmosphere, where = "Stayed in the air"),
+    data.frame(t = d$t, gtc = d$atmosphere, where = LAB_STILL_IN_AIR),
     data.frame(t = d$t, gtc = d$land,       where = "Taken up by land"),
     data.frame(t = d$t, gtc = d$ocean,      where = "Taken up by the ocean"))
-  long$where <- factor(long$where, levels = c("Stayed in the air",
+  long$where <- factor(long$where, levels = c(LAB_STILL_IN_AIR,
                                               "Taken up by land",
                                               "Taken up by the ocean"))
   ggplot(long, aes(t, gtc, fill = where)) +
@@ -797,10 +804,9 @@ plot_partition <- function(pt, yr_range) {
     annotate("text", x = yr_range[1] + 0.05 * diff(yr_range),
              y = max(d$emitted) * 0.93, hjust = 0, size = 3.4, colour = "grey20",
              label = "dashed = total emitted (fossil + land use)") +
-    scale_fill_manual(values = c("Stayed in the air" = PAL[["atm"]],
-                                 "Taken up by land" = PAL[["land"]],
-                                 "Taken up by the ocean" = PAL[["ocean"]])) +
-    labs(x = LAB_YEAR, y = paste("Cumulative", LAB_GTC),
+    scale_fill_manual(values = stats::setNames(PAL[c("atm", "land", "ocean")],
+                                               c(LAB_STILL_IN_AIR, "Taken up by land", "Taken up by the ocean"))) +
+    labs(x = LAB_YEAR, y = paste("Cumulative", sub("^C", "c", LAB_GTC)),   # "Cumulative carbon (GtC)", 2026-10-21
          caption = app_provenance_caption()) +
     theme_ccx()
 }

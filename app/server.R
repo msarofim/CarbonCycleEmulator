@@ -61,12 +61,16 @@ function(input, output, session) {
   renderPlotFit <- function(id, expr, env = parent.frame(), quoted = FALSE, height = "auto") {
     fn <- shiny::exprToFunction(expr, env, quoted)
     assign(id, fn, envir = dl_plots)
+    # 2026-10-21: every chart's alt text is its name from the download registry (APP_DL_SPEC), which already
+    # names all of them; with none, Shiny fell back to ggplot2::get_alt_text(), "" here, so screen readers
+    # skipped every chart. A chart without a spec keeps Shiny's default.
+    spec <- app_dl_spec(id)
     shiny::renderPlot({
       app_set_panel_px(session$clientData[[paste0("output_", id, "_width")]])
       on.exit(app_clear_panel_px(), add = TRUE)
       res <- withVisible(fn())
       if (res$visible) app_fit_plot(res$value) else invisible(res$value)
-    }, height = height)
+    }, height = height, alt = if (is.null(spec)) NA else spec$chart)
   }
 
   # ---- 1. Keeling ----------------------------------------------------
@@ -98,12 +102,15 @@ function(input, output, session) {
                   "the measured value is about %.0f ppm. The model's inputs are",
                   # Marcus 2026-10-02 (carbotopecomment): "volcanic aerosol light diffusion",
                   # and the "what it is never told ... the next tab" sentence deleted.
-                  "emissions, global temperature, an ENSO index, volcanic aerosol",
+                  # Marcus 2026-10-21: "Add sea surface temperature to the list" (hyphenated as in h_drivers).
+                  # Marcus 2026-10-21 ("3a"): the acronym spelled out at first use (was "an ENSO index").
+                  "emissions, global temperature, sea-surface temperature, an index of El Niño and La Niña (ENSO), volcanic aerosol",
                   "light diffusion and nitrogen deposition, and its calibration data include the CO₂ level and",
                   "seasonal cycle at both Mauna Loa and the South Pole. But it is",
-                  # Marcus 2026-10-11 (CarboTopecomments.10.11.26): "it only adjusts", verbatim.
-                  "not an abstract regression: it only adjusts quantities that",
-                  "stand for physical things."),
+                  # Marcus 2026-10-21, verbatim (it read "it only adjusts quantities that stand for physical
+                  # things", which Known issues 1 and 7 contradict: a correction with no mechanism; stand-ins).
+                  "not an abstract regression: with a couple exceptions, it is designed around",
+                  "parameters that represent physical processes."),
             kn$start, kn$start_year, kn$now, kn$now_year, kn$obs_now)
   })
 
@@ -133,7 +140,7 @@ function(input, output, session) {
     s <- d$atmosphere + d$land + d$ocean
     # 2026-10-15 review: "%s is in the land" -> the land SINK (GCB convention, partition_table()), with the
     # clearing it is net of; both numbers from the same row. The land as a stock gained far less.
-    sprintf(paste("Of the %s of carbon emitted since 1750, %s is still in the",
+    sprintf(paste("Of the %s of carbon emitted since", paste0(APP_HIST_YEARS[1], ","), "%s is still in the",   # year read (2026-10-21)
                   "air, %s was taken up by the land sink (while land clearing released %s",
                   "from it) and %s is in the ocean — %s, %s and",
                   "%s of the total."),   # "The three add back to ..." cut, Marcus 2026-10-15 ("Apply all the app text suggestions")
@@ -619,7 +626,7 @@ function(input, output, session) {
                              F_off = cf_run()$forcing)
       req(!is.null(d))
       plot_driver(d, input$c_years,
-                  paste("Without:", CCX_MECHANISMS[[nm]]$label))
+                  paste0(APP_DRIVER_OFF_WORD, ": ", CCX_MECHANISMS[[nm]]$label))
     })
   })
 
@@ -642,9 +649,9 @@ function(input, output, session) {
         note <- if (isTRUE(d$removes_driver) && !is.null(CCX_MECHANISMS[[n]]$driver_note))
           CCX_MECHANISMS[[n]]$driver_note
         else if (isTRUE(d$removes_driver))
-          sprintf(paste("Switching off “%s” removes this input: the purple",
+          sprintf(paste("Switching off “%s” removes this input: the “%s”",
                         "line is the driver the counterfactual actually ran with."),
-                  CCX_MECHANISMS[[n]]$label)
+                  CCX_MECHANISMS[[n]]$label, APP_DRIVER_OFF_WORD)
         else
           sprintf(paste("Switching off “%s” does not touch this input — it is",
                         "identical in both runs, so only one line is drawn. The model",
@@ -870,6 +877,12 @@ function(input, output, session) {
 
   output$f_takeaway <- renderText({
     if (identical(input$f_mode, "Pulse lab")) {
+      # 2026-10-21: no result yet (a link at other settings, or no stored default): ask for the press. At the
+      # defaults the stored result is on its way (the observer above), so wait for it rather than flash the prompt.
+      if (is.null(pulse_shown())) {
+        if (app_pulse_is_default(pulse_inputs()) && !is.null(app_pulse_default_result())) req(FALSE)
+        return(APP_PULSE_PROMPT)
+      }
       pr <- pulse_runs()
       cb <- pr$base$climate; cp <- pr$pulse$climate
       ppm <- pr$gtc / ccx_const("GtC_PER_PPM")
@@ -906,6 +919,7 @@ function(input, output, session) {
               pr$gtc, pr$year, fmt_pct(f(y1)), fmt_pct(f(y2)), y2 - pr$year)
       }
     } else if (identical(input$f_mode, "Build your own")) {
+      if (is.null(input$s_go) || input$s_go == 0) return(APP_BUILD_PROMPT)   # nothing run yet (2026-10-21)
       r <- stylised_run(); cl <- r$climate; sp <- stylised_spec()
       # ⛔ THE SECOND CLAUSE IS CONDITIONAL ON THE BRANCH (2026-09-25). It used
       # to read "even when emissions stop" for ALL THREE `s_kind` values, and
@@ -1302,18 +1316,21 @@ function(input, output, session) {
   # expensive issues (2-5, each needing a model run the app does not already
   # have) off the startup path. withProgress gives the first view of the tab a
   # reason for the wait instead of a blank panel.
-  rv_render <- function(id, f, label) renderPlotFit(id, {
-    withProgress(message = label, value = NULL, f())
+  # 2026-10-21 (Marcus, "4a"): one message for all nine. Three of them said the model was running ("Running the
+  # model with its ENSO mechanisms off", "Releasing a pulse ...", "Following the pulse ...") while the tab reads
+  # data/review_precompute.rds; RV_PROGRESS_MSG is true either way.
+  rv_render <- function(id, f) renderPlotFit(id, {
+    withProgress(message = RV_PROGRESS_MSG, value = NULL, f())
   })
-  output$rv_repdc     <- rv_render("rv_repdc", rv_plot_repdc,     "Comparing the model with Mauna Loa")
-  output$rv_gradient  <- rv_render("rv_gradient", rv_plot_gradient,  "Measuring the north\u2013south gradients")
-  output$rv_diseq     <- rv_render("rv_diseq", rv_plot_diseq,     "Measuring the ocean's isotopic disequilibrium")
-  output$rv_variance  <- rv_render("rv_variance", rv_plot_variance,  "Measuring the year-to-year variability")
-  output$rv_enso      <- rv_render("rv_enso", rv_plot_enso,      "Running the model with its ENSO mechanisms off")
-  output$rv_irf       <- rv_render("rv_irf", rv_plot_irf,       "Releasing a pulse and following it")
-  output$rv_partition <- rv_render("rv_partition", rv_plot_partition, "Following the pulse for a thousand years")
-  output$rv_oclim       <- rv_render("rv_oclim", rv_plot_oclim, "Reading the ocean's climate effect")
-  output$rv_oclim_stake <- rv_render("rv_oclim_stake", rv_plot_oclim_stake, "Reading what it is worth in 2300")
+  output$rv_repdc     <- rv_render("rv_repdc", rv_plot_repdc)
+  output$rv_gradient  <- rv_render("rv_gradient", rv_plot_gradient)
+  output$rv_diseq     <- rv_render("rv_diseq", rv_plot_diseq)
+  output$rv_variance  <- rv_render("rv_variance", rv_plot_variance)
+  output$rv_enso      <- rv_render("rv_enso", rv_plot_enso)
+  output$rv_irf       <- rv_render("rv_irf", rv_plot_irf)
+  output$rv_partition <- rv_render("rv_partition", rv_plot_partition)
+  output$rv_oclim       <- rv_render("rv_oclim", rv_plot_oclim)
+  output$rv_oclim_stake <- rv_render("rv_oclim_stake", rv_plot_oclim_stake)
 
   # THE STAND-IN LIST IS GENERATED, NOT TYPED. Which names are held, and at what
   # value, is a property of the mode file the app is running; a hand-kept table
@@ -1392,7 +1409,9 @@ function(input, output, session) {
                  enso_lab,
                  "Volcanic aerosol", "Bomb and industrial \u00b9\u2074C",
                  "Nitrogen deposition on land"),
-      Covers = c("1750\u20132024", "1750\u20132024", "1850\u20132024",
+      # 2026-10-21: the two emissions rows are APP_HIST_YEARS's own file (forcing_emissions_historical.rds), so
+      # their span is read, not typed; the other rows are other products, still typed.
+      Covers = c(rep(sprintf("%d\u2013%d", APP_HIST_YEARS[1], APP_HIST_YEARS[2]), 2), "1850\u20132024",
                  sprintf("1850\u2013%d", y_end),
                  sprintf("%d\u2013%d", CCX_DRIVERS$enso$since, y_end), "1850\u20132024", "1952\u20132023",
                  "1750\u20132024"),

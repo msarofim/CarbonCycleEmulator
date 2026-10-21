@@ -51,7 +51,10 @@ sp <- ccx_spinup_from_label(ccx_mode_spinup(md$md))(md$p)
 # its run is unchanged. At hilda29e this run is dg_run()'s bit for bit through 2024 (CHANGELOG 10-08 (k)).
 F  <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = sp$prod_c14,
                         bomb_total_kmol = md$bomb_total, luc_scale = md$luc_scale,
-                        enso_index = ccx_enso_index_of(md$p), aod_mode = ccx_aod_mode_of(md$p))
+                        enso_index = ccx_enso_index_of(md$p), aod_mode = ccx_aod_mode_of(md$p),
+                        # 2026-10-21: the structure's nuclear 14C share too; without it ccx_run_prepared()
+                        # refused the run ("the parameters name 'per_year' but the forcing carries 'constant'")
+                        nuc_share = ccx_nuc_share_of(md$p))
 o  <- ccx_run_fast(sp, F)$out
 o$co2_global <- (o$co2_NH + o$co2_SH) / 2
 

@@ -128,6 +128,24 @@ APP_REPO_URL     <- "https://github.com/msarofim/CarbonCycleEmulator"
 APP_SHORT_LINK_LEAD  <- "Short link:"
 APP_SHORT_LINK_LABEL <- "CarboTope.org"
 APP_SHORT_URL        <- paste0("https://", tolower(APP_SHORT_LINK_LABEL))
+# Futures -> Build your own draws nothing until its button is pressed (a link never presses it, app/R/links.R);
+# until then its takeaway asks for the press (Marcus 2026-10-21: "Drafts 10 and 11 as written"). Before this the
+# takeaway bar sat empty above a blank chart.
+APP_BUILD_RUN_LABEL <- "Run it"
+# The Pulse lab's button and, opened at settings with no stored result (a link at non-default settings), its
+# takeaway (Marcus 2026-10-21, "5": "Release the pulse to see results at these settings.").
+APP_PULSE_GO_LABEL <- "Release the pulse"
+APP_PULSE_PROMPT   <- paste(APP_PULSE_GO_LABEL, "to see results at these settings.")
+# What if...?'s driver chart: the counterfactual's legend entry is "Without: <switch>", and the notes under it name
+# that line by this word (Marcus 2026-10-21, "2a"; they said "the purple line"). R/mechanisms.R's driver_note
+# types the same word; test-app-review-copy.R checks both.
+APP_DRIVER_OFF_WORD <- "Without"
+APP_BUILD_PROMPT    <- sprintf("Choose a pathway and press \u201c%s\u201d.", APP_BUILD_RUN_LABEL)
+# Counts in running text are written as words (Under the hood, 2026-10-21); a number past the list prints as digits.
+app_number_word <- function(n) {
+  w <- c("one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve")
+  if (length(n) == 1L && n == round(n) && n >= 1 && n <= length(w)) w[n] else format(n)
+}
 # Marcus 2026-10-15: his wording ("Substack" capitalized).
 APP_FEEDBACK_HOW <- paste("Comments are public on Substack. Be specific about what",
                           "issue your comment addresses (use the issue number if",
@@ -1108,7 +1126,7 @@ APP_FAIR_PULSE_OFFGRID_FMT <- c(
 # The Futures checkbox serves TWO overlays: FaIR's scenario runs (Scenarios) and FaIR's pulse (Pulse lab). Marcus
 # 2026-10-15 asked for "Compare with FaIR (100 GtC pulse only)"; that is true of the pulse lab only, so the label
 # follows the pill (server.R updates it). The size is the grid's, never typed.
-APP_FAIR_CHECK_LAB_SCEN  <- "Compare with standard FaIR"
+APP_FAIR_CHECK_LAB_SCEN  <- "Compare with FaIR, a widely used climate emulator."   # Marcus 2026-10-21 (the old label: CHANGELOG 10-21 h)
 APP_FAIR_CHECK_LAB_PULSE <- "Compare with FaIR (%g GtC pulse only)"
 app_fair_check_label <- function(mode) {
   if (!identical(mode, "Pulse lab") || is.null(APP_FAIR_PULSE)) return(APP_FAIR_CHECK_LAB_SCEN)

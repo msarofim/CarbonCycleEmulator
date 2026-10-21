@@ -24,6 +24,13 @@ gloss <- function(term, meaning) {
   tags$abbr(title = meaning, style = "text-decoration: underline dotted; cursor: help;",
             term, .noWS = "outside")
 }
+# The two unit glosses, one wording each (Keeling's ppm line, 2026-10-15; Where's GtC gloss, 2026-09-22), so the
+# copies on other tabs cannot drift. 2026-10-21 (Marcus: "Mechanical fixes 1-9"): the tabs that showed ppm or GtC
+# with no gloss (What if, Futures, Where's readouts, Under the hood) get the same one-line note.
+GLOSS_PPM <- "parts per million: molecules of CO₂ in every million molecules of dry air"
+GLOSS_GTC <- "gigatonnes of carbon: a billion tonnes"
+unit_note_ppm <- function() p(tags$small("CO₂ is measured in ", gloss("ppm", GLOSS_PPM), "."))
+unit_note_gtc <- function() p(tags$small("Carbon is measured in ", gloss("GtC", GLOSS_GTC), "."))
 
 # `takeaway()` and `info_box()` moved to global.R 2026-09-24: server.R needs them
 # too (the regrowth section renders through uiOutput), and a UI helper defined in
@@ -47,7 +54,9 @@ provenance_banner <- function() {
       " ", tags$em(sprintf("Reviewers: see the \u201c%s\u201d tab.", RV_TAB_TITLE)),
       # 2026-10-21, Marcus's place and words. A new tab, so a click cannot reset the view the reader has set up.
       if (app_link_ok(APP_SHORT_URL))
-        tagList(" ", APP_SHORT_LINK_LEAD, " ", tags$a(href = APP_SHORT_URL, target = "_blank", APP_SHORT_LINK_LABEL)))
+        tagList(" ", APP_SHORT_LINK_LEAD, " ",
+                tags$a(href = APP_SHORT_URL, target = "_blank", rel = "noopener",
+                       `aria-label` = paste0(APP_SHORT_LINK_LABEL, APP_NEW_TAB_NOTE), APP_SHORT_LINK_LABEL)))
 }
 
 # What the banner used to carry, kept whole and moved off the top of every tab.
@@ -95,7 +104,8 @@ review_card <- function(id, plot_id = NULL, plot_height = "330px",
             tags$strong("The comment link is not set in this build. "),
             sprintf("Reply on the post and mention issue %d.", c_$id))
       else
-        p(tags$a(href = url, target = "_blank",
+        p(tags$a(href = url, target = "_blank", rel = "noopener",
+                 `aria-label` = sprintf("Comment on issue %d%s", c_$id, APP_NEW_TAB_NOTE),
                  sprintf("Comment on issue %d \u2192", c_$id))))
 }
 
@@ -115,6 +125,11 @@ review_card <- function(id, plot_id = NULL, plot_height = "330px",
 # Above that width none of these rules applies: the two wrappers are plain blocks and the select is hidden.
 APP_PHONE_MAX_PX      <- 575.98
 APP_PHONE_PLOT_MIN_PX <- 320
+# 2026-10-21 (Marcus: "Phone menu on its own row below 360 px"). Measured at 360 px: the menu's text area was
+# 178 px and "Where does the carbon go?" needs 184 (Inter 14 px), so its "?" was cut; at 320 px, 138 px. The
+# chevron needs 28 px on the right (16 px wide at 8 px from the edge) where Bootstrap gives 36, which buys the
+# 8 px that fit it at 360. Below APP_PHONE_NARROW_PX nothing fits beside the title, so the menu takes its own row.
+APP_PHONE_NARROW_PX   <- 359.98
 APP_TAB_MENU_LABEL    <- "Choose a tab"   # the select's accessible name (screen readers); never displayed. Approved by Marcus 2026-10-20
 
 #' A sidebarLayout main panel in two parts: `lead` (takeaway + main plot) and everything else
@@ -129,7 +144,8 @@ phone_css <- sprintf("
     .navbar > .container-fluid { flex-wrap: nowrap; }  /* brand and select on one row */
     .navbar .navbar-header { width: auto; }            /* bs3compat makes it a full-width row */
     .navbar .navbar-brand { margin-right: 10px; }
-    #ccx-tab-select { display: block; width: auto; flex: 0 1 auto; min-width: 0; }
+    #ccx-tab-select { display: block; width: auto; flex: 0 1 auto; min-width: 0;
+                      padding-right: 28px; background-position: right 8px center; }
     .tab-content > .tab-pane { margin-top: 0; }      /* the banner's own margin already separates them */
     .row > [role='main'] { display: contents; }
     .row > [role='main'] > .ccx-lead, .row > [role='main'] > .ccx-rest {
@@ -146,7 +162,11 @@ phone_css <- sprintf("
     /* a word wider than the screen breaks rather than pushing the page sideways: the review tables' code
        names and the repository URL did (Known issues 537 px wide, Under the hood 401 px) */
     .tab-content { overflow-wrap: anywhere; }
-  }", APP_PHONE_MAX_PX, APP_PHONE_PLOT_MIN_PX, as.integer(DIAGRAM_REF_PX))
+  }
+  @media (max-width: %4$.2fpx) {
+    .navbar > .container-fluid { flex-wrap: wrap; }
+    #ccx-tab-select { flex: 1 1 100%%; margin: 2px 0 6px 0; }
+  }", APP_PHONE_MAX_PX, APP_PHONE_PLOT_MIN_PX, as.integer(DIAGRAM_REF_PX), APP_PHONE_NARROW_PX)
 
 # The select: one option per navbar link, in the links' order and with their text, so a tab added, renamed or
 # reordered in navbarPage() below needs nothing here. Choosing an option clicks that link (Bootstrap shows the
@@ -175,6 +195,7 @@ phone_tab_js <- sprintf("
 
 function(request) navbarPage(   # a function of the request: deep links (app/R/links.R, 2026-10-20)
   title = APP_TITLE,
+  lang = "en",   # 2026-10-21: screen readers pick the voice from it; the page had no lang
   id = "tabs",
   theme = bs_theme(version = 5, bootswatch = "flatly", base_font = font_google("Inter")),
   header = tagList(
@@ -293,15 +314,13 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
         # editorial choices (Keeling 1958, the bomb spike 1940), not this fact.
         sliderInput("k_years", "Years shown",
                     min = APP_HIST_YEARS[1], max = APP_HIST_YEARS[2],
-                    value = c(1958, APP_HIST_YEARS[2]), step = 1, sep = ""),
+                    value = c(1958, APP_HIST_YEARS[2]), step = 1, sep = "", ticks = FALSE),
         radioButtons("k_hemi", "Hemisphere",
                      c("Both" = "both", "Northern only" = "NH",
                        "Southern only" = "SH")),
         checkboxInput("k_obs", "Show measurements", TRUE),
         # 2026-10-15 review: the chart's unit gets its tooltip (house style: ppm is glossed).
-        p(tags$small("CO₂ is measured in ",
-                     gloss("ppm", "parts per million: molecules of CO₂ in every million molecules of dry air"),
-                     ".")),
+        unit_note_ppm(),
         info_box("Why the two hemispheres differ",
                  p("Almost all fossil fuel is burned north of the equator, so",
                    "the Northern Hemisphere runs a little higher. Air takes",
@@ -337,9 +356,10 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
         width = 3,
         sliderInput("w_years", "Years shown",
                     min = APP_HIST_YEARS[1], max = APP_HIST_YEARS[2],
-                    value = c(1850, APP_HIST_YEARS[2]), step = 1, sep = ""),
+                    value = c(1850, APP_HIST_YEARS[2]), step = 1, sep = "", ticks = FALSE),
+        unit_note_gtc(),
         info_box("What the numbers mean",
-                 p(gloss("GtC", "gigatonnes of carbon: a billion tonnes"),
+                 p(gloss("GtC", GLOSS_GTC),
                    " is the unit. One GtC is about 3.7 billion tonnes of CO₂."),
                  # W4 (Marcus 2026-09-22): the old gloss called this "the single
                  # most useful summary", which overclaims. It is a ratio of one
@@ -365,7 +385,7 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
           # `col-4` (2026-10-20): the three readouts stay side by side on a phone too, rather than stacking into
           # ~170 px between the takeaway and the chart; at 576 px and up `col-sm-4` already set the same width
           fluidRow(
-            column(4, class = "col-4", div(class = "readout-label", "Still in the air"),
+            column(4, class = "col-4", div(class = "readout-label", LAB_STILL_IN_AIR),
                    div(class = "readout", textOutput("w_atm", inline = TRUE))),
             column(4, class = "col-4", div(class = "readout-label", "Taken up by land"),
                    div(class = "readout", textOutput("w_land", inline = TRUE))),
@@ -437,7 +457,8 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
                            selected = names(CCX_MECHANISMS)[1]),
         sliderInput("c_years", "Years shown",
                     min = APP_HIST_YEARS[1], max = APP_HIST_YEARS[2],
-                    value = c(1850, APP_HIST_YEARS[2]), step = 1, sep = ""),
+                    value = c(1850, APP_HIST_YEARS[2]), step = 1, sep = "", ticks = FALSE),
+        unit_note_ppm(),
         uiOutput("c_blurb")
       ),
       main_panel(
@@ -500,7 +521,7 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
         width = 3,
         sliderInput("i_years", "Years shown",
                     min = APP_HIST_YEARS[1], max = APP_HIST_YEARS[2],
-                    value = c(1940, APP_HIST_YEARS[2]), step = 1, sep = ""),
+                    value = c(1940, APP_HIST_YEARS[2]), step = 1, sep = "", ticks = FALSE),
         # I1 (Marcus 2026-09-22): the same control the Keeling tab has. The
         # north-south difference is discussed on this tab and was never drawn.
         radioButtons("i_hemi", "Hemisphere (\u03b4\u00b9\u00b3C)",
@@ -524,7 +545,7 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
                    "all. The 1960s spike is from atmospheric nuclear weapons",
                    "tests, and how fast it fell tells us how quickly carbon atoms",
                    "are swapped between the air, the ocean and the land — much",
-                   "faster than extra CO₂ is removed (see the Pulse lab)."),
+                   "faster than extra CO₂ is removed (see Futures → Pulse lab)."),
                  p(tags$small("Both are reported in ", gloss("‰", "per mil: parts per thousand"),
                               ", as small differences from a reference ratio.")))
       ),
@@ -576,7 +597,7 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
                                          -5, 5, 1, step = 0.5)),
             selectInput("s_bg", "Everything else follows", APP_SCENARIOS,
                         selected = APP_SCENARIO_BG),
-            actionButton("s_go", "Run it", class = "btn-primary btn-sm")
+            actionButton("s_go", APP_BUILD_RUN_LABEL, class = "btn-primary btn-sm")
           ),
           tabPanel(
             "Pulse lab", br(),
@@ -586,10 +607,11 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
                         APP_PULSE_GtC_DEFAULT, step = APP_PULSE_GTC_RANGE[3]),
             sliderInput("p_year", "Release it in", APP_PULSE_YEAR_RANGE[1], APP_PULSE_YEAR_RANGE[2],
                         APP_PULSE_YEAR_DEFAULT, step = APP_PULSE_YEAR_RANGE[3], sep = ""),
-            actionButton("p_go", "Release the pulse", class = "btn-primary btn-sm"),
+            actionButton("p_go", APP_PULSE_GO_LABEL, class = "btn-primary btn-sm"),
             uiOutput("p_stale_note"),   # 2026-10-20: shown while the result on screen is for other settings
             helpText("Runs the model twice — with and without the pulse — and",
-                     "takes the difference. The difference is what the extra carbon does.")
+                     "takes the difference. The difference is what the extra carbon does."),
+            unit_note_gtc()
           )
         ),
         # F4 (Marcus 2026-09-22). The radio used to live INSIDE the Scenarios
@@ -603,6 +625,7 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
         hr(),
         radioButtons("f_yvar", "Show", APP_FUTURE_YVARS,
                      selected = APP_FUTURE_YVAR_DEFAULT),
+        unit_note_ppm(),
         # ⛔ NOT offered in "Build your own": FaIR was never run on a pathway the
         # user invented, so there is no line to draw. Withholding the control is
         # honest; drawing the background scenario's FaIR line beside the user's
@@ -793,15 +816,20 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
         # biosphere" was wrong already at hilda29l. The land is CCX_LAND_POOLS
         # (leaf, wood, soil_fast, soil_slow) plus the inert soil box
         # (CCX_LAND_INERT, live since hilda33d's label).
+        # 2026-10-21: the layer count is the run's grid (as the diagram's "(%d layers)"), written as a word as
+        # before. The pool count stays typed: the A6 copy check (test-app-review-copy.R) pins this sentence, and it
+        # names the four pools one by one anyway.
         p("Two hemispheres, each with an atmosphere, a land biosphere of four",
           "pools (leaves, wood, fast soil and slow soil) beside a store of inert",
-          "soil carbon, and an ocean column of a mixed layer over ten diffusive layers, with",
+          sprintf("soil carbon, and an ocean column of a mixed layer over %s diffusive layers, with",
+                  app_number_word(APP_SPIN$grid$nl)),
           "a cold high-latitude surface box and a deep box alongside it.",
           "Monthly steps from 1750. All exchanges include all three carbon",
           "isotopes — ¹²C, ¹³C and ¹⁴C."),
         # the height follows the width (server.R, 2026-10-15); on a phone the diagram keeps its tuned width and
         # scrolls sideways inside this wrapper (2026-10-20, phone_css)
         div(class = "ccx-diagram", plotOutput("h_diagram", height = "auto")),
+        unit_note_gtc(),
         h4("Parameters"),
         # 2026-10-06 (Marcus: "Mark held rows (Recommended)"): "and the few it holds at a stated
         # value" added; the table's "Set" column says which (app/R/params_meta.R)
@@ -870,7 +898,8 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
         # is (global.R app_link_ok()). Unguarded, it linked to the placeholder "SET-BEFORE-DEPLOY";
         # and the GitHub remote is private, so there is no public target until one is chosen.
         if (app_link_ok(APP_REPO_URL))
-          p(tags$a(href = APP_REPO_URL, target = "_blank", APP_REPO_URL))
+          p(tags$a(href = APP_REPO_URL, target = "_blank", rel = "noopener",
+                   `aria-label` = paste0(APP_REPO_URL, APP_NEW_TAB_NOTE), APP_REPO_URL))
         else
           div(class = "prov prov-warn",
               tags$strong("This build has no repository link set. "),
