@@ -56,10 +56,6 @@ provenance_detail <- function() {
   # text suggestions"): the banner on every tab already says both.
 }
 
-# Shown once, at the top of the first tab: the only place a first-time visitor
-# is told what they just waited for. Measured, not guessed -- see APP_WARMUP_NOTE.
-warmup_note <- function() div(class = "caveat", APP_WARMUP_NOTE)
-
 # A pointer FROM a teaching tab TO the card that owns a flaw visible on it.
 # Written as a function so the card number cannot be typed twice.
 see_card <- function(id, what) {
@@ -116,7 +112,7 @@ review_card <- function(id, plot_id = NULL, plot_height = "330px",
 # Above that width none of these rules applies: the two wrappers are plain blocks and the select is hidden.
 APP_PHONE_MAX_PX      <- 575.98
 APP_PHONE_PLOT_MIN_PX <- 320
-APP_TAB_MENU_LABEL    <- "Choose a tab"   # the select's accessible name (screen readers); never displayed
+APP_TAB_MENU_LABEL    <- "Choose a tab"   # the select's accessible name (screen readers); never displayed. Approved by Marcus 2026-10-20
 
 #' A sidebarLayout main panel in two parts: `lead` (takeaway + main plot) and everything else
 main_panel <- function(lead, ...) {
@@ -314,7 +310,6 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
       ),
       main_panel(
         lead = tagList(
-          warmup_note(),
           takeaway(textOutput("k_takeaway", inline = TRUE)),
           plotOutput("k_plot", height = "380px")),
         # Marcus's own wording (2026-09-22, review K4), used as supplied.

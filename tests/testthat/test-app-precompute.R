@@ -378,3 +378,48 @@ test_that("11. MUTATION: the gray-out reaches every output that draws the result
   expect_false(identical(ui2, ui))
   expect_match(apre_grayout_problems(ids, srv, ui2), "does not toggle")
 })
+
+# 2026-10-20 (h), Marcus: while the pulse lab's result is grayed its charts still hold the PREVIOUS run, so their
+# downloads carry the gray-out note instead of that run's data (the CSV's "link to this view" already holds the
+# new settings). What a downloaded CSV holds: "data" (rows after the header), "note" or "other".
+apre_dl_state <- function(lines) {
+  rows <- lines[!startsWith(lines, .app$APP_DL_COMMENT)]
+  if (length(rows) > 1) return("data")                 # a column-name line and at least one row
+  if (any(grepl(.app$APP_PULSE_STALE_NOTE, lines, fixed = TRUE))) return("note")
+  "other"
+}
+
+test_that("12. MUTATION: the pulse charts' downloads carry the note while grayed, the run otherwise", {
+  skip_if_not_installed("shiny")
+  srv_txt <- readLines(file.path(.root, "app", "server.R"))
+  run <- function(txt) {
+    srv_fn <- function() eval(parse(text = txt), envir = new.env(parent = .app))
+    st <- new.env()
+    withr::local_options(ccx.app_precompute = TRUE)
+    rm(list = ls(.app$APP_PRE_PULSE), envir = .app$APP_PRE_PULSE)
+    withCallingHandlers(shiny::testServer(srv_fn(), {
+      session$setInputs(f_mode = "Scenarios", f_yvar = "co2_ppm", f_fair = FALSE,
+                        p_bg = "vvM", p_year = 2050L, p_gtc = 100L)
+      session$setInputs(f_mode = "Pulse lab")
+      st$opened <- readLines(output$f_partition_csv)
+      session$setInputs(p_gtc = 200L)
+      st$grayed <- readLines(output$f_partition_csv)
+      st$grayed_png <- file.size(output$f_partition_png)
+      session$setInputs(p_go = 1L)
+      st$clicked <- readLines(output$f_partition_csv)
+    }), warning = function(w)
+      if (grepl("No shared levels found", conditionMessage(w), fixed = TRUE)) invokeRestart("muffleWarning"))
+    st
+  }
+  st <- run(srv_txt)
+  expect_identical(apre_dl_state(st$opened), "data")
+  expect_identical(apre_dl_state(st$grayed), "note")
+  expect_gt(st$grayed_png, 0)
+  expect_identical(apre_dl_state(st$clicked), "data")
+  # MUTATION: server.R without the `withheld =` argument downloads the previous run while grayed
+  k <- grep("withheld = function(id)", srv_txt, fixed = TRUE)
+  expect_length(k, 1L)
+  mut <- srv_txt
+  mut[k - 1L] <- sub(",\\s*$", ")", mut[k - 1L]); mut <- mut[-k]
+  expect_identical(apre_dl_state(run(mut)$grayed), "data")
+})

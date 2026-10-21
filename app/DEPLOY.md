@@ -125,8 +125,8 @@ a fresh process each time, so the C++ compile is cold; M4, load average 2.8–3.
 - ⚠ **This is a laptop number.** shinyapps.io "does not make any guarantees regarding the number of
   CPU cores, or the speed of the CPUs" (Posit's applications guide), so re-time it on the FIRST
   deploy: a cold instance after the 15-minute idle timeout.
-- ⚠ **`APP_WARMUP_NOTE` still says "allow up to three minutes"** — more than 20× the laptop number. Its
-  wording is Marcus's; re-word it once the shinyapps.io number is known. The post should say the same.
+- The start-up note (`APP_WARMUP_NOTE`) was deleted 2026-10-20 (Marcus), once the first page stopped waiting on
+  the compile and the spin-up (CHANGELOG 2026-10-20 c, h).
 
 Everything after start-up is live, except the stored values named above: a counterfactual rerun is ~60 ms, three
 coupled SSP futures ~0.5 s, a matched pulse pair over 1750–2300 ~0.65 s (older measurements). The

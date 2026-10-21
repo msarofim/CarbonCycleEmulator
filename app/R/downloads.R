@@ -25,7 +25,7 @@
 # test-app-downloads.R fails if a plotOutput() id has no entry.
 # =====================================================================
 
-# ---- copy (DRAFT for Marcus; listed in CHANGELOG 2026-10-20 e) --------------
+# ---- copy (Marcus 2026-10-20: "approve the rest as drafted"; CHANGELOG 2026-10-20 e, h) ----
 APP_DL_LEAD       <- "Download:"
 APP_DL_LABEL_CSV  <- "data (CSV)"
 APP_DL_LABEL_PNG  <- "figure (PNG)"
@@ -432,7 +432,7 @@ app_dl_glossary <- function(tab, sp) {
 
 #' The full CSV text: provenance header, then the table
 #' @param link the deep link to the view the chart was drawn in, or NULL
-app_dl_csv_lines <- function(tab, sp, link = NULL) {
+app_dl_csv_lines <- function(tab, sp, link = NULL, empty = APP_DL_EMPTY) {
   src <- vapply(sp$sources, function(k) DLS[[k]](), character(1))
   hdr <- c(sprintf(APP_DL_CSV_TITLE, APP_TITLE, sp$chart),
            sprintf("Release: %s", APP_RELEASE_NAME),
@@ -443,7 +443,7 @@ app_dl_csv_lines <- function(tab, sp, link = NULL) {
            "Teaching software, not peer-reviewed.",
            "Sources:", paste0("  ", src))
   if (is.null(tab) || !nrow(tab))
-    return(paste0(APP_DL_COMMENT, c(hdr, APP_DL_EMPTY)))
+    return(paste0(APP_DL_COMMENT, c(hdr, empty)))
   gl <- app_dl_glossary(tab, sp)
   hdr <- c(hdr, "Columns:", sprintf("  %s: %s", names(gl), gl),
            if (!is.null(sp$rows)) sp$rows else APP_DL_ROW_NOTE, sp$note)
@@ -520,8 +520,12 @@ app_dl_spec_for <- function(id, mode = NULL, yvar = NULL) {
 #' @param plots environment of plot functions by output id (server.R's renderPlotFit fills it)
 #' @param link function returning the current deep link, or NULL
 #' @param futures function returning the Futures tab's pill and y variable (list(mode, yvar)), for its column names
+#' @param withheld function of a chart id returning a message when that chart's download must carry the message
+#'   instead of the chart (2026-10-20, Marcus: the Pulse lab's charts while grayed, whose data are the previous
+#'   settings' run while the controls and the "link to this view" already hold the new ones); NULL to download
 app_dl_server <- function(output, session, plots, link = function() NULL,
-                          futures = function() list(mode = NULL, yvar = NULL)) {
+                          futures = function() list(mode = NULL, yvar = NULL),
+                          withheld = function(id) NULL) {
   spec_now <- function(id) {
     f <- shiny::isolate(futures())
     app_dl_spec_for(id, f$mode, f$yvar)
@@ -532,9 +536,14 @@ app_dl_server <- function(output, session, plots, link = function() NULL,
       filename = function() app_dl_filename(id, "csv"),
       content = function(file) {
         sz <- app_dl_size(session, id)
+        sp <- spec_now(id)
+        msg <- shiny::isolate(withheld(id))
+        if (!is.null(msg)) {
+          app_dl_write_csv(app_dl_csv_lines(NULL, sp, shiny::isolate(link()), empty = msg), file)
+          return(invisible(NULL))
+        }
         fn <- get0(id, envir = plots, inherits = FALSE)
         tab <- if (is.null(fn)) NULL else app_dl_chart_table(id, fn, sz[["width"]], session)
-        sp <- spec_now(id)
         app_dl_write_csv(app_dl_csv_lines(if (is.null(tab)) NULL else app_dl_named(tab, sp), sp,
                                           shiny::isolate(link())), file)
       },
@@ -546,7 +555,8 @@ app_dl_server <- function(output, session, plots, link = function() NULL,
         fn <- get0(id, envir = plots, inherits = FALSE)
         app_dl_device(file, sz[["width"]], sz[["height"]])
         on.exit(grDevices::dev.off(), add = TRUE)
-        p <- if (is.null(fn)) NULL else app_dl_build(fn, sz[["width"]], session)
+        msg <- shiny::isolate(withheld(id))
+        p <- if (is.null(fn) || !is.null(msg)) NULL else app_dl_build(fn, sz[["width"]], session)
         if (inherits(p, "ggplot")) {
           cap <- p$labels$caption
           p <- p + ggplot2::labs(caption = paste(c(if (!is.null(cap) && nzchar(cap)) cap, app_dl_png_foot()),
@@ -554,7 +564,8 @@ app_dl_server <- function(output, session, plots, link = function() NULL,
           print(p)
         } else {
           grid::grid.newpage()
-          grid::grid.text(APP_DL_EMPTY, gp = grid::gpar(fontsize = CAPTION_PT + 2, col = "grey30"))
+          grid::grid.text(if (is.null(msg)) APP_DL_EMPTY else msg,
+                          gp = grid::gpar(fontsize = CAPTION_PT + 2, col = "grey30"))
         }
       },
       contentType = "image/png")

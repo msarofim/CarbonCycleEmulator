@@ -1434,7 +1434,10 @@ function(input, output, session) {
 
   # ---- deep links and downloads (2026-10-20; app/R/links.R, app/R/downloads.R) ----
   links <- app_links_server(input, session)
+  # While the pulse lab's result is grayed (its settings changed, no click yet) its charts still hold the
+  # previous run, so their downloads carry the gray-out note instead (Marcus 2026-10-20).
   app_dl_server(output, session, dl_plots, link = links$url,
-                futures = function() list(mode = input$f_mode, yvar = input$f_yvar))
+                futures = function() list(mode = input$f_mode, yvar = input$f_yvar),
+                withheld = function(id) if (id %in% APP_PULSE_RESULT_IDS && isTRUE(pulse_stale())) APP_PULSE_STALE_NOTE)
 }
 

@@ -16,7 +16,7 @@
 # not already have (a gate run to 2025, a knockout run, a 1000-year pulse pair).
 # (2026-10-15 review: card 2 added -- rv_gradients() reads the same gate run as card 3.)
 # Each is memoized in RV_CACHE and computed on FIRST VIEW, not at startup --
-# startup is already the app's worst number (APP_WARMUP_NOTE) and nobody should
+# startup is the first thing every visitor waits through, and nobody should
 # pay for a tab they never open. (The old card 6, the one that spun up a second mode,
 # was RETIRED 2026-10-01; see the ledger.)
 #

@@ -2,6 +2,13 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-20 (h) — **App copy settled for the redeploy: the start-up note deleted; the download labels, the empty-chart message and "Choose a tab" approved as drafted; the Pulse lab's downloads carry the gray-out note while grayed** (Marcus: "Delete the start-up note; approve the rest as drafted (though for the Pulse lab, it should only happen when changing pulse size/date, not before the first run because now there's a default, right?)").
+
+- **Start-up note:** `APP_WARMUP_NOTE` ("First load compiles the model ... allow up to a minute ...") and its `warmup_note()` at the top of The Keeling Curve are gone (`app/global.R`, `app/ui.R`); comments in `app/R/review.R` and `app/DEPLOY.md` follow. The tab now opens on its takeaway (local check, no output errors).
+- **His question, answered:** yes. Opened at the defaults the Pulse lab is never empty, so the empty-chart message (`APP_DL_EMPTY`) applies there only to a link that opens it at other settings (it waits for the click, (d)/(e)) or a refused product.
+- **Found while answering it:** while grayed, the pulse charts' downloads gave the PREVIOUS run's data, with a "link to this view" line holding the new settings. Now `app_dl_server()` takes `withheld(id)`; `server.R` withholds `APP_PULSE_RESULT_IDS` while `pulse_stale()`, so the CSV and PNG carry Marcus's gray-out note instead. Reusing his note there is my choice of wording, not his ruling.
+- **Tests:** `test-app-precompute.R` 12 (real server: data on opening, the note while grayed, data after the click; MUTATION: server.R without `withheld =` downloads the old run and is caught). The 17 app-facing files: 1,164 expectations, 0 failed.
+
 ## 2026-10-20 (g) — **Pulse lab gray-out note: Marcus's wording** ("Chart reflects previous settings. Release the pulse to update."), replacing the draft in `APP_PULSE_STALE_NOTE` (`app/global.R`). `test-app-precompute`, `-us-spelling`, `-review-copy`, `-links`, `-downloads`, `-phone-layout`: 708 expectations, 0 failed. Still for his wording before a redeploy: the download and link labels (e), "Choose a tab" (b), and the stale `APP_WARMUP_NOTE` (c).
 
 ## 2026-10-20 (f) — **Phone layout (b), first visit (c, d) and deep links + downloads (e) MERGED into main; full suite @ `ba898e25`: 8,704 passed, 0 failed, 1 skipped (the standing skip), 231 warnings (as at `cd7a1c9`), 20.9 min** (Marcus: "Merge all three (Recommended)"). Not redeployed.

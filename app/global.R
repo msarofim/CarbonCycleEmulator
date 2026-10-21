@@ -104,28 +104,9 @@ APP_RELEASE_MODE <- "hilda31w"   # Marcus 2026-10-15: "Beta v1.0 is fine, becaus
 # unfreeze, and a freeze verdict is Marcus's (the B8 assessment record).
 # Marcus 2026-10-15 (comments 10.15.26b): "What is under review is how much ..." and "not for citation" deleted.
 # APP_STAGE_NOTE retired 2026-10-15: the banner says "BETA" and "not peer-reviewed" on every tab.
-# ⚠ STARTUP IS SLOW AND THE USER MUST BE TOLD BEFORE THEY WAIT. Measured on an
-# M4: 73 s idle, 116 s at load ~2.5 (2026-09-22), 2.8 min under load (four Julia
-# jobs). DEPLOY.md's older "~20 s" was a warm-cache number. shinyapps.io
-# cold-starts a fresh container per idle process, so a visitor arriving from a
-# post pays this.
-# ⚠ EVERY PROCESS START RECOMPILES THE C++ CORE, and that is most of the wait.
-# Rcpp::sourceCpp()'s cacheDir defaults to the R session's own tempdir, so
-# nothing is reused across starts -- a container is always a cold start. Once the
-# process is listening the first page is essentially instant: 0.4 s from navigate
-# to the takeaway text and the first rendered plot (measured 2026-09-22). So the
-# note below is about the PROCESS, not the page, and "three minutes" is kept as
-# an upper bound that covers the contended case rather than the best one.
-# Marcus 2026-10-15 ("Apply all the app text suggestions"): "three minutes" -> "a minute". Measured 6-8 s cold start for the
-# deploy bundle on the Mac (CHANGELOG 2026-10-15 a); shinyapps.io is NOT measured -- a fresh container also
-# compiles the C++ core. ⚠ Re-time after the first deploy.
-# ⚠ STALE SINCE 2026-10-20 (CHANGELOG 2026-10-20 c), LEFT FOR MARCUS'S WORDING: the first load no longer
-# compiles the model or runs the spin-up before the page appears (the spin-up is read from
-# APP_PRE_FILES$startup, the compile runs in the background), and the pulse lab's default is a stored
-# run of the same model. Laptop cold start to first plot: 6.2-6.5 s before, see CHANGELOG for after.
-APP_WARMUP_NOTE  <-paste("First load compiles the model and runs a 1750 spin-up:",
-                          "allow up to a minute. After that every panel is a",
-                          "live model run, not a stored picture.")
+# The start-up note (APP_WARMUP_NOTE, "First load compiles the model ... allow up to a minute") was DELETED
+# 2026-10-20 (Marcus: "Delete the start-up note"): since CHANGELOG 2026-10-20 (c) the first page no longer
+# waits on the compile or the spin-up. Its history is in CHANGELOG (09-22, 10-15, 10-20 c and h).
 
 # ⛔ BOTH URLS ARE PLACEHOLDERS UNTIL SET, AND THE APP SAYS SO ON SCREEN.
 # A dead link in a public beta costs exactly the feedback the beta exists to
