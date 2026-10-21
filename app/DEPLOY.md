@@ -25,7 +25,10 @@ send a 302 to the app over http and https (Let's Encrypt certificate for `carbot
   fallback) would strand every past visitor; with a 302, editing the forward moves everyone.
 - **Never masked or framed.** Inside a frame, `updateQueryString()` rewrites the frame's address, so a
   copied link loses its view (`app/R/links.R`).
-- **To move the app:** edit the forward's destination at Porkbun. Nothing in the app names carbotope.org.
+- **Include path is ON** (2026-10-21), destination without a trailing slash: `carbotope.org/?<settings>` opens that
+  view; a mistyped path gets the app's 404. Wildcard is on, so any subdomain forwards too.
+- **To move the app:** edit the forward's destination at Porkbun. The banner's "Short link: CarboTope.org"
+  (`APP_SHORT_URL`, `app/global.R`) names the domain, not the host, so it needs no change.
 
 **Deliberately NOT renamed** (Marcus's scoping of R3): the repository stays
 `CarbonCycleEmulator` and the code keeps its `ccx_` prefix. Neither is public-facing.
