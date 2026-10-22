@@ -2,6 +2,14 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-22 (b) — **Full suite @ `8d1c5982` (code = `153ff068`; frozen, linked): 9,181 passed, 0 failed, 1 skipped (the standing `l2-enso-limb` skip), 0 errored, 233 warnings, 21.6 min. Bundle built from `8d1c5982` and served locally: every tab draws, no output errors. The publish is Marcus's** (Marcus: "Run the suite and build the bundle.").
+
+- **Suite:** +1 over (w), the (y) pin row. Log and per-file counts `outputs/diagnostics/suite_20261022_8d1c5982{.log,_perfile.csv}`; README's test line cites it. Launch script `~/ccx_frozen/suite_20261022_8d1c5982.sh` kept; worktree removed. Linked per file (78 + 3 tracked = 81).
+- **Bundle:** `app/make_deploy_bundle.sh ~/ccx_frozen/bundle_20261022_8d1c5982 8d1c5982`: 116 files, 7.3 MB, mode file `refit_20261013_hilda31w_…/mode_fit_pumpN.rds`, placeholder guard passed, `FROZEN_FROM_COMMIT.txt` = `8d1c5982`. The shipped paths do not differ between `8d1c5982` and `c533da46` (git diff on the ship list is empty). No precompute rebuild: no adoption and no stored label changed since `6cf56879`.
+- **Served locally from the bundle** (a temporary `.claude/launch.json` entry, reverted): at 1440 × 900 every tab and sub-tab draws all its plots with no output errors (Keeling 2/2, Where 5/5, What if 3/3, Scenarios 3/3, Build your own 3/3, Pulse lab 3/3, Isotopes 2/2, Futures 2/2, Known issues 9/9, What pins 2/2, Under the hood 1/1); at 375 × 812 the Keeling tab 2/2. The texts of (v) and (y) are on the page, the mixing explanation is gone, and a CSV download reads "Code commit: 8d1c598 (the deployed copy was built from this commit)".
+  - At the pane's default size before the resize, the Keeling plots showed "figure margins too large". It went away at 1440 × 900 and at 375 × 812, so it is R refusing to draw into a plot area smaller than its margins, in a pane much smaller than a phone.
+- **Not done:** the publish (`deployApp()`, Marcus's; the session's permission check refuses it) and the live checks after it.
+
 ## 2026-10-22 (a) — **T8e: a full refit with the MLO CO₂ seasonal row on flask CO₂ is forecast to gain about 15.6 log-units under that objective, 15.3 of them already reached by refitting the 8 seasonal names. Every gain is on the two MLO seasonal rows, and nothing the app headlines moves by more than about 0.1 %. The visible change is the MLO seasonal cycle** (Marcus: "Evaluate how big an improvement we are likely to get from the refit.").
 
 - **Driver** `calibration/diag_seas8_refit_forecast_20261022.R` @`ebdb89e6`, no refit, no RNG; output `outputs/diagnostics/seas8_20261021_hilda31w/t8e_refit_forecast_hilda31w.{log,rds}`, run twice, identical. Gates: R1 and R2 (both objectives reproduce the mode, diff 0), the block-refit point reproduces T8c's stored objective (diff 0), the rebuilt loader equals `ccx_load_mode()` (1e-10), the physical run reproduces the objective's rows (0).
