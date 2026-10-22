@@ -1,0 +1,54 @@
+=== calibration/diag_ch4ox_forecast_20261022.R @ac4129f5, 2026-10-22 18:48 ===
+[ccx_adopt_mode_band] h_ml -> [42.5, 200] (mode 69.5414); kz -> [1161.6, 27808] (mode 13790.0802)
+
+=== 1. GATES ===
+GATE R1: the objective rebuilt here scores the mode -1054.495920 vs stored -1054.495920 (diff 0.00e+00, tol 5e-05) -> PASS
+E_FOS 2008-2017: model input 9.3839 GtC/yr, GCB file 9.3839 (diff -0.0000) -> r = central 0.00884, min 0.00650, max 0.01044
+  cumulative source added 1750-2024 at the central r: 4.46 GtC (2.10 ppm emitted)
+GATE W (mutation): the wrapper at r = 0.00884 moves the objective by -26.1907 -> PASS (live)
+
+=== 2. EVERY ROW at the canonical, no refit (row change = with source - without) ===
+  co2_level_SPO                  -15.399  [min   -9.525, max  -20.146]
+  d13c_level_MLO                  -9.195  [min   -6.501, max  -11.137]
+  co2_level_MLO                   -5.534  [min   -2.008, max   -8.790]
+  d13c_level_SPO                  +4.184  [min   +3.286, max   +4.708]
+  d14c_SH                         -1.350  [min   -0.934, max   -1.657]
+  d13c_icecore                    -1.124  [min   -0.817, max   -1.336]
+  co2_icecore                     +0.772  [min   +0.571, max   +0.907]
+  d14c_NH                         +0.646  [min   +0.544, max   +0.687]
+  d14c_intcal                     +0.593  [min   +0.438, max   +0.697]
+  co2_gradient                    +0.516  [min   +0.402, max   +0.584]
+  gcb_land_sink                   -0.513  [min   -0.372, max   -0.611]
+  gcb_ocean_sink                  +0.431  [min   +0.327, max   +0.498]
+  co2_seasonal_MLO                -0.238  [min   -0.173, max   -0.283]
+  ocean_grad_d13c                 -0.109  [min   -0.080, max   -0.129]
+  co2_seasonal_SPO                +0.043  [min   +0.032, max   +0.051]
+  hs_surf_d13c                    +0.041  [min   +0.030, max   +0.048]
+  ocean_grad_dic                  +0.021  [min   +0.016, max   +0.025]
+  excess_c14_ocean                +0.017  [min   +0.012, max   +0.020]
+  d13c_seasonal_MLO               +0.004  [min   +0.003, max   +0.005]
+  hs_surf_dic                     +0.004  [min   +0.003, max   +0.005]
+  rows moving by <= 1e-3: 7 of 27
+  TOTAL logpost change: min -14.742, central -26.191, max -35.861
+
+=== 3. PHYSICAL OUTPUTS at the canonical, 2024 (no refit) ===
+  CO2 425.386 -> 426.416 ppm (+1.030); d13C -8.8644 -> -8.8794 permil (-0.0150); D14C -3.157 -> -4.154 permil (-0.996)
+
+=== 4. GRADIENTS by central differences at md$hess_eps (with and without the source) ===
+  |g| x sd, largest five, without the source: fert_k -0.011, beta_max +0.011, seas_T_lag -0.010, seas_lag_p_NH +0.007, kz_deep_frac -0.007
+  the SOURCE's gradient (g_new - g_old) x sd, largest five: fert_k -331.579, beta_max +266.430, ndep_ret +123.690, luc_scale -118.030, kz +36.021
+
+=== 5. NEWTON STEP on the stored Hessian (all 31 names) ===
+  forecast gain over the mode: without the source +0.000 (the mode's own residual), with +23.341
+  the SOURCE's forecast move (Newton with - without), posterior sd, largest six:
+    imb_share_land          +0.846 sd
+    luc_scale               +0.698 sd
+    bomb_total              +0.697 sd
+    ndep_ret                -0.575 sd
+    beta_max                +0.512 sd
+    imb_share_ocean_rest    +0.495 sd
+  with the source, Newton step 1.0 EVALUATED: -1059.3326 (+21.3540 over the canonical under the source; forecast +23.3408)
+  with the source, Newton step 0.5 EVALUATED: -1062.3967 (+18.2899 over the canonical under the source; forecast +17.5056)
+
+wrote outputs/diagnostics/ch4ox_20261022_hilda31w/ch4ox_forecast_hilda31w.rds
+exit 0
