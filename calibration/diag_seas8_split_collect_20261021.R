@@ -28,6 +28,7 @@ say <- function(...) { cat(sprintf(...)); flush.console() }
 say("=== %s @%s, %s ===\n", S8K_DRIVER, S8K_COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M"))
 S  <- s8_setup(S8K_DRIVER)
 say("alpha_photo_eps %.2f permil%s\n", S$eps, if (is.finite(S8_EPS)) " (CCX_SEAS8_EPS override)" else " (the canonical's)")
+if (nzchar(S$co2seas)) say("co2_seasonal_MLO scores %s (CCX_SEAS8_CO2SEAS override)\n", S$co2seas)
 SC <- readRDS(file.path(S8_SCREEN_DIR, sprintf("t8c_screen_%s.rds", S8_MODE)))
 S8K_EPS_CANON <- ccx_mode_base(S$md)$alpha_photo_eps    # fits written before the override recorded no epsilon: they ran this
 BLOCK <- SC$block; sdB <- SC$pred$B_iii$marg_sd
@@ -39,6 +40,8 @@ for (nm in names(FITS)) {
   if (!identical(FITS[[nm]]$provenance$mode_md5, S$mode_md5)) stop(nm, " was fitted at a different mode file")
   fe <- FITS[[nm]]$provenance$alpha_photo_eps; if (is.null(fe)) fe <- S8K_EPS_CANON
   if (!isTRUE(all.equal(fe, S$eps))) stop(nm, " was fitted at alpha_photo_eps ", fe, ", not ", S$eps)
+  fc <- FITS[[nm]]$provenance$co2seas; if (is.null(fc)) fc <- ""     # fits before the override scored in situ
+  if (!identical(fc, S$co2seas)) stop(nm, " was fitted with co2_seasonal_MLO on '", fc, "', not '", S$co2seas, "'")
 }
 say("fits read (%d): %s\n", length(FITS), paste(names(FITS), collapse = ", "))
 x0 <- S$u0[BLOCK]
@@ -60,13 +63,13 @@ say("\n=== 1. GATE (iii): B_iii from every start returns to the mode ===\n")
 G3 <- tab[tab$set == "B_iii", ]
 for (i in seq_len(nrow(G3))) say("  %-24s max |dx|/sd %.4f (%s), obj - mode %+.5f, converged %s\n", G3$fit[i],
                                  G3$max_abs_dsd[i], G3$worst[i], G3$obj[i] - G3$obj_mode[i], G3$converged[i])
-if (is.finite(S8_EPS)) {
-  # Under an epsilon override the joint optimum is NOT the mode, so the gate is that the joint fit agrees with
+if (s8_override()) {
+  # Under an epsilon (or CO2SEAS) override the joint optimum is NOT the mode, so the gate is that the joint fit agrees with
   # ITSELF from every start (two of them far from the mode), within the same tolerance.
   xs <- lapply(G3$fit, function(n) FITS[[n]]$result$x[BLOCK])
   pair <- if (length(xs) > 1) max(vapply(seq_along(xs), function(i) max(vapply(seq_along(xs), function(j)
     max(abs((xs[[i]] - xs[[j]]) / sdB)), 0)), 0)) else Inf
-  say("  (epsilon override: the gate is the starts' mutual agreement, max pairwise |dx|/sd %.4f)\n", pair)
+  say("  (override: the gate is the starts' mutual agreement, max pairwise |dx|/sd %.4f)\n", pair)
   gate_ok <- nrow(G3) >= 3 && pair <= S8K_GATE_SD_FRAC && all(G3$converged)
 } else
   gate_ok <- nrow(G3) >= 3 && all(G3$max_abs_dsd <= S8K_GATE_SD_FRAC) && all(G3$obj - G3$obj_mode <= S8K_GATE_GAIN) &&
@@ -140,7 +143,7 @@ for (s in c("B_i", "B_ii")) {
 }
 
 say("\n=== 5. THE CYCLES AT EACH LANDING (peak-to-peak; peak month; d13C-per-ppm) ===\n")
-L <- ccx_load_mode(S8_MODE); obs <- ccx_prepare_obs()
+L <- ccx_load_mode(S8_MODE); obs <- S$obs     # = ccx_prepare_obs() unless CCX_SEAS8_CO2SEAS is set
 YR <- lapply(stats::setNames(nm = S8_STATIONS), function(st) intersect(obs$co2_seas[[st]]$year, obs$d13_seas[[st]]$year))
 ov <- list(); for (st in S8_STATIONS) {
   k <- match(YR[[st]], obs$co2_seas[[st]]$year); j <- match(YR[[st]], obs$d13_seas[[st]]$year)
@@ -168,7 +171,7 @@ saveRDS(list(table = tab, gate_iii = gate_ok, best = lapply(best, `[[`, "result"
              rows_used = lapply(SC$sets, function(s) setdiff(s, "logprior")),
              provenance = list(driver = S8K_DRIVER, commit = S8K_COMMIT, mode = S8_MODE, mode_file = S$mode_file,
                                mode_md5 = S$mode_md5, gate_sd_frac = S8K_GATE_SD_FRAC, gate_gain = S8K_GATE_GAIN,
-                               alpha_photo_eps = S$eps, eps_override = is.finite(S8_EPS),
+                               alpha_photo_eps = S$eps, eps_override = is.finite(S8_EPS), co2seas = S$co2seas,
                                fits = vapply(FITS, function(F) F$provenance$start, ""),
                                rng = "none", units = "u-space sd; log-units; ppm; permil; months",
                                built = format(Sys.time(), "%Y-%m-%d %H:%M"))),

@@ -36,6 +36,26 @@ S8_SCREEN_DIR <- Sys.getenv("CCX_SEAS8_SCREEN_DIR", S8_OUT_DIR)
 # in every run AFTER GATE R1 has passed at the canonical's own value. NA = unset = the canonical's own (16.2).
 # T8b's probe put the MLO station d13C-per-ppm on the observed value at 18.35.
 S8_EPS <- suppressWarnings(as.numeric(Sys.getenv("CCX_SEAS8_EPS", "")))
+# 2026-10-21 (T8d, CHANGELOG x; Marcus: "Measure first"): CCX_SEAS8_CO2SEAS names the monthly CO2 series that the
+# MLO CO2 SEASONAL row scores, in place of the canonical's Scripps in situ. "MLO_SIO_FLASK" = Scripps flask CO2, the
+# same flasks the d13C row scores (T8d: flask CO2's phase runs 2.2 d ahead of in situ). Only obs$co2_seas$MLO changes,
+# coefficients and sigma both, by the row's own rule (ccx_year_harmonic -> ccx_seasonal_target); the level, gradient
+# and every other row keep the in situ record. Applied, like CCX_SEAS8_EPS, only AFTER GATE R1. "" = unset.
+S8_CO2SEAS <- Sys.getenv("CCX_SEAS8_CO2SEAS", "")
+if (!S8_CO2SEAS %in% c("", "MLO_SIO_FLASK")) stop("CCX_SEAS8_CO2SEAS must be unset or MLO_SIO_FLASK, not ", S8_CO2SEAS)
+s8_override <- function() is.finite(S8_EPS) || nzchar(S8_CO2SEAS)
+
+#' The observations every seas8 run scores: ccx_prepare_obs(), with the CO2SEAS override applied when set.
+s8_obs <- function() {
+  obs <- ccx_prepare_obs()
+  if (nzchar(S8_CO2SEAS)) {
+    co2 <- as.data.frame(readRDS(ccx_path("data", "obs_co2_monthly.rds")))
+    o <- co2[co2$station == S8_CO2SEAS, ]
+    if (!nrow(o)) stop("no monthly CO2 rows for station ", S8_CO2SEAS)
+    obs$co2_seas$MLO <- ccx_seasonal_target(ccx_year_harmonic(o$decimal_date, o$co2_ppm))
+  }
+  obs
+}
 
 s8_amp    <- function(v) 2 * sqrt(sum(v^2))                        # PEAK-TO-PEAK, always
 s8_ang_mo <- function(v) 12 * ((atan2(v[1], v[2]) / (2 * pi)) %% 1)
@@ -71,7 +91,19 @@ s8_setup <- function(who) {
     if (abs(as.numeric(v0) - md$logpost) <= CCX_REPRO_TOL) stop("the epsilon override did not reach the objective")
     eps <- S8_EPS
   }
-  list(md = md, pins = pins, spf = spf, bp0 = bp0, lp = lp, u0 = u0, v0 = v0, eps = eps,
+  obs <- s8_obs()
+  if (nzchar(S8_CO2SEAS)) {
+    o0 <- ccx_prepare_obs()$co2_seas$MLO; o1 <- obs$co2_seas$MLO
+    lp <- ccx_make_logpost(obs = obs, base_params = bp0, by_stream = TRUE, spinup_fn = spf)
+    v1 <- lp(u0)
+    cat(sprintf(paste0("CO2SEAS OVERRIDE (CCX_SEAS8_CO2SEAS): co2_seasonal_MLO scores %s, %d years %d-%d, sd_a %.4f sd_b %.4f ppm",
+                       " (in situ: %d years, sd_a %.4f sd_b %.4f); the mode's values now score logpost %.6f (%+.3f vs the previous step)\n"),
+                S8_CO2SEAS, o1$n_years, min(o1$year), max(o1$year), o1$sd_a, o1$sd_b, o0$n_years, o0$sd_a, o0$sd_b,
+                as.numeric(v1), as.numeric(v1) - as.numeric(v0)))
+    if (abs(as.numeric(v1) - as.numeric(v0)) <= CCX_REPRO_TOL) stop("the CO2SEAS override did not reach the objective")
+    v0 <- v1
+  }
+  list(md = md, pins = pins, spf = spf, bp0 = bp0, lp = lp, u0 = u0, v0 = v0, eps = eps, obs = obs, co2seas = S8_CO2SEAS,
        mode_file = ccx_mode_file(S8_MODE),
        mode_md5 = unname(tools::md5sum(ccx_mode_file(S8_MODE))))
 }

@@ -91,7 +91,9 @@ say("start objective %.6f (log-prior %.4f)\n", p_st$obj, p_st$logprior)
 PENALTY <- max(S8F_PENALTY_FLOOR, S8F_PENALTY_MULT * abs(p_st$obj))
 
 say("alpha_photo_eps %.2f permil%s\n", S$eps, if (is.finite(S8_EPS)) " (CCX_SEAS8_EPS override)" else " (the canonical's)")
+if (nzchar(S$co2seas)) say("co2_seasonal_MLO scores %s (CCX_SEAS8_CO2SEAS override)\n", S$co2seas)
 ID <- list(set = S8F_SET, start = S8F_START, mode_md5 = S$mode_md5, rows = ROWS, block = BLOCK, eps = S$eps)
+if (nzchar(S$co2seas)) ID$co2seas <- S$co2seas      # only when set, so a pre-override checkpoint still resumes
 St <- if (file.exists(S8F_CKPT)) readRDS(S8F_CKPT) else
   list(x = x_start, best = -p_st$obj, cycle = 0L, n_eval = 0L,
        trace = data.frame(cycle = 0L, step = "start", obj = p_st$obj, cpu_min = 0), id = ID)
@@ -152,7 +154,7 @@ saveRDS(list(result = RES, converged = converged, trace = St$trace, n_eval = St$
              provenance = list(driver = S8F_DRIVER, lib = "calibration/lib_seas8_20261021.R",
                                commit = S8F_COMMIT, mode = S8_MODE, mode_file = S$mode_file,
                                mode_md5 = S$mode_md5, set = S8F_SET, rows = ROWS, block = BLOCK,
-                               alpha_photo_eps = S$eps, eps_override = is.finite(S8_EPS), screen = S8F_SCREEN,
+                               alpha_photo_eps = S$eps, eps_override = is.finite(S8_EPS), co2seas = S$co2seas, screen = S8F_SCREEN,
                                start = S8F_START, start_x = x_start, scale = SCALE,
                                recipe = c(restarts = S8F_RESTARTS, cycles = S8F_CYCLES, nm_maxit = S8F_NM_MAXIT,
                                           nm_reltol = S8F_NM_RELTOL, tol = S8F_TOL, cycle_tol = S8F_CYCLE_TOL,
