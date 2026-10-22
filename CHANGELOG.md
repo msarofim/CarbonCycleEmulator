@@ -2,6 +2,12 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-21 (y) — **Item 8 revised for sampling; the T8c rerun with flask CO₂ is next** (Marcus, on (x)'s two questions: "Revise for sampling (Recommended)"; "Measure first (Recommended)"). Not deployed.
+
+- **Item 8** (`app/server.R`, What pins down what?): "A likely reason they disagree: at Mauna Loa, the ¹³C cycle measured in air samples runs about four days ahead of the continuously measured CO₂ cycle. About half of that comes from the two sampling methods, and the model's land plants move the two tracers in step, so the fit splits the difference." It replaces (v)'s version, which gave the mixed-product 4.4 d as the atmosphere's lead.
+- **Pins:** `AC_CHECKS_1021C` follows the ruling (the (v) phrase is now forbidden, the new sentences required). The 42 app-facing files: 2,478 passed, 0 failed. Local app: the paragraph renders as above.
+- **Measure first:** T8c is to be rerun with the MLO CO₂ seasonal row scored on Scripps flask CO₂ (the same air as the δ¹³C row), the canonical unchanged; recorded in (z) when done.
+
 ## 2026-10-21 (x) — **T8d: about half of the observed 4.4-day δ¹³C lead at Mauna Loa is a sampling mismatch between the two rows' data. Flask CO₂'s seasonal phase runs 2.2 days earlier than in situ CO₂ in both the Scripps and NOAA networks; the δ¹³C row scores flask data and the CO₂ row in situ. Measured on the same flasks, the lead is 2.2 days. Days do matter in this row: it scores 45 years with a per-year σ of 4–10 days of phase** (Marcus: "I'm surprised that a 4 day offset at Mauna Loa matters for a monthly model."; then "Run tests 1 and 2").
 
 - **Driver** `calibration/diag_seas8_lead_obs_20261021.R` @`95ca2bf3`: observations only, the likelihood's per-year harmonic estimator (`ccx_year_harmonic()`, window 1975–2024), no RNG, no model runs. GATE O: its primary per-year coefficients equal `ccx_prepare_obs()`'s exactly. Output `outputs/diagnostics/seas8_20261021_hilda31w/t8d_lead_obs_hilda31w.{log,rds}`; run twice, identical apart from the build time.

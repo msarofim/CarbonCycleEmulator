@@ -1216,16 +1216,15 @@ function(input, output, session) {
                         "δ¹³C seasonal cycles against each other."),
                   nrow(seas)) else NULL,
         " The fitted phase and amplitude are a compromise between the two tracers.",
-        # 2026-10-21 (CHANGELOG v; Marcus chose this draft over his own 10-21 text, the land + ocean sum, after
-        # the seasonal-tracer tests at hilda31w, CHANGELOG 10-21 s, t): the conflict sits at MLO, where the
-        # model's cycle is ~92 % land (amplitude 7.09 land, 0.59 ocean); observed MLO d13C leads CO2's antiphase
-        # by 0.144 [0.107, 0.181] mo (4.4 [3.3, 5.5] days, 1980-2024 mean harmonics) while the model gives +0.01
-        # to +0.10 in every fit; holding eps at 18.35 leaves the d13C rows' loss at 17.2. "nearly all of the
-        # model's" because MLO has no observed land/ocean split.
-        " A likely reason they disagree: at Mauna Loa, where nearly all of the model's",
-        " seasonal cycle comes from land plants, the observed ¹³C cycle runs about four",
-        " days ahead of the CO₂ cycle. The model's land plants move the two tracers in",
-        " step, so the fit splits the difference."),
+        # 2026-10-21 (CHANGELOG v, then y; Marcus chose the timing draft over his own 10-21 text, the land + ocean
+        # sum, after the seasonal-tracer tests at hilda31w, CHANGELOG 10-21 s, t; then "Revise for sampling" after
+        # T8d, x): observed MLO d13C (Scripps flask) leads the CO2 row's in situ antiphase by 0.144 mo (4.4 d,
+        # 1980-2024 mean harmonics); flask CO2 runs 2.2 d ahead of in situ in both the Scripps and NOAA networks,
+        # and the same-flask lead is 2.2 d ("about half"). The model gives +0.01 to +0.10 mo in every fit.
+        " A likely reason they disagree: at Mauna Loa, the ¹³C cycle measured in air",
+        " samples runs about four days ahead of the continuously measured CO₂ cycle.",
+        " About half of that comes from the two sampling methods, and the model's land",
+        " plants move the two tracers in step, so the fit splits the difference."),
       p(tags$strong("The land's magnitude is well constrained; its shape is not. "),
         # 2026-10-15 review: "pinned hard" / "only pinned as a combination" -> "constrained" ("pinning" is the
         # sidebar's defined term for one kind of sensitivity, not a synonym for well constrained)

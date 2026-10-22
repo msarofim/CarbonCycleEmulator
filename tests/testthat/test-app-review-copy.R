@@ -282,10 +282,14 @@ test_that("MUTATION: the scan list fires when an old phrase returns or a new one
 # Marcus 2026-10-21, on the three held draft strings after the seasonal-tracer and H2 tests (CHANGELOG 10-21 v):
 # item 8 (What pins down what?'s seasonal paragraph) the timing draft, item 9 (the `response` gloss) "after
 # calibration", item 10 (card 8's detail) the decomposition draft; then "Update the pins".
+# Item 8 revised again the same day after T8d (CHANGELOG 10-21 y, Marcus: "Revise for sampling"): half the lead is
+# the flask / in situ sampling difference.
 AC_CHECKS_1021C <- list(
   c("S seasonal: timing at MLO",   "the surface ocean without a",
-    "seasonal cycle comes from land plants, the observed ¹³C cycle runs about four"),
-  c("S seasonal: in step",         NA, "step, so the fit splits the difference."),
+    " samples runs about four days ahead of the continuously measured CO₂ cycle."),
+  c("S seasonal: sampling half",   "seasonal cycle comes from land plants, the observed ¹³C cycle runs about four",
+    " About half of that comes from the two sampling methods, and the model's land"),
+  c("S seasonal: in step",         NA, " plants move the two tracers in step, so the fit splits the difference."),
   c("Gloss: response",             "refitting the same model does not fix it",
     "the process is in the model, but after calibration it still responds by"),
   c("K issue 8: decomposition",    "Our leading explanation",
