@@ -1,0 +1,108 @@
+=== calibration/diag_seas8_refit_forecast_20261022.R @ebdb89e6, 2026-10-22 06:14 ===
+[ccx_adopt_mode_band] h_ml -> [42.5, 200] (mode 69.5414); kz -> [1161.6, 27808] (mode 13790.0802)
+GATE R1 (hilda31w): canonical logpost -1054.495920 vs stored -1054.495920 (diff 0.00e+00, tol 5e-05) -> PASS
+CO2SEAS OVERRIDE (CCX_SEAS8_CO2SEAS): co2_seasonal_MLO scores MLO_SIO_FLASK, 49 years 1975-2024, sd_a 0.3267 sd_b 0.1823 ppm (in situ: 50 years, sd_a 0.2987 sd_b 0.1562); the mode's values now score logpost -1070.203647 (-15.708 vs the previous step)
+GATE R2: the in situ objective rebuilt here scores the mode -1054.495920 vs stored -1054.495920 (diff 0.00e+00) -> PASS
+block-refit point (T8c flask B_iii): new objective -1054.9048 (T8c stored -1054.9048, diff 0.0e+00); the mode under it -1070.2036
+
+=== 1. GRADIENTS (central differences at md$hess_eps; check at 2x) ===
+  at the mode: |g_old| max 0.083 (sd-scaled 0.011) -- the canonical's own residual gradient
+  step check (max |g(h) - g(2h)| / max |g|): mode old 0.291, mode new 0.000, block point new 0.001
+  name                  g_new@mode    dg@mode  g_new@blk         sd
+  beta_max                  13.845     13.816      1.386     0.3725
+  fert_k                   -23.621    -23.578     -2.537     0.2625
+  q10                     -747.536   -747.541    -21.564     0.0389
+  k_w                        0.839      0.799      0.643     0.0286
+  h_ml                       5.232      5.238      0.550     0.2514
+  kz                         1.335      1.326      0.561     0.1669
+  kz_deep_frac              -0.030     -0.023     -0.004     0.9722
+  hs_asx_frac                0.690      0.680     -0.144     0.1858
+  h_hs                      -0.124     -0.126      0.052     0.5895
+  u_hs                      -0.976     -0.984      0.117     0.2526
+  pump_hs_gcm2               0.204      0.207      0.068     0.3215
+  pump_grad                 17.183     17.197      1.981     0.1054
+  tau_ex                   -82.540    -82.549      5.188     0.0502
+  npp_frac_NH               27.214     27.202      0.012     0.2767  [block]
+  seas_T_amp_NH           -102.755   -102.745     -0.009     0.2169  [block]
+  seas_T_amp_SH             -3.928     -3.928     -0.006     0.2869  [block]
+  seas_lag_p_NH           -439.912   -439.995      0.078     0.0872  [block]
+  seas_lag_p_SH             -0.733     -0.733     -0.006     0.1444  [block]
+  sst_seas_amp_NH           -0.262     -0.257     -0.004     0.1588  [block]
+  sst_seas_amp_SH          -12.784    -12.788     -0.012     0.1404  [block]
+  bomb_total                -0.018      0.000     -2.517     0.0074
+  luc_scale                -15.684    -15.718     -1.989     0.0381
+  sigma_d14c                -0.004      0.000     -0.000     0.1088
+  rep_dC                     0.005     -0.000      0.166     0.2374
+  grad_off_co2               0.000      0.000     -0.677     0.0929
+  grad_off_d13c              0.008      0.000      3.558     0.0061
+  ndep_ret                  -1.088     -1.090      0.223     0.6026
+  imb_share_land             0.001      0.000      0.002     0.5526
+  imb_share_ocean_rest      -0.001      0.000     -0.004     1.0494
+  bomb_share_NH             -0.002      0.000     -0.010     0.6805
+  seas_T_lag                27.138     27.147     -0.006     1.0904  [block]
+
+=== 2. VALIDATION: the quadratic forecast of the BLOCK refit against T8c's measurement ===
+  from dg (change of objective): forecast gain 12.56 vs measured 15.30 (ratio 0.82); move corr 0.986, max |forecast - measured| 0.11 sd
+  from g_new (incl. the canonical's residual): forecast gain 12.56 vs measured 15.30 (ratio 0.82); move corr 0.989, max |forecast - measured| 0.11 sd
+  name               forecast  measured  (posterior sd)
+  npp_frac_NH           -0.03     -0.03
+  seas_T_amp_NH         -0.48     -0.59
+  seas_T_amp_SH         -0.22     -0.25
+  seas_lag_p_NH         -0.34     -0.45
+  seas_lag_p_SH         +0.22     +0.23
+  sst_seas_amp_NH       +0.16     +0.27
+  sst_seas_amp_SH       -0.29     -0.37
+  seas_T_lag            +0.03     +0.01
+
+=== 3. THE FULL REFIT BEYOND THE BLOCK: one Newton step from the block-refit point ===
+  forecast extra gain: all 31 names 0.27; the 23 non-block names alone 0.02
+  largest forecast moves (posterior sd): q10 -0.60, seas_T_amp_NH +0.58, seas_T_amp_SH +0.34, seas_T_lag +0.26, seas_lag_p_NH +0.25, sst_seas_amp_SH +0.22, seas_lag_p_SH +0.19, grad_off_co2 -0.17
+  moves beyond 2 sd: none
+  step 1.0: forecast +0.27, EVALUATED +0.26 (new objective, vs the block-refit point)
+  step 0.5: forecast +0.20, EVALUATED +0.21 (new objective, vs the block-refit point)
+  the Newton point used below: step 1.0
+
+=== 4. EVERY ROW at the canonical, the block-refit point and the Newton point ===
+  d13c_seasonal_MLO        block  +11.63 | Newton  +11.70 | (in situ objective: Newton  +11.70)
+  co2_seasonal_MLO         block   +4.09 | Newton   +4.04 | (in situ objective: Newton  -30.90)
+  logprior                 block   -0.21 | Newton   +0.53 | (in situ objective: Newton   +0.53)
+  d13c_level_SPO           block   -0.01 | Newton   -0.39 | (in situ objective: Newton   -0.39)
+  d13c_level_MLO           block   -0.03 | Newton   -0.37 | (in situ objective: Newton   -0.37)
+  co2_gradient             block   +0.03 | Newton   +0.35 | (in situ objective: Newton   +0.35)
+  d13c_icecore             block   -0.35 | Newton   -0.31 | (in situ objective: Newton   -0.31)
+  gcb_land_sink            block   +0.01 | Newton   -0.15 | (in situ objective: Newton   -0.15)
+  d14c_NH                  block   -0.02 | Newton   -0.11 | (in situ objective: Newton   -0.11)
+  co2_icecore              block   +0.03 | Newton   +0.10 | (in situ objective: Newton   +0.10)
+  co2_seasonal_SPO         block   -0.03 | Newton   +0.10 | (in situ objective: Newton   +0.10)
+  ocean_grad_alk           block   +0.00 | Newton   -0.09 | (in situ objective: Newton   -0.09)
+  d13c_seasonal_SPO        block   +0.15 | Newton   +0.06 | (in situ objective: Newton   +0.06)
+  d14c_intcal              block   -0.00 | Newton   -0.05 | (in situ objective: Newton   -0.05)
+  TOTAL (new objective): block +15.30, Newton +15.56 | (in situ objective at the Newton point -19.38)
+
+=== 5. PHYSICAL OUTPUTS at the three points ===
+GATE L: load_at(the mode) is ccx_load_mode() to 1e-10 -> PASS
+GATE P: phys() at the mode reproduces the new objective's rows to 0.0e+00 -> PASS
+  observed MLO 1980-2024: CO2 in situ 6.808 ppm @ 3.55 mo, flask 7.132 @ 3.48; d13C 0.3567 permil @ 9.41
+  quantity             canonical       block      newton  newton-can
+  co2_amp_MLO             6.9244      7.2361      7.2620     +0.3376
+  co2_peak_MLO            3.5269      3.4606      3.4607     -0.0662
+  d13_amp_MLO             0.3228      0.3364      0.3378     +0.0150
+  d13_peak_MLO            9.5491      9.4910      9.4917     -0.0574
+  lead_MLO                0.0222      0.0304      0.0310     +0.0088
+  co2_amp_SPO             1.1539      1.1548      1.1600     +0.0060
+  co2_peak_SPO            9.0352      9.0388      9.0360     +0.0007
+  d13_amp_SPO             0.0405      0.0390      0.0398     -0.0008
+  d13_peak_SPO            3.1034      3.0364      3.0598     -0.0436
+  lead_SPO                0.0682     -0.0024      0.0238     -0.0443
+  co2_amp_trend_MLO       0.0247      0.0255      0.0254     +0.0007
+  co2_MLO_2024          427.1352    427.1386    427.1476     +0.0124
+  grad_co2                3.1366      3.1385      3.1585     +0.0219
+  grad_d13c              -0.1535     -0.1536     -0.1546     -0.0011
+  ocean_flux              3.0829      3.0827      3.0826     -0.0003
+  land_flux               1.8437      1.8437      1.8470     +0.0032
+  irf_20                  0.5144      0.5145      0.5147     +0.0003
+  irf_100                 0.3744      0.3745      0.3745     +0.0001
+  irf_300                 0.2933      0.2933      0.2929     -0.0004
+
+wrote outputs/diagnostics/seas8_20261021_hilda31w/t8e_refit_forecast_hilda31w.rds
+=== DONE ===

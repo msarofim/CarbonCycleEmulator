@@ -2,6 +2,19 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-22 (a) — **T8e: a full refit with the MLO CO₂ seasonal row on flask CO₂ is forecast to gain about 15.6 log-units under that objective, 15.3 of them already reached by refitting the 8 seasonal names. Every gain is on the two MLO seasonal rows, and nothing the app headlines moves by more than about 0.1 %. The visible change is the MLO seasonal cycle** (Marcus: "Evaluate how big an improvement we are likely to get from the refit.").
+
+- **Driver** `calibration/diag_seas8_refit_forecast_20261022.R` @`ebdb89e6`, no refit, no RNG; output `outputs/diagnostics/seas8_20261021_hilda31w/t8e_refit_forecast_hilda31w.{log,rds}`, run twice, identical. Gates: R1 and R2 (both objectives reproduce the mode, diff 0), the block-refit point reproduces T8c's stored objective (diff 0), the rebuilt loader equals `ccx_load_mode()` (1e-10), the physical run reproduces the objective's rows (0).
+- **Method:** central-difference gradients of the in situ and flask objectives at the canonical's Hessian steps (stable at 2× the step to 0.1 %, apart from the in situ gradient at its own mode, which is ~0: max 0.083), then one Newton step on the canonical's stored 31×31 Hessian.
+- **Validation:** forecasting the block refit from the mode gives +12.6 against T8c's measured +15.3 (the quadratic underpredicts by 18 %); the forecast moves correlate 0.986 with the measured ones, within 0.11 posterior sd.
+- **The full refit beyond the block:** a Newton step from the block-refit point over all 31 names forecasts **+0.27** (+0.02 from the 23 non-block names alone); evaluated, **+0.26** at step 1 and +0.21 at step 0.5. No forecast move exceeds 0.6 posterior sd (q10 −0.60, `seas_T_amp_NH` +0.58).
+- **Rows** (new objective, Newton point minus canonical): `d13c_seasonal_MLO` +11.70, `co2_seasonal_MLO` (flask) +4.04, the prior +0.53; every other row within ±0.4; total +15.56. Scored on the in situ objective the same point is −19.38 (`co2_seasonal_MLO` in situ −30.90): the cycle moves toward the flask record.
+- **Physical outputs** (canonical → Newton point; observed MLO 1980–2024: CO₂ in situ 6.81 ppm @ 3.55 mo, flask 7.13 @ 3.48; δ¹³C 0.357 ‰ @ 9.41):
+  - MLO CO₂ cycle 6.92 → 7.26 ppm, peak 3.53 → 3.46 mo; MLO δ¹³C 0.323 → 0.338 ‰ (0.90× → 0.95× observed), peak 9.55 → 9.49 mo (4.2 → 2.4 days late); the model's lead +0.022 → +0.031 mo;
+  - CO₂ 2024 +0.012 ppm; NS gradient CO₂ +0.022 ppm, δ¹³C −0.001 ‰; ocean flux 2014–2023 −0.0003 GtC/yr, land +0.003; the PD100 pulse at 20/100/300 yr +0.0003 / +0.0001 / −0.0004.
+- **The app:** it plots Scripps in situ CO₂ at MLO (`app/R/plots.R`, `global.R`). After such a refit the model's cycle would sit about 7 % above that plotted record (now about 2 % below it), unless the plotted series changed too.
+- **Also measured:** the flask CO₂ cycle at MLO is 4.8 % larger than in situ (7.13 against 6.81 ppm), as well as 2.2 days earlier (T8d). Not explained here.
+
 ## 2026-10-21 (z) — **T8c with the MLO CO₂ seasonal row on Scripps flask CO₂ (the same flasks as the δ¹³C row): the δ¹³C rows' loss in the joint fit falls from 18.7 to 7.0 log-units (2ΔL 13.9, below χ²₈'s 95 % point of 15.5). The prediction stated before the run was about 6. About two-thirds of the seasonal conflict was the in situ / flask sampling mismatch; the rest is the same-air lead of 2.2 days, which no seasonal-block setting reproduces** (Marcus: "Measure first (Recommended)").
 
 - **Design:** (s)'s T8c unchanged except `CCX_SEAS8_CO2SEAS=MLO_SIO_FLASK` (`153ff068`): after GATE R1 passes at the canonical, `co2_seasonal_MLO` scores Scripps flask CO₂ by the row's own construction (49 years 1975–2024; σ sd_a 0.327, sd_b 0.182 ppm against in situ's 0.299, 0.156). Every other row keeps in situ. The same seven starts as the ε run, from a frozen worktree (78 links), 31 min wall. Outputs `outputs/diagnostics/seas8_20261021_hilda31w/co2flask/`, launch script in its `logs/`.
