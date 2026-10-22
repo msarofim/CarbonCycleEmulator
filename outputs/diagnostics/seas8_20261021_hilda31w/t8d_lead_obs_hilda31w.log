@@ -1,0 +1,65 @@
+=== calibration/diag_seas8_lead_obs_20261021.R @95ca2bf3, 2026-10-21 20:45 ===
+estimator: ccx_year_harmonic() per calendar year (>= 9 months), window 1975-2024 (LIK_SEAS_WINDOW)
+
+=== 0. SERIES (years scored inside the window) ===
+  co2_sio_insitu     Scripps in situ CO2 (the CO2 row)                1975-2024  N 50
+  co2_sio_flask      Scripps flask CO2 (same flasks as the d13C row)  1975-2024  N 49
+  co2_noaa_insitu    NOAA in situ CO2                                 1975-2024  N 50
+  co2_noaa_flask     NOAA flask CO2 (same programme as INSTAAR d13C)  1977-2024  N 48
+  d13_sio_flask      Scripps flask d13C (the d13C row)                1980-2024  N 45
+  d13_instaar_flask  INSTAAR flask d13C (NOAA flasks)                 1990-2014  N 24
+GATE O: the primary series' per-year coefficients equal ccx_prepare_obs()'s (max |diff| 0.0e+00, same years TRUE) -> PASS
+
+=== TEST 2a. THE LEAD BY PAIRING (negative = d13C early), each on its own common years ===
+  P0_primary               N 45 (1980-2024) | mean-vector -0.144 mo (-4.4 d) | per-year mean -0.141, sd 0.129 (3.9 d), se 0.019, AR1 se 0.024 (rho +0.21) | 89% of years lead
+  P1_sio_same_flask        N 45 (1980-2024) | mean-vector -0.073 mo (-2.2 d) | per-year mean -0.070, sd 0.126 (3.8 d), se 0.019, AR1 se 0.021 (rho +0.13) | 67% of years lead
+  P2_noaa_same_flask       N 24 (1990-2014) | mean-vector -0.073 mo (-2.2 d) | per-year mean -0.074, sd 0.099 (3.0 d), se 0.020, AR1 se 0.023 (rho +0.14) | 75% of years lead
+  P3_noaa_insitu_x_sio     N 45 (1980-2024) | mean-vector -0.142 mo (-4.3 d) | per-year mean -0.138, sd 0.135 (4.1 d), se 0.020, AR1 se 0.024 (rho +0.17) | 84% of years lead
+  P4_sio_insitu_x_instaar  N 24 (1990-2014) | mean-vector -0.158 mo (-4.8 d) | per-year mean -0.156, sd 0.109 (3.3 d), se 0.022, AR1 se 0.022 (rho -0.07) | 96% of years lead
+
+=== TEST 2b. THE SAME PAIRINGS on the years every series has (1990-2014, N 24) ===
+  P0_primary               N 24 (1990-2014) | mean-vector -0.136 mo (-4.1 d) | per-year mean -0.132, sd 0.093 (2.8 d), se 0.019, AR1 se 0.021 (rho +0.08) | 96% of years lead
+  P1_sio_same_flask        N 24 (1990-2014) | mean-vector -0.050 mo (-1.5 d) | per-year mean -0.046, sd 0.088 (2.7 d), se 0.018, AR1 se 0.018 (rho -0.22) | 67% of years lead
+  P2_noaa_same_flask       N 24 (1990-2014) | mean-vector -0.073 mo (-2.2 d) | per-year mean -0.074, sd 0.099 (3.0 d), se 0.020, AR1 se 0.023 (rho +0.14) | 75% of years lead
+  P3_noaa_insitu_x_sio     N 24 (1990-2014) | mean-vector -0.121 mo (-3.7 d) | per-year mean -0.116, sd 0.097 (3.0 d), se 0.020, AR1 se 0.020 (rho -0.02) | 88% of years lead
+  P4_sio_insitu_x_instaar  N 24 (1990-2014) | mean-vector -0.158 mo (-4.8 d) | per-year mean -0.156, sd 0.109 (3.3 d), se 0.022, AR1 se 0.022 (rho -0.07) | 96% of years lead
+
+=== TEST 2c. SAME-TRACER PHASE DIFFERENCES between products (paired by year; positive = first one later) ===
+  co2_sio_flask_minus_insitu         N 49 (1975-2024) | mean-vector -0.074 mo (-2.3 d) | per-year mean -0.075, sd 0.081, se 0.012
+  co2_noaa_flask_minus_insitu        N 48 (1977-2024) | mean-vector -0.070 mo (-2.1 d) | per-year mean -0.068, sd 0.091, se 0.013
+  co2_noaa_insitu_minus_sio_insitu   N 50 (1975-2024) | mean-vector -0.003 mo (-0.1 d) | per-year mean -0.004, sd 0.036, se 0.005
+  co2_noaa_flask_minus_sio_flask     N 47 (1977-2024) | mean-vector +0.003 mo (+0.1 d) | per-year mean +0.004, sd 0.065, se 0.010
+  d13_instaar_minus_sio              N 24 (1990-2014) | mean-vector -0.021 mo (-0.7 d) | per-year mean -0.025, sd 0.125, se 0.026
+
+=== TEST 2d. BY DECADE (mean-vector, Scripps; own years): the primary lead, the same-flask lead, and flask minus in situ CO2 ===
+  1980s N 10 | primary -0.226 (-6.9 d) se 0.052 | same-flask -0.128 (-3.9 d) se 0.062 | CO2 flask - in situ -0.098 (-3.0 d) se 0.028
+  1990s N 10 | primary -0.178 (-5.4 d) se 0.042 | same-flask -0.096 (-2.9 d) se 0.043 | CO2 flask - in situ -0.081 (-2.5 d) se 0.019
+  2000s N 10 | primary -0.134 (-4.1 d) se 0.022 | same-flask -0.049 (-1.5 d) se 0.019 | CO2 flask - in situ -0.085 (-2.6 d) se 0.013
+  2010s N 10 | primary -0.095 (-2.9 d) se 0.030 | same-flask -0.037 (-1.1 d) se 0.032 | CO2 flask - in situ -0.059 (-1.8 d) se 0.013
+  2020s N  5 | primary -0.024 (-0.7 d) se 0.051 | same-flask -0.032 (-1.0 d) se 0.032 | CO2 flask - in situ +0.008 (+0.2 d) se 0.064
+
+=== TEST 1a. THE ROW'S SIGMA AND THE PER-YEAR SCATTER (d13c_seasonal_MLO) ===
+  N 45 years; observed d13C 0.3567 permil peak-to-peak (half-amplitude 0.1783) @ 9.41 mo
+  sigma: sd_a 0.0295, sd_b 0.0131 permil = 9.6, 4.3 days of phase at that amplitude
+  per-year phase scatter (circular sd): d13C 0.142 mo (4.3 d), CO2 0.102 mo (3.1 d), the lead 0.129 mo (3.9 d)
+  first principles: a pure phase error of D months at the observed amplitude costs N/2 * |dv / sigma|^2:
+    D 0.050 mo (1.5 d): 2.74 log-units
+    D 0.073 mo (2.2 d): 5.89 log-units
+    D 0.100 mo (3.0 d): 10.90 log-units
+    D 0.144 mo (4.4 d): 22.55 log-units
+    D 0.166 mo (5.1 d): 29.83 log-units
+    D 0.250 mo (7.6 d): 66.96 log-units
+
+=== TEST 1b. THE JOINT FIT'S LOSS ON d13c_seasonal_MLO, SPLIT (T8c, t8c_split_hilda31w.rds) ===
+  row: joint 211.045, d13C-only 229.148, CO2-only 198.525 -> joint - d13C-only -18.103
+  obs   d13C 0.3567 @ 9.407 mo | vs obs: amplitude x1.000, phase +0.000 mo | mean-vector cost 0.00
+  mode  d13C 0.3228 @ 9.549 mo | vs obs: amplitude x0.905, phase +0.142 mo | mean-vector cost 18.42
+  B_i   d13C 0.3268 @ 9.601 mo | vs obs: amplitude x0.916, phase +0.194 mo | mean-vector cost 30.96
+  B_ii  d13C 0.3485 @ 9.417 mo | vs obs: amplitude x0.977, phase +0.010 mo | mean-vector cost 0.45
+  B_iii d13C 0.3228 @ 9.549 mo | vs obs: amplitude x0.905, phase +0.142 mo | mean-vector cost 18.42
+  joint vs d13C-only: phase -0.132 mo (-4.0 d), amplitude x1.080
+  the joint fit's loss -18.103 = mean-vector part -17.969 + year-to-year remainder -0.134
+    mean-vector part, rotate then scale: phase -10.191, amplitude -7.778
+    mean-vector part, scale then rotate: amplitude +0.914, phase -18.883
+
+wrote outputs/diagnostics/seas8_20261021_hilda31w/t8d_lead_obs_hilda31w.rds
