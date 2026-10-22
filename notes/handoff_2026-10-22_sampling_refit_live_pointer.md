@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-22: the δ¹³C lead is half sampling; the refit forecast; redeployed; the live pointer bug
 
+> **Superseded** by `notes/handoff_2026-10-22_flask_label_refit.md` (the pointer fix is live; the flask label is built).
+
 **Supersedes** `notes/handoff_2026-10-21_draft_strings_h2_seas8.md`. Written on Marcus's request ("Then write a handoff"),
 2026-10-22.
 

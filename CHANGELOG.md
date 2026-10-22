@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-22 (i) — **Handoff `notes/handoff_2026-10-22_flask_label_refit.md`** (Marcus: "Write the handoff (Recommended)"). It supersedes `handoff_2026-10-22_sampling_refit_live_pointer.md`, which now points to it. Rulings for the refit, on the questions after (h): **"Carry module, then check (Recommended)"** (the canonical's pins, the interannual module's four included, carried into the flask refit; `fit_iav_module.R --check` after) and **"Add it as a third (Recommended)"** (T8f's Newton point as a third start, beside T8c's block point and the canonical). Next: the refit code (a ruled reference-set branch, file starts in the multistart driver, port targets, a basins entry, a new read), then the three-start local refit.
+
 ## 2026-10-22 (h) — **Live checks on revision `01a1638d-7ac2-c682-a56b-6d52a8c539ac` (from `2c5b445c`, published 12:19 UTC by Marcus: "I published the pointer fix; do the live checks"): both Known-issue pointers open their card on the host, with the host's rewrite firing. Every tab draws. Also: the full suite at the flask label, `f63edcd1`, passes.**
 
 - **Revision:** active, published; 1024 MB, `conn_timeout` 1200, `read_timeout` 1800, `idle_timeout` 5 (survived the republish).
