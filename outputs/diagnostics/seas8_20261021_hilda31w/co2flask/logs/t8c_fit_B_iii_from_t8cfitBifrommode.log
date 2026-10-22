@@ -1,0 +1,22 @@
+=== calibration/diag_seas8_split_fit_20261021.R @153ff068, 2026-10-21 21:10: set B_iii, start fit:/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas8_20261021_hilda31w/t8c_fit_B_i_from_mode.rds ===
+[ccx_adopt_mode_band] h_ml -> [42.5, 200] (mode 69.5414); kz -> [1161.6, 27808] (mode 13790.0802)
+GATE R1 (hilda31w): canonical logpost -1054.495920 vs stored -1054.495920 (diff 0.00e+00, tol 5e-05) -> PASS
+CO2SEAS OVERRIDE (CCX_SEAS8_CO2SEAS): co2_seasonal_MLO scores MLO_SIO_FLASK, 49 years 1975-2024, sd_a 0.3267 sd_b 0.1823 ppm (in situ: 50 years, sd_a 0.2987 sd_b 0.1562); the mode's values now score logpost -1070.203647 (-15.708 vs the previous step)
+BLOCK (8): npp_frac_NH, seas_T_amp_NH, seas_T_amp_SH, seas_lag_p_NH, seas_lag_p_SH, sst_seas_amp_NH, sst_seas_amp_SH, seas_T_lag
+ROWS (26): co2_level_MLO, co2_level_SPO, co2_seasonal_MLO, co2_seasonal_SPO, d13c_seasonal_MLO, d13c_seasonal_SPO, co2_icecore, d13c_icecore, d13c_level_MLO, d13c_level_SPO, co2_gradient, d13c_gradient, d14c_NH, d14c_SH, d14c_intcal, excess_c14_ocean, d14c_profile_level, d14c_profile_ab, d14c_profile_bd, ocean_grad_dic, ocean_grad_d13c, ocean_grad_alk, hs_surf_dic, hs_surf_d13c, gcb_ocean_sink, gcb_land_sink
+start objective -1092.456503 (log-prior -36.7472)
+alpha_photo_eps 16.20 permil (the canonical's)
+co2_seasonal_MLO scores MLO_SIO_FLASK (CCX_SEAS8_CO2SEAS override)
+  cycle 1 NM 1: obj -1054.924176 (gain 37.532327, 1657 evals, 10.0 CPU-min)
+  cycle 1 NM 2: obj -1054.908831 (gain 0.015345, 1103 evals, 16.5 CPU-min)
+  cycle 1 NM 3: obj -1054.905215 (gain 0.003616, 1037 evals, 22.3 CPU-min)
+  cycle 1 BFGS: obj -1054.904839 (gain 0.000376, convergence 0, 24.6 CPU-min)
+  cycle 2 NM 1: obj -1054.904824 (gain 0.000015, 887 evals, 28.8 CPU-min)
+  cycle 2 BFGS: obj -1054.904824 (gain 0.000000, convergence 0, 28.9 CPU-min)
+cycle 2 gained 0.000015 < 0.01: CONVERGED
+
+RESULT B_iii_from_fit_B_i_from_mode: objective -1054.904824 | log-prior -39.0047 | full logpost -1054.9048 | full likelihood -1015.9001
+  seasonal rows: co2_seasonal_MLO -14.328, co2_seasonal_SPO 67.789, d13c_seasonal_MLO 222.671, d13c_seasonal_SPO 250.586
+  block: npp_frac_NH 0.63777, seas_T_amp_NH 12.786, seas_T_amp_SH 3.198, seas_lag_p_NH 1.2193, seas_lag_p_SH 2.3705, sst_seas_amp_NH 1.4751, sst_seas_amp_SH 1.5418, seas_T_lag 0.28027
+wrote /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas8_20261021_hilda31w/co2flask/t8c_fit_B_iii_from_fit_B_i_from_mode.rds
+=== DONE ===

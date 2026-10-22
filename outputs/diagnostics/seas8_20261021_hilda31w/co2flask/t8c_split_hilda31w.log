@@ -1,0 +1,92 @@
+=== calibration/diag_seas8_split_collect_20261021.R @153ff068, 2026-10-21 21:41 ===
+[ccx_adopt_mode_band] h_ml -> [42.5, 200] (mode 69.5414); kz -> [1161.6, 27808] (mode 13790.0802)
+GATE R1 (hilda31w): canonical logpost -1054.495920 vs stored -1054.495920 (diff 0.00e+00, tol 5e-05) -> PASS
+CO2SEAS OVERRIDE (CCX_SEAS8_CO2SEAS): co2_seasonal_MLO scores MLO_SIO_FLASK, 49 years 1975-2024, sd_a 0.3267 sd_b 0.1823 ppm (in situ: 50 years, sd_a 0.2987 sd_b 0.1562); the mode's values now score logpost -1070.203647 (-15.708 vs the previous step)
+alpha_photo_eps 16.20 permil (the canonical's)
+co2_seasonal_MLO scores MLO_SIO_FLASK (CCX_SEAS8_CO2SEAS override)
+fits read (7): B_i_from_fit_B_ii_from_quadA_iii, B_i_from_mode, B_ii_from_fit_B_ii_from_quadA_iii, B_ii_from_mode, B_iii_from_fit_B_i_from_mode, B_iii_from_fit_B_ii_from_quadA_iii, B_iii_from_mode
+
+=== 0. EVERY FIT: convergence, objective, distance from the mode (block-marginal sd of B_iii) ===
+                                fit   set
+   B_i_from_fit_B_ii_from_quadA_iii   B_i
+                      B_i_from_mode   B_i
+  B_ii_from_fit_B_ii_from_quadA_iii  B_ii
+                     B_ii_from_mode  B_ii
+       B_iii_from_fit_B_i_from_mode B_iii
+ B_iii_from_fit_B_ii_from_quadA_iii B_iii
+                    B_iii_from_mode B_iii
+                                                                                                                                               start
+ fit:/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas8_20261021_hilda31w/t8c_fit_B_ii_from_quadA_iii.rds
+                                                                                                                                                mode
+ fit:/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas8_20261021_hilda31w/t8c_fit_B_ii_from_quadA_iii.rds
+                                                                                                                                                mode
+       fit:/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas8_20261021_hilda31w/t8c_fit_B_i_from_mode.rds
+ fit:/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas8_20261021_hilda31w/t8c_fit_B_ii_from_quadA_iii.rds
+                                                                                                                                                mode
+ converged n_eval cpu_min       obj  obj_mode max_abs_dsd           worst
+      TRUE   4630    26.5 -1525.515 -1531.681    1.984595   seas_T_amp_NH
+      TRUE   5232    29.4 -1525.515 -1531.681    1.985756   seas_T_amp_NH
+      TRUE    866     5.4 -1097.812 -1119.606    3.371244 sst_seas_amp_NH
+      TRUE   3473    20.6 -1097.812 -1119.606    3.368232 sst_seas_amp_NH
+      TRUE   5143    28.9 -1054.905 -1070.204    1.479336   seas_T_amp_NH
+      TRUE   4226    24.6 -1054.905 -1070.204    1.482263   seas_T_amp_NH
+      TRUE   5564    30.9 -1054.905 -1070.204    1.479995   seas_T_amp_NH
+
+=== 1. GATE (iii): B_iii from every start returns to the mode ===
+  B_iii_from_fit_B_i_from_mode max |dx|/sd 1.4793 (seas_T_amp_NH), obj - mode +15.29882, converged TRUE
+  B_iii_from_fit_B_ii_from_quadA_iii max |dx|/sd 1.4823 (seas_T_amp_NH), obj - mode +15.29882, converged TRUE
+  B_iii_from_mode          max |dx|/sd 1.4800 (seas_T_amp_NH), obj - mode +15.29882, converged TRUE
+  (override: the gate is the starts' mutual agreement, max pairwise |dx|/sd 0.0029)
+  GATE (iii): PASS (tolerance 0.10 sd, gain <= 0.05, 3 starts)
+
+=== 2. DO THE STARTS OF EACH SOLO FIT AGREE? (best start kept) ===
+  B_i   starts fit:/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas8_20261021_hilda31w/t8c_fit_B_ii_from_quadA_iii.rds / mode: objectives -1525.5146 / -1525.5146; max |dx|/sd between them 0.002 -> AGREE; kept B_i_from_fit_B_ii_from_quadA_iii
+  B_ii  starts fit:/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas8_20261021_hilda31w/t8c_fit_B_ii_from_quadA_iii.rds / mode: objectives -1097.8119 / -1097.8119; max |dx|/sd between them 0.007 -> AGREE; kept B_ii_from_fit_B_ii_from_quadA_iii
+  B_iii starts fit:/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas8_20261021_hilda31w/t8c_fit_B_i_from_mode.rds / fit:/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas8_20261021_hilda31w/t8c_fit_B_ii_from_quadA_iii.rds / mode: objectives -1054.9048 / -1054.9048 / -1054.9048; max |dx|/sd between them 0.003 -> AGREE; kept B_iii_from_fit_B_i_from_mode
+
+=== 3. WHERE EACH SEASONAL PARAMETER LANDS ===
+  natural value | move from the mode in the B_iii block-marginal sd [and in the canonical's marginal sd] | prior z
+  npp_frac_NH      mode    0.6385 (z +1.00) | CO2-only    0.6398  +0.11 [ +0.05] z +1.03 | d13C-only    0.6371  -0.11 [ -0.05] z +0.96 | joint    0.6378  -0.06 z +0.98 | CO2-d13C sep  +0.23 sd
+  seas_T_amp_NH    mode     14.54 (z +0.07) | CO2-only     12.24  -1.98 [ -0.79] z -0.70 | d13C-only     11.84  -2.37 [ -0.95] z -0.85 | joint     12.79  -1.48 z -0.51 | CO2-d13C sep  +0.39 sd
+  seas_T_amp_SH    mode     3.437 (z -1.13) | CO2-only     3.407  -0.04 [ -0.03] z -1.15 | d13C-only     3.241  -0.25 [ -0.21] z -1.30 | joint     3.198  -0.30 z -1.34 | CO2-d13C sep  +0.21 sd
+  seas_lag_p_NH    mode     1.259 (z -1.32) | CO2-only     1.272  +0.18 [ +0.15] z -1.30 | d13C-only     1.144  -1.62 [ -1.31] z -1.47 | joint     1.219  -0.55 z -1.37 | CO2-d13C sep  +1.80 sd
+  seas_lag_p_SH    mode     2.338 (z +0.12) | CO2-only     2.358  +0.18 [ +0.14] z +0.14 | d13C-only     2.695  +3.24 [ +2.47] z +0.59 | joint      2.37  +0.30 z +0.16 | CO2-d13C sep  -3.05 sd
+  sst_seas_amp_NH  mode     1.413 (z -1.84) | CO2-only     1.908  +1.92 [ +1.89] z -0.64 | d13C-only     2.394  +3.37 [ +3.32] z +0.27 | joint     1.475  +0.27 z -1.67 | CO2-d13C sep  -1.45 sd
+  sst_seas_amp_SH  mode     1.624 (z -0.29) | CO2-only     1.513  -0.92 [ -0.51] z -0.58 | d13C-only     1.483  -1.18 [ -0.65] z -0.66 | joint     1.542  -0.67 z -0.50 | CO2-d13C sep  +0.26 sd
+  seas_T_lag       mode     0.276 (z -1.68) | CO2-only    0.3604  +0.29 [ +0.26] z -1.55 | d13C-only    0.2692  -0.03 [ -0.02] z -1.70 | joint    0.2803  +0.02 z -1.68 | CO2-d13C sep  +0.32 sd
+
+  Mahalanobis distances under the joint objective's block curvature (sqrt(dx' (-H) dx)):
+    CO2-only vs mode 4.89 | d13C-only vs mode 18.07 | CO2-only vs d13C-only 15.94
+
+=== 4. WHAT EACH TRACER LOSES IN THE JOINT FIT (log-units; seasonal rows of that tracer) ===
+  co2_seasonal_MLO   CO2-only   -12.802 | d13C-only   -68.020 | joint   -14.328 | mode   -18.421
+  co2_seasonal_SPO   CO2-only    68.156 | d13C-only    18.686 | joint    67.789 | mode    67.824
+  d13c_seasonal_MLO  CO2-only   215.844 | d13C-only   229.148 | joint   222.671 | mode   211.045
+  d13c_seasonal_SPO  CO2-only   249.754 | d13C-only   251.066 | joint   250.586 | mode   250.433
+  CO2 seasonal rows:  joint - CO2-only = -1.893  (2 dL = 3.79)
+  d13C seasonal rows: joint - d13C-only = -6.957  (2 dL = 13.91)
+  ... and what each SOLO fit costs the OTHER tracer: d13C rows in the CO2-only fit -7.658; CO2 rows in the d13C-only fit -102.795
+  scale: chi-square(8) 95 % point = 15.51 (a 2 dL above it on one tracer's rows is not noise-sized);
+         the mean-vector headroom of each row (T8a sec.5) is the size of that row's whole first-harmonic misfit.
+  B_i: non-seasonal rows -0.782 vs the joint fit; log-prior +1.535
+  B_ii: non-seasonal rows +2.845 vs the joint fit; log-prior +0.752
+
+=== 5. THE CYCLES AT EACH LANDING (peak-to-peak; peak month; d13C-per-ppm) ===
+  [re-run check B_i: streams reproduce to 1.0e-05]
+  [re-run check B_ii: streams reproduce to 9.8e-06]
+  [re-run check B_iii: streams reproduce to 8.9e-06]
+  --- MLO
+  obs    CO2  7.1324 @  3.48 | d13C  0.35668 @  9.41 | sig 0.05001 | d13C - antiphase(CO2) -0.073 mo
+  mode   CO2  6.9244 @  3.53 | d13C  0.32284 @  9.55 | sig 0.04662 | d13C - antiphase(CO2) +0.022 mo
+  B_i    CO2  7.1404 @  3.49 | d13C  0.33977 @  9.53 | sig 0.04758 | d13C - antiphase(CO2) +0.044 mo
+  B_ii   CO2  7.1845 @  3.34 | d13C  0.34851 @  9.42 | sig 0.04851 | d13C - antiphase(CO2) +0.081 mo
+  B_iii  CO2  7.2361 @  3.46 | d13C  0.33636 @  9.49 | sig 0.04648 | d13C - antiphase(CO2) +0.030 mo
+  --- SPO
+  obs    CO2  1.1684 @  8.96 | d13C  0.03366 @  3.24 | sig 0.02881 | d13C - antiphase(CO2) +0.281 mo
+  mode   CO2  1.1512 @  9.04 | d13C  0.04061 @  3.11 | sig 0.03527 | d13C - antiphase(CO2) +0.070 mo
+  B_i    CO2  1.1682 @  9.03 | d13C  0.03973 @  2.95 | sig 0.03401 | d13C - antiphase(CO2) -0.085 mo
+  B_ii   CO2  0.9134 @  9.43 | d13C  0.02843 @  3.34 | sig 0.03113 | d13C - antiphase(CO2) -0.084 mo
+  B_iii  CO2  1.1521 @  9.04 | d13C  0.03903 @  3.04 | sig 0.03388 | d13C - antiphase(CO2) +0.000 mo
+
+wrote /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas8_20261021_hilda31w/co2flask/t8c_split_hilda31w.rds
+=== DONE ===
