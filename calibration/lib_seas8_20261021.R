@@ -43,16 +43,38 @@ S8_EPS <- suppressWarnings(as.numeric(Sys.getenv("CCX_SEAS8_EPS", "")))
 # and every other row keep the in situ record. Applied, like CCX_SEAS8_EPS, only AFTER GATE R1. "" = unset.
 S8_CO2SEAS <- Sys.getenv("CCX_SEAS8_CO2SEAS", "")
 if (!S8_CO2SEAS %in% c("", "MLO_SIO_FLASK")) stop("CCX_SEAS8_CO2SEAS must be unset or MLO_SIO_FLASK, not ", S8_CO2SEAS)
-s8_override <- function() is.finite(S8_EPS) || nzchar(S8_CO2SEAS)
+# 2026-10-22 (T8f; Marcus: "Price all-flask first"): CCX_SEAS8_CO2LEVEL moves the MLO CO2 LEVEL row and the CO2
+# GRADIENT row to the same series, so every MLO CO2 row scores it: obs$co2_ann$MLO is the series' per-year harmonics
+# (the seasonal target is built from the same harmonics, as in ccx_prepare_obs()), and obs$co2_grad is that level
+# minus SPO's, by ccx_prepare_obs()'s own pairing rule. The rows' sigmas are constants (LIK_CO2_REP_ERR,
+# LIK_GRAD_CO2_SD) and do not change. It requires CCX_SEAS8_CO2SEAS set to the same series. "" = unset.
+S8_CO2LEVEL <- Sys.getenv("CCX_SEAS8_CO2LEVEL", "")
+if (!S8_CO2LEVEL %in% c("", "MLO_SIO_FLASK")) stop("CCX_SEAS8_CO2LEVEL must be unset or MLO_SIO_FLASK, not ", S8_CO2LEVEL)
+if (nzchar(S8_CO2LEVEL) && !identical(S8_CO2LEVEL, S8_CO2SEAS))
+  stop("CCX_SEAS8_CO2LEVEL needs CCX_SEAS8_CO2SEAS set to the same series (", S8_CO2LEVEL, ")")
+s8_override <- function() is.finite(S8_EPS) || nzchar(S8_CO2SEAS) || nzchar(S8_CO2LEVEL)
 
-#' The observations every seas8 run scores: ccx_prepare_obs(), with the CO2SEAS override applied when set.
-s8_obs <- function() {
+#' ccx_prepare_obs()'s gradient pairing (its local ccx_pair_grad()), restated so an override can rebuild the row.
+#' GATE G (s8_setup) holds it to ccx_prepare_obs()'s own co2_grad, exactly.
+s8_pair_grad <- function(a, b) {
+  m <- merge(a[, c("year", "level")], b[, c("year", "level")], by = "year", suffixes = c("_n", "_s"))
+  data.frame(year = m$year, grad = m$level_n - m$level_s)
+}
+
+#' The observations every seas8 run scores: ccx_prepare_obs(), with the CO2SEAS override applied when set and,
+#' when `level` is TRUE, the CO2LEVEL override too.
+s8_obs <- function(level = TRUE) {
   obs <- ccx_prepare_obs()
   if (nzchar(S8_CO2SEAS)) {
     co2 <- as.data.frame(readRDS(ccx_path("data", "obs_co2_monthly.rds")))
     o <- co2[co2$station == S8_CO2SEAS, ]
     if (!nrow(o)) stop("no monthly CO2 rows for station ", S8_CO2SEAS)
-    obs$co2_seas$MLO <- ccx_seasonal_target(ccx_year_harmonic(o$decimal_date, o$co2_ppm))
+    h <- ccx_year_harmonic(o$decimal_date, o$co2_ppm)
+    obs$co2_seas$MLO <- ccx_seasonal_target(h)
+    if (level && nzchar(S8_CO2LEVEL)) {
+      obs$co2_ann$MLO <- h
+      obs$co2_grad <- s8_pair_grad(h, obs$co2_ann$SPO)
+    }
   }
   obs
 }
@@ -91,7 +113,7 @@ s8_setup <- function(who) {
     if (abs(as.numeric(v0) - md$logpost) <= CCX_REPRO_TOL) stop("the epsilon override did not reach the objective")
     eps <- S8_EPS
   }
-  obs <- s8_obs()
+  obs <- s8_obs(level = FALSE)
   if (nzchar(S8_CO2SEAS)) {
     o0 <- ccx_prepare_obs()$co2_seas$MLO; o1 <- obs$co2_seas$MLO
     lp <- ccx_make_logpost(obs = obs, base_params = bp0, by_stream = TRUE, spinup_fn = spf)
@@ -103,7 +125,27 @@ s8_setup <- function(who) {
     if (abs(as.numeric(v1) - as.numeric(v0)) <= CCX_REPRO_TOL) stop("the CO2SEAS override did not reach the objective")
     v0 <- v1
   }
+  if (nzchar(S8_CO2LEVEL)) {
+    o0 <- ccx_prepare_obs()
+    g0 <- s8_pair_grad(o0$co2_ann$MLO, o0$co2_ann$SPO)
+    gG <- identical(g0$year, o0$co2_grad$year) && identical(g0$grad, o0$co2_grad$grad)
+    cat(sprintf("GATE G: s8_pair_grad() on the in situ levels is ccx_prepare_obs()'s co2_grad, exactly -> %s\n",
+                if (gG) "PASS" else "FAIL"))
+    if (!gG) stop("s8_pair_grad() does not reproduce ccx_prepare_obs()'s gradient")
+    obs <- s8_obs()
+    lp <- ccx_make_logpost(obs = obs, base_params = bp0, by_stream = TRUE, spinup_fn = spf)
+    v1 <- lp(u0)
+    cat(sprintf(paste0("CO2LEVEL OVERRIDE (CCX_SEAS8_CO2LEVEL): co2_level_MLO scores %s, %d years %d-%d (in situ: %d, %d-%d);",
+                       " co2_gradient %d years %d-%d (in situ: %d); the mode's values now score logpost %.6f (%+.3f vs the previous step)\n"),
+                S8_CO2LEVEL, nrow(obs$co2_ann$MLO), min(obs$co2_ann$MLO$year), max(obs$co2_ann$MLO$year),
+                nrow(o0$co2_ann$MLO), min(o0$co2_ann$MLO$year), max(o0$co2_ann$MLO$year),
+                nrow(obs$co2_grad), min(obs$co2_grad$year), max(obs$co2_grad$year), nrow(o0$co2_grad),
+                as.numeric(v1), as.numeric(v1) - as.numeric(v0)))
+    if (abs(as.numeric(v1) - as.numeric(v0)) <= CCX_REPRO_TOL) stop("the CO2LEVEL override did not reach the objective")
+    v0 <- v1
+  }
   list(md = md, pins = pins, spf = spf, bp0 = bp0, lp = lp, u0 = u0, v0 = v0, eps = eps, obs = obs, co2seas = S8_CO2SEAS,
+       co2level = S8_CO2LEVEL,
        mode_file = ccx_mode_file(S8_MODE),
        mode_md5 = unname(tools::md5sum(ccx_mode_file(S8_MODE))))
 }
