@@ -2,6 +2,18 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-22 (c) — **Redeployed from `8d1c5982` (Marcus ran the publish: "I ran it; do the live checks"). Revision `01a16341-24ac-cda7-525c-55e82f97f7ec`, published 10:56 UTC, 1024 MB, timeouts 1200 / 1800 s, idle 5 s. Every tab draws and the new texts are live, but the Known-issue POINTER (10-21 m, first deployed today) does not work on the live host: Connect Cloud's client script rewrites the link's `href` on click, before our handler reads it.**
+
+- **Passed** (Browser pane through `carbotope.org`, 302 to the app, at 1440 × 900): `lang="en"`; every tab and sub-tab draws every plot, each with alt text, no output errors (Keeling 2/2, Where 5/5, What if 3/3, Scenarios 3/3, Build your own 3/3, Pulse lab 3/3, Isotopes 2/2, Futures 2/2, Known issues 9/9, What pins 2/2, Under the hood 1/1). Items 8 (the sampling text), 9 and 10 are on the page; the mixing explanation, "refitting the same model" and "the surface ocean without a" are gone. A CSV reads "Code commit: 8d1c598 (the deployed copy was built from this commit)". ENSO's Covers reads 1948–2025; the Under the hood takeaway and the "Short link: CarboTope.org" banner are present.
+- **`check_scan_ui.py` against `https://carbotope.org/`** (headless Chrome): the share link copies `https://carbotope.org/?_inputs_&tabs=…` ("Link copied"), and at 375 × 812 the phone gloss opens inline with no sideways scroll; **the see-card step FAILS** (the tab stays on Keeling, no scroll), so the script reports CHECK FAILED.
+- **Diagnosis** (tests on the live page, no hypothesis taken on trust):
+  1. On a warm page a click on the visible pointer changes the hash to `#issue-1` and nothing else, so the handler is not acting (and timing is ruled out).
+  2. The handler is on the page and registered (`jQuery._data(document,'events').click` lists `a.ccx-see-card`); `#issue-1` exists.
+  3. On a fresh page with no other clicks, the pointer's `href` reads `#issue-1` before the click and the full page URL + `#issue-1` after it, with `defaultPrevented` false. Only links that have been clicked are rewritten.
+  4. The host injects `<base href="_w_<worker>/">`, and its `__assets__/shiny-server-client.min.js` binds `jQuery("body").on("click","a",…)`. For a link without `data-toggle` it strips `/_w_<hex>/` from the resolved `href` (`fixupUrl`, which keeps the query and the hash) and writes the result back. It runs on `body`, before our `document`-delegated handler, which then takes `getAttribute('href').slice(1)` as an element id, finds nothing, and returns without `preventDefault()`.
+  - Locally there is no `<base>` and no client script, which is why every local check passed (10-21 n, and the bundle served in (b)).
+- **Proposed fix (not made):** `SEE_CARD_JS` in `app/ui.R` reads `this.hash.slice(1)`, which is `#issue-1` before and after the rewrite. Verify locally by injecting the host's rewrite before the click (and mutation-test: the old line must fail under it), then the suite, a bundle and a publish. The share link is unaffected (its handler reads `data-base` and `location.search`).
+
 ## 2026-10-22 (b) — **Full suite @ `8d1c5982` (code = `153ff068`; frozen, linked): 9,181 passed, 0 failed, 1 skipped (the standing `l2-enso-limb` skip), 0 errored, 233 warnings, 21.6 min. Bundle built from `8d1c5982` and served locally: every tab draws, no output errors. The publish is Marcus's** (Marcus: "Run the suite and build the bundle.").
 
 - **Suite:** +1 over (w), the (y) pin row. Log and per-file counts `outputs/diagnostics/suite_20261022_8d1c5982{.log,_perfile.csv}`; README's test line cites it. Launch script `~/ccx_frozen/suite_20261022_8d1c5982.sh` kept; worktree removed. Linked per file (78 + 3 tracked = 81).
