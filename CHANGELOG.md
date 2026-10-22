@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-21 (w) — **Full suite @ `9a6fc4d1` (frozen, linked): 9,180 passed, 0 failed, 1 skipped (the standing `l2-enso-limb` skip), 0 errored, 233 warnings, 21.3 min.** The +11 over (p) are (o)'s 3 and (v)'s 8. Log and per-file counts: `outputs/diagnostics/suite_20261021_9a6fc4d1{.log,_perfile.csv}`; README's test line cites it. Launch script `~/ccx_frozen/suite_20261021_9a6fc4d1.sh` kept; worktree removed. Linked per file (78 links + 3 tracked = 81). Bundle NOT built: Marcus questioned whether a four-day offset can matter in a monthly model, and item 8's new text rests on it; three tests proposed (per-year scatter and sign of the observed lead, the lead from same-flask CO₂, and a T8c refit with the observed δ¹³C rotated by +0.144 mo), none run yet.
+
 ## 2026-10-21 (v) — **The three held draft strings settled in light of (r)–(t): items 8, 9 and 10 take the drafts drawn from the tests** (Marcus chose the recommended option on each; then, on the copy pins they broke, "Update the pins"). Not deployed.
 
 - **8, What pins down what?'s seasonal paragraph** (`app/server.R`): his 10-21 text gave the land + ocean sum as the reason; (s)–(t) put the conflict at Mauna Loa, where the model's cycle is ~92 % land, as a δ¹³C lead of 0.144 mo the model cannot make. Now: "A likely reason they disagree: at Mauna Loa, where nearly all of the model's seasonal cycle comes from land plants, the observed ¹³C cycle runs about four days ahead of the CO₂ cycle. The model's land plants move the two tracers in step, so the fit splits the difference." (0.144 [0.107, 0.181] mo = 4.4 [3.3, 5.5] days; "of the model's" because MLO has no observed land/ocean split.)
