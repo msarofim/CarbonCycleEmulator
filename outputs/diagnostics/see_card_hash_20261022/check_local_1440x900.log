@@ -1,0 +1,5 @@
+arm A old_handler=False rewrite=False: href before '#issue-1' after '#issue-1'; active 'Known issues', scrollY 460, cardTop 0, handlers 1 -> pass (expected pass) OK
+arm B old_handler=False rewrite=True: href before '#issue-1' after 'http://127.0.0.1:7788/?_inputs_&tabs=%22The%20Keeling%20Curve%22&k_years=%5B1958%2C2024%5D&k_hemi=%22both%22&k_obs=true#issue-1'; active 'Known issues', scrollY 460, cardTop 0, handlers 1 -> pass (expected pass) OK
+arm C old_handler=True rewrite=True: href before '#issue-1' after 'http://127.0.0.1:7788/?_inputs_&tabs=%22The%20Keeling%20Curve%22&k_years=%5B1958%2C2024%5D&k_hemi=%22both%22&k_obs=true#issue-1'; active 'The Keeling Curve', scrollY 0, cardTop 0, handlers 1 -> FAIL (expected FAIL) OK
+arm D old_handler=True rewrite=False: href before '#issue-1' after '#issue-1'; active 'Known issues', scrollY 460, cardTop 0, handlers 1 -> pass (expected pass) OK
+ALL ARMS AS EXPECTED

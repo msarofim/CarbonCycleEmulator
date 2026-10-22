@@ -2,6 +2,13 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-22 (e) — **The Known-issue pointer reads the card id from the link's `hash`, so the host's href rewrite no longer breaks it** (Marcus: "Make the fix & build the bundle."). Not deployed.
+
+- **Fix** (`app/ui.R`, `SEE_CARD_JS`): `document.getElementById(this.hash.slice(1))` in place of `this.getAttribute('href').slice(1)`. `this.hash` is `#issue-N` before and after Connect Cloud's client script writes the full page URL into a clicked link's `href` ((c)). The comment above it says why. The navbar lookup in the same handler still reads the nav links' `href`: they carry `data-toggle`, which the host's rewrite skips (checked live in (c)).
+- **Check** `outputs/diagnostics/see_card_hash_20261022/check_see_card_rewrite.py` (headless Chrome against the local app, a fresh page per arm). It injects a stand-in for the host's rewrite: a `body` click handler that, for links without `data-toggle`, sets `href` to the full URL with the query and hash. Arms: A served handler, no rewrite; B served handler, rewrite; C the pre-fix handler (swapped in on the page), rewrite; D pre-fix, no rewrite. At 1440 × 900 and 375 × 812: A, B, D open Known issues with card 1's top at 0 px; C stays on The Keeling Curve with no scroll, the live symptom in (c). Logs `check_local_{1440x900,375x812}.log`. The saved `check_scan_ui.py` on the local app: ALL OK.
+  - The Browser pane cannot run this check: even a bare `scrollIntoView()` leaves `scrollY` at 0 there.
+- **Pin** (`test-app-scan-items.R`): the handler takes the id from `this.hash` and does not read `getAttribute('href').slice(1)`. The 42 app-facing files: 2,480 passed, 0 failed (+2).
+
 ## 2026-10-22 (d) — **Handoff `notes/handoff_2026-10-22_sampling_refit_live_pointer.md`** (Marcus: "Then write a handoff."). It supersedes `handoff_2026-10-21_draft_strings_h2_seas8.md`, which now points to it. Open: the live Known-issue pointer (fix proposed in (c), not made); the flask-CO₂ refit decision (Marcus's, on (a)'s forecast); the science follow-ups. Live = revision `01a16341` from `8d1c5982`.
 
 ## 2026-10-22 (c) — **Redeployed from `8d1c5982` (Marcus ran the publish: "I ran it; do the live checks"). Revision `01a16341-24ac-cda7-525c-55e82f97f7ec`, published 10:56 UTC, 1024 MB, timeouts 1200 / 1800 s, idle 5 s. Every tab draws and the new texts are live, but the Known-issue POINTER (10-21 m, first deployed today) does not work on the live host: Connect Cloud's client script rewrites the link's `href` on click, before our handler reads it.**

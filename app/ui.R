@@ -101,9 +101,12 @@ see_card <- function(id, what) {
 rv_card_anchor <- function(id) sprintf("issue-%d", id)
 # Click: show the tab that holds the card (its navbar link, so the phone menu and `input$tabs` follow), then
 # scroll to the card once the tab is shown.
+# The card id comes from `this.hash`, not the href attribute (2026-10-22): on Connect Cloud the host's
+# shiny-server-client binds a click handler on `body`, which runs before this `document`-delegated one and
+# rewrites a clicked link's href to the full page URL (keeping the hash). `this.hash` is "#issue-N" both ways.
 SEE_CARD_JS <- "
   $(document).on('click', 'a.ccx-see-card', function (e) {
-    var card = document.getElementById(this.getAttribute('href').slice(1));
+    var card = document.getElementById(this.hash.slice(1));
     if (!card) return;
     e.preventDefault();
     var pane = card.closest('.tab-pane');

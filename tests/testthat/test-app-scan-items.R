@@ -71,6 +71,10 @@ test_that("1. every unit gloss has the class and tabindex; the CSS and JS open i
     expect_gte(lengths(regmatches(html, gregexpr('class="ccx-see-card"', html))), 2L)
     for (i in 1:8) expect_true(grepl(sprintf('id="%s"', get("rv_card_anchor", uienv)(i)), html, fixed = TRUE), info = i)
     expect_true(grepl("a.ccx-see-card", get("SEE_CARD_JS", uienv), fixed = TRUE))
+    # 2026-10-22: the live host rewrites a clicked link's href before this handler runs, so the card id comes
+    # from the link's hash and the handler must not read its href attribute.
+    expect_true(grepl("getElementById(this.hash.slice(1))", get("SEE_CARD_JS", uienv), fixed = TRUE))
+    expect_false(grepl("getAttribute('href').slice(1)", get("SEE_CARD_JS", uienv), fixed = TRUE))
 
     # 3. the share links: the seven static tabs carry one each (What pins down what? draws its chart in the server)
     expect_identical(lengths(regmatches(html, gregexpr('class="ccx-share"', html))), 7L)
