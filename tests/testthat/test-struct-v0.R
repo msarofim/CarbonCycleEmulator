@@ -40,8 +40,9 @@ test_that("fert_k's prior is FLAT unless the label switches it on", {
   #   09-30c handoff's "extend the label ledgers deliberately")
   # + the land ENSO lag label chained from THAT (hilda_csl3v0kaidgbe; 2026-10-02, objective #15;
   #   the 10-02 plan's "extend the four label ledgers")
+  # 2026-10-22: + hilda_csl3v0kaidgbemwtcf, the flask label (...wtc's model and blocks, plus a likelihood switch)
   PRIOR_ON <- c("hilda_csl3v0k", "hilda_csl3v0ka", "hilda_csl3v0kan", "hilda_csl3v0kai", "hilda_csl3v0kaidgb",
-                "hilda_csl3v0kaidgbe", "hilda_csl3v0kaidgbem", "hilda_csl3v0kaidgbemw", "hilda_csl3v0kaidgbemwt", "hilda_csl3v0kaidgbemwtc")  # + the redesigned cut (2026-10-07, objective #18; Marcus: "Full redesign (Recommended)", the name "hilda_csl3v0kaidgbemwt (Recommended)")   # + the interannual cut's main half (2026-10-06, objective #17; Marcus: "Build: land + ocean module (Recommended)", the name "hilda_csl3v0kaidgbemw (Recommended)")   # + the stratification feedback (2026-10-04; DESIGN §3.4a S; extension authorized by Marcus's ruling "History + futures, one #16 refit")
+                "hilda_csl3v0kaidgbe", "hilda_csl3v0kaidgbem", "hilda_csl3v0kaidgbemw", "hilda_csl3v0kaidgbemwt", "hilda_csl3v0kaidgbemwtc", "hilda_csl3v0kaidgbemwtcf")  # + the redesigned cut (2026-10-07, objective #18; Marcus: "Full redesign (Recommended)", the name "hilda_csl3v0kaidgbemwt (Recommended)")   # + the interannual cut's main half (2026-10-06, objective #17; Marcus: "Build: land + ocean module (Recommended)", the name "hilda_csl3v0kaidgbemw (Recommended)")   # + the stratification feedback (2026-10-04; DESIGN §3.4a S; extension authorized by Marcus's ruling "History + futures, one #16 refit")
   for (lab in PRIOR_ON) expect_identical(ccx_struct_block(lab)$fert_k_prior, 1L, info = lab)
   for (lab in setdiff(CCX_STRUCT_LABELS, PRIOR_ON)) {
     p <- ccx_apply_structure(ccx_default_params(), lab, seas_ml = "0")

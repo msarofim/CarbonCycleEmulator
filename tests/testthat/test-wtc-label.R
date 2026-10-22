@@ -101,9 +101,13 @@ test_that("THE BLOCK: #18's plus the ruled fields, every value read from its pro
   expect_identical(ccx_const("ALPHA_PHOTO_EPS"), 18); expect_identical(ccx_const("PUMP_EPS13_ORG"), -20)
   expect_identical(ccx_default_params()$bomb_share_NH, FORC_BOMB_NH_SHARE)
   expect_identical(ccx_default_params()$seas_T_lag, CCX_SEAS_T_LAG)
-  # the ledger: every other label carries none of the fields
-  for (lab in setdiff(CCX_STRUCT_LABELS, WTC_LABEL))
+  # the ledger: every other label carries none of the fields, except the labels built ON this one
+  # (2026-10-22: hilda_csl3v0kaidgbemwtcf, the flask label), which carry every one of them unchanged
+  WTC_CHILDREN <- "hilda_csl3v0kaidgbemwtcf"
+  for (lab in setdiff(CCX_STRUCT_LABELS, c(WTC_LABEL, WTC_CHILDREN)))
     expect_false(any(WTC_FIELDS %in% names(ccx_struct_block(lab))), info = lab)
+  for (lab in WTC_CHILDREN)
+    expect_identical(ccx_struct_block(lab)[WTC_FIELDS], ccx_struct_block(WTC_LABEL)[WTC_FIELDS], info = lab)
 })
 
 # a fixture: the canonical's vector under the NEW label, the two new names OFF their legacy values

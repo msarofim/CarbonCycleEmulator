@@ -77,7 +77,8 @@ test_that("IR1 THE LABEL: #17's block plus exactly the two fields; #17's gates; 
   expect_identical(b_t$iav_cut, 1L)
   expect_identical(ccx_gates_open(IR_LABEL), ccx_gates_open(IR_PARENT))     # opens no gate
   # the labels built ON #18 carry its two fields unchanged; extending this is a DELIBERATE edit
-  IR_CARRIERS <- c("hilda_csl3v0kaidgbemwtc")  # + the citation batch (2026-10-12; Marcus: "New label (a) (Recommended)", the name "…wtc (c = cited)")
+  # 2026-10-22: + hilda_csl3v0kaidgbemwtcf, the flask label (...wtc's model and blocks, plus a likelihood switch)
+  IR_CARRIERS <- c("hilda_csl3v0kaidgbemwtc", "hilda_csl3v0kaidgbemwtcf")  # + the citation batch (2026-10-12; Marcus: "New label (a) (Recommended)", the name "…wtc (c = cited)")
   for (lab in IR_CARRIERS) expect_identical(ccx_struct_block(lab)[IR_FIELDS], b_t[IR_FIELDS], info = lab)
   for (lab in setdiff(CCX_STRUCT_LABELS, c(IR_LABEL, IR_CARRIERS)))         # every other label: neither field
     expect_false(any(IR_FIELDS %in% names(ccx_struct_block(lab))), info = lab)

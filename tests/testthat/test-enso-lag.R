@@ -230,7 +230,8 @@ test_that("CONSERVE: closed-system carbon is conserved with the lag on", {
 })
 
 # the ledger: the labels that OPEN THE LAG GATE. Extending it is a DELIBERATE edit.
-EL_LAG_OPEN_LABELS <- c("hilda_csl3v0kaidgbe", "hilda_csl3v0kaidgbem", "hilda_csl3v0kaidgbemw", "hilda_csl3v0kaidgbemwt", "hilda_csl3v0kaidgbemwtc")  # + the redesigned cut (2026-10-07, objective #18; Marcus: "Full redesign (Recommended)", the name "hilda_csl3v0kaidgbemwt (Recommended)")   # + the interannual cut's main half (2026-10-06, objective #17; Marcus: "Build: land + ocean module (Recommended)", the name "hilda_csl3v0kaidgbemw (Recommended)")   # + the stratification feedback (2026-10-04; DESIGN §3.4a S; extension authorized by Marcus's ruling "History + futures, one #16 refit")
+# 2026-10-22: + hilda_csl3v0kaidgbemwtcf, the flask label (...wtc's model and blocks, plus a likelihood switch)
+EL_LAG_OPEN_LABELS <- c("hilda_csl3v0kaidgbe", "hilda_csl3v0kaidgbem", "hilda_csl3v0kaidgbemw", "hilda_csl3v0kaidgbemwt", "hilda_csl3v0kaidgbemwtc", "hilda_csl3v0kaidgbemwtcf")  # + the redesigned cut (2026-10-07, objective #18; Marcus: "Full redesign (Recommended)", the name "hilda_csl3v0kaidgbemwt (Recommended)")   # + the interannual cut's main half (2026-10-06, objective #17; Marcus: "Build: land + ocean module (Recommended)", the name "hilda_csl3v0kaidgbemw (Recommended)")   # + the stratification feedback (2026-10-04; DESIGN §3.4a S; extension authorized by Marcus's ruling "History + futures, one #16 refit")
 
 test_that("GATE: the ledger, the spec tied to its constants, apply / undo exact", {
   opened <- CCX_STRUCT_LABELS[vapply(CCX_STRUCT_LABELS, ccx_gate_open, logical(1),

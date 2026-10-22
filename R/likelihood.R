@@ -281,6 +281,21 @@ LIK_ANNUAL_MIN_MONTHS <- 9L
 # see CHANGELOG 2026-08-09), so both stations contribute over the same years.
 LIK_SEAS_WINDOW <- c(1975, 2024)
 
+# ---- THE MLO CO2 SERIES (label hilda_csl3v0kaidgbemwtcf, ruled 2026-10-22) ------------------
+# The station tag of Scripps FLASK CO2 at Mauna Loa in data/obs_co2_monthly.rds (built by
+# data-raw/build_calibration_data.R from the Scripps file monthly_flask_co2_mlo.csv, the same flasks
+# the MLO d13C rows score). Under the label's `co2_mlo_flask` switch (ccx_err_with_struct() copies it
+# onto `err`) the three MLO CO2 rows -- co2_level_MLO, co2_seasonal_MLO, co2_gradient -- score this
+# series by their own construction (ccx_year_harmonic(), ccx_seasonal_target(), the gradient
+# pairing); their sigmas do not change. Absent switch = Scripps in situ, every registered mode bit
+# for bit. Marcus, 2026-10-22: the fits should use "the most consistent source of data", and the
+# plots and tests should use what the fits use; on the scope, "All MLO CO2 rows (Recommended)" after
+# T8f (CHANGELOG 2026-10-22 f). Gate 6 stays on in situ, the only MLO record with the 1960s (ruled
+# "Keep in situ, state why").
+LIK_CO2_FLASK_STATION <- "MLO_SIO_FLASK"
+# The rows the switch moves (ccx_comparable_rows() drops them between arms that differ in it).
+LIK_CO2_FLASK_ROWS <- c("co2_level_MLO", "co2_seasonal_MLO", "co2_gradient")
+
 # ---- WHICH AMPLITUDE ESTIMATOR REPORTS A SEASONAL CYCLE (2026-08-27, Marcus)
 # The likelihood scores the per-year sin/cos COEFFICIENTS and never forms an
 # amplitude, so this constant governs DIAGNOSTICS AND REPORTING ONLY -- no
@@ -544,6 +559,10 @@ ccx_comparable_rows <- function(rows, structs) {
     v <- vapply(structs, sw_of, numeric(1), f = LIK_LOWPASS_SWITCHES[[row]])
     if (length(unique(v)) > 1L) common <- setdiff(common, row)
   }
+  # THE MLO CO2 SERIES (2026-10-22): an arm with `co2_mlo_flask` scores the three MLO CO2 rows on
+  # flask CO2, one without it on in situ -- the same names, different data. Dropped when they differ.
+  v <- vapply(structs, sw_of, numeric(1), f = "co2_mlo_flask")
+  if (length(unique(v)) > 1L) common <- setdiff(common, LIK_CO2_FLASK_ROWS)
   common
 }
 # Each GCB sink row and the structure field that switches it to its low-pass part.
@@ -761,6 +780,8 @@ ccx_err_with_struct <- function(err, p) {
   # the IntCal row's published D14C sigma
   if (!is.null(p[["ocean_depth"]]))          err$ocean_depth          <- p[["ocean_depth"]]
   if (!is.null(p[["intcal_sd_published"]]))  err$intcal_sd_published  <- p[["intcal_sd_published"]]
+  # label hilda_csl3v0kaidgbemwtcf (2026-10-22): the MLO CO2 rows on Scripps flask (LIK_CO2_FLASK_STATION)
+  if (!is.null(p[["co2_mlo_flask"]]))        err$co2_mlo_flask        <- p[["co2_mlo_flask"]]
   if (!is.null(p[["gcb_land_lowpass_df"]]))  err$gcb_land_lowpass_df  <- p[["gcb_land_lowpass_df"]]
   if (!is.null(p[["gcb_ocean_lowpass_df"]])) err$gcb_ocean_lowpass_df <- p[["gcb_ocean_lowpass_df"]]
   if (!is.null(p[["gcb_enso_slope_row"]]))   err$gcb_enso_slope_row   <- p[["gcb_enso_slope_row"]]
@@ -2200,7 +2221,9 @@ ccx_prepare_obs <- function() {
   exc  <- tryCatch(readRDS(ccx_path("data", "obs_excess_c14.rds")),
                    error = function(e) NULL)
 
-  # primary stations only -- the NOAA records are cross-checks, not targets
+  # primary stations only -- the NOAA records are cross-checks, not targets. (Scripps flask MLO is
+  # kept aside for the hilda_csl3v0kaidgbemwtcf label's targets, below; `co2` stays MLO + SPO.)
+  co2_all <- co2
   co2 <- co2[co2$station %in% c("MLO", "SPO"), ]
   d13 <- d13[d13$station %in% c("MLO", "SPO"), ]
 
@@ -2299,6 +2322,16 @@ ccx_prepare_obs <- function() {
   co2_grad  <- ccx_pair_grad(co2_ann$MLO, co2_ann$SPO)
   d13c_grad <- ccx_pair_grad(d13_ann$MLO, d13_ann$SPO)
 
+  # ---- THE MLO FLASK CO2 TARGETS (2026-10-22; see LIK_CO2_FLASK_STATION) ---
+  # Additive: the in situ targets above are untouched, so every registered mode scores as before.
+  # Built by the SAME machinery as the in situ ones (the per-year harmonics, the seasonal target
+  # from those harmonics, the gradient pairing against SPO), so a label that switches to them
+  # changes the data and nothing else. `co2_flask` is the monthly frame, for the plots.
+  co2_flask <- co2_all[co2_all$station == LIK_CO2_FLASK_STATION, ]
+  co2_ann_flask  <- list(MLO = ccx_year_harmonic(co2_flask$decimal_date, co2_flask$co2_ppm))
+  co2_seas_flask <- list(MLO = ccx_seasonal_target(co2_ann_flask$MLO))
+  co2_grad_flask <- ccx_pair_grad(co2_ann_flask$MLO, co2_ann$SPO)
+
   # ---- THE GCB ENSO OCEAN SLOPE (objective #13, 2026-09-18 e) ---------
   # The observed regression, on the same estimator and the same index the model
   # row uses (ccx_enso_slope / ccx_enso_annual_index); its se is the row's sigma.
@@ -2311,6 +2344,8 @@ ccx_prepare_obs <- function() {
        co2_ann = co2_ann, d13_ann = d13_ann, co2_seas = co2_seas,
        d13_seas = d13_seas,
        co2_grad = co2_grad, d13c_grad = d13c_grad,
+       co2_flask = co2_flask, co2_ann_flask = co2_ann_flask, co2_seas_flask = co2_seas_flask,
+       co2_grad_flask = co2_grad_flask,
        d14_nh_ann = d14_nh_ann, d14_sh_ann = d14_sh_ann,
        excess_c14_all = exc, excess_c14 = ccx_excess_c14_target(exc))
 }
@@ -2446,10 +2481,38 @@ ccx_npp_modern_target <- local({
 #' before "hilda_csl3v0kan"), so objective #13 is untouched. Present = one row,
 #' `npp_modern`: the model's mean global NPP over the target's window against
 #' data/obs_npp_modern_target.rds (ccx_npp_modern_target()).
+#' Is the MLO CO2 flask switch on? Absent = no (every label but hilda_csl3v0kaidgbemwtcf).
+ccx_co2_flask_on <- function(err) {
+  s <- err[["co2_mlo_flask"]]
+  if (is.null(s)) return(FALSE)
+  if (length(s) != 1L || !is.finite(s) || !s %in% c(0, 1))
+    stop("ccx_loglik(): err$co2_mlo_flask must be 0 or 1; got ", paste(s, collapse = ","), ".")
+  s == 1
+}
+#' The observations a label SCORES: `obs` with the MLO CO2 targets swapped to Scripps flask when
+#' `flask` is TRUE (see LIK_CO2_FLASK_STATION). `monthly = TRUE` also replaces the monthly MLO rows of
+#' `obs$co2` with the flask rows (relabelled "MLO"), for plots and gates that read the monthly frame.
+ccx_obs_co2_scored <- function(obs, flask, monthly = FALSE) {
+  if (!isTRUE(flask)) return(obs)
+  if (is.null(obs$co2_ann_flask$MLO) || is.null(obs$co2_seas_flask$MLO) || is.null(obs$co2_grad_flask))
+    stop("ccx_obs_co2_scored(): `obs` carries no flask targets -- build it with ccx_prepare_obs()")
+  obs$co2_ann$MLO  <- obs$co2_ann_flask$MLO
+  obs$co2_seas$MLO <- obs$co2_seas_flask$MLO
+  obs$co2_grad     <- obs$co2_grad_flask
+  if (isTRUE(monthly)) {
+    f <- obs$co2_flask; f$station <- "MLO"
+    obs$co2 <- rbind(f, obs$co2[obs$co2$station != "MLO", ])
+  }
+  obs
+}
+
 ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
                        ocean_grad = NULL, by_stream = FALSE, d14c_mid = NULL,
                        npp = NULL, residuals = FALSE) {
   parts <- c()
+  # THE MLO CO2 SERIES (2026-10-22): under the flask switch the three MLO CO2 rows read the flask
+  # targets. A local copy; the caller's `obs` is untouched.
+  obs <- ccx_obs_co2_scored(obs, ccx_co2_flask_on(err))
   # THE COLUMN DEPTH every GLODAP row is read at (2026-10-12): the structure's, which
   # ccx_err_with_struct() copies onto `err`; absent = 3700 m, every registered mode, bit for bit.
   # The ocean-gradient bundle carries the depth it was BUILT on (ccx_ocean_grad_scored()), and a

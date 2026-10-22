@@ -2630,10 +2630,26 @@ ccx_struct_hilda_csl3v0kaidgbemwtc <- function() {
   stopifnot(!anyDuplicated(names(blk)))
   blk
 }
+#' THE "hilda_csl3v0kaidgbemwtcf" STRUCTURE (THE FLASK LABEL, RULED 2026-10-22): hilda_csl3v0kaidgbemwtc
+#' with every Mauna Loa CO2 row -- co2_level_MLO, co2_seasonal_MLO, co2_gradient -- scored on Scripps
+#' FLASK CO2 (LIK_CO2_FLASK_STATION), the same flasks the MLO d13C rows score, in place of Scripps in
+#' situ. Marcus, verbatim: "we'd want whatever we are using for the fits to be the most consistent
+#' source of data"; on the scope, after T8f's pricing, "All MLO CO2 rows (Recommended)"; the NAME
+#' "hilda_csl3v0kaidgbemwtcf (Recommended)" (f = flask). Why: the in situ cycle runs 2.2 days behind
+#' and 4.8 % smaller than flask in both the Scripps and NOAA networks (T8d), and the mixed pair carried
+#' about two-thirds of the CO2 / d13C seasonal conflict (T8c, CHANGELOG 2026-10-21 x, z; 10-22 a, f).
+#' The one field is a likelihood switch (ccx_err_with_struct() -> ccx_loglik()); the model is unchanged.
+#' Every other label leaves it absent, so every registered file stays bit-exact.
+ccx_struct_hilda_csl3v0kaidgbemwtcf <- function() {
+  blk <- ccx_struct_hilda_csl3v0kaidgbemwtc()
+  blk$co2_mlo_flask <- 1
+  stopifnot(!anyDuplicated(names(blk)))
+  blk
+}
 #' The structure labels the objective knows, and each one's DECLARED block --
 #' ONE dispatch (2026-09-14f), read by ccx_apply_structure(), the array driver's
 #' banner and the tests, so no consumer keeps its own list.
-CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", names(CCX_L2_RETURN_LAYERS), "hilda_cs", "hilda_csl3v0", "hilda_csl3v0k", "hilda_csl3v0ka", "hilda_csl3v0kan", "hilda_csl3v0kai", "hilda_csl3v0kaidgb", "hilda_csl3v0kaidgbe", "hilda_csl3v0kaidgbem", "hilda_csl3v0kaidgbemw", "hilda_csl3v0kaidgbemwt", "hilda_csl3v0kaidgbemwtc")
+CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", names(CCX_L2_RETURN_LAYERS), "hilda_cs", "hilda_csl3v0", "hilda_csl3v0k", "hilda_csl3v0ka", "hilda_csl3v0kan", "hilda_csl3v0kai", "hilda_csl3v0kaidgb", "hilda_csl3v0kaidgbe", "hilda_csl3v0kaidgbem", "hilda_csl3v0kaidgbemw", "hilda_csl3v0kaidgbemwt", "hilda_csl3v0kaidgbemwtc", "hilda_csl3v0kaidgbemwtcf")
 ccx_struct_block <- function(struct) {
   if (identical(struct, "")) return(list())        # the column: nothing declared
   switch(struct,
@@ -2656,6 +2672,7 @@ ccx_struct_block <- function(struct) {
     "hilda_csl3v0kaidgbemw" = ccx_struct_hilda_csl3v0kaidgbemw(), # ... + the interannual cut's main half (2026-10-06; objective #17)
     "hilda_csl3v0kaidgbemwt" = ccx_struct_hilda_csl3v0kaidgbemwt(), # ... + the detrended ENSO index + the low-pass ocean row (2026-10-07; objective #18)
     "hilda_csl3v0kaidgbemwtc" = ccx_struct_hilda_csl3v0kaidgbemwtc(), # ... + the citation batch (2026-10-12; "New label (a)")
+    "hilda_csl3v0kaidgbemwtcf" = ccx_struct_hilda_csl3v0kaidgbemwtcf(), # ... + every MLO CO2 row on Scripps flask (2026-10-22)
     stop("ccx_struct_block(): unknown structure label '", struct, "'"))
 }
 #' The pump field's construction is the THIRD structure axis (option D + E,
@@ -2949,7 +2966,8 @@ ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", ""),
          "and \"hilda_csl3v0kaidgbem\" (+ the stratification feedback, DESIGN §3.4a S, 2026-10-04) ",
          "and \"hilda_csl3v0kaidgbemw\" (+ the interannual cut's main half, objective #17, 2026-10-06) ",
          "and \"hilda_csl3v0kaidgbemwt\" (+ the detrended ENSO index + the low-pass ocean row, objective #18, 2026-10-07) ",
-         "and \"hilda_csl3v0kaidgbemwtc\" (+ the citation batch, 2026-10-12).")
+         "and \"hilda_csl3v0kaidgbemwtc\" (+ the citation batch, 2026-10-12) ",
+         "and \"hilda_csl3v0kaidgbemwtcf\" (+ every MLO CO2 row on Scripps flask, 2026-10-22).")
   blk <- ccx_struct_block(struct)
   for (n in names(blk)) p[[n]] <- blk[[n]]
   structure(p, struct = struct, seas_ml = seas_ml, pump_field = pump_field)

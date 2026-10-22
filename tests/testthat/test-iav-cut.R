@@ -76,8 +76,9 @@ test_that("IC1 THE LABEL: kaidgbem's block plus exactly the three cut fields; ka
   # the ledger: the labels that CARRY the cut's three fields. Extending it is a DELIBERATE edit.
   # + the redesigned cut (2026-10-07, objective #18; Marcus: "Full redesign (Recommended)", the name
   #   "hilda_csl3v0kaidgbemwt (Recommended)"): #17's block + two fields, so the three at #17's values
+  # 2026-10-22: + hilda_csl3v0kaidgbemwtcf, the flask label (...wtc's model and blocks, plus a likelihood switch)
   IC_CUT_LABELS <- c(IC_LABEL, "hilda_csl3v0kaidgbemwt",
-                     "hilda_csl3v0kaidgbemwtc")  # + the citation batch (2026-10-12; Marcus: "New label (a) (Recommended)", the name "…wtc (c = cited)")
+                     "hilda_csl3v0kaidgbemwtc", "hilda_csl3v0kaidgbemwtcf")  # + the citation batch (2026-10-12; Marcus: "New label (a) (Recommended)", the name "…wtc (c = cited)")
   for (lab in setdiff(IC_CUT_LABELS, IC_LABEL))                             # the cut's own three, unchanged
     expect_identical(ccx_struct_block(lab)[IC_FIELDS], b_w[IC_FIELDS], info = lab)
   for (lab in setdiff(CCX_STRUCT_LABELS, IC_CUT_LABELS))                    # every other label: none of the three
