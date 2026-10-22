@@ -1,0 +1,2 @@
+before Run: {"vis": ["f_plot:none:noalt"], "errs": [], "busy": false, "msg": ["Choose a pathway and press \u201cRun it\u201d."]}
+after Run (4 s): {"vis": ["f_plot:img:alt"], "errs": [], "busy": false, "msg": ["Your pathway reaches 701 ppm and +4.0 \u00b0C by 2150. Fossil emissions nev"]}

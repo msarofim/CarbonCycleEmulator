@@ -2,6 +2,14 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-22 (h) — **Live checks on revision `01a1638d-7ac2-c682-a56b-6d52a8c539ac` (from `2c5b445c`, published 12:19 UTC by Marcus: "I published the pointer fix; do the live checks"): both Known-issue pointers open their card on the host, with the host's rewrite firing. Every tab draws. Also: the full suite at the flask label, `f63edcd1`, passes.**
+
+- **Revision:** active, published; 1024 MB, `conn_timeout` 1200, `read_timeout` 1800, `idle_timeout` 5 (survived the republish).
+- **`check_scan_ui.py` against `https://carbotope.org/`** (headless Chrome, 1440 × 900): ALL OK. The share link copies the short address plus the view; the Keeling pointer opens Known issues at card 1 (top 0 px; it FAILED here before the fix, (c)); at 375 × 812 the phone gloss opens inline, no sideways scroll. Log `outputs/diagnostics/see_card_hash_20261022/live_01a1638d_check_scan_ui.log`.
+- **`check_live_pointer.py`** (new, same folder): the page has a `<base href=…/_w_<worker>/>`. The fixed handler is served and the pre-fix line is not. Both pointers, each on a fresh page from its own tab (issue 1 from The Keeling Curve, issue 2 from Isotope fingerprints), had their `href` rewritten by the host to the full URL and still opened Known issues with the card's top at 0 px. A CSV reads "Code commit: 2c5b445 (the deployed copy was built from this commit)". Every tab draws every plot with alt text and no output errors (Keeling 2/2, Where 5/5, What if 3/3, Isotopes 2/2, Futures Scenarios 1/1 and Pulse lab 2/2, Known issues 9/9, What pins 2/2, Under the hood 1/1).
+  - Its one FAIL was the check's own: on Futures → Build your own the plot waits for "Run it" by design (APP_BUILD_PROMPT, shown). Pressed, it drew in 4 s with alt text, no errors ("Your pathway reaches 701 ppm and +4.0 °C by 2150 …"); `live_01a1638d_build_your_own.log`.
+- **Full suite @ `f63edcd1`** (the flask label, no refit; frozen, linked 78 + 3 = 81): 9,247 passed, 0 failed, 1 skipped (the standing `l2-enso-limb` skip), 0 errored, 233 warnings, 22.7 min. +64 over (e): the label's 58 and the extended ledgers. Every registered mode still reproduces its stored logpost (`test-hml-floor.R` F3, `test-mode-file.R` d). Log and per-file counts `outputs/diagnostics/suite_20261022_f63edcd1{.log,_perfile.csv}`; README's test line cites it; launch script `~/ccx_frozen/suite_20261022_f63edcd1.sh` kept; worktree removed.
+
 ## 2026-10-22 (g) — **Label `hilda_csl3v0kaidgbemwtcf` built: every MLO CO₂ row on Scripps flask. It reproduces T8f's override objective exactly at three points; every registered mode is unchanged** (Marcus, after (f): "All MLO CO₂ rows (Recommended)"; the name "hilda_csl3v0kaidgbemwtcf (Recommended)"). No refit yet.
 
 - **Routing** (the 10-12 (dd) pattern: a new label, so every registered file stays bit-exact):
