@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-22 (d) — **Handoff `notes/handoff_2026-10-22_sampling_refit_live_pointer.md`** (Marcus: "Then write a handoff."). It supersedes `handoff_2026-10-21_draft_strings_h2_seas8.md`, which now points to it. Open: the live Known-issue pointer (fix proposed in (c), not made); the flask-CO₂ refit decision (Marcus's, on (a)'s forecast); the science follow-ups. Live = revision `01a16341` from `8d1c5982`.
+
 ## 2026-10-22 (c) — **Redeployed from `8d1c5982` (Marcus ran the publish: "I ran it; do the live checks"). Revision `01a16341-24ac-cda7-525c-55e82f97f7ec`, published 10:56 UTC, 1024 MB, timeouts 1200 / 1800 s, idle 5 s. Every tab draws and the new texts are live, but the Known-issue POINTER (10-21 m, first deployed today) does not work on the live host: Connect Cloud's client script rewrites the link's `href` on click, before our handler reads it.**
 
 - **Passed** (Browser pane through `carbotope.org`, 302 to the app, at 1440 × 900): `lang="en"`; every tab and sub-tab draws every plot, each with alt text, no output errors (Keeling 2/2, Where 5/5, What if 3/3, Scenarios 3/3, Build your own 3/3, Pulse lab 3/3, Isotopes 2/2, Futures 2/2, Known issues 9/9, What pins 2/2, Under the hood 1/1). Items 8 (the sampling text), 9 and 10 are on the page; the mixing explanation, "refitting the same model" and "the surface ocean without a" are gone. A CSV reads "Code commit: 8d1c598 (the deployed copy was built from this commit)". ENSO's Covers reads 1948–2025; the Under the hood takeaway and the "Short link: CarboTope.org" banner are present.

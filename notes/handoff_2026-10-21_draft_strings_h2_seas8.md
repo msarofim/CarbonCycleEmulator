@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-21 (4): ENSO full year; the draft-string pass; H2 and the seasonal-tracer tests at hilda31w (nothing deployed)
 
+> **SUPERSEDED 2026-10-22** by `notes/handoff_2026-10-22_sampling_refit_live_pointer.md`.
+
 **Supersedes** `notes/handoff_2026-10-21_scan_items_built.md`. Written on Marcus's request ("Write the handoff note"),
 2026-10-21.
 
