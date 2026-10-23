@@ -2,6 +2,12 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-23 (g) — **The 10-22 CFC driver's overlay converted and re-verified: the suite's last failing lint passes** (Marcus: "Convert, re-verify (Recommended)").
+
+- `calibration/diag_cfc_power_20261022.R:95` copied the fitted values with a bare `intersect()` loop (the objective's own idiom), which `test-overlay-idiom-lint.R` refuses in a file outside its 2026-09-02 baseline (59 > 58). It is now `p <- ccx_overlay_par(bp0, pv)`.
+- **Re-verified.** Rerun after the change (at `facf8851` plus the conversion): every result field of `cfc_power_hilda31w.rds` is `identical()` to the 10-22 (j) record (`gates`, `surface`, `base`, `inv0`, `readouts0`, `t_box`, `k_check`, `G`, `sd_pred`, `s_obs`, `cov_update`, `ceiling`, `perfect_all`); only `provenance$commit` and `$run` differ, and the log matches line for line after its header. The rerun is in `outputs/diagnostics/cfc_power_20261022_hilda31w/reverify_20261023/` (with the diff); the original record beside it is unchanged.
+- `test-overlay-idiom-lint.R` 8/0 and `test-mode-struct-lint.R` 5/0; the test files are not edited. With (f)'s fix to `test-ms-file.R`, all four of the 3e1feaf2 suite's failures are resolved; a full rerun follows.
+
 ## 2026-10-23 (f) — **Refit item 5 and the launch: the flask refit runs, three fixed starts on the Mac (ids 1, 6, 7), with the landing armed** (rulings 2026-10-22: "Local refit from T8c's point (Recommended)", "Add it as a third (Recommended)", "Carry module, then check (Recommended)").
 
 - **Basins** (`3e1feaf2`): `diag_obj18_basins.R` gains the pair (flask label, `CCX_MODE_FLASK_PINS`). The WTC and #18 pass 2 pairs share those pins; the label tells the three apart.

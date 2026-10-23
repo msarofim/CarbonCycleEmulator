@@ -1,0 +1,16 @@
+diff --git a/calibration/diag_cfc_power_20261022.R b/calibration/diag_cfc_power_20261022.R
+index 0d2977bb..8353e5df 100644
+--- a/calibration/diag_cfc_power_20261022.R
++++ b/calibration/diag_cfc_power_20261022.R
+@@ -92,7 +92,10 @@ cfc_params <- function(u) {
+   names(u) <- CCX_PARAM_NAMES
+   pv <- ccx_unc_to_par(u)
+   p_pr <- bp0; for (n in names(pv)) p_pr[[n]] <- pv[[n]]
+-  p <- bp0; for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]
++  # ccx_overlay_par(), converted on touch (2026-10-23; test-overlay-idiom-lint.R; Marcus: "Convert, re-verify"): the
++  # objective's own loop, plus the pins carried and an assertion that nothing was deleted. The rerun against the
++  # 10-22 (j) output is compared field for field in outputs/diagnostics/cfc_power_20261022_hilda31w/reverify_20261023/.
++  p <- ccx_overlay_par(bp0, pv)
+   list(p = ccx_set_enso(p, p_pr), pv = pv)
+ }
+ L0 <- ccx_load_mode(CFC_MODE)

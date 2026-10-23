@@ -1,0 +1,59 @@
+=== calibration/diag_cfc_power_20261022.R @facf8851+dirty, 2026-10-23 09:27 ===
+[ccx_adopt_mode_band] h_ml -> [42.5, 200] (mode 69.5414); kz -> [1161.6, 27808] (mode 13790.0802)
+GATE D: the objective's decode at the mode equals ccx_load_mode()'s parameter list (129 scalars, max rel 2.6e-16, tol 1e-12) -> PASS
+GATE K: R/constants.R's CO2 Schmidt coefficients equal Orr et al. 2017 Table 1's CO2 row -> PASS (Sc_CO2(20 C) = 668.3; Sc_CFC11(20 C) = 1178.9, table 1179)
+  phi0(CFC-11, S 34.76): 24 at 2 C, 9.054 at 20 C mol m-3 atm-1 (ratio 2.65)
+  atmosphere: cfc_atm_history_bullister_2023.csv, CFC11 NH/SH, 1765.5-2022.5; first nonzero 1945.5; tracer starts at zero in 1944
+  ocean boxes 26; surface (atmosphere row responds): NH_ml, NH_hs, SH_ml, SH_hs
+GATE C (conservation, 24 months): interior diagonal FD vs conservation max rel 4.48e-08; atmosphere/land response to interior max rel 0.00e+00 -> PASS
+GATE L (linearity): the operator at step x100 vs x1, max rel 3.38e-10 -> PASS
+GATE S (state independence): ocean carbon x1.02 moves the operator by max rel 7.09e-10 -> PASS
+GATE V (T V = dV/dt, 24 months): max rel residual 2.24e-08 (tol 1e-06) -> PASS; dropping dV/dt it is 4.49e-01 (the gate can fail)
+
+=== 1. THE CANONICAL'S INVENTORY ===
+  modelled CFC-11 inventory 1994.5: 5.079e+08 mol vs observed 5.50e+08 +- 1.2e+08 (model/obs 0.92; ln-ratio -0.08 = -0.37 obs sd)
+  epoch sensitivity: +2.80 % per year around 1994.5 (so +-2 yr is +-6 %)
+  inventory 1980.5: 2.364e+08 mol
+  inventory 2000.5: 5.768e+08 mol
+  inventory 2010.5: 6.508e+08 mol
+  inventory 2022.46 (the last month): 7.108e+08 mol
+  at 1994.46: upper 1000 m holds 83 % (observed 82 %); the high-latitude HS+HD column holds 35 %; NH 41 % of the total
+  gas exchange x0.5 moves the 1994.5 inventory by -1.9 % (the k / Schmidt approximation's reach)
+
+=== 2. SENSITIVITY: d ln(inventory) / du by central differences at md$hess_eps ===
+  per posterior sd of each parameter (d readout / du x sd); ln_inventory in ln units, the shares as fractions
+                  ln_inventory        upper     hs_share     nh_share
+  k_w                  +0.0006      -0.0001      +0.0001      -0.0000
+  h_ml                 +0.0088      +0.0014      -0.0030      -0.0012
+  kz                   +0.0160      +0.0021      -0.0052      +0.0002
+  kz_deep_frac         +0.0007      +0.0000      -0.0002      -0.0000
+  hs_asx_frac          +0.0012      -0.0004      +0.0007      +0.0000
+  h_hs                 +0.0374      +0.0041      +0.0241      +0.0008
+  u_hs                 +0.0308      -0.0196      +0.0162      +0.0012
+  pump_hs_gcm2         +0.0000      -0.0000      +0.0000      -0.0000
+  pump_grad            +0.0000      -0.0000      +0.0000      -0.0000
+
+=== 3. POWER: the posterior spread of the prediction vs the observation ===
+  posterior sd of ln(inventory) 0.0399 (4.0 %) vs observation 0.218 (1 sigma reading) / 0.109 (2 sigma reading)
+  one_sigma: parameters whose sd shrinks by > 2 %: none
+    corr(u_hs, pump_hs_gcm2) +0.706 -> +0.706; corr(kz, kz_deep_frac) -0.657 -> -0.657; corr(kz, u_hs) -0.593 -> -0.592
+  two_sigma: parameters whose sd shrinks by > 2 %: h_hs 3.9 %
+    corr(u_hs, pump_hs_gcm2) +0.706 -> +0.704; corr(kz, kz_deep_frac) -0.657 -> -0.656; corr(kz, u_hs) -0.593 -> -0.591
+
+  THE CEILING (a perfect observation): posterior sd of each readout, and each parameter's best possible sd shrink
+                  ln_inventory        upper     hs_share     nh_share
+  readout sd            0.0399       0.0218       0.0301       0.0018
+  k_w                     0.3%        17.3%         0.3%         1.7%
+  h_ml                    0.2%         0.9%         1.4%        31.2%
+  kz                      1.4%        20.8%        15.7%         2.9%
+  kz_deep_frac            0.6%         7.4%         7.3%         2.4%
+  hs_asx_frac             0.2%        11.0%         0.5%         1.1%
+  h_hs                   40.1%         4.4%        34.2%         8.1%
+  u_hs                    7.8%        81.4%        15.4%        19.1%
+  pump_hs_gcm2            3.4%        28.6%         6.9%         7.4%
+  pump_grad               0.4%         0.7%         1.8%         0.9%
+  all 4 readouts observed perfectly at once: k_w 27.7 %, h_ml 97.9 %, kz 97.6 %, kz_deep_frac 23.9 %, hs_asx_frac 20.7 %, h_hs 99.3 %, u_hs 98.3 %, pump_hs_gcm2 29.7 %, pump_grad 3.2 %
+    corr(u_hs, pump_hs_gcm2) +0.706 -> -0.236
+
+wrote outputs/diagnostics/cfc_power_20261022_hilda31w/cfc_power_hilda31w.rds
+exit 0
