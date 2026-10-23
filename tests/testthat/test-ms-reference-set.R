@@ -366,34 +366,5 @@ test_that("(14) #18 PASS 2's pins (2026-10-08 d; Marcus: \"Basin 1, run the seco
 # (15) THE WTC REFIT's branch (2026-10-12) was REMOVED with its test at hilda31w's adoption (2026-10-13 f): the canonical is a
 # file of that label, so its pins take the first branch, the canonical as a MODE -- the hilda33p / hilda29e precedent.
 
-test_that("(16) THE FLASK REFIT (2026-10-22; Marcus: \"Local refit from T8c's point (Recommended)\", \"Carry module, then check (Recommended)\"): the canonical's pins under the flask label at seas_ml 1 -> the canonical (a start) / the control; refused at seas_ml 0, with #18 pass 1's pins, a module value moved, a module name dropped; the canonical's own label still takes the canonical as a MODE", {
-  fp <- CCX_MODE_FLASK_PINS
-  # the pins are #18 pass 2's set BY ITS PARTS (a later adoption cannot move them), = the incumbent's own
-  expect_identical(fp, CCX_MODE_OBJ18P2_PINS)
-  expect_identical(ccx_pin_label(ccx_mode_pins(ccx_mode_file(CCX_MODE_FLASK_INCUMBENT))), ccx_pin_label(fp))
-  expect_identical(CCX_MODE_FLASK_INCUMBENT, "hilda31w"); expect_true(CCX_MODE_FLASK_INCUMBENT %in% names(CCX_MODE_FILES))
-  expect_true(CCX_MODE_FLASK_STRUCT %in% CCX_STRUCT_LABELS)
-  # the label is the incumbent's plus the flask switch, nothing else (test-flask-label.R guards the rest)
-  inc_struct <- ccx_mode_struct(ccx_mode_file(CCX_MODE_FLASK_INCUMBENT))
-  expect_identical(setdiff(names(ccx_struct_block(CCX_MODE_FLASK_STRUCT)), names(ccx_struct_block(inc_struct))), "co2_mlo_flask")
-  # the branch is live only while the canonical is NOT a file of the label (else the first branch, as a MODE)
-  expect_false(identical(ccx_mode_struct(ccx_mode_file(CCX_MODE_CANONICAL)), CCX_MODE_FLASK_STRUCT))
-  r16 <- ccx_ms_reference_set(fp, "1", pump_field = "solved", struct = CCX_MODE_FLASK_STRUCT)
-  expect_identical(r16$incumbent, CCX_MODE_FLASK_INCUMBENT); expect_identical(r16$new_basin, CCX_MODE_SEASML0_CONTROL)
-  expect_match(r16$why, "FLASK REFIT.*a start, not a mode")
-  # the LAUNCH STRING, through the driver's own parser
-  launch <- paste(sprintf("%s=%.17g", names(fp), fp), collapse = ",")
-  expect_identical(ccx_parse_pins(launch), fp)
-  expect_identical(ccx_ms_reference_set(ccx_parse_pins(launch), "1", pump_field = "solved", struct = CCX_MODE_FLASK_STRUCT), r16)
-  # the canonical's OWN label is untouched: the canonical as a MODE
-  r0 <- ccx_ms_reference_set(fp, "1", pump_field = "solved", struct = inc_struct)
-  expect_identical(r0$why, "the canonical, under this array's pins")
-  # MUTATION: seas_ml 0; #18 pass 1's pins under the label; a module value moved; a module name dropped; another label
-  expect_error(ccx_ms_reference_set(fp, "0", pump_field = "solved", struct = CCX_MODE_FLASK_STRUCT), "flask refit is ruled at seas_ml 1")
-  expect_error(ccx_ms_reference_set(CCX_MODE_OBJ18_PINS, "1", pump_field = "solved", struct = CCX_MODE_FLASK_STRUCT), "ruled under")
-  moved <- fp; moved[["w_enso_l2"]] <- CCX_MODE_OBJ18_PINS[["w_enso_l2"]]
-  expect_error(ccx_ms_reference_set(moved, "1", pump_field = "solved", struct = CCX_MODE_FLASK_STRUCT), "no registered incumbent")
-  expect_error(ccx_ms_reference_set(fp[setdiff(names(fp), "lag_enso_land")], "1", pump_field = "solved", struct = CCX_MODE_FLASK_STRUCT),
-               "no registered incumbent")
-  expect_error(ccx_ms_reference_set(fp, "1", pump_field = "solved", struct = CCX_MODE_OBJ17_STRUCT), "is not that label")
-})
+# (16) THE FLASK REFIT's branch (2026-10-22) was REMOVED with its test at hilda31fl's adoption (2026-10-23 k): the canonical is
+# a file of that label, so its pins take the first branch, the canonical as a MODE -- the WTC refit's precedent (15).

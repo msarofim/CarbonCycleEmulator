@@ -1,6 +1,6 @@
 # CarbonCycleEmulator — Design Document
 
-**Status (2026-10-15):** design record, not a draft. The model is built; the canonical parameter set is `hilda31w` (2026-10-13); the app is BETA v1.0 CarboTope. Sections keep the 2026-08-09 spec with dated amendments in place; where they disagree, the amendment and README §Status are current.
+**Status (2026-10-23):** design record, not a draft. The model is built; the canonical parameter set is `hilda31fl` (2026-10-23; `hilda31w` refitted with every Mauna Loa CO₂ row on Scripps flask); the app is BETA v1.0 CarboTope. Sections keep the 2026-08-09 spec with dated amendments in place; where they disagree, the amendment and README §Status are current.
 Created 2026-08-09. This document is the authoritative spec; changes to it are logged in
 `CHANGELOG.md`.
 
@@ -81,7 +81,7 @@ Per hemisphere *h* ∈ {N, S}, per isotope *i* ∈ {12, 13, 14}, carbon mass in 
   thickness increasing downward to a mean full depth ≈ 3700 m [VERIFY]. Interior layers
   exchange by vertical eddy diffusion only; no advective overturning loop in v1 (§10).
   **HILDA structure (canonical since 2026-09-11, first in `hilda31s`; carried by the
-  canonical `hilda31w`, 2026-10-13):** adds a high-latitude
+  canonical `hilda31fl`, 2026-10-23):** adds a high-latitude
   surface box `C_hs[h,i]` and a high-latitude deep box `C_hd[h,i]` per hemisphere beside the
   low-latitude column (`ccx_apply_structure(p, "hilda")`; §3.4 and the author's private notes).
 
@@ -115,8 +115,9 @@ d M_atm[h]/dt =
   > became **Michaelis–Menten** on 2026-08-14 (CHANGELOG "2026-08-14 (cont.) — DECISION 2
   > TAKEN: the default IS the saturating form"): NPP = NPP₀ · (1 + β_max · Δχ / (K + Δχ)),
   > Δχ = χ − χ₀, fitted names `beta_max` and `fert_k` (`ccx_fert_factor()` in `R/model.R`).
-  > The canonical `hilda31w` runs MM (fert_form 1; β_max 2.01, K 601 ppm; read from its mode
-  > file 2026-10-15; at the previous canonical `hilda29e`, K was 669 ppm). The log form above
+  > The canonical `hilda31fl` runs MM (fert_form 1; β_max 1.93, K 589 ppm; read from its mode
+  > file 2026-10-23; at the previous canonical `hilda31w`, β_max 2.01 and K 601 ppm; at `hilda29e`,
+  > K was 669 ppm). The log form above
   > is kept reachable (`fert_form` = 0) so pre-2026-08-14 results reproduce.
   NPP₀ global ≈ 60 GtC/yr [PROVISIONAL, cited 2026-09-29 as PRESENT-DAY ~60 (IPCC TAR §3.2.1;
   bracketed by Haberl 2007, Ito 2011, MOD17); no 1750 source exists — see R/constants.R. ~~To be
@@ -689,7 +690,7 @@ model (§5.2), not ignored.
 
 ## 5. Calibration design
 
-### 5.1 Free parameters (draft — ~16) (31 fitted, 14 held at hilda31w)
+### 5.1 Free parameters (draft — ~16) (31 fitted, 14 held at hilda31fl)
 
 | Param | Meaning | Draft prior |
 |---|---|---|
@@ -1443,9 +1444,10 @@ only — measured ≤ 1.3e-16 relative on the canonical's final state, code revi
 ## 6. Sanity gates (all must pass before headline claims)
 
 > ⚠ **STALE CANONICAL (banner added 2026-10-12, code review; numbers below NOT rewritten).** The ledger
-> below was measured at `hilda30c`. The canonical is **`hilda31w`** since 2026-10-13 (CHANGELOG 2026-10-13 (f);
-> amended 2026-10-15). The most recent whole-model scorecard log is
-> `outputs/diagnostics/whole_model_scorecard_20261012_hilda29e.log`, made at the previous canonical `hilda29e`.
+> below was measured at `hilda30c`. The canonical is **`hilda31fl`** since 2026-10-23 (CHANGELOG 2026-10-23 (k);
+> amended 2026-10-23). The most recent whole-model scorecard log is
+> `outputs/diagnostics/flask_landing_20261023/scorecard.log`, `hilda31w` and `hilda31fl` side by side (every verdict
+> the same).
 > Read every "at `hilda30c`" / "the canonical" below as the 09-14 state, not today's.
 
 > ⭐⭐ **THE LIVE ACCEPTANCE LEDGER (rewritten 2026-09-14 g — option J of the 09-12 assessment; the canonical is `hilda30c`

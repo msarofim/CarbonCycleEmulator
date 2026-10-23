@@ -40,6 +40,7 @@ COPYFILE_DISABLE=1 tar --no-xattrs -czf "$OUT" \
   DESIGN.md CLAUDE.md README.md DATA.md \
   R src data tests \
   calibration/*.R calibration/torch calibration/mac \
+  calibration/output/refit_20261023_hilda31fl_flask_hilda_csl3v0kaidgbemwtcf \
   calibration/output/refit_20261013_hilda31w_wtc_hilda_csl3v0kaidgbemwtc \
   calibration/output/refit_20261008_hilda29e_obj18p2_hilda_csl3v0kaidgbemwt \
   calibration/output/refit_20261005_hilda33p_obj16_hilda_csl3v0kaidgbem \
