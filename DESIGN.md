@@ -604,6 +604,8 @@ CHANGELOG 10-05.
 | N deposition on land (2026-09-30) | NOx + NH₃ emissions above 1750 (CMIP7 vV v1.1.1; RCMIP SSPs ratio-harmonized to CMIP7 by 2050) × land 0.60 × NH 0.83 | `data/forcing_ndep.rds` (`data-raw/build_ndep_forcing.R`); "historical" = CMIP7 to 2023, then the seven-marker mean (2024, 2025); pulse experiments HOLD it at the reference year (`ccx_pulse_forcings()`) |
 | Future scenarios | SSP CO₂ emissions (fossil+LUC) from RCMIP-format CSVs (reuse FaIR-project inputs — flagged question Q3) + stylized generators | §7 |
 
+> **Left out (2026-10-23, Marcus: "Leave the CH4 out and make a DESIGN.md note"): CO₂ from oxidised fugitive fossil CH₄.** GCB's fossil CO₂, the input above, includes CO from incomplete combustion and vented oil-production CH₄, but not fugitive CH₄ from coal, oil and gas. GCB 2025 supplement S.8.1 (p. 27) puts the CO₂ from its oxidation at 0.083 GtC/yr for 2008–2017 (min–max 0.061–0.098; from Saunois et al. 2020's top-down budget), 0.9 % of fossil CO₂ in that decade. Priced 2026-10-22 as fossil CO₂ × 1.0088 (CHANGELOG 2026-10-22 (j), `calibration/diag_ch4ox_forecast_20261022.R`): at fixed parameters it adds 1.03 ppm CO₂ and −1.0 ‰ Δ¹⁴C by 2024 and lowers the objective by 26.2; after one Newton step the objective is 4.8 below the canonical's, and no parameter moves more than 0.85 posterior sd (`imb_share_land` +0.85, `luc_scale` +0.70). The model has no methane.
+
 ### 3.7 Numerics
 
 - Monthly master step. Air–sea exchange and mixed-layer↔interior diffusion are the stiff

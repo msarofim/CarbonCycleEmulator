@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-23 (a) — **Rulings on (j)'s two tests (Marcus: "Leave the CH4 out and make a DESIGN.md note. Don't add CFC tracers."). DESIGN.md §3.6 gains a note under the forcing table: the CO₂ from oxidised fugitive fossil CH₄ is left out of the fossil input, with GCB 2025 S.8.1's numbers and (j)'s pricing.** No CFC tracer is added; the power check's driver and `data-raw/download_cfc_atm_history.R` stay as the record. Both findings and rulings saved to memory (`ccx_fossil_ch4_oxidation_omitted`, `ccx_cfc_inventory_no_power`).
+
 ## 2026-10-22 (j) — **Two cheap tests (Marcus: "Do the cheap tests for both methane and CFC"). (1) The CO₂ from oxidised fugitive fossil CH₄, which GCB's E_FOS omits, costs the canonical 26.2 log-likelihood units before a refit and 4.8 after one Newton step; the refit moves no parameter beyond 0.85 posterior sd. (2) An observed global ocean CFC-11 inventory has no power against the canonical: the posterior already predicts it to 4.0 % (1σ) against the observation's 22 %, and no parameter's sd would shrink by more than 2 %.** No model, objective or app change. Drivers @`ac4129f5`; both rerun at that commit reproduce the first runs field for field (no RNG).
 
 - **Fossil CH₄, the fact.** GCB 2025 supplement S.8.1 (p. 27): E_FOS counts CO from incomplete combustion and vented oil-production CH₄, not fugitive coal, oil and gas CH₄. Its oxidation adds 0.083 GtC/yr in 2008–2017 (min–max 0.061–0.098), from Saunois et al. 2020's top-down budget.
