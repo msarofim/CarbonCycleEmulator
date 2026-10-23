@@ -60,7 +60,9 @@ HF_BUNSEN_W <- 0.09                         # Bunsen, Nissen & Hauck 2024 GRL s3
 HF_F_TYPED  <- list(hilda33p = c(f1 = 1, f_T_hi = 0.724, f_T = 0.613, f_T_lo = 0.502, f_W = 0.296, f0 = 0))
 HF_OC_RDS   <- list(hilda29e = file.path("outputs", "diagnostics", "ocean_climate_gobm_20261008_obj18p2b1.rds"),
                     # hilda31w (2026-10-13): the WTC wave's stage-C product, made as `wtcid017` before the rename; md5-gated
-                    hilda31w = file.path("outputs", "diagnostics", "ocean_climate_gobm_20261013_wtcid017.rds"))
+                    hilda31w = file.path("outputs", "diagnostics", "ocean_climate_gobm_20261013_wtcid017.rds"),
+                    # hilda31fl (2026-10-23): the flask landing's product, made as `flaskid006` before the rename; md5-gated
+                    hilda31fl = file.path("outputs", "diagnostics", "ocean_climate_gobm_20261023_flaskid006.rds"))
 hf_derive_f <- function(rds, mode_file) {
   x <- readRDS(rds)
   md5 <- sub("^md5 ", "", regmatches(x$provenance, regexpr("md5 [0-9a-f]{32}", x$provenance)))
@@ -77,9 +79,10 @@ HF_FUT     <- c(fut_f_T = HF_ALL[["f_T"]], fut_f_W = HF_ALL[["f_W"]])
 #   hilda33p 1461.53 -- 10-05 (p), obj16_refit_read_20261005.log l. 83;
 #   hilda29e 1475.29 -- the APP's own params + spin-up (app_params(), app_spinup()), calibration/diag_app_ssp585_ref.R,
 #                       outputs/diagnostics/app_ssp585_ref_20261008_hilda29e.log (1475.2878);
-#   hilda31w 1486.85 -- the same app path, outputs/diagnostics/app_ssp585_ref_20261013_hilda31w.log (1486.8484 @6ddf4b2).
+#   hilda31w 1486.85 -- the same app path, outputs/diagnostics/app_ssp585_ref_20261013_hilda31w.log (1486.8484 @6ddf4b2);
+#   hilda31fl 1492.67 -- the same app path, outputs/diagnostics/app_ssp585_ref_20261023_hilda31fl.log (1492.6672 @f6fd95c1).
 HF_REC_BY_MODE <- list(hilda33p = c(ssp585_2300 = 1461.53), hilda29e = c(ssp585_2300 = 1475.29),
-                       hilda31w = c(ssp585_2300 = 1486.85))
+                       hilda31w = c(ssp585_2300 = 1486.85), hilda31fl = c(ssp585_2300 = 1492.67))
 if (is.null(HF_REC_BY_MODE[[HF_MODE]])) stop("no independent SSP5-8.5 2300 reference recorded for ", HF_MODE, ": G1b cannot run")
 HF_REC     <- HF_REC_BY_MODE[[HF_MODE]]
 HF_REC_TOL <- 0.005                                # half its printed last digit
