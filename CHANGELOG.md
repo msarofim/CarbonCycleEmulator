@@ -2,6 +2,11 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-23 (w) — **RULED (Marcus, verbatim): "Yes, hilda31w's settings (Recommended)". When the chains land, the armed chain goes on to Phase 2: pool all 4, drop 0, thin ×2 within chain (~17 000 draws), the band on 8 cores beside the tie stability on 100 draws.** Nothing is promoted; shipping is Marcus's after the read and the by-chain test.
+
+- Ruling file `~/ccx_frozen/20261024_land_hilda31fl.RULED` (`DROP=0`, `THIN=2`; copy in `outputs/diagnostics/mcmc_landing_20261024_hilda31fl/`). The armed script reads it at the end of Phase 1.
+- Expected: chains land ~06:40 10-24, Phase 1 ~10 min, the tie stability ~40 min, the band ~3.6 h (hilda31w: 216 min), so done about 10:30.
+
 ## 2026-10-23 (v) — **The hilda31fl landing chain is ARMED (PID 10464, 17:25): when the four chains exit it snapshots them and runs the drop-0 read and the identifiability check. The band and the tie stability run only if a ruling file exists** (their drop, thinning and pooling are Marcus's to rule, as at hilda31w). Record: `outputs/diagnostics/mcmc_landing_20261024_hilda31fl/` (README).
 
 - **Frozen worktree** `~/ccx_frozen/20261024_land_hilda31fl` @`d1e3c476`, `data-raw/downloads` linked per file (79 + 3 tracked). The script refuses an unlinked tree or edited tracked files.
