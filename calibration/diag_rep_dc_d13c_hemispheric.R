@@ -52,7 +52,9 @@ D5_OBS    <- file.path(.root, "data", "obs_d13c_hemispheric.rds")
 # a longer record. It is reported here alongside, as a cross-check on the
 # flask-built one.
 D5_CO2_OBS <- file.path(.root, "data", "obs_co2_hemispheric_flask.rds")
-D5_CO2_MBL <- c(NH = 0.738, SH = 0.814)   # diag_rep_dc_mbl_zonal.R, for comparison
+# diag_rep_dc_mbl_zonal.R, for comparison: on the MLO series the canonical scores (flask at hilda31fl,
+# rep_dc_mbl_zonal_20261023_hilda31fl.log; 0.738 on in situ, 09-22)
+D5_CO2_MBL <- c(NH = 0.668, SH = 0.814)
 D5_WEIGHTS <- c("equalarea", "unweighted", "coslat")   # primary first
 
 if (!file.exists(D5_OBS))
@@ -64,10 +66,12 @@ cat(sprintf("  %s\n  %d sites; %s\n", attr(hm, "source"), attr(hm, "n_sites"),
 
 # ---- the model's implied d13C offset, on its own state --------------
 md <- ccx_load_mode(CCX_MODE_CANONICAL)
-sp <- ccx_spinup_from_label(ccx_mode_spinup(md$md))(md$p)
-F  <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = sp$prod_c14,
-                        bomb_total_kmol = md$bomb_total, luc_scale = md$luc_scale)
-o  <- ccx_run_fast(sp, F)$out
+# ⚠ 2026-10-23: the run is the design gates' (dg_vector() + dg_run(), 1750-2025), whose forcing carries the
+# structure's ENSO index, AOD mode and nuclear share. This file built its own forcing without them, and from
+# hilda33p's label on ccx_run_prepared() refused it ("the parameters name 'detrend' but the forcing carries
+# 'demean'"), so the 09-22 log was the last run. Only the 1989-2014 means of the box are read below.
+source(file.path("calibration", "lib_design_gates.R"))
+o  <- dg_run(dg_vector(CCX_MODE_CANONICAL))$out
 rep_dC <- md$err$rep_dC
 stopifnot(is.numeric(rep_dC), length(rep_dC) == 1L)
 
