@@ -66,7 +66,7 @@ ccx_load_cpp()
 
 # ---- NAMED CONSTANTS: every label, filename and threshold derives from here ----
 CM_TAG        <- "constraint_map"
-CM_DATE       <- "20261013f"  # the SHIPPED canonical artifact's tag: hilda31w at its adoption (10-13 f; built 10-13 after Marcus's "Existing groups (Recommended)" for its two new names; was 20261008e = hilda29e, built 10-08 h after Marcus's "Main fit only" ruling; 20261006a = hilda33p, 20261003h = hilda34g, 20261001k = hilda33d after the 10-01 (k) flip, 20261001 for that adoption build, 20260925 at hilda29l); see CM4. ⚠ MOVE IT AT EVERY ADOPTION: the canonical's log is named by it, so a stale tag overwrites the previous canonical's record (it did, 10-03, and was restored from git)
+CM_DATE       <- "20261023k"  # the SHIPPED canonical artifact's tag: hilda31fl at its adoption (10-23 k; same fitted names as hilda31w, so no grouping change; was 20261013f = hilda31w, built 10-13 after Marcus's "Existing groups (Recommended)" for its two new names; 20261008e = hilda29e, built 10-08 h after Marcus's "Main fit only" ruling; 20261006a = hilda33p, 20261003h = hilda34g, 20261001k = hilda33d after the 10-01 (k) flip, 20261001 for that adoption build, 20260925 at hilda29l); see CM4. ⚠ MOVE IT AT EVERY ADOPTION: the canonical's log is named by it, so a stale tag overwrites the previous canonical's record (it did, 10-03, and was restored from git)
 # ⛔⛔ CM4  THE ARM (2026-09-26). The map used to be canonical-only. A SECOND
 #       evaluation point answers a question one point cannot: is the pins/pulls
 #       picture a property of the MODEL, or only of THIS FIT?
