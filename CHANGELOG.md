@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-23 (t) — **Handoff `notes/handoff_2026-10-23_products_rebuilt_mcmc_next.md`** (Marcus: "Yes, write the handoff"). It supersedes `handoff_2026-10-23_hilda31fl_adopted.md`, which now points to it. Done since: (p)–(s). State: the model-only products, the app's flask series, both precomputes and the wording calls are done; the suite @`ca48a2a5` has only the six expected reds; the MCMC is running (PIDs in `~/ccx_frozen/20261023_mcmc_hilda31fl.pids`, ~06:30 10-24). Next: the MCMC read and identifiability, the band, the map's tie stability, then the suite and Marcus's release.
+
 ## 2026-10-23 (s) — **Marcus's four wording calls from (q), applied and pinned: card 1 "about −38‰", card 2 "about 12%", the Scripps credits, and item 8 on the same-flask lead.** Not deployed.
 
 - **Rulings (Marcus, verbatim):** card 1, "About −38‰ (Recommended)"; card 2, "About 12% (Recommended)"; the credits, "Scripps draft (Recommended)"; item 8, "Draft one for me", then, on the draft, "Apply, move the pins (Recommended)".

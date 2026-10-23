@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-23: hilda31fl ADOPTED, ledger applied, MCMC running; the product rebuilds are next
 
+> ⚠ **SUPERSEDED** by `notes/handoff_2026-10-23_products_rebuilt_mcmc_next.md` (§4 items 1, 3, 4 done; the suite run; the wording calls settled; the MCMC read next).
+
 **Supersedes** `notes/handoff_2026-10-23_flask_refit_running.md`, which now points here. Written on Marcus's request ("Yes,
 write the handoff"), 2026-10-23 ~14:10.
 
