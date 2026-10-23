@@ -1,0 +1,9 @@
+[ccx_adopt_mode_band] h_ml -> [42.5, 200] (mode 69.6916); kz -> [1161.6, 27808] (mode 13818.8237)
+[calibration/run_mcmc_check.R chain 2 @2ec25511] mode hilda31fl logpost: recomputed -1050.120651, stored -1050.120651 (diff 0.00e+00)
+chain 2: start draw 1 has a non-finite log-posterior (h_ml 75.79); redrawing from the same stream
+chain 2: start draw 2 has a non-finite log-posterior (h_ml 78.78); redrawing from the same stream
+chain 2 starts at logpost -1169.824 (mode -1050.121) after 2 redraw(s)
+chain 2 iter 100/300  logpost -1081.333  acceptance 0.160  (0.5 min)
+chain 2 iter 200/300  logpost -1078.470  acceptance 0.340  (0.9 min)
+chain 2 iter 300/300  logpost -1081.543  acceptance 0.370, post-adapt 0.430  (1.3 min)
+chain 2 COMPLETE: 300 iterations, 5 kept samples, acceptance 0.370 (post-adapt 0.430)

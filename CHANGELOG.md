@@ -2,6 +2,12 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-23 (n) — **The hilda31fl MCMC band is RUNNING: 4 chains to 200k on the Mac, launched 13:52 EDT** (Marcus: "Mac, tonight (Recommended)"). Record: `outputs/diagnostics/mcmc_launch_20261023_hilda31fl/` (README).
+
+- **Where:** Mac rather than Torch, said before the launch: a Torch node runs about 2× slower per evaluation, and the laptop is otherwise idle. Frozen worktree `~/ccx_frozen/20261023_mcmc_hilda31fl` at `2ec25511`; the hilda31w launch (10-13 j) with the tree, out dir and logs renamed. Load 2.9 before launch, no other R job; 10 cores (4 performance).
+- **Smoke** (300 iterations × 4, in parallel): every chain reproduces the stored logpost −1050.120651 (diff 0); chain 2 redraws twice (h_ml 75.79, 78.78), as hilda31w's chains 1–2 did; 0.26–0.30 s/iteration, so about 15–17 h for 200k. The production chains repeat the same starts (same seeds).
+- **Next while it runs:** the model-only products (constraint map, `pulse_vs_tcre`, card 8, ocean card, `ALPHA_AS_FCO3`). ⚠ The two app precomputes (start-up, Known issues) compare against `APP_OBS`, which handoff §4 item 6 switches to flask; rebuild them after that switch, not before.
+
 ## 2026-10-23 (m) — **Ledger (l) APPLIED as ruled: the six edited files pass, 830 / 0.** The remaining reds are D's 67 (the products keyed to hilda31w, cleared as each is rebuilt) and F's `app-version`.
 
 Marcus, verbatim: "Approve all (Recommended)" (classes B, B2, C); "Either of the two (Recommended)" (G); "Mac, tonight (Recommended)" (the MCMC).
