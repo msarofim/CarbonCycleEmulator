@@ -153,7 +153,7 @@ test_that("MF4: THE FLASK FILE holds T8f's two points and values under the flask
   expect_identical(x$starts$t8c_block$logpost, T8F$forecast$block$base)
   expect_identical(x$starts$t8f_newton$logpost, sum(T8F$rows$all_at_allN))
   expect_identical(x$provenance$from_md5, unname(tools::md5sum(MF_T8F)))
-  md <- readRDS(ccx_mode_file(CCX_MODE_FLASK_INCUMBENT))
+  md <- CCX_MODE_FLASK_INCUMBENT   # the labels are read through the registry name (test-mode-struct-lint.R's rule)
   expect_identical(x$struct, CCX_MODE_FLASK_STRUCT)
   expect_identical(x$seas_ml, ccx_mode_seas_ml(md)); expect_identical(x$pump_field, ccx_mode_pump_field(md))
   expect_identical(ccx_pin_label(x$pins), ccx_pin_label(CCX_MODE_FLASK_PINS))
