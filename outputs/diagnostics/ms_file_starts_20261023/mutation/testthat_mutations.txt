@@ -1,0 +1,16 @@
+test-ms-file.R under 12 mutations (2026-10-23, at the working tree that became 475b30e3 / 6d00fcd8); mutate.sh applied each with
+perl, ran the file, and restored the original (cmp-verified). Every mutation failed the file:
+M1 reader: label check off: failed/errored = 5 0 MF1: every refusal names its cause
+M2 reader: slot count off: failed/errored = 1 0 MF1: every refusal names its cause
+M3 reader: no reorder: failed/errored = 1 0 MF1: no file is no starts; a good file comes back in slot order, each u in the run's name order
+M4 floor: draw order: failed/errored = 2 0 MF2: the bound is PORT GATE (a)'s; the floor is the old measurement draw for draw and keeps the caller's RNG
+M5 floor: RNG not restored: failed/errored = 0 1 MF2: (same test)
+M6 bound: floor dropped: failed/errored = 1 0 MF2: (same test)
+M7 driver: ms_fixed_u loses the file slot: failed/errored = 1 0 MF3: the driver dispatches the file slots in both functions, gates them, and agrees with the collector
+M8 driver: floor not moved (MS_DISPERSED_FROM 6): failed/errored = 1 0 MF3
+M9 collector: slots disagree: failed/errored = 1 0 MF3
+M10 driver: value gate off: failed/errored = 2 0 MF3
+M11 flask starts file corrupted: failed/errored = 0 1 MF4: THE FLASK FILE holds T8f's two points and values under the flask arm, and the driver's objective scores them
+M12 collector: empty slots in the benchmark: failed/errored = 1 0 MF3
+End to end through the driver (CCX_MS_PREFLIGHT=1; mut_*.log): a target moved by 1e-3 (id 6), a wrong struct (id 6), q10 moved by
+1e-4 in u (id 7) each stop the driver with the named cause (rc 1).
