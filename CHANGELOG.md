@@ -2,6 +2,18 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-23 (s) — **Marcus's four wording calls from (q), applied and pinned: card 1 "about −38‰", card 2 "about 12%", the Scripps credits, and item 8 on the same-flask lead.** Not deployed.
+
+- **Rulings (Marcus, verbatim):** card 1, "About −38‰ (Recommended)"; card 2, "About 12% (Recommended)"; the credits, "Scripps draft (Recommended)"; item 8, "Draft one for me", then, on the draft, "Apply, move the pins (Recommended)".
+- **Card 1** (`app/R/review.R`): the NH source signature "about −38‰" (measured −37.6 on flask; −35.1 on in situ, 09-22). **Card 2:** "about 12% low" and, in its question, "within about 12%" (11.5 % on flask).
+- **Credits** (`app/R/downloads.R`): "Measured CO₂: Mauna Loa monthly flask means and South Pole monthly means (Scripps CO₂ Program, Scripps Institution of Oceanography)." and "Measured δ¹³C: Mauna Loa and South Pole monthly flask means (Scripps CO₂ Program, Scripps Institution of Oceanography)." They replace credits to NOAA GML and INSTAAR, which named the cross-check records.
+- **Item 8** (`app/server.R`, What pins down what?): "A likely reason they disagree: at Mauna Loa, measured in the same air samples, the ¹³C cycle runs about two days ahead of the CO₂ cycle. The model's land plants move the two tracers nearly in step, so the fit splits the difference." It replaces the four-day, two-sampling-methods sentences.
+  - The basis is T8d's same-flask lead, 2.2 d (1980–2024), which is the third of the conflict left after T8c's flask fit (10-21 z).
+  - The model's δ¹³C sits 0.7–2.4 d behind in every fit, about 0.9 at the joint fit, hence "nearly". At hilda31fl the paragraph's computed count is 2 seasonal pairs among the 6 strongest (hilda31w 4).
+- **Pins:** `test-app-review-copy.R` `AC_CHECKS_1023` (card 1, card 2 ×2, item 8 ×3; the 10-21 item-8 present-halves set to NA, and the "in step" row moved whole), with mutations. `test-app-downloads.R` test 5: both credits name the Scripps CO₂ Program and no NOAA/INSTAAR, and the Mauna Loa credit says "flask" exactly when `APP_CO2_FLASK` is on. A mutated credit fails it.
+- **Tried and dropped:** test 5's first mutation compared the live credit with the negated switch. That can never fail when the line above it passes, so it was replaced by a mutated credit string before commit.
+- Tests: app-review-copy, app-downloads, review-cards, review-card-numbers, app-us-spelling, constraint-map-panel pass. Commits `15ecf86f`, `27caa4f7`.
+
 ## 2026-10-23 (r) — **Full suite @ `ca48a2a5` (frozen, linked): 9,343 passed, 6 failed, 1 skipped (the standing `l2-enso-limb` skip), 0 errored, 233 warnings, 25.9 min. The six are the expected ones:** `app-version` (F: the release is Marcus's), `cmap-tie` ×4 and `futures-ribbons` (both wait on the hilda31fl MCMC). Every other entry of ledger (l)'s class D cleared with (p) and (q).
 
 - Log and per-file counts: `outputs/diagnostics/suite_20261023_ca48a2a5{.log,_perfile.csv}`. Launch script `~/ccx_frozen/suite_20261023_ca48a2a5.sh` kept; worktree removed. Linked per file (79 links + 3 tracked = 82, as the MCMC worktree).
