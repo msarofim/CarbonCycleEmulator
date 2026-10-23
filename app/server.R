@@ -1422,7 +1422,10 @@ function(input, output, session) {
                  "IntCal20 tree-ring \u0394\u00b9\u2074C",
                  "Ocean bomb-\u00b9\u2074C inventory (Naegler & Levin 2006)", "Global Carbon Budget 2025",
                  "GLODAPv2.2023 ocean bottles"),
-      Covers = c("1958\u20132024", "1975\u20132024", "1752\u20131957", "1752\u20131976", "1977\u20132024",
+      # Mauna Loa's first year is read from the series the app plots (2026-10-23): Scripps flask under the flask
+      # label starts in 1960, in situ in 1958. It ends with the historical run, as before.
+      Covers = c(sprintf("%d\u2013%d", min(APP_OBS$co2$year[APP_OBS$co2$station == "MLO"]), APP_HIST_YEARS[2]),
+                 "1975\u20132024", "1752\u20131957", "1752\u20131976", "1977\u20132024",
                  "1941\u20132019", "1750\u20131940", "1975 and 1995", "1959\u20132024", "depth climatology"),
       `Used for` = c("CO\u2082 level and seasonal cycle", "Southern CO\u2082 level and seasonal cycle",
                      "CO\u2082 before the station record", "\u03b4\u00b9\u00b3C before the station record",

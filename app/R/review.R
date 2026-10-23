@@ -162,7 +162,9 @@ RV_REP_OBS_SOURCE <- paste("NOAA MBL zonal reference (Lan, Tans, Thoning & NOAA 
                            "doi:10.15138/DVNP-F961) minus the station records the",
                            "likelihood scores, matched month by month;",
                            "calibration/diag_rep_dc_mbl_zonal.R")
-RV_REP_OBS_NH   <- 0.738   # ppm, MBL 0-90N  minus Mauna Loa, 1979-2025, positive in 47/47 yr
+# NH re-measured 2026-10-23 on the MLO series the canonical scores, Scripps flask (hilda31fl's label):
+# outputs/diagnostics/rep_dc_mbl_zonal_20261023_hilda31fl.log @7ea63a50. It was 0.738 on Scripps in situ (09-22).
+RV_REP_OBS_NH   <- 0.668   # ppm, MBL 0-90N  minus Mauna Loa (flask), 1979-2025, positive in 47/47 yr
 RV_REP_OBS_SH   <- 0.814   # ppm, MBL 90S-0  minus South Pole, 1979-2024, positive in 46/46 yr
 RV_REP_OBS_MEAN <- (RV_REP_OBS_NH + RV_REP_OBS_SH) / 2
 # ---- and the δ¹³C side of the same parameter (N5, 2026-09-22) -------

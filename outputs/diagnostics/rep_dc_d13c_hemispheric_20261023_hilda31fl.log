@@ -1,0 +1,49 @@
+=== the observed hemispheric mean ===
+  NOAA GML Carbon Cycle Cooperative Global Air Sampling Network, surface-flask monthly means; https://gml.noaa.gov/aftp/data/trace_gases/co2c13/flask/surface/ Site coordinates from gml.noaa.gov/dv/site.
+  87 sites; Marcus 2026-09-22: all sites, latitude-band-area (equal sin-lat, 12 bands/hemisphere) weighted, gaps dropped -- no interpolation, empty bands dropped and weights renormalised. `unweighted` and `coslat` carried for sensitivity to the wording.
+
+=== the model's IMPLIED d13C offset (derived from rep_dC = +4.220 ppm) ===
+  NH (MLO): -0.2037 permil   [range -0.2220 to -0.1850 over 1990-2014]
+  SH (SPO): -0.2065 permil   [range -0.2221 to -0.1901 over 1990-2014]
+
+=== MEASURED: hemispheric mean MINUS station (permil) ===
+    + = the hemispheric mean is HEAVIER (less negative) than the station
+
+  weighting: equalarea     NH -0.0922 (n 300)   SH -0.0106 (n 296)
+  weighting: unweighted    NH -0.1119 (n 300)   SH -0.0101 (n 296)
+  weighting: coslat        NH -0.0971 (n 300)   SH -0.0059 (n 296)
+
+  primary = equalarea. ⚠ spread across the three weightings is the sensitivity to
+     the ruling's wording, not an uncertainty on the atmosphere.
+
+=== 1. DOES THE MODEL'S IMPLIED OFFSET MATCH THE MEASURED ONE? ===
+                                         NH           SH
+  model implies                     -0.2037      -0.2065
+  MEASURED                          -0.0922      -0.0106
+  same sign?                            yes          yes
+  model / measured                      2.2         19.4
+
+(calibration/diag_rep_dc_d13c_hemispheric.R @e6f5b8d7 | canonical hilda31fl | MLO CO2 series: Scripps FLASK)
+
+=== the CO2 station offset, from the SAME 87 sites and weighting ===
+  NH (MLO): +1.1829 ppm over 312 months, 1989-2014   [MBL reference: +0.668]
+  SH (SPO): +0.7865 ppm over 305 months, 1989-2014   [MBL reference: +0.814]
+
+=== 2. ⭐ THE MASS-BALANCE TIE, TESTED AGAINST OBSERVATION ===
+  Feed the MEASURED CO2 offset through the model's own formula
+  (d_s = LIK_REP_SOURCE_D13C = -26.5 permil, PROVISIONAL and UNCITED):
+
+                                               NH           SH
+  predicted from the MEASURED CO2 offset      -0.0573      -0.0386
+  MEASURED d13C offset                    -0.0922      -0.0106
+  measured / predicted                        1.6          0.3
+
+  source signature that WOULD reconcile        -37.6        -13.2
+    (the model assumes)                     -26.5        -26.5
+
+  ⇒ If these agree, the mass-balance tie is corroborated by observation and
+    the d13C side of `rep_dC` is over-large for the SAME reason the CO2 side
+    is. If they disagree, the TIE is the defect, not just the magnitude --
+    and d_s is the uncited constant in it.
+
+  n = 300 (NH) / 296 (SH) matched months, 1989-2014.
