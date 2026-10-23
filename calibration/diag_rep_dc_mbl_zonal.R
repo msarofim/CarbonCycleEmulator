@@ -77,7 +77,14 @@ read_mbl <- function(z) {
 }
 M <- lapply(stats::setNames(names(MBL_FILES), names(MBL_FILES)), read_mbl)
 
-co2 <- ccx_prepare_obs()$co2
+# ⭐ THE STATIONS THE CANONICAL SCORES (2026-10-23). Under the flask label (hilda_csl3v0kaidgbemwtcf, the canonical
+# hilda31fl's) every MLO CO2 row is Scripps FLASK, so the monthly MLO frame is swapped the way ccx_loglik() swaps its
+# targets (ccx_obs_co2_scored(monthly = TRUE) relabels the flask rows "MLO"). A label without the switch reads in situ,
+# as before. SPO is the same Scripps record under either label.
+REP_FLASK <- ccx_co2_flask_on(ccx_load_mode(CCX_MODE_CANONICAL)$err)
+co2 <- ccx_obs_co2_scored(ccx_prepare_obs(), REP_FLASK, monthly = TRUE)$co2
+cat(sprintf("%s @%s | canonical %s | MLO series: %s\n\n", "calibration/diag_rep_dc_mbl_zonal.R", ccx_git_stamp(),
+            CCX_MODE_CANONICAL, if (REP_FLASK) "Scripps FLASK (the flask label)" else "Scripps in situ"))
 pair <- function(station, zone) {
   x <- co2[co2$station == station, ]
   x$dec <- x$year + (x$month - 0.5) / 12
