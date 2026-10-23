@@ -1,0 +1,94 @@
+calibration/diag_h2_futures_stake.R @4c829447 | 2026-10-23 14:05 | canonical hilda31fl | 3 workers
+f values (DERIVED from outputs/diagnostics/ocean_climate_gobm_20261023_flaskid006.rds): f1 1.0000, f_T_hi 0.5993, f_T 0.4903, f_T_lo 0.3814, f_W 0.2936, f0 0.0000
+mode file /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261023_hilda31fl_flask_hilda_csl3v0kaidgbemwtcf/mode_fit_pumpN.rds (md5 80c487f576f9a1e44f7900597d95a3e4); SST record ends 2025, seam (last 10 yr) NH 1.080 SH 0.927 K
+
+=== GATES ===
+G1 f = 1 through the wrapper vs unwrapped: identical() TRUE; ssp585 2300 1492.667 vs the recorded reference 1492.67 -> PASS
+G2 f = 0 vs the model's own route (sst_obs = 0, sst_scale = 0): identical() TRUE (ssp585 2300 1430.705 vs 1430.705) -> PASS
+G3a a futures-only arm vs f = 1 over 1750-2024 (both records observed), the arms' own settings: identical() TRUE -> PASS
+G3b the same pair, both forced to 12 coupled iterations (tol 0), over 1750-2025 (the SST record): identical() TRUE -> PASS
+
+=== 64 runs (8 arms x 8 scenarios) on 3 forked workers ===
+
+=== CO2 (ppm, global annual mean) at f = 1, the canonical ("today" = 2024) ===
+ scenario co2_today co2_2100 co2_2150 co2_2300 gmst_2100 gmst_2300
+     vvVL    425.42   391.93   365.89   327.47    1.6971   1.17665
+     vvLN    425.42   384.24   306.65   243.65    1.7339   0.23696
+      vvL    425.42   412.08   367.19   337.42    1.8618   1.28670
+     vvML    425.42   463.71   407.00   326.74    2.2869   1.25896
+      vvM    425.42   565.67   620.49   577.19    2.9523   4.20344
+     vvHL    425.42   539.05   439.78   326.91    2.9085   1.29059
+      vvH    425.43   648.25   829.07  1023.24    3.3837   6.49865
+   ssp585    412.16   962.37  1370.47  1492.67    4.6107   7.71068
+
+=== THE STAKE: CO2 change against f = 1 (ppm); negative = less CO2 with a weaker ocean thermal response ===
+-- f_T_hi (f = 0.599, all-time)
+ scenario d_today d_2100 d_2150  d_2300 d_2300_since_today
+     vvVL   -1.91  -3.28  -3.15  -2.686             -0.773
+     vvLN   -1.91  -3.41  -2.69  -0.783              1.130
+      vvL   -1.91  -3.59  -3.42  -2.917             -1.003
+     vvML   -1.91  -4.39  -4.49  -3.035             -1.121
+      vvM   -1.91  -5.67  -8.00 -11.459             -9.546
+     vvHL   -1.91  -5.83  -5.36  -3.203             -1.290
+      vvH   -1.91  -6.54 -10.30 -19.664            -17.751
+   ssp585   -1.87  -8.69 -14.34 -25.136            -23.268
+-- f_T (f = 0.490, all-time)
+ scenario d_today d_2100 d_2150 d_2300 d_2300_since_today
+     vvVL   -2.43  -4.16  -3.99  -3.40             -0.966
+     vvLN   -2.43  -4.32  -3.41  -0.99              1.444
+      vvL   -2.43  -4.55  -4.33  -3.69             -1.257
+     vvML   -2.43  -5.57  -5.69  -3.84             -1.404
+      vvM   -2.43  -7.19 -10.14 -14.49            -12.061
+     vvHL   -2.43  -7.39  -6.79  -4.05             -1.616
+      vvH   -2.43  -8.29 -13.06 -24.90            -22.471
+   ssp585   -2.38 -11.03 -18.19 -31.89            -29.518
+-- f_T_lo (f = 0.381, all-time)
+ scenario d_today d_2100 d_2150 d_2300 d_2300_since_today
+     vvVL   -2.95  -5.03  -4.83  -4.10              -1.15
+     vvLN   -2.95  -5.23  -4.12  -1.19               1.76
+      vvL   -2.95  -5.51  -5.24  -4.45              -1.50
+     vvML   -2.95  -6.75  -6.88  -4.63              -1.68
+      vvM   -2.95  -8.71 -12.27 -17.50             -14.54
+     vvHL   -2.95  -8.95  -8.21  -4.88              -1.93
+      vvH   -2.95 -10.04 -15.80 -30.10             -27.15
+   ssp585   -2.88 -13.36 -22.03 -38.62             -35.74
+-- f_W (f = 0.294, all-time)
+ scenario d_today d_2100 d_2150 d_2300 d_2300_since_today
+     vvVL   -3.37  -5.73  -5.50  -4.67              -1.29
+     vvLN   -3.37  -5.96  -4.69  -1.36               2.02
+      vvL   -3.37  -6.28  -5.97  -5.07              -1.69
+     vvML   -3.37  -7.69  -7.84  -5.26              -1.89
+      vvM   -3.37  -9.92 -13.97 -19.89             -16.52
+     vvHL   -3.37 -10.19  -9.35  -5.55              -2.18
+      vvH   -3.37 -11.44 -17.99 -34.26             -30.89
+   ssp585   -3.29 -15.23 -25.11 -44.02             -40.73
+-- f0 (f = 0.000, all-time)
+ scenario d_today d_2100 d_2150 d_2300 d_2300_since_today
+     vvVL   -4.77  -8.05  -7.70  -6.51              -1.74
+     vvLN   -4.77  -8.38  -6.56  -1.89               2.88
+      vvL   -4.77  -8.82  -8.36  -7.07              -2.30
+     vvML   -4.77 -10.81 -10.98  -7.33              -2.56
+      vvM   -4.77 -13.95 -19.60 -27.75             -22.98
+     vvHL   -4.77 -14.32 -13.09  -7.72              -2.95
+      vvH   -4.77 -16.09 -25.26 -47.96             -43.19
+   ssp585   -4.66 -21.42 -35.33 -61.96             -57.30
+-- fut_f_T (f = 0.490, futures only)
+ scenario d_today d_2100  d_2150   d_2300 d_2300_since_today
+     vvVL       0  -1.07  -0.793  -0.0196            -0.0196
+     vvLN       0  -1.21  -0.416   1.8583             1.8583
+      vvL       0  -1.40  -1.132  -0.2758            -0.2758
+     vvML       0  -2.24  -2.271  -0.4329            -0.4329
+      vvM       0  -3.63  -6.098  -9.8591            -9.8591
+     vvHL       0  -3.88  -3.238  -0.6497            -0.6497
+      vvH       0  -4.59  -8.713 -19.3476           -19.3476
+   ssp585       0  -7.12 -13.564 -25.9583           -25.9583
+-- fut_f_W (f = 0.294, futures only)
+ scenario d_today d_2100  d_2150   d_2300 d_2300_since_today
+     vvVL       0  -1.48  -1.088  -0.0216            -0.0216
+     vvLN       0  -1.67  -0.567   2.5608             2.5608
+      vvL       0  -1.93  -1.556  -0.3735            -0.3735
+     vvML       0  -3.09  -3.125  -0.5846            -0.5846
+      vvM       0  -5.01  -8.403 -13.5355           -13.5355
+     vvHL       0  -5.34  -4.453  -0.8792            -0.8792
+      vvH       0  -6.34 -12.010 -26.6197           -26.6197
+   ssp585       0  -9.83 -18.720 -35.8178           -35.8178
