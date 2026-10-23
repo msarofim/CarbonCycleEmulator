@@ -3,6 +3,12 @@
 **Supersedes** `notes/handoff_2026-10-23_hilda31fl_adopted.md`, which now points here. Written on Marcus's request ("Yes,
 write the handoff"), 2026-10-23 ~15:20.
 
+- **UPDATE 17:30 (CHANGELOG 2026-10-23 u–w):** §4.1–4.3's runs are ARMED, not to be launched by hand. PID 10464 waits on the
+  chains, then snapshots them and runs the drop-0 read, identifiability, the thin-×2 read, the band (8 cores, by chain, drift)
+  and the tie stability (100 draws), as ruled ("Yes, hilda31w's settings (Recommended)"). Everything lands in the frozen tree
+  `~/ccx_frozen/20261024_land_hilda31fl`; log `~/ccx_frozen/20261024_land_hilda31fl_armed.out`; done about 10:30 10-24. Then:
+  copy the snapshot and products into the repo (`cmp`), read them, and do the §4.2–4.3 promotions and test moves, which are
+  Marcus's calls. Record: `outputs/diagnostics/mcmc_landing_20261024_hilda31fl/`.
 - **Start here:** CHANGELOG **2026-10-23 (p) to (s)** and this note's §4. Memory: `ccx_hilda31fl_adopted` (linked from
   `INDEX_ccx.md`'s LIVE STATE line and the root `MEMORY.md`).
 - **main = the commit that logs this note as CHANGELOG 2026-10-23 (t), pushed.** No branches, no extra worktrees. **The canonical
