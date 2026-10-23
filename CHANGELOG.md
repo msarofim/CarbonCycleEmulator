@@ -2,6 +2,29 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-23 (p) — **The model-only products at hilda31fl, beside the MCMC (handoff 10-23 §4 item 1): `pulse_vs_tcre`, the constraint map, card 8's chain and `ALPHA_AS_FCO3`.** Every driver gate passes, and every typed claim on the pulse box, the map tab and card 8 still holds. One test is red by design: `test-cmap-tie`, which waits on the MCMC.
+
+- **Torch verdict, said out loud: Mac.** Each product is single-core or 3 workers and takes 12 s to 1.1 min; about 5 cores were free beside the 4 chains (Photos was also running).
+- **`pulse_vs_tcre`** (`pulse_vs_tcre_20261023`, @`617ce082`, 27 s, all gates pass; `5dc67758`):
+  - 1.359 °C per 1000 GtC at the app's defaults (hilda31w 1.350); spread over sizes 2.2 % (2.1); horizons 1.436 / 1.372 / 1.359 / 1.411 (1.429 / 1.363 / 1.350 / 1.402).
+  - App constants synced: `APP_PULSE_LIN_SPREAD` 2.1 → 2.2; `APP_PULSE_PER1000_BY_HORIZON` 1.44 / 1.37 / 1.36 / 1.41; the source string. test-pulse-linearity passes in full, no skips.
+  - "About 1.4" now holds with room: the headline 1.35889 rounds to 1.4 by 0.009 (at hilda31w, by 0.0003).
+  - The gate anchor still compares with the app's box as read on 10-13 (1.35, tolerance 0.02). Re-read it off the running app at the release checks.
+- **Constraint map** (`data/constraint_map.rds`, log `20261023k`, @`8b1e8e41`, 62 evaluations; `CM_DATE` → `20261023k`; `f6fd95c1`):
+  - All gates pass: harness −1050.1207 reproduced, cover 31 / 7 and 26 / 12, module held, Hessian pd, 0 of 31 nonlinear. No grouping change (same fitted names as hilda31w).
+  - Every row keeps its hilda31w winner, and no row share moves by more than 2.6 pp. Pin share 8.0 → 8.7 %; ocean Δ¹⁴C → mixing 81.0 → 80.9 %; interior chemistry → pump 74.1 (same); CO₂ level → land 34.1 → 33.9 %.
+  - The seasonal names lose leverage (total: `seas_T_amp_NH` 3.15 → 2.00, `q10` 4.14 → 3.02, `seas_lag_p_NH` 4.90 → 3.68, `seas_T_lag` 4.42 → 3.38).
+  - The app's computed `beta_max`/`fert_k` sentence moves from "about 51×" to "about 32×" (`fert_k` 50.8 → 31.8, `beta_max` 40.5 → 31.0). The sentence's claim, "only constrained as a combination", still holds. No copy change.
+  - `test-cmap-tie` is RED (4 failures), as its header says it must be: it refuses hilda31w's `data/constraint_map_stability.rds` against a rebuilt map. The trigger is to re-run `diag_cmap_posterior_spread.R` and `promote_cmap_stability.R` from the hilda31fl chains. Until then the app hides the map's takeaway sentence and logs why (`APP_CMAP_STAB`). At the ledger it skipped (D).
+  - test-constraint-map, -constraint-map-panel, -git-stamp-lint, -review-cards pass.
+- **Card 8, the chain:**
+  - Time shape (`h2_time_shape_20261023_hilda31fl`, from the `flaskid006` OC product, md5 = canonical): 2015–24 −0.434 (−0.434); per-K ratio 1.80 ± 0.41 (same); emergence 27 yr before GCB (same).
+  - The independent G1 reference (`app_ssp585_ref_20261023_hilda31fl`): **1492.6672 ppm** (hilda31w 1486.8484), the +5.82 the handoff recorded. Registered in `diag_h2_futures_stake.R` with the OC product (`4c829447`).
+  - Futures stake (`h2_futures_stake_20261023_hilda31fl`, @`4c829447`, 3 workers, 1.1 min; `47222e4c`): G1, G2, G3a, G3b pass. f_T 0.4903 (0.4905). GCB-sized response in 2300: SSP5-8.5 −31.9 ppm (−31.7), vvH −24.9 (−24.8), vvM −14.5 (−14.4).
+  - Card (`data/ocean_climate_card.rds`, @`47222e4c`; `10b9b822`): **2.17×** GCB (2.17×). "About twice" and "decades earlier" hold. test-ocean-climate-card, -review-card-numbers and -review-cards pass. The card text is still Claude's draft awaiting Marcus's wording.
+- **`ALPHA_AS_FCO3`** (`fco3_at_mode_20261023`, @`4c829447`; `934a6823`): 0.0926 in 2024 (NH 0.0981, SH 0.0871) and 0.1191 in 1750, against the shipped 0.082. Nothing changed: Marcus kept 0.082 at hilda31w, and hilda31fl's values equal hilda31w's to the printed digit. hilda31w, measured beside it, reproduces 10-13 (i).
+- **Tried and dropped:** the first FCO3 run sent stdout to `/dev/null`; the driver writes only the rds and prints its report, so the log was re-run with stdout captured (17 s, no RNG).
+
 ## 2026-10-23 (o) — **Handoff `notes/handoff_2026-10-23_hilda31fl_adopted.md`** (Marcus: "Yes, write the handoff"). It supersedes `handoff_2026-10-23_flask_refit_running.md`, which now points to it. Done since: (i)–(n). State: `hilda31fl` is the canonical; the ledger applied; the MCMC running (launched 13:52, PIDs in `~/ccx_frozen/20261023_mcmc_hilda31fl.pids`). Next: the model-only products beside the MCMC, then the MCMC read and band, the app's MLO series to flask, and the two app precomputes after that switch.
 
 ## 2026-10-23 (n) — **The hilda31fl MCMC band is RUNNING: 4 chains to 200k on the Mac, launched 13:52 EDT** (Marcus: "Mac, tonight (Recommended)"). Record: `outputs/diagnostics/mcmc_launch_20261023_hilda31fl/` (README).
