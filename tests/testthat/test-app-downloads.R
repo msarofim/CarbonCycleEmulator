@@ -410,3 +410,26 @@ test_that("4. each CSV opens with its provenance; names derive from the constant
     expect_identical(readBin(output$f_partition_png, "raw", 4L), as.raw(c(0x89, 0x50, 0x4e, 0x47)))
   })
 })
+
+# Marcus 2026-10-23 ("Scripps draft (Recommended)"; CHANGELOG 10-23 s): the CO2 and d13C credits name the Scripps CO2
+# Program, whose records the app scores and plots (data-raw/build_calibration_data.R); the NOAA GML / INSTAAR credits
+# they replace named the cross-check records. The Mauna Loa CO2 credit says "flask", so it must agree with the
+# series the app plots: APP_CO2_FLASK (global.R) is the switch.
+test_that("5. the observation credits name the Scripps CO2 Program, and Mauna Loa's CO2 credit matches the plotted series", {
+  skip_if_no_app()
+  app <- suppressMessages(shiny::shinyAppDir(.dl_app_dir))
+  shiny::testServer(app, {
+    AE <- environment(renderPlotFit); A <- function(nm) get(nm, envir = AE)
+    co2 <- A("DLS")$co2_obs(); d13 <- A("DLS")$d13c_obs()
+    for (s in c(co2, d13)) {
+      expect_true(grepl("Scripps CO₂ Program", s, fixed = TRUE), info = s)
+      expect_false(grepl("NOAA|INSTAAR", s), info = s)
+    }
+    expect_identical(grepl("Mauna Loa monthly flask means", co2, fixed = TRUE), isTRUE(A("APP_CO2_FLASK")))
+    # MUTATION: a credit that names the other series fails the same comparison
+    co2_mut <- if (isTRUE(A("APP_CO2_FLASK"))) sub("monthly flask means", "monthly means", co2, fixed = TRUE) else
+      sub("Mauna Loa monthly means", "Mauna Loa monthly flask means", co2, fixed = TRUE)
+    expect_false(identical(co2_mut, co2))
+    expect_false(identical(grepl("Mauna Loa monthly flask means", co2_mut, fixed = TRUE), isTRUE(A("APP_CO2_FLASK"))))
+  })
+})

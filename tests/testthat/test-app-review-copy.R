@@ -311,6 +311,27 @@ test_that("MUTATION: the 10-21 held-strings list fires when an old sentence retu
   for (ck in AC_CHECKS_1021C) expect_true(!is.na(ck[[2]]) || !is.na(ck[[3]]), info = ck[[1]])
 })
 
+# Marcus 2026-10-23, on the wording calls after the app's MLO CO2 series moved to Scripps flask (CHANGELOG 10-23 s):
+# card 1's NH source signature "About −38‰ (Recommended)" (−37.6 on the flask series; −35.1 on in situ, 09-22) and
+# card 2's CO2 gradient "About 12% (Recommended)" (11.5 % low on the flask gradient; 10.3 % on in situ).
+AC_CHECKS_1023 <- list(
+  c("K issue 1: NH signature", "is about \\u221235\\u2030 in the north", "is about \\u221238\\u2030 in the north"),
+  c("K issue 2: CO2 gradient", "same two stations is about 10% low", "same two stations is about 12% low"),
+  c("K issue 2: ask",          "CO₂ gradient is within about 10%",   "CO₂ gradient is within about 12%")
+)
+
+test_that("Marcus's 2026-10-23 rulings on the flask wording calls are still applied", {
+  problems <- ac_audit(.ac_src, AC_CHECKS_1023)
+  expect_equal(problems, character(0), info = paste(problems, collapse = " | "))
+})
+
+test_that("MUTATION: the 10-23 list fires when an old number returns", {
+  m1 <- gsub("about 12% low", "about 10% low", .ac_src, fixed = TRUE)
+  expect_true(any(grepl("K issue 2: CO2 gradient", ac_audit(m1, AC_CHECKS_1023), fixed = TRUE)))
+  m2 <- gsub("\\u221238\\u2030 in the north", "\\u221235\\u2030 in the north", .ac_src, fixed = TRUE)
+  expect_true(any(grepl("K issue 1: NH signature", ac_audit(m2, AC_CHECKS_1023), fixed = TRUE)))
+})
+
 test_that("all of Marcus's 2026-10-15 copy rulings are still applied", {
   problems <- ac_audit(.ac_src, AC_CHECKS_1015)
   expect_equal(problems, character(0), info = paste(problems, collapse = " | "))

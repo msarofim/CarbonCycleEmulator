@@ -175,14 +175,15 @@ RV_REP_OBS_MEAN <- (RV_REP_OBS_NH + RV_REP_OBS_SH) / 2
 # sites by data-raw/build_hemispheric_flask_means.R on Marcus's ruling -- all
 # sites, latitude-band-area weighted, gaps dropped -- and CO₂ is built the same
 # way from the same sites so the two can be compared without comparing networks.
-# A signed number with a true minus (U+2212), as the typed ones beside it (−35‰): sprintf prints a hyphen.
+# A signed number with a true minus (U+2212), as the typed ones beside it (−38‰): sprintf prints a hyphen.
 rv_signed <- function(fmt, x) sub("-", "\u2212", sprintf(fmt, x), fixed = TRUE)
 RV_REP_OBS_D13C_NH <- -0.092  # permil, hemispheric mean minus MLO, 1989-2014
 RV_REP_OBS_D13C_SH <- -0.011  # permil, hemispheric mean minus SPO
 # ⛔ THE ASYMMETRY IS THE POINT: measured, the δ¹³C offset is ~8x larger in the
 # north than the south; the model's is the SAME in both (one common-mode
 # parameter). And the source signature that would reconcile the measured CO₂
-# and δ¹³C offsets is -35 permil in the north against -13 in the south, where
+# and δ¹³C offsets is -38 permil in the north against -13 in the south (2026-10-23, on the flask MLO CO2
+# series, calibration/diag_rep_dc_d13c_hemispheric.R: -37.6 / -13.2; -35.1 on in situ, 09-22), where
 # the model assumes a single -26.5 (LIK_REP_SOURCE_D13C, itself PROVISIONAL and
 # UNCITED). No one value can describe both hemispheres.
 # ⚠ The SH row is the weaker of the two: NOAA's MBL reference EXCLUDES Mauna Loa
@@ -602,7 +603,7 @@ RV_CARDS <- list(
                                     "same in both hemispheres, because it is one",
                                     "common-mode number. Worse, the carbon signature that",
                                     "would reconcile the measured CO\u2082 and \u03b4\u00b9\u00b3C offsets",
-                                    "is about \u221235\u2030 in the north and \u221213\u2030 in the",
+                                    "is about \u221238\u2030 in the north and \u221213\u2030 in the",
                                     "south, where the model assumes a single \u221226.5\u2030 \u2014 so no",
                                     "one value describes both. The tie itself, not just its",
                                     "size, is doing work it cannot support."),
@@ -621,11 +622,11 @@ RV_CARDS <- list(
        # right". Measured at hilda31w (rv_gradients()): CO2 2.18 vs 2.43 +/- 0.059 ppm = 0.90x (z -4.3, 1962-2023);
        # d13C 1.97x (1980-2023). Card 2's caption prints both ratios live.
        # 2026-10-23, hilda31fl on the flask gradient (data/review_precompute.rds): CO2 2.28 vs 2.58 +/- 0.047 ppm =
-       # 0.885x (z -6.3, 55 yr 1962-2023), i.e. 11.5 % low; d13C 2.00x. The "about 10%" below is Marcus's to re-word.
+       # 0.885x (z -6.3, 55 yr 1962-2023), i.e. 11.5 % low; d13C 2.00x. Marcus 2026-10-23: "About 12% (Recommended)".
        plain = paste("Between Mauna Loa and the South Pole, the model's δ¹³C",
                      "difference is about twice what is measured — as a nearly",
                      "constant offset, not a drift. The CO₂ gradient between the",
-                     "same two stations is about 10% low — far closer than the isotopic one."),
+                     "same two stations is about 12% low — far closer than the isotopic one."),
        detail = paste("Closing it needs a persistent north-minus-south isotopic",
                       "flux the model has no carrier for. Each hemisphere has its",
                       "own ocean and they exchange only through the air, so",
@@ -637,7 +638,7 @@ RV_CARDS <- list(
                       "isotopic loading of it is."),
        # 2026-10-15 review: "2x" -> "2×"; "whose CO₂ gradient and both Suess trends are right" -> the 10 % qualifier
        ask = paste("Is a 2× hemispheric isotope gradient a deal-breaker for a",
-                   "model whose CO₂ gradient is within about 10% and whose Suess trends are right?",
+                   "model whose CO₂ gradient is within about 12% and whose Suess trends are right?",
                    "What mechanism might help close it?")),
   list(id = 3, key = "diseq", class = "structural",
        title = "The ocean's north–south isotopic disequilibrium is too symmetric",

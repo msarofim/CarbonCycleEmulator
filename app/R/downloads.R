@@ -124,9 +124,13 @@ DLC_HIGH   <- "upper edge of the drawn range, same unit as %s"
 DLS <- list(
   model    = function() sprintf("Model output: %s, computed live with the %s parameter set.",
                                 APP_RELEASE_NAME, APP_DL_MODE),
-  co2_obs  = function() paste("Measured CO₂: Mauna Loa monthly means (Scripps Institution of Oceanography",
-                              "and NOAA Global Monitoring Laboratory); South Pole monthly flask means (NOAA GML)."),
-  d13c_obs = function() "Measured δ¹³C: Mauna Loa and South Pole monthly flask means (NOAA GML and INSTAAR).",
+  # Marcus 2026-10-23 ("Scripps draft (Recommended)"): every CO2 and d13C series the app scores and plots is the
+  # Scripps CO2 Program's (data-raw/build_calibration_data.R; citation in data-raw/manual/README.md). The NOAA GML /
+  # INSTAAR credits these replace named the cross-check records. Mauna Loa CO2 is flask under the flask label.
+  co2_obs  = function() paste("Measured CO₂: Mauna Loa monthly flask means and South Pole monthly means",
+                              "(Scripps CO₂ Program, Scripps Institution of Oceanography)."),
+  d13c_obs = function() paste("Measured δ¹³C: Mauna Loa and South Pole monthly flask means",
+                              "(Scripps CO₂ Program, Scripps Institution of Oceanography)."),
   d14c_obs = function() "Measured Δ¹⁴C: the zonal atmospheric compilation of Hua et al. (2022).",
   gcb      = function() "Measured budget: Global Carbon Budget 2025.",
   luc      = function() paste("Land-use split: the Global Carbon Budget 2025 bookkeeping models;",
