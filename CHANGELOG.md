@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-23 (i) — **Ruling: the empty-slot rule stands** (Marcus: "Keep the empty-slot rule; continue when it lands"). An empty file slot (no `CCX_MS_FILE_STARTS`, or a file with fewer starts than slots) runs its id's old dispersed draw, labeled EMPTY, start_class "dispersed", as (e) built it and flagged. No code change: `calibration/lib_ms_file.R` and `run_dispersed_multistart.R` already state the rule, and `test-ms-file.R` checks the label. Run state at 10:16: id 1 −1050.3235, id 6 −1050.4404 (one restart each), id 7 −1050.1342 (two restarts; the second gained 0.0004).
+
 ## 2026-10-23 (h) — **Handoff `notes/handoff_2026-10-23_flask_refit_running.md`** (Marcus: "Yes, write the handoff"). It supersedes `handoff_2026-10-23_flask_refit_item2.md`, which now points to it. Done since: (e)–(g). State: the flask refit running (tag `20261023f`, launcher pid 73635, launched 09:26), its dry-run and landing chain armed (pid 73795). At 09:55 id 1 was at −1050.3235 after one restart and id 7 at −1050.1345. Next: read the landing, then Marcus rules adoption, the name and the module-check reference.
 
 ## 2026-10-23 (g) — **The 10-22 CFC driver's overlay converted and re-verified: the suite's last failing lint passes** (Marcus: "Convert, re-verify (Recommended)").
