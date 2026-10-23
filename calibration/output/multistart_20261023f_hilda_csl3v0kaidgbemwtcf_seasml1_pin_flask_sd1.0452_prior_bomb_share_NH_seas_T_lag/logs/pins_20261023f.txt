@@ -1,0 +1,1 @@
+ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.0800000000000001,w_vent=0,gamma_vent=0,w_thc=0,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0,npp_tsens=0,lag_enso_land=5.9293432319444337,gamma_enso_land_NH=0.66318950821232669,gamma_enso_land_SH=0.6355964031675142,w_enso_l2=16.787744029103425

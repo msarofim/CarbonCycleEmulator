@@ -1,0 +1,37 @@
+
+==========================================================================
+DISPERSED MULTI-START SURVEY -- 3 starts under
+  /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261023f_hilda_csl3v0kaidgbemwtcf_seasml1_pin_flask_sd1.0452_prior_bomb_share_NH_seas_T_lag
+==========================================================================
+  ⚠ reference start 'cold' (id 0) IS MISSING -- the starts that ran checked the port themselves (their port column below)
+  reference incumbent  id 1  logpost   -1050.1207  port VERIFIED (rel 1.4e-14)
+  ⚠ reference start 'new_basin' (id 2) IS MISSING -- the starts that ran checked the port themselves (their port column below)
+  file start t8c_block id 6  logpost   -1050.1207  port VERIFIED (rel 2.1e-15)  value gate VERIFIED (|diff| 0.0e+00)
+  file start t8f_newton id 7  logpost   -1050.1340  port VERIFIED (rel 2.1e-15)  value gate VERIFIED (|diff| 0.0e+00)
+
+  3 of 3 starts CONVERGED, 0 ran out of CPU time (excluded from the
+  basin count, kept in the table), 0 spent their restart budget.
+  cluster radius 0.9639 = 0.25 x the measured inter-basin separation
+
+  ⇒ 1 DISTINCT BASIN among the 3 finished starts.
+
+   rank     id        logpost        vs best    basin  status    min clock  kind
+      1      6     -1050.1207         0.0000        1    conv    129   cpu  file start 't8c_block' (slot file1): T8c's block point (outputs/diagnostics/seas8_20261021_hilda31w/t8f_allflask_forecast_hilda31w.rds: $points$uB; logpost $forecast$block$base; T8f @6f134ab0); it scored -1052.232908 there
+      2      1     -1050.1207        -0.0000        1    conv    124   cpu  reference: INCUMBENT = hilda31w (the FLASK REFIT (label hilda_csl3v0kaidgbemwtcf, Marcus 2026-10-22): the canonical's pins with its interannual module carried, every MLO CO2 row on Scripps flask; the incumbent hilda31w is scored under the flask label: a start, not a mode of this objective; scored under this build's objective, periodic spinup, evaluated at seas_ml 1)
+      3      7     -1050.1340        -0.0134        1    conv     61   cpu  file start 't8f_newton' (slot file2): T8f's Newton point (outputs/diagnostics/seas8_20261021_hilda31w/t8f_allflask_forecast_hilda31w.rds: $points$uN_all; logpost sum($rows$all_at_allN); T8f @6f134ab0); it scored -1050.185317 there
+
+--------------------------------------------------------------------------
+  BEST FOUND      id 6 at -1050.1207
+  TO BEAT         id 6 (file start 't8c_block' (slot file1): T8c's block point (outputs/diagnostics/seas8_20261021_hilda31w/t8f_allflask_forecast_hilda31w.rds: $points$uB; logpost $forecast$block$base; T8f @6f134ab0); it scored -1052.232908 there) at -1050.1207
+  difference      +0.0000 log-units
+  ⚠ the benchmark is the best of only 3 of the 7 known-basin starts;
+    ids 2, 3, 4, 5 are MISSING and one of them could be higher.
+  ⚠ NO DISPERSED START finished, so the survey has not been run yet --
+    the table above is the known basins re-converged, and nothing more.
+  ⚠ A survey bounds what N starts at ONE dispersion found. It is not a
+    proof that no better basin exists ([[no_power_null]]: measure the
+    test's power before believing its null).
+
+  summary written to /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261023f_hilda_csl3v0kaidgbemwtcf_seasml1_pin_flask_sd1.0452_prior_bomb_share_NH_seas_T_lag/summary.csv
+⛔ NOTHING IS ADOPTED.
+==========================================================================

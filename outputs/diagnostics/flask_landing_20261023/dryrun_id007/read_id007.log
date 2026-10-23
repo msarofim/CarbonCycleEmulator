@@ -1,0 +1,117 @@
+calibration/diag_flask_refit_read.R @63633d99+dirty, 2026-10-23 10:43
+  incumbent hilda31w (/Users/MarcusMarcus/ccx_frozen/20261023f_flask_chaindry/calibration/output/refit_20261013_hilda31w_wtc_hilda_csl3v0kaidgbemwtc/mode_fit_pumpN.rds, md5 53ee816ac48cea0f1c1fad244651c5fd)
+  flask mode /Users/MarcusMarcus/ccx_frozen/20261023f_flask_chaindry/calibration/output/DRYRUN_refit_20261023_flask_hilda_csl3v0kaidgbemwtcf/mode_fit_pumpN.rds (md5 89c3b9feefc5905121485738c9e7684f)
+  wave      /Users/MarcusMarcus/ccx_frozen/20261023f_flask_chaindry/calibration/output/DRYRUN_multistart_20261023f_hilda_csl3v0kaidgbemwtcf_seasml1_pin_flask_sd1.0452_prior_bomb_share_NH_seas_T_lag
+  port      /Users/MarcusMarcus/ccx_frozen/20261023f_flask_chaindry/calibration/output/DRYRUN_multistart_20261023f_hilda_csl3v0kaidgbemwtcf_seasml1_pin_flask_sd1.0452_prior_bomb_share_NH_seas_T_lag/port_targets_hilda_csl3v0kaidgbemwtcf.csv
+  T8f       outputs/diagnostics/seas8_20261021_hilda31w/t8f_allflask_forecast_hilda31w.rds
+  ⚠ TAGGED '_DRYRUN_id007': read the provenance before quoting anything below
+
+=== 0. EACH VECTOR REPRODUCES ITS STORED LOGPOST IN ITS OWN SPACE (tol 5e-05); THE WAVE ===
+  incumbent hilda31w (in situ) logpost -1054.495920 (stored -1054.495920, diff +0.0e+00)  likelihood -1015.7034 on 26 rows
+  flask mode                   logpost -1050.134021 (stored -1050.134021, diff +0.0e+00)  likelihood -1011.6951 on 26 rows
+  ⚠ the wave's ids are 7, not the ruled three (1, 6, 7)
+  id 007 t8f_newton start -1050.185317 -> final -1050.134021 (+0.0513)  converged (value gate |diff| 0.0e+00), 61.3 cpu-min
+  ⚠ only 1 converged start(s): no agreement to read
+  promoted: id 7 at -1050.134021, chosen by best_logpost
+
+=== 1. ON THE FLASK ROWS: the new mode vs REF (hilda31w under hilda_csl3v0kaidgbemwtcf at the same pins: id 1's start) ===
+  REF vs the wave's port target (incumbent -1067.5979272958): -1.5e-11; REF's rows vs T8f's canonical rows: max |diff| 0.0e+00 (tol 5e-05)
+  the label alone at the incumbent (REF - hilda31w's own rows): likelihood -13.1020, logpost -13.1020
+  d13c_seasonal_MLO      REF    211.045 | flask  +11.727
+  co2_seasonal_MLO       REF    -18.421 | flask   +4.184   <- a flask row
+  co2_gradient           REF    -16.539 | flask   +2.752   <- a flask row
+  d13c_level_MLO         REF     66.777 | flask   -0.821
+  co2_icecore            REF   -511.783 | flask   +0.730
+  co2_level_SPO          REF    -62.917 | flask   -0.639
+  d13c_level_SPO         REF     59.307 | flask   -0.609
+  co2_level_MLO          REF    -64.631 | flask   +0.251   <- a flask row
+  d14c_NH                REF   -286.244 | flask   -0.205
+  d14c_intcal            REF   -542.969 | flask   -0.201
+  gcb_land_sink          REF    -23.249 | flask   -0.123
+  d13c_seasonal_SPO      REF    250.433 | flask   +0.122
+  d13c_gradient          REF    105.816 | flask   +0.109
+  ocean_grad_alk         REF     -5.882 | flask   -0.078
+  gcb_ocean_sink         REF     -3.072 | flask   -0.054
+  d14c_profile_ab        REF     -3.236 | flask   -0.032
+  ocean_grad_dic         REF     -6.790 | flask   +0.031
+  d13c_icecore           REF     66.391 | flask   -0.028
+  ocean_grad_d13c        REF     -2.744 | flask   +0.028
+  d14c_SH                REF   -286.219 | flask   -0.024
+  hs_surf_d13c           REF     -2.530 | flask   +0.022
+  co2_seasonal_SPO       REF     67.824 | flask   -0.017
+  excess_c14_ocean       REF     -9.524 | flask   -0.016
+  hs_surf_dic            REF     -4.175 | flask   +0.003
+  d14c_profile_level     REF     -3.276 | flask   -0.002
+  d14c_profile_bd        REF     -2.196 | flask   +0.001
+  TOTAL likelihood +17.1103 (REF -1028.8054; flask -1011.6951); stored logpost +17.4639 (same objective and pins: comparable)
+  by group: intcal -0.201, bomb_c14 -0.229, ice_cores +0.702, co2_levels -0.387, d13c_levels -1.430, seasonal +16.017, ocean -0.045, gcb_rows -0.177
+  against T8f's Newton point (id 7's start, -1050.185317; measured +17.4126 over REF): the refit +0.0513 beyond it, +17.4639 over REF
+  the refit from id 7 (t8f_newton): stored logpost -1050.134021 (converged); the promoted mode +0.0000 against it
+
+=== 2. ON THE IN SITU ROWS: the new mode under hilda_csl3v0kaidgbemwtc (hilda31w's own label) vs hilda31w ===
+  co2_seasonal_MLO       hilda31w     -2.713 | flask  -30.623   <- a flask row
+  d13c_seasonal_MLO      hilda31w    211.045 | flask  +11.727
+  d13c_level_MLO         hilda31w     66.777 | flask   -0.821
+  co2_icecore            hilda31w   -511.783 | flask   +0.730
+  co2_level_SPO          hilda31w    -62.917 | flask   -0.639
+  d13c_level_SPO         hilda31w     59.307 | flask   -0.609
+  co2_gradient           hilda31w    -12.937 | flask   -0.503   <- a flask row
+  co2_level_MLO          hilda31w    -70.838 | flask   -0.266   <- a flask row
+  d14c_NH                hilda31w   -286.244 | flask   -0.205
+  d14c_intcal            hilda31w   -542.969 | flask   -0.201
+  gcb_land_sink          hilda31w    -23.249 | flask   -0.123
+  d13c_seasonal_SPO      hilda31w    250.433 | flask   +0.122
+  d13c_gradient          hilda31w    105.816 | flask   +0.109
+  ocean_grad_alk         hilda31w     -5.882 | flask   -0.078
+  gcb_ocean_sink         hilda31w     -3.072 | flask   -0.054
+  d14c_profile_ab        hilda31w     -3.236 | flask   -0.032
+  ocean_grad_dic         hilda31w     -6.790 | flask   +0.031
+  d13c_icecore           hilda31w     66.391 | flask   -0.028
+  ocean_grad_d13c        hilda31w     -2.744 | flask   +0.028
+  d14c_SH                hilda31w   -286.219 | flask   -0.024
+  hs_surf_d13c           hilda31w     -2.530 | flask   +0.022
+  co2_seasonal_SPO       hilda31w     67.824 | flask   -0.017
+  excess_c14_ocean       hilda31w     -9.524 | flask   -0.016
+  hs_surf_dic            hilda31w     -4.175 | flask   +0.003
+  d14c_profile_level     hilda31w     -3.276 | flask   -0.002
+  d14c_profile_bd        hilda31w     -2.196 | flask   +0.001
+  TOTAL likelihood -21.4692, logpost -21.1156: what the refit costs on the in situ objective
+
+=== 3. THE PRIOR LEDGER (the same 31 free names, both under hilda_csl3v0kaidgbemwtcf) and THE MOVES in hilda31w's marginal Laplace sd ===
+  priors -0.0470, Jacobians +0.4006 (flask - REF)
+  q10                        1.1532 ->       1.1278   -0.57 sd
+  grad_off_co2              0.24776 ->      0.29121   +0.47 sd
+  grad_off_d13c            0.064384 ->     0.066746   +0.39 sd
+  sst_seas_amp_NH            1.4134 ->          1.5   +0.37 sd
+  tau_ex                    0.94335 ->      0.95914   +0.33 sd
+  seas_lag_p_SH              2.3379 ->       2.3845   +0.32 sd
+  seas_T_lag                0.27597 ->      0.37908   +0.31 sd
+  seas_lag_p_NH              1.2585 ->       1.2398   -0.21 sd
+  ndep_ret                   6.7301 ->       7.3876   +0.15 sd
+  bomb_share_NH              0.8417 ->      0.83692   -0.15 sd
+  beta_max                   2.0054 ->       1.9685   -0.15 sd
+  npp_frac_NH               0.63849 ->      0.63523   -0.12 sd
+  seas_T_amp_NH              14.536 ->       14.458   -0.02 sd
+  h_ml                       69.541 ->       69.762   +0.04 sd
+  luc_scale                 0.94169 ->      0.94052   -0.03 sd
+  imb_share_land            0.73053 ->      0.72869   -0.02 sd
+
+=== 4. THE FUTURES: CO2 (ppm) in 2300 (br_futures()) ===
+  inc   ssp585  1486.85 | vvH  1019.71
+  ref   ssp585  1486.85 | vvH  1019.71
+  flask ssp585  1487.97 | vvH  1020.63
+  REF - inc: max |diff| 0.0e+00 (tol 0: the label changes the scoring, not the model)
+  the refit (flask - inc): ssp585   +1.12 | vvH   +0.91
+  ⚠ No ridge width is measured for this objective: a move here is not a finding until it is compared with one.
+
+=== 5. THE LAND's NET CLIMATE EFFECT, 2015-2024 (TRENDY S2 - S1), GtC/yr ===
+  inc   net climate effect -0.0945, z +1.01 against GCB 2025's -0.8 +/- 0.7
+  flask net climate effect -0.0791, z +1.03 against GCB 2025's -0.8 +/- 0.7
+
+=== THE SEPARATE DRIVERS (each writes its own log) ===
+  THE MODULE CHECK (RULED 0.1 sigma); the reference is Marcus's to choose (handoff 2026-10-23 §2), so both are run:
+    Rscript calibration/fit_iav_module.R --base=/Users/MarcusMarcus/ccx_frozen/20261023f_flask_chaindry/calibration/output/DRYRUN_refit_20261023_flask_hilda_csl3v0kaidgbemwtcf/mode_fit_pumpN.rds --check=calibration/output/iav_module_20261013_refit_20261013_wtc_hilda_csl3v0kaidgbemwtc.rds   (hilda31w's own check)
+    Rscript calibration/fit_iav_module.R --base=/Users/MarcusMarcus/ccx_frozen/20261023f_flask_chaindry/calibration/output/DRYRUN_refit_20261023_flask_hilda_csl3v0kaidgbemwtcf/mode_fit_pumpN.rds --check=calibration/output/iav_module_20261008_refit_20261008_obj18_hilda_csl3v0kaidgbemwt.rds   (the file the pins came from)
+  CCX_SC_EXTRA_MODE="flask=/Users/MarcusMarcus/ccx_frozen/20261023f_flask_chaindry/calibration/output/DRYRUN_refit_20261023_flask_hilda_csl3v0kaidgbemwtcf/mode_fit_pumpN.rds" CCX_SC_TAG_SUFFIX=_flask Rscript calibration/diag_whole_model_scorecard.R
+  CCX_OC_MODE="flask=/Users/MarcusMarcus/ccx_frozen/20261023f_flask_chaindry/calibration/output/DRYRUN_refit_20261023_flask_hilda_csl3v0kaidgbemwtcf/mode_fit_pumpN.rds" Rscript calibration/diag_ocean_climate_gobm.R
+saved outputs/diagnostics/flask_refit_read_20261023_DRYRUN_id007.{log,rds}. ⛔ ADOPTS NOTHING.

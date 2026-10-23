@@ -1,0 +1,82 @@
+armed 2026-10-23T09:26:00-0400: launcher 73635; stage 1 waits for a finished start under /Users/MarcusMarcus/ccx_frozen/20261023_flask/calibration/output/multistart_20261023f_hilda_csl3v0kaidgbemwtcf_seasml1_pin_flask_sd1.0452_prior_bomb_share_NH_seas_T_lag
+stage 1 2026-10-23T10:30:00-0400: finished starts: 1
+dry-run tree /Users/MarcusMarcus/ccx_frozen/20261023f_flask_chaindry at 63633d99
+scratch copies of 1 finished start files (start_007.rds )
+flask landing chain (dryrun) at 63633d99, 2026-10-23T10:30:02-0400
+== collect  10:30:02
+   rc 0
+== basins  10:30:03
+   rc 0
+   the basins: LP id 7 (best stored logpost), NAT id 7 (best likelihood + prior)
+== promote_lp  10:30:08
+   rc 0
+   promoted: DRYRUN_refit_20261023_flask_hilda_csl3v0kaidgbemwtcf = id 007
+== hessian_id007  10:30:13
+   rc 0
+== read_id007  10:43:54
+   rc 0
+== check_pins_id007  10:44:06
+   rc 0
+== checkz_pins_id007  10:46:45
+   rc 0
+     reference /Users/MarcusMarcus/ccx_frozen/20261023f_flask_chaindry/calibration/output/iav_module_20261008_refit_20261008_obj18_hilda_csl3v0kaidgbemwt.rds
+     L moved +0.03480 sigma
+     s moved -0.02917 sigma
+     w moved -0.15454 sigma
+     RULED 0.1 sigma (Marcus 2026-10-12): a name moved MORE: to Marcus before any second pass
+== check_own_id007  10:46:46
+   rc 0
+== checkz_own_id007  10:49:27
+   rc 0
+     reference /Users/MarcusMarcus/ccx_frozen/20261023f_flask_chaindry/calibration/output/iav_module_20261013_refit_20261013_wtc_hilda_csl3v0kaidgbemwtc.rds
+     L moved -0.00660 sigma
+     s moved +0.03814 sigma
+     w moved -0.04490 sigma
+     RULED 0.1 sigma (Marcus 2026-10-12): STOP -- no second pass
+== ocean_id007  10:49:27
+   rc 0
+== scorecard  10:52:59
+   rc 0
+== CHAIN DONE (dryrun) 10:53:35. Logs: /Users/MarcusMarcus/ccx_frozen/20261023f_flask_chaindry/DRYRUN_logs
+stage 1: the dry-run chain ended rc 0 2026-10-23T10:53:35-0400
+stage 2 2026-10-23T10:53:35-0400: waiting on launcher 73635
+launcher 73635 gone 2026-10-23T11:36:35-0400; its end line: flask refit end 2026-10-23T11:36:14-0400 rc 0
+flask landing chain (land) at 63633d99, 2026-10-23T11:36:36-0400
+== land  11:36:36
+   rc 0
+== collect  11:36:36
+   rc 0
+== basins  11:36:36
+   rc 0
+   the basins: LP id 6 (best stored logpost), NAT id 6 (best likelihood + prior)
+== promote_lp  11:36:40
+   rc 0
+   promoted: refit_20261023_flask_hilda_csl3v0kaidgbemwtcf = id 006
+== hessian_id006  11:36:44
+   rc 0
+== read_id006  11:49:37
+   rc 0
+== check_pins_id006  11:49:49
+   rc 0
+== checkz_pins_id006  11:51:14
+   rc 0
+     reference /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/iav_module_20261008_refit_20261008_obj18_hilda_csl3v0kaidgbemwt.rds
+     L moved +0.03338 sigma
+     s moved -0.02559 sigma
+     w moved -0.15554 sigma
+     RULED 0.1 sigma (Marcus 2026-10-12): a name moved MORE: to Marcus before any second pass
+== check_own_id006  11:51:14
+   rc 0
+== checkz_own_id006  11:52:37
+   rc 0
+     reference /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/iav_module_20261013_refit_20261013_wtc_hilda_csl3v0kaidgbemwtc.rds
+     L moved -0.00796 sigma
+     s moved +0.04171 sigma
+     w moved -0.04591 sigma
+     RULED 0.1 sigma (Marcus 2026-10-12): STOP -- no second pass
+== ocean_id006  11:52:37
+   rc 0
+== scorecard  11:55:55
+   rc 0
+== CHAIN DONE (land) 11:56:29. Logs: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/flask_landing_20261023
+armed landing: the chain ended rc 0 2026-10-23T11:56:29-0400

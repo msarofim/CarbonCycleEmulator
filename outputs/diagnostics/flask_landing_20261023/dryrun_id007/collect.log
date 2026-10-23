@@ -1,0 +1,34 @@
+
+==========================================================================
+DISPERSED MULTI-START SURVEY -- 1 starts under
+  /Users/MarcusMarcus/ccx_frozen/20261023f_flask_chaindry/calibration/output/DRYRUN_multistart_20261023f_hilda_csl3v0kaidgbemwtcf_seasml1_pin_flask_sd1.0452_prior_bomb_share_NH_seas_T_lag
+==========================================================================
+  ⚠ reference start 'cold' (id 0) IS MISSING -- the starts that ran checked the port themselves (their port column below)
+  ⚠ reference start 'incumbent' (id 1) IS MISSING -- the starts that ran checked the port themselves (their port column below)
+  ⚠ reference start 'new_basin' (id 2) IS MISSING -- the starts that ran checked the port themselves (their port column below)
+  file start t8f_newton id 7  logpost   -1050.1340  port VERIFIED (rel 2.1e-15)  value gate VERIFIED (|diff| 0.0e+00)
+
+  1 of 1 starts CONVERGED, 0 ran out of CPU time (excluded from the
+  basin count, kept in the table), 0 spent their restart budget.
+  cluster radius 0.9639 = 0.25 x the measured inter-basin separation
+
+  ⇒ 1 DISTINCT BASIN among the 1 finished starts.
+
+   rank     id        logpost        vs best    basin  status    min clock  kind
+      1      7     -1050.1340         0.0000        1    conv     61   cpu  file start 't8f_newton' (slot file2): T8f's Newton point (outputs/diagnostics/seas8_20261021_hilda31w/t8f_allflask_forecast_hilda31w.rds: $points$uN_all; logpost sum($rows$all_at_allN); T8f @6f134ab0); it scored -1050.185317 there
+
+--------------------------------------------------------------------------
+  BEST FOUND      id 7 at -1050.1340
+  TO BEAT         id 7 (file start 't8f_newton' (slot file2): T8f's Newton point (outputs/diagnostics/seas8_20261021_hilda31w/t8f_allflask_forecast_hilda31w.rds: $points$uN_all; logpost sum($rows$all_at_allN); T8f @6f134ab0); it scored -1050.185317 there) at -1050.1340
+  difference      +0.0000 log-units
+  ⚠ the benchmark is the best of only 1 of the 7 known-basin starts;
+    ids 1, 2, 3, 4, 5, 6 are MISSING and one of them could be higher.
+  ⚠ NO DISPERSED START finished, so the survey has not been run yet --
+    the table above is the known basins re-converged, and nothing more.
+  ⚠ A survey bounds what N starts at ONE dispersion found. It is not a
+    proof that no better basin exists ([[no_power_null]]: measure the
+    test's power before believing its null).
+
+  summary written to /Users/MarcusMarcus/ccx_frozen/20261023f_flask_chaindry/calibration/output/DRYRUN_multistart_20261023f_hilda_csl3v0kaidgbemwtcf_seasml1_pin_flask_sd1.0452_prior_bomb_share_NH_seas_T_lag/summary.csv
+⛔ NOTHING IS ADOPTED.
+==========================================================================

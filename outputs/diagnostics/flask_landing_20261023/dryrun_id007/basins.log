@@ -1,0 +1,24 @@
+calibration/diag_obj18_basins.R @63633d99+dirty, 2026-10-23 10:30
+  wave /Users/MarcusMarcus/ccx_frozen/20261023f_flask_chaindry/calibration/output/DRYRUN_multistart_20261023f_hilda_csl3v0kaidgbemwtcf_seasml1_pin_flask_sd1.0452_prior_bomb_share_NH_seas_T_lag
+  ⚠ TAGGED '_flask_DRYRUN': read the provenance before quoting anything below
+  objective: flask refit (structure hilda_csl3v0kaidgbemwtcf; pins CCX_MODE_FLASK_PINS)
+  1 start files; structure hilda_csl3v0kaidgbemwtcf, seas_ml 1, pump field solved, pump mode N, h_ml band [42.5, 200]; pins _pin_ent_seas_amp_SH=0.0000000_w_eq=27.0000000_gamma_eq=1.0000000_pump_export=9.0800000_w_vent=0.0000000_gamma_vent=0.0000000_w_thc=0.0000000_gamma_enso_ocn_NH=0.0000000_gamma_enso_ocn_SH=0.0000000_npp_tsens=0.0000000_lag_enso_land=5.9293432_gamma_enso_land_NH=0.6631895_gamma_enso_land_SH=0.6355964_w_enso_l2=16.7877440
+  DUPLICATES (optimum bit-identical to a lower id): none
+
+=== 0. GATES ===
+  basin 1 (id 007): logpost -1050.134021, stored -1050.134021, diff +0.0e+00 (tol 1e-05)
+  likelihood + prior + Jacobian close every logpost to <= 1e-08
+
+=== 1. THE BASINS (collect's clustering; each by its best stored-logpost member) ===
+  basin 1  id 007  x1 (1 distinct)  logpost -1050.1340  likelihood -1011.6951  prior -77.7313  Jacobian +39.2923  lik+prior -1089.4264
+            h_ml 69.762, pump_grad 332.79, kz 13833, beta_max 1.9685, fert_k 598.92, q10 1.1278, bomb_share_NH 0.83692, seas_T_lag 0.37908
+            members: 7
+
+  BEST by stored logpost: id 007 (basin 1) | by LIKELIHOOD: id 007 (basin 1) | by likelihood + prior: id 007 (basin 1)
+  ⇒ the stored logpost and likelihood + prior AGREE on the best basin
+
+=== 2. EACH BASIN AGAINST THE LOGPOST-BEST (other - best) ===
+  one basin: nothing to compare
+
+saved outputs/diagnostics/obj18_basins_20261023_flask_DRYRUN.{log,rds,ids}: LP 7, NAT 7
+⛔ ADOPTS NOTHING.

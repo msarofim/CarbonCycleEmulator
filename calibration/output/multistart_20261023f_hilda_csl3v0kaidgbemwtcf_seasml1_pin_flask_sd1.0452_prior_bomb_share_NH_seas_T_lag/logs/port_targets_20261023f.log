@@ -1,0 +1,24 @@
+run-time inputs present: 14/14. OK
+reference set: incumbent hilda31w, new basin hilda31pe (the FLASK REFIT (label hilda_csl3v0kaidgbemwtcf, Marcus 2026-10-22): the canonical's pins with its interannual module carried, every MLO CO2 row on Scripps flask; the incumbent hilda31w is scored under the flask label: a start, not a mode of this objective)
+objective label: struct 'hilda_csl3v0kaidgbemwtcf', seas_ml 1, pump_field 'solved', pins '_pin_ent_seas_amp_SH=0.0000000_w_eq=27.0000000_gamma_eq=1.0000000_pump_export=9.0800000_w_vent=0.0000000_gamma_vent=0.0000000_w_thc=0.0000000_gamma_enso_ocn_NH=0.0000000_gamma_enso_ocn_SH=0.0000000_npp_tsens=0.0000000_lag_enso_land=5.9293432_gamma_enso_land_NH=0.6631895_gamma_enso_land_SH=0.6355964_w_enso_l2=16.7877440' (31 free parameters)
+SEEDING ndep_ret for the new_basin port target: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 3.9.
+     The ancestor held no opinion about this coordinate.
+SEEDING imb_share_land for the new_basin port target: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.333333.
+     The ancestor held no opinion about this coordinate.
+SEEDING imb_share_ocean_rest for the new_basin port target: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+
+PORT TARGETS written to /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/torch/port_targets.csv
+
+      name           logpost           stored            offset
+      cold -58339.1009927710             <NA>              <NA>
+ incumbent  -1067.5979272958 -1054.4959200334    -13.1020072624
+ new_basin -11342.8028590519 -1231.0747417395 -10111.7281173124
+
+  arm N, 31 parameters, struct 'hilda_csl3v0kaidgbemwtcf', seas_ml 1, commit 6d00fcd8, host MacBook-Pro-2.local, R 4.5.3
+  ⚠ `stored` is each mode FILE's own logpost and is NOT the target: each
+    offset (incumbent -13.10, new_basin -10111.73) is objective drift since that file was fitted, not a port defect.
+    (This line was a typed '-0.85' until 2026-09-07f; it is now GENERATED.)
