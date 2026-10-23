@@ -620,6 +620,8 @@ RV_CARDS <- list(
        # 2026-10-15 review (Marcus: "Apply all"): "close to right" / "is right" -> "about 10 % low" / "nearly
        # right". Measured at hilda31w (rv_gradients()): CO2 2.18 vs 2.43 +/- 0.059 ppm = 0.90x (z -4.3, 1962-2023);
        # d13C 1.97x (1980-2023). Card 2's caption prints both ratios live.
+       # 2026-10-23, hilda31fl on the flask gradient (data/review_precompute.rds): CO2 2.28 vs 2.58 +/- 0.047 ppm =
+       # 0.885x (z -6.3, 55 yr 1962-2023), i.e. 11.5 % low; d13C 2.00x. The "about 10%" below is Marcus's to re-word.
        plain = paste("Between Mauna Loa and the South Pole, the model's δ¹³C",
                      "difference is about twice what is measured — as a nearly",
                      "constant offset, not a drift. The CO₂ gradient between the",
