@@ -63,7 +63,8 @@ if (ccx_mix_on(.sp$params)) .s2$tdeep0 <- ccx_mix_tdeep_after(.F1$gmst, .F1$t, .
 
 test_that("the canonical runs the structures the trace broke on (else this file has no power)", {
   # 2026-10-13 (g): re-expressed to hilda31w (Marcus: "Approve all (Recommended)"); the structure checks below are the power
-  expect_identical(CCX_MODE_CANONICAL, "hilda31w")
+  # 2026-10-23 (m): re-expressed to hilda31fl (Marcus: "Approve all (Recommended)"); the same structures, the flask label
+  expect_identical(CCX_MODE_CANONICAL, "hilda31fl")
   expect_true(isTRUE(.aux$hs_on == 1L))
   expect_true(isTRUE(.aux$l2_on == 1L))
   expect_true(ccx_seas_ml_on(.sp$params))

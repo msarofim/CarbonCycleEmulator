@@ -331,6 +331,12 @@ test_that("the ocean switch is RUN-ONLY: the combinations that crashed spin up a
   # outputs/diagnostics/mechanism_sweep_20261013_hilda31w.log): at hilda31w the old construction crashes on 8 of the 64
   # ocean combinations and warns non-convergence on 40; the pair warming_feedback + ocean_sink now only warns (|resid|
   # 5.0e-7), so the check moves to the SMALLEST combination that still crashes. The app's construction: 127 / 127 clean.
-  expect_error(suppressWarnings(sp_fn(ccx_apply_mechanisms(p, F0, c("warming_feedback", "ocean_sink", "revelle"))$p)),
-               "singular")
+  # 2026-10-23 (m) RE-MEASURED (Marcus: "Either of the two (Recommended)"; outputs/diagnostics/mechanism_sweep_20261023_hilda31fl.log):
+  # at hilda31fl the pair crashes again (8 of 64 crash, every one with warming_feedback + ocean_sink and without revelle)
+  # and the triple only warns (|resid| 5.2e-9). The crash moved between the two at two adoptions in a row, so the check
+  # takes EITHER: the old construction must crash "singular" on at least one of them. Both run clean in the loop above.
+  old_crash <- vapply(list(c("warming_feedback", "ocean_sink"), c("warming_feedback", "ocean_sink", "revelle")),
+                      function(off) tryCatch({ suppressWarnings(sp_fn(ccx_apply_mechanisms(p, F0, off)$p)); "" },
+                                             error = function(e) conditionMessage(e)), character(1))
+  expect_true(any(grepl("singular", old_crash)), info = paste(old_crash, collapse = " | "))
 })

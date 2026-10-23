@@ -505,8 +505,11 @@ test_that("GATE S has POWER against its own blind spot: at a seas_ml = 1 canonic
   # ⭐ TESTED 2026-10-13 (p): with the SH lag restored to 1.32 the blind read is 4.155 (-0.222 for -0.216), i.e. 80 % of
   # the move; the rest is the refit. The whole limb moves 8.91 -> 9.35, still PASS
   # (outputs/diagnostics/gateS_sst_lag_test_20261013_hilda31w/).
+  # At hilda31fl (2026-10-23 m, the flask label): whole limb 0.407 @ 8.98 PASS (8.983; the scorecard's number,
+  # flask_landing_20261023/scorecard.log), +0.07 mo; the blind read stays within 4.38 +- 0.05. MEASURED (Marcus 2026-10-23:
+  # "Approve all (Recommended)"; ledger_20261023_hilda31fl).
   expect_true(full$pass)
-  expect_equal(full$mo,  8.91, tolerance = 0.05, scale = 1)
+  expect_equal(full$mo,  8.98, tolerance = 0.05, scale = 1)
   expect_equal(blind$mo, 4.38, tolerance = 0.05, scale = 1)
   expect_false(dg_gateS_verdict(list(mo = blind$mo, amp = blind$amp))$pass)
 })

@@ -6,7 +6,8 @@
 #   * ABSENT  = the in situ objective, bit for bit (the flask targets are additive in ccx_prepare_obs());
 #   * PRESENT = the three MLO CO2 rows score flask by their own construction, and nothing else moves;
 #   * the label reproduces T8f's override objective (calibration/lib_seas8_20261021.R, an independent
-#     implementation) EXACTLY at three points: the canonical, T8c's block point, T8f's Newton point;
+#     implementation) EXACTLY at three points: T8f's mode (hilda31w, the canonical when T8f ran; read by name
+#     since hilda31fl's adoption, 2026-10-23 m), T8c's block point, T8f's Newton point;
 #   * the switch is LIVE (a power check), and ccx_comparable_rows() drops the three rows across it.
 # =====================================================================
 FL_LABEL <- "hilda_csl3v0kaidgbemwtcf"
@@ -68,9 +69,11 @@ test_that("COMPARABLE ROWS: the three MLO CO2 rows drop between arms that differ
   expect_identical(ccx_comparable_rows(list(rows, rows), c(w, w)), rows)
 })
 
-# the canonical's vector, its pins live, and the objective under a given label (restores the pins)
-fl_score <- function(label, at = NULL) {
-  md <- readRDS(ccx_mode_file())
+# a mode's vector, its pins live, and the objective under a given label (restores the pins). 2026-10-23 (m) (Marcus:
+# "Approve all (Recommended)"): the mode is NAMED -- it read ccx_mode_file(), which meant T8f's mode only while that was
+# the canonical
+fl_score <- function(label, mode, at = NULL) {
+  md <- readRDS(ccx_mode_file(mode))
   rm_ <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm_), add = TRUE)
   bp <- ccx_mode_base(md); if (!is.null(md$pump_mode)) bp$pump_mode <- md$pump_mode
   if (!is.null(label)) bp <- ccx_apply_structure(bp, label, seas_ml = ccx_mode_seas_ml(md),
@@ -86,22 +89,28 @@ test_that("REPRODUCTION: the label scores T8f's override objective exactly, at t
   skip_if_no_cpp()
   skip_if_not(file.exists(FL_T8F), "T8f's output is not in this checkout")
   T8F <- readRDS(FL_T8F)
-  md <- readRDS(ccx_mode_file())
-  expect_identical(T8F$provenance$mode_md5, unname(tools::md5sum(ccx_mode_file())))
+  m8 <- T8F$provenance$mode   # "hilda31w": T8f's mode, the flask refit's incumbent
+  expect_identical(m8, CCX_MODE_FLASK_INCUMBENT)
+  md <- readRDS(ccx_mode_file(m8))
+  expect_identical(T8F$provenance$mode_md5, unname(tools::md5sum(ccx_mode_file(m8))))
   expect_identical(c(T8F$provenance$co2seas, T8F$provenance$co2level), rep(LIK_CO2_FLASK_STATION, 2))
-  a0 <- fl_score(FL_LABEL)
+  a0 <- fl_score(FL_LABEL, m8)
   expect_identical(a0$u[names(T8F$points$u0)], T8F$points$u0)
   expect_equal(a0$v, sum(T8F$rows_canonical$all), tolerance = FL_REPRO_TOL, scale = 1)
   expect_equal(a0$rows[names(T8F$rows_canonical$all)], T8F$rows_canonical$all, tolerance = FL_REPRO_TOL, scale = 1)
-  aB <- fl_score(FL_LABEL, at = T8F$points$uB)
+  aB <- fl_score(FL_LABEL, m8, at = T8F$points$uB)
   expect_equal(aB$v, T8F$forecast$block$base, tolerance = FL_REPRO_TOL, scale = 1)
-  aN <- fl_score(FL_LABEL, at = T8F$points$uN_all)
+  aN <- fl_score(FL_LABEL, m8, at = T8F$points$uN_all)
   expect_equal(aN$v, sum(T8F$rows$all_at_allN), tolerance = FL_REPRO_TOL, scale = 1)
-  # ABSENT = the in situ objective: the canonical's own label reproduces its stored logpost
-  i0 <- fl_score(NULL)
+  # ABSENT = the in situ objective: T8f's mode's own label reproduces its stored logpost
+  i0 <- fl_score(NULL, m8)
   expect_equal(i0$v, md$logpost, tolerance = CCX_REPRO_TOL, scale = 1)
   # LIVE: the switch moves exactly the three rows, each by more than a log-unit at the canonical
   d <- a0$rows - i0$rows[names(a0$rows)]
   expect_identical(sort(names(d)[abs(d) > 0]), sort(LIK_CO2_FLASK_ROWS))
   expect_true(all(abs(d[LIK_CO2_FLASK_ROWS]) > 1))
+  # 2026-10-23 (m): the ADOPTED mode runs this label, and its own label reproduces its stored logpost
+  f0 <- fl_score(NULL, CCX_MODE_CANONICAL)
+  expect_identical(ccx_mode_struct(f0$md), FL_LABEL)
+  expect_equal(f0$v, f0$md$logpost, tolerance = CCX_REPRO_TOL, scale = 1)
 })

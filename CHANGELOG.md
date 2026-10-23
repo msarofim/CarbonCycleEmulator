@@ -2,6 +2,16 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-23 (m) — **Ledger (l) APPLIED as ruled: the six edited files pass, 830 / 0.** The remaining reds are D's 67 (the products keyed to hilda31w, cleared as each is rebuilt) and F's `app-version`.
+
+Marcus, verbatim: "Approve all (Recommended)" (classes B, B2, C); "Either of the two (Recommended)" (G); "Mac, tonight (Recommended)" (the MCMC).
+
+- **B, re-expressed to hilda31fl:** `flux-trace-exact:66` the canonical's name; `ms-reference-set` (11) the canonical runs the flask label; (14) pass 2's pins under the canonical's label return it as a MODE, and under the WTC label (hilda31w's) they are now REFUSED ("is not that label", a new mutation), as under #18's and #17's; seas_ml 0, a moved module value and a dropped module name stay refused under the flask label. `flask-label`: `fl_score()` takes the mode by name; the reproduction reads T8f's mode from T8f's provenance (= `CCX_MODE_FLASK_INCUMBENT`, "hilda31w", md5-checked), every assertion kept; ADDED: hilda31fl runs the flask label and its own label reproduces its stored logpost (`CCX_REPRO_TOL`).
+- **B2:** `mode-file`'s comparable-row test drops `LIK_IMB_ROWS` plus `LIK_CO2_FLASK_ROWS` when the two labels differ in `co2_mlo_flask` (read from `ccx_struct_block()`), and checks the count (5).
+- **C:** GATE S whole limb re-pinned 8.98 (measured 8.983), with the measurement in the comment.
+- **G:** the old construction must crash "singular" on the pair OR the triple (`outputs/diagnostics/mechanism_sweep_20261023_hilda31fl.log`). **Mutation-tested:** with the pair removed (only the triple, which warns at hilda31fl), the check fails (1 of 108); the scratch copy was removed.
+- **Per file:** flask-label 61/0, flux-trace-exact 16/0, gate-bounds 212/0, mechanisms 108/0, mode-file 248/0, ms-reference-set 185/0 (`outputs/diagnostics/ledger_20261023_hilda31fl/edited_files_run.log`).
+
 ## 2026-10-23 (l) — **The adoption's test ledger: the full suite at `6171db02` has 9177 passed, 81 failed, 2 errored, 4 skipped (24.5 min).** 83 entries in 27 tests across 16 files, every one classified; **no repo test is edited.** No harness errors and no app gap this time. Evidence: `outputs/diagnostics/ledger_20261023_hilda31fl/` (README).
 
 - **B. The previous canonical by name or label (11 in 4 tests):** `flux-trace-exact:66` ("hilda31w"); `ms-reference-set` (11) and (14), 2 + 1 error (the WTC label as the canonical's); `flask-label`'s REPRODUCTION ×6, whose `fl_score()` reads `ccx_mode_file()` where it means the mode T8f was computed at (hilda31w, md5 `53ee816a…`).

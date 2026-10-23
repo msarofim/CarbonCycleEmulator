@@ -443,8 +443,13 @@ test_that("the comparable-row rule drops the D3-moved rows exactly when the obje
   expect_true(all(LIK_IMB_ROWS %in% intersect(r_c, r_ctl)))
   mixed <- ccx_comparable_rows(list(r_c, r_ctl), c(s_c, s_ctl))
   # mixed objectives: exactly the two moved rows go, nothing else
-  expect_setequal(mixed, setdiff(intersect(r_c, r_ctl), LIK_IMB_ROWS))
-  expect_equal(length(intersect(r_c, r_ctl)) - length(mixed), length(LIK_IMB_ROWS))
+  # 2026-10-23 (m) (Marcus: "Approve all (Recommended)"): since hilda31fl the canonical also differs from the control in the
+  # flask switch (ruled 2026-10-22 g), so the rule also drops the three MLO CO2 rows. Both drops are checked.
+  flask_of <- function(s) isTRUE(ccx_struct_block(s)$co2_mlo_flask == 1)
+  drop <- c(LIK_IMB_ROWS, if (!identical(flask_of(s_c), flask_of(s_ctl))) LIK_CO2_FLASK_ROWS)
+  expect_true(all(drop %in% intersect(r_c, r_ctl)))
+  expect_setequal(mixed, setdiff(intersect(r_c, r_ctl), drop))
+  expect_equal(length(intersect(r_c, r_ctl)) - length(mixed), length(drop))
   # the SAME objective (#14 vs #14): every row is kept -- the shares are parameters there
   same <- ccx_comparable_rows(list(r_c, r_c), c(s_c, s_c))
   expect_setequal(same, r_c)
