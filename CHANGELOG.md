@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-23 (o) — **Handoff `notes/handoff_2026-10-23_hilda31fl_adopted.md`** (Marcus: "Yes, write the handoff"). It supersedes `handoff_2026-10-23_flask_refit_running.md`, which now points to it. Done since: (i)–(n). State: `hilda31fl` is the canonical; the ledger applied; the MCMC running (launched 13:52, PIDs in `~/ccx_frozen/20261023_mcmc_hilda31fl.pids`). Next: the model-only products beside the MCMC, then the MCMC read and band, the app's MLO series to flask, and the two app precomputes after that switch.
+
 ## 2026-10-23 (n) — **The hilda31fl MCMC band is RUNNING: 4 chains to 200k on the Mac, launched 13:52 EDT** (Marcus: "Mac, tonight (Recommended)"). Record: `outputs/diagnostics/mcmc_launch_20261023_hilda31fl/` (README).
 
 - **Where:** Mac rather than Torch, said before the launch: a Torch node runs about 2× slower per evaluation, and the laptop is otherwise idle. Frozen worktree `~/ccx_frozen/20261023_mcmc_hilda31fl` at `2ec25511`; the hilda31w launch (10-13 j) with the tree, out dir and logs renamed. Load 2.9 before launch, no other R job; 10 cores (4 performance).

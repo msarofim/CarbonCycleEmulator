@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-23: the flask refit is RUNNING; its landing is armed
 
+> ⚠ **SUPERSEDED** by `notes/handoff_2026-10-23_hilda31fl_adopted.md` (the refit landed and was adopted as `hilda31fl`; ledger applied; the MCMC running).
+
 **Supersedes** `notes/handoff_2026-10-23_flask_refit_item2.md`, which now points here. Written on Marcus's request ("Yes,
 write the handoff"), 2026-10-23 ~10:00.
 
