@@ -129,7 +129,12 @@ cat(sprintf("  %-28s %12.1f %12.1f\n", "model / measured",
 # ---- confrontation 2: is the mass-balance TIE right? ----------------
 # ---- the CO2 offset, from the SAME product family --------------------
 cm <- readRDS(D5_CO2_OBS)
-co2obs <- ccx_prepare_obs()$co2
+# THE MLO CO2 SERIES THE CANONICAL SCORES (2026-10-23): Scripps flask under the flask label (the same flasks as the
+# MLO d13C above), swapped as ccx_loglik() swaps its targets; in situ under any other label.
+D5_FLASK <- ccx_co2_flask_on(md$err)
+co2obs <- ccx_obs_co2_scored(ccx_prepare_obs(), D5_FLASK, monthly = TRUE)$co2
+cat(sprintf("\n(%s @%s | canonical %s | MLO CO2 series: %s)\n", "calibration/diag_rep_dc_d13c_hemispheric.R",
+            ccx_git_stamp(), CCX_MODE_CANONICAL, if (D5_FLASK) "Scripps FLASK" else "Scripps in situ"))
 co2off <- list()
 cat("\n=== the CO2 station offset, from the SAME 87 sites and weighting ===\n")
 for (h in names(arm)) {
