@@ -122,8 +122,10 @@ RB_LABEL <- if (nzchar(RB_DRAWS_FILE))
 # the emissions interpolation each mode's STORED covariance was computed under (see the header)
 RB_COV_EMIS <- c(hilda33d = "spline",     # computed before the 2026-10-01 flip (CHANGELOG 10-01)
                  hilda29e = "constant",   # recompute_hessian.R 2026-10-08, after the flip, no override
-                 hilda31w = "constant")   # recompute_hessian.R 2026-10-13 (the WTC resume's stage A, df4ebb6: `"$M" --update`,
+                 hilda31w = "constant",   # recompute_hessian.R 2026-10-13 (the WTC resume's stage A, df4ebb6: `"$M" --update`,
                                           # no emissions argument; the driver has none), after the flip, no override
+                 hilda31fl = "constant")  # recompute_hessian.R 2026-10-23 (the flask landing chain's hessian_id006 step,
+                                          # 63633d99: `"$M" --update`, no emissions argument), after the flip, no override
 if (!CCX_MODE_CANONICAL %in% names(RB_COV_EMIS))
   stop("RB_COV_EMIS does not say which emissions interpolation ", CCX_MODE_CANONICAL,
        "'s covariance was computed under: check its Hessian's date against the 2026-10-01 flip and add it")

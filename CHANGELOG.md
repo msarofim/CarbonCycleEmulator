@@ -2,6 +2,12 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-23 (u) — **`RB_COV_EMIS` gains `hilda31fl = "constant"` (handoff 10-23 §4.2's first step), and an interim look at the running chains: not converged at ~10.5k post-adaptation iterations, as expected this early.** (Marcus: "Read handoff … and continue work".)
+
+- **`RB_COV_EMIS`** (`calibration/build_futures_ribbons.R`): hilda31fl's Hessian is the flask landing chain's `hessian_id006` step, `recompute_hessian.R "$M" --update` at `63633d99` (10-23 10:27). The driver takes no emissions argument and none was passed, so it ran under `CCX_EMIS_METHOD_DEFAULT`, "constant" since the 10-01 flip. The band build would otherwise stop at this line.
+- **Interim look** (`outputs/diagnostics/mcmc_interim_20261023_hilda31fl_40k/`, README there): checkpoint copies at 40.5k–43k of 200k, read in scratch with `read_mcmc_check.R --drop=0`. R-hat above 1.01 on all 32, bulk ESS 7–28. Chain 4 already reaches `seas_T_lag` 2.2 months (95 % point), the ridge it walked at hilda31w; chain 2 sits higher on `beta_max` / `fert_k` (medians 2.55 / 815 vs 1.92–1.97 / 533–664). The partial pooled draws are not kept.
+- Chains at 17:15: 40.0k–42.5k, ~0.29–0.30 s/iteration; the slowest (chain 4) lands about 06:40 10-24.
+
 ## 2026-10-23 (t) — **Handoff `notes/handoff_2026-10-23_products_rebuilt_mcmc_next.md`** (Marcus: "Yes, write the handoff"). It supersedes `handoff_2026-10-23_hilda31fl_adopted.md`, which now points to it. Done since: (p)–(s). State: the model-only products, the app's flask series, both precomputes and the wording calls are done; the suite @`ca48a2a5` has only the six expected reds; the MCMC is running (PIDs in `~/ccx_frozen/20261023_mcmc_hilda31fl.pids`, ~06:30 10-24). Next: the MCMC read and identifiability, the band, the map's tie stability, then the suite and Marcus's release.
 
 ## 2026-10-23 (s) — **Marcus's four wording calls from (q), applied and pinned: card 1 "about −38‰", card 2 "about 12%", the Scripps credits, and item 8 on the same-flask lead.** Not deployed.
