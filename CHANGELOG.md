@@ -2,6 +2,16 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-23 (l) — **The adoption's test ledger: the full suite at `6171db02` has 9177 passed, 81 failed, 2 errored, 4 skipped (24.5 min).** 83 entries in 27 tests across 16 files, every one classified; **no repo test is edited.** No harness errors and no app gap this time. Evidence: `outputs/diagnostics/ledger_20261023_hilda31fl/` (README).
+
+- **B. The previous canonical by name or label (11 in 4 tests):** `flux-trace-exact:66` ("hilda31w"); `ms-reference-set` (11) and (14), 2 + 1 error (the WTC label as the canonical's); `flask-label`'s REPRODUCTION ×6, whose `fl_score()` reads `ccx_mode_file()` where it means the mode T8f was computed at (hilda31w, md5 `53ee816a…`).
+- **B2. A premise the flask switch breaks (2 in 1):** `mode-file:446-447`. The comparable-row rule now also drops the three MLO CO₂ rows between the canonical and the seas_ml-0 control (they differ in the flask switch, ruled 10-22 g); the test expected only the D3 rows.
+- **C. Re-pin (1):** GATE S whole limb 8.91 → 8.983 (`gate-bounds:509`; the scorecard's 8.98); the blind read and the verdict pass.
+- **D. Products keyed to hilda31w, refused by their loaders (67 in 19):** the app start-up and default-pulse precompute (`app-precompute` 47 + 1 error, `app-a11y:64`), the constraint map (×4, + `app-scan-items:118`), the ocean-climate card (1), `app-downloads:341` (the map and the card not drawn), the Known-issues precompute (`review-precompute` ×9), the futures band (1), `pulse_vs_tcre` (1, + 2 skips).
+- **F. Release (1):** `app-version` (`APP_RELEASE_MODE` "hilda31w").
+- **G. Power lost (1):** `mechanisms:334`. MEASURED with `calibration/diag_mechanism_sweep.R` at hilda31fl (`outputs/diagnostics/mechanism_sweep_20261023_hilda31fl.{log,rds}`): the old construction crashes on 8 of 64 ocean combinations, every one containing `warming_feedback + ocean_sink` without `revelle`; the pair crashes again and the 10-13 triple only warns (|resid| 5.2e-9). App construction 127 / 127 clean. The crash has moved between pair and triple at two adoptions in a row; proposals (a) back to the pair, (b) either of the two.
+- **Skips:** `cmap-tie`, `pulse-linearity` ×2 (from D), `l2-enso-limb` (standing).
+
 ## 2026-10-23 (k) — **ADOPTED: `hilda31fl` (the flask refit's id 6) is the canonical** (Marcus, verbatim: "Adopt id 6 (Recommended)"; the name "hilda31fl (Recommended)"; the module-check reference "Pins' file, no 2nd pass (Recommended)"). The handoff's §4 item 4, following `2b1c603d` (hilda31w's).
 
 - **The module-check ruling.** Asked for a recommendation, I gave the pins' file: the check guards the pins a refit carries, and those are the 10-08 file's values, so the comparison belongs against that file. Against it `w_enso_l2` moved −0.156 σ (hilda31w had −0.110); against hilda31w's check, −0.046 σ. Re-optimising the module at the new base gains +0.017 in the module's log-likelihood and moves `w_enso_l2` 16.79 → 16.56 Sv (1.3 %); the ocean climate effect's elasticity to it is 0.007. Recorded, not iterated; refresh the pins at the next refit run for its own reasons.

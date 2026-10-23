@@ -1,0 +1,817 @@
+Test passed with 10 successes 🥇.
+run-time inputs present: 14/14. OK
+app-a11y: ........................................................................................1..........
+app-downloads: ......................................................................................................................................................................................................................................................................................................................2..........................................................................
+app-precompute: 3....4.....567.89.abcdefghijklmnopqrstuvwxyzABCDEFGHIJ............K...........................L......MN...O
+app-scan-items: .....................................................WP.................W......
+app-version: .......Q..
+constraint-map: .......................................................................................................................R...........S........TU...
+flask-label: ................................................V.WXY...ZF
+flux-trace-exact: F...............
+futures-ribbons: ......................F................................................................
+gate-bounds: .....................................................................................................................................................F..............................................................
+mechanisms: ...........................................................................................................F
+mode-file: ......................................................................................................................................................................................................................................SEEDING w_eq for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_thc for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_enso_l2 for the test-mode-file: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 18.7.
+     The ancestor held no opinion about this coordinate.
+....
+  [test-mode-file] PINNED canonical hilda31fl: likelihood -893.0373 on 21 common rows; parent hilda32f -1039.6709 (price +146.6336, RECORDED not gated); control hilda31pe -1038.9870 (+145.9497)
+..FF.........
+ms-reference-set: .................................................................................F..........................................................................................FFE
+ocean-climate-card: .F.......................
+pulse-linearity: .......F..SS
+review-precompute: .F.........F.F.F.F.F.FFF.....
+
+══ Skipped ═════════════════════════════════════════════════════════════════════
+1. APP_PULSE_LIN_* still describe the driver's own measurement ('test-pulse-linearity.R:59:3') - Reason: the newest pulse_vs_tcre CSV is not the canonical's (the test above fails)
+
+2. the HORIZON table still matches, and every horizon is 'about' the box's one figure ('test-pulse-linearity.R:75:3') - Reason: the newest pulse_vs_tcre CSV is not the canonical's (the test above fails)
+
+══ Warnings ════════════════════════════════════════════════════════════════════
+1. 3. one share link per tab, on its first chart, copying the short address plus the view ('test-app-scan-items.R:117:5') - No shared levels found between `names(values)` of the manual scale and the
+data's colour values.
+
+2. 4-6. the seasonal window, the drivers' spans and the growth note's year are read from the data ('test-app-scan-items.R:168:5') - No shared levels found between `names(values)` of the manual scale and the
+data's colour values.
+
+══ Failed ══════════════════════════════════════════════════════════════════════
+── 1. Failure ('test-app-a11y.R:64:5'): 1-3. charts carry their names, download 
+Expected `startsWith(...)` to be TRUE.
+Differences:
+`actual`:   FALSE
+`expected`: TRUE 
+
+Backtrace:
+     ▆
+  1. ├─shiny::testServer(...) at test-app-a11y.R:28:3
+  2. │ ├─shiny:::withMockContext(...)
+  3. │ │ ├─shiny::isolate(...)
+  4. │ │ │ ├─shiny::..stacktraceoff..(...)
+  5. │ │ │ └─ctx$run(...)
+  6. │ │ │   ├─promises::with_promise_domain(...)
+  7. │ │ │   │ └─domain$wrapSync(expr)
+  8. │ │ │   ├─shiny::withReactiveDomain(...)
+  9. │ │ │   │ └─promises::with_promise_domain(...)
+ 10. │ │ │   │   └─domain$wrapSync(expr)
+ 11. │ │ │   │     └─base::force(expr)
+ 12. │ │ │   ├─shiny:::with_otel_span_context(...)
+ 13. │ │ │   │ └─base::force(expr)
+ 14. │ │ │   ├─shiny::captureStackTraces(...)
+ 15. │ │ │   │ └─promises::with_promise_domain(...)
+ 16. │ │ │   │   └─domain$wrapSync(expr)
+ 17. │ │ │   │     └─base::withCallingHandlers(expr, error = doCaptureStack)
+ 18. │ │ │   └─env$runWith(self, func)
+ 19. │ │ │     └─shiny (local) contextFunc()
+ 20. │ │ │       └─shiny::..stacktraceon..(expr)
+ 21. │ │ ├─shiny::withReactiveDomain(...)
+ 22. │ │ │ └─promises::with_promise_domain(...)
+ 23. │ │ │   └─domain$wrapSync(expr)
+ 24. │ │ │     └─base::force(expr)
+ 25. │ │ └─withr::with_options(...)
+ 26. │ │   └─base::force(code)
+ 27. │ └─rlang::eval_tidy(quosure, mask, rlang::caller_env())
+ 28. └─testthat::expect_true(...) at test-app-a11y.R:64:5
+
+── 2. Failure ('test-app-downloads.R:341:5'): 3. every chart's downloaded CSV is
+Expected `seen` to have the same values as `ls(dl_plots)`.
+Actual: "c_driver_emissions", "c_driver_enso", "c_driver_volcanic", "c_driver_warming_feedback", "c_growth", "c_plot", "c_resid", "f_plot", "h_diagram", ...
+Expected: "c_driver_emissions", "c_driver_enso", "c_driver_volcanic", "c_driver_warming_feedback", "c_growth", "c_plot", "c_resid", "cm_map", "cm_tension", ...
+Absent: "cm_map", "cm_tension", "rv_oclim", "rv_oclim_stake"
+Backtrace:
+     ▆
+  1. ├─shiny::testServer(...) at test-app-downloads.R:281:3
+  2. │ ├─shiny:::withMockContext(...)
+  3. │ │ ├─shiny::isolate(...)
+  4. │ │ │ ├─shiny::..stacktraceoff..(...)
+  5. │ │ │ └─ctx$run(...)
+  6. │ │ │   ├─promises::with_promise_domain(...)
+  7. │ │ │   │ └─domain$wrapSync(expr)
+  8. │ │ │   ├─shiny::withReactiveDomain(...)
+  9. │ │ │   │ └─promises::with_promise_domain(...)
+ 10. │ │ │   │   └─domain$wrapSync(expr)
+ 11. │ │ │   │     └─base::force(expr)
+ 12. │ │ │   ├─shiny:::with_otel_span_context(...)
+ 13. │ │ │   │ └─base::force(expr)
+ 14. │ │ │   ├─shiny::captureStackTraces(...)
+ 15. │ │ │   │ └─promises::with_promise_domain(...)
+ 16. │ │ │   │   └─domain$wrapSync(expr)
+ 17. │ │ │   │     └─base::withCallingHandlers(expr, error = doCaptureStack)
+ 18. │ │ │   └─env$runWith(self, func)
+ 19. │ │ │     └─shiny (local) contextFunc()
+ 20. │ │ │       └─shiny::..stacktraceon..(expr)
+ 21. │ │ ├─shiny::withReactiveDomain(...)
+ 22. │ │ │ └─promises::with_promise_domain(...)
+ 23. │ │ │   └─domain$wrapSync(expr)
+ 24. │ │ │     └─base::force(expr)
+ 25. │ │ └─withr::with_options(...)
+ 26. │ │   └─base::force(code)
+ 27. │ └─rlang::eval_tidy(quosure, mask, rlang::caller_env())
+ 28. └─testthat::expect_setequal(seen, ls(dl_plots)) at test-app-downloads.R:341:5
+
+── 3. Failure ('test-app-precompute.R:45:5'): 1. both products exist, are the ca
+Expected `.app$app_pre_problems(x, product)` to be identical to `character(0)`.
+Differences:
+Lengths differ: 3 is not 0
+startup
+
+── 4. Failure ('test-app-precompute.R:45:5'): 1. both products exist, are the ca
+Expected `.app$app_pre_problems(x, product)` to be identical to `character(0)`.
+Differences:
+Lengths differ: 3 is not 0
+pulse
+
+── 5. Failure ('test-app-precompute.R:56:3'): 2. the stored start-up values are 
+Expected `v$spin` to be identical to `.app$APP_SPIN`.
+Differences:
+Component “y”: Mean relative difference: 0.0007264081
+Component “prod_c14”: Mean relative difference: 0.0001175451
+Component “aux”: Component “npp0”: Component “NH”: Mean relative difference: 0.006324417
+Component “aux”: Component “npp0”: Component “SH”: Mean relative difference: 0.01117022
+Component “aux”: Component “veg0”: Component “NH”: Mean relative difference: 0.006324417
+Component “aux”: Component “veg0”: Component “SH”: Mean relative difference: 0.01117022
+Component “aux”: Component “land0”: Component “NH”: Mean relative difference: 0.006324417
+Component “aux”: Component “land0”: Component “SH”: Mean relative difference: 0.01117022
+Component “aux”: Component “soil_inert”: Component “NH”: Mean relative difference: 0.006324417
+...
+
+── 6. Failure ('test-app-precompute.R:57:3'): 2. the stored start-up values are 
+Expected `v$hist` to be identical to `.app$APP_HIST`.
+Differences:
+Component “state”: Mean relative difference: 0.0007627314
+Component “out”: Component “co2_NH”: Mean relative difference: 0.0004094553
+Component “out”: Component “co2_SH”: Mean relative difference: 7.854413e-05
+Component “out”: Component “d13c_NH”: Mean relative difference: 0.0009401995
+Component “out”: Component “d13c_SH”: Mean relative difference: 0.0001010394
+Component “out”: Component “d14c_NH”: Mean relative difference: 0.0006811537
+Component “out”: Component “d14c_SH”: Mean relative difference: 0.0004373807
+Component “out”: Component “ocean_C”: Mean relative difference: 4.393597e-05
+Component “out”: Component “land_C”: Mean relative difference: 0.0001301071
+...
+
+── 7. Failure ('test-app-precompute.R:58:3'): 2. the stored start-up values are 
+Expected `v$flux` to be identical to `.app$APP_FLUX`.
+Differences:
+Component “gpp”: Mean relative difference: 0.005471268
+Component “litter”: Mean relative difference: 0.005672315
+Component “rh”: Mean relative difference: 0.005848491
+Component “seas”: Mean relative difference: 0.2108964
+Component “luc”: Mean relative difference: 0.00179535
+Component “as_down”: Mean relative difference: 0.001667422
+Component “as_up”: Mean relative difference: 0.001722629
+Component “ml_int”: Mean relative difference: 0.007274415
+Component “pump”: Mean relative difference: 0.006925166
+...
+
+── 8. Failure ('test-app-precompute.R:68:3'): 3. the stored default pulse is the
+Expected `.pre$pulse$values$runs` to be identical to `live`.
+Differences:
+Component “base”: Component “state”: Mean relative difference: 0.0008441712
+Component “base”: Component “out”: Component “co2_NH”: Mean relative difference: 0.0004959813
+Component “base”: Component “out”: Component “co2_SH”: Mean relative difference: 0.0003413256
+Component “base”: Component “out”: Component “d13c_NH”: Mean relative difference: 0.0006792166
+Component “base”: Component “out”: Component “d13c_SH”: Mean relative difference: 0.0001159708
+Component “base”: Component “out”: Component “d14c_NH”: Mean relative difference: 0.0008310004
+Component “base”: Component “out”: Component “d14c_SH”: Mean relative difference: 0.001096023
+Component “base”: Component “out”: Component “ocean_C”: Mean relative difference: 4.108691e-05
+Component “base”: Component “out”: Component “land_C”: Mean relative difference: 0.0002037428
+...
+
+── 9. Failure ('test-app-precompute.R:69:3'): 3. the stored default pulse is the
+Expected `.pre$pulse$values$depth` to be identical to `depth`.
+Differences:
+Component “base”: Component “atm_C”: Mean relative difference: 0.0003705098
+Component “base”: Component “land_C”: Mean relative difference: 0.0001967124
+Component “base”: Component “ocean_C”: Mean relative difference: 3.798271e-05
+Component “base”: Component “upper_C”: Mean relative difference: 0.0006397089
+Component “base”: Component “intermediate_C”: Mean relative difference: 0.0003218408
+Component “base”: Component “deep_C”: Mean relative difference: 8.524684e-05
+Component “base”: Component “atm_C14”: Mean relative difference: 0.00048336
+Component “base”: Component “land_C14”: Mean relative difference: 0.0001767775
+Component “base”: Component “ocean_C14”: Mean relative difference: 0.000131507
+...
+
+── 10. Failure ('test-app-precompute.R:75:3'): 3. the stored default pulse is th
+Expected `.app$app_pulse_lab(.defaults)` to be identical to `c(live, list(depth = depth))`.
+Differences:
+Length mismatch: comparison on first 6 components
+
+── 11. Failure ('test-app-precompute.R:87:5'): 4. MUTATION: the refusal check re
+Expected every element of `.app$app_pre_problems(m, product, mf)` to match regexp "not the canonical".
+Actual text:
+✔ │ it was built for hilda31fl_old, not the canonical hilda31fl
+✔ │ its mode file is not the canonical's (md5)
+✖ │ it was built at other run inputs: params, bomb_total, luc_scale
+startup
+
+── 12. Failure ('test-app-precompute.R:89:5'): 4. MUTATION: the refusal check re
+Expected every element of `.app$app_pre_problems(m, product, mf)` to match regexp "md5".
+Actual text:
+✖ │ it was built for hilda31w, not the canonical hilda31fl
+✔ │ its mode file is not the canonical's (md5)
+✖ │ it was built at other run inputs: params, bomb_total, luc_scale
+startup
+
+── 13. Failure ('test-app-precompute.R:90:5'): 4. MUTATION: the refusal check re
+Expected every element of `.app$app_pre_problems(x, product, tempfile())` to match regexp "md5".
+Actual text:
+✖ │ it was built for hilda31w, not the canonical hilda31fl
+✔ │ its mode file is not the canonical's (md5)
+✖ │ it was built at other run inputs: params, bomb_total, luc_scale
+startup
+
+── 14. Failure ('test-app-precompute.R:93:5'): 4. MUTATION: the refusal check re
+Expected every element of `.app$app_pre_problems(m, product, mf)` to match regexp "lacks spin".
+Actual text:
+✖ │ it was built for hilda31w, not the canonical hilda31fl
+✖ │ its mode file is not the canonical's (md5)
+✔ │ it lacks spin
+✖ │ it was built at other run inputs: params, bomb_total, luc_scale
+startup
+
+── 15. Failure ('test-app-precompute.R:97:7'): 4. MUTATION: the refusal check re
+Expected `p` to have length 1.
+Actual length: 3.
+
+── 16. Failure ('test-app-precompute.R:98:7'): 4. MUTATION: the refusal check re
+Expected every element of `p` to match regexp "other run inputs: params$".
+Actual text:
+✖ │ it was built for hilda31w, not the canonical hilda31fl
+✖ │ its mode file is not the canonical's (md5)
+✖ │ it was built at other run inputs: params, bomb_total, luc_scale
+startup params
+
+── 17. Failure ('test-app-precompute.R:97:7'): 4. MUTATION: the refusal check re
+Expected `p` to have length 1.
+Actual length: 3.
+
+── 18. Failure ('test-app-precompute.R:98:7'): 4. MUTATION: the refusal check re
+Expected every element of `p` to match regexp "other run inputs: bomb_total$".
+Actual text:
+✖ │ it was built for hilda31w, not the canonical hilda31fl
+✖ │ its mode file is not the canonical's (md5)
+✖ │ it was built at other run inputs: params, bomb_total, luc_scale
+startup bomb_total
+
+── 19. Failure ('test-app-precompute.R:97:7'): 4. MUTATION: the refusal check re
+Expected `p` to have length 1.
+Actual length: 3.
+
+── 20. Failure ('test-app-precompute.R:98:7'): 4. MUTATION: the refusal check re
+Expected every element of `p` to match regexp "other run inputs: luc_scale$".
+Actual text:
+✖ │ it was built for hilda31w, not the canonical hilda31fl
+✖ │ its mode file is not the canonical's (md5)
+✖ │ it was built at other run inputs: params, bomb_total, luc_scale
+startup luc_scale
+
+── 21. Failure ('test-app-precompute.R:97:7'): 4. MUTATION: the refusal check re
+Expected `p` to have length 1.
+Actual length: 3.
+
+── 22. Failure ('test-app-precompute.R:98:7'): 4. MUTATION: the refusal check re
+Expected every element of `p` to match regexp "other run inputs: spinup_label$".
+Actual text:
+✖ │ it was built for hilda31w, not the canonical hilda31fl
+✖ │ its mode file is not the canonical's (md5)
+✖ │ it was built at other run inputs: params, bomb_total, luc_scale, spinup_label
+startup spinup_label
+
+── 23. Failure ('test-app-precompute.R:97:7'): 4. MUTATION: the refusal check re
+Expected `p` to have length 1.
+Actual length: 3.
+
+── 24. Failure ('test-app-precompute.R:98:7'): 4. MUTATION: the refusal check re
+Expected every element of `p` to match regexp "other run inputs: hist_years$".
+Actual text:
+✖ │ it was built for hilda31w, not the canonical hilda31fl
+✖ │ its mode file is not the canonical's (md5)
+✖ │ it was built at other run inputs: params, bomb_total, luc_scale, hist_years
+startup hist_years
+
+── 25. Failure ('test-app-precompute.R:87:5'): 4. MUTATION: the refusal check re
+Expected every element of `.app$app_pre_problems(m, product, mf)` to match regexp "not the canonical".
+Actual text:
+✔ │ it was built for hilda31fl_old, not the canonical hilda31fl
+✔ │ its mode file is not the canonical's (md5)
+✖ │ it was built at other run inputs: params, bomb_total, luc_scale
+pulse
+
+── 26. Failure ('test-app-precompute.R:89:5'): 4. MUTATION: the refusal check re
+Expected every element of `.app$app_pre_problems(m, product, mf)` to match regexp "md5".
+Actual text:
+✖ │ it was built for hilda31w, not the canonical hilda31fl
+✔ │ its mode file is not the canonical's (md5)
+✖ │ it was built at other run inputs: params, bomb_total, luc_scale
+pulse
+
+── 27. Failure ('test-app-precompute.R:90:5'): 4. MUTATION: the refusal check re
+Expected every element of `.app$app_pre_problems(x, product, tempfile())` to match regexp "md5".
+Actual text:
+✖ │ it was built for hilda31w, not the canonical hilda31fl
+✔ │ its mode file is not the canonical's (md5)
+✖ │ it was built at other run inputs: params, bomb_total, luc_scale
+pulse
+
+── 28. Failure ('test-app-precompute.R:93:5'): 4. MUTATION: the refusal check re
+Expected every element of `.app$app_pre_problems(m, product, mf)` to match regexp "lacks runs".
+Actual text:
+✖ │ it was built for hilda31w, not the canonical hilda31fl
+✖ │ its mode file is not the canonical's (md5)
+✔ │ it lacks runs
+✖ │ it was built at other run inputs: params, bomb_total, luc_scale
+pulse
+
+── 29. Failure ('test-app-precompute.R:97:7'): 4. MUTATION: the refusal check re
+Expected `p` to have length 1.
+Actual length: 3.
+
+── 30. Failure ('test-app-precompute.R:98:7'): 4. MUTATION: the refusal check re
+Expected every element of `p` to match regexp "other run inputs: params$".
+Actual text:
+✖ │ it was built for hilda31w, not the canonical hilda31fl
+✖ │ its mode file is not the canonical's (md5)
+✖ │ it was built at other run inputs: params, bomb_total, luc_scale
+pulse params
+
+── 31. Failure ('test-app-precompute.R:97:7'): 4. MUTATION: the refusal check re
+Expected `p` to have length 1.
+Actual length: 3.
+
+── 32. Failure ('test-app-precompute.R:98:7'): 4. MUTATION: the refusal check re
+Expected every element of `p` to match regexp "other run inputs: bomb_total$".
+Actual text:
+✖ │ it was built for hilda31w, not the canonical hilda31fl
+✖ │ its mode file is not the canonical's (md5)
+✖ │ it was built at other run inputs: params, bomb_total, luc_scale
+pulse bomb_total
+
+── 33. Failure ('test-app-precompute.R:97:7'): 4. MUTATION: the refusal check re
+Expected `p` to have length 1.
+Actual length: 3.
+
+── 34. Failure ('test-app-precompute.R:98:7'): 4. MUTATION: the refusal check re
+Expected every element of `p` to match regexp "other run inputs: luc_scale$".
+Actual text:
+✖ │ it was built for hilda31w, not the canonical hilda31fl
+✖ │ its mode file is not the canonical's (md5)
+✖ │ it was built at other run inputs: params, bomb_total, luc_scale
+pulse luc_scale
+
+── 35. Failure ('test-app-precompute.R:97:7'): 4. MUTATION: the refusal check re
+Expected `p` to have length 1.
+Actual length: 3.
+
+── 36. Failure ('test-app-precompute.R:98:7'): 4. MUTATION: the refusal check re
+Expected every element of `p` to match regexp "other run inputs: spinup_label$".
+Actual text:
+✖ │ it was built for hilda31w, not the canonical hilda31fl
+✖ │ its mode file is not the canonical's (md5)
+✖ │ it was built at other run inputs: params, bomb_total, luc_scale, spinup_label
+pulse spinup_label
+
+── 37. Failure ('test-app-precompute.R:97:7'): 4. MUTATION: the refusal check re
+Expected `p` to have length 1.
+Actual length: 3.
+
+── 38. Failure ('test-app-precompute.R:98:7'): 4. MUTATION: the refusal check re
+Expected every element of `p` to match regexp "other run inputs: hist_years$".
+Actual text:
+✖ │ it was built for hilda31w, not the canonical hilda31fl
+✖ │ its mode file is not the canonical's (md5)
+✖ │ it was built at other run inputs: params, bomb_total, luc_scale, hist_years
+pulse hist_years
+
+── 39. Failure ('test-app-precompute.R:97:7'): 4. MUTATION: the refusal check re
+Expected `p` to have length 1.
+Actual length: 3.
+
+── 40. Failure ('test-app-precompute.R:98:7'): 4. MUTATION: the refusal check re
+Expected every element of `p` to match regexp "other run inputs: pulse_inputs$".
+Actual text:
+✖ │ it was built for hilda31w, not the canonical hilda31fl
+✖ │ its mode file is not the canonical's (md5)
+✖ │ it was built at other run inputs: params, bomb_total, luc_scale, pulse_inputs
+pulse pulse_inputs
+
+── 41. Failure ('test-app-precompute.R:97:7'): 4. MUTATION: the refusal check re
+Expected `p` to have length 1.
+Actual length: 3.
+
+── 42. Failure ('test-app-precompute.R:98:7'): 4. MUTATION: the refusal check re
+Expected every element of `p` to match regexp "other run inputs: pulse_years$".
+Actual text:
+✖ │ it was built for hilda31w, not the canonical hilda31fl
+✖ │ its mode file is not the canonical's (md5)
+✖ │ it was built at other run inputs: params, bomb_total, luc_scale, pulse_years
+pulse pulse_years
+
+── 43. Failure ('test-app-precompute.R:97:7'): 4. MUTATION: the refusal check re
+Expected `p` to have length 1.
+Actual length: 3.
+
+── 44. Failure ('test-app-precompute.R:98:7'): 4. MUTATION: the refusal check re
+Expected every element of `p` to match regexp "other run inputs: pulse_emis_method$".
+Actual text:
+✖ │ it was built for hilda31w, not the canonical hilda31fl
+✖ │ its mode file is not the canonical's (md5)
+✖ │ it was built at other run inputs: params, bomb_total, luc_scale, pulse_emis_method
+pulse pulse_emis_method
+
+── 45. Failure ('test-app-precompute.R:106:3'): 5. MUTATION: app_pre_read() serv
+Expected `.app$app_pre_read("startup", good)` to be identical to `.pre$startup$values`.
+Differences:
+target is NULL, current is list
+
+── 46. Failure ('test-app-precompute.R:136:3'): 6. MUTATION: app_pulse_lab() ser
+Expected `.app$app_pulse_default_result()` to be identical to `c(.pre$pulse$values$runs, list(depth = .pre$pulse$values$depth))`.
+Differences:
+target is NULL, current is list
+
+── 47. Error ('test-app-precompute.R:296:5'): 10. the real server: the default d
+<shiny.silent.error/validation/error/condition>
+Error: 
+Backtrace:
+     ▆
+  1. ├─mock(...) at test-app-precompute.R:288:3
+  2. │ ├─base::withCallingHandlers(...) at test-app-precompute.R:283:5
+  3. │ ├─base::eval(bquote(shiny::testServer(srv_fn(), .(q))))
+  4. │ │ └─base::eval(bquote(shiny::testServer(srv_fn(), .(q))))
+  5. │ └─shiny::testServer(...)
+  6. │   ├─shiny:::withMockContext(...)
+  7. │   │ ├─shiny::isolate(...)
+  8. │   │ │ ├─shiny::..stacktraceoff..(...)
+  9. │   │ │ └─ctx$run(...)
+ 10. │   │ │   ├─promises::with_promise_domain(...)
+ 11. │   │ │   │ └─domain$wrapSync(expr)
+ 12. │   │ │   ├─shiny::withReactiveDomain(...)
+ 13. │   │ │   │ └─promises::with_promise_domain(...)
+ 14. │   │ │   │   └─domain$wrapSync(expr)
+ 15. │   │ │   │     └─base::force(expr)
+ 16. │   │ │   ├─shiny:::with_otel_span_context(...)
+ 17. │   │ │   │ └─base::force(expr)
+ 18. │   │ │   ├─shiny::captureStackTraces(...)
+ 19. │   │ │   │ └─promises::with_promise_domain(...)
+ 20. │   │ │   │   └─domain$wrapSync(expr)
+ 21. │   │ │   │     └─base::withCallingHandlers(expr, error = doCaptureStack)
+ 22. │   │ │   └─env$runWith(self, func)
+ 23. │   │ │     └─shiny (local) contextFunc()
+ 24. │   │ │       └─shiny::..stacktraceon..(expr)
+ 25. │   │ ├─shiny::withReactiveDomain(...)
+ 26. │   │ │ └─promises::with_promise_domain(...)
+ 27. │   │ │   └─domain$wrapSync(expr)
+ 28. │   │ │     └─base::force(expr)
+ 29. │   │ └─withr::with_options(...)
+ 30. │   │   └─base::force(code)
+ 31. │   └─rlang::eval_tidy(quosure, mask, rlang::caller_env())
+ 32. ├─.app$app_pulse_partition_table(pulse_depth(), pulse_runs()$gtc) at test-app-precompute.R:296:5
+ 33. ├─shiny (local) pulse_depth()
+ 34. │ ├─shiny::..stacktraceoff..(self$.updateValue())
+ 35. │ └─self$.updateValue()
+ 36. │   └─ctx$run(...)
+ 37. │     ├─promises::with_promise_domain(...)
+ 38. │     │ └─domain$wrapSync(expr)
+ 39. │     ├─shiny::withReactiveDomain(...)
+ 40. │     │ └─promises::with_promise_domain(...)
+ 41. │     │   └─domain$wrapSync(expr)
+ 42. │     │     └─base::force(expr)
+ 43. │     ├─shiny:::with_otel_span_context(...)
+ 44. │     │ └─base::force(expr)
+ 45. │     ├─shiny::captureStackTraces(...)
+ 46. │     │ └─promises::with_promise_domain(...)
+ 47. │     │   └─domain$wrapSync(expr)
+ 48. │     │     └─base::withCallingHandlers(expr, error = doCaptureStack)
+ 49. │     └─env$runWith(self, func)
+ 50. │       └─shiny (local) contextFunc()
+ 51. │         ├─base::withCallingHandlers(...)
+ 52. │         ├─base::withVisible(.func())
+ 53. │         └─shiny (local) .func()
+ 54. │           ├─shiny::..stacktraceon..(`<reactive>`(...))
+ 55. │           └─`<reactive>`(...)
+ 56. │             └─shiny (local) pulse_runs()
+ 57. │               └─base::stop(.value)
+ 58. ├─shiny (local) `<fn>`(`<shny.sl.>`)
+ 59. │ └─base::stop(e)
+ 60. └─shiny (local) `<fn>`(`<shny.sl.>`)
+
+── 48. Failure ('test-app-precompute.R:415:3'): 12. MUTATION: the pulse charts' 
+Expected `apre_dl_state(st$opened)` to be identical to "data".
+Differences:
+1/1 mismatches
+x[1]: "other"
+y[1]: "data"
+
+── 49. Failure ('test-app-precompute.R:416:3'): 12. MUTATION: the pulse charts' 
+Expected `apre_dl_state(st$grayed)` to be identical to "note".
+Differences:
+1/1 mismatches
+x[1]: "other"
+y[1]: "note"
+
+── 50. Failure ('test-app-precompute.R:424:3'): 12. MUTATION: the pulse charts' 
+Expected `apre_dl_state(run(mut)$grayed)` to be identical to "data".
+Differences:
+1/1 mismatches
+x[1]: "other"
+y[1]: "data"
+
+── 51. Failure ('test-app-scan-items.R:118:5'): 3. one share link per tab, on it
+Expected `grepl("ccx-share", output$cm_map_ui$html, fixed = TRUE)` to be TRUE.
+Differences:
+`actual`:   FALSE
+`expected`: TRUE 
+
+Backtrace:
+     ▆
+  1. ├─shiny::testServer(...) at test-app-scan-items.R:100:3
+  2. │ ├─shiny:::withMockContext(...)
+  3. │ │ ├─shiny::isolate(...)
+  4. │ │ │ ├─shiny::..stacktraceoff..(...)
+  5. │ │ │ └─ctx$run(...)
+  6. │ │ │   ├─promises::with_promise_domain(...)
+  7. │ │ │   │ └─domain$wrapSync(expr)
+  8. │ │ │   ├─shiny::withReactiveDomain(...)
+  9. │ │ │   │ └─promises::with_promise_domain(...)
+ 10. │ │ │   │   └─domain$wrapSync(expr)
+ 11. │ │ │   │     └─base::force(expr)
+ 12. │ │ │   ├─shiny:::with_otel_span_context(...)
+ 13. │ │ │   │ └─base::force(expr)
+ 14. │ │ │   ├─shiny::captureStackTraces(...)
+ 15. │ │ │   │ └─promises::with_promise_domain(...)
+ 16. │ │ │   │   └─domain$wrapSync(expr)
+ 17. │ │ │   │     └─base::withCallingHandlers(expr, error = doCaptureStack)
+ 18. │ │ │   └─env$runWith(self, func)
+ 19. │ │ │     └─shiny (local) contextFunc()
+ 20. │ │ │       └─shiny::..stacktraceon..(expr)
+ 21. │ │ ├─shiny::withReactiveDomain(...)
+ 22. │ │ │ └─promises::with_promise_domain(...)
+ 23. │ │ │   └─domain$wrapSync(expr)
+ 24. │ │ │     └─base::force(expr)
+ 25. │ │ └─withr::with_options(...)
+ 26. │ │   └─base::force(code)
+ 27. │ └─rlang::eval_tidy(quosure, mask, rlang::caller_env())
+ 28. └─testthat::expect_true(...) at test-app-scan-items.R:118:5
+
+── 52. Failure ('test-app-version.R:55:3'): the release was cut on the mode the 
+Expected `p` to equal `character(0)`.
+Differences:
+Lengths differ: 1 is not 0
+APP_RELEASE_MODE is 'hilda31w' but the app loads 'hilda31fl'
+
+── 53. Failure ('test-constraint-map.R:121:3'): 6. the artifact stamps its own p
+Expected `pv$mode` to be identical to `CCX_MODE_CANONICAL`.
+Differences:
+1/1 mismatches
+x[1]: "hilda31w"
+y[1]: "hilda31fl"
+
+── 54. Failure ('test-constraint-map.R:174:3'): 7. the app's loader accepts the 
+Expected `ccx_cmap_problems(cm)` to be identical to `character(0)`.
+Differences:
+Lengths differ: 3 is not 0
+
+── 55. Failure ('test-constraint-map.R:199:3'): 7. the app's loader accepts the 
+Expected `is.null(ok$cm)` to be FALSE.
+Differences:
+`actual`:   TRUE 
+`expected`: FALSE
+
+
+── 56. Failure ('test-constraint-map.R:199:33'): 7. the app's loader accepts the
+Expected `ok$why` to be NULL.
+Differences:
+`actual` is a character vector ('built for mode \'hilda31w\', the canonical is \'hilda31fl\'')
+`expected` is NULL
+
+
+── 57. Failure ('test-flask-label.R:90:3'): REPRODUCTION: the label scores T8f's
+Expected `T8F$provenance$mode_md5` to be identical to `unname(tools::md5sum(ccx_mode_file()))`.
+Differences:
+1/1 mismatches
+x[1]: "53ee816ac48cea0f1c1fad244651c5fd"
+y[1]: "80c487f576f9a1e44f7900597d95a3e4"
+
+── 58. Failure ('test-flask-label.R:93:3'): REPRODUCTION: the label scores T8f's
+Expected `a0$u[names(T8F$points$u0)]` to be identical to `T8F$points$u0`.
+Differences:
+31/31 mismatches (average diff: 0.0411)
+[1]  0.585 -  0.701 == -0.11622
+[2] -0.908 - -0.878 == -0.03067
+[3]  0.118 -  0.143 == -0.02464
+[4]  7.516 -  7.515 ==  0.00136
+[5] -1.567 - -1.574 ==  0.00669
+[6] -0.100 - -0.104 ==  0.00433
+[7] -5.847 - -5.821 == -0.02588
+[8] -0.579 - -0.581 ==  0.00193
+[9]  0.296 -  0.281 ==  0.01425
+...
+
+── 59. Failure ('test-flask-label.R:94:3'): REPRODUCTION: the label scores T8f's
+Expected `a0$v` to equal `sum(T8F$rows_canonical$all)`.
+Differences:
+1/1 mismatches
+[1] -1050 - -1068 == 17.5
+
+── 60. Failure ('test-flask-label.R:95:3'): REPRODUCTION: the label scores T8f's
+Expected `a0$rows[names(T8F$rows_canonical$all)]` to equal `T8F$rows_canonical$all`.
+Differences:
+27/27 mismatches (average diff: 0.879)
+[1]  -64.4 -  -64.6 ==  0.1999
+[2]  -63.6 -  -62.9 == -0.7168
+[3]  -14.1 -  -18.4 ==  4.3484
+[4]   67.8 -   67.8 == -0.0190
+[5]  222.8 -  211.0 == 11.7310
+[6]  250.5 -  250.4 ==  0.1161
+[7] -511.0 - -511.8 ==  0.8270
+[8]   66.4 -   66.4 ==  0.0403
+[9]   65.8 -   66.8 == -0.9578
+...
+
+── 61. Failure ('test-flask-label.R:105:3'): REPRODUCTION: the label scores T8f'
+Expected `sort(names(d)[abs(d) > 0])` to be identical to `sort(LIK_CO2_FLASK_ROWS)`.
+Differences:
+Lengths differ: 0 is not 3
+
+── 62. Failure ('test-flask-label.R:106:3'): REPRODUCTION: the label scores T8f'
+Expected `all(abs(d[LIK_CO2_FLASK_ROWS]) > 1)` to be TRUE.
+Differences:
+`actual`:   FALSE
+`expected`: TRUE 
+
+
+── 63. Failure ('test-flux-trace-exact.R:66:3'): the canonical runs the structur
+Expected `CCX_MODE_CANONICAL` to be identical to "hilda31w".
+Differences:
+1/1 mismatches
+x[1]: "hilda31fl"
+y[1]: "hilda31w"
+
+── 64. Failure ('test-futures-ribbons.R:156:3'): the shipped band passes the app
+Expected `p` to equal `character(0)`.
+Differences:
+Lengths differ: 2 is not 0
+built for mode 'hilda31w', the canonical is 'hilda31fl' | built at a different parameter vector from the checked mode's par_mode
+
+── 65. Failure ('test-gate-bounds.R:509:3'): GATE S has POWER against its own bl
+Expected `full$mo` to equal 8.91.
+Differences:
+1/1 mismatches
+[1] 8.98 - 8.91 == 0.0731
+
+── 66. Failure ('test-mechanisms.R:334:3'): the ocean switch is RUN-ONLY: the co
+Expected `suppressWarnings(...)` to throw a error.
+
+── 67. Failure ('test-mode-file.R:446:3'): the comparable-row rule drops the D3-
+Expected `mixed` to have the same values as `setdiff(intersect(r_c, r_ctl), LIK_IMB_ROWS)`.
+Actual: "co2_level_SPO", "co2_seasonal_SPO", "d13c_seasonal_MLO", "d13c_seasonal_SPO", "co2_icecore", "d13c_icecore", "d13c_level_MLO", "d13c_level_SPO", "d13c_gradient", ...
+Expected: "co2_level_MLO", "co2_level_SPO", "co2_seasonal_MLO", "co2_seasonal_SPO", "d13c_seasonal_MLO", "d13c_seasonal_SPO", "co2_icecore", "d13c_icecore", "d13c_level_MLO", ...
+Absent: "co2_level_MLO", "co2_seasonal_MLO", "co2_gradient"
+
+── 68. Failure ('test-mode-file.R:447:3'): the comparable-row rule drops the D3-
+Expected `length(intersect(r_c, r_ctl)) - length(mixed)` to equal `length(LIK_IMB_ROWS)`.
+Differences:
+1/1 mismatches
+[1] 5 - 2 == 3
+
+── 69. Failure ('test-ms-reference-set.R:198:3'): (11) OBJECTIVE #16's pins ARE 
+Expected `ccx_mode_struct(readRDS(ccx_mode_file()))` to be identical to `CCX_MODE_WTC_STRUCT`.
+Differences:
+1/1 mismatches
+x[1]: "hilda_csl3v0kaidgbemwtcf"
+y[1]: "hilda_csl3v0kaidgbemwtc"
+the canonical runs the WTC label (hilda31w)
+
+── 70. Failure ('test-ms-reference-set.R:346:50'): (14) #18 PASS 2's pins (2026-
+Expected `CCX_MODE_CANONICAL` to be identical to "hilda31w".
+Differences:
+1/1 mismatches
+x[1]: "hilda31fl"
+y[1]: "hilda31w"
+
+── 71. Failure ('test-ms-reference-set.R:347:3'): (14) #18 PASS 2's pins (2026-1
+Expected `ccx_mode_struct(ccx_mode_file())` to be identical to `CCX_MODE_WTC_STRUCT`.
+Differences:
+1/1 mismatches
+x[1]: "hilda_csl3v0kaidgbemwtcf"
+y[1]: "hilda_csl3v0kaidgbemwtc"
+
+── 72. Error ('test-ms-reference-set.R:348:3'): (14) #18 PASS 2's pins (2026-10-
+Error in `ccx_ms_reference_set(p2, "1", pump_field = "solved", struct = CCX_MODE_WTC_STRUCT)`: ccx_ms_reference_set(): the canonical's pins carry the interannual module's values, fitted under hilda_csl3v0kaidgbemwtcf; struct 'hilda_csl3v0kaidgbemwtc' is not that label (a cut canonical's pins are ruled under its own).
+Backtrace:
+    ▆
+ 1. └─global ccx_ms_reference_set(p2, "1", pump_field = "solved", struct = CCX_MODE_WTC_STRUCT) at test-ms-reference-set.R:348:3
+
+── 73. Failure ('test-ocean-climate-card.R:27:3'): 1. the product is the CANONIC
+Expected `.oc_rv$rv_oclim_problems(x, ccx_mode_file())` to be identical to `character(0)`.
+Differences:
+Lengths differ: 2 is not 0
+
+── 74. Failure ('test-pulse-linearity.R:49:3'): the measurement is OF THE CANONI
+Expected `.csv_mode_ok(R)` to be TRUE.
+Differences:
+`actual`:   FALSE
+`expected`: TRUE 
+
+pulse_vs_tcre_20261013.csv was made at hilda31w; the app loads hilda31fl -- re-run calibration/diag_pulse_vs_tcre.R
+
+── 75. Failure ('test-review-precompute.R:23:3'): 1. the product exists, is the 
+Expected `e$rv_pre_problems(x, ccx_mode_file())` to be identical to `character(0)`.
+Differences:
+Lengths differ: 2 is not 0
+
+── 76. Failure ('test-review-precompute.R:39:5'): 2. every stored value is what 
+Expected `x$values[[k]]` to be identical to `live[[k]]`.
+Differences:
+Component “g”: Component “co2”: Mean relative difference: 0.01699818
+Component “g”: Component “d13c”: Mean relative difference: 0.01754845
+Component “verdict_H”: Component “R_co2”: Mean relative difference: 0.01699818
+Component “verdict_H”: Component “R_d13c”: Mean relative difference: 0.01754845
+Component “verdict_H”: Component “se_co2”: Mean relative difference: 0.01699818
+Component “verdict_H”: Component “se_d13c”: Mean relative difference: 0.01754845
+Component “verdict_H”: Component “d”: Mean relative difference: 0.01801056
+Component “verdict_H”: Component “se”: Mean relative difference: 0.01751674
+Component “verdict_H”: Component “z”: Mean relative difference: 0.0004853136
+...
+gradients
+
+── 77. Failure ('test-review-precompute.R:39:5'): 2. every stored value is what 
+Expected `x$values[[k]]` to be identical to `live[[k]]`.
+Differences:
+Component “asym”: Mean relative difference: 0.006759897
+Component “z”: Mean relative difference: 0.003207067
+Component “hemi”: Mean relative difference: 0.001031254
+Component “z_hemi”: Mean relative difference: 0.009466952
+Component “region”: Mean relative difference: 0.002769593
+Component “z_region”: Mean relative difference: 0.003163492
+gateD
+
+── 78. Failure ('test-review-precompute.R:39:5'): 2. every stored value is what 
+Expected `x$values[[k]]` to be identical to `live[[k]]`.
+Differences:
+Component “model_anom”: Mean relative difference: 0.01631621
+Component “enso”: Component “r_model”: Mean relative difference: 0.002168551
+Component “enso”: Component “p_model”: Mean relative difference: 0.04476954
+Component “verdict”: Component “sd_model”: Mean relative difference: 0.01392829
+Component “verdict”: Component “ratio”: Mean relative difference: 0.01392829
+Component “verdict”: Component “z”: Mean relative difference: 0.09831988
+Component “gv”: Component “sd”: Mean relative difference: 0.01392829
+Component “gv”: Component “rho”: Mean relative difference: 0.1284735
+variability
+
+── 79. Failure ('test-review-precompute.R:39:5'): 2. every stored value is what 
+Expected `x$values[[k]]` to be identical to `live[[k]]`.
+Differences:
+Component “full”: Component “slope”: Mean relative difference: 0.008330255
+Component “full”: Component “se”: Mean relative difference: 0.002520818
+Component “full”: Component “anom”: Mean relative difference: 0.005998708
+Component “sol”: Component “slope”: Mean relative difference: 0.003007728
+Component “sol”: Component “se”: Mean relative difference: 0.003469742
+Component “sol”: Component “anom”: Mean relative difference: 0.007661413
+Component “ratio”: Mean relative difference: 0.008330255
+enso_slope
+
+── 80. Failure ('test-review-precompute.R:39:5'): 2. every stored value is what 
+Expected `x$values[[k]]` to be identical to `live[[k]]`.
+Differences:
+Component “irf”: Mean relative difference: 0.006154776
+Component “read”: Mean relative difference: 0.006384775
+Component “partition”: Component “share”: Mean relative difference: 0.003569153
+Component “partition”: Component “z”: Mean relative difference: 0.07603744
+pulse
+
+── 81. Failure ('test-review-precompute.R:49:3'): 3. MUTATION: the refusal check
+Expected `e$rv_pre_problems(m, mf)` to have length 1.
+Actual length: 2.
+
+── 82. Failure ('test-review-precompute.R:51:3'): 3. MUTATION: the refusal check
+Expected `e$rv_pre_problems(m, mf)` to have length 1.
+Actual length: 2.
+
+── 83. Failure ('test-review-precompute.R:53:3'): 3. MUTATION: the refusal check
+Expected every element of `e$rv_pre_problems(m, mf)` to match regexp "lacks pulse".
+Actual text:
+✖ │ it was built for hilda31w, not the canonical hilda31fl
+✖ │ its mode file is not the canonical's (md5)
+✔ │ it lacks pulse
+
+══ DONE ════════════════════════════════════════════════════════════════════════
+
+=== RERUN of the 16 failing files @ 6171db02: 81 failed, 2 errored ===
+rc=0
