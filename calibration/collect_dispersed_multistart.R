@@ -49,12 +49,22 @@ CO_REF_IDS  <- c(cold = 0L, incumbent = 1L, new_basin = 2L)
 # So the number to beat is the best FINAL value among the fixed non-cold starts,
 # which is what ids 3-5 exist to produce.
 CO_SEED_IDS <- c(inc_enso = 3L, new_enso = 4L, new_obs = 5L)
-CO_BENCH_IDS <- c(CO_REF_IDS[c("incumbent", "new_basin")], CO_SEED_IDS)
+# THE FILE SLOTS (2026-10-23): MIRRORS run_dispersed_multistart.R's MS_FILE_IDS (test-ms-file.R checks the two agree). A
+# FILLED slot is a known point (the flask refit's T8c / T8f points), so it joins the benchmark; an EMPTY one ran its id's
+# dispersed draw (start_class "dispersed") and joins the draws. Which slots were filled is READ from the starts'
+# `file_starts_n` below, so a slot the file did not fill is never reported as a MISSING known-basin start.
+CO_FILE_IDS <- c(file1 = 6L, file2 = 7L, file3 = 8L, file4 = 9L)
 CO_OUT     <- file.path(CO_DIR, "summary.csv")
 
 fs <- sort(list.files(CO_DIR, pattern = "^start_[0-9]+\\.rds$", full.names = TRUE))
 if (!length(fs)) stop("no start_*.rds under ", CO_DIR)
 R <- lapply(fs, readRDS)
+# how many file slots the wave's file filled; a file written before 2026-10-23 has no field and filled none
+CO_FILE_N <- unique(vapply(R, function(r) if (is.null(r$file_starts_n)) 0L else as.integer(r$file_starts_n), integer(1)))
+if (length(CO_FILE_N) > 1L)
+  stop("the starts under ", CO_DIR, " record different numbers of file starts (", paste(CO_FILE_N, collapse = ", "),
+       "). They are not one survey.")
+CO_BENCH_IDS <- c(CO_REF_IDS[c("incumbent", "new_basin")], CO_SEED_IDS, CO_FILE_IDS[seq_len(CO_FILE_N)])
 
 # ---- GATE: one parameter set, one arm, one dispersion, or they are not
 # comparable and a ranking across them is meaningless.
@@ -70,20 +80,37 @@ R <- lapply(fs, readRDS)
 .chk("param_names", "the parameter set")
 .chk("pump_mode",   "the arm")
 .chk("spread",      "the dispersion sd")
+# one file of FILE STARTS (2026-10-23): a start without one records NA, and one written before the field existed has none
+local({
+  v <- unique(vapply(R, function(r) if (is.null(r$file_starts_md5) || is.na(r$file_starts_md5)) "none"
+                     else r$file_starts_md5, character(1)))
+  if (length(v) > 1L)
+    stop("the starts under ", CO_DIR, " disagree on the file starts (CCX_MS_FILE_STARTS md5 ", paste(v, collapse = "  /  "),
+         "). They are not one survey.")
+})
 cat(sprintf("\n%s\nDISPERSED MULTI-START SURVEY -- %d starts under\n  %s\n%s\n",
             strrep("=", 74), length(R), CO_DIR, strrep("=", 74)))
 
 # ---- did every reference start pass its port gate? -------------------
 for (nm in names(CO_REF_IDS)) {
   k <- which(vapply(R, function(r) identical(r$id, CO_REF_IDS[[nm]]), logical(1)))
-  if (!length(k)) { cat(sprintf("  ⚠ reference start '%s' (id %d) IS MISSING -- the port is NOT verified\n",
-                                nm, CO_REF_IDS[[nm]])); next }
+  # (2026-10-23) every task checks the port (a non-reference one at the new-basin point), so a missing reference start
+  # leaves the port unverified only when no start that ran checked it -- a local refit runs ids 1 and 6-7 only
+  if (!length(k)) { cat(sprintf("  ⚠ reference start '%s' (id %d) IS MISSING -- %s\n", nm, CO_REF_IDS[[nm]],
+                                if (any(vapply(R, function(r) isTRUE(r$port_checked), logical(1))))
+                                  "the starts that ran checked the port themselves (their port column below)"
+                                else "the port is NOT verified")); next }
   r <- R[[k]]
   cat(sprintf("  reference %-10s id %d  logpost %12.4f  port %s\n", nm, r$id, r$logpost,
               if (isTRUE(r$port_checked)) sprintf("VERIFIED (rel %.1e)", r$port_rel)
               else if (identical(r$id, CO_REF_IDS[["cold"]])) "n/a"
               else "*** NOT VERIFIED ***"))
 }
+# ---- the FILE STARTS (2026-10-23): each one's value gate and port, from its own record
+for (r in R[vapply(R, function(r) identical(r$start_class, "file"), logical(1))])
+  cat(sprintf("  file start %-9s id %d  logpost %12.4f  port %s  value gate %s\n", r$file_start_name, r$id, r$logpost,
+              if (isTRUE(r$port_checked)) sprintf("VERIFIED (rel %.1e)", r$port_rel) else "*** NOT VERIFIED ***",
+              if (isTRUE(r$file_gate$checked)) sprintf("VERIFIED (|diff| %.1e)", r$file_gate$diff) else "*** NOT RUN ***"))
 
 # ⛔ DEAD TASKS (2026-09-10): a start whose reported optimum is not a finite point
 # of the objective (it ended on the penalty plateau) is REFUSED, not ranked --
@@ -215,6 +242,10 @@ CO_TOL <- local({
 # survey's draws below, never the benchmark, and it is not MISSING either. Older files carry the id's class.
 co_drawn <- vapply(R, function(r) identical(r$start_class, "dispersed"), logical(1))
 co_unseedable <- ids[ids %in% CO_SEED_IDS & co_drawn]
+# a FILLED file slot that reports a draw is a driver defect, not a fallback: CO_BENCH_IDS holds only the filled slots
+if (any(ids %in% CO_FILE_IDS[seq_len(CO_FILE_N)] & co_drawn))
+  stop("file slot(s) ", paste(ids[ids %in% CO_FILE_IDS[seq_len(CO_FILE_N)] & co_drawn], collapse = ", "),
+       " ran a dispersed draw although the wave's file filled them (file_starts_n = ", CO_FILE_N, ").")
 kB <- which(ids %in% CO_BENCH_IDS & !co_drawn)
 if (length(co_unseedable))
   cat(sprintf("\n  ⚠ seeded slot%s %s %s UNSEEDABLE under this arm (its seed moves no fitted name) and ran %s:\n    counted with the survey's draws, not in the benchmark.\n",

@@ -20,7 +20,7 @@
 # is untouched; ranking and adoption are separate steps and the adoption one is
 # Marcus's.
 #
-# THE SIX FIXED STARTS. Ids 0-5 are not dispersed:
+# THE FIXED STARTS. Ids 0-9 are not dispersed by number:
 #   id 0  the COLD hand-set init            -- the control the refits all quote
 #   id 1  the INCUMBENT -- since 2026-09-10 `hilda31p` (see MS_REF_INC below)
 #   id 2  the NEW BASIN -- since 2026-09-10 `hilda31`, by path (see MS_REF_NEW)
@@ -29,6 +29,12 @@
 #   id 4  the NEW BASIN + the same
 #   id 5  the NEW BASIN + the OBSERVATION-implied ENSO partition (land x1.734,
 #         ocean +0.326 each), which the objective conditionally RESISTS
+#   ids 6-9  FILE STARTS (2026-10-23, the flask refit's T8c / T8f points): named u
+#         vectors from the rds CCX_MS_FILE_STARTS names, in its order, each GATED on
+#         its label and on the logpost it scored where it was computed
+#         (calibration/lib_ms_file.R). An EMPTY slot (no file, or fewer starts than
+#         slots) runs its id's dispersed draw, labeled EMPTY, start_class
+#         "dispersed": the vector that id drew before the slots existed.
 # ⛔ IDS 3-5 SEED ONLY WHAT THE ARM FITS (2026-10-07 m, calibration/lib_ms_seed.R). A
 # slot whose seed moves no fitted name is UNSEEDABLE under that arm and runs its
 # id's DISPERSED DRAW, labeled UNSEEDABLE, start_class "dispersed"; and no task
@@ -102,6 +108,8 @@
 #   CCX_MS_CLOCK     the budget's clock: wall | cpu          (default wall; the Mac runner exports cpu)
 #   CCX_MS_SPREAD    dispersion sd in u-space               (default: measured)
 #   CCX_MS_SEED      base seed; start k uses SEED + k        (default 2026)
+#   CCX_MS_FILE_STARTS  the rds of FILE STARTS for ids 6-9, a path relative to the
+#                    project root or absolute               (default: none; every slot EMPTY)
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
@@ -125,6 +133,7 @@ if (length(MS_PINS)) cat(sprintf("PINNED (removed from the fitted set, held in t
 source(ccx_path("calibration", "lib_run_inputs.R"))
 source(ccx_path("calibration", "lib_ms_deadline.R"))   # the in-restart deadline (option A, 2026-10-05)
 source(ccx_path("calibration", "lib_ms_seed.R"))       # the seeded slots + the duplicate-start refusal (2026-10-07 m)
+source(ccx_path("calibration", "lib_ms_file.R"))       # the file starts + the evaluation-identity bound (2026-10-23)
 ccx_require_run_inputs()   # BEFORE the budget's clock starts, and before any target is written
 
 # ---- named constants ------------------------------------------------
@@ -209,7 +218,7 @@ MS_REF_NEW_LABEL <- sprintf("NEW BASIN = %s (%s; registered, evaluated at seas_m
                             Sys.getenv("CCX_MS_SEAS_ML", "UNSET"))
 # ⚠ THESE THREE NAMES ARE ALSO THE PORT-TARGET KEYS in calibration/torch/
 # port_targets.csv, so this vector may not be extended with ids that have no
-# target row -- the seeded ids below are deliberately NOT in it, and the port
+# target row -- the seeded and file ids below are deliberately NOT in it, and the port
 # gate treats them the way it treats a dispersed id (it checks the new-basin
 # reference point, which every task can evaluate).
 MS_REF_IDS    <- c(cold = 0L, incumbent = 1L, new_basin = 2L)
@@ -219,7 +228,12 @@ MS_REF_IDS    <- c(cold = 0L, incumbent = 1L, new_basin = 2L)
 # neither is a mode of this space and neither -1548.01 nor -1496.01 is a number
 # a 25-parameter result may be ranked against.
 MS_SEED_IDS   <- c(inc_enso = 3L, new_enso = 4L, new_obs = 5L)
-MS_DISPERSED_FROM <- 6L        # every id at or above this one is a random draw
+# ---- THE FILE STARTS (2026-10-23; calibration/lib_ms_file.R). Four slots, filled in the order of the rds that
+# CCX_MS_FILE_STARTS names. The flask refit needs two (T8c's block point, T8f's Newton point); four cost nothing, because
+# an EMPTY slot runs the dispersed draw its id ran before the slots existed. ⚠ MIRRORED by CO_FILE_IDS in
+# collect_dispersed_multistart.R (test-ms-file.R checks the two agree). Not port-target keys, like the seeded ids.
+MS_FILE_IDS   <- c(file1 = 6L, file2 = 7L, file3 = 8L, file4 = 9L)
+MS_DISPERSED_FROM <- 10L       # every id at or above this one is a random draw (6 until 2026-10-23)
 # MEASURED, and re-measurable in four evaluations. The objective's own
 # conditional optimum for the ocean pair at the 08-31e basin, with the other 23
 # coordinates FROZEN: +0.05 -> +1.43, +0.10 -> +1.91, +0.15 -> +1.44,
@@ -633,6 +647,21 @@ neg_lp <- function(u) {
 .ms_limb_on    <- ccx_l2_on(bp)                       # bp = the run's own base (structure applied above)
 MS_L2_SEED_SV <- ccx_eq_cell_obs()$w0_prior$interannual$per_index_sv   # c(14, 25) Sv per index, Meinen 2001
 MS_FIXED_IDS  <- seq.int(0L, MS_DISPERSED_FROM - 1L)  # the ids that are not random draws by NUMBER
+# THE FILE STARTS, read and GATED ON THEIR LABEL here (lib_ms_file.R gate (1)), before any task's start is built, so a file
+# scored under another objective stops every task -- the preflight included -- in about a second. A relative path resolves
+# against the project root, so a frozen tree reads its own copy. Its md5 goes into every start file.
+MS_FILE_STARTS_PATH <- local({
+  p <- Sys.getenv("CCX_MS_FILE_STARTS", "")
+  if (nzchar(p) && !startsWith(p, "/")) ccx_path(p) else p
+})
+MS_FILE_STARTS <- ms_read_file_starts(MS_FILE_STARTS_PATH, length(MS_FILE_IDS),
+                                      list(struct = MS_STRUCT, seas_ml = MS_SEAS_ML, pump_field = MS_PUMP_FIELD, pins = MS_PINS),
+                                      CCX_PARAM_NAMES)
+MS_FILE_STARTS_MD5 <- if (nzchar(MS_FILE_STARTS_PATH)) unname(tools::md5sum(MS_FILE_STARTS_PATH)) else NA_character_
+if (length(MS_FILE_STARTS))
+  cat(sprintf("  file starts: %d from %s (md5 %s): %s\n", length(MS_FILE_STARTS), MS_FILE_STARTS_PATH, MS_FILE_STARTS_MD5,
+              paste(sprintf("id %d = '%s'", MS_FILE_IDS[seq_along(MS_FILE_STARTS)], vapply(MS_FILE_STARTS, `[[`, "", "name")),
+                    collapse = ", ")))
 ms_seed <- function(sk) ms_seed_slot(sk, if (identical(sk, "inc_enso")) P_INC else P_NEW,
                                      free = CCX_PARAM_NAMES, pinned = names(MS_PINS), limb_on = .ms_limb_on,
                                      l2_edges = MS_L2_SEED_SV, ocn_opt = MS_ENSO_OCN_OPT, ocn_obs = MS_ENSO_OCN_OBS,
@@ -665,6 +694,8 @@ ms_fixed_u <- function(id) {
   if (id == MS_REF_IDS[["new_basin"]]) return(U_NEW)
   sk <- names(MS_SEED_IDS)[match(id, MS_SEED_IDS)]
   if (!is.na(sk)) { s <- ms_seed(sk); return(if (s$seeded) s$u else NULL) }
+  fk <- match(id, MS_FILE_IDS)
+  if (!is.na(fk)) return(if (fk <= length(MS_FILE_STARTS)) MS_FILE_STARTS[[fk]]$u else NULL)
   NULL
 }
 ms_start <- function(id) {
@@ -696,6 +727,25 @@ ms_start <- function(id) {
     if (s$seeded) return(list(u = s$u, kind = s$kind, draws = 0L, ref = NA_real_, class = "seeded"))
     d <- ms_draw(id)
     d$kind <- ms_unseedable_kind(.sk, s, d$kind)
+    d$fallback <- "an UNSEEDABLE seeded slot"
+    return(d)
+  }
+  # ---- THE FILE STARTS (2026-10-23; lib_ms_file.R). `target` is what the point scored where it was computed: the
+  # FILE-START GATE below checks this run's value there against it. An empty slot runs its id's draw, labeled so.
+  .fk <- match(id, MS_FILE_IDS)
+  if (!is.na(.fk)) {
+    if (.fk <= length(MS_FILE_STARTS)) {
+      e <- MS_FILE_STARTS[[.fk]]
+      return(list(u = e$u, kind = ms_file_kind(names(MS_FILE_IDS)[.fk], e), draws = 0L, ref = NA_real_,
+                  class = "file", target = e$logpost, file_name = e$name))
+    }
+    d <- ms_draw(id)
+    d$kind <- ms_empty_file_kind(names(MS_FILE_IDS)[.fk],
+                                 if (!length(MS_FILE_STARTS)) "no CCX_MS_FILE_STARTS"
+                                 else sprintf("CCX_MS_FILE_STARTS holds %d start%s", length(MS_FILE_STARTS),
+                                              if (length(MS_FILE_STARTS) == 1L) "" else "s"),
+                                 d$kind)
+    d$fallback <- "an EMPTY file slot"
     return(d)
   }
   # ⛔ AN ID BELOW THE DISPERSED FLOOR THAT MATCHED NOTHING ABOVE IS A GAP IN
@@ -704,7 +754,7 @@ ms_start <- function(id) {
   if (id < MS_DISPERSED_FROM)
     stop("id ", id, " is below MS_DISPERSED_FROM (", MS_DISPERSED_FROM, ") but ",
          "matches no fixed start. The fixed ids are ",
-         paste(sort(c(MS_REF_IDS, MS_SEED_IDS)), collapse = ", "),
+         paste(sort(c(MS_REF_IDS, MS_SEED_IDS, MS_FILE_IDS)), collapse = ", "),
          "; add the missing one here or raise the floor.")
   ms_draw(id)
 }
@@ -916,20 +966,15 @@ local({
   # THE MEASURED FLOOR (2026-09-15; see MS_PORT_FLOOR_* above): the objective's own
   # roundoff sensitivity AT THIS POINT, ON THIS MACHINE. Its RNG stream is private so
   # the driver's dispersion / restart streams are untouched by adding this step.
-  .had_seed <- exists(".Random.seed", envir = globalenv(), inherits = FALSE)
-  .saved <- if (.had_seed) get(".Random.seed", envir = globalenv()) else NULL
-  set.seed(MS_PORT_FLOOR_SEED)
-  .floor_d <- vapply(seq_len(MS_PORT_FLOOR_N), function(k) {
-    du <- u_ref; j <- sample(length(du), 1L)
-    du[j] <- du[j] * (1 + sample(c(-1, 1), 1L) * MS_PORT_FLOOR_EPS)
-    lp_fun(du) - here
-  }, numeric(1))
-  if (.had_seed) assign(".Random.seed", .saved, envir = globalenv()) else rm(".Random.seed", envir = globalenv())
+  # (2026-10-23: the measurement and the bound live in lib_ms_file.R, shared with the
+  # FILE-START GATE below; the arithmetic and the RNG stream are the ones written here before.)
+  .floor_d <- ms_roundoff_floor(lp_fun, u_ref, here, MS_PORT_FLOOR_N, MS_PORT_FLOOR_EPS, MS_PORT_FLOOR_SEED)
   fl <- max(abs(.floor_d))
   diff_abs <- abs(here - tgt)
   rel      <- diff_abs / max(abs(tgt), 1e-12)
-  tol_abs  <- max(MS_EVAL_TOL * max(abs(tgt), 1e-12), MS_PORT_FLOOR_K * fl)
-  ceil_abs <- MS_PORT_TOL_CEIL * max(abs(tgt), 1e-12)
+  .bd      <- ms_identity_bound(tgt, fl, MS_EVAL_TOL, MS_PORT_FLOOR_K, MS_PORT_TOL_CEIL)
+  tol_abs  <- .bd$tol
+  ceil_abs <- .bd$ceil
   cat(sprintf("PORT GATE (a) at the %s reference point: here %.10f vs %s@%s %.10f,\n              |diff| %.3e (rel %.2e)%s\n",
               nm, here, r$host[1], r$commit[1], tgt, diff_abs, rel,
               if (identical(MS_ID, unname(MS_REF_IDS[[nm]]))) "" else "  [this task's own start is elsewhere]"))
@@ -952,6 +997,34 @@ local({
          "before submitting the survey.")
   MS_PORT <<- list(checked = TRUE, target = tgt, rel = rel, diff = diff_abs, floor = fl, tol = tol_abs)
   cat("PORT GATE (a) PASSED.\n")
+})
+
+# ---- THE FILE-START GATE (2026-10-23; lib_ms_file.R gate (2)): a file start's u, scored by THIS run's objective, must
+# reproduce the logpost the file says it scored where it was computed. The same claim as PORT GATE (a) -- one fixed point,
+# an evaluation identity -- so the same bound: max(MS_EVAL_TOL relative, MS_PORT_FLOOR_K x the roundoff floor measured
+# here), under the same ceiling. It gates MS_REF_LP, the FIXED start's value, never a resumed run's progress. A u decoded
+# under another table, or a label whose plumbing moved, scores differently and stops here, before the budget is spent.
+MS_FILE_GATE <- list(checked = FALSE)
+if (identical(st$class, "file")) local({
+  tgt <- st$target
+  fd  <- ms_roundoff_floor(lp_fun, st$u, MS_REF_LP, MS_PORT_FLOOR_N, MS_PORT_FLOOR_EPS, MS_PORT_FLOOR_SEED)
+  fl  <- max(abs(fd))
+  bd  <- ms_identity_bound(tgt, fl, MS_EVAL_TOL, MS_PORT_FLOOR_K, MS_PORT_TOL_CEIL)
+  diff_abs <- abs(MS_REF_LP - tgt)
+  cat(sprintf("FILE-START GATE at '%s': here %.10f vs the file's %.10f, |diff| %.3e (rel %.2e)\n",
+              st$file_name, MS_REF_LP, tgt, diff_abs, diff_abs / max(abs(tgt), 1e-12)))
+  cat(sprintf("              roundoff floor here: max |delta lp| %.3e over %d perturbations of u by %.0e; bound %.3e, ceiling %.3e\n",
+              fl, MS_PORT_FLOOR_N, MS_PORT_FLOOR_EPS, bd$tol, bd$ceil))
+  if (!is.finite(fl) || bd$tol > bd$ceil)
+    stop("FILE-START GATE CANNOT BE APPLIED at '", st$file_name, "': the objective's roundoff floor there (",
+         format(fl, digits = 3), ") puts the bound above its ceiling (", format(bd$ceil, digits = 3), ").")
+  if (diff_abs > bd$tol)
+    stop("FILE-START GATE FAILED at '", st$file_name, "': this run's objective scores the file's u at ",
+         sprintf("%.10f", MS_REF_LP), ", the file says ", sprintf("%.10f", tgt), " (|diff| ",
+         format(diff_abs, digits = 3), " > bound ", format(bd$tol, digits = 3), "). The point was computed under ",
+         "another objective or another table; it is not the start the file names. Do not launch.")
+  MS_FILE_GATE <<- list(checked = TRUE, target = tgt, diff = diff_abs, floor = fl, tol = bd$tol)
+  cat("FILE-START GATE PASSED.\n")
 })
 
 # ---- the budget, PROJECTED rather than merely checked -----------------
@@ -1015,8 +1088,11 @@ if (MS_PROJ_SAFETY * MS_SEC_PER_EVAL * MS_MAXIT / 60 > MS_BUDGET_MIN)
 if (MS_PREFLIGHT) {
   cat(sprintf("PREFLIGHT id %03d on %s: start %s, log-post %.4f, %d draw%s, port %s,\n             %.4f %s => a %d-eval restart takes %.1f %s of a %g %s budget. LAUNCHABLE.\n",
               MS_ID, Sys.info()[["nodename"]],
+              # the fallback is read off the START (an unseedable or empty slot says so), not the id (2026-10-23)
               switch(st$class, seeded = "SEEDED", reference = "REFERENCE",
-                     dispersed = if (MS_ID < MS_DISPERSED_FROM) "dispersed (an UNSEEDABLE seeded slot)" else "dispersed"),
+                     file = sprintf("FILE '%s', value gate VERIFIED (|diff| %.1e, bound %.1e)", st$file_name,
+                                    MS_FILE_GATE$diff, MS_FILE_GATE$tol),
+                     dispersed = if (is.null(st$fallback)) "dispersed" else sprintf("dispersed (%s)", st$fallback)),
               MS_START_LP,
               st$draws, if (st$draws == 1L) "" else "s",
               if (isTRUE(MS_PORT$checked)) sprintf("VERIFIED rel %.1e (floor %.1e, bound %.1e)", MS_PORT$rel, MS_PORT$floor, MS_PORT$tol)
@@ -1034,6 +1110,8 @@ if (MS_PREFLIGHT) {
          "spend its whole budget on an unchecked objective. Fix that before submitting.")
   if (!is.finite(MS_START_LP))
     stop("PREFLIGHT id ", MS_ID, ": the start point has a non-finite log-posterior.")
+  if (identical(st$class, "file") && !isTRUE(MS_FILE_GATE$checked))
+    stop("PREFLIGHT id ", MS_ID, ": a FILE start whose value gate did not run.")
   quit(save = "no", status = 0)
 }
 elapsed_min      <- function() (ms_now() - t0) / 60                    # on MS_CLOCK: what the budget counts
@@ -1288,6 +1366,12 @@ res <- list(id = MS_ID, kind = st$kind, u_mode = u, par_mode = pm, logpost = -be
             # ⚠ FROM THE START ITSELF since 2026-10-07 m, not from the id: an UNSEEDABLE seeded slot ran a draw
             # and is "dispersed" (its `kind` says UNSEEDABLE and why).
             start_class = st$class,
+            # RECORDED (2026-10-23) AND READ by the collector: the file starts the wave was launched with (every task, an
+            # empty slot's and a dispersed draw's too, so a survey can be shown to share one file), and this start's gate
+            file_starts_path = MS_FILE_STARTS_PATH, file_starts_md5 = MS_FILE_STARTS_MD5,
+            file_starts_n = length(MS_FILE_STARTS),
+            file_start_name = if (identical(st$class, "file")) st$file_name else NA_character_,
+            file_gate = MS_FILE_GATE,
             spread_pool = MS_SPREAD_POOL, spread_skipped = MS_SPREAD_SKIP,
             spread_all = MS_SPREAD_ALL,
             enso_seed = c(ocn_opt = MS_ENSO_OCN_OPT, ocn_obs = MS_ENSO_OCN_OBS,
