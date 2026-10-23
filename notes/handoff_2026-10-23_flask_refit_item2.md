@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-23: CH₄ and CFC priced and ruled out; gate 6 stays in situ; refit item 1 done; item 2 is next
 
+> ⚠ **SUPERSEDED** by `notes/handoff_2026-10-23_flask_refit_running.md` (items 2–5 done, the refit running, its landing armed).
+
 **Supersedes** `notes/handoff_2026-10-22_flask_label_refit.md`, which now points here. Written on Marcus's request ("Write the
 handoff"), 2026-10-23.
 

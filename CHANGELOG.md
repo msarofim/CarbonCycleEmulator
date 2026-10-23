@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-23 (h) — **Handoff `notes/handoff_2026-10-23_flask_refit_running.md`** (Marcus: "Yes, write the handoff"). It supersedes `handoff_2026-10-23_flask_refit_item2.md`, which now points to it. Done since: (e)–(g). State: the flask refit running (tag `20261023f`, launcher pid 73635, launched 09:26), its dry-run and landing chain armed (pid 73795). At 09:55 id 1 was at −1050.3235 after one restart and id 7 at −1050.1345. Next: read the landing, then Marcus rules adoption, the name and the module-check reference.
+
 ## 2026-10-23 (g) — **The 10-22 CFC driver's overlay converted and re-verified: the suite's last failing lint passes** (Marcus: "Convert, re-verify (Recommended)").
 
 - `calibration/diag_cfc_power_20261022.R:95` copied the fitted values with a bare `intersect()` loop (the objective's own idiom), which `test-overlay-idiom-lint.R` refuses in a file outside its 2026-09-02 baseline (59 > 58). It is now `p <- ccx_overlay_par(bp0, pv)`.
