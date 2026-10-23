@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-22 (late): the pointer fix is live; the flask label is built; the local refit is next
 
+> **Superseded** by `notes/handoff_2026-10-23_flask_refit_item2.md` (CH₄ and CFC ruled out; gate 6 done; refit item 1 done).
+
 **Supersedes** `notes/handoff_2026-10-22_sampling_refit_live_pointer.md`. Written on Marcus's request ("Write the handoff
 (Recommended)"), 2026-10-22.
 
