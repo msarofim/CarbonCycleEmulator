@@ -2,6 +2,11 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-23 (r) — **Full suite @ `ca48a2a5` (frozen, linked): 9,343 passed, 6 failed, 1 skipped (the standing `l2-enso-limb` skip), 0 errored, 233 warnings, 25.9 min. The six are the expected ones:** `app-version` (F: the release is Marcus's), `cmap-tie` ×4 and `futures-ribbons` (both wait on the hilda31fl MCMC). Every other entry of ledger (l)'s class D cleared with (p) and (q).
+
+- Log and per-file counts: `outputs/diagnostics/suite_20261023_ca48a2a5{.log,_perfile.csv}`. Launch script `~/ccx_frozen/suite_20261023_ca48a2a5.sh` kept; worktree removed. Linked per file (79 links + 3 tracked = 82, as the MCMC worktree).
+- Against (l) at `6171db02` (9177 passed, 81 failed, 2 errored, 4 skipped): +166 passed, 75 fewer failed, 2 fewer errored, 3 fewer skipped. Not decomposed further: (m) edited six test files in between.
+
 ## 2026-10-23 (q) — **The app's MLO CO₂ series follow the fit (handoff 10-23 §4 items 3 and 4): the Keeling chart, the seasonal cycle, the takeaway, card 1 and card 2 read Scripps flask, as the canonical is scored; both app precomputes rebuilt after the switch.** Four wording calls are Marcus's (below). Not deployed.
 
 - **The switch** (`7ea63a50`): `APP_CO2_FLASK` is read off the fitted parameter list the way `ccx_loglik()` reads it (`ccx_co2_flask_on(ccx_err_with_struct(list(), APP_PARAMS))`), and `APP_OBS <- ccx_obs_co2_scored(ccx_prepare_obs(), APP_CO2_FLASK, monthly = TRUE)`. A label without the switch gets the in situ record unchanged. Card 2's `rv_gradients()` reads the same switch off its arm, because the review precompute loads `review.R` without `global.R`. Nothing in the app calls `dg_gate6_obs()`.
