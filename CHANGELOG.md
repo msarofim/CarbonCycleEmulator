@@ -2,6 +2,27 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-23 (q) — **The app's MLO CO₂ series follow the fit (handoff 10-23 §4 items 3 and 4): the Keeling chart, the seasonal cycle, the takeaway, card 1 and card 2 read Scripps flask, as the canonical is scored; both app precomputes rebuilt after the switch.** Four wording calls are Marcus's (below). Not deployed.
+
+- **The switch** (`7ea63a50`): `APP_CO2_FLASK` is read off the fitted parameter list the way `ccx_loglik()` reads it (`ccx_co2_flask_on(ccx_err_with_struct(list(), APP_PARAMS))`), and `APP_OBS <- ccx_obs_co2_scored(ccx_prepare_obs(), APP_CO2_FLASK, monthly = TRUE)`. A label without the switch gets the in situ record unchanged. Card 2's `rv_gradients()` reads the same switch off its arm, because the review precompute loads `review.R` without `global.R`. Nothing in the app calls `dg_gate6_obs()`.
+- **What the readers do with flask's gaps** (flask starts 1960; 17 of its years in 1960–81 lack months, 1–7 in 1963–68; 2025 has two):
+  - `plot_keeling()` draws observations as points, so a gap is missing points; the early record is visibly sparse in 1963–68.
+  - `app_seas_window()`: 2000–2024, as on in situ. The measured average cycle is 7.12 ppm peak to trough (in situ 6.82).
+  - `app_keeling_numbers()`: 2024 has 12 flask months; "about 425 ppm" holds (424.52; in situ 424.35). Its 1958 is the model's year, not the record's.
+  - Card 1 (`rv_rep_dc()`, live): 700 matched months; mean scored residual −0.039 ppm, rmse 0.826.
+- **Card 1's measured offset** (`RV_REP_OBS_NH`, `b71084ee`): 0.738 → **0.668 ppm** (MBL 0–90N minus Mauna Loa flask, 1979–2025, positive in 47/47 yr; SH unchanged 0.814). `diag_rep_dc_mbl_zonal.R` now reads the MLO series the canonical scores, per its own rule, and stamps commit and series (`3d2821d6`; log `rep_dc_mbl_zonal_20261023_hilda31fl.log` @`7ea63a50`). The card's claims hold: positive in every year, SH > NH.
+- **Card 1's source signature** (`diag_rep_dc_d13c_hemispheric.R`): the NH signature that would reconcile the measured CO₂ and δ¹³C offsets is **−37.6 ‰** on flask (09-22, in situ: −35.1); SH −13.2 (same). The move is the CO₂ offset, 1.292 → 1.183 ppm over 1989–2014. The card types "about −35‰".
+  - **Tried and dropped:** the driver's own forcing build. It lacked the structure's ENSO index and was refused at every canonical since hilda33p ("the parameters name 'detrend' but the forcing carries 'demean'"), so 09-22 was its last run. It now reads the design gates' run (`dg_vector()` + `dg_run()`), and its typed MBL comparison takes 0.668 (`2f3a6b27`, `e6f5b8d7`).
+- **Card 2 on the flask gradient** (`data/review_precompute.rds`): CO₂ 2.282 vs 2.578 ± 0.047 ppm = **0.885×** (z −6.3, 55 yr 1962–2023); hilda31w on in situ 0.897× (z −4.3, 59 yr). δ¹³C 2.00× (1.97×). The flask gradient is larger because flask MLO runs above in situ in recent decades (+0.12 ppm 2000–24, T8f).
+- **Under the hood:** Mauna Loa's "Covers" now reads its first year from the plotted series (1960–2024). The other rows are unchanged.
+- **The two precomputes** (`ca48a2a5`; `build_app_precompute.R`, `build_review_precompute.R` @`b71084ee`, 14–15 s each): test-app-precompute, -review-precompute and -app-a11y pass.
+- **Tests on the touched paths pass:** app-scan-items, review-cards, review-card-numbers, review-gradient-labels, takeaway-arithmetic, app-review-copy, flask-label, app-downloads.
+- **Marcus's calls (not made):**
+  1. Card 1: "about −35‰ in the north" against a measured −37.6.
+  2. Card 2: "about 10% low" (and the ask's "within about 10%") against a measured 11.5 %.
+  3. The credits. `DLS$co2_obs` names NOAA GML for Mauna Loa and the South Pole, and `DLS$d13c_obs` names NOAA GML and INSTAAR. Every series the app scores and plots is Scripps (`data-raw/build_calibration_data.R`): Mauna Loa flask (in situ before), the South Pole merge product, and δ¹³C flask at both. This predates the switch.
+  4. Item 8's sentence ("the continuously measured CO₂ cycle … two sampling methods"), open since 10-22.
+
 ## 2026-10-23 (p) — **The model-only products at hilda31fl, beside the MCMC (handoff 10-23 §4 item 1): `pulse_vs_tcre`, the constraint map, card 8's chain and `ALPHA_AS_FCO3`.** Every driver gate passes, and every typed claim on the pulse box, the map tab and card 8 still holds. One test is red by design: `test-cmap-tie`, which waits on the MCMC.
 
 - **Torch verdict, said out loud: Mac.** Each product is single-core or 3 workers and takes 12 s to 1.1 min; about 5 cores were free beside the 4 chains (Photos was also running).
