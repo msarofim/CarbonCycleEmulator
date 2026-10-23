@@ -632,7 +632,21 @@ DG_LEDGER <- list(
             not ship. Mutation-tested on the kernel.")),
   # ---- RESTORED / ADDED 2026-10-02 (W4; audit 10-02 B6 + "a DG_LEDGER row for gate D") ----
   list(id = "6", what = "MLO seasonal-amplitude GROWTH, 1960s -> 2010s (restored 2026-10-02)",
-       class = "OBSERVATION", src = "Scripps MLO monthly CO2 (obs$co2); the model's NH box, same estimator",
+       class = "OBSERVATION", src = paste("Scripps MLO IN SITU monthly CO2 (obs$co2, station MLO); the",
+         "
+            model's NH box, same estimator. In situ under EVERY label, the flask",
+         "
+            one (hilda_csl3v0kaidgbemwtcf) included: ruled 2026-10-22 ('Keep in",
+         "
+            situ, state why'). Scripps flask has 1-7 months a year in 1963-68",
+         "
+            (49 of the 1960s' 120 months, against 117 in situ), so it cannot",
+         "
+            supply the 1960s end of a growth ratio, and the estimator's centred",
+         "
+            12-month moving average needs a gap-free monthly series.",
+         "
+            dg_gate6_obs() refuses an obs whose MLO rows were swapped to flask."),
        bound = paste("TWO-SIDED |z| <= DG_G6_NSD (2) on the OBSERVED growth ratio's own",
          "
             sampling error, a block bootstrap over years within each decade",
@@ -1815,8 +1829,15 @@ dg_g6_ptt <- function(d, dec, yrs = NULL) {
   max(cl) - min(cl)
 }
 #' The observed growth ratio and its bootstrap se (the seed and the resample count travel with it)
+#' IN SITU, always (ruled 2026-10-22, see the ledger row): ccx_obs_co2_scored(monthly = TRUE) relabels
+#' the flask rows "MLO", so an obs built that way (the app's, under the flask label) is refused by name.
 dg_gate6_obs <- function(obs = ccx_prepare_obs()) {
   m <- obs$co2[obs$co2$station == "MLO", ]
+  f <- obs$co2_flask
+  if (!is.null(f) && nrow(m) == nrow(f) && identical(unname(m$decimal_date), unname(f$decimal_date)) &&
+      identical(unname(m$co2_ppm), unname(f$co2_ppm)))
+    stop("dg_gate6_obs(): obs$co2's MLO rows are the Scripps FLASK series (ccx_obs_co2_scored(monthly = TRUE)).",
+         " Gate 6 reads IN SITU under every label (ruled 2026-10-22); pass ccx_prepare_obs() unswapped.")
   d <- dg_g6_seasonal(m$decimal_date, m$co2_ppm)
   a <- vapply(DG_G6_DECADES, function(dec) dg_g6_ptt(d, dec), 0)
   set.seed(DG_G6_SEED)

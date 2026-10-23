@@ -87,6 +87,12 @@ test_that("GATE 6: the estimator recovers a known growth; the bootstrap se is se
   expect_identical(o1$seed, DG_G6_SEED); expect_identical(o1$boot, DG_G6_BOOT)
   expect_equal(o1$ratio, o1$ptt[[2]] / o1$ptt[[1]])
   expect_gt(o1$se, 0); expect_lt(o1$se, 0.2)
+  # IN SITU under every label (ruled 2026-10-22): the label-swapped targets leave the monthly frame alone and
+  # score identically; the monthly swap (flask rows relabelled "MLO") is refused by name
+  obs <- ccx_prepare_obs()
+  expect_identical(dg_gate6_obs(ccx_obs_co2_scored(obs, TRUE)), o1)
+  expect_error(dg_gate6_obs(ccx_obs_co2_scored(obs, TRUE, monthly = TRUE)), "IN SITU under every label")
+  expect_match(DG_LEDGER[[which(vapply(DG_LEDGER, `[[`, "", "id") == "6")]]$src, "In situ under EVERY label")
   # two-sided at DG_G6_NSD
   at <- function(k) dg_gate6_verdict(list(ratio = o1$ratio + k * o1$se), o1)
   expect_true(at(0)$pass); expect_true(at(DG_G6_NSD)$pass); expect_true(at(-DG_G6_NSD)$pass)
