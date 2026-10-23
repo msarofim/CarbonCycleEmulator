@@ -2,6 +2,15 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-23 (v) — **The hilda31fl landing chain is ARMED (PID 10464, 17:25): when the four chains exit it snapshots them and runs the drop-0 read and the identifiability check. The band and the tie stability run only if a ruling file exists** (their drop, thinning and pooling are Marcus's to rule, as at hilda31w). Record: `outputs/diagnostics/mcmc_landing_20261024_hilda31fl/` (README).
+
+- **Frozen worktree** `~/ccx_frozen/20261024_land_hilda31fl` @`d1e3c476`, `data-raw/downloads` linked per file (79 + 3 tracked). The script refuses an unlinked tree or edited tracked files.
+- **Wait:** `kill -0` on each chain PID, plus a check that the PID still runs `run_mcmc_check.R`. No `pgrep` loop.
+- **Phase 1:** each chain at 200 000 or STOP; `cp -p` + `cmp` + `MD5SUMS` into `outputs/mcmc_check_<landing date>_hilda31fl_200k/` in the frozen tree, with the chain logs and launch script; `read_mcmc_check.R --drop=0`; `diag_mcmc_identifiability.R`.
+- **Phase 2**, only if `~/ccx_frozen/20261024_land_hilda31fl.RULED` exists (`DROP=` / `THIN=` lines read with `grep`, never sourced): the read at those settings, then the band (8 cores; by chain with `--laplace=none`; drift on `h_ml` plus the four worst other R-hats) beside the tie stability (100 draws, 1 core). Nothing is promoted.
+- **Smoke** of every step on the interim copies, at `d1e3c476`: every gate passes with diff 0 (identifiability's logpost; the tie spread's STEP, MAP, JOIN, LP; the band's central line). The first pass stopped at drift: `diag_mcmc_drift.R` requires `h_ml` in `--names`, and the five worst R-hats did not include it. Fixed in the armed script and re-run by hand (rc 0). The tie spread costs 21.8 s per map, about 37 min for 100 draws.
+- Torch verdict, said out loud: Mac (the chains land here; the hilda31w band took 216 min on 8 cores).
+
 ## 2026-10-23 (u) — **`RB_COV_EMIS` gains `hilda31fl = "constant"` (handoff 10-23 §4.2's first step), and an interim look at the running chains: not converged at ~10.5k post-adaptation iterations, as expected this early.** (Marcus: "Read handoff … and continue work".)
 
 - **`RB_COV_EMIS`** (`calibration/build_futures_ribbons.R`): hilda31fl's Hessian is the flask landing chain's `hessian_id006` step, `recompute_hessian.R "$M" --update` at `63633d99` (10-23 10:27). The driver takes no emissions argument and none was passed, so it ran under `CCX_EMIS_METHOD_DEFAULT`, "constant" since the 10-01 flip. The band build would otherwise stop at this line.

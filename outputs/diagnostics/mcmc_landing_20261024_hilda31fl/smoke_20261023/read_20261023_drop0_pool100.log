@@ -1,0 +1,54 @@
+=== calibration/read_mcmc_check.R @d1e3c476, 2026-10-23 17:20: outputs/smoke_20261023/snap, drop 0 ===
+4 chains of mode hilda31fl (hilda_csl3v0kaidgbemwtcf), commit 2ec25511; n 200000, adapt 30000, thin 20; canonical now hilda31fl (the same mode, structure and pins)
+  chain_1.rds: seed 20261002, MacBook-Pro-2.local; iter 41500/200000 (PARTIAL); kept 575; acceptance 0.127, post-adapt 0.083; last logpost -1064.63
+  chain_2.rds: seed 20261003, MacBook-Pro-2.local; iter 41000/200000 (PARTIAL); kept 550; acceptance 0.116, post-adapt 0.056; last logpost -1066.46
+  chain_3.rds: seed 20261004, MacBook-Pro-2.local; iter 43000/200000 (PARTIAL); kept 650; acceptance 0.117, post-adapt 0.078; last logpost -1067.96
+  chain_4.rds: seed 20261005, MacBook-Pro-2.local; iter 40500/200000 (PARTIAL); kept 525; acceptance 0.113, post-adapt 0.076; last logpost -1061.75
+
+log-posterior by 5000-iteration block (adaptation ends at 30000). If the posterior were the Laplace
+Gaussian, a converged chain would sit at mode - chi2_31/2: median -1065.3, 95% [-1074.2, -1058.9]
+              chain_1 chain_2 chain_3 chain_4
+     1-  5000 -1064.8 -1064.5 -1064.6 -1065.3
+  5001- 10000 -1063.4 -1064.1 -1063.7 -1062.3
+ 10001- 15000 -1065.3 -1065.0 -1065.1 -1063.6
+ 15001- 20000 -1063.9 -1065.2 -1064.9 -1064.4
+ 20001- 25000 -1064.8 -1064.4 -1064.8 -1065.5
+ 25001- 30000 -1065.3 -1063.0 -1065.3 -1066.6
+ 30001- 35000 -1066.9 -1068.3 -1068.2 -1066.5
+ 35001- 40000 -1065.5 -1067.9 -1068.4 -1067.6
+ 40001- 43000 -1066.0 -1065.4 -1066.4 -1067.2
+
+window: iterations (30000, 40500], 525 kept samples per chain (thin 20), 2100 pooled
+
+R-hat: max 1.5707 (beta_max); 32 of 32 quantities above 1.01 [Vehtari et al. 2021's reference]
+ESS: min bulk 7 (beta_max), min tail 13 (seas_T_lag); 32 below 400 in either [their reference: 100 per chain]
+
+worst R-hat first:
+            name  rhat ess_bulk ess_tail
+        beta_max 1.571    7.202    14.92
+        ndep_ret 1.514    7.509    18.10
+          fert_k 1.494    7.619    28.41
+      seas_T_lag 1.388    8.952    13.40
+       luc_scale 1.324   10.300    72.81
+   seas_lag_p_SH 1.235   13.360    16.07
+      bomb_total 1.162   19.260    30.06
+   seas_lag_p_NH 1.151   20.090    23.36
+            h_ml 1.146   28.480    17.94
+ sst_seas_amp_SH 1.140   22.670    46.46
+
+the posterior against the Laplace approximation (u-space), largest departures first:
+                 name sd_over_laplace shift_in_laplace_sd  rhat ess_bulk
+                 h_ml          5.1410             -4.8030 1.146   28.480
+             beta_max          2.0360              1.1300 1.571    7.202
+               fert_k          1.9780              0.9306 1.494    7.619
+                 h_hs          1.6830              0.5539 1.056   60.660
+ imb_share_ocean_rest          1.4010             -0.2790 1.131   22.400
+        seas_lag_p_NH          0.7219             -0.1566 1.151   20.090
+       imb_share_land          1.3050              0.2472 1.090   30.090
+      sst_seas_amp_SH          1.2480             -0.8057 1.140   22.670
+            luc_scale          1.2410             -0.2388 1.324   10.300
+        bomb_share_NH          1.2270             -0.1267 1.034   88.740
+
+wrote outputs/smoke_20261023/snap/diag_20261023_drop0.csv
+pooled draws thinned x100 within each chain: 5 of 525 kept samples per chain
+wrote outputs/smoke_20261023/snap/pooled_u_thin100.rds: 20 draws x 31 names (md5 23410e52b369699124b2c9ec162fd712)

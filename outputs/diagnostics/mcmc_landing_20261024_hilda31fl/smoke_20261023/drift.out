@@ -1,0 +1,51 @@
+=== calibration/diag_mcmc_drift.R @d1e3c476, 2026-10-23 17:24 ===
+dir outputs/smoke_20261023/snap
+ribbons outputs/smoke_20261023/ribbons_smoke.rds
+[ccx_adopt_mode_band] h_ml -> [42.5, 200] (mode 69.6916); kz -> [1161.6, 27808] (mode 13818.8237)
+mode hilda31fl; h_ml band [42.5, 200] (mode 69.69 m)
+
+--- (1) the drift: per-chain median [5 %, 95 %] by 10000-iteration block (window (30000, 200000]) ---
+beta_max (mode 1.927):
+  ( 30000,  40000]  pooled 2.043 [1.631, 2.605]   chains 1.956 2.53 1.921 1.967
+  ( 40000,  50000]  pooled 1.991 [1.587, 2.665]   chains 1.824 2.659 1.984 1.942
+ndep_ret (mode 7.821):
+  ( 30000,  40000]  pooled 6.923 [2.678, 15.69]   chains 4.347 6.223 12.49 6.355
+  ( 40000,  50000]  pooled 4.48 [2.242, 9.753]   chains 3.575 2.608 6.926 8.008
+fert_k (mode 588.9):
+  ( 30000,  40000]  pooled 656.3 [456.2, 896.9]   chains 547.1 814.3 699.6 611.4
+  ( 40000,  50000]  pooled 576 [416.4, 828.3]   chains 477.3 817.8 579.1 595.1
+seas_T_lag (mode 0.4085):
+  ( 30000,  40000]  pooled 0.2027 [0.03114, 1.143]   chains 0.2582 0.1077 0.1443 0.3691
+  ( 40000,  50000]  pooled 0.3022 [0.07443, 0.6877]   chains 0.2926 0.33 0.3054 0.4317
+h_ml (mode 69.69):
+  ( 30000,  40000]  pooled 60.39 [46.27, 73.26]   chains 61.86 64.79 57.25 56.29
+  ( 40000,  50000]  pooled 59.8 [51.22, 71.47]   chains 68.52 54.31 57.83 59.42
+h_ml within 5 m of the 42.5 floor: first half 6.9 %, second half NaN %; per chain (second half) NaN % NaN % NaN % NaN %
+
+--- (2) the log-posterior's mean, iterations (30000, 115000] vs (115000, 200000] ---
+  chain 1: -1066.14 -> NaN (NaN)
+  chain 2: -1067.88 -> NaN (NaN)
+  chain 3: -1067.86 -> NaN (NaN)
+  chain 4: -1067.03 -> NaN (NaN)
+  pooled: -1067.23 -> NaN (NaN)
+
+pooled draws outputs/smoke_20261023/snap/pooled_u_thin100.rds: 5 per chain (pool thin 100), joined to their samples
+
+--- (3) leverage: each name's effect per posterior sd (one regression, standardised names), and the late - early shift ---
+vvH co2_ppm 2150 (ppm): 5-95 % width 18.38; R2 0.94
+   per posterior sd: beta_max -7.18, ndep_ret -0.926, fert_k +0.513, seas_T_lag -0.604, h_ml +0.907
+   late - early median NA; predicted from the names' mean drift NaN (beta_max NaN, ndep_ret NaN, fert_k NaN, seas_T_lag NaN, h_ml NaN)
+vvLN co2_ppm 2150 (ppm): 5-95 % width 9.845; R2 0.99
+   per posterior sd: beta_max +1.33, ndep_ret -2.69, fert_k -1.29, seas_T_lag -0.0134, h_ml +0.406
+   late - early median NA; predicted from the names' mean drift NaN (beta_max NaN, ndep_ret NaN, fert_k NaN, seas_T_lag NaN, h_ml NaN)
+vvHL co2_ppm 2100 (ppm): 5-95 % width 7.477; R2 0.88
+   per posterior sd: beta_max -4.97, ndep_ret -0.24, fert_k +4.18, seas_T_lag -0.299, h_ml +0.644
+   late - early median NA; predicted from the names' mean drift NaN (beta_max NaN, ndep_ret NaN, fert_k NaN, seas_T_lag NaN, h_ml NaN)
+vvLN gmst 2150 (degC): 5-95 % width 0.07768; R2 0.98
+   per posterior sd: beta_max +0.00653, ndep_ret -0.0243, fert_k -0.00597, seas_T_lag -0.000595, h_ml +0.00347
+   late - early median NA; predicted from the names' mean drift NaN (beta_max NaN, ndep_ret NaN, fert_k NaN, seas_T_lag NaN, h_ml NaN)
+vvM gmst 2100 (degC): 5-95 % width 0.0194; R2 0.78
+   per posterior sd: beta_max -0.017, ndep_ret -0.0071, fert_k +0.0103, seas_T_lag -0.00131, h_ml +0.00196
+   late - early median NA; predicted from the names' mean drift NaN (beta_max NaN, ndep_ret NaN, fert_k NaN, seas_T_lag NaN, h_ml NaN)
+
+wrote outputs/diagnostics/mcmc_drift_smoke_20261023.rds
