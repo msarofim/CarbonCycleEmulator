@@ -2,6 +2,13 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-23 (c) — **Refit code item 1 (handoff `notes/handoff_2026-10-22_flask_label_refit.md` §3): `ccx_ms_reference_set()` takes the canonical's pins under the flask label at seas_ml 1, with the canonical as a START and the seas_ml-0 control as the new basin** (Marcus: "Yes, start with the gate 6 ledger edit and refit code item 1"; rulings 2026-10-22: "Local refit from T8c's point (Recommended)", "Carry module, then check (Recommended)").
+
+- **Before:** the cut canonical's own-label guard refused these pins under `hilda_csl3v0kaidgbemwtcf` ("a cut canonical's pins are ruled under its own"). **After:** a ruled exception checked before that guard, the WTC refit's precedent (its branch was removed at hilda31w's adoption, 2026-10-13 f, and is the template here). Live only while the canonical is not a file of the flask label; remove it at adoption.
+- **Constants** (R/paths.R, after the WTC records): `CCX_MODE_FLASK_STRUCT` = the flask label, `CCX_MODE_FLASK_PINS` = `CCX_MODE_OBJ18P2_PINS` (named by its parts, = hilda31w's own pins), `CCX_MODE_FLASK_INCUMBENT` = "hilda31w".
+- **Test** `test-ms-reference-set.R` (16): the pins equal the incumbent's own; the label is the incumbent's plus `co2_mlo_flask` only; the launch string round-trips through the driver's parser; the canonical's own label still takes the canonical as a MODE. Refused: seas_ml 0, #18 pass 1's pins, a module value moved, a module name dropped, #17's label. With the four related files (`ms-reference-set`, `flask-label`, `wtc-label`, `iav-redesign`, `ms-seed`): 619 passed, 0 failed. Mutation test: with the branch disabled, (16) fails; restored byte for byte. The full suite was not run.
+- **Next:** item 2, file starts in `run_dispersed_multistart.R`.
+
 ## 2026-10-23 (b) — **Gate 6's ledger row now names its series and the reason it stays on Scripps in situ under every label, the flask one included (ruled 2026-10-22: "Keep in situ, state why (Recommended)"); `dg_gate6_obs()` refuses an `obs` whose MLO rows were swapped to flask** (Marcus: "Yes, start with the gate 6 ledger edit and refit code item 1").
 
 - **The reason, measured:** Scripps flask has 1–7 months a year in 1963–68 (5, 9, 11, 1, 1, 3, 6, 2, 7, 10 for 1960–69): 49 of the 1960s' 120 months carry a seasonal value, against 117 in situ, so flask cannot supply the 1960s end of the growth ratio. The estimator's centred 12-month moving average also indexes by position, so on a gappy series its window spans more than 12 calendar months. (The handoff gave the coverage once as "1–6 months in 1963–67" and once as "1–7 in 1963–68"; both are true of the data, and the row uses the wider span.)

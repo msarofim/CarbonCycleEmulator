@@ -554,6 +554,16 @@ CCX_MODE_OBJ18P2_NEW       <- "hilda29a6"    # #18's basin 2: the runner-up, ref
 CCX_MODE_WTC_STRUCT    <- "hilda_csl3v0kaidgbemwtc"
 CCX_MODE_WTC_PINS      <- CCX_MODE_OBJ18P2_PINS
 CCX_MODE_WTC_INCUMBENT <- "hilda29e"         # the canonical at the ruling (#18 pass 2's basin 1): a START of this refit
+# THE FLASK REFIT (2026-10-22; Marcus, verbatim: "Local refit from T8c's point (Recommended)", "Add it as a third
+# (Recommended)", "Carry module, then check (Recommended)"). The local refit under label hilda_csl3v0kaidgbemwtcf (every MLO
+# CO2 row on Scripps flask, CHANGELOG 2026-10-22 g) runs at the canonical's pins with the interannual module's four carried
+# (#18 pass 2's set, named by its parts so a later adoption cannot move it; fit_iav_module.R --check after). The canonical
+# is a START of it, scored under the flask label (-1067.597927, test-flask-label.R), not a mode; the new basin is the
+# seas_ml-0 control. Ruled only under the label at seas_ml 1, and only while the canonical is NOT a file of that label:
+# remove the branch from ccx_ms_reference_set() at adoption, as the WTC refit's went (2026-10-13 f).
+CCX_MODE_FLASK_STRUCT    <- "hilda_csl3v0kaidgbemwtcf"
+CCX_MODE_FLASK_PINS      <- CCX_MODE_OBJ18P2_PINS
+CCX_MODE_FLASK_INCUMBENT <- "hilda31w"       # the canonical at the ruling: a START of this refit
 #' The registered FREE mode nearest the canonical: the canonical itself when it
 #' is free, its parent when it is pinned. For a consumer that needs a vector
 #' ENCODABLE on the full table (an ancestor constructed by dropping names, a
