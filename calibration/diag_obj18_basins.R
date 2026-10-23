@@ -31,6 +31,8 @@
 # parts close each logpost exactly (1e-8); `LP` is the best converged, in-time, live start; collect's basin 1 holds it.
 # ⭐ 2026-10-12 (ff): ALSO THE WTC REFIT's wave (label hilda_csl3v0kaidgbemwtc, hilda29e's pins): OB_OBJECTIVES pairs each
 # label with its pin set, and the two new fitted names join the per-basin print when the wave fits them.
+# 2026-10-23 (f): AND THE FLASK REFIT's (label hilda_csl3v0kaidgbemwtcf, the canonical's pins): a three-start local refit
+# (ids 1, 6, 7), read here like any wave.
 # Usage: Rscript calibration/diag_obj18_basins.R  (CCX_O18_WAVE=<dir> overrides the wave; CCX_O18_TAG=<suffix> tags
 #        the outputs). OUTPUTS: outputs/diagnostics/obj18_basins_<date><tag>.{log,rds,ids}. ⛔ ADOPTS NOTHING. No RNG.
 # =====================================================================
@@ -40,12 +42,14 @@ ccx_load_cpp()
 # ---- named constants (every label below derives from these) -------------------------
 OB_DRIVER    <- "calibration/diag_obj18_basins.R"
 # THE OBJECTIVES THIS SCRIPT READS, each a (LABEL, PIN SET) PAIR (2026-10-08 d: + #18 PASS 2, the module at the one-pass
-# check's values at basin 1; 2026-10-12 ff: + THE WTC REFIT, label hilda_csl3v0kaidgbemwtc on hilda29e's pins). A wave must
-# match ONE pair exactly; which one is printed. ⚠ The WTC refit's pins ARE #18 pass 2's (R/paths.R CCX_MODE_WTC_PINS), so
-# the pin set alone cannot tell them apart -- the label does. Any other pair is refused.
-OB_OBJECTIVES <- list(`#18`        = list(label = CCX_MODE_OBJ18_STRUCT, pins = CCX_MODE_OBJ18_PINS,   pins_name = "CCX_MODE_OBJ18_PINS"),
-                      `#18 pass 2` = list(label = CCX_MODE_OBJ18_STRUCT, pins = CCX_MODE_OBJ18P2_PINS, pins_name = "CCX_MODE_OBJ18P2_PINS"),
-                      `WTC refit`  = list(label = CCX_MODE_WTC_STRUCT,   pins = CCX_MODE_WTC_PINS,     pins_name = "CCX_MODE_WTC_PINS"))
+# check's values at basin 1; 2026-10-12 ff: + THE WTC REFIT, label hilda_csl3v0kaidgbemwtc on hilda29e's pins; 2026-10-23 f:
+# + THE FLASK REFIT, label hilda_csl3v0kaidgbemwtcf on the canonical's pins). A wave must match ONE pair exactly; which one
+# is printed. ⚠ The WTC and flask refits' pins ARE #18 pass 2's (R/paths.R CCX_MODE_WTC_PINS, CCX_MODE_FLASK_PINS), so
+# the pin set alone cannot tell the three apart -- the label does. Any other pair is refused.
+OB_OBJECTIVES <- list(`#18`          = list(label = CCX_MODE_OBJ18_STRUCT, pins = CCX_MODE_OBJ18_PINS,   pins_name = "CCX_MODE_OBJ18_PINS"),
+                      `#18 pass 2`   = list(label = CCX_MODE_OBJ18_STRUCT, pins = CCX_MODE_OBJ18P2_PINS, pins_name = "CCX_MODE_OBJ18P2_PINS"),
+                      `WTC refit`    = list(label = CCX_MODE_WTC_STRUCT,   pins = CCX_MODE_WTC_PINS,     pins_name = "CCX_MODE_WTC_PINS"),
+                      `flask refit`  = list(label = CCX_MODE_FLASK_STRUCT, pins = CCX_MODE_FLASK_PINS,   pins_name = "CCX_MODE_FLASK_PINS"))
 OB_WAVE_GLOB <- "multistart_20261007i_hilda_csl3v0kaidgbemwt_seasml1_pin_obj18_sd1.0452"
 OB_REPRO_TOL <- 1e-5          # recompute_hessian.R's GATE 1, promote's GATE 4
 OB_CLOSE_TOL <- 1e-8          # the three parts sum to the logpost (diag_obj17_basins.R)
