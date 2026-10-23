@@ -284,12 +284,12 @@ test_that("MUTATION: the scan list fires when an old phrase returns or a new one
 # calibration", item 10 (card 8's detail) the decomposition draft; then "Update the pins".
 # Item 8 revised again the same day after T8d (CHANGELOG 10-21 y, Marcus: "Revise for sampling"): half the lead is
 # the flask / in situ sampling difference.
+# 2026-10-23 (Marcus: "Apply, move the pins (Recommended)"): item 8's three present-halves were superseded when both
+# MLO rows moved to the same flasks; they are pinned in AC_CHECKS_1023 (the new sentences, with these as ABSENT). The
+# "in step" row, which had no absent half, moved there whole.
 AC_CHECKS_1021C <- list(
-  c("S seasonal: timing at MLO",   "the surface ocean without a",
-    " samples runs about four days ahead of the continuously measured CO₂ cycle."),
-  c("S seasonal: sampling half",   "seasonal cycle comes from land plants, the observed ¹³C cycle runs about four",
-    " About half of that comes from the two sampling methods, and the model's land"),
-  c("S seasonal: in step",         NA, " plants move the two tracers in step, so the fit splits the difference."),
+  c("S seasonal: timing at MLO",   "the surface ocean without a", NA),
+  c("S seasonal: sampling half",   "seasonal cycle comes from land plants, the observed ¹³C cycle runs about four", NA),
   c("Gloss: response",             "refitting the same model does not fix it",
     "the process is in the model, but after calibration it still responds by"),
   c("K issue 8: decomposition",    "Our leading explanation",
@@ -317,7 +317,14 @@ test_that("MUTATION: the 10-21 held-strings list fires when an old sentence retu
 AC_CHECKS_1023 <- list(
   c("K issue 1: NH signature", "is about \\u221235\\u2030 in the north", "is about \\u221238\\u2030 in the north"),
   c("K issue 2: CO2 gradient", "same two stations is about 10% low", "same two stations is about 12% low"),
-  c("K issue 2: ask",          "CO₂ gradient is within about 10%",   "CO₂ gradient is within about 12%")
+  c("K issue 2: ask",          "CO₂ gradient is within about 10%",   "CO₂ gradient is within about 12%"),
+  # item 8 (What pins down what?'s seasonal paragraph), Marcus: "Draft one for me", then "Apply, move the pins
+  # (Recommended)": both MLO rows on the same flasks, so the same-air lead (2.2 d) replaces the mixed-product one
+  c("S seasonal: same air",        " samples runs about four days ahead of the continuously measured CO₂ cycle.",
+    " samples, the ¹³C cycle runs about two days ahead of the CO₂ cycle. The"),
+  c("S seasonal: sampling half",   " About half of that comes from the two sampling methods, and the model's land", NA),
+  c("S seasonal: nearly in step",  " plants move the two tracers in step, so the fit splits the difference.",
+    " model's land plants move the two tracers nearly in step, so the fit splits")
 )
 
 test_that("Marcus's 2026-10-23 rulings on the flask wording calls are still applied", {
@@ -330,6 +337,9 @@ test_that("MUTATION: the 10-23 list fires when an old number returns", {
   expect_true(any(grepl("K issue 2: CO2 gradient", ac_audit(m1, AC_CHECKS_1023), fixed = TRUE)))
   m2 <- gsub("\\u221238\\u2030 in the north", "\\u221235\\u2030 in the north", .ac_src, fixed = TRUE)
   expect_true(any(grepl("K issue 1: NH signature", ac_audit(m2, AC_CHECKS_1023), fixed = TRUE)))
+  m3 <- paste(.ac_src, '  " About half of that comes from the two sampling methods, and the model\'s land",', sep = "\n")
+  expect_true(any(grepl("S seasonal: sampling half", ac_audit(m3, AC_CHECKS_1023), fixed = TRUE)))
+  for (ck in AC_CHECKS_1023) expect_true(!is.na(ck[[2]]) || !is.na(ck[[3]]), info = ck[[1]])
 })
 
 test_that("all of Marcus's 2026-10-15 copy rulings are still applied", {

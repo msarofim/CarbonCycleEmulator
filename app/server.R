@@ -1221,10 +1221,14 @@ function(input, output, session) {
         # T8d, x): observed MLO d13C (Scripps flask) leads the CO2 row's in situ antiphase by 0.144 mo (4.4 d,
         # 1980-2024 mean harmonics); flask CO2 runs 2.2 d ahead of in situ in both the Scripps and NOAA networks,
         # and the same-flask lead is 2.2 d ("about half"). The model gives +0.01 to +0.10 mo in every fit.
-        " A likely reason they disagree: at Mauna Loa, the ¹³C cycle measured in air",
-        " samples runs about four days ahead of the continuously measured CO₂ cycle.",
-        " About half of that comes from the two sampling methods, and the model's land",
-        " plants move the two tracers in step, so the fit splits the difference."),
+        # 2026-10-23 (Marcus: "Draft one for me", then "Apply, move the pins (Recommended)"; CHANGELOG 10-23 s): both
+        # MLO rows are now scored on the same Scripps flasks (hilda31fl), so the sampling half is gone and the same-air
+        # lead remains, 2.2 d (T8d), the third of the conflict that survived T8c's flask fit (10-21 z). The model's
+        # d13C sits 0.7-2.4 d BEHIND in every fit (about 0.9 at T8c's joint fit), hence "nearly in step".
+        " A likely reason they disagree: at Mauna Loa, measured in the same air",
+        " samples, the ¹³C cycle runs about two days ahead of the CO₂ cycle. The",
+        " model's land plants move the two tracers nearly in step, so the fit splits",
+        " the difference."),
       p(tags$strong("The land's magnitude is well constrained; its shape is not. "),
         # 2026-10-15 review: "pinned hard" / "only pinned as a combination" -> "constrained" ("pinning" is the
         # sidebar's defined term for one kind of sensitivity, not a synonym for well constrained)
