@@ -577,7 +577,17 @@ app_flux_trace <- function(spin) {
 
 APP_STARTUP_PRE <- app_pre_read("startup")
 APP_SPIN <- if (is.null(APP_STARTUP_PRE)) app_spinup(APP_PARAMS) else APP_STARTUP_PRE$spin
-APP_OBS  <- ccx_prepare_obs()
+# THE MLO CO2 SERIES FOLLOWS THE FIT (Marcus's rule; handoff 2026-10-23 §4 item 3). A label with the flask switch
+# (hilda_csl3v0kaidgbemwtcf, the canonical hilda31fl's) scores every MLO CO2 row on Scripps flask, so the app plots,
+# averages and compares against the same series: the monthly MLO rows of APP_OBS$co2 are the flask rows, relabelled
+# "MLO" (ccx_obs_co2_scored(monthly = TRUE)), and the annual, seasonal and gradient targets are the flask ones. The
+# switch is read from the fitted parameter list, the same way ccx_loglik() reads it, so a label without it gets the
+# in situ record unchanged. Flask starts in 1960 (in situ 1958); 17 of its years in 1960-81 lack months (1-7 months in
+# 1963-68; rows absent, not NA), and 2025 has two. The Keeling chart draws observations as points, so a gap is missing
+# points; the seasonal window (2000-2024) and the takeaway's "today" (2024) are full flask years.
+# ⛔ Never pass APP_OBS to dg_gate6_obs(): gate 6 reads in situ under every label (ruled 2026-10-22) and stops on it.
+APP_CO2_FLASK <- ccx_co2_flask_on(ccx_err_with_struct(list(), APP_PARAMS))
+APP_OBS  <- ccx_obs_co2_scored(ccx_prepare_obs(), APP_CO2_FLASK, monthly = TRUE)
 # The Keeling tab's average seasonal cycle (plot_seasonal()). Marcus 2026-10-21 ("10: End at the last observed
 # year"): the window starts in APP_SEAS_START and ends at the last calendar year that Mauna Loa measured in all
 # twelve months and the historical run covers (its last year is APP_HIST_YEARS[2]). It was a typed 2000-2024.

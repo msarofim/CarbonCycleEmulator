@@ -312,7 +312,10 @@ ccx_const_or <- function(x, default) tryCatch(
 rv_gradients <- function() rv_memo("gradients", function() {
   rv_need_gates()
   v <- rv_arm(CCX_MODE_CANONICAL); r <- rv_run(CCX_MODE_CANONICAL)
-  obs <- ccx_prepare_obs()
+  # the gradient the canonical was SCORED on (2026-10-23): Scripps flask MLO under the flask label. The switch is read
+  # off the arm's own parameter list, as ccx_loglik() reads it, because the review precompute loads this file without
+  # global.R (so APP_CO2_FLASK is not there); a label without the switch gets the in situ gradient unchanged.
+  obs <- ccx_obs_co2_scored(ccx_prepare_obs(), ccx_co2_flask_on(ccx_err_with_struct(list(), v$p)))
   ho <- dg_gateH_obs(obs)
   g  <- dg_gateH(v, obs, ho, r = r)
   list(g = g, ho = ho,
