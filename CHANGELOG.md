@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-23 (d) — **Handoff `notes/handoff_2026-10-23_flask_refit_item2.md`** (Marcus: "Write the handoff"). It supersedes `handoff_2026-10-22_flask_label_refit.md`, which now points to it. Done since: (j), (a)–(c). Next: refit item 2, file starts in `run_dispersed_multistart.R` for T8f's `$points$uB` and `$points$uN_all` (the canonical is already id 1), then items 3–5, the full suite and the three-start run. Memory `ccx_seas8_tracer_conflict_hilda31w` updated to match.
+
 ## 2026-10-23 (c) — **Refit code item 1 (handoff `notes/handoff_2026-10-22_flask_label_refit.md` §3): `ccx_ms_reference_set()` takes the canonical's pins under the flask label at seas_ml 1, with the canonical as a START and the seas_ml-0 control as the new basin** (Marcus: "Yes, start with the gate 6 ledger edit and refit code item 1"; rulings 2026-10-22: "Local refit from T8c's point (Recommended)", "Carry module, then check (Recommended)").
 
 - **Before:** the cut canonical's own-label guard refused these pins under `hilda_csl3v0kaidgbemwtcf` ("a cut canonical's pins are ruled under its own"). **After:** a ruled exception checked before that guard, the WTC refit's precedent (its branch was removed at hilda31w's adoption, 2026-10-13 f, and is the template here). Live only while the canonical is not a file of the flask label; remove it at adoption.

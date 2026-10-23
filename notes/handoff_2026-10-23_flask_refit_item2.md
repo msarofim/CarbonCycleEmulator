@@ -6,7 +6,8 @@ handoff"), 2026-10-23.
 - **Start here:** CHANGELOG **2026-10-22 (j)** and **2026-10-23 (a)–(c)**; this note's §3. Memory: `ccx_fossil_ch4_oxidation_omitted`
   (`INDEX_ccx_inputs.md`), `ccx_cfc_inventory_no_power` (`INDEX_ccx_ocean.md`), and for the flask arc
   `ccx_seas8_tracer_conflict_hilda31w` (`INDEX_ccx_seas.md`).
-- **main = the commit that adds this note, pushed.** No branches, no worktrees, no servers, no background jobs.
+- **main = the commit that logs this note as CHANGELOG 2026-10-23 (d), pushed** (the note itself landed one commit earlier, at
+  `3194dfc9`). No branches, no worktrees, no servers, no background jobs.
 - **Live app = revision `01a1638d-7ac2-c682-a56b-6d52a8c539ac` from `2c5b445c`**, unchanged. The canonical is still `hilda31w`.
 
 ## 1. What was done
