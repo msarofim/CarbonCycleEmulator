@@ -2,6 +2,14 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-24 (i) — **Live checks on BETA v1.1 (Marcus: "I published it; do the live checks, then write the handoff"): the host serves `9c7ec7d`, every tab draws, both Known-issue pointers open their card, and the v1.1 texts are live (banner, card 6, the map takeaway, the band and its caption).** Record: `outputs/diagnostics/live_20261024_v11/`.
+
+- **`check_live_pointer.py`** (headless Chrome, 1440 × 900, `https://carbotope.org/`): a CSV reads "# Code commit: 9c7ec7d (the deployed copy was built from this commit)". Both pointers had their `href` rewritten by the host and still opened Known issues with the card's top at 0 px. Every tab draws every plot with alt text and no output errors: Keeling 2/2, Where 5/5, What if 3/3, Isotopes 2/2, Futures Scenarios 1/1 and Pulse lab 2/2, Known issues 9/9, What pins 2/2, Under the hood 1/1. Its one FAIL is the check's own, as on 10-22 (h): Build your own waits for "Run it" by design.
+- **`check_scan_ui.py`**, 1440 × 900 and 375 × 812: ALL OK at both (pointer, share link, the phone gloss inline, no sideways scroll); screenshots beside the logs.
+- **v1.1-specific** (`live_v11_specific.log`, built-in browser, in-page JavaScript): the banner reads "BETA v1.1 CarboTope" and no "BETA v1.0" is on the page; card 6 has the (c) text and not the old; the map takeaway is (e)'s; Build your own after "Run it" draws, 701 ppm and +4.0 °C by 2150, no errors; the CO₂ band is shaded and its caption reads "Shaded: the 5–95% range of 17,000 model runs, …".
+- Not read: the revision's own record (memory size, timeouts), which 10-22 (h) took from the host; nothing in the deploy changed them.
+- Headless Chrome stopped by PID; the built-in browser's viewport reset.
+
 ## 2026-10-24 (h) — **Full suite @ `9c7ec7de`, the BETA v1.1 release commit (frozen, linked): 9,395 passed, 0 failed, 1 skipped (the standing `l2-enso-limb` skip), 0 errored, 233 warnings, 22.2 min. The release bundle is built from it and served locally: the banner reads "BETA v1.1 CarboTope".** The publish is Marcus's.
 
 - **Suite:** +1 passed over (f) and the `app-version` red cleared, as (g) intended. Log and per-file counts `outputs/diagnostics/suite_20261024_9c7ec7de{.log,_perfile.csv}`; launch script `~/ccx_frozen/suite_20261024_9c7ec7de.sh` kept; worktree removed. README's test line now cites it.

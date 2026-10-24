@@ -1,0 +1,15 @@
+Live checks specific to BETA v1.1, 2026-10-24 ~12:35 EDT, https://carbotope.org/ (-> 01a14244-...share.connect.posit.cloud),
+built-in browser at 1440 x 900, read with in-page JavaScript (CHANGELOG 2026-10-24 i):
+  banner: "BETA v1.1 CarboTope — single best fit. Teaching software — not peer-r..."; "BETA v1.0" on the page: false
+  What pins down what? takeaway: "The metrics most sensitive to changes in this model are δ13C level & gradient — led by Input
+    scalings & reporting (22%, though not in every posterior draw) ahead of High-latitude structure (21%); CO2 level — led by
+    Land uptake (34%, though not in every posterior draw) ahead of Mixed layer & vertical mixing (22%); Δ14C in the air (bomb)
+    — mostly influenced by Input scalings & reporting (38%). A metric low on the chart is one this model could change a good
+    deal without results changing substantially."
+  Known issues, card 6: "three of the four chains sampled" true; "about 4 ppm" true; "about two fifths" true;
+    "one chain sampled" false; "about a fifth" false
+  Futures / Build your own, after "Run it": f_plot drawn, alt "Futures", 0 output errors; takeaway "Your pathway reaches 701 ppm
+    and +4.0 °C by 2150. Fossil emissions never stop on this pathway — ..."
+  Futures / Scenarios, CO2 view: drawn; the band shaded; caption in the figure (read from a zoomed screenshot): "Shaded: the
+    5–95% range of 17,000 model runs, each with a different plausible set of the fitted carbon-cycle parameters. The climate
+    response, the non-CO2 forcing and the model's structure are held fixed, so the full uncertainty is likely wider."

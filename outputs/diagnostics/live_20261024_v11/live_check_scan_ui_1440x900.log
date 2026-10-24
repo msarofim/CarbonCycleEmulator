@@ -1,0 +1,21 @@
+saved outputs/diagnostics/live_20261024_v11/live_scan_ui_1440x900_desktop_after_see_card.png 115892 bytes
+saved outputs/diagnostics/live_20261024_v11/live_scan_ui_1440x900_phone_gloss_open.png 157973 bytes
+{
+ "share": {
+  "copied": "https://carbotope.org/?_inputs_&tabs=%22The%20Keeling%20Curve%22&k_years=%5B1958%2C2024%5D&k_hemi=%22both%22&k_obs=true",
+  "label": "Link copied",
+  "search": "?_inputs_&tabs=%22The%20Keeling%20Curve%22&k_years=%5B1958%2C2024%5D&k_hemi=%22both%22&k_obs=true"
+ },
+ "see_card": {
+  "active": "Known issues",
+  "scrollY": 460,
+  "cardTop": 0
+ },
+ "phone_gloss": {
+  "open": true,
+  "shown": "inline",
+  "meaning": " (parts per million: molecules of CO2 in every million molecules of dry air)",
+  "sideways": false
+ }
+}
+ALL OK
