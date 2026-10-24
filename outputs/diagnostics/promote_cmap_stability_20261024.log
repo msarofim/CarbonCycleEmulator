@@ -1,0 +1,14 @@
+calibration/promote_cmap_stability.R @cb7f402a: 12 rows from outputs/diagnostics/cmap_posterior_spread_20261024_hilda31fl_n400.rds (400 draws); like-for-like with data/constraint_map.rds (mode hilda31fl, map commit 8b1e8e41)
+  CO₂ level                    winner Land uptake                    lost in  36 of 400 draws (  9.0 %; upper 95 %  12.2 %) -> tie
+  CO₂ seasonal cycle           winner Seasonal cycle                 lost in   0 of 400 draws (  0.0 %; upper 95 %   0.9 %) -> named
+  CO₂ north–south gradient   winner Mixed layer & vertical mixing  lost in 184 of 400 draws ( 46.0 %; upper 95 %  51.0 %) -> tie
+  CO₂ in ice cores             winner Land uptake                    lost in 126 of 400 draws ( 31.5 %; upper 95 %  36.3 %) -> tie
+  δ¹³C in ice cores           winner Seasonal cycle                 lost in  28 of 400 draws (  7.0 %; upper 95 %  10.0 %) -> tie
+  δ¹³C level & gradient       winner Input scalings & reporting     lost in  20 of 400 draws (  5.0 %; upper 95 %   7.6 %) -> tie
+  δ¹³C seasonal cycle         winner Seasonal cycle                 lost in   0 of 400 draws (  0.0 %; upper 95 %   0.9 %) -> named
+  Δ¹⁴C in the air (bomb)     winner Input scalings & reporting     lost in   5 of 400 draws (  1.2 %; upper 95 %   2.9 %) -> named
+  Δ¹⁴C in the air (pre-bomb) winner High-latitude structure        lost in  75 of 400 draws ( 18.8 %; upper 95 %  22.9 %) -> tie
+  Δ¹⁴C in the ocean          winner Mixed layer & vertical mixing  lost in  29 of 400 draws (  7.2 %; upper 95 %  10.2 %) -> tie
+  Ocean interior chemistry       winner Biological pump                lost in   0 of 400 draws (  0.0 %; upper 95 %   0.9 %) -> named
+  Measured land & ocean sinks    winner Input scalings & reporting     lost in  48 of 400 draws ( 12.0 %; upper 95 %  15.6 %) -> tie
+wrote data/constraint_map_stability.rds (md5 ae482204179924d0c461c9a01661ecc2)
