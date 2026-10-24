@@ -1223,11 +1223,17 @@ APP_FAIR_PULSE_NOTE <- paste("FaIR is shown for the same pulse on the same scena
 # question directly. The map's cells are first-order slopes (a step-scaling test, 10-14 c), and they
 # move across the posterior.
 # ⚠ 5 % is the band's own convention (the 5-95 % range everywhere in the app), not a fitted threshold.
+# ⭐ 2026-10-24 (Marcus, verbatim: "Name only rows clear of the cut (Recommended)"): the share is a SAMPLE, so a
+# row is named only if the exact (Clopper-Pearson) 95 % upper bound of its share is below 5 %
+# (ccx_cmap_lost_hi95, R/paths.R). At hilda31fl, δ¹³C level & gradient lost its winner in exactly 5 / 100
+# and then 20 / 400 draws (95 % 3.1-7.6 %), with losses in all four chains: its share is about 5 %, and more
+# draws could not place it on one side of a point cut (CHANGELOG 10-24 d). At 400 draws, 11 losses are named
+# and 12 are a tie.
 # The shares are DATA (data/constraint_map_stability.rds, calibration/promote_cmap_stability.R), refused
 # unless computed against THIS map (ccx_cmap_stab_problems, R/paths.R). A rebuilt map drops the tie
 # rule until the stability is re-run: the takeaway is then not shown, and the log says why.
 APP_CMAP_TIE_LOST_MAX <- 0.05
-APP_CMAP_TIE_SRC <- "share of 100 MCMC posterior draws (hilda31w, 4 chains x 200k) in which the map's winner loses the row; calibration/diag_cmap_posterior_spread.R, 2026-10-14"
+APP_CMAP_TIE_SRC <- "share of 400 MCMC posterior draws (hilda31fl, 4 chains x 200k) in which the map's winner loses the row, named only if its exact 95 % upper bound is below 5 %; calibration/diag_cmap_posterior_spread.R, 2026-10-24"
 APP_CMAP_STAB_FILE <- file.path(CCX_ROOT, "data", "constraint_map_stability.rds")
 APP_CMAP_STAB <- local({
   if (is.null(APP_CMAP)) return(NULL)
@@ -1241,21 +1247,25 @@ APP_CMAP_STAB <- local({
 #' How to describe who holds one row of the constraint map
 #'
 #' @param row one row of `MC` (named leverage per component)
-#' @param lost_share the share of posterior draws in which this row's winner at the mode loses the row
-#' @param lost_max the share above which the top two are reported as a tie rather than a winner
+#' @param n_lost the posterior draws in which this row's winner at the mode loses the row
+#' @param n_draws the posterior draws the map was re-run at
+#' @param lost_max the cut: the row is a tie unless the exact 95 % upper bound of n_lost / n_draws is below it
 #' @return a phrase; Marcus's wording (2026-09-27) for the tie case
-app_cmap_holder_phrase <- function(row, lost_share, lost_max = APP_CMAP_TIE_LOST_MAX) {
-  stopifnot(length(lost_share) == 1L, is.finite(lost_share), lost_share >= 0, lost_share <= 1)
+app_cmap_holder_phrase <- function(row, n_lost, n_draws, lost_max = APP_CMAP_TIE_LOST_MAX) {
+  hi <- ccx_cmap_lost_hi95(n_lost, n_draws)   # refuses a count that is not a count
   sh <- 100 * row / sum(row)
   o  <- sort(sh, decreasing = TRUE)
   # 2026-10-15 review: "influenced about equally by X (34%) and Y (22%)" was not equal. The review's proposed
   # "though Y leads in some posterior draws" is FALSE for one shipped row: δ¹³C level & gradient's runner-up at the
   # mode (High-latitude structure, 21%) wins 0 of 100 draws -- its 8 lost draws go to Land uptake (5) and Mixed
   # layer (3) (outputs/diagnostics/cmap_posterior_spread_20261014_hilda31w_n100.rds, $winners). So the phrase says
-  # only what lost_share measures: the leader does not lead in every draw. Same variables as before.
-  if (length(o) >= 2 && lost_share > lost_max)
+  # only what the counts measure: the leader does not lead in every draw.
+  if (length(o) >= 2 && hi >= lost_max) {
+    # that clause is FALSE for a row that never lost: with under 72 draws even 0 losses cannot clear 5 %
+    if (n_lost == 0) stop("a row that never lost cannot be named at ", n_draws, " draws: run more draws")
     return(sprintf("led by %s (%.0f%%, though not in every posterior draw) ahead of %s (%.0f%%)",
                    names(o)[1], o[[1]], names(o)[2], o[[2]]))
+  }
   sprintf("mostly influenced by %s (%.0f%%)", names(o)[1], o[[1]])
 }
 

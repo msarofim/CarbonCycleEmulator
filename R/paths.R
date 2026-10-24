@@ -1049,7 +1049,28 @@ ccx_cmap_stab_problems <- function(st, cm) {
     bad <- c(bad, "computed against a different constraint map (its MC_map is not the shown map's MC)")
   if (!setequal(names(st[["lost_share"]]), rownames(cm[["MC"]])) || anyNA(st[["lost_share"]]))
     bad <- c(bad, "its rows are not the map's rows")
+  # since 2026-10-24 the rule reads COUNTS (ccx_cmap_lost_hi95): a file without them predates the rule
+  n <- pv[["n_draws"]]; k <- st[["n_lost"]]
+  if (is.null(k) || !is.numeric(n) || length(n) != 1L || !is.finite(n) || n < 1)
+    bad <- c(bad, "no draw counts (n_lost, provenance$n_draws): it predates the 2026-10-24 tie rule")
+  else if (!setequal(names(k), names(st[["lost_share"]])) || anyNA(k) || any(k != round(k)) || any(k < 0 | k > n) ||
+           any(k != round(st[["lost_share"]][names(k)] * n)))
+    bad <- c(bad, "its draw counts (n_lost) do not match its rows or its shares")
   bad
+}
+
+#' The exact (Clopper-Pearson) upper 95 % bound of a row's winner-loss share
+#'
+#' The takeaway's tie rule since 2026-10-24 (Marcus, verbatim: "Name only rows clear of the cut
+#' (Recommended)"): a row's winner is named only if this bound is BELOW APP_CMAP_TIE_LOST_MAX, so a share
+#' whose sampling interval reaches the cut is a tie. At 400 draws, 11 losses are named and 12 are a tie.
+#' Equal to binom.test(k, n)$conf.int[2]. Shared by app/global.R, calibration/promote_cmap_stability.R and
+#' test-cmap-tie.R.
+#' @param k draws in which the map's winner loses the row; @param n draws
+ccx_cmap_lost_hi95 <- function(k, n) {
+  stopifnot(length(k) == 1L, length(n) == 1L, is.finite(k), is.finite(n), k == round(k), n == round(n),
+            n >= 1, k >= 0, k <= n)
+  if (k == n) 1 else stats::qbeta(0.975, k + 1, n - k)
 }
 
 #' Parameters at a fitted mode, decoded under the band that FOUND it

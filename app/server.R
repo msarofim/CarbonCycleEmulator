@@ -1132,8 +1132,10 @@ function(input, output, session) {
     # three rows, and two of the three are TIES whose winner changes with the
     # arm (0.13 pp and 0.85 pp). The phrase is now a pure function in global.R
     # so it can be gated, and it reports a tie as a tie. Since 2026-10-14 a tie is a winner that
-    # loses the row in more than APP_CMAP_TIE_LOST_MAX of the posterior draws.
-    who <- vapply(top, function(r) app_cmap_holder_phrase(APP_CMAP$MC[r, ], APP_CMAP_STAB$lost_share[[r]]),
+    # loses the row in posterior draws; since 2026-10-24 it is named only if the exact 95 % upper bound
+    # of that share is below APP_CMAP_TIE_LOST_MAX (the helper reads the counts).
+    who <- vapply(top, function(r) app_cmap_holder_phrase(APP_CMAP$MC[r, ], APP_CMAP_STAB$n_lost[[r]],
+                                                           APP_CMAP_STAB$provenance$n_draws),
                   character(1))
     paste0("The metrics most sensitive to changes in this model are ",
            paste(sprintf("%s — %s", top, who), collapse = "; "),
