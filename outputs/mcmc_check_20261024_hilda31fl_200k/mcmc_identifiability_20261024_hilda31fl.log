@@ -1,0 +1,26 @@
+=== calibration/diag_mcmc_identifiability.R @d1e3c476, 2026-10-24 05:59 ===
+[ccx_adopt_mode_band] h_ml -> [42.5, 200] (mode 69.6916); kz -> [1161.6, 27808] (mode 13818.8237)
+mode hilda31fl (md5 80c487f576f9a1e44f7900597d95a3e4); draws outputs/mcmc_check_20261024_hilda31fl_200k/pooled_u.rds (md5 e585663d474cb76ab3856301785267c7): 34000 x 31, from calibration/read_mcmc_check.R @d1e3c476, window (30000, 2e+05], per chain 8500
+GATE: recomputed logpost -1050.120651 vs stored -1050.120651 (diff 0.00e+00, tol 5e-05) -> PASS
+
+=== (1) THE WTC LABEL'S TWO NEW NAMES ===
+bomb_share_NH  band [0.77, 0.98] (logit); mode 0.8370; posterior mean 0.8338 sd 0.0341, 2.5/50/97.5 % 0.7747 / 0.8322 / 0.9046
+               u-space posterior sd / Laplace sd 1.546; share in the band's outer 1% / 5%: low 0.013 / 0.051, high 0.000 / 0.000
+               vs tau_ex         r: Laplace -0.309, posterior -0.351 (u) / -0.365 (parameter scale)
+               vs bomb_total     r: Laplace -0.065, posterior -0.069 (u) / -0.076 (parameter scale)
+seas_T_lag     band [0, 6] (logit); mode 0.4085; posterior mean 0.6342 sd 0.6664, 2.5/50/97.5 % 0.0238 / 0.3836 / 2.4943
+               u-space posterior sd / Laplace sd 1.259; share in the band's outer 1% / 5%: low 0.100 / 0.432, high 0.000 / 0.000
+               vs seas_lag_p_NH  r: Laplace +0.978, posterior +0.898 (u) / +0.955 (parameter scale)
+
+=== (2) h_ml AGAINST THE P8 WALL (measured at the mode, every other name held) ===
+the OBJECTIVE's wall at the mode: 75.02 m (finite at 75.020, refused at 75.028; 14 bisection evaluations)
+  refused by: ccx_substeps_for: the stability bound needs 267.1 substeps, past CCX_SUBSTEPS_MAX = 256 (h_ml 75.028, kz 13818.8) -- refusing to run a count the bound itself ca
+P8 alone (ccx_seas_ml_guard on the label's grid, depth 3682.2 m): 75.14 m
+posterior h_ml: mode 69.69; mean 62.85 sd 6.98; 2.5/50/97.5 % 48.01 / 63.55 / 74.06; 99 % 74.61; max 75.02 m
+share of draws PAST the wall-at-mode (an MCMC draw there is finite, so its own wall is higher): 0.000
+share of draws within 1 / 2 / 5 m BELOW the wall-at-mode: 0.026 / 0.056 / 0.171
+share of draws within 1 / 2 / 5 m ABOVE the 42.5 m floor: 0.000 / 0.001 / 0.020
+u-space posterior sd / Laplace sd for h_ml: 3.617
+
+provenance: calibration/diag_mcmc_identifiability.R @d1e3c476; mode hilda31fl; draws pooled_u.rds (34000); no RNG
+wrote outputs/mcmc_check_20261024_hilda31fl_200k/mcmc_identifiability_20261024_hilda31fl.{log,rds}

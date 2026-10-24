@@ -1,0 +1,41 @@
+=== armed 2026-10-23 17:25:46 @d1e3c476; waiting on 89110 89111 89112 89113 ===
+pid 89110 exited by 05:23:52
+pid 89111 exited by 05:59:52
+pid 89112 exited by 05:59:52
+pid 89113 exited by 05:59:52
+=== PHASE 1 2026-10-24 05:59:52 ===
+chain 1: iter 200000; chain 1 COMPLETE: 200000 iterations, 8500 kept samples, acceptance 0.082 (post-adapt 0.071)
+chain 2: iter 200000; chain 2 COMPLETE: 200000 iterations, 8500 kept samples, acceptance 0.070 (post-adapt 0.058)
+chain 3: iter 200000; chain 3 COMPLETE: 200000 iterations, 8500 kept samples, acceptance 0.076 (post-adapt 0.066)
+chain 4: iter 200000; chain 4 COMPLETE: 200000 iterations, 8500 kept samples, acceptance 0.082 (post-adapt 0.074)
+3cc3ac6b6ee90daec6cf32a345825e4e chain_1.rds
+0594ed44bab1e6545869e26b08f83d3c chain_2.rds
+5d139007fd7e109afc2f8ba5db605b44 chain_3.rds
+fe76b75857281f158311418263e61b6b chain_4.rds
+snapshot outputs/mcmc_check_20261024_hilda31fl_200k: 4 chains cmp-identical to /Users/MarcusMarcus/ccx_frozen/20261023_mcmc_hilda31fl/outputs/mcmc_check_20261023_hilda31fl
+--- read drop 0 05:59:53
+window: iterations (30000, 200000], 8500 kept samples per chain (thin 20), 34000 pooled
+R-hat: max 1.1126 (seas_T_lag); 12 of 32 quantities above 1.01 [Vehtari et al. 2021's reference]
+ESS: min bulk 27 (seas_T_lag), min tail 27 (beta_max); 10 below 400 in either [their reference: 100 per chain]
+--- identifiability 05:59:54
+GATE: recomputed logpost -1050.120651 vs stored -1050.120651 (diff 0.00e+00, tol 5e-05) -> PASS
+=== PHASE 1 done 2026-10-24 06:00:23 ===
+=== PHASE 2 2026-10-24 06:00:23; ruling file:
+# Marcus 2026-10-23 ~17:30 EDT, verbatim: "Yes, hilda31w's settings (Recommended)"
+# (the question: pool all 4, drop 0, thin x2 within chain (~17,000 draws); tie stability on 100 draws; nothing promoted)
+DROP=0
+THIN=2
+===
+--- read drop 0 thin 2 06:00:23
+wrote outputs/mcmc_check_20261024_hilda31fl_200k/pooled_u_thin2.rds: 17000 draws x 31 names (md5 bb3c6fd89a6048b8efd6ef484ae9c174)
+pooled outputs/mcmc_check_20261024_hilda31fl_200k/pooled_u_thin2.rds (md5 bb3c6fd89a6048b8efd6ef484ae9c174); drift names seas_T_lag,seas_lag_p_NH,seas_lag_p_SH,ndep_ret,h_ml; ribbons -> outputs/diagnostics/futures_ribbons_mcmc_20261024_hilda31fl_200k.rds
+ 6:00  up 3 days, 17:36, 4 users, load averages: 2.16 2.18 2.43
+--- band build 06:00:24
+--- tie spread 06:00:24
+--- tie done 06:44:08
+tie rc 0
+--- band by chain 09:48:33
+--- band drift 09:48:35
+--- band done 09:48:38
+band rc 0
+=== PHASE 2 done 2026-10-24 09:48:38; nothing promoted ===
