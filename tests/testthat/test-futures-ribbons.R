@@ -273,7 +273,8 @@ test_that("MUTATION: MCMC draws without the chains' seeds, RNG kind or seed plac
 # out of the TEXT and compared with its artifact:
 #   counts (chains, steps, parameter sets, fitted, held, lag names) -- EXACT;
 #   "less than X" -- an ORDERING against the band's widest GMST cell anywhere in its span;
-#   "about N" / "about a fifth" -- the measured value ROUNDED TO THE TYPED PRECISION equals the typed one.
+#   "about N" / "about two fifths" -- the measured value ROUNDED TO THE TYPED PRECISION equals the typed one
+#   (a fraction: the share times its denominator, rounded, equals the numerator; "a fifth" or "two fifths").
 # Artifacts: the shipped band (chains, window, draws, held, the fitted vector); the by-chain read of THAT band
 # (outputs/diagnostics/mcmc_band_by_chain_hilda31fl_200k_20261024.csv, CHANGELOG 10-24 a; tied to the shipped
 # band cell by cell below); the R-hat read and the h_ml wall read beside the band's own draws file
@@ -294,6 +295,15 @@ FR_LAG_NAMES  <- c("seas_T_lag", "seas_lag_p_NH", "seas_lag_p_SH")   # "how far 
 .fr_grab <- function(pat, txt) { m <- regmatches(txt, regexec(pat, txt, perl = TRUE))[[1]]; if (length(m) < 2L) NA_character_ else m[2] }
 .fr_word <- function(w, tab) { v <- tab[tolower(w)]; if (is.na(w) || is.na(v)) NA_real_ else unname(v) }
 .fr_num  <- function(x) as.numeric(gsub(",", "", x))
+# "at most about a fifth of the" -> c(num 1, den 5); "... two fifths of the" -> c(2, 5); NA when the phrase is gone.
+# 2026-10-24 (Marcus: Use "about two fifths" and update the parser): the old grammar read "a <fraction>" only.
+.fr_frac <- function(txt) {
+  m <- regmatches(txt, regexec("at most about (\\w+) (\\w+) of the", txt, perl = TRUE))[[1]]
+  if (length(m) < 3L) return(c(num = NA_real_, den = NA_real_))
+  num <- if (tolower(m[2]) %in% c("a", "one")) 1 else .fr_word(m[2], FR_NUM_WORDS)
+  den <- .fr_word(sub("s$", "", sub("halves$", "half", tolower(m[3]))), FR_FRAC_WORDS)
+  c(num = num, den = den)
+}
 
 # What in `detail` / `note_temp` is no longer true of the artifacts: each a string, empty when all hold.
 .fr_issue6_problems <- function(detail, note_temp, ship, bychain, diag, wall, canon_md5) {
@@ -315,8 +325,8 @@ FR_LAG_NAMES  <- c("seas_T_lag", "seas_lag_p_NH", "seas_lag_p_SH")   # "how far 
   co <- bychain[bychain$var == "co2_ppm", ]
   chk(round(max(co$range_q05, co$range_q50, co$range_q95)) == as.numeric(.fr_grab("within about (\\d+) ppm", detail)),
       "between-chain ppm")
-  chk(round(1 / max(co$range_over_width)) == .fr_word(.fr_grab("at most about a (\\w+) of the", detail), FR_FRAC_WORDS),
-      "between-chain share of the width")
+  fr <- .fr_frac(detail)
+  chk(round(max(co$range_over_width) * fr[["den"]]) == fr[["num"]], "between-chain share of the width")
   top <- diag$name[order(-diag$rhat)][seq_along(FR_LAG_NAMES)]
   chk(setequal(top, FR_LAG_NAMES) &&
         .fr_word(.fr_grab("(\\w+) parameters that set", detail), FR_NUM_WORDS) == length(FR_LAG_NAMES),
@@ -354,8 +364,16 @@ test_that("issue 6's typed numbers, and the temperature sentence's, are true of 
   expect_true("held count"           %in% run(d = sw("Fourteen other", "Nine other")))
   expect_true("temperature band width" %in% run(d = sw("less than 0.1 ", "less than 0.05 ")))
   expect_true("temperature band width" %in% run(nt = sw("less than 0.1 ", "less than 0.05 ", .fr_env$APP_RIBBON_NOTE_TEMP)))
-  expect_true("between-chain ppm"    %in% run(d = sw("about 5 ppm", "about 3 ppm")))
-  expect_true("between-chain share of the width" %in% run(d = sw("about a fifth", "about a tenth")))
+  expect_true("between-chain ppm"    %in% run(d = sw("about 4 ppm", "about 3 ppm")))
+  expect_true("between-chain share of the width" %in% run(d = sw("about two fifths", "about a fifth")))
+  expect_true("between-chain share of the width" %in% run(d = sw("about two fifths", "about three fifths")))
+  expect_true("between-chain share of the width" %in% run(d = sw("about two fifths", "about a tenth")))
+  expect_true("between-chain share of the width" %in% run(d = sw("about two fifths of the", "about two fifths across the")))   # phrase gone -> NA -> caught
+  # the parser itself: singular, plural, the old card's phrase, and a gone phrase
+  expect_identical(.fr_frac("at most about a fifth of the"), c(num = 1, den = 5))
+  expect_identical(.fr_frac("at most about two fifths of the"), c(num = 2, den = 5))
+  expect_identical(.fr_frac("at most about three halves of the"), c(num = 3, den = 2))
+  expect_true(all(is.na(.fr_frac("agree closely"))))
   expect_true("the lag names are the worst-converged" %in% run(d = sw("Three parameters", "Two parameters")))
   expect_true("h_ml wall depth"      %in% run(d = sw("about 75 m", "about 60 m")))
   expect_true("chain count"          %in% run(d = sw("four chains of", "four sets of")))   # sentence gone -> NA -> caught

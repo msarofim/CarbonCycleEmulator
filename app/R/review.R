@@ -812,6 +812,9 @@ RV_CARDS <- list(
   # and this is Marcus's copy for it (drafted on "Draft all four for me to edit"; his one edit deleted the
   # Laplace sentences; notes/band_copy_drafts_2026-10-15.md). Every number below is pinned against its
   # artifact by test-futures-ribbons.R ("issue 6's typed numbers"): change them together.
+  # 2026-10-24: the hilda31fl band ships (CHANGELOG 10-24 b); the chains sentence and the two between-chain numbers
+  # follow it (Marcus, verbatim: Use "about two fifths" and update the parser): 3.79 ppm -> "about 4", 38 % -> "about two
+  # fifths", and three of the four chains visited the lag ridge (10-24 a).
   list(id = 6, key = "bands", class = "gap",
        title = "The uncertainty band covers only the carbon-cycle parameters",
        plain = paste("Each line in this app is a single best fit. On the Futures tab,",
@@ -829,11 +832,11 @@ RV_CARDS <- list(
                       "0.1 \u00b0C, and no band is drawn for it.",
                       "The sampler has not fully converged. Three parameters that set",
                       "how far plant growth and respiration lag behind the seasons can",
-                      "compensate for one another, and one chain sampled a different",
-                      "combination of them for part of its run. This has less effect",
-                      "on the projections: bands computed from each chain separately",
-                      "agree to within about 5 ppm, at most about a fifth of the",
-                      "band's width.",
+                      "compensate for one another, and three of the four chains sampled",
+                      "a different combination of them for parts of their runs. This has",
+                      "less effect on the projections: bands computed from each chain",
+                      "separately agree to within about 4 ppm, at most about two fifths",
+                      "of the band's width.",
                       "The depth of the ocean's mixed layer is cut off at about 75 m",
                       "by a limit in the model's time-stepping, so its sampled range",
                       "may be narrower than the data allow."),

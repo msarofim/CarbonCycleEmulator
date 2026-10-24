@@ -2,6 +2,12 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-24 (c) — **Card 6's band copy follows the hilda31fl band (Marcus, verbatim: Use "about two fifths" and update the parser). `test-futures-ribbons` is GREEN (94 / 0); `app-review-copy` 129 / 0, `app-us-spelling` 9 / 0.** Not deployed.
+
+- **`app/R/review.R`, card 6's detail**, three phrases as drafted after (b), with the measured value behind each: "three of the four chains sampled a different combination of them for parts of their runs" (chains 2, 3 and 1 at 40k–60k, 130k–170k and 160k–190k; 10-24 a), "about 4 ppm" (3.79), "at most about two fifths of the band's width" (38 %, at vvHL CO₂ 2100). The rest of the card is unchanged.
+- **`test-futures-ribbons.R`:** the share check read only "a <fraction>" (1 / share, rounded). The new `.fr_frac()` reads "a fifth" or "two fifths"; the check is now round(share × denominator) = numerator. Mutations: "a fifth", "three fifths", "a tenth" and a gone phrase are each caught; the ppm mutation moves to "about 4 ppm". Parser checks pin singular, plural ("three halves") and a missing phrase.
+- `notes/band_copy_drafts_2026-10-15.md` keeps the 10-15 wording as the record of that draft.
+
 ## 2026-10-24 (b) — **SHIPPED (Marcus, verbatim): "Ship it (Recommended)". The hilda31fl MCMC band is in `data/futures_ribbons.rds` (md5 61bc2632…), with the 10-15 ruled label carried. `test-futures-ribbons` is 86 / 1: the one red is card 6's typed numbers, which are Marcus's copy (below).** Also ruled: the tie stability is re-run on 400 draws ("Re-run on 400 draws (Recommended)"), running.
 
 - **`promote_futures_ribbons.R`** at the clean `283e3f3b` (log `outputs/diagnostics/promote_futures_ribbons_20261024.log`): bands untouched; the draws md5 checked; chain seeds 20261002–05 recorded; `key_draws` dropped (22.1 → 0.3 MB); `ccx_ribbons_problems()` at the canonical: none. Two runs byte-identical (second path first).
