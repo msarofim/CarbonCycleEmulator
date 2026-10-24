@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-24 (j) — **Handoff `notes/handoff_2026-10-24_v11_live.md`** (Marcus: "I published it; do the live checks, then write the handoff"). It supersedes `handoff_2026-10-23_products_rebuilt_mcmc_next.md`, which now points to it. Done since: 10-23 (u)–(w), 10-24 (a)–(i). State: BETA v1.1 CarboTope live on hilda31fl from `9c7ec7de` (suite 9,395 / 0 / 1), live-checked. Open, all Marcus's: the `v1.1-beta-hilda31fl` tag, the carried-over items (card 8's text, the Keeling 1960s note, `f_plot` alt text, capacity, the science follow-ups), and whether to work on the seasonal-lag non-convergence. Memory `ccx_hilda31fl_adopted` and `INDEX_ccx.md`'s live-state line updated to the release.
+
 ## 2026-10-24 (i) — **Live checks on BETA v1.1 (Marcus: "I published it; do the live checks, then write the handoff"): the host serves `9c7ec7d`, every tab draws, both Known-issue pointers open their card, and the v1.1 texts are live (banner, card 6, the map takeaway, the band and its caption).** Record: `outputs/diagnostics/live_20261024_v11/`.
 
 - **`check_live_pointer.py`** (headless Chrome, 1440 × 900, `https://carbotope.org/`): a CSV reads "# Code commit: 9c7ec7d (the deployed copy was built from this commit)". Both pointers had their `href` rewritten by the host and still opened Known issues with the card's top at 0 px. Every tab draws every plot with alt text and no output errors: Keeling 2/2, Where 5/5, What if 3/3, Isotopes 2/2, Futures Scenarios 1/1 and Pulse lab 2/2, Known issues 9/9, What pins 2/2, Under the hood 1/1. Its one FAIL is the check's own, as on 10-22 (h): Build your own waits for "Run it" by design.

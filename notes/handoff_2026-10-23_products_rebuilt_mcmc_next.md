@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-23 (2): products rebuilt, the app on flask, wording settled; the MCMC read is next
 
+> ⚠ **SUPERSEDED** by `notes/handoff_2026-10-24_v11_live.md` (§4 done: the MCMC read, the band shipped, the tie stability under a counts rule, the suite green, BETA v1.1 published and live-checked).
+
 **Supersedes** `notes/handoff_2026-10-23_hilda31fl_adopted.md`, which now points here. Written on Marcus's request ("Yes,
 write the handoff"), 2026-10-23 ~15:20.
 
