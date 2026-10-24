@@ -12,6 +12,9 @@
 # - 2026-10-14 (Marcus): "Ship the hilda31w band (Recommended)". The SAME recipe at the new canonical hilda31w
 #   (4 chains to 200 000, window (30000, 200000], thin 20, x2 within chain = 17 000 draws; CHANGELOG
 #   2026-10-14 e, f). The ship record below moved with it: the shipped mode and the landing it was promoted from.
+# - 2026-10-24 (Marcus): "Ship it (Recommended)". The SAME recipe at the new canonical hilda31fl (CHANGELOG
+#   2026-10-24 a, b), promoted with the ruled 10-15 label carried. The ship record and the by-chain, R-hat and
+#   h_ml-wall reads below moved with it.
 #
 # - 2026-10-10 (Marcus): "Omit it on temperature". The band is drawn on the CO2 view only
 #   (APP_RIBBON_YVARS); the temperature view says in words that its spread comes only through CO2 and is
@@ -35,7 +38,7 @@
 # =====================================================================
 
 .fr_ship_file <- file.path(.root, "data", "futures_ribbons.rds")
-.fr_src_file  <- file.path(.root, "outputs", "diagnostics", "futures_ribbons_mcmc_20261014_hilda31w_200k.rds")
+.fr_src_file  <- file.path(.root, "outputs", "diagnostics", "futures_ribbons_mcmc_20261024_hilda31fl_200k.rds")
 .fr_lap_file  <- file.path(.root, "outputs", "diagnostics", "futures_ribbons_laplace_held_20261001.rds")
 .fr_global    <- file.path(.root, "app", "global.R")
 .fr_review    <- file.path(.root, "app", "R", "review.R")
@@ -54,7 +57,7 @@ if (file.exists(.fr_global))
 .fr_lap <- if (.fr_lap_have) readRDS(.fr_lap_file) else NULL
 # THE MODES, by NAME, never read back from the artifacts (a check of an artifact against its own label
 # would pass whatever it said). ccx_ribbons_problems() reads each mode file itself.
-.fr_ship_md <- "hilda31w"   # the canonical the band was ruled for (10-14; hilda29e 10-09); a new canonical must REFUSE it
+.fr_ship_md <- "hilda31fl"  # the canonical the band was ruled for (10-24; hilda31w 10-14, hilda29e 10-09); a new canonical must REFUSE it
 .fr_lap_md  <- "hilda33d"   # the held Laplace evidence (re-expressed 2026-10-03 h, "Approve all")
 
 FR_PROBS_RULED    <- c(0.05, 0.50, 0.95)   # the ruled band (+ the median), both builds
@@ -272,11 +275,11 @@ test_that("MUTATION: MCMC draws without the chains' seeds, RNG kind or seed plac
 #   "less than X" -- an ORDERING against the band's widest GMST cell anywhere in its span;
 #   "about N" / "about a fifth" -- the measured value ROUNDED TO THE TYPED PRECISION equals the typed one.
 # Artifacts: the shipped band (chains, window, draws, held, the fitted vector); the by-chain read of THAT band
-# (outputs/diagnostics/mcmc_band_by_chain_hilda31w_200k_20261014.csv, CHANGELOG 10-14 e; tied to the shipped
+# (outputs/diagnostics/mcmc_band_by_chain_hilda31fl_200k_20261024.csv, CHANGELOG 10-24 a; tied to the shipped
 # band cell by cell below); the R-hat read and the h_ml wall read beside the band's own draws file
-# (diag_20261014_drop0.csv, mcmc_identifiability_20261014_hilda31w.rds; the latter tied by the canonical's md5).
+# (diag_20261024_drop0.csv, mcmc_identifiability_20261024_hilda31fl.rds; the latter tied by the canonical's md5).
 # ---------------------------------------------------------------------
-FR_BYCHAIN_FILE <- file.path(.root, "outputs", "diagnostics", "mcmc_band_by_chain_hilda31w_200k_20261014.csv")
+FR_BYCHAIN_FILE <- file.path(.root, "outputs", "diagnostics", "mcmc_band_by_chain_hilda31fl_200k_20261024.csv")
 FR_NUM_WORDS  <- c(one = 1, two = 2, three = 3, four = 4, five = 5, six = 6, seven = 7, eight = 8, nine = 9,
                    ten = 10, eleven = 11, twelve = 12, thirteen = 13, fourteen = 14, fifteen = 15)
 FR_FRAC_WORDS <- c(half = 2, third = 3, quarter = 4, fifth = 5, sixth = 6, tenth = 10)
@@ -327,9 +330,9 @@ FR_LAG_NAMES  <- c("seas_T_lag", "seas_lag_p_NH", "seas_lag_p_SH")   # "how far 
 
 .fr_issue6_inputs <- function() {
   ddir <- file.path(.root, dirname(.fr_ship$provenance$draws_provenance$draws_file))
-  idf <- readRDS(file.path(ddir, "mcmc_identifiability_20261014_hilda31w.rds"))
+  idf <- readRDS(file.path(ddir, "mcmc_identifiability_20261024_hilda31fl.rds"))
   list(bychain = read.csv(FR_BYCHAIN_FILE),
-       diag    = read.csv(file.path(ddir, "diag_20261014_drop0.csv")),
+       diag    = read.csv(file.path(ddir, "diag_20261024_drop0.csv")),
        wall    = c(idf$wall, list(canon_md5 = idf$provenance$mode_md5)),
        canon_md5 = unname(tools::md5sum(ccx_mode_file(.fr_ship_md))))
 }

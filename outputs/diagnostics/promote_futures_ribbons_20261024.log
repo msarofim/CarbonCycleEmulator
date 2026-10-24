@@ -1,0 +1,8 @@
+=== calibration/promote_futures_ribbons.R @283e3f3b ===
+from  outputs/diagnostics/futures_ribbons_mcmc_20261024_hilda31fl_200k.rds (md5 c39613eaf3c1c8d0a50db64db94750e8)
+draws outputs/mcmc_check_20261024_hilda31fl_200k/pooled_u_thin2.rds (md5 bb3c6fd89a6048b8efd6ef484ae9c174)
+mode hilda31fl; 17000 draws (17000 ok); 5614 band rows; chains seeded 20261002 20261003 20261004 20261005 (Mersenne-Twister/Inversion/Rejection)
+label (RULED): each with a different plausible set of the fitted carbon-cycle parameters. The climate response, the non-CO₂ forcing and the model's structure are held fixed, so the full uncertainty is likely wider
+dropped key_draws: 22.1 MB -> 0.3 MB in memory
+ccx_ribbons_problems() at the canonical: none
+wrote data/futures_ribbons.rds (md5 61bc2632cc2793688aa9d935dde395a1)

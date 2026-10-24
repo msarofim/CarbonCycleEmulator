@@ -2,6 +2,16 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-24 (b) — **SHIPPED (Marcus, verbatim): "Ship it (Recommended)". The hilda31fl MCMC band is in `data/futures_ribbons.rds` (md5 61bc2632…), with the 10-15 ruled label carried. `test-futures-ribbons` is 86 / 1: the one red is card 6's typed numbers, which are Marcus's copy (below).** Also ruled: the tie stability is re-run on 400 draws ("Re-run on 400 draws (Recommended)"), running.
+
+- **`promote_futures_ribbons.R`** at the clean `283e3f3b` (log `outputs/diagnostics/promote_futures_ribbons_20261024.log`): bands untouched; the draws md5 checked; chain seeds 20261002–05 recorded; `key_draws` dropped (22.1 → 0.3 MB); `ccx_ribbons_problems()` at the canonical: none. Two runs byte-identical (second path first).
+  - The first promote ran without `--label`, which drops the ruled label (`label_ruled` FALSE, and the caption test needs TRUE). Re-promoted with `--label` = the shipped hilda31w band's label, verbatim ("each with a different plausible set of the fitted carbon-cycle parameters. …"); its wording names no mode.
+  - The first byte-identity pair after that differed in one field: the scratch run recorded `283e3f3b+dirty`, because `data/futures_ribbons.rds` was already modified. Re-run from a clean tree: identical.
+- **`test-futures-ribbons.R`:** the ship record moves with the ruling (`.fr_src_file`, `.fr_ship_md` hilda31w → hilda31fl, `FR_BYCHAIN_FILE`, the R-hat and `h_ml`-wall reads); the header records the ruling. Every mutation check still fails as designed.
+  - ⚠ **Red (not edited):** "issue 6's typed numbers". Card 6 (`app/R/review.R`) says the per-chain bands "agree to within about 5 ppm, at most about a fifth of the band's width". At hilda31fl that is 3.79 ppm (rounds to 4) and 38 % (at vvHL CO₂ 2100, a 9.4 ppm band). The card's "one chain sampled a different combination of them for part of its run" is also no longer true: three of the four chains visited the lag ridge (10-24 a). The test does not pin that sentence. The copy is Marcus's.
+- `app/global.R`: comments only. The hold's comment records the re-ship; the GMST-width comment now reads 0.020–0.084 °C at 2100–2150 (hilda31w 0.085). The card-6 temperature claim "less than 0.1 °C" still holds (0.084).
+- The hilda31w band stays in git history and in its committed landing (`outputs/diagnostics/futures_ribbons_mcmc_20261014_hilda31w_200k.rds`). It was superseded by a new canonical, not by a bug, so it is not quarantined.
+
 ## 2026-10-24 (a) — **The hilda31fl 200k chains LANDED, were snapshotted and read; the band and the tie stability ran as ruled (10-23 w). Not converged by Vehtari et al.'s reference, but closer than hilda31w: worst R-hat 1.113 (`seas_T_lag`; hilda31w 1.241), 12 of 32 above 1.01. The band barely moves from hilda31w's shipped one (median shifts ≤ 0.09 of its width, widths ×0.97–1.06). The app's two top-leverage map rows lose their winner in exactly 5 of 100 draws, which is ON the tie cut.** Nothing promoted; the calls are Marcus's. (Marcus: "Yes, copy and commit when the band lands".)
 
 - **Landing** (`outputs/diagnostics/mcmc_landing_20261024_hilda31fl/20261024_land_hilda31fl_armed.out`): chains exited 05:24–06:00, Phase 1 at 06:00, the tie stability done 06:44, the band done 09:48. Every step rc 0.

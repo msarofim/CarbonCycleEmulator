@@ -779,9 +779,10 @@ APP_RIBBONS_FILE <- file.path(CCX_ROOT, "data", "futures_ribbons.rds")
 # says nothing, even if a ribbons file appears in data/; test-futures-ribbons.R asserts it.
 # ⭐ SHIP RULED (Marcus 2026-10-09: "Ship the 200k band (Recommended)"; CHANGELOG 10-09 e-f), and
 # RE-SHIPPED at the canonical hilda31w (Marcus 2026-10-14: "Ship the hilda31w band (Recommended)";
-# CHANGELOG 10-14 e-f): the hilda31w MCMC band (4 chains to 200k, 17 000 draws; chains agree to
-# <= 4.76 ppm, 21 % of the width, median 11 %) is in data/futures_ribbons.rds
-# (calibration/promote_futures_ribbons.R).
+# CHANGELOG 10-14 e-f), and again at the canonical hilda31fl (Marcus 2026-10-24: "Ship it (Recommended)";
+# CHANGELOG 10-24 a-b): the hilda31fl MCMC band (4 chains to 200k, 17 000 draws; chains agree to
+# <= 3.79 ppm, at most 38 % of the width, median 16 %) is in data/futures_ribbons.rds
+# (calibration/promote_futures_ribbons.R, with the 10-15 ruled label carried).
 # ⭐ LIFTED 2026-10-15 with Marcus's copy (drafted on "Draft all four for me to edit", his one edit
 # applied; notes/band_copy_drafts_2026-10-15.md): the band's label (provenance$label, label_ruled),
 # card 6 (app/R/review.R), the parameter panel's clause above and APP_RIBBON_NOTE_TEMP below, in ONE
@@ -814,8 +815,8 @@ APP_RIBBON_NOTE <- if (isTRUE(APP_RIBBONS$ok)) with(APP_RIBBONS$provenance, spri
 # temperature"). The draws vary the CARBON CYCLE's fitted parameters only; the
 # climate module (fitted to FaIR) and the non-CO2 forcing are fixed, so
 # temperature moves only through the CO2 it is handed. The shipped band is
-# 0.020-0.085 degC wide at 2100-2150 and at most 0.085 anywhere in 1750-2150
-# (hilda31w; notes/ship_copy_facts_2026-10-14_hilda31w.md, D), about 3 px at the app's scale: a razor-thin band reads as "the warming is
+# 0.020-0.084 degC wide at 2100-2150 and at most 0.084 anywhere in 1750-2150
+# (hilda31fl, CHANGELOG 10-24 b; hilda31w 0.085, notes/ship_copy_facts_2026-10-14_hilda31w.md, D), about 3 px at the app's scale: a razor-thin band reads as "the warming is
 # known this precisely". So the band is drawn on APP_RIBBON_YVARS only. The
 # artifact still carries the GMST bands (ccx_ribbons_problems() checks every
 # APP_FUTURE_YVARS); the app just does not draw them.
