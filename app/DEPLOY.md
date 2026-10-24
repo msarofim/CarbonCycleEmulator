@@ -35,11 +35,12 @@ send a 302 to the app over http and https (Let's Encrypt certificate for `carbot
 
 ## ⚠ BEFORE THE PUBLIC BETA GOES OUT
 
-The app ships as **BETA v1.0 CarboTope** (`APP_RELEASE_NAME`), cut on mode **`hilda31w`**
-(`APP_RELEASE_MODE`; Marcus 2026-10-15: "Beta v1.0 is fine, because this is the first public
-version"). `tests/testthat/test-app-version.R` requires `APP_RELEASE_MODE` to be the mode the app
+The app ships as **BETA v1.1 CarboTope** (`APP_RELEASE_NAME`), cut on mode **`hilda31fl`**
+(`APP_RELEASE_MODE`; Marcus 2026-10-24: "Bump the version", "BETA v1.1 CarboTope (Recommended)").
+`tests/testthat/test-app-version.R` requires `APP_RELEASE_MODE` to be the mode the app
 loads, so the next adoption fails the suite until someone decides whether the release moves too.
-Earlier cuts: `hilda29e` 10-08, `hilda33p` 10-06, `hilda34g` 10-03, `hilda33d` 10-01.
+Earlier cuts: BETA v1.0 on `hilda31w` (10-15: "Beta v1.0 is fine, because this is the first public
+version"), `hilda29e` 10-08, `hilda33p` 10-06, `hilda34g` 10-03, `hilda33d` 10-01.
 Its "Known issues" tab is the point of the release: it puts each remaining flaw to the reader and
 asks whether it is a deal-breaker, fixable or acceptable.
 

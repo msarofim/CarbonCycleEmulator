@@ -95,11 +95,12 @@ APP_AUTHOR       <- "Marcus C. Sarofim"
 # recorded separately (APP_RELEASE_MODE) and test-app-version.R requires it to
 # equal the mode the app actually loads: adopting a new canonical fails the
 # suite until someone decides whether the release name moves too.
-APP_VERSION      <- "v1.0"
+APP_VERSION      <- "v1.1"   # Marcus 2026-10-24: "Bump the version"; "BETA v1.1 CarboTope (Recommended)"
 APP_STAGE        <- "beta"
-APP_RELEASE_NAME <- paste(toupper(APP_STAGE), APP_VERSION, APP_TITLE)   # "BETA v1.0 CarboTope"
-APP_RELEASE_MODE <- "hilda31w"   # Marcus 2026-10-15: "Beta v1.0 is fine, because this is the first public version"
-                                 # (was hilda29e 10-08, hilda33p 10-06, hilda34g 10-03, hilda33d 10-01)
+APP_RELEASE_NAME <- paste(toupper(APP_STAGE), APP_VERSION, APP_TITLE)   # "BETA v1.1 CarboTope"
+APP_RELEASE_MODE <- "hilda31fl"  # v1.1, 2026-10-24 (the flask refit, its MCMC band and the count tie rule)
+                                 # (BETA v1.0 was cut on hilda31w, Marcus 2026-10-15: "Beta v1.0 is fine, because this is
+                                 # the first public version"; earlier: hilda29e 10-08, hilda33p 10-06, hilda34g 10-03, hilda33d 10-01)
 # "frozen at this version" was dropped 2026-10-01: stale since the 09-30
 # unfreeze, and a freeze verdict is Marcus's (the B8 assessment record).
 # Marcus 2026-10-15 (comments 10.15.26b): "What is under review is how much ..." and "not for citation" deleted.

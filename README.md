@@ -25,16 +25,16 @@ undergraduate environmental studies).
 
 Teaching software, not peer-reviewed.
 
-## Status (2026-10-23)
+## Status (2026-10-24)
 
-- **App:** CarboTope, release BETA v1.0, the first public version; not yet deployed.
+- **App:** CarboTope, release BETA v1.1 (cut on `hilda31fl`, 2026-10-24). BETA v1.0, the first public
+  version (cut on `hilda31w`), is the live app until v1.1 is published.
 - **Canonical parameter set:** `hilda31fl` (adopted 2026-10-23): 31 parameters fitted, 14 held
   at stated values. It refits `hilda31w` (2026-10-13) with every Mauna Loa CO₂ observation taken
   from Scripps flask samples, the same flasks that supply the Mauna Loa δ¹³C record. The app
-  live-runs a single parameter set (the posterior mode); it runs `hilda31w` until its products
-  are rebuilt at `hilda31fl`.
-- **Posterior sampling** (at `hilda31w`): adaptive Metropolis, 4 chains × 200,000 iterations, 17,000 draws.
-  Max R-hat 1.24, on the seasonal-lag parameters: not converged by the strict criterion.
+  live-runs a single parameter set (the posterior mode).
+- **Posterior sampling** (at `hilda31fl`): adaptive Metropolis, 4 chains × 200,000 iterations, 17,000 draws.
+  Max R-hat 1.11, on the seasonal-lag parameters: not converged by the strict criterion.
 - **Uncertainty bands:** the Futures tab's CO₂ view shows the 5–95 % range of those draws
   (`data/futures_ribbons.rds`). It varies only the fitted carbon-cycle parameters, so temperature
   has no band. The app also shows FaIR 5–95 % ranges on Known issue 5 and in the pulse lab.

@@ -6,6 +6,7 @@
 # literal, the app follows `CCX_MODE_CANONICAL`, and nothing tied the two
 # together, so the label drifted SILENTLY (review 10-01c B2).
 #
+# 2026-10-24 (Marcus: "Bump the version"; "BETA v1.1 CarboTope (Recommended)"): v1.1 is cut on hilda31fl.
 # Marcus ruled the new name, "BETA v1.0 CarboTope", which no longer carries a
 # mode at all. So the mode the release was cut on is recorded on its own,
 # `APP_RELEASE_MODE`, and this gate requires it to be the mode the app LOADS.
@@ -43,8 +44,8 @@ av_problems <- function(release_mode, app_text, canonical = CCX_MODE_CANONICAL) 
 test_that("the release name is Marcus's ruled one, built from the named constants", {
   skip_if_not(file.exists(.av_global), "app/global.R is not present")
   for (w in .av_want) expect_true(exists(w, envir = .av_env, inherits = FALSE), info = w)
-  # the ruled wording (Marcus 2026-10-01, review 10-01c B2), verbatim
-  expect_identical(.av_env$APP_RELEASE_NAME, "BETA v1.0 CarboTope")
+  # the ruled wording (Marcus 2026-10-01, review 10-01c B2; the version bumped 2026-10-24), verbatim
+  expect_identical(.av_env$APP_RELEASE_NAME, "BETA v1.1 CarboTope")
   # and no mode suffix is left in the version string to drift
   expect_false(grepl("hilda", .av_env$APP_VERSION, fixed = TRUE))
 })

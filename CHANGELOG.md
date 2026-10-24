@@ -2,6 +2,12 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-24 (g) — **RULED (Marcus, verbatim): "Bump the version"; "BETA v1.1 CarboTope (Recommended)". `APP_VERSION` "v1.1", `APP_RELEASE_MODE` "hilda31fl". `test-app-version` is GREEN (10 / 0), so the suite's last red clears.** Not deployed.
+
+- `app/global.R`: the two constants, with the v1.0 cut (hilda31w, 10-15) kept in the comment's history. `test-app-version.R` pins "BETA v1.1 CarboTope" (the gate change is the ruling); `app-short-link` 8 / 0 (its "BETA v1.0" is a fixture's stand-in, not a pin), `app-review-copy` 129 / 0.
+- `app/DEPLOY.md`: the release paragraph names v1.1 on hilda31fl, with v1.0 on hilda31w among the earlier cuts.
+- `README.md` status block (dated 10-24): the release line (v1.1 cut; v1.0 the live app until v1.1 is published), the stale "runs `hilda31w` until its products are rebuilt" removed, and the sampling line at hilda31fl (max R-hat 1.11; was hilda31w's 1.24). The test line moves with the next suite.
+
 ## 2026-10-24 (f) — **Full suite @ `51948d67` (frozen, linked): 9,394 passed, 1 failed, 1 skipped (the standing `l2-enso-limb` skip), 0 errored, 233 warnings, 22.4 min. The one failure is `app-version` (the release is Marcus's). Bundle built from `51948d67` and served locally: every tab draws, no output errors.** The publish is Marcus's. (Marcus: "Yes, run the suite and build the bundle".)
 
 - **Suite:** against 10-23 (r)'s 9,343 / 6, the five MCMC-waiting reds are green (`cmap-tie` ×4, `futures-ribbons`), plus the tests added in (b), (c) and (e). Log and per-file counts `outputs/diagnostics/suite_20261024_51948d67{.log,_perfile.csv}`; launch script `~/ccx_frozen/suite_20261024_51948d67.sh` kept; worktree removed. Linked per file (79 + 3 tracked = 82). README's test line still cites `f63edcd1` (the last suite with 0 failed); it moves once the release clears `app-version`.
