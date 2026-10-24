@@ -2,6 +2,13 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-24 (d) — **The tie stability on 400 draws (Marcus: "Re-run on 400 draws (Recommended)"): CO₂ level is a TIE (36 of 400 lost, 9.0 %, exact 95 % 6.4–12.2 %), but δ¹³C level & gradient lands ON the cut again: 20 of 400 (5.0 %, 3.1–7.6 %). Its losses are spread over all four chains (7 / 1 / 6 / 6) and the whole window, so its share is about 5 %. More draws cannot place it on one side of a 5 % cut.** Not promoted; the call is Marcus's.
+
+- Run: `~/ccx_frozen/20261024_cmap400_hilda31fl` @`283e3f3b` (linked), 400 evenly spaced rows of `pooled_u_thin2.rds` (every 42.6th; 100 per chain), 8 cores, 29.0 min. GATES STEP, MAP, JOIN, LP all diff 0. 28 of 400 draws fell back to the finite half at `h_ml+` (n100: 2 of 100). Log and rds `outputs/diagnostics/cmap_posterior_spread_20261024_hilda31fl_n400.{log,rds}`; launch script and output in `outputs/diagnostics/mcmc_landing_20261024_hilda31fl/cmap400/`.
+- Determinism: the 100- and 400-draw runs share 4 pooled rows, and their winners are identical there. The two runs are otherwise near-independent subsamples.
+- Share of draws in which the winner loses (exact 95 % interval): CO₂ N–S gradient 0.46, CO₂ in ice cores 0.315, Δ¹⁴C pre-bomb 0.1875, measured sinks 0.12, CO₂ level 0.09 (0.064–0.122), Δ¹⁴C in the ocean 0.0725 (0.049–0.102; n100 had 0.03), δ¹³C in ice cores 0.07 (0.047–0.100), δ¹³C level & gradient 0.05 (0.031–0.076), Δ¹⁴C bomb 0.0125 (0.004–0.029), both seasonal rows and ocean interior 0 (≤ 0.009).
+- Under the ruled rule (a tie when the share is ABOVE 0.05), five rows are named: both seasonal rows, ocean interior, Δ¹⁴C bomb, and δ¹³C level & gradient at exactly 0.05. δ¹³C level & gradient is the only row whose status depends on how the cut treats sampling error. Its losses go to Mixed layer & vertical mixing (10), Land uptake (9) and High-latitude structure (1).
+
 ## 2026-10-24 (c) — **Card 6's band copy follows the hilda31fl band (Marcus, verbatim: Use "about two fifths" and update the parser). `test-futures-ribbons` is GREEN (94 / 0); `app-review-copy` 129 / 0, `app-us-spelling` 9 / 0.** Not deployed.
 
 - **`app/R/review.R`, card 6's detail**, three phrases as drafted after (b), with the measured value behind each: "three of the four chains sampled a different combination of them for parts of their runs" (chains 2, 3 and 1 at 40k–60k, 130k–170k and 160k–190k; 10-24 a), "about 4 ppm" (3.79), "at most about two fifths of the band's width" (38 %, at vvHL CO₂ 2100). The rest of the card is unchanged.

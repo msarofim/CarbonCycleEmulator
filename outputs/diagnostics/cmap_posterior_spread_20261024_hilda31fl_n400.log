@@ -1,0 +1,55 @@
+=== calibration/diag_cmap_posterior_spread.R @283e3f3b, 2026-10-24 10:00 ===
+[ccx_adopt_mode_band] h_ml -> [42.5, 200] (mode 69.6916); kz -> [1161.6, 27808] (mode 13818.8237)
+GATE STEP: shipped conditional sd vs 1/sqrt(diag(-H)) of hilda31fl: max |diff| 0.00e+00 -> PASS (exact)
+GATE MAP: this harness's map at hilda31fl vs data/constraint_map.rds (commit 8b1e8e41): max |diff| 0.00e+00 log-units (tol 1e-09) -> PASS; 18.3 s per map
+GATE JOIN: 400 of 400 chosen pooled rows are exactly the chain sample they claim -> PASS
+draws: outputs/mcmc_check_20261024_hilda31fl_200k/pooled_u_thin2.rds (md5 bb3c6fd89a6048b8efd6ef484ae9c174), 400 of 17000 rows, every 42.6-th; per chain 100 / 100 / 100 / 100
+--- 400 maps x 63 evaluations on 8 core(s), ~15 min ---
+400 of 400 maps ran (29.0 min)
+GATE LP: at every draw the harness's logpost vs the chain's stored one: max |diff| 0.00e+00 (tol 5e-05 = CCX_REPRO_TOL; shift +0.0000) -> PASS
+
+=== each row's signed margin of the canonical's winner, pp of the row, over 400 draws ===
+                      family                        winner margin_mode    q05
+           Δ¹⁴C in the ocean Mixed layer & vertical mixing       70.65  -4.86
+    CO₂ north–south gradient Mixed layer & vertical mixing       23.84 -64.09
+ Measured land & ocean sinks    Input scalings & reporting       23.34 -13.00
+           δ¹³C in ice cores                Seasonal cycle       16.18  -1.23
+         δ¹³C seasonal cycle                Seasonal cycle       64.08  43.02
+                   CO₂ level                   Land uptake       12.27  -1.87
+          CO₂ seasonal cycle                Seasonal cycle       62.56  46.53
+      Δ¹⁴C in the air (bomb)    Input scalings & reporting       10.55   3.57
+            CO₂ in ice cores                   Land uptake        4.64  -7.20
+    Ocean interior chemistry               Biological pump       57.30  47.46
+  Δ¹⁴C in the air (pre-bomb)       High-latitude structure        3.57  -3.51
+       δ¹³C level & gradient    Input scalings & reporting        1.36   0.15
+   q50   q95 range_5_95 excursion share_other_winner total_rank
+ 64.43 87.91      92.77     75.52             0.0725          9
+  1.27 22.97      87.06     87.92             0.4600         11
+ 27.26 55.98      68.98     36.34             0.1200          8
+ 16.34 37.77      39.01     21.60             0.0700         10
+ 61.40 75.74      32.72     21.05             0.0000          5
+ 10.71 22.13      24.01     14.15             0.0900          2
+ 58.80 69.42      22.89     16.03             0.0000          4
+ 13.16 23.76      20.19     13.21             0.0125          3
+  2.70 10.08      17.28     11.84             0.3150          7
+ 57.15 64.62      17.16      9.84             0.0000          6
+  4.21  8.23      11.74      7.08             0.1875         12
+  3.85  8.58       8.43      7.22             0.0500          1
+
+THE RULED STATISTIC: the largest 5-95 % range of any row's margin = 92.774 pp (Δ¹⁴C in the ocean)
+  beside it, NOT ruled: largest one-sided excursion from the mode's margin 87.923 pp (CO₂ north–south gradient)
+  the carried cut today: APP_CMAP_TIE_PP 1.923 pp (hilda29e vs hilda29a6, 10-12 h)
+the app's top three rows by total leverage, at the mode: δ¹³C level & gradient (margin 1.36 -> TIE at 92.774); CO₂ level (margin 12.27 -> TIE at 92.774); Δ¹⁴C in the air (bomb) (margin 10.55 -> TIE at 92.774)
+rows whose mode margin EXCEEDS the cut but whose winner differs in some draw: 0
+rows that are TIES at the mode under this cut: 12 of 12
+
+REFUSED HALF-STEPS: 28 of 400 draws had one {h_ml+}; the cut over the other 372 draws: 91.419 pp (all draws 92.774)
+
+DIAGNOSTIC SPLIT (not the map): the ruled statistic on each part of the cell, over the 372 draws with no refusal
+     part    cut                      row median_row_range share_other_winner
+       MC  91.42        Δ¹⁴C in the ocean            22.99            0.11626
+  MC_curv  94.32        Δ¹⁴C in the ocean            51.05            0.09185
+ MC_slope 129.45 CO₂ north–south gradient            22.36            0.18705
+
+provenance: calibration/diag_cmap_posterior_spread.R @283e3f3b; mode hilda31fl; map data/constraint_map.rds @8b1e8e41; draws outputs/mcmc_check_20261024_hilda31fl_200k/pooled_u_thin2.rds (400); no RNG
+wrote outputs/diagnostics/cmap_posterior_spread_20261024_hilda31fl_n400.{log,rds}
