@@ -2,6 +2,13 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-24 (h) — **Full suite @ `9c7ec7de`, the BETA v1.1 release commit (frozen, linked): 9,395 passed, 0 failed, 1 skipped (the standing `l2-enso-limb` skip), 0 errored, 233 warnings, 22.2 min. The release bundle is built from it and served locally: the banner reads "BETA v1.1 CarboTope".** The publish is Marcus's.
+
+- **Suite:** +1 passed over (f) and the `app-version` red cleared, as (g) intended. Log and per-file counts `outputs/diagnostics/suite_20261024_9c7ec7de{.log,_perfile.csv}`; launch script `~/ccx_frozen/suite_20261024_9c7ec7de.sh` kept; worktree removed. README's test line now cites it.
+- **Bundle:** `app/make_deploy_bundle.sh ~/ccx_frozen/bundle_20261024_9c7ec7de 9c7ec7de`: 116 files, 7.3 MB, the hilda31fl mode file, placeholder guard passed. Against (f)'s bundle at `51948d67`, which was checked tab by tab, only three files differ: `FROZEN_FROM_COMMIT.txt`, `app/DEPLOY.md` and `app/global.R` (`APP_VERSION`, `APP_RELEASE_MODE` and their comments).
+- **Served locally** (a temporary `.claude/launch.json` entry, reverted): at 1440 × 900 the banner reads "BETA v1.1 CarboTope — single best fit. …", no "BETA v1.0" is left on the page, the Keeling tab draws 2/2 with no output errors, and the log has no "NOT drawn" / "NOT shown" message.
+- **The publish (Marcus's):** `Rscript -e 'rsconnect::deployApp("/Users/MarcusMarcus/ccx_frozen/bundle_20261024_9c7ec7de", appId = "01a14244-5cc3-1951-7b06-9e2fb07beae3", account = "saraphreport", server = "connect.posit.cloud", forceUpdate = TRUE)'`, then the live checks.
+
 ## 2026-10-24 (g) — **RULED (Marcus, verbatim): "Bump the version"; "BETA v1.1 CarboTope (Recommended)". `APP_VERSION` "v1.1", `APP_RELEASE_MODE` "hilda31fl". `test-app-version` is GREEN (10 / 0), so the suite's last red clears.** Not deployed.
 
 - `app/global.R`: the two constants, with the v1.0 cut (hilda31w, 10-15) kept in the comment's history. `test-app-version.R` pins "BETA v1.1 CarboTope" (the gate change is the ruling); `app-short-link` 8 / 0 (its "BETA v1.0" is a fixture's stand-in, not a pin), `app-review-copy` 129 / 0.
