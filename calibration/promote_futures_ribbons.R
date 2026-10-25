@@ -40,8 +40,9 @@ PR_DROP   <- "key_draws"                       # never read by the app
 PR_GLOBAL <- file.path("app", "global.R")
 if (!nzchar(PR_FROM) || !nzchar(PR_DRAWS)) stop("--from= and --draws= are both required")
 stopifnot(file.exists(PR_FROM), file.exists(PR_DRAWS), file.exists(PR_GLOBAL))
-# the product is excluded from the dirty check when it sits inside the repo (git refuses an outside pathspec)
-PR_EXCL <- if (startsWith(normalizePath(PR_OUT, mustWork = FALSE), normalizePath(getwd()))) PR_OUT else character(0)
+# the product is excluded from the dirty check when it sits inside the repo (git refuses an outside pathspec).
+# 2026-10-25: the shared helper; the old startsWith() test also matched a sibling directory named <repo>2/
+PR_EXCL <- ccx_stamp_exclude(PR_OUT)
 
 # the tab's scenario ids and y-variables, PARSED out of global.R (pure literals), as test-futures-ribbons.R
 # does: sourcing it would compile the core and run a spin-up

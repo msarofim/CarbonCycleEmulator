@@ -49,6 +49,10 @@
 # ⚠ A driver that WRITES under `paths` passes its own output as `exclude`: it
 # is the product, never an input, and a second run before the first is
 # committed would otherwise stamp ITSELF dirty ([[gate_reads_its_own_output]]).
+# ⚠ A driver whose output path is an ARGUMENT passes ccx_stamp_exclude(<out>), not
+# <out>: an output outside the repository cannot make it dirty, and git cannot
+# resolve it, so a raw outside exclude stamps a clean tree "+dirty?" (2026-10-24 e,
+# promote_cmap_stability.R's second-path run).
 # =====================================================================
 
 CCX_STAMP_PATHS          <- c("R", "src", "calibration", "app", "data")
@@ -88,6 +92,29 @@ ccx_git_stamp <- function(paths = CCX_STAMP_PATHS, exclude = character(0),
   if (length(l1) == 1L && grepl("^[0-9a-f]{7,40}$", l1))
     return(paste0(substr(l1, 1L, 7L), CCX_STAMP_FROZEN))
   CCX_STAMP_NONE
+}
+
+#' The `exclude` for a driver's output path: the paths that lie inside the repository, the rest dropped
+#'
+#' ccx_git_stamp() reads an exclude git cannot resolve as "+dirty?", and git cannot resolve a path
+#' outside the work tree. An output written outside the repository cannot make the repository dirty,
+#' so it is not excluded at all. A relative path is read relative to `root`, as ccx_git_stamp() reads
+#' it. The path is resolved through its deepest EXISTING ancestor (the output may not exist yet) with
+#' symlinks followed, and compared with the root by whole components, so a sibling directory whose
+#' name starts with the repository's (".../CarbonCycleEmulator2/") is outside.
+#' @param path the driver's output path(s); @param root the repository root
+#' @return the elements of `path` inside `root`, unchanged (character(0) when none)
+ccx_stamp_exclude <- function(path, root = ccx_root()) {
+  stopifnot(is.character(path), !anyNA(path), all(nzchar(path)))
+  r <- normalizePath(root, mustWork = TRUE)
+  inside <- vapply(path, function(p) {
+    d <- if (grepl("^(/|~)", p)) path.expand(p) else file.path(r, p)
+    rest <- character(0)
+    while (!file.exists(d) && dirname(d) != d) { rest <- c(basename(d), rest); d <- dirname(d) }
+    full <- paste(c(normalizePath(d, mustWork = TRUE), rest), collapse = "/")
+    identical(full, r) || startsWith(full, paste0(r, "/"))
+  }, logical(1))
+  unname(path[inside])
 }
 
 #' Whether a stamp says the tree was dirty: TRUE, FALSE, or NA when it cannot tell

@@ -47,7 +47,7 @@ PS_LOST_MAX <- local({
   stopifnot(is.numeric(e$APP_CMAP_TIE_LOST_MAX), length(e$APP_CMAP_TIE_LOST_MAX) == 1L)
   e$APP_CMAP_TIE_LOST_MAX
 })
-PS_COMMIT <- ccx_git_stamp(exclude = PS_OUT)
+PS_COMMIT <- ccx_git_stamp(exclude = ccx_stamp_exclude(PS_OUT))   # an --out outside the repo is not excluded (it would read +dirty?)
 
 src <- readRDS(PS_FROM); cm <- readRDS(PS_MAP)
 bad <- ccx_cmap_problems(cm, CCX_MODE_CANONICAL)

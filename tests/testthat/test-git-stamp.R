@@ -114,6 +114,40 @@ test_that("a driver's OWN output is excluded -- repo-relative or absolute -- and
                    paste0(r3$head, CCX_STAMP_STATUS_UNKNOWN))
 })
 
+test_that("ccx_stamp_exclude() keeps an output inside the repo and drops one outside it (2026-10-25)", {
+  skip_if_no_git()
+  r <- gs_repo()
+  inside  <- c(file.path("data", "out.rds"), file.path(r$dir, "data", "out.rds"),
+               file.path(r$dir, "data", "new dir (not yet made)", "x.rds"), file.path("data", "not yet.rds"))
+  outside <- c(file.path(tempdir(), "elsewhere.rds"), paste0(r$dir, "2"), file.path(paste0(r$dir, "2"), "x.rds"),
+               file.path("..", "x.rds"), file.path("data", "..", "..", "x.rds"))
+  for (p in inside)  expect_identical(ccx_stamp_exclude(p, root = r$dir), p, info = p)
+  for (p in outside) expect_identical(ccx_stamp_exclude(p, root = r$dir), character(0), info = p)
+  expect_identical(ccx_stamp_exclude(c(inside[1], outside[1]), root = r$dir), inside[1])
+  for (bad in list(NA_character_, "", 1)) expect_error(ccx_stamp_exclude(bad, root = r$dir))
+  # THE DEFECT: a clean tree with an output path outside it. Raw, the exclude reads +dirty? (the control);
+  # through the helper it reads clean
+  far <- file.path(tempdir(), "second path.rds")
+  expect_identical(ccx_git_stamp(exclude = far, root = r$dir), paste0(r$head, CCX_STAMP_STATUS_UNKNOWN))
+  expect_identical(ccx_git_stamp(exclude = ccx_stamp_exclude(far, root = r$dir), root = r$dir), r$head)
+  # and an inside output is still excluded, an inside edit elsewhere still dirty
+  gs_edit(r, "data", "out.rds")
+  expect_identical(ccx_git_stamp(exclude = ccx_stamp_exclude(file.path("data", "out.rds"), root = r$dir), root = r$dir), r$head)
+  gs_edit(r, "R", "f.txt")
+  expect_identical(ccx_git_stamp(exclude = ccx_stamp_exclude(file.path("data", "out.rds"), root = r$dir), root = r$dir),
+                   paste0(r$head, CCX_STAMP_DIRTY))
+})
+
+test_that("every driver whose output path is an ARGUMENT passes it through ccx_stamp_exclude()", {
+  root <- ccx_root()
+  fs <- list.files(file.path(root, c("calibration", "data-raw")), pattern = "[.]R$", full.names = TRUE)
+  takes_out <- Filter(function(f) { x <- readLines(f, warn = FALSE)
+    any(grepl("_arg\\(\"out\"", x)) && any(grepl("ccx_git_stamp\\(exclude", x)) }, fs)
+  expect_true(all(c("promote_cmap_stability.R", "promote_futures_ribbons.R", "build_futures_ribbons.R") %in% basename(takes_out)))
+  for (f in takes_out)
+    expect_true(any(grepl("ccx_stamp_exclude(", readLines(f, warn = FALSE), fixed = TRUE)), info = basename(f))
+})
+
 test_that("a git status that FAILS reads +dirty?, never clean and never +dirty", {
   skip_if_no_git()
   r <- gs_repo()
