@@ -51,7 +51,7 @@
 
 ## 4. Next (none started; all Marcus's to choose)
 
-1. **Git tag** `v1.1-beta-hilda31fl` at `9c7ec7de`, following `v1.0-beta-hilda31w`. Offered, not asked back; not done.
+1. ~~**Git tag**~~ DONE 10-24 (k): `v1.1-beta-hilda31fl` (annotated) at `9c7ec7de`, pushed.
 2. **Carried over, unchanged:** card 8's text (still Claude's draft since 10-13); whether the Keeling chart needs a note on
    flask's sparse 1960s; `f_plot`'s alt text is "Futures" in all three modes (seen again live); capacity before a live
    class; cold start ~8 s; the marketing list; handoff 10-21 §3.3's science follow-ups; flask CO₂'s MLO cycle is 4.8 %
