@@ -34,7 +34,14 @@ test_that("1b. the Futures chart's alt text names its view, in all six (2026-10-
     expect_setequal(names(tbl), c("Scenarios", "Build your own", "Pulse lab"))
     for (m in names(tbl)) expect_setequal(names(tbl[[m]]), unname(A("APP_FUTURE_YVARS")))
     d <- A("APP_PULSE_DEFAULTS")
-    session$setInputs(tabs = "Futures", f_scen = c("vvL", "vvM", "vvH"), f_fair = FALSE,
+    # EVERY input in the first call, as test 1-3 does: the session's first flush renders every output, and a chart
+    # drawn with its inputs still NULL (a state the UI's defaults never allow) raised a ggplot manual-scale warning
+    # (suite @07d04b16: 234 warnings, this block's first setInputs)
+    mech_drv <- names(Filter(function(m) !is.null(m$driver), A("CCX_MECHANISMS")))
+    session$setInputs(tabs = "Futures", k_years = c(1958, 2024), k_hemi = "both", k_obs = TRUE,
+                      w_years = c(1850, 2024), c_mech = mech_drv, c_years = c(1850, 2024),
+                      i_years = c(1940, 2024), i_hemi = "both", cm_level = "component",
+                      f_mode = "Scenarios", f_yvar = "co2_ppm", f_scen = c("vvL", "vvM", "vvH"), f_fair = FALSE,
                       s_kind = "constant", s_bg = "vvM", s_go = 1, p_bg = d$p_bg, p_gtc = d$p_gtc, p_year = d$p_year)
     seen <- character(0)
     for (m in names(tbl)) for (y in unname(A("APP_FUTURE_YVARS"))) {
