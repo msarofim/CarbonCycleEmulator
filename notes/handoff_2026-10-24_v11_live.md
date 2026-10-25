@@ -5,8 +5,8 @@
 
 - **Start here:** CHANGELOG **2026-10-23 (u) to 2026-10-24 (j)**. Memory: `ccx_hilda31fl_adopted` (state through the
   release) and `ccx_cmap_tie_posterior_stability` (the tie rule's 10-24 refinement).
-- **main = the commit that logs this note as CHANGELOG 2026-10-24 (j), pushed.** No branches. One extra worktree is kept
-  (§5). **The canonical is `hilda31fl`; the live app is BETA v1.1 CarboTope, built from `9c7ec7de`, published by Marcus
+- **main = the commit that logs this note as CHANGELOG 2026-10-24 (j), pushed.** No branches, no extra worktrees
+  (the MCMC one removed 10-24 l). **The canonical is `hilda31fl`; the live app is BETA v1.1 CarboTope, built from `9c7ec7de`, published by Marcus
   10-24 and live-checked (i).**
 - Nothing is running.
 
@@ -64,9 +64,8 @@
 
 ## 5. Non-obvious state
 
-- **Kept worktree:** `~/ccx_frozen/20261023_mcmc_hilda31fl` @`2ec25511`. Its real chains are in the repo (cmp-identical),
-  but its `outputs/mcmc_smoke_20261023_hilda31fl/chain_{1..4}.rds` (the 10-23 smoke) are not. Remove with
-  `git worktree remove --force` once those are copied or judged unneeded.
+- ~~**Kept worktree**~~ REMOVED 10-24 (l), after its smoke chains were copied to
+  `outputs/diagnostics/mcmc_launch_20261023_hilda31fl/smoke_chains/`. No extra worktrees remain.
 - **Bundles in `~/ccx_frozen`:** `bundle_20261024_9c7ec7de` is the published one. `bundle_20261024_51948d67` still carries
   v1.0 and must not be published.
 - **The tie rule reads counts.** A stability file without `n_lost` + `provenance$n_draws` is refused. Each map rebuild

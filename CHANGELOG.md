@@ -2,6 +2,12 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-24 (l) — **The hilda31fl MCMC worktree is removed, after its 10-23 smoke chains were copied into the launch record** (Marcus: "Remove the MCMC worktree after copying the smoke chains").
+
+- `outputs/diagnostics/mcmc_launch_20261023_hilda31fl/smoke_chains/chain_{1..4}.rds` + `MD5SUMS`, `cmp`-identical to the worktree's `outputs/mcmc_smoke_20261023_hilda31fl/`: 300 iterations, 5 kept each, `2ec25511`, seeds 20261002–05, chain 2 with 2 start redraws (as the README's smoke row says). README row added.
+- Before removal, the worktree's four production chains were re-checked `cmp`-identical to the committed snapshot `outputs/mcmc_check_20261024_hilda31fl_200k/`. Its only other untracked entries were the `data-raw/downloads` links; no tracked file was modified.
+- `git worktree remove --force ~/ccx_frozen/20261023_mcmc_hilda31fl`: the links went, their targets in this checkout did not (82 entries). The chain logs and launch script outside the tree (`~/ccx_frozen/20261023_mcmc_hilda31fl_*`) stay. No extra worktrees remain.
+
 ## 2026-10-24 (k) — **Tagged `v1.1-beta-hilda31fl` at `9c7ec7de`, the published release commit, and pushed the tag** (Marcus: "Tag v1.1-beta-hilda31fl and push the tag"). Annotated, like `v1.0-beta-hilda31w`; its message names the canonical, the band, the tie rule, the suite @`9c7ec7de` (9,395 / 0 / 1) and the publish. Only this tag was pushed.
 
 ## 2026-10-24 (j) — **Handoff `notes/handoff_2026-10-24_v11_live.md`** (Marcus: "I published it; do the live checks, then write the handoff"). It supersedes `handoff_2026-10-23_products_rebuilt_mcmc_next.md`, which now points to it. Done since: 10-23 (u)–(w), 10-24 (a)–(i). State: BETA v1.1 CarboTope live on hilda31fl from `9c7ec7de` (suite 9,395 / 0 / 1), live-checked. Open, all Marcus's: the `v1.1-beta-hilda31fl` tag, the carried-over items (card 8's text, the Keeling 1960s note, `f_plot` alt text, capacity, the science follow-ups), and whether to work on the seasonal-lag non-convergence. Memory `ccx_hilda31fl_adopted` and `INDEX_ccx.md`'s live-state line updated to the release.
