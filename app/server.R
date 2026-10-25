@@ -64,16 +64,15 @@ function(input, output, session) {
   renderPlotFit <- function(id, expr, env = parent.frame(), quoted = FALSE, height = "auto") {
     fn <- shiny::exprToFunction(expr, env, quoted)
     assign(id, fn, envir = dl_plots)
-    # 2026-10-21: every chart's alt text is its name from the download registry (APP_DL_SPEC), which already
-    # names all of them; with none, Shiny fell back to ggplot2::get_alt_text(), "" here, so screen readers
-    # skipped every chart. A chart without a spec keeps Shiny's default.
-    spec <- app_dl_spec(id)
+    # 2026-10-21: every chart's alt text is its name from the download registry (APP_DL_SPEC); with none, Shiny fell
+    # back to ggplot2::get_alt_text(), "" here, so screen readers skipped every chart. 2026-10-25: the Futures
+    # chart's follows its view (app_dl_alt, R/downloads.R). A chart without a spec keeps Shiny's default.
     shiny::renderPlot({
       app_set_panel_px(session$clientData[[paste0("output_", id, "_width")]])
       on.exit(app_clear_panel_px(), add = TRUE)
       res <- withVisible(fn())
       if (res$visible) app_fit_plot(res$value) else invisible(res$value)
-    }, height = height, alt = if (is.null(spec)) NA else spec$chart)
+    }, height = height, alt = app_dl_alt(id, input))
   }
 
   # ---- 1. Keeling ----------------------------------------------------

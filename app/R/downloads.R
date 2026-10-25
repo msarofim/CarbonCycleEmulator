@@ -197,6 +197,14 @@ APP_DL_SPEC <- list(
 # the Futures chart names its columns by what it is showing
 APP_DL_FUTURE_Y <- list(co2_ppm = DLC$co2, gmst = DLC$gmst)
 APP_DL_PULSE_Y  <- list(co2_ppm = DLC$frac, gmst = DLC$dT)
+# ... and the Futures chart's NAME by its pill and y variable (2026-10-25, Marcus: "Yes, fix the alt text"). The name
+# is the chart's alt text (server.R, renderPlotFit) and its CSV title; the registry's "Futures" said only which tab it
+# was on, in all six views. Keyed by the f_mode pill values and APP_FUTURE_YVARS; the Pulse lab names follow its y
+# columns (DLC$frac, DLC$dT). test-app-a11y.R reads every one off the running server.
+APP_DL_FUTURE_CHART <- list(
+  "Scenarios"      = c(co2_ppm = "Future CO₂ under the chosen scenarios", gmst = "Future warming under the chosen scenarios"),
+  "Build your own" = c(co2_ppm = "Future CO₂ on your pathway",            gmst = "Future warming on your pathway"),
+  "Pulse lab"      = c(co2_ppm = "Share of the pulse still in the air",   gmst = "Extra warming caused by the pulse"))
 # the review cards: one entry each, named from the card (rv_card()) they sit on;
 # the card numbers are ui.R's review_card() calls, asserted by test-app-downloads.R
 APP_DL_RV_CARD <- c(rv_repdc = 1L, rv_gradient = 2L, rv_diseq = 3L, rv_variance = 4L, rv_enso = 4L,
@@ -512,15 +520,31 @@ app_dl_chart_table <- function(id, fn, width_px, session = shiny::getDefaultReac
   tab
 }
 
-#' The spec for a chart as it is drawn now: the Futures chart names its columns by its pill and y variable
+#' The spec for a chart as it is drawn now: the Futures chart names itself and its columns by its pill and y variable
 app_dl_spec_for <- function(id, mode = NULL, yvar = NULL) {
   sp <- app_dl_spec(id)
   if (identical(id, "f_plot")) {
     tbl <- if (identical(mode, "Pulse lab")) APP_DL_PULSE_Y else APP_DL_FUTURE_Y
     if (!is.null(yvar) && !is.null(tbl[[yvar]])) sp$y <- tbl[[yvar]]
     if (identical(mode, "Pulse lab")) sp$x <- DLC$yearmid
+    nm <- if (is.character(mode) && length(mode) == 1L && is.character(yvar) && length(yvar) == 1L)
+      APP_DL_FUTURE_CHART[[mode]][yvar]
+    if (length(nm) == 1L && !is.na(nm)) sp$chart <- unname(nm)   # an unknown view keeps the registry's "Futures"
   }
   sp
+}
+
+#' The alt text renderPlotFit() (server.R) hands renderPlot() for a chart
+#'
+#' The chart's registry name, or NA for a chart without a spec (Shiny's default). For the Futures chart, a FUNCTION of
+#' its view (2026-10-25): Shiny reads it inside that output's own render, which already depends on f_mode and
+#' f_yvar, so its six views each say what they show and no other chart gains the dependency.
+#' @param id the output id; @param input the session's input
+app_dl_alt <- function(id, input) {
+  sp <- app_dl_spec(id)
+  if (is.null(sp)) return(NA)
+  if (identical(id, "f_plot")) return(function() app_dl_spec_for(id, input$f_mode, input$f_yvar)$chart)
+  sp$chart
 }
 
 #' Register the CSV and PNG download handlers for every chart with a spec

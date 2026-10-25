@@ -4,6 +4,8 @@
 #
 #   1. Every chart's alt text is its name from the download registry (APP_DL_SPEC). Before, Shiny fell back to
 #      ggplot2::get_alt_text(), which is "" for these plots, so a screen reader skipped all of them.
+#      2026-10-25 (Marcus: "Yes, fix the alt text"): the name of the chart AS DRAWN (app_dl_spec_for). The Futures
+#      chart read "Futures" in all six views (three pills x CO2 / temperature); it now names each one.
 #   2. Every download link's accessible name carries its chart's name (thirty links all read "data (CSV)").
 #   3. Futures -> Build your own says what to do before "Run it" is pressed; its takeaway bar was empty.
 #   4. The page has a language, and every link that opens a new tab says so to a screen reader (and has
@@ -21,6 +23,34 @@ skip_if_no_app <- function() {
 
 # A chart's alt text is right when it is its registry name: non-empty and that chart's, not another's.
 ay_alt_ok <- function(alt, chart) is.character(alt) && length(alt) == 1L && nzchar(alt) && identical(alt, chart)
+
+test_that("1b. the Futures chart's alt text names its view, in all six (2026-10-25)", {
+  skip_if_no_app()
+  app <- suppressMessages(shiny::shinyAppDir(.ay_app_dir))
+  shiny::testServer(app, {
+    AE <- environment(renderPlotFit); A <- function(nm) get(nm, envir = AE)
+    tbl <- A("APP_DL_FUTURE_CHART")
+    # keyed by the real pills and y variables (a key that drifts from ui.R would draw the default view below)
+    expect_setequal(names(tbl), c("Scenarios", "Build your own", "Pulse lab"))
+    for (m in names(tbl)) expect_setequal(names(tbl[[m]]), unname(A("APP_FUTURE_YVARS")))
+    d <- A("APP_PULSE_DEFAULTS")
+    session$setInputs(tabs = "Futures", f_scen = c("vvL", "vvM", "vvH"), f_fair = FALSE,
+                      s_kind = "constant", s_bg = "vvM", s_go = 1, p_bg = d$p_bg, p_gtc = d$p_gtc, p_year = d$p_year)
+    seen <- character(0)
+    for (m in names(tbl)) for (y in unname(A("APP_FUTURE_YVARS"))) {
+      session$setInputs(f_mode = m, f_yvar = y)
+      alt <- output$f_plot$alt
+      expect_true(ay_alt_ok(alt, unname(tbl[[m]][[y]])), info = sprintf("%s / %s: alt %s", m, y, deparse(alt)))
+      expect_true(ay_alt_ok(alt, A("app_dl_spec_for")("f_plot", m, y)$chart), info = paste(m, y))
+      seen <- c(seen, alt)
+    }
+    expect_length(unique(seen), 6L)                        # six views, six names
+    expect_false(A("app_dl_spec")("f_plot")$chart %in% seen) # the registry's bare "Futures" (the old alt) is gone
+    # an unknown view keeps the registry name rather than an NA alt
+    expect_identical(A("app_dl_spec_for")("f_plot", "No such pill", "co2_ppm")$chart, A("app_dl_spec")("f_plot")$chart)
+    expect_identical(A("app_dl_spec_for")("f_plot", NULL, NULL)$chart, A("app_dl_spec")("f_plot")$chart)
+  })
+})
 
 test_that("1-3. charts carry their names, download links name their chart, Build your own asks for the press", {
   skip_if_no_app()
@@ -41,7 +71,8 @@ test_that("1-3. charts carry their names, download links name their chart, Build
       if (is.null(sp)) next
       out <- tryCatch(output[[id]], error = function(e) NULL)
       if (is.null(out)) next   # a chart this view does not draw
-      expect_true(ay_alt_ok(out$alt, sp$chart), info = sprintf("%s: alt %s", id, deparse(out$alt)))
+      now <- A("app_dl_spec_for")(id, input$f_mode, input$f_yvar)
+      expect_true(ay_alt_ok(out$alt, now$chart), info = sprintf("%s: alt %s", id, deparse(out$alt)))
       n_checked <- n_checked + 1L
       html <- as.character(A("app_dl_links")(id))
       want <- function(lab) sprintf('aria-label="%s"', htmltools::htmlEscape(paste0(sp$chart, ": ", lab), attribute = TRUE))
