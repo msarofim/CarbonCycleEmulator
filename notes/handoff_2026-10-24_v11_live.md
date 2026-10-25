@@ -59,8 +59,7 @@
 3. **Sampler, if wanted:** the chains still do not converge on the seasonal-lag triplet (`seas_T_lag`, `seas_lag_p_NH/SH`,
    r +0.955). The band barely depends on it (the lag names move vvH CO₂ 2150 by ≤ 0.77 ppm per posterior sd on 22.8 ppm),
    which is why it shipped. A longer run or a reparameterisation of the triplet would be the fix.
-4. **Small robustness fix:** `promote_cmap_stability.R` passes `--out` to `ccx_git_stamp(exclude=)` unguarded, so a second
-   path outside the repo stamps `+dirty?`. `promote_futures_ribbons.R` has the guard (`PR_EXCL`).
+4. ~~**Small robustness fix**~~ DONE 10-25 (a): `ccx_stamp_exclude()` in all three drivers that take `--out`.
 
 ## 5. Non-obvious state
 
@@ -69,8 +68,8 @@
 - **Bundles in `~/ccx_frozen`:** `bundle_20261024_9c7ec7de` is the published one. `bundle_20261024_51948d67` still carries
   v1.0 and must not be published.
 - **The tie rule reads counts.** A stability file without `n_lost` + `provenance$n_draws` is refused. Each map rebuild
-  needs `diag_cmap_posterior_spread.R --n=400 --cores=8` (~30 min) then `promote_cmap_stability.R`, run with any second
-  path INSIDE the repo. At 400 draws, 11 losses are named and 12 are a tie; fewer than 72 draws are refused.
+  needs `diag_cmap_posterior_spread.R --n=400 --cores=8` (~30 min) then `promote_cmap_stability.R` (a second path
+  outside the repo stamps clean since 10-25 a). At 400 draws, 11 losses are named and 12 are a tie; fewer than 72 draws are refused.
 - **Card 6's typed numbers are pinned** against the band's by-chain read (`test-futures-ribbons`, "issue 6's typed
   numbers"): a rebuilt band that moves them turns that test red, and the copy is Marcus's.
 - **Live-check recipe:** `"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new

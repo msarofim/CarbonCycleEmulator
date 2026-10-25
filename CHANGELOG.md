@@ -2,6 +2,13 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-25 (a) — **The stamp guard for an output path given as an argument: `ccx_stamp_exclude()` (`R/provenance.R`), used by `promote_cmap_stability.R`, `promote_futures_ribbons.R` and `build_futures_ribbons.R`. An `--out` outside the repo now stamps a clean tree clean; on 10-24 (e) it read `+dirty?`.** (Marcus: "Fix the promote_cmap_stability stamp guard". `0255f27a`.)
+
+- `ccx_git_stamp()` is unchanged: an exclude git cannot resolve still reads `+dirty?` ("not proven clean"), as `test-git-stamp` requires. The helper works on the caller's side, passing an output as an exclude only when it lies inside the repo, since an output outside it cannot make it dirty. A relative path is read relative to the root, as the stamp reads it; a path whose directory does not exist yet resolves through its deepest existing ancestor; the root is compared by whole components.
+- `promote_futures_ribbons.R` had a guard (`PR_EXCL`), but its `startsWith()` also matched a sibling directory named `<repo>2/`. It now uses the helper. `build_futures_ribbons.R` joins `--out` onto the root, so only a `--out=../…` would leave the repo; it uses the helper too. These three are the only drivers in `calibration/` and `data-raw/` that take `--out` and pass an exclude.
+- **Tests** (`test-git-stamp` 84 / 0, `test-git-stamp-lint` 6 / 0): inside paths kept (relative, absolute, not yet made); outside paths dropped (tempdir, the `<repo>2` sibling, `../`, `data/../../`); bad input refused. A control reproduces the defect: the raw outside exclude reads `+dirty?` and the guarded one reads clean. A source check requires every driver that takes `--out` and passes an exclude to call the helper. Mutations: the raw exclude put back in `promote_cmap_stability.R` fails the source check; the old prefix test (no separator) fails two. `futures-ribbons` 94 / 0, `cmap-tie` 66 / 0.
+- **End to end** at the clean `0255f27a`: the 400-draw promote with `--out` in the scratch directory stamps `0255f27a` and is byte-identical to the same run with `--out` inside the repo. `data/` untouched.
+
 ## 2026-10-24 (l) — **The hilda31fl MCMC worktree is removed, after its 10-23 smoke chains were copied into the launch record** (Marcus: "Remove the MCMC worktree after copying the smoke chains").
 
 - `outputs/diagnostics/mcmc_launch_20261023_hilda31fl/smoke_chains/chain_{1..4}.rds` + `MD5SUMS`, `cmp`-identical to the worktree's `outputs/mcmc_smoke_20261023_hilda31fl/`: 300 iterations, 5 kept each, `2ec25511`, seeds 20261002–05, chain 2 with 2 start redraws (as the README's smoke row says). README row added.
