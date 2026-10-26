@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-25 (e) — **Handoff `notes/handoff_2026-10-25_alt_text_live.md`** (Marcus: "Write the handoff"). It supersedes `handoff_2026-10-24_v11_live.md`, which now points to it. Done since: 10-24 (k)–(l), 10-25 (a)–(d). State: BETA v1.1 live from `07d04b16` (suite 9,437 / 0 / 1), live-checked; nothing running, no worktrees. Open, all Marcus's: capacity before a live class, the small-window plot error, card 8's text and the Keeling 1960s note, whether to tag the redeploy, the host's revision record, the science follow-ups, memory budgets. Memory `ccx_hilda31fl_adopted` points to the new note.
+
 ## 2026-10-25 (d) — **Live checks on the alt-text deploy (Marcus: "I published it; do the live checks"): the host serves `07d04b1`, every tab draws, both pointers open their card, the scan UI is ALL OK at both sizes, and all six Futures alt texts are live.** Record: `outputs/diagnostics/live_20261025_alt/`.
 
 - **`check_live_pointer.py`** (1440 × 900): the first run, started right after the publish, found the pointers working but no plot drawn and an empty CSV, with no output errors: the app was still cold-starting. Kept as `live_check_live_pointer_first_try_cold.log`. Re-run a few minutes later: a CSV reads "# Code commit: 07d04b1 (the deployed copy was built from this commit)"; every tab draws every plot with alt text and no output errors (Keeling 2/2, Where 5/5, What if 3/3, Isotopes 2/2, Futures Scenarios 1/1 and Pulse lab 2/2, Known issues 9/9, What pins 2/2, Under the hood 1/1). Its one FAIL is the check's own, Build your own waiting for "Run it".

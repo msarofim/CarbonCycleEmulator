@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-24: BETA v1.1 is live on hilda31fl; the MCMC arc is closed
 
+> ⚠ **SUPERSEDED** by `notes/handoff_2026-10-25_alt_text_live.md` (§4 items 1 and 4 done; the MCMC worktree removed; the alt text fixed and live from `07d04b16`).
+
 **Supersedes** `notes/handoff_2026-10-23_products_rebuilt_mcmc_next.md`, which now points here. Written on Marcus's request
 ("I published it; do the live checks, then write the handoff"), 2026-10-24 ~12:45 EDT.
 
