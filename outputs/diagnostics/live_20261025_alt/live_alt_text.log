@@ -1,0 +1,13 @@
+Live alt-text checks, 2026-10-25, https://carbotope.org/ (-> 01a14244-...share.connect.posit.cloud), built-in browser at
+1440 x 900, read with in-page JavaScript (CHANGELOG 2026-10-25 d). The f_plot <img> alt in each view:
+  Scenarios      / co2_ppm : "Future CO₂ under the chosen scenarios"
+  Scenarios      / gmst    : "Future warming under the chosen scenarios"
+  Pulse lab      / gmst    : "Extra warming caused by the pulse"
+  Pulse lab      / co2_ppm : "Share of the pulse still in the air"
+  Build your own / co2_ppm : "Future CO₂ on your pathway"   (after "Run it")
+  Build your own / gmst    : "Future warming on your pathway"; 0 output errors
+A CSV from the host reads "# Code commit: 07d04b1 (the deployed copy was built from this commit)" and
+"# CarboTope data download: CO₂ at Mauna Loa and the South Pole" (k_plot).
+Before the resize, at the pane's small default size, k_plot and k_seasonal showed Shiny's sanitized "An error has occurred"
+while Under the hood drew; at 1440 x 900 both draw. Locally at that pane size the same two outputs log R's
+"figure margins too large" (10-22 b; the 10-24 bundle serve), so this is the known small-panel refusal, not this deploy.

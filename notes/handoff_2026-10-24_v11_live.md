@@ -53,7 +53,7 @@
 
 1. ~~**Git tag**~~ DONE 10-24 (k): `v1.1-beta-hilda31fl` (annotated) at `9c7ec7de`, pushed.
 2. **Carried over, unchanged:** card 8's text (still Claude's draft since 10-13); whether the Keeling chart needs a note on
-   flask's sparse 1960s; `f_plot`'s alt text (FIXED 10-25 b in the code, not yet deployed); capacity before a live
+   flask's sparse 1960s; `f_plot`'s alt text (FIXED 10-25 b, live since 10-25 d); capacity before a live
    class; cold start ~8 s; the marketing list; handoff 10-21 §3.3's science follow-ups; flask CO₂'s MLO cycle is 4.8 %
    larger and 2.2 d earlier than in situ, unexplained.
 3. **Sampler, if wanted:** the chains still do not converge on the seasonal-lag triplet (`seas_T_lag`, `seas_lag_p_NH/SH`,

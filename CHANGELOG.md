@@ -2,6 +2,14 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-25 (d) — **Live checks on the alt-text deploy (Marcus: "I published it; do the live checks"): the host serves `07d04b1`, every tab draws, both pointers open their card, the scan UI is ALL OK at both sizes, and all six Futures alt texts are live.** Record: `outputs/diagnostics/live_20261025_alt/`.
+
+- **`check_live_pointer.py`** (1440 × 900): the first run, started right after the publish, found the pointers working but no plot drawn and an empty CSV, with no output errors: the app was still cold-starting. Kept as `live_check_live_pointer_first_try_cold.log`. Re-run a few minutes later: a CSV reads "# Code commit: 07d04b1 (the deployed copy was built from this commit)"; every tab draws every plot with alt text and no output errors (Keeling 2/2, Where 5/5, What if 3/3, Isotopes 2/2, Futures Scenarios 1/1 and Pulse lab 2/2, Known issues 9/9, What pins 2/2, Under the hood 1/1). Its one FAIL is the check's own, Build your own waiting for "Run it".
+- **`check_scan_ui.py`**, 1440 × 900 and 375 × 812: ALL OK at both.
+- **The six alts** (`live_alt_text.log`, built-in browser at 1440 × 900): each view's `f_plot` alt is its (b) name; Build your own after "Run it" draws, 0 output errors.
+- **At the browser pane's small default size**, before the resize, k_plot and k_seasonal showed Shiny's sanitized "An error has occurred" while Under the hood drew; at 1440 × 900 both draw. Locally, at that pane size, the same two outputs log R's "figure margins too large" (10-22 b, and the 10-24 bundle serve), so this is the known refusal to draw into a panel smaller than the plot's margins, not this deploy. The live message itself is sanitized, so the attribution rests on that size dependence and the local log.
+- Headless Chrome stopped by PID; viewport reset.
+
 ## 2026-10-25 (c) — **Full suite @ `07d04b16` (frozen, linked): 9,437 passed, 0 failed, 1 skipped (the standing `l2-enso-limb` skip), 0 errored, 22.8 min. Bundle built from `07d04b16` and served locally: every tab draws, and all six Futures views carry their alt text.** The publish is Marcus's. (Marcus: "Yes, run the suite and build the bundle".)
 
 - **Suite:** +42 over (h) at `9c7ec7de`: `test-git-stamp` +21 (10-25 a) and `test-app-a11y` +21 (10-25 b). Log and per-file counts `outputs/diagnostics/suite_20261025_07d04b16{.log,_perfile.csv}`; launch script kept; worktree removed. README's test line cites it.
