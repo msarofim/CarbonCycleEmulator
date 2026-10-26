@@ -41,21 +41,25 @@ handoff"), 2026-10-25.
 - **Bundles in `~/ccx_frozen`:** `bundle_20261025_07d04b16` (live), `bundle_20261024_9c7ec7de` (the first v1.1 publish),
   `bundle_20261024_51948d67` (still labeled v1.0: never publish).
 
-## 4. Open (all Marcus's to choose; none started)
+## 4. Open (all Marcus's to choose)
+
+**Update 2026-10-25, same evening:** Marcus chose 2, 4, 5 and 7 (housekeeping part); all four done, CHANGELOG
+2026-10-25 (f)–(h). The fix in (g) is committed and bundled (`~/ccx_frozen/bundle_20261025_5c9576fa`) but NOT published;
+the live app is still `07d04b16`.
 
 1. **Capacity before a live class:** raise the app's memory to 2–4 GB on Connect Cloud; cold start is ~8 s.
-2. **Small windows:** at a panel smaller than a plot's margins, R refuses to draw and the live app shows Shiny's sanitized
-   "An error has occurred" (k_plot, k_seasonal; seen 10-22 and 10-25 d). A phone at 375 × 812 draws fine. A friendlier
-   message, or a smaller margin floor, would be a code change.
+2. ~~**Small windows**~~ **DONE (g), not published.** The reading here was wrong: it was a 0 px panel (Shiny's `startPNG()`),
+   plus a separate seasonal-chart bug below ~200 px. A 0 px panel now draws nothing until it has a size; every tab
+   draws at 200 × 800.
 3. **Copy:** card 8's text (listed as Claude's draft since 10-13); whether the Keeling chart needs a note on flask's sparse 1960s.
-4. **Tag the 10-25 redeploy** (for example `v1.1.1-…`), or leave the tag on the first v1.1 publish.
-5. **The host's revision record** (memory size, timeouts) has not been read since 10-22 (`rsconnect:::clientForAccount(...)`,
-   handoff 10-21 §3).
+4. ~~**Tag the 10-25 redeploy**~~ **DONE (f):** `v1.1.1-beta-hilda31fl` at `07d04b16`, pushed.
+5. ~~**The host's revision record**~~ **DONE (f):** 1024 MB, 1 CPU, timeouts as on 10-22; so item 1 stays open.
+   `outputs/diagnostics/live_20261025_alt/host_revision_20261025.json`.
 6. **Science, not app blockers:** the seasonal-lag triplet that keeps the sampler from converging (R-hat 1.11); the δ¹³C
    seasonal lead; card 8's unexplained share; flask CO₂'s MLO cycle 4.8 % larger and 2.2 d earlier than in situ; the model's
    MLO amplitude trend (+0.024 /yr against +0.009 observed).
-7. **Housekeeping:** `INDEX_ccx.md` and `INDEX_ccx_gates.md` ~14.8 KB, `INDEX_ccx_app.md` also over its 14 KB soft budget;
-   the marketing list.
+7. **Housekeeping:** ~~the three indexes~~ **DONE (h)** (new `INDEX_ccx_app_build.md`; `FaIRtoFrEDI/CLAUDE.md`'s sub-index
+   list does not name it yet; `_arch_modes`, `_arch`, `_seas_ml_arch` still over soft). Still open: the marketing list.
 
 ## 5. Non-obvious state
 
@@ -63,8 +67,9 @@ handoff"), 2026-10-25.
   an empty CSV with no errors. Re-run a few minutes later. Recipe: headless Chrome on port 9333 (scratch profile), then
   `check_live_pointer.py 9333 https://carbotope.org/ 1440 900 <commit7>` and `check_scan_ui.py 9333 https://carbotope.org/
   <prefix> <W> <H>`; stop Chrome by PID. Build your own's FAIL there is by design.
-- **The built-in browser pane at its default size** is smaller than the Keeling plots' margins: resize to 1440 × 900
-  before judging a tab. Keep each in-page script under 45 s.
+- **The built-in browser pane** can render the first tab before it has a width (0 px). Before (g) that showed "figure
+  margins too large"; since (g) the chart is blank until the panel has a size. Resize to 1440 × 900 before judging a
+  tab. Keep each in-page script under 45 s.
 - **`renderPlotFit()` must stay short:** `test-app-phone-layout` 7 reads only the first 12 lines of its body and needs
   `app_fit_plot(res$value)` there. The alt logic lives in `app_dl_alt()` for that reason.
 - **A `testServer` block sets every input in its first `setInputs`.** The session's first flush renders every output;
