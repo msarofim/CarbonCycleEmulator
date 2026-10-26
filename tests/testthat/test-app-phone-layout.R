@@ -141,12 +141,49 @@ test_that("4b. crowded year ticks get fewer breaks, across a facet edge too; an 
   pf_at(e, 351, 320, expect_identical(e$app_fit_plot(one), one))
 })
 
+test_that("4c. crowded ticks with their own labels keep each label on its break (2026-10-25)", {
+  skip_if_no_fit(); e <- .pf_env
+  # plot_seasonal()'s month axis: in a 176 px panel the thinning gave the scale new breaks under its seven labels,
+  # and the chart failed "`breaks` and `labels` have different lengths"
+  months <- c("Jan", "Mar", "May", "Jul", "Sep", "Nov", "Jan")
+  p <- ggplot(data.frame(x = c(0, 12), y = c(-3, 3)), aes(x, y)) + geom_line() +
+    scale_x_continuous(breaks = seq(0, 12, 2), labels = months) + e$theme_ccx()
+  collide <- function(q) { b <- ggplot2::ggplot_build(q); e$.fit_x_ticks_collide(q, b, ggplot2::ggplot_gtable(b)) }
+  pairs <- function(q) {
+    x <- ggplot2::ggplot_build(q)$layout$panel_params[[1]]$x
+    stats::setNames(x$get_labels(), x$get_breaks())
+  }
+  pf_at(e, 150, 320, {
+    expect_gte(collide(p), 3L)                        # the fixture really collides
+    expect_no_message(q <- e$app_fit_plot(p))         # no "left as drawn": the refit itself succeeded
+    got <- pairs(q)
+    expect_lt(length(got), length(months))
+    expect_identical(unname(got), unname(pairs(p)[names(got)]))   # every kept label sits on its own break
+    expect_identical(collide(q), 0L)
+  })
+})
+
 test_that("5. a plot that fails to build is returned as it was, with a message", {
   skip_if_no_fit(); e <- .pf_env
   bad <- ggplot(data.frame(x = 1), aes(x, no_such_column)) + geom_point()
   pf_at(e, 351, 300, {
     expect_message(r <- e$app_fit_plot(bad), "app_fit_plot: left as drawn")
     expect_identical(r, bad)
+  })
+})
+
+test_that("5b. an error after a step has changed the plot still returns the plot as it came in (2026-10-25)", {
+  skip_if_no_fit(); e <- .pf_env
+  # The handler returned `p` after the steps had reassigned it, so a later failure drew a half-refitted plot and
+  # its error reached the screen. Here the legend refit (step 1) runs, then the tick check (step 4) fails.
+  real <- e$.fit_x_ticks_collide
+  on.exit(assign(".fit_x_ticks_collide", real, envir = e), add = TRUE)
+  assign(".fit_x_ticks_collide", function(...) stop("injected after step 1"), envir = e)
+  pf_at(e, 351, 380, {
+    p <- pf_legend_plot(e)
+    expect_gt(pf_geo(e, p)$legend_over, 0.5)          # step 1 really refits this one before step 4 runs
+    expect_message(r <- e$app_fit_plot(p), "left as drawn \\(injected after step 1\\)")
+    expect_identical(r, p)
   })
 })
 
@@ -174,6 +211,28 @@ test_that("7. renderPlotFit() sends every visible plot through app_fit_plot()", 
   src <- readLines(file.path(.root, "app", "server.R"), warn = FALSE)
   body <- src[grep("renderPlotFit <- function", src):length(src)][1:12]
   expect_length(grep("app_fit_plot(res$value)", body, fixed = TRUE), 1L)
+})
+
+test_that("7b. a panel that reports no size draws nothing until it has one (2026-10-25)", {
+  skip_if_no_fit(); skip_if_not_installed("shiny"); e <- .pf_env
+  # Shiny's device fails on a 0 px width or height ("figure margins too large", before any plot code runs). The
+  # live app showed it as "An error has occurred" on the Keeling tab in a window not yet laid out.
+  ses <- function(w = NULL, h = NULL) list(clientData = list(output_x_width = w, output_x_height = h))
+  quiet <- function(f) expect_error(f(), class = "shiny.silent.error")
+  quiet(e$app_plot_dim(ses(0, 380), "x", "width"))
+  quiet(e$app_plot_dim(ses(NULL, 380), "x", "width"))
+  quiet(e$app_plot_dim(ses(300, 0), "x", "height"))
+  expect_identical(e$app_plot_dim(ses(300, 380), "x", "width")(), 300)
+  expect_identical(e$app_plot_dim(ses(300, 380), "x", "height")(), 380)
+  # a height renderPlotFit() was handed (the box diagram's follows its width): called, or passed through
+  expect_identical(e$app_plot_dim(ses(0, 0), "x", "height", function() 512)(), 512)
+  quiet(e$app_plot_dim(ses(), "x", "height", function() 0))
+  expect_identical(e$app_plot_dim(ses(), "x", "height", 260)(), 260)
+  # ...and renderPlotFit() hands renderPlot() both
+  src <- readLines(file.path(.root, "app", "server.R"), warn = FALSE)
+  body <- src[grep("renderPlotFit <- function", src):length(src)][1:14]
+  expect_length(grep('width = app_plot_dim(session, id, "width")', body, fixed = TRUE), 1L)
+  expect_length(grep('height = app_plot_dim(session, id, "height", height)', body, fixed = TRUE), 1L)
 })
 
 # ---- ui.R: every sidebar tab leads with its takeaway on a phone ----------------

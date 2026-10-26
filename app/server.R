@@ -61,6 +61,8 @@ function(input, output, session) {
   # 2026-10-20 (phones): the finished plot goes through app_fit_plot() (plots.R), which at narrow widths gives
   # an overflowing legend more rows and wraps an axis title too long for its panel. It runs while the width is
   # still published, and only on a visible result: a base-graphics plot returns invisibly and is passed through.
+  # 2026-10-25: the width and height go through app_plot_dim() (plots.R), so a panel that reports 0 px draws nothing
+  # until it has a size; Shiny's own device failed on it with "figure margins too large".
   renderPlotFit <- function(id, expr, env = parent.frame(), quoted = FALSE, height = "auto") {
     fn <- shiny::exprToFunction(expr, env, quoted)
     assign(id, fn, envir = dl_plots)
@@ -72,7 +74,8 @@ function(input, output, session) {
       on.exit(app_clear_panel_px(), add = TRUE)
       res <- withVisible(fn())
       if (res$visible) app_fit_plot(res$value) else invisible(res$value)
-    }, height = height, alt = app_dl_alt(id, input))
+    }, width = app_plot_dim(session, id, "width"), height = app_plot_dim(session, id, "height", height),
+    alt = app_dl_alt(id, input))
   }
 
   # ---- 1. Keeling ----------------------------------------------------

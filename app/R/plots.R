@@ -334,6 +334,25 @@ app_live_panel_px <- function() {
     get("panel_px", envir = .CCX_RENDER) else NULL
 }
 
+# ⭐ A PANEL WITH NO SIZE YET DRAWS NOTHING (2026-10-25). renderPlot() opens its PNG device at the size the browser
+# reports and calls plot.new() on it, with zero margins, before any plot code runs. A width or height of 0 px (a
+# window not yet laid out, or a hidden one) fails there with "figure margins too large", which the host shows as
+# "An error has occurred". Measured 2026-10-25 (shiny 1.13.0, ragg 1.5.0): Shiny's device fails at 0 device px and
+# opens at 1 px and up, and k_plot draws in a 76 px panel, so this is the zero size and not small margins.
+# renderPlotFit() (server.R) hands renderPlot() these as its width and height: a size that is not a positive number
+# cancels the render quietly (req), and Shiny runs it again when the panel reports one.
+#' @param given renderPlot()'s own argument: "auto" reads the panel's size from the session, a function is called
+app_plot_dim <- function(session, id, dim = c("width", "height"), given = "auto") {
+  dim <- match.arg(dim)
+  function() {
+    v <- if (is.function(given)) given()
+         else if (identical(given, "auto")) session$clientData[[paste0("output_", id, "_", dim)]]
+         else given
+    shiny::req(is.numeric(v) && length(v) == 1L && is.finite(v) && v > 0)
+    v
+  }
+}
+
 #' Text budget in px, after the plot's own margins
 #'
 #' Uses the LIVE width when a render has published one; otherwise the named
@@ -585,6 +604,9 @@ APP_FIT_KEY_GAP_PT <- 2    # vertical gap between legend rows once a legend is r
 app_fit_plot <- function(p) {
   px <- app_live_panel_px()
   if (is.null(px) || px > APP_FIT_MAX_PX || !inherits(p, "ggplot")) return(p)
+  # ⚠ The steps below reassign `p`, so the error handler returns this copy. It returned `p` until 2026-10-25, i.e.
+  # whatever step it failed in, and that plot's own error then reached the screen when Shiny printed it.
+  p0 <- p
   tryCatch({
     b <- ggplot_build(p); g <- ggplot_gtable(b)
     geo <- .fit_geometry(g)
@@ -631,14 +653,21 @@ app_fit_plot <- function(p) {
       if (n < 3L) break
       sc <- p$scales$get_scales("x")
       sc <- if (is.null(sc)) scale_x_continuous() else sc$clone()
-      sc$breaks <- scales::breaks_extended(n = max(2L, n %/% 2L))
+      # 2026-10-25: a scale that carries its own labels (the seasonal chart's months) keeps every other break WITH
+      # its label. New breaks under the old labels failed "`breaks` and `labels` have different lengths" in a 176 px
+      # panel (it drew at 206). Fixed labels on breaks the scale computes cannot be thinned in step: left as drawn.
+      if (!is.null(sc$labels) && !inherits(sc$labels, "waiver") && !is.function(sc$labels)) {
+        if (!is.numeric(sc$breaks) || length(sc$breaks) != length(sc$labels)) break
+        keep <- seq(1L, length(sc$breaks), by = 2L)
+        sc$breaks <- sc$breaks[keep]; sc$labels <- sc$labels[keep]
+      } else sc$breaks <- scales::breaks_extended(n = max(2L, n %/% 2L))
       p <- suppressMessages(p + sc)
       b <- ggplot_build(p); g <- ggplot_gtable(b)
     }
     p
   }, error = function(e) {
     message("app_fit_plot: left as drawn (", conditionMessage(e), ")")
-    p
+    p0
   })
 }
 

@@ -1,0 +1,6 @@
+unmutated: RESULT: none 
+M1 handler returns p (pre-fix): failing blocks = RESULT: 5b. 
+M2 no fixed-label branch: failing blocks = RESULT: 4c. 
+M3 app_plot_dim without req: failing blocks = RESULT: 7b. 
+M4 renderPlotFit without width: failing blocks = RESULT: 7b. 
+all restored
