@@ -2,6 +2,15 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-26 (a) — **Live checks on the small-window deploy (Marcus: "I published it; do the live checks"): the host serves `5c9576f`; a 0 px chart is blank with no error and redraws when it has a width; the seasonal chart draws in a 176 px panel; every tab draws at 1440 × 900 and 200 × 800; scan UI ALL OK at both sizes.** Record: `outputs/diagnostics/live_20261026_small_window/`.
+
+- **Revision** `01a177bd-d5c0-f756-f8c1-cf170e3f00c6`, published 10:25:04 UTC from `~/ccx_frozen/bundle_20261025_5c9576fa`: 1024 MB, 1 CPU, connection options unchanged (`host_revision_20261026.json`, upload URL omitted). The headless checks started at 10:26:51, after a `curl` had woken the app; none caught the cold start.
+- **Defect 1 live** (built-in browser, 1440 × 900): `k_plot`'s element set to 0 px wide went blank with no error and redrew at 1056 px when restored. Before (g) the same check gave "figure margins too large" (locally; the host sanitizes it to "An error has occurred").
+- **Defect 2 live:** at 200 × 800 both Keeling charts draw in 176 px panels; `k_seasonal` failed at that width before (g).
+- **`check_live_pointer.py`** at 1440 × 900 and 200 × 800: every tab draws every chart with alt text and no output errors; both pointers open Known issues at card top 0 with the host's href rewrite; the CSV names `5c9576f`. Each run's one FAIL is Build your own before "Run it" (by design). Pressed in the built-in browser, it drew in 3.5 s with alt "Future CO₂ on your pathway" and 0 output errors on the page.
+- **`check_scan_ui.py`** at 1440 × 900 and 375 × 812: ALL OK.
+- **Not tagged.** `v1.1.1-beta-hilda31fl` marks the 10-25 publish (`07d04b16`); whether this one gets a tag is Marcus's.
+
 ## 2026-10-25 (h) — **Full suite @ `5c9576fa`: 9,454 passed, 0 failed, 1 standing skip, 0 errored, 21.4 min. Bundle `~/ccx_frozen/bundle_20261025_5c9576fa` built and served locally: every tab draws at 1440 × 900, 375 × 812 and 200 × 800, scan UI ALL OK at both standard sizes. Not published. Memory housekeeping (§4.7) done.**
 
 - **Suite** (frozen worktree, `data-raw/downloads` linked 79 + 3; launch script `~/ccx_frozen/suite_20261025_5c9576fa.sh` kept; worktree removed): 233 warnings. Against `07d04b16`, only two files changed counts: `test-app-phone-layout` 37 → 55 ((g)'s three blocks) and `test-app-a11y` 126 → 125 (its one warning, removed in (c)). The standing skip is `l2-enso-limb`. Log and per-file counts `outputs/diagnostics/suite_20261025_5c9576fa{.log,_perfile.csv}`; README's test line cites it.
