@@ -2,6 +2,11 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-25 (f) — **Tagged the 10-25 redeploy `v1.1.1-beta-hilda31fl` at `07d04b16` and pushed the tag; read the host's revision record (read-only): 1024 MB and 1 CPU, connection options unchanged since 10-22 (h).** Marcus chose all four of handoff 10-25 §4.2, §4.4, §4.5 and §4.7; these are §4.4 and §4.5.
+
+- **Tag:** annotated, same form as `v1.1-beta-hilda31fl`. Between the two tags only `R/provenance.R`, `app/R/downloads.R` and `app/server.R` change (the stamp guard, (a); the six Futures alts, (b)). The message cites the suite at `07d04b16` and the bundle `~/ccx_frozen/bundle_20261025_07d04b16`.
+- **Revision `01a175a1-abea-e32d-7c02-723f96ce933a`**, published 2026-10-26 00:34:58 UTC (20:34 EDT on 10-25, ten minutes before (d)'s commit, so it is the copy (d) checked): active, published, `memory` 1024, `cpu` 1, `execution_time_limit` 60, R 4.5.3 on jammy. `connect_options`: `conn_timeout` 1200, `read_timeout` 1800, `idle_timeout` 5, `init_timeout` 60, `sched_min_proc` 1, `sched_max_proc` 10, `sched_max_conns` 20, `sched_load_factor` 0.5, `shiny_isolation` TRUE. 10-22 (h) recorded only memory and three timeouts; those four are unchanged. Memory is still 1 GB, so §4.1 (2–4 GB before a live class) stays open. Record: `outputs/diagnostics/live_20261025_alt/host_revision_20261025.json` (the bundle upload URL is omitted because it carries a token).
+
 ## 2026-10-25 (e) — **Handoff `notes/handoff_2026-10-25_alt_text_live.md`** (Marcus: "Write the handoff"). It supersedes `handoff_2026-10-24_v11_live.md`, which now points to it. Done since: 10-24 (k)–(l), 10-25 (a)–(d). State: BETA v1.1 live from `07d04b16` (suite 9,437 / 0 / 1), live-checked; nothing running, no worktrees. Open, all Marcus's: capacity before a live class, the small-window plot error, card 8's text and the Keeling 1960s note, whether to tag the redeploy, the host's revision record, the science follow-ups, memory budgets. Memory `ccx_hilda31fl_adopted` points to the new note.
 
 ## 2026-10-25 (d) — **Live checks on the alt-text deploy (Marcus: "I published it; do the live checks"): the host serves `07d04b1`, every tab draws, both pointers open their card, the scan UI is ALL OK at both sizes, and all six Futures alt texts are live.** Record: `outputs/diagnostics/live_20261025_alt/`.
