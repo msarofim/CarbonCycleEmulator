@@ -2,6 +2,14 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-28 (a) — **The live app now runs on 4 GB and 2 CPUs (Marcus: "I set it to 4 GB and 2 CPUs and republished"), ahead of a Reddit post. Same bundle, so the code is still `5c9576f`; every tab draws.** Handoff 10-25 §4.1. Record: `outputs/diagnostics/live_20261028_capacity/`.
+
+- **Revision** `01a183f1-9f47-753b-d003-8091f049793d`, published 19:16:58 UTC: `memory` 4096, `cpu` 2; `source_bundle_id` `01a177bd-d595-…`, the same as 10-26 (a). `connect_options` unchanged (`sched_load_factor` 0.5, `sched_max_conns` 20, `sched_max_proc` 10, `sched_min_proc` 1, timeouts 1200 / 1800 / idle 5). `host_revision_20261028.json`, upload URL omitted.
+- **Why both:** the 10-20 load test (1 CPU / 1 GB) served 5 simultaneous users from one R process and crashed at 10, most likely on memory (one local R process ~600 MB after its first session, growing and never shrinking: 1.3 GB after 32). 4 GB leaves room for a second and third process. A second CPU is used only when a second process runs; with load factor 0.5 of 20 connections that is around 10 simultaneous visitors, if Connect Cloud spawns processes the way Posit Connect's docs describe (not confirmed).
+- **Cost:** Connect Cloud's docs give credits per hour = 0.75 × CPUs + 0.25 × GB of the configured maximum: 1.0 before, 2.5 now. Marcus reports about 13 credits a day so far, so the same activity would be about 33 a day.
+- **`check_live_pointer.py`** at 1440 × 900, 19:18 UTC: every tab draws every chart with alt text and no output errors; both pointers open their card; the CSV names `5c9576f`; the one FAIL is Build your own before "Run it" (by design).
+- **Not tested:** capacity at the new settings. The 10-20 load test has not been repeated (a live load test takes the app down for real visitors if it fails).
+
 ## 2026-10-26 (a) — **Live checks on the small-window deploy (Marcus: "I published it; do the live checks"): the host serves `5c9576f`; a 0 px chart is blank with no error and redraws when it has a width; the seasonal chart draws in a 176 px panel; every tab draws at 1440 × 900 and 200 × 800; scan UI ALL OK at both sizes.** Record: `outputs/diagnostics/live_20261026_small_window/`.
 
 - **Revision** `01a177bd-d5c0-f756-f8c1-cf170e3f00c6`, published 10:25:04 UTC from `~/ccx_frozen/bundle_20261025_5c9576fa`: 1024 MB, 1 CPU, connection options unchanged (`host_revision_20261026.json`, upload URL omitted). The headless checks started at 10:26:51, after a `curl` had woken the app; none caught the cold start.

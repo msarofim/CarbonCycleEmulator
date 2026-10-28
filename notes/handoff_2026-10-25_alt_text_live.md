@@ -47,7 +47,8 @@ handoff"), 2026-10-25.
 2026-10-25 (f)–(h). The fix in (g) was published by Marcus 2026-10-26 from `~/ccx_frozen/bundle_20261025_5c9576fa` and
 live-checked (CHANGELOG 2026-10-26 a): the live app is `5c9576fa`, not tagged.
 
-1. **Capacity before a live class:** raise the app's memory to 2–4 GB on Connect Cloud; cold start is ~8 s.
+1. ~~**Capacity before a live class**~~ **DONE 10-28 (a):** 4 GB / 2 CPU, revision `01a183f1…`, same bundle. Not load-tested
+   at the new setting. Cold start is ~8 s.
 2. ~~**Small windows**~~ **DONE (g), live 10-26 (a).** The reading here was wrong: it was a 0 px panel (Shiny's `startPNG()`),
    plus a separate seasonal-chart bug below ~200 px. A 0 px panel now draws nothing until it has a size; every tab
    draws at 200 × 800.

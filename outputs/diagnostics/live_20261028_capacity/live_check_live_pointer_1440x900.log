@@ -1,0 +1,15 @@
+pointers ['#issue-1', '#issue-2']; fixed handler served True; pre-fix line served False; <base> https://01a14244-5cc3-1951-7b06-9e2fb07beae3.share.connect.posit.cloud/_w_c1221b0737b84508a912aee9b3af31e2/
+pointer 1 (#issue-1 from 'The Keeling Curve'): host rewrote href: True (https://01a14244-5cc3-1951-7b06-9e2fb07beae3.share.connect.p...); active 'Known issues', card top 0 -> OK
+pointer 2 (#issue-2 from 'Isotope fingerprints'): host rewrote href: True (https://01a14244-5cc3-1951-7b06-9e2fb07beae3.share.connect.p...); active 'Known issues', card top 0 -> OK
+CSV k_plot_csv: '# Code commit: 5c9576f (the deployed copy was built from this commit)' -> OK
+  The Keeling Curve / The Keeling Curve: 2/2 drawn, alt 2, errors [] -> OK
+  Where does the carbon go? / Where does the carbon go?: 5/5 drawn, alt 5, errors [] -> OK
+  What if…? / What if…?: 3/3 drawn, alt 3, errors [] -> OK
+  Isotope fingerprints / Isotope fingerprints: 2/2 drawn, alt 2, errors [] -> OK
+  Futures / Scenarios: 1/1 drawn, alt 1, errors [] -> OK
+  Futures / Build your own: 0/1 drawn, alt 0, errors [] -> FAIL
+  Futures / Pulse lab: 2/2 drawn, alt 2, errors [] -> OK
+  Known issues / Known issues: 9/9 drawn, alt 9, errors [] -> OK
+  What pins down what? / What pins down what?: 2/2 drawn, alt 2, errors [] -> OK
+  Under the hood / Under the hood: 1/1 drawn, alt 1, errors [] -> OK
+CHECK FAILED
