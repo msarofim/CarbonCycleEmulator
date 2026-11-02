@@ -1,0 +1,11 @@
+# Server log of the local bundle (54e9ef80, port 7791), lines matching CCX_SESSION, 2026-11-02.
+# d9637e02 = the built-in browser pane (preview_start; still open when the server stopped, so no end line);
+# the three headless sessions = check_live_pointer.py (its tab sweep, then one page per Known-issue pointer),
+# closed when headless Chrome was stopped.
+CCX_SESSION {"event":"start","id":"d9637e02","start":"2026-11-02T14:02:41Z","client":"desktop"}
+CCX_SESSION {"event":"start","id":"78caf6ec","start":"2026-11-02T14:02:51Z","client":"headless"}
+CCX_SESSION {"event":"start","id":"a6940575","start":"2026-11-02T14:03:00Z","client":"headless"}
+CCX_SESSION {"event":"start","id":"a36440b1","start":"2026-11-02T14:03:11Z","client":"headless"}
+CCX_SESSION {"event":"end","id":"a36440b1","start":"2026-11-02T14:03:11Z","client":"headless","dur_s":88,"ref":"none","tabs":["The Keeling Curve","Where does the carbon go?","What if…?","Isotope fingerprints","Futures","Known issues","What pins down what?","Under the hood"],"n_changes":2,"changed":["f_mode"]}
+CCX_SESSION {"event":"end","id":"a6940575","start":"2026-11-02T14:03:00Z","client":"headless","dur_s":100,"ref":"none","tabs":["The Keeling Curve","Isotope fingerprints","Known issues"],"n_changes":0,"changed":[]}
+CCX_SESSION {"event":"end","id":"78caf6ec","start":"2026-11-02T14:02:51Z","client":"headless","dur_s":109,"ref":"none","tabs":["The Keeling Curve","Known issues"],"n_changes":0,"changed":[]}
