@@ -136,7 +136,9 @@ for t in navs:
       return res;
     }})()""")
     for x in r:
-        good = x["plots"] == x["drawn"] == x["alt"] and not x["errors"]
+        # 2026-11-02 (c): a pane with no chart on show is a FAIL; before, 0/0 passed (a pane whose charts sit in an
+        # output the server had not yet sent read as "0/0 drawn -> OK" on a stalled connection)
+        good = x["plots"] > 0 and x["plots"] == x["drawn"] == x["alt"] and not x["errors"]
         ok &= good
         print(f"  {t} / {x['label']}: {x['drawn']}/{x['plots']} drawn, alt {x['alt']}, errors {x['errors']} -> {'OK' if good else 'FAIL'}")
 print("ALL OK" if ok else "CHECK FAILED")
