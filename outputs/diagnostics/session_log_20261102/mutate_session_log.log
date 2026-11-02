@@ -1,0 +1,8 @@
+unmutated: RESULT: none 
+M1 no headless class: failing blocks = RESULT: 1. 
+M2 referrer path kept: failing blocks = RESULT: 2. 
+M3 first appearance counted: failing blocks = RESULT: 3. 
+M4 referrer in the Keeling link: failing blocks = RESULT: 4. 
+M5 server never starts the log: failing blocks = RESULT: 5. 
+M6 script sends the full referrer: failing blocks = RESULT: 5. 
+all restored

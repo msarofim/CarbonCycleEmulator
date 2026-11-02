@@ -1448,6 +1448,8 @@ function(input, output, session) {
 
   # ---- deep links and downloads (2026-10-20; app/R/links.R, app/R/downloads.R) ----
   links <- app_links_server(input, session)
+  # one log line when the visit starts and one when it ends (2026-11-02; app/R/sessionlog.R)
+  app_session_log_server(input, session)
   # While the pulse lab's result is grayed (its settings changed, no click yet) its charts still hold the
   # previous run, so their downloads carry the gray-out note instead (Marcus 2026-10-20).
   app_dl_server(output, session, dl_plots, link = links$url,

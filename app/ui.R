@@ -330,6 +330,7 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
     tags$script(HTML(GLOSS_JS)),
     tags$script(HTML(SEE_CARD_JS)),
     tags$script(HTML(APP_SHARE_JS)),
+    tags$script(HTML(APP_SESSION_JS)),   # 2026-11-02: the referring site's host, for the session log (sessionlog.R)
     # The pulse lab's result grays out while its settings differ from the ones it was run at (server.R
     # pulse_stale(); global.R APP_PULSE_RESULT_IDS). shiny.js is loaded in <head>, so Shiny exists here.
     tags$script(HTML("
