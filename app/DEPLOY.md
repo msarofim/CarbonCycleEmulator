@@ -30,6 +30,26 @@ send a 302 to the app over http and https (Let's Encrypt certificate for `carbot
 - **To move the app:** edit the forward's destination at Porkbun. The banner's "Short link: CarboTope.org"
   (`APP_SHORT_URL`, `app/global.R`) names the domain, not the host, so it needs no change.
 
+**The landing page (2026-11-10; PREPARED, NOT LIVE until the switch below).** Marcus: "Go with option 1, the landing
+page with a button." `docs/` holds a static page for https://carbotope.org, served by GitHub Pages from `main` /docs.
+Crawlers and link previews read it without waking the app; the Connect Cloud app keeps its default robots.txt (every
+crawler but LinkedInBot and Twitterbot disallowed, CHANGELOG 2026-11-10 a). An address with a query goes on to the app
+(shared views keep working); the app is woken in the background on the visitor's first mouse move, touch, key or scroll.
+`tests/testthat/test-landing-page.R` holds its addresses to README's "App:" line and `app/global.R`. **To move the
+app** after the switch: change the app address in `docs/index.html` (three places), `docs/404.html` and README.
+The switch, in the order GitHub's docs give (docs.github.com, "Managing a custom domain for your GitHub Pages site",
+read 2026-11-10: add the domain on GitHub before changing DNS, or someone else can claim it):
+1. Verify the domain: GitHub profile → Settings → Pages → Add a domain → `carbotope.org`; add the TXT record it shows
+   (host `_github-pages-challenge-msarofim`) at Porkbun; press Verify. Keep the record.
+2. Repository → Settings → Pages: deploy from branch `main`, folder `/docs`; custom domain `carbotope.org` (GitHub
+   commits a CNAME file).
+3. Porkbun: delete the URL forwards (apex, `www`, and the wildcard: GitHub advises against wildcard records), and any
+   records Porkbun set for forwarding. Add A `185.199.108.153`, `185.199.109.153`, `185.199.110.153`,
+   `185.199.111.153`; AAAA `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`;
+   CNAME `www` → `msarofim.github.io`. GitHub then redirects `www` to the apex. DNS can take up to 24 h.
+4. When GitHub has issued the certificate (up to 24 h): tick "Enforce HTTPS".
+During the switch carbotope.org may be briefly unreachable; the app's own address keeps working throughout.
+
 **Deliberately NOT renamed** (Marcus's scoping of R3): the repository stays
 `CarbonCycleEmulator` and the code keeps its `ccx_` prefix. Neither is public-facing.
 

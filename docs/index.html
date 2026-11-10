@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--
+  CarboTope landing page (2026-11-10; Marcus: "Go with option 1, the landing page with a button").
+  Served by GitHub Pages from this repository's docs/ folder at https://carbotope.org/. It is a plain
+  page so that crawlers and link previews read it without waking the app on Posit Connect Cloud.
+  - An address with a query (a shared view, carbotope.org/?_inputs_&...) goes straight on to the app.
+  - The app is woken in the background on the visitor's first mouse move, touch, key or scroll, so most
+    of its start-up passes while the page is being read. Crawlers do none of those and leave it asleep.
+  Text sources: the description is the app's Connect Cloud description (Settings -> Info, Marcus); the
+  lead paragraph is Marcus's 2026-10-28 Reddit post, with the address and "that I created" taken out.
+  The rest (title, button, note, labels) is Claude's draft for Marcus's edit.
+  The app's address appears three times below (twice in the script, once in the button); the test
+  tests/testthat/test-landing-page.R holds all three to the address in README.md.
+-->
+<script>
+  (function () {
+    var APP = "https://01a14244-5cc3-1951-7b06-9e2fb07beae3.share.connect.posit.cloud/";
+    if (location.search.length > 1) location.replace(APP + location.search + location.hash);
+  })();
+</script>
+<title>CarboTope: a carbon-cycle model built for students</title>
+<meta name="description" content="A carbon-cycle model calibrated to observations, built for students. Beta teaching software, not peer-reviewed.">
+<link rel="canonical" href="https://carbotope.org/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://carbotope.org/">
+<meta property="og:title" content="CarboTope">
+<meta property="og:description" content="A carbon-cycle model calibrated to observations, built for students. Beta teaching software, not peer-reviewed.">
+<meta property="og:image" content="https://carbotope.org/preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The CarboTope app open at its first tab, the Keeling Curve.">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  :root {
+    --navy: #2c3e50;      /* the app's bootswatch "flatly" primary */
+    --teal: #18bc9c;      /* flatly's success colour, the app's active-tab colour */
+    --teal-dark: #128f76;
+    --paper: #ffffff;
+    --mist: #ecf0f1;
+    --ink: #212529;
+    --muted: #5a6570;
+    --beta-bg: #fdf3e1;
+    --beta-edge: #e8a33d;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font: 17px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  header { background: var(--navy); color: #fff; }
+  header .wrap { display: flex; align-items: baseline; gap: 0.75rem; padding-top: 1.1rem; padding-bottom: 1.1rem; }
+  .wrap { max-width: 50rem; margin: 0 auto; padding-left: 16px; padding-right: 16px; }
+  .brand { font-size: 1.5rem; font-weight: 600; letter-spacing: 0.01em; margin: 0; }
+  .badge {
+    font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--navy); background: var(--beta-bg); border-left: 3px solid var(--beta-edge);
+    padding: 0.1rem 0.45rem; border-radius: 2px;
+  }
+  main { padding: 2rem 0 2.5rem; }
+  .lead { font-size: 1.15rem; margin: 0 0 1.5rem; }
+  .cta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1.2rem; margin: 0 0 2rem; }
+  .button {
+    display: inline-block; background: var(--teal); color: #fff; text-decoration: none;
+    font-weight: 600; font-size: 1.1rem; padding: 0.75rem 1.5rem; border-radius: 6px;
+  }
+  .button:hover, .button:focus-visible { background: var(--teal-dark); }
+  .button:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; }
+  .note { color: var(--muted); font-size: 0.95rem; margin: 0; max-width: 26rem; }
+  figure { margin: 0 0 2rem; }
+  figure img { display: block; width: 100%; height: auto; border: 1px solid #d5dbe0; border-radius: 6px; }
+  h2 { font-size: 1.1rem; color: var(--navy); margin: 0 0 0.5rem; }
+  .tabs { margin: 0 0 2rem; padding-left: 1.2rem; }
+  .tabs li { margin: 0.15rem 0; }
+  .status { background: var(--mist); border-radius: 6px; padding: 0.8rem 1rem; margin: 0 0 2rem; font-size: 0.95rem; }
+  footer { border-top: 1px solid #dde3e8; color: var(--muted); font-size: 0.95rem; }
+  footer .wrap { padding-top: 1.2rem; padding-bottom: 2rem; }
+  footer p { margin: 0.2rem 0; }
+  a { color: var(--teal-dark); }
+  @media (max-width: 30rem) {
+    body { font-size: 16px; }
+    .lead { font-size: 1.05rem; }
+    .button { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1 class="brand">CarboTope</h1>
+    <span class="badge">Beta</span>
+  </div>
+</header>
+<main>
+  <div class="wrap">
+    <p class="lead">CarboTope is a new simple carbon cycle model (designed for teaching, not research, and still in beta)
+      and accompanying website, aimed at informed users who want to better understand how seasonal patterns,
+      hemispheric differences, and different isotopes all interact. It is free and open source.</p>
+
+    <div class="cta">
+      <a class="button" id="open-app" href="https://01a14244-5cc3-1951-7b06-9e2fb07beae3.share.connect.posit.cloud/">Open CarboTope</a>
+      <p class="note">The model starts when you open it. The first view can take about 30 seconds.</p>
+    </div>
+
+    <figure>
+      <img src="preview.png" width="1200" height="630"
+           alt="The CarboTope app open at its first tab, the Keeling Curve: modelled and measured CO₂ at Mauna Loa and the South Pole from 1958 to 2024, with the year range, hemisphere and measurement controls on the left.">
+    </figure>
+
+    <h2>In the app</h2>
+    <ul class="tabs">
+      <li>The Keeling Curve</li>
+      <li>Where does the carbon go?</li>
+      <li>What if…?</li>
+      <li>Isotope fingerprints</li>
+      <li>Futures</li>
+      <li>Known issues</li>
+      <li>What pins down what?</li>
+      <li>Under the hood</li>
+    </ul>
+
+    <p class="status">Beta teaching software, not peer-reviewed. The app's “Known issues” tab lists where the model
+      and the measurements disagree.</p>
+  </div>
+</main>
+<footer>
+  <div class="wrap">
+    <p>Made by Marcus C. Sarofim.</p>
+    <p>Source code: <a href="https://github.com/msarofim/CarbonCycleEmulator">GitHub</a>.
+      Comments and questions: <a href="https://thesaraphreport.substack.com/p/the-debut-of-carbotope-beta-a-new">Substack</a>.</p>
+  </div>
+</footer>
+<script>
+  // Wake the app on the first sign of a person (mouse, touch, key, scroll), once. The request fetches the
+  // app's page and opens no session, so the model does not run until the button is pressed.
+  (function () {
+    var APP = "https://01a14244-5cc3-1951-7b06-9e2fb07beae3.share.connect.posit.cloud/";
+    var events = ["pointermove", "pointerdown", "touchstart", "keydown", "scroll"];
+    function warm() {
+      events.forEach(function (e) { window.removeEventListener(e, warm, true); });
+      try { fetch(APP, { mode: "no-cors", cache: "no-store", credentials: "omit" }).catch(function () {}); } catch (e) {}
+    }
+    events.forEach(function (e) { window.addEventListener(e, warm, { capture: true, passive: true }); });
+  })();
+</script>
+</body>
+</html>

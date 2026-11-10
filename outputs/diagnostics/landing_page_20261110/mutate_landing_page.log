@@ -1,0 +1,8 @@
+unmutated                                    expect none   got none     OK
+M1 button points elsewhere                   expect 1.     got 1.       OK
+M2 repository link changed                   expect 1.     got 1.       OK
+M3 og:image tag removed                      expect 2.     got 2.       OK
+M4 og:image:width wrong                      expect 2.     got 2.       OK
+M5 shared view loses its query               expect 3.     got 3.       OK
+M6 app woken on page load                    expect 3.     got 3.       OK
+M7 institution in the footer                 expect 4.     got 4.       OK
