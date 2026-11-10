@@ -2,6 +2,12 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-11-10 (c) — **GitHub Pages switched on for the landing page (Marcus: "Github successfully verified carbotope. Do the next step."): `main` /docs, custom domain `carbotope.org`, domain verified. GitHub serves the page; carbotope.org still forwards to the app until Marcus changes the DNS at Porkbun (step 3 in `app/DEPLOY.md`).**
+
+- **Step 1 (Marcus):** the TXT record `_github-pages-challenge-msarofim.carbotope.org` answered on all four Porkbun nameservers and at 1.1.1.1, 8.8.8.8 and 9.9.9.9, once, with no doubled name; a lookup a minute earlier got the wildcard forward's CNAME instead (the record had just been published). GitHub then verified the domain.
+- **Step 2 (`gh api`):** `POST /pages` (source `main`, `/docs`), then `PUT /pages` with `cname=carbotope.org`: `protected_domain_state` "verified". GitHub committed `docs/CNAME` ("Create CNAME", `3d867ab8`). The first build (`5bfc68f9`) shows "errored" because that commit cancelled it; the second built. Asked directly at GitHub's address (`--resolve carbotope.org:80:185.199.108.153`) the page and `preview.png` come back 200. `msarofim.github.io/CarbonCycleEmulator/` sends a 301 to carbotope.org, which still forwards to the app.
+- **Test:** `test-landing-page.R` now holds `docs/CNAME` to the site's domain (31 expectations); changing or deleting the file fails block 2 (ad hoc mutations, appended to `mutate_landing_page.log`).
+
 ## 2026-11-10 (b) — **A static landing page for carbotope.org (Marcus: "Go with option 1, the landing page with a button"), in `docs/` for GitHub Pages. Built, tested and browser-checked; not live. The switch (GitHub domain verification, Pages settings, Porkbun DNS) is Marcus's and is written down in `app/DEPLOY.md`.** Record: `outputs/diagnostics/landing_page_20261110/`.
 
 - **Why:** crawlers and link previews that fetch carbotope.org now wake the app, and search engines are kept off it by the host's robots.txt ((a)). A plain page on another host can be indexed and previewed with the app asleep. Options weighed with Marcus: the current forward, this page, an instant forward, opening the app to crawlers, a subdomain page, a crawler page from inside the app, the existing README and posts.

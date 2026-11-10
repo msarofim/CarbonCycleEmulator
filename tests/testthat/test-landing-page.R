@@ -61,6 +61,8 @@ test_that("2. search and preview tags are present, absolute, and the preview ima
   }
   expect_match(.lp_html("404.html"), '<meta name="robots" content="noindex">', fixed = TRUE)
   expect_match(.lp_html("robots.txt"), "Allow: /", fixed = TRUE)
+  # GitHub's own commit (2026-11-10, "Create CNAME") when the custom domain was set; without it the domain is dropped
+  expect_identical(trimws(.lp_html("CNAME")), sub("^https://(.*)/$", "\\1", .lp_site))
 })
 
 test_that("3. a shared view goes on to the app; the app is woken only from an event handler", {

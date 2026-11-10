@@ -6,3 +6,5 @@ M4 og:image:width wrong                      expect 2.     got 2.       OK
 M5 shared view loses its query               expect 3.     got 3.       OK
 M6 app woken on page load                    expect 3.     got 3.       OK
 M7 institution in the footer                 expect 4.     got 4.       OK
+M8 CNAME changed (ad hoc, 2026-11-10 c)      expect 2.     got 2.       OK
+M9 CNAME deleted (ad hoc, 2026-11-10 c)      expect 2.     got 2.       OK

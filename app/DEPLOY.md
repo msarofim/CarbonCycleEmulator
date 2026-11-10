@@ -39,10 +39,10 @@ crawler but LinkedInBot and Twitterbot disallowed, CHANGELOG 2026-11-10 a). An a
 app** after the switch: change the app address in `docs/index.html` (three places), `docs/404.html` and README.
 The switch, in the order GitHub's docs give (docs.github.com, "Managing a custom domain for your GitHub Pages site",
 read 2026-11-10: add the domain on GitHub before changing DNS, or someone else can claim it):
-1. Verify the domain: GitHub profile → Settings → Pages → Add a domain → `carbotope.org`; add the TXT record it shows
-   (host `_github-pages-challenge-msarofim`) at Porkbun; press Verify. Keep the record.
-2. Repository → Settings → Pages: deploy from branch `main`, folder `/docs`; custom domain `carbotope.org` (GitHub
-   commits a CNAME file).
+1. ✅ 2026-11-10. Verify the domain: GitHub profile → Settings → Pages → Add a domain → `carbotope.org`; add the TXT
+   record it shows (host `_github-pages-challenge-msarofim`) at Porkbun; press Verify. Keep the record.
+2. ✅ 2026-11-10 (`gh api`). Repository → Settings → Pages: deploy from branch `main`, folder `/docs`; custom domain
+   `carbotope.org`. GitHub committed `docs/CNAME` ("Create CNAME", `3d867ab8`); the test holds it.
 3. Porkbun: delete the URL forwards (apex, `www`, and the wildcard: GitHub advises against wildcard records), and any
    records Porkbun set for forwarding. Add A `185.199.108.153`, `185.199.109.153`, `185.199.110.153`,
    `185.199.111.153`; AAAA `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`;
