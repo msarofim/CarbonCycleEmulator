@@ -2,6 +2,13 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-11-11 (m) — **Live checks on the `01cdaf99` deploy (Marcus: "I published it; do the live checks"): revision `01a1cbfb`, 4 GB / 2 CPU and the timeouts kept; every tab draws at 1440 × 900 and 200 × 800; every Download link works at 1440 × 900 and 375 × 812; scan UI ALL OK; no page scrolls sideways on a phone; the log is clean. Card 2's facet titles draw their digits on the host. The box diagram does not hold A1's fix on the host's font (below); not fixed.** Record: `outputs/diagnostics/live_20261111_batch_a/` (`live_browser_checks.md`).
+
+- **Host:** published 19:00:44 UTC from `bundle_20261111_01cdaf99`; timeouts 1200 / 1800 / idle 5, `sched_min_proc` 1 (`host_revision_20261111b.json`, upload URL omitted).
+- **Checks:** `time_tab_draws.py` ALL OK at both sizes (slowest 5.8 s); `check_live_pointer.py` with the host's href rewrite, CSV `01cdaf9`, its one FAIL Build your own before "Run it" (by design); `check_scan_ui.py` ALL OK at both sizes; `check_dl_links.py` ALL OK, 10/10 panes at both sizes; `shoot_tabs.py --mobile` at 375 × 812, every page 375 px wide; `log_problems.R` since 19:00, 15 sessions and no problem lines.
+- **Card 2** draws "CO₂ gradient (ppm)" and "δ¹³C gradient (‰)" with their digits; the gaps seen on 11-11 (i) were this laptop's font.
+- **Box diagram, host only:** the host's wider font makes Vegetation and Soil wider, the gap between them is about 15 px at 1440 × 900 (47 px on this laptop), and the litterfall arrow shows no head at 1440 or 565 px; the land-use arrow lands on Soil's corner. A1's "head shows" holds only on this laptop. **Host and laptop, at the tuned 565 px** (a phone's sideways-scrolled view): the 92 arrow touches "warm" and the 69 soil-to-air arrow touches "respiration"; clear at 815 px. Crops beside the record (`pngcrop.py`; no PIL or R `png` here).
+
 ## 2026-11-11 (l) — **Full suite @ `01cdaf99`: 9,719 passed, 0 failed, 1 standing skip, 0 errored, 233 warnings, 24.8 min. Bundle `~/ccx_frozen/bundle_20261111_01cdaf99` built and served locally: every tab draws, every Download link under a drawn chart works at 1440 × 900 and 375 × 812, the CSV names `01cdaf9`. Ready for Marcus to publish.**
 
 - **Suite:** against `34252dc7` the only per-file change is `app-us-spelling` (1 failed → 0). Log and per-file counts `outputs/diagnostics/suite_20261111_01cdaf99{.log,_perfile.csv}`; launch script kept in `~/ccx_frozen/`; worktree removed. README's test line cites it.

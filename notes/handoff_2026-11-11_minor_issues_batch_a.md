@@ -26,7 +26,10 @@ Supersedes `notes/handoff_2026-10-25_alt_text_live.md` for the app's live state.
   `34252dc7` (`suspendWhenHidden = FALSE` in `app_dl_server()`; gate A11b; browser check
   `outputs/diagnostics/review_20261111/check_dl_links.py`; old bundle quarantined). The suites then failed the U.S.-spelling
   lint on batch A's "no colour for" error; Marcus chose "Fix both" (message and A3's pattern; test edit flagged), `01cdaf99`.
-- **Deploy candidate:** `~/ccx_frozen/bundle_20261111_01cdaf99`. Suite 9,719 / 0 / 1 skip / 233 warnings; served locally,
+- **LIVE since 19:00 UTC (CHANGELOG 2026-11-11 m):** `01cdaf99`, revision `01a1cbfb`; live checks all pass. Open: the
+  box diagram on the host's font (litterfall arrowhead hidden; land-use arrow on Soil's corner) and, at the tuned 565 px
+  on any font, the 92 and 69 arrows touching "warm" and "respiration". Not fixed; Marcus to decide.
+- **Was the deploy candidate:** `~/ccx_frozen/bundle_20261111_01cdaf99`. Suite 9,719 / 0 / 1 skip / 233 warnings; served locally,
   all checks pass. Marcus publishes (command in CHANGELOG l), then the live checks in §3 step 5, plus `check_dl_links.py`
   on the live URL. Headless Chrome on 9333 was left running for the live checks (PID 49106; `kill 49106` if this
   session did not).
