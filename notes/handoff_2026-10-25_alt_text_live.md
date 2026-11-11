@@ -1,5 +1,7 @@
 # HANDOFF 2026-10-25: BETA v1.1 live from 07d04b16 (the stamp guard and the Futures alt text)
 
+**Superseded 2026-11-11 by `notes/handoff_2026-11-11_minor_issues_batch_a.md`** for the app's live state.
+
 **Supersedes** `notes/handoff_2026-10-24_v11_live.md`, which now points here. Written on Marcus's request ("Write the
 handoff"), 2026-10-25.
 
