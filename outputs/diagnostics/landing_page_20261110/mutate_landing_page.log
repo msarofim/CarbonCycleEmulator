@@ -8,3 +8,8 @@ M6 app woken on page load                    expect 3.     got 3.       OK
 M7 institution in the footer                 expect 4.     got 4.       OK
 M8 CNAME changed (ad hoc, 2026-11-10 c)      expect 2.     got 2.       OK
 M9 CNAME deleted (ad hoc, 2026-11-10 c)      expect 2.     got 2.       OK
+M10 tab renamed on the page (ad hoc, 2026-11-11 b)   expect 3b.    got 3b.      OK
+M11 two tabs swapped (ad hoc, 2026-11-11 b)          expect 3b.    got 3b.      OK
+M12 a description dropped (ad hoc, 2026-11-11 b)     expect 3b.    got 3b.      OK
+M13 two sentences in one (ad hoc, 2026-11-11 b)      expect 3b.    got 3b.      OK
+M14 em-dash in a description (ad hoc, 2026-11-11 b)  expect 3b.    got 3b.      OK

@@ -79,6 +79,26 @@ test_that("3. a shared view goes on to the app; the app is woken only from an ev
   expect_match(h, 'window.addEventListener(e, warm, { capture: true, passive: true })', fixed = TRUE)
 })
 
+test_that("3b. the page describes every tab the app has, by its name and in its order, one sentence each", {
+  skip_if(!file.exists(file.path(.lp_dir, "index.html")), "landing page absent")
+  # the app's tab list (app/R/links.R app_link_inputs(), which test-app-links holds to the UI), with its two constants
+  lk <- paste(readLines(file.path(.root, "app", "R", "links.R"), warn = FALSE, encoding = "UTF-8"), collapse = "\n")
+  vec <- sub("(?s).*app_link_inputs <- function\\(\\).*?character\\(0\\)\\),\\s*c\\((.*?)\\)\\)\\s*\\n.*", "\\1", lk, perl = TRUE)
+  rv <- sub('^[^"]*"([^"]+)".*$', "\\1", grep("^RV_TAB_TITLE\\s*<-", readLines(file.path(.root, "app", "R", "review.R"), warn = FALSE), value = TRUE)[1])
+  tabs <- trimws(strsplit(vec, ",")[[1]])
+  tabs <- ifelse(tabs == "RV_TAB_TITLE", rv, ifelse(tabs == "APP_CMAP_TAB", .lp_const("APP_CMAP_TAB"), gsub('"', "", tabs)))
+  expect_length(tabs, 8L)
+  h <- .lp_html()
+  dt <- regmatches(h, gregexpr("<dt>[^<]*</dt>", h))[[1]]
+  expect_identical(gsub("</?dt>", "", dt), tabs)
+  dd <- gsub("\\s+", " ", trimws(gsub("</?dd>", "", regmatches(h, gregexpr("<dd>[^<]*</dd>", h))[[1]])))
+  expect_length(dd, length(tabs))
+  for (s in dd) {
+    expect_length(gregexpr("[.!?](\\s|$)", s)[[1]], 1L)                   # one sentence
+    expect_false(grepl("—", s), info = s)                            # no em-dash (Marcus's word list)
+  }
+})
+
 test_that("4. informal output: the bare name, no institution; no draft markers", {
   skip_if(!file.exists(file.path(.lp_dir, "index.html")), "landing page absent")
   vis <- gsub("<!--.*?-->", "", .lp_html())                                  # comments are not shown

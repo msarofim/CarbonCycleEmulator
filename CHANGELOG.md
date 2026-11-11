@@ -2,6 +2,12 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-11-11 (b) — **The landing page now gives each tab a one-sentence description (Marcus: "Maybe add one sentence descriptions about why a user might be interested in each of the tabs?"). Claude's draft, for Marcus to edit; live on push.**
+
+- **Page:** the "In the app" list became a definition list: each tab's name, then one sentence on what a visitor can do there, written from the tab's contents (its controls, charts and takeaways in `app/ui.R`; the What if…? switches from `ccx_mechanism_choices()`; the Futures pills).
+- **Test** (`test-landing-page.R` block 3b, 50 expectations in all): the names match the app's tab list in `app/R/links.R` (`app_link_inputs()`, resolving `RV_TAB_TITLE` and `APP_CMAP_TAB`), in order; one description each; one sentence each; no em-dash. Mutation-tested (a renamed tab, two tabs swapped, a description dropped, two sentences, an em-dash: each fails 3b; appended to `mutate_landing_page.log`).
+- **Browser** (local `docs/`): 1440 × 900 and 375 × 812, no horizontal scroll, eight names and eight descriptions.
+
 ## 2026-11-11 (a) — **carbotope.org is the landing page, over HTTPS (Marcus changed the Porkbun DNS on 11-10; then "When I try to go to carbotope, I get a 'this site doesn't support a secure connection' error"). GitHub had not requested a certificate in 15 hours; removing and re-adding the custom domain issued it at once. HTTPS is enforced; every address checked.**
 
 - **DNS (Marcus, 11-10, Porkbun):** forwards and their records deleted; four A, four AAAA and `www` CNAME → `msarofim.github.io` added; the verification TXT kept. All four Porkbun nameservers, 1.1.1.1 and 8.8.8.8 answered with GitHub's addresses; the wildcard was gone; `http://carbotope.org` served the page from GitHub and `www` redirected to it. Two `_acme-challenge` TXT records from Porkbun's old forwarding certificate remain (unused, harmless).

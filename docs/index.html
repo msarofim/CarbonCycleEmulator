@@ -73,8 +73,10 @@
   figure { margin: 0 0 2rem; }
   figure img { display: block; width: 100%; height: auto; border: 1px solid #d5dbe0; border-radius: 6px; }
   h2 { font-size: 1.1rem; color: var(--navy); margin: 0 0 0.5rem; }
-  .tabs { margin: 0 0 2rem; padding-left: 1.2rem; }
-  .tabs li { margin: 0.15rem 0; }
+  .tabs { margin: 0 0 2rem; }
+  .tabs dt { font-weight: 600; color: var(--navy); margin-top: 0.8rem; }
+  .tabs dt:first-child { margin-top: 0; }
+  .tabs dd { margin: 0.1rem 0 0; }
   .status { background: var(--mist); border-radius: 6px; padding: 0.8rem 1rem; margin: 0 0 2rem; font-size: 0.95rem; }
   footer { border-top: 1px solid #dde3e8; color: var(--muted); font-size: 0.95rem; }
   footer .wrap { padding-top: 1.2rem; padding-bottom: 2rem; }
@@ -111,16 +113,31 @@
     </figure>
 
     <h2>In the app</h2>
-    <ul class="tabs">
-      <li>The Keeling Curve</li>
-      <li>Where does the carbon go?</li>
-      <li>What if…?</li>
-      <li>Isotope fingerprints</li>
-      <li>Futures</li>
-      <li>Known issues</li>
-      <li>What pins down what?</li>
-      <li>Under the hood</li>
-    </ul>
+    <!-- One sentence per tab (2026-11-11, Marcus: "add one sentence descriptions about why a user might be
+         interested in each of the tabs"; Claude's draft). The names must match the app's tabs, in its order:
+         test-landing-page.R reads them from app/R/links.R. -->
+    <dl class="tabs">
+      <dt>The Keeling Curve</dt>
+      <dd>Compare the model with measured CO₂ at Mauna Loa and the South Pole, including the seasonal cycle and the
+        difference between the hemispheres.</dd>
+      <dt>Where does the carbon go?</dt>
+      <dd>See how much of the carbon we have emitted stayed in the air and how much the land and ocean took up.</dd>
+      <dt>What if…?</dt>
+      <dd>Turn off processes such as CO₂ fertilization or the ocean sink and see how atmospheric CO₂ would have
+        changed.</dd>
+      <dt>Isotope fingerprints</dt>
+      <dd>Compare the model with carbon-13 and carbon-14 measurements, which show the effects of fossil fuel use and
+        the 1960s nuclear tests.</dd>
+      <dt>Futures</dt>
+      <dd>Project CO₂ and temperature under different scenarios, build your own emissions pathway, or follow a pulse
+        of carbon over time.</dd>
+      <dt>Known issues</dt>
+      <dd>See where the model and the measurements disagree, and leave comments on Substack.</dd>
+      <dt>What pins down what?</dt>
+      <dd>See which measurements tell us about each part of the model.</dd>
+      <dt>Under the hood</dt>
+      <dd>See the model's structure, its parameters, and the data used to drive and fit it.</dd>
+    </dl>
 
     <p class="status">Beta teaching software, not peer-reviewed. The app's “Known issues” tab lists where the model
       and the measurements disagree.</p>
