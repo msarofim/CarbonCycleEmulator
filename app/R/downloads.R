@@ -600,6 +600,11 @@ app_dl_server <- function(output, session, plots, link = function() NULL,
         }
       },
       contentType = "image/png")
+    # 2026-11-11: Shiny suspends an output it sees as hidden, and a suspended download link gets no address. ui.R
+    # hides the Download line until its chart has an image (review A11), so Shiny checked these links while they were
+    # hidden and never looked again: every link stayed disabled. The address is a few bytes and the file is made only
+    # on a click, so the links are never suspended. Gate: test-app-review-20261111.R A11b.
+    for (suffix in c("_csv", "_png")) shiny::outputOptions(output, paste0(id, suffix), suspendWhenHidden = FALSE)
   }
   for (id in ids()) if (!is.null(app_dl_spec(id))) register(id)
   invisible(NULL)

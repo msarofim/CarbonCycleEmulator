@@ -7,6 +7,7 @@
 #   A8  small temperatures to two significant figures            A13 FaIR keyed; "Without:" mid-line; legends read across
 #   A15 the South Pole span read from the data                   A16 the module note's count words
 #   A4/A10/A11  the CSS rules and the slider attribute are where they must be
+#   A11b  every Download link is registered never to suspend (found serving the batch-A bundle; CHANGELOG 11-11 j)
 # Functions are parsed out of app/global.R (sourcing it loads the whole app) and app/R/plots.R is sourced alone.
 # Mutation-tested: outputs/diagnostics/review_20261111/mutate_batch_a.sh.
 # =====================================================================
@@ -141,4 +142,33 @@ test_that("A4/A10/A11. the phone table rule, the checkbox contrast, the empty-ch
   html <- as.character(e$sliderInput("x", "X", 0, 10, 5))
   expect_match(html, 'data-force-edges="true"', fixed = TRUE)
   expect_false(grepl('data-force-edges', as.character(shiny::sliderInput("x", "X", 0, 10, 5)), fixed = TRUE))   # POWER
+})
+
+# 2026-11-11, found serving the batch-A bundle (check_live_pointer.py: the CSV line came back empty). Shiny suspends an
+# output it sees as hidden, and a suspended download link gets no address. A11's rule above hides the Download line
+# until its chart has an image, so on every tab Shiny checked the links while they were hidden and never looked again:
+# each link stayed disabled. app_dl_server() now marks every download output never to suspend. testServer() cannot see
+# output options (its mock session does not record them), so app_dl_server() runs here against a stand-in for Shiny's
+# output object that records both calls and, as Shiny does, refuses options on an output not yet defined.
+test_that("A11b. every Download link is registered never to suspend, so a line hidden while its chart draws still works", {
+  skip_if_not_installed("shiny")
+  e <- new.env(parent = globalenv())
+  for (x in parse(file.path(.rv_root, "app", "R", "downloads.R"), keep.source = FALSE))
+    if (is.call(x) && identical(as.character(x[[1]]), "<-") && is.name(x[[2]]) && as.character(x[[2]]) == "app_dl_server")
+      eval(x, e)
+  expect_true(is.function(e$app_dl_server))
+  assign("app_dl_spec", function(id) list(chart = id), envir = e)
+  rec <- new.env(); rec$defined <- character(); rec$opts <- list()
+  impl <- list(
+    defineOutput = function(name, value, label) rec$defined <- c(rec$defined, name),
+    outputOptions = function(name, ...) {
+      if (!name %in% rec$defined) stop(name, " is not in list of output objects")
+      rec$opts[[name]] <- utils::modifyList(rec$opts[[name]] %||% list(), list(...))
+    })
+  out <- structure(list(impl = impl, ns = function(x) x), class = "shinyoutput")
+  plots <- new.env(); for (id in c("k_plot", "w_af", "f_partition")) assign(id, function() NULL, envir = plots)
+  e$app_dl_server(out, session = NULL, plots = plots)
+  want <- as.vector(outer(ls(plots), c("_csv", "_png"), paste0))
+  expect_setequal(rec$defined, want)
+  for (nm in want) expect_identical(rec$opts[[nm]]$suspendWhenHidden, FALSE, info = nm)
 })

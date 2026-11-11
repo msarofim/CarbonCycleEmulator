@@ -1,0 +1,11 @@
+  The Keeling Curve / The Keeling Curve: lines 2, under drawn charts 2, links 4, bad [], line shown under an undrawn chart [], CSV ('k_plot_csv', True, '# Code commit: 4342515d+dirty') -> OK
+  Where does the carbon go? / Where does the carbon go?: lines 5, under drawn charts 5, links 10, bad [], line shown under an undrawn chart [], CSV ('w_partition_csv', True, '# Code commit: 4342515d+dirty') -> OK
+  What if…? / What if…?: lines 3, under drawn charts 3, links 6, bad [], line shown under an undrawn chart [], CSV ('c_plot_csv', True, '# Code commit: 4342515d+dirty') -> OK
+  Isotope fingerprints / Isotope fingerprints: lines 2, under drawn charts 2, links 4, bad [], line shown under an undrawn chart [], CSV ('i_d13c_csv', True, '# Code commit: 4342515d+dirty') -> OK
+  Futures / Scenarios: lines 1, under drawn charts 1, links 2, bad [], line shown under an undrawn chart [], CSV ('f_plot_csv', True, '# Code commit: 4342515d+dirty') -> OK
+  Futures / Build your own: lines 1, under drawn charts 0, links 0, bad [], line shown under an undrawn chart [], CSV None -> OK
+  Futures / Pulse lab: lines 2, under drawn charts 2, links 4, bad [], line shown under an undrawn chart [], CSV ('f_plot_csv', True, '# Code commit: 4342515d+dirty') -> OK
+  Known issues / Known issues: lines 9, under drawn charts 9, links 18, bad [], line shown under an undrawn chart [], CSV ('rv_repdc_csv', True, '# Code commit: 4342515d+dirty') -> OK
+  What pins down what? / What pins down what?: lines 2, under drawn charts 2, links 4, bad [], line shown under an undrawn chart [], CSV ('cm_map_csv', True, '# Code commit: 4342515d+dirty') -> OK
+  Under the hood / Under the hood: lines 1, under drawn charts 1, links 2, bad [], line shown under an undrawn chart [], CSV ('h_diagram_csv', True, '# Code commit: 4342515d+dirty') -> OK
+ALL OK

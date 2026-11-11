@@ -1,0 +1,5 @@
+unmutated test-app-review-20261111.R: RESULT: none 
+M13 A11b options line removed                  test-app-review-20261111.R         expect A11b.      got A11b.
+M14 A11b PNG links left suspended              test-app-review-20261111.R         expect A11b.      got A11b.
+M15 A11b suspendWhenHidden = TRUE              test-app-review-20261111.R         expect A11b.      got A11b.
+M16 A11b options before the output             test-app-review-20261111.R         expect A11b.      got A11b.
