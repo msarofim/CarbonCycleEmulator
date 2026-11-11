@@ -117,10 +117,15 @@ test_that("every claimed number is the one the PATHWAY actually has", {
     expect_true(grepl(sprintf("%+.1f%%", r), cl, fixed = TRUE),   # re-pinned 2026-10-02: "14%" style (approved)
                 info = sprintf("rate %+.1f not quoted", r))
     expect_true(grepl(as.character(y_end), cl, fixed = TRUE))
-    # the end-of-run rate, at whichever precision that branch prints
-    expect_true(grepl(sprintf("%.1f", e_end), cl, fixed = TRUE) ||
-                grepl(sprintf("%.2f", e_end), cl, fixed = TRUE),
+    # the end-of-run rate, at whichever precision that branch prints. ⚠ 2026-11-11 (review A12): at 10x today's
+    # rate and above the rising branch prints a whole number with separators ("4,926"), so that form is accepted
+    # there, and only there; the ratio is checked at its printed precision too.
+    big <- r > 0 && e_end / E0 >= 10
+    expect_true(if (big) grepl(format(round(e_end), big.mark = ","), cl, fixed = TRUE)
+                else grepl(sprintf("%.1f", e_end), cl, fixed = TRUE) || grepl(sprintf("%.2f", e_end), cl, fixed = TRUE),
                 info = sprintf("end rate %.3f not quoted for %+.1f", e_end, r))
+    if (r > 0) expect_true(grepl(sprintf(if (big) "%.0f times" else "%.1f times", e_end / E0), cl, fixed = TRUE),
+                           info = sprintf("ratio not quoted for %+.1f", r))
   }
 })
 

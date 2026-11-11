@@ -142,6 +142,28 @@ APP_PULSE_PROMPT   <- paste(APP_PULSE_GO_LABEL, "to see results at these setting
 # types the same word; test-app-review-copy.R checks both.
 APP_DRIVER_OFF_WORD <- "Without"
 APP_BUILD_PROMPT    <- sprintf("Choose a pathway and press \u201c%s\u201d.", APP_BUILD_RUN_LABEL)
+# Futures -> Scenarios with every box unticked (2026-11-11 review A16; it showed an empty takeaway and a blank chart).
+# Claude's draft wording.
+APP_SCEN_PROMPT <- "Tick at least one scenario to draw it."
+#' The first South Pole year the calibration scores the CO₂ LEVEL on: a calendar year with at least
+#' LIK_ANNUAL_MIN_MONTHS monthly values (R/likelihood.R's annual reduction). For Under the hood's "What it is fitted to".
+app_spo_first_scored_year <- function(obs = APP_OBS$co2, min_months = LIK_ANNUAL_MIN_MONTHS) {
+  o <- obs[obs$station == "SPO" & is.finite(obs$co2_ppm), ]
+  n <- table(floor(o$decimal_date))
+  as.integer(min(as.integer(names(n)[n >= min_months])))
+}
+#' sliderInput() with ion.rangeSlider's force_edges on (2026-11-11 review A10): a value label, or the merged "2015 — 2024"
+#' label, stays inside the slider instead of running ~10 px past the sidebar card's edge.
+#' ⚠ ui.R's `sliderInput(` calls resolve to THIS function, which masks shiny's in the app's environment. The calls keep
+#' shiny's name and arguments because three tests read them off ui.R's source (test-app-links, test-app-precompute,
+#' test-ui-year-bounds-lint); test-app-review-20261111.R holds that the attribute reaches the page.
+sliderInput <- function(...)
+  htmltools::tagAppendAttributes(shiny::sliderInput(...), `data-force-edges` = "true", .cssSelector = "input")
+#' A temperature change for a sentence: two decimals from 0.1 °C up, two significant figures below it
+#' (2026-11-11 review A8: a 10 GtC pulse's 0.015 and 0.014 °C both printed "0.01").
+app_degC_small <- function(x) {
+  if (is.finite(x) && abs(x) < 0.1 && x != 0) formatC(signif(x, 2), format = "fg", digits = 2) else sprintf("%.2f", x)
+}
 # Counts in running text are written as words (Under the hood, 2026-10-21); a number past the list prints as digits.
 app_number_word <- function(n) {
   w <- c("one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve")
@@ -176,6 +198,24 @@ APP_SCENARIOS <- c(
   "High (rising to 2100)"                      = "vvH"
 )
 APP_SCENARIO_COMPARE <- c("vvL", "vvM", "vvH")   # the Futures tab's opening selection
+# ⭐ ONE COLOUR PER SCENARIO, IN EVERY VIEW (2026-11-11 review A3). The Futures chart coloured its lines by their
+# position in the ticked set (scale_colour_hue), so Low was red in the opening view and green with all seven ticked,
+# and Build your own's background was always red. The dataviz rule: colour follows the entity, never its rank.
+# Hues are the dataviz skill's categorical palette, validated with its validate_palette.js (light, white surface,
+# 2026-11-11): the opening three (Low blue, Medium aqua, High orange) pass on ALL pairs (CVD worst 9.2, normal 24.0);
+# all seven, in value order, pass on VALUE-ADJACENT pairs (CVD 9.1, normal 22.9) -- the lines that run side by side
+# -- and no seven-colour set passes on all pairs, so the legend carries identity there. Aqua, yellow and magenta are
+# under 3:1 against white: the legend and the CSV download are the relief the skill asks for.
+APP_SCENARIO_COLOURS <- c(vvVL = "#e87ba4", vvLN = "#008300", vvL = "#2a78d6", vvML = "#eda100",
+                          vvM = "#1baf7a", vvHL = "#6250d6", vvH = "#eb6834")
+# Build your own's own pathway: the app's ink (PAL[["obs"]]), set apart from every scenario hue by lightness (red
+# beside High's orange failed the normal-vision floor, 7.1).
+APP_YOUR_SCENARIO <- "Your scenario"
+APP_YOUR_SCENARIO_COLOUR <- "#22313f"
+#' The colours plot_future() draws with, keyed by the names the runs carry (the display labels, and "Your scenario")
+app_scenario_colours <- function()
+  c(stats::setNames(unname(APP_SCENARIO_COLOURS[unname(APP_SCENARIOS)]), names(APP_SCENARIOS)),
+    stats::setNames(APP_YOUR_SCENARIO_COLOUR, APP_YOUR_SCENARIO))
 APP_SCENARIO_BG      <- "vvM"                    # default background: build-your-own + pulse lab
 APP_SCENARIO_SRC <- paste(
   "Scenarios are the seven marker pathways of the CMIP7 ScenarioMIP set",
@@ -389,8 +429,9 @@ app_params <- local({
     detail <- paste0("Best fit of ", .n_fit,
                      " parameters to CO₂, δ¹³C, Δ¹⁴C and Global Carbon Budget",
                      " sinks",
-                     if (.n_pin) paste0(", with ", .n_pin,
-                                        " further values held at stated numbers") else "",
+                     if (.n_pin) paste0(", with ", .n_pin,   # 2026-11-11 review A16: "1 further values" guarded
+                                        if (.n_pin == 1L) " further value held at a stated number"
+                                        else " further values held at stated numbers") else "",
                      # 2026-10-15 (Marcus's band copy): the band shipped (APP_RIBBONS_HOLD
                      # below), so "not yet a posterior -- no uncertainty ranges are shown" went
                      # with the lift; the last sentence is the approved text, unchanged.
@@ -928,10 +969,21 @@ app_mech_list <- function(off, sentence_start = FALSE) {
 # labels derive from named constants (~/.claude/CLAUDE.md).
 TAKEAWAY_PPM_RESOLUTION <- 0.5
 
+#' The What-if sentence's three numbers, as printed: both levels rounded to the ppm, and the difference OF THOSE
+#' (2026-11-11 review A2: "486 ppm instead of 425 — a difference of +60 ppm" printed round(485.88 - 425.43) next to
+#' round(485.88) and round(425.43), in 58 of the 124 switch combinations). `d` is 0 exactly when the sentence would
+#' print "+0", which is when it switches to words (TAKEAWAY_PPM_RESOLUTION's rule, now on the printed numbers).
+#' `signed` carries a true minus sign (U+2212), as the Known-issues cards do (rv_signed()).
+app_ppm_change <- function(with_switch, without_switch) {
+  a <- round(with_switch); b <- round(without_switch); d <- b - a
+  list(full = a, off = b, d = d, signed = paste0(if (d > 0) "+" else if (d < 0) "−" else "", abs(d)))
+}
+
 #' The legend key for the counterfactual line: short by construction
 app_mech_key <- function(off) {
   if (!length(off)) return("Without: nothing")
-  if (length(off) == 1L) return(paste("Without:", CCX_MECHANISMS[[off]]$label))
+  # mid-line after "Without:", so the inline form (2026-11-11 review A13: "Without: The ocean sink")
+  if (length(off) == 1L) return(paste("Without:", app_mech_inline(CCX_MECHANISMS[[off]]$label)))
   sprintf("Without %d mechanisms", length(off))
 }
 
@@ -996,11 +1048,14 @@ app_cmap_module_note <- function(cm = APP_CMAP) {
   # 2026-10-21 (Marcus: "Do 1-7"): "year-to-year", as card 4 says. The module scores the CENTERED 12-month growth
   # (sampled monthly, detrended; data-raw/build_mbl_global_growth_monthly.R), which removes the seasonal cycle,
   # so "month-to-month" misdescribed it.
-  sprintf(paste(" Not on this map: the model's %s El Niño settings. They are fitted in a separate",
+  # 2026-11-11 review A16: the words follow the count (one setting printed "one El Niño settings. They are ... are")
+  one <- n == 1L
+  sprintf(paste(" Not on this map: the model's %s El Niño %s. %s fitted in a separate",
                 "step, to the year-to-year wobble in CO₂'s growth rate (%d–%d) and to %s, and",
-                "are held fixed while everything shown here is fitted."),
-          nw, m$growth_window[1], m$growth_window[2],
-          paste(APP_CMAP_MODULE_ROW_TEXT[m$rows], collapse = " and "))
+                "%s held fixed while everything shown here is fitted."),
+          nw, if (one) "setting" else "settings", if (one) "It is" else "They are",
+          m$growth_window[1], m$growth_window[2],
+          paste(APP_CMAP_MODULE_ROW_TEXT[m$rows], collapse = " and "), if (one) "is" else "are")
 }
 # Which family each parameter belongs to, as a lookup for the parameter-level view.
 APP_CMAP_OF_PAR <- if (is.null(APP_CMAP)) NULL else {
@@ -1581,11 +1636,17 @@ app_stylised_tail_clause <- function(kind, rate_pct, emissions, e0, climate = NU
                          # own -2 %/yr run has CO2 FALLING by 2150 with fossil emissions still ~0.8
                          # GtC/yr, so "to zero to stabilise" was stronger than the model shows.
                          "to drop to near zero for concentrations to stay stable."), e0, y_end))
-  if (rate_pct > 0)
+  if (rate_pct > 0) {
+    # 2026-11-11 review A12: at 10x today's rate and above, whole numbers with separators ("4,926 GtC a year, 468
+    # times"; it printed "4925.7 ... 467.6 times"), the rule app_erf_range_note() already uses for its ratio
+    big <- e_end / e0 >= 10
     # Marcus 2026-10-02: "The warming above is what that compounding buys ..." deleted
     return(sprintf(paste("Fossil emissions never stop on this pathway \u2014 at %+.1f%% a",
-                         "year they grow, reaching %.1f GtC a year by %d, %.1f times",
-                         "today's rate."), rate_pct, e_end, y_end, e_end / e0))
+                         "year they grow, reaching %s GtC a year by %d, %s times",
+                         "today's rate."), rate_pct,
+                   if (big) format(round(e_end), big.mark = ",") else sprintf("%.1f", e_end), y_end,
+                   sprintf(if (big) "%.0f" else "%.1f", e_end / e0)))
+  }
   # Marcus 2026-10-02: "on top of what does not come back down quickly" deleted
   sprintf(paste("Fossil emissions fall on this pathway but never reach zero \u2014",
                 "a steady %+.1f%% a year only ever approaches it, and by %d",

@@ -184,6 +184,12 @@ phone_css <- sprintf("
     .navbar > .container-fluid { flex-wrap: nowrap; }  /* brand and select on one row */
     .navbar .navbar-header { width: auto; }            /* bs3compat makes it a full-width row */
     .navbar .navbar-brand { margin-right: 10px; }
+    /* 2026-11-11 review A4: a table scrolls sideways in its own box and keeps its words and numbers whole; the
+       overflow-wrap: anywhere below is for prose, and it split '1.93' into '1.9' and '3' */
+    .tab-content table { display: block; max-width: 100%%; overflow-x: auto; overflow-wrap: normal; word-break: normal; }
+    /* 2026-11-11 review A5: on a phone the heatmap's subtitle and caption wrap to many lines and its nine rows ran into
+       each other at 430 px; the chart redraws at this height */
+    #cm_map { height: 600px !important; }
     #ccx-tab-select { display: block; width: auto; flex: 0 1 auto; min-width: 0;
                       padding-right: 28px; background-position: right 8px center; }
     .tab-content > .tab-pane { margin-top: 0; }      /* the banner's own margin already separates them */
@@ -255,6 +261,14 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
          this is a no-op (already row), so the rule cannot drift with the
          breakpoint it was written for. */
       .navbar .navbar-nav { flex-direction: row; flex-wrap: wrap; }
+      /* 2026-11-11 review A10: unticked boxes and radios had a #dee2e6 border on #f7f7f7 (1.2:1); #6c757d is 4.4:1.
+         A wrapped label lines up under its own text, not under the box. */
+      .checkbox input[type=checkbox]:not(:checked), .radio input[type=radio]:not(:checked) { border-color: #6c757d; }
+      .checkbox label, .radio label { display: inline-flex; align-items: flex-start; gap: 0.4em; }
+      .checkbox label > input, .radio label > input { flex: none; margin-top: 0.25em; }
+      /* 2026-11-11 review A11: no Download line under a chart that has not been drawn (Build your own before
+         'Run it', the Pulse lab before 'Release the pulse') */
+      .shiny-plot-output:not(:has(img)) + .ccx-dl { display: none; }
       /* 2026-11-11: the name links to the landing page (navbarPage title); it keeps the brand's look */
       .navbar .navbar-brand a.ccx-brand-link { color: inherit; text-decoration: none; }
       .takeaway { font-size: 1.08rem; line-height: 1.5; background: #eef5fb;
@@ -656,7 +670,8 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
             selectInput("p_bg", "Background scenario", APP_SCENARIOS,
                         selected = APP_SCENARIO_BG),
             sliderInput("p_gtc", "Pulse size (GtC)", APP_PULSE_GTC_RANGE[1], APP_PULSE_GTC_RANGE[2],
-                        APP_PULSE_GtC_DEFAULT, step = APP_PULSE_GTC_RANGE[3]),
+                        APP_PULSE_GtC_DEFAULT, step = APP_PULSE_GTC_RANGE[3],
+                        ticks = FALSE),   # 2026-11-11 review A10: its ticks ran 10, 60 ... 460, 500, the last two crowded
             sliderInput("p_year", "Release it in", APP_PULSE_YEAR_RANGE[1], APP_PULSE_YEAR_RANGE[2],
                         APP_PULSE_YEAR_DEFAULT, step = APP_PULSE_YEAR_RANGE[3], sep = ""),
             actionButton("p_go", APP_PULSE_GO_LABEL, class = "btn-primary btn-sm"),

@@ -45,11 +45,11 @@ skip_if_no_plots <- function() {
 })
 
 # longest rendered LINE, in px at res 72 — the quantity that clips
-pt_px <- function(s, pt) {
+pt_px <- function(s, pt, face = "plain") {
   if (is.null(s) || !nzchar(paste(s, collapse = ""))) return(0)
   lines <- unlist(strsplit(paste(s, collapse = "\n"), "\n", fixed = TRUE))
   max(vapply(lines, function(l)
-    grid::convertWidth(grid::grobWidth(grid::textGrob(l, gp = grid::gpar(fontsize = pt))),
+    grid::convertWidth(grid::grobWidth(grid::textGrob(l, gp = grid::gpar(fontsize = pt, fontface = face))),
                        "in", valueOnly = TRUE), numeric(1))) * 72
 }
 pt_with_device <- function(px, expr) {
@@ -208,6 +208,30 @@ test_that("3a. the BOX DIAGRAM's two footnotes fit, and neither is hand-broken",
   expect_length(grep("size = DIAGRAM_NOTE_SIZE", ann), 2L)
   # no hand-broken newline survives in either footnote's label
   expect_length(grep("molecule\\\\nstays", diag), 0L)
+})
+
+# 2026-11-11 (review A1): block 3a measured the BOLD footnote in the plain face, and so did the wrapper, so the
+# bold sentence ran past both edges of the diagram at every width while 3a passed. Measured BOLD here, at the
+# sentence as it now reads and at the widths the diagram is drawn (phone 565, the 768 floor's panel, 1440's 807).
+test_that("3a2. the diagram's bold sentence is wrapped and measured in bold, and fits at every drawn width", {
+  skip_if_no_plots(); skip_if(is.null(.pt_env), "plots.R did not load")
+  e <- .pt_env
+  txt <- paste0("Photosynthesis and the sea move 183 GtC a year in and out of the air, ",
+                "so an average CO\u2082 molecule stays only ~4.9 years. ",
+                "The increase in atmospheric carbon concentrations persists for centuries.")
+  for (W in c(565L, e$APP_PANEL_PX[["diagram"]], 807L)) pt_with_device(W, {
+    e$app_set_panel_px(W); on.exit(e$app_clear_panel_px(), add = TRUE)
+    budget <- e$app_text_px("diagram")
+    pt <- e$diagram_note_pt(e$DIAGRAM_NOTE_SIZE_BOLD * e$diagram_scale(W))
+    expect_lte(pt_px(e$app_wrap_px(txt, budget, pt, face = "bold"), pt, "bold"), budget, label = paste("bold at", W))
+    # POWER: wrapped at plain widths (the bug), some line measured bold is over the budget
+    expect_gt(pt_px(e$app_wrap_px(txt, budget, pt), pt, "bold"), budget, label = paste("plain wrap at", W))
+  })
+  # and the call site wraps the bold annotate() with face = "bold"
+  src <- readLines(.pt_plots, warn = FALSE)
+  diag <- src[grep("plot_box_diagram <- function", src):length(src)]
+  diag <- diag[seq_len(min(160L, length(diag)))]
+  expect_length(grep('DIAGRAM_NOTE_SIZE_BOLD \\* scale\\), face = "bold"\\)', diag), 1L)
 })
 
 test_that("3b. legend keys fit, as a ROW and not only one at a time", {

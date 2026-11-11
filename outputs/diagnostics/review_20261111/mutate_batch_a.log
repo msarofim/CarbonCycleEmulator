@@ -1,0 +1,16 @@
+unmutated test-app-review-20261111.R: RESULT: none 
+unmutated test-takeaway-arithmetic.R: RESULT: none 
+unmutated test-plot-text-fits.R: RESULT: none 
+unmutated test-stylised-takeaway.R: RESULT: none 
+M1 A3 colours ignored                          test-app-review-20261111.R         expect A3.        got A3.
+M2 A7 default steps (2.5)                      test-app-review-20261111.R         expect A7/A8.     got A7/A8.
+M3 A8 method not unwrapped                     test-app-review-20261111.R         expect A7/A8.     got A7/A8.
+M4 A8 two decimals always                      test-app-review-20261111.R         expect A8.        got A8.
+M5 A13 FaIR key beside the rest                test-app-review-20261111.R         expect A13.       got A13.
+M6 A13 Without: label as typed                 test-app-review-20261111.R         expect A13.       got A13.
+M7 A15 month count ignored                     test-app-review-20261111.R         expect A15.       got A15.
+M8 A11 empty-chart rule removed                test-app-review-20261111.R         expect A4/A10/A11. got A4/A10/A11.
+M9 A10 slider mask removed                     test-app-review-20261111.R         expect A4/A10/A11. got A4/A10/A11.
+M10 A2 unrounded difference                    test-takeaway-arithmetic.R         expect A5:        got A5:
+M11 A1 bold measured plain                     test-plot-text-fits.R              expect 3a2.       got 3a2.
+M12 A12 big numbers with decimals              test-stylised-takeaway.R           expect every      got every

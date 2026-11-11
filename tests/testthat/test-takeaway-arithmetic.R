@@ -18,7 +18,7 @@
 })
 # parsed out of global.R, not sourced with it (sourcing loads the whole app; see test-stylised-takeaway.R)
 .ta_env <- new.env(parent = globalenv())
-.ta_want <- c("app_year_mask", "app_annual_mean_of", "app_scenario_span", "app_keeling_numbers")
+.ta_want <- c("app_year_mask", "app_annual_mean_of", "app_scenario_span", "app_keeling_numbers", "app_ppm_change")
 for (e in parse(file.path(.root, "app", "global.R"))) {
   if (is.call(e) && length(e) >= 3L && identical(as.character(e[[1]]), "<-") &&
       is.name(e[[2]]) && as.character(e[[2]]) %in% .ta_want) eval(e, .ta_env)
@@ -29,7 +29,7 @@ for (e in parse(file.path(.root, "app", "global.R"))) {
              local({ library(ggplot2); sys.source(file.path(.root, "app", "R", "plots.R"), envir = .ta_env) })
              TRUE }, error = function(e) FALSE)
 
-test_that("the four helpers were found in global.R", {
+test_that("the helpers were found in global.R", {
   for (f in .ta_want) expect_true(is.function(get0(f, envir = .ta_env)), info = f)
 })
 
@@ -94,4 +94,22 @@ test_that("A4: app_sinks_annual's land_net is CALENDAR-YEAR, not a difference of
   a <- stats::aggregate(list(g = out$land_C), list(year = floor(out$t)), mean)
   old <- stats::setNames(diff(a$g), a$year[-1])
   expect_equal(unname(old[c("1902", "1903")]), c(0.125, 0.875), tolerance = 1e-12)
+})
+
+# 2026-11-11 review A2: the What-if sentence printed round(b - a) beside round(b) and round(a).
+test_that("A5: the What-if difference is the difference of the PRINTED levels, with a true minus sign", {
+  f <- .ta_env$app_ppm_change
+  x <- f(425.43, 485.88)                                   # fertilization off, as measured at hilda31fl
+  expect_identical(c(x$full, x$off, x$d), c(425, 486, 61))
+  expect_identical(x$signed, "+61")
+  expect_identical(sprintf("%.0f", 485.88 - 425.43), "60")  # POWER: the old construction printed 60
+  y <- f(425.43, 419.6)
+  expect_identical(c(y$off, y$d), c(420, -5))
+  expect_identical(y$signed, "\u22125")
+  # a half-ppm difference that rounds both levels to the same ppm is "unchanged" (d 0): the old test on the
+  # unrounded difference (0.5, not < 0.5) printed "+0 ppm"
+  z <- f(425.5, 426.0)
+  expect_identical(z$d, 0)
+  expect_false(abs(426.0 - 425.5) < 0.5)
+  expect_identical(f(425.2, 424.9)$d, 0)
 })

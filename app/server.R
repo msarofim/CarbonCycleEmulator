@@ -258,19 +258,25 @@ function(input, output, session) {
                  # reads as a double negative. The two small terms keep their
                  # signs because no word orders them.
                  a <- function(v) sprintf("%.2f", abs(v))
+                 # 2026-11-11 review A16: "plus"/"less" were typed around unsigned values (right at the current fit:
+                 # imbalance +0.54, cement +0.09, land-use term -0.10); they now follow the signs, and a signed term
+                 # cannot print "-0.00"
+                 pm <- function(v, pos, neg) if (v < 0) neg else pos
+                 sg <- function(v) sprintf("%+.2f", round(v, 2) + 0)
                  # 2026-10-15 review: it said "no remainder at all ... exactly ... Nothing is left
                  # unexplained" while printing the remainder (0.007 GtC/yr at hilda31w).
                  sprintf(paste("Taking the whole gap apart accounts for almost all of it. Against",
                                "the measured budget this model's land sink runs about %s GtC",
                                "a year high over %d\u2013%d, and that is almost exactly the budget's",
-                               "leftover carbon (%s), plus a cement sink this model does not",
-                               "have (%s), less the fitted land-use scaling (%s) \u2014 with the",
-                               "model's growth and ocean differences adding %+.2f and %+.2f.",
+                               "leftover carbon (%s), %s a cement sink this model does not",
+                               "have (%s), %s the fitted land-use scaling (%s) \u2014 with the",
+                               "model's growth and ocean differences adding %s and %s.",
                                "The terms leave a remainder of %.3f GtC a year,",
                                "about %.0f%% of the gap they account for."),
                          a(z$d_land), z$window[1], z$window[2],
-                         a(z$imbal), a(z$cement), a(z$d_luc),
-                         -z$d_grow, -z$d_ocn,
+                         rv_signed("%.2f", z$imbal), pm(z$cement, "plus", "less"), a(z$cement),
+                         pm(z$d_luc, "plus", "less"), a(z$d_luc),
+                         sg(-z$d_grow), sg(-z$d_ocn),
                          abs(z$closure), 100 * abs(z$closure / z$d_land))
                })))
                # 2026-10-02: "The one place the model really does sit outside the band is the
@@ -296,7 +302,9 @@ function(input, output, session) {
     sprintf(paste("The model takes up more carbon than the GCB estimate%s.",
                   "When the budget imbalance is added to the GCB estimate, it exceeds the",
                   "model estimate in %d out of %d decades on this chart."),
-            if (above == n) "" else sprintf(" in %d of %d decades", above, n), exceeds, n)
+            # 2026-11-11 review A16: "in 0 of 7 decades" guarded
+            if (above == n) "" else if (above == 0L) " in none of the decades" else sprintf(" in %d of %d decades", above, n),
+            exceeds, n)
   })
 
   # ---- REGROWTH TIER 1 (Marcus 2026-09-24) --------------------------
@@ -537,7 +545,9 @@ function(input, output, session) {
                          "full model %.2f ppm per year, without %s %.2f (%s),",
                          "and the measured record %.2f."),
                    yr[1], yr[2], a, app_mech_list(off), b,
-                   if (b < a) sprintf("%.0f%% less", 100 * (1 - b / a))
+                   # 2026-11-11 review A16: equal to the percent printed "0% more"
+                   if (round(100 * abs(b / a - 1)) == 0) "unchanged"
+                   else if (b < a) sprintf("%.0f%% less", 100 * (1 - b / a))
                    else sprintf("%.0f%% more", 100 * (b / a - 1)),
                    ob)
     # ⛔⛔ THE NON-ADDITIVITY WARNING, IN WORDS AND WITHOUT AN INVENTED NUMBER.
@@ -691,7 +701,7 @@ function(input, output, session) {
                            "global-average CO₂ at %.0f ppm in %d. Tick a mechanism to see what the",
                            "model does without it."), co2_now(a), y_now))
     b <- cf_alt()
-    d <- co2_now(b) - co2_now(a)
+    pc <- app_ppm_change(co2_now(a), co2_now(b))   # 2026-11-11: the printed numbers and their own difference
     # ⛔⛔ A SWITCH WITH NO EFFECT ON THE LEVEL IS NOT A SWITCH WITH NO EFFECT,
     # and until 2026-09-25 this sentence could not tell the reader apart from
     # the other. Tick El Nino and volcanic haze together and it printed "CO2
@@ -702,20 +712,19 @@ function(input, output, session) {
     # switches are interannual by construction, so a level of ~0 is the RIGHT
     # answer and the wrong sentence.
     #
-    # ⚠ THE THRESHOLD IS DERIVED FROM THE FORMAT, NOT PICKED. Below half a ppm
-    # the "%.0f" above prints "+0", so half a ppm is exactly the point at which
-    # the numeric sentence stops saying anything — no hand-chosen tolerance is
-    # involved, and changing the format changes the threshold with it.
-    if (abs(d) < TAKEAWAY_PPM_RESOLUTION)
+    # ⚠ THE THRESHOLD IS DERIVED FROM THE FORMAT, NOT PICKED. The words replace the numbers exactly when the
+    # printed difference would be "+0" (app_ppm_change(): both levels rounded, then differenced; 2026-11-11). Until
+    # then it was |unrounded difference| < TAKEAWAY_PPM_RESOLUTION, which could print a difference that did not
+    # equal the two printed levels.
+    if (pc$d == 0)
       return(sprintf(paste("With %s switched off, global-average CO₂ in %d is unchanged to the",
                            "nearest ppm — these are year-to-year mechanisms, and",
                            "they move the wobble rather than the level. The",
                            "growth-rate chart below is where they show up."),
                      app_mech_list(off), y_now))
     sprintf(paste("With %s switched off, global-average CO₂ in %d would be %.0f ppm instead of",
-                  "%.0f — a difference of %s%.0f ppm."),
-            app_mech_list(off), y_now, co2_now(b), co2_now(a),
-            if (d > 0) "+" else "", d)
+                  "%.0f — a difference of %s ppm."),
+            app_mech_list(off), y_now, pc$off, pc$full, pc$signed)
   })
 
   # ---- 4. Isotopes ---------------------------------------------------
@@ -836,12 +845,12 @@ function(input, output, session) {
                          fair = if (isTRUE(input$f_fair)) app_fair_pulse(pr$bg, pr$year, pr$gtc))
     } else if (identical(input$f_mode, "Build your own")) {
       r <- stylised_run()
-      runs <- c(stylised_bg_run(), list(`Your scenario` = r))
+      runs <- c(stylised_bg_run(), stats::setNames(list(r), APP_YOUR_SCENARIO))
       # F5: run 1750-2150, SHOW 1900-2150. The two spans are separate
       # constants; see the note on APP_FUTURE_VIEW in global.R.
       plot_future(runs, input$f_yvar %||% APP_FUTURE_YVAR_DEFAULT,
                   if (identical(input$f_yvar, "gmst")) LAB_TEMP else LAB_CO2,
-                  view = APP_FUTURE_VIEW)
+                  view = APP_FUTURE_VIEW, colours = app_scenario_colours())
     } else {
       rs <- future_runs()
       # ⭐ 2026-09-26: standard FaIR as a dashed reference, on request.
@@ -861,7 +870,7 @@ function(input, output, session) {
                     app_fair_overlay(APP_SCENARIOS[APP_SCENARIOS %in% input$f_scen],
                                      input$f_yvar),
                   bands = app_future_bands(input$f_scen, input$f_yvar),
-                  note = app_ribbon_note(input$f_yvar))
+                  note = app_ribbon_note(input$f_yvar), colours = app_scenario_colours())
     }
   })
 
@@ -910,9 +919,11 @@ function(input, output, session) {
                 "longer-lived of the two."),
           fmt_pct(keep_T), fmt_pct(keep_C),
           if (keep_T > keep_C) "warming" else "carbon")
-        sprintf(paste0("Release %d GtC in %d and the world is %.2f °C warmer ",
-                       "a century later, and %.2f °C warmer after %d years.%s"),
-                pr$gtc, pr$year, dT(y1), dT(y2), y2 - pr$year, tail)
+        # 2026-11-11 review A8: two significant figures below 0.1 °C (a 10 GtC pulse printed "0.01 °C ... 0.01 °C"
+        # for 0.015 and 0.014); two decimals as before at 0.1 °C and above (app_degC_small(), global.R)
+        sprintf(paste0("Release %d GtC in %d and the world is %s °C warmer ",
+                       "a century later, and %s °C warmer after %d years.%s"),
+                pr$gtc, pr$year, app_degC_small(dT(y1)), app_degC_small(dT(y2)), y2 - pr$year, tail)
       } else {
       # Marcus 2026-10-02 (carbotopecomment), his wording ("GHGs" spelled out for the reader).
       sprintf(paste("Release %d GtC in %d and %s of it is still in the air a",
@@ -953,9 +964,12 @@ function(input, output, session) {
         sp$kind, sp$rate_pct, sp$emissions,
         APP_EMIS_HIST$fossil_GtC[APP_EMIS_HIST$year == max(APP_EMIS_HIST$year)],
         climate = cl)   # 2026-10-02: the to_zero temperature clause is read off the run
-      sprintf("Your pathway reaches %.0f ppm and %+.1f °C by %d. %s",
-              cl$co2_ppm[nrow(cl)], cl$gmst[nrow(cl)], max(cl$year), tail_clause)
+      # 2026-11-11 review A12: thousands separator ("45,707 ppm"), as the range note under the chart prints it
+      sprintf("Your pathway reaches %s ppm and %+.1f °C by %d. %s",
+              format(round(cl$co2_ppm[nrow(cl)]), big.mark = ","), cl$gmst[nrow(cl)], max(cl$year), tail_clause)
     } else {
+      # 2026-11-11 review A16: with every box unticked the takeaway was empty above a blank chart
+      if (!length(input$f_scen)) return(APP_SCEN_PROMPT)
       # 2026-10-12 code review: min/max over EVERY ticked run (app_scenario_span, global.R); it read
       # the first and last ticked run, and the menu is not ordered by outcome.
       sp <- app_scenario_span(future_runs())
@@ -1216,9 +1230,9 @@ function(input, output, session) {
         # 2026-10-15 review: "seasonal parameters (seas_lag_p_NH, ..., q10)" -- q10 is land uptake, and code names
         # are not reader copy
         if (!is.null(seas) && nrow(seas))
-          sprintf(paste(" %s of the strongest opposing pairs are parameters that set the CO₂ and",
+          sprintf(paste(" %s of the strongest opposing pairs %s parameters that set the CO₂ and",
                         "δ¹³C seasonal cycles against each other."),
-                  nrow(seas)) else NULL,
+                  nrow(seas), if (nrow(seas) == 1L) "is" else "are") else NULL,   # 2026-11-11 review A16
         " The fitted phase and amplitude are a compromise between the two tracers.",
         # 2026-10-21 (CHANGELOG v, then y; Marcus chose the timing draft over his own 10-21 text, the land + ocean
         # sum, after the seasonal-tracer tests at hilda31w, CHANGELOG 10-21 s, t; then "Revise for sampling" after
@@ -1433,7 +1447,12 @@ function(input, output, session) {
       # Mauna Loa's first year is read from the series the app plots (2026-10-23): Scripps flask under the flask
       # label starts in 1960, in situ in 1958. It ends with the historical run, as before.
       Covers = c(sprintf("%d\u2013%d", min(APP_OBS$co2$year[APP_OBS$co2$station == "MLO"]), APP_HIST_YEARS[2]),
-                 "1975\u20132024", "1752\u20131957", "1752\u20131976", "1977\u20132024",
+                 # 2026-11-11 review A15: the South Pole LEVEL is scored on every year with LIK_ANNUAL_MIN_MONTHS
+                 # months (R/likelihood.R), from the early 1960s; only the seasonal statistic starts in 1975
+                 # (LIK_SEAS_WINDOW). It read "1975-2024" for both. Claude's draft wording.
+                 sprintf("%d\u2013%d (seasonal cycle %d\u2013%d)", app_spo_first_scored_year(), APP_HIST_YEARS[2],
+                         LIK_SEAS_WINDOW[1], LIK_SEAS_WINDOW[2]),
+                 "1752\u20131957", "1752\u20131976", "1977\u20132024",
                  "1941\u20132019", "1750\u20131940", "1975 and 1995", "1959\u20132024", "depth climatology"),
       `Used for` = c("CO\u2082 level and seasonal cycle", "Southern CO\u2082 level and seasonal cycle",
                      "CO\u2082 before the station record", "\u03b4\u00b9\u00b3C before the station record",

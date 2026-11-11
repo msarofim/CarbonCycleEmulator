@@ -14,7 +14,7 @@ CO₂-to-forcing fit. The app shows its "Outside the fitted range" note for that
 
 ✔ = checked by me against the code or the image; the rest are as reported by the review passes, with their screenshots.
 
-## A. Fixes that need no wording decision
+## A. Fixes that need no wording decision — ✅ DONE 2026-11-11 (CHANGELOG 2026-11-11 i), not yet deployed
 
 | # | Where | Problem | Proposed fix |
 |---|---|---|---|

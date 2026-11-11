@@ -64,44 +64,32 @@ rv_plot_repdc <- function() rv_guard(rv_rep_dc(), function(x) {
                who = "Model box − Mauna Loa"),
     data.frame(t = x$year, r = x$resid_scored,
                who = "What the calibration scored (box − offset − Mauna Loa)"))
+  # the two reference lines and their names (the labels' words as before, now legend keys)
+  refs <- data.frame(y = c(x$rep_dC, RV_REP_OBS_MEAN),
+                     ref = c(sprintf("Fitted station offset %.2f ppm (prior sd %.1f ppm)", x$rep_dC, x$prior_sd),
+                             sprintf("Measured offset (mean of both stations) %.2f ppm", RV_REP_OBS_MEAN)))
+  refs$ref <- factor(refs$ref, levels = refs$ref)
   ggplot(d, aes(t, r, colour = who)) +
     geom_hline(yintercept = 0, colour = "grey55", linewidth = 0.4) +
-    geom_hline(yintercept = x$rep_dC, colour = RV_COL_BAD(),
-               linetype = "dashed", linewidth = 0.5) +
     # ⭐ THE MEASURED OFFSET, as a second reference line (Marcus 2026-09-22,
     # K3/N3). The card's whole claim is that the fitted offset is much larger
     # than the one that exists; drawing both is what lets a reader see the gap
     # instead of being told about it. RV_REP_OBS_* are OBSERVATIONS and do not
     # move with a refit; everything model-dependent below is computed.
-    geom_hline(yintercept = RV_REP_OBS_MEAN, colour = RV_COL_OBS(),
-               linetype = "dotted", linewidth = 0.6) +
+    # ⚠ 2026-11-11 (review A5/A6): the two lines are named in a LINE-STYLE LEGEND. They were annotate() labels in
+    # two corners of the panel, and on the host's font the fitted one ran across the points, the measured one sat on
+    # its own dotted line, and on a 360 px phone both were cut at the panel edge. A legend wraps with the panel.
+    geom_hline(data = refs, aes(yintercept = y, linetype = ref), colour = c(RV_COL_BAD(), RV_COL_OBS()),
+               linewidth = 0.55, inherit.aes = FALSE) +
     geom_point(size = 0.45, alpha = 0.6) +
-    # ⚠ TWO LABELS, TWO CORNERS. Both used to be anchored at the left: the
-    # fitted one in the EMPTY BAND between the point clouds (y = rep_dC/2,
-    # which is where that band happens to be) and the measured one on its own
-    # line just below it -- and with the measured line added on 2026-09-22 they
-    # overlapped and neither could be read. The fitted label keeps the band at
-    # the left; the measured one goes to the RIGHT edge, on its own line. They
-    # cannot collide because they share neither an x anchor nor a y.
-    # geom_label, not annotate("text"): the measured line sits INSIDE the lower
-    # point cloud, and only an opaque box is legible there.
-    annotate("text", x = min(x$year), y = x$rep_dC / 2, hjust = 0, vjust = 0.5,
-             size = 3.4, colour = RV_COL_BAD(),
-             label = sprintf("fitted station offset %.2f ppm (prior sd %.1f ppm)",
-                             x$rep_dC, x$prior_sd)) +
-    annotate("label", x = max(x$year), y = RV_REP_OBS_MEAN, hjust = 1, vjust = 0.5,
-             size = 3.1, colour = RV_COL_OBS(), fill = "white", alpha = 0.85,
-             # linewidth, not label.size (2026-10-13): ggplot2 4.0 dropped label.size, so 4.0.2 IGNORED it
-             # ("Ignoring unknown parameters") and drew a border round the box. linewidth = 0 is the 4.0 form.
-             linewidth = 0, label.padding = unit(0.12, "lines"),
-             # 2026-10-15 review: the line is the TWO stations' mean (RV_REP_OBS_MEAN), while the card's text quotes
-             # Mauna Loa's own +0.74 -- so the label says which it is
-             label = sprintf("measured offset (mean of both stations) %.2f ppm", RV_REP_OBS_MEAN)) +
     scale_colour_manual(values = stats::setNames(
       c(RV_COL_ALT(), RV_COL_MODEL()),
       c("Model box − Mauna Loa",
         "What the calibration scored (box − offset − Mauna Loa)"))) +
-    guides(colour = guide_legend(nrow = 2)) +
+    scale_linetype_manual(values = stats::setNames(c("dashed", "dotted"), levels(refs$ref)), name = NULL) +
+    guides(colour = guide_legend(nrow = 2, order = 1),
+           linetype = guide_legend(nrow = 2, order = 2,
+                                   override.aes = list(colour = c(RV_COL_BAD(), RV_COL_OBS()), linewidth = 0.7))) +
     labs(x = LAB_YEAR, y = "Difference from Mauna Loa (ppm)",
          caption = rv_cap(sprintf(paste(
            "Means over %d monthly observations: box %+.2f ppm, scored %+.2f ppm (RMS %.2f).",
@@ -143,6 +131,8 @@ rv_plot_gradient <- function() rv_guard(rv_gradients(), function(x) {
     geom_errorbar(aes(ymin = value - se, ymax = value + se), width = 0.18,
                   colour = "grey25", na.rm = TRUE) +
     facet_wrap(~what, scales = "free_y", labeller = as_labeller(app_plotmath_str, default = label_parsed)) +
+    # 2026-11-11 review A6: the δ¹³C Model bar ran to the panel's lower edge and read as cut off
+    scale_y_continuous(expand = expansion(mult = c(0.12, 0.08))) +
     scale_fill_manual(values = stats::setNames(c(RV_COL_OBS(), RV_COL_MODEL()),
                                                c("Measured", "Model"))) +
     labs(x = NULL, y = "Mauna Loa minus South Pole",
@@ -162,6 +152,9 @@ rv_plot_gradient <- function() rv_guard(rv_gradients(), function(x) {
 # error; the four boxes follow. The cold boxes are the largest misfits box by box, but they cover little area.
 RV_DISEQ_PANEL_HEMI <- "Hemisphere averages"
 RV_DISEQ_PANEL_BOX  <- "The four boxes"
+RV_DISEQ_WRAP_BELOW_PX <- 480
+#' Is the panel being drawn narrower than `px`? (the live width renderPlotFit() publishes; FALSE with none)
+rv_narrow <- function(px) { w <- app_live_panel_px(); !is.null(w) && w < px }
 rv_plot_diseq <- function() rv_guard(rv_gateD(), function(x) {
   reg <- c("NH_ml", "NH_hs", "SH_ml", "SH_hs")
   reg <- reg[reg %in% names(x$region) & reg %in% names(x$obs_region)]
@@ -187,7 +180,10 @@ rv_plot_diseq <- function() rv_guard(rv_gateD(), function(x) {
     geom_errorbar(aes(ymin = value - se, ymax = value + se), position = dodge, width = 0.25,
                   colour = "grey25", na.rm = TRUE) +
     geom_hline(yintercept = 0, colour = "grey55", linewidth = 0.4) +
-    facet_grid(~ panel, scales = "free_x", space = "free_x") +
+    # 2026-11-11 review A5: at 375 px "Hemisphere averages" was cut to "emisphere average"; titles wrap below
+    # RV_DISEQ_WRAP_BELOW_PX of live panel width
+    facet_grid(~ panel, scales = "free_x", space = "free_x",
+               labeller = if (rv_narrow(RV_DISEQ_WRAP_BELOW_PX)) label_wrap_gen(12) else "label_value") +
     scale_fill_manual(values = stats::setNames(c(RV_COL_OBS(), RV_COL_MODEL()),
                                                c(lab_obs, lab_mod))) +
     labs(x = NULL, y = app_plotmath("Air–sea δ¹³C disequilibrium (‰)"),

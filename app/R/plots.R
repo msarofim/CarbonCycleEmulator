@@ -140,6 +140,10 @@ KEY_PULSE_EXTRA  <- "The extra CO\u2082 (with the pulse, minus without)"
 KEY_PULSE_TAGGED <- "The pulse's carbon atoms (tagged)"
 # 2026-10-15 review: the temperature view's model key, shown only beside FaIR (plot_pulse_warming(fair = ...))
 KEY_PULSE_WARM_MODEL <- "This model (with the pulse, minus without)"
+# The Futures chart's line styles, keyed when FaIR is drawn (2026-11-11 review A13: a downloaded PNG lost the caption's
+# explanation of the dashes). Claude's draft wording; FaIR's name and calibration as APP_FAIR_NOTE gives them.
+KEY_FUTURE_MODEL <- "This model"
+KEY_FUTURE_FAIR  <- "FaIR 2.2.4 (calib 1.6.0)"   # the caption says it is the ensemble mean
 PANEL_PULSE_EXTRA  <- "The extra carbon"
 PANEL_PULSE_TAGGED <- "The pulse's carbon atoms"   # Marcus 2026-10-15
 # the partition bands' opacity; the palette gate scores the fills composited at THIS value over white
@@ -399,11 +403,13 @@ app_text_px <- function(panel = "full") {
 #' is deliberately CONSERVATIVE -- scaled by the panel's share of a full one --
 #' so the no-device path cannot silently produce the 683 px lines that started
 #' this.
-app_wrap_px <- function(txt, px, pt) {
+# `face` (2026-11-11 review A1): text drawn bold must be MEASURED bold. The diagram's bold sentence was wrapped at
+# plain-text widths and ran past both edges of the image at every width.
+app_wrap_px <- function(txt, px, pt, face = "plain") {
   txt <- paste(txt, collapse = " ")
   if (!nzchar(txt)) return(txt)
   measure <- function(s) tryCatch(
-    grid::convertWidth(grid::grobWidth(grid::textGrob(s, gp = grid::gpar(fontsize = pt))),
+    grid::convertWidth(grid::grobWidth(grid::textGrob(s, gp = grid::gpar(fontsize = pt, fontface = face))),
                        "in", valueOnly = TRUE) * 72,
     error = function(e) NA_real_)
   if (is.na(measure("M"))) {
@@ -612,9 +618,31 @@ APP_FIT_KEY_GAP_PT <- 2    # vertical gap between legend rows once a legend is r
     if (edges[[i + 1L]][["first_l"]] - edges[[i]][["last_r"]] < 2) hit <- TRUE
   if (hit) n_max else 0L
 }
+# ⭐ WHOLE-YEAR BREAKS ON A YEAR AXIS (2026-11-11 review A7). ggplot's default breaks_extended() may step by 2.5, so a
+# 2015-2024 window was labelled 2015.0, 2017.5, 2020.0, 2022.5. These step by 1, 2, 3, 4 or 5 (x 10^k) and keep only
+# whole years. `release` (A8): the Pulse lab's release year is labelled too (a 2030 release started at "2100"), and a
+# regular break closer to it than APP_YEAR_BREAK_GAP of the axis is dropped so the two labels cannot collide. The class
+# lets app_fit_plot()'s tick thinning keep the rule when it asks for fewer breaks.
+APP_YEAR_BREAK_GAP <- 0.08
+app_year_breaks <- function(n = 5L, release = NULL) structure(function(lims) {
+  lims <- range(lims[is.finite(lims)])
+  b <- scales::breaks_extended(n, Q = c(1, 5, 2, 4, 3))(lims)
+  b <- b[is.finite(b) & abs(b - round(b)) < 1e-9]
+  if (length(b) < 2L) {
+    lo <- ceiling(lims[1]); hi <- floor(lims[2])
+    b <- if (hi > lo) seq(lo, hi, by = max(1, round((hi - lo) / max(1, n - 1)))) else round(mean(lims))
+  }
+  if (!is.null(release) && is.finite(release) && release >= lims[1] && release <= lims[2])
+    b <- sort(c(release, b[abs(b - release) > APP_YEAR_BREAK_GAP * diff(lims)]))
+  b
+}, class = c("ccx_year_breaks", "function"), n = n, release = release)
 # Could the y title be taller than its panel? The cheap test that lets a wide plot skip the build (2026-11-11): the
 # title's length against APP_FIT_Y_CHECK_FRAC of the device's height. A title set by an aesthetic rather than labs()
 # is not seen here; test-app-phone-layout.R (block 3d) builds every app plot at its drawn height to hold the cut-off.
+# A function stored on a ggplot scale comes back wrapped as a "ggproto_method", which drops its class and attributes;
+# the original is in the wrapper's environment as `f` (2026-11-11: app_year_breaks()'s class and release year were
+# invisible to the tick thinning below, so a narrow Pulse lab lost its release year).
+.fit_unwrap <- function(fn) if (inherits(fn, "ggproto_method") && is.function(environment(fn)$f)) environment(fn)$f else fn
 APP_FIT_Y_CHECK_FRAC <- 0.4
 .fit_y_title_maybe_tall <- function(p) {
   lab <- p$labels$y
@@ -701,6 +729,9 @@ app_fit_plot <- function(p) {
         if (!is.numeric(sc$breaks) || length(sc$breaks) != length(sc$labels)) break
         keep <- seq(1L, length(sc$breaks), by = 2L)
         sc$breaks <- sc$breaks[keep]; sc$labels <- sc$labels[keep]
+      } else if (inherits(.fit_unwrap(sc$breaks), "ccx_year_breaks")) {
+        # 2026-11-11: a whole-year axis stays whole when thinned (and keeps the Pulse lab's release year)
+        sc$breaks <- app_year_breaks(max(2L, n %/% 2L), release = attr(.fit_unwrap(sc$breaks), "release"))
       } else sc$breaks <- scales::breaks_extended(n = max(2L, n %/% 2L))
       p <- suppressMessages(p + sc)
       b <- ggplot_build(p); g <- ggplot_gtable(b)
@@ -788,7 +819,9 @@ plot_keeling <- function(out, obs, yr_range, hemi = "both", show_obs = TRUE,
           PAL[["nh"]], PAL[["sh"]]),
         c(lab_n, lab_s, "Measured, Mauna Loa", "Measured, South Pole",
           lab_nb, lab_sb))) +
-    guides(colour = guide_legend(nrow = 2, byrow = TRUE)) +
+    # 2026-11-11 review A13: ggplot's own row count (one row up to five keys), read across; nrow = 2 put a
+    # two-key legend (Southern only, measurements off) on two rows
+    guides(colour = guide_legend(byrow = TRUE)) +
     labs(x = LAB_YEAR, y = app_plotmath(LAB_CO2),
          caption = if (off != 0)
            # ⚠ NO SECOND WRAP. This used to re-wrap the assembled caption at 95
@@ -801,6 +834,7 @@ plot_keeling <- function(out, obs, yr_range, hemi = "both", show_obs = TRUE,
              "hemispheric box minus a fitted station offset of %.2f ppm. Faint =",
              "the box itself. Known issue 1 has the residuals."), off))
            else app_provenance_caption()) +
+    scale_x_continuous(breaks = app_year_breaks()) +   # whole years (2026-11-11 review A7)
     theme_ccx()
 }
 
@@ -893,6 +927,7 @@ plot_partition <- function(pt, yr_range) {
                                                c(LAB_STILL_IN_AIR, "Taken up by land", "Taken up by the ocean"))) +
     labs(x = LAB_YEAR, y = paste("Cumulative", sub("^C", "c", LAB_GTC)),   # "Cumulative carbon (GtC)", 2026-10-21
          caption = app_provenance_caption()) +
+    scale_x_continuous(breaks = app_year_breaks()) +   # whole years (2026-11-11 review A7)
     theme_ccx()
 }
 
@@ -910,6 +945,7 @@ plot_airborne_fraction <- function(pt, yr_range) {
          # full-panel budget.
          caption = app_provenance_caption(
            "Dashed line at 50% for reference.", panel = "half")) +
+    scale_x_continuous(breaks = app_year_breaks()) +   # whole years (2026-11-11 review A7)
     theme_ccx()
 }
 
@@ -1264,6 +1300,9 @@ app_imbalance_decades <- function(out, gcb, F) {
 LAB_CMAP_FILL   <- "Log-likelihood units moved"
 LAB_CMAP_OBS    <- "What is measured"
 LAB_CMAP_PART   <- "Part of the model"
+# 2026-11-11 review A9: at the parameter level the columns are code names, under the component level's title. Claude's
+# draft wording; the code names are the ones Under the hood's parameter table lists.
+LAB_CMAP_PARAM  <- "Model parameter (code names, as listed on Under the hood)"
 LAB_CMAP_PULL   <- "Log-likelihood units the measurement gains by moving it"
 # ⛔ ONE formatter for a row total, used by the CHART LABEL here and by the
 # tab's PROSE in server.R, so the two cannot disagree about the same number.
@@ -1321,7 +1360,7 @@ plot_constraint_map <- function(cm, level = c("component", "parameter")) {
               size = 3, colour = "white", fontface = "bold") +
     scale_fill_gradient(low = "#f2f6f9", high = PAL[["obs"]], name = LAB_CMAP_FILL) +
     scale_y_discrete(labels = lab) +
-    labs(x = LAB_CMAP_PART, y = LAB_CMAP_OBS,
+    labs(x = if (identical(level, "component")) LAB_CMAP_PART else LAB_CMAP_PARAM, y = LAB_CMAP_OBS,
          subtitle = app_subtitle(paste(
            "Darker = this measurement would notice if that part of the model",
            "changed. The number after each measurement is its total, so a pale",
@@ -1348,7 +1387,8 @@ plot_constraint_map <- function(cm, level = c("component", "parameter")) {
 #' the names were cut at the panel edge. When the longest name does not fit that room -- MEASURED, from the
 #' live width -- the names go above their bars instead, starting at zero, where each has half the panel.
 CMAP_TENSION_EXPAND   <- 0.35
-CMAP_TENSION_LABEL_MM <- 3       # geom_text size of the measurement names
+CMAP_TENSION_PAR_WRAP <- 26      # characters per line of a parameter's plain name on the tension chart's axis
+CMAP_TENSION_LABEL_MM <- 3.4     # geom_text size of the measurement names (3 -> 3.4, 2026-11-11 review A9: ~8 px tall)
 cmap_tension_names_above <- function(d) {
   px <- app_live_panel_px()
   if (is.null(px)) return(FALSE)
@@ -1381,6 +1421,14 @@ plot_constraint_tension <- function(tn) {
                                               c(KEY_CMAP_DOWN, KEY_CMAP_UP)),
                       name = NULL) +
     scale_x_continuous(expand = expansion(mult = if (above) 0.05 else CMAP_TENSION_EXPAND)) +
+    # 2026-11-11 review A9: the parameters by their plain names (params_meta.R), wrapped, where the prose uses them;
+    # the code name only when no description exists (or plots.R is loaded without params_meta.R)
+    scale_y_discrete(labels = function(x) {
+      d <- if (exists("app_param_desc", mode = "function")) app_param_desc(x) else x
+      vapply(d, function(s) paste(strwrap(s, width = CMAP_TENSION_PAR_WRAP), collapse = "\n"), "")
+    },
+    # names above the bars: room for the top row's name inside the panel (it was cut at the top on a 360 px phone)
+    expand = expansion(add = c(0.6, if (above) 1 else 0.6))) +
     labs(x = LAB_CMAP_PULL, y = NULL,
          subtitle = app_subtitle(paste(
            "Two measurements, pulling the same knob opposite ways. The fitted",
@@ -1405,6 +1453,7 @@ plot_counterfactual <- function(base, alt = NULL, yr_range, label) {
     scale_colour_manual(values = stats::setNames(c(PAL[["model"]], PAL[["off"]]),
                                                  c("Full model", label))) +
     labs(x = LAB_YEAR, y = app_plotmath(LAB_CO2), caption = app_provenance_caption()) +
+    scale_x_continuous(breaks = app_year_breaks()) +   # whole years (2026-11-11 review A7)
     theme_ccx()
 }
 
@@ -1461,6 +1510,7 @@ plot_growth_resid <- function(base, alt = NULL, obs = NULL,
          caption = app_provenance_caption(paste(
            "Positive = the model grew faster than the measured record that year.",
            "Same years and same estimators as the panel above."))) +
+    scale_x_continuous(breaks = app_year_breaks()) +   # whole years (2026-11-11 review A7)
     theme_ccx()
 }
 
@@ -1538,6 +1588,7 @@ plot_growth_rate <- function(base, alt = NULL, obs = NULL, yr_range = c(1960, 20
     scale_colour_manual(values = cols[names(cols) %in% unique(d$who)]) +
     labs(x = LAB_YEAR, y = app_plotmath(LAB_GROWTH),
          caption = app_provenance_caption(GROWTH_UNIT_NOTE)) +
+    scale_x_continuous(breaks = app_year_breaks()) +   # whole years (2026-11-11 review A7)
     theme_ccx()
 }
 
@@ -1726,6 +1777,8 @@ GROWTH_RESID_MIN_YEARS <- 12L
 #' release therefore shows as two steps (0 at the pulse year's start, about half at mid-year).
 #'
 #' @param tab app_pulse_partition_table(app_pulse_depth_runs(...), pulse_gtc)
+PULSE_PART_WRAP_BELOW_PX  <- 480
+PULSE_PART_PANEL_GAP_LINES <- 2
 plot_pulse_partition <- function(tab, pulse_gtc, pulse_year, yr_max = NULL) {
   k <- tab$t >= pulse_year
   if (!is.null(yr_max)) k <- k & tab$t <= yr_max
@@ -1772,8 +1825,14 @@ plot_pulse_partition <- function(tab, pulse_gtc, pulse_year, yr_max = NULL) {
     labs(x = LAB_YEAR, y = sprintf("Share of the %g GtC pulse (%%)", pulse_gtc),
          caption = app_provenance_caption(paste("Left:", PULSE_PARTITION_NOTE, PULSE_TAG_PARTITION_NOTE))) +
     expand_limits(y = c(0, 100)) +   # 2026-10-02: a pulse share runs 0-100 % (Marcus, card 5: "zero to 1")
-    facet_wrap(~ panel, nrow = 1) +
-    theme_ccx()
+    # 2026-11-11 review A5: strips wrap on a narrow panel ("The pulse's carbon atoms" was cut at 360 px)
+    facet_wrap(~ panel, nrow = 1, labeller = if (!is.null(app_live_panel_px()) && app_live_panel_px() < PULSE_PART_WRAP_BELOW_PX)
+                                               label_wrap_gen(14) else "label_value") +
+    scale_x_continuous(breaks = app_year_breaks(release = pulse_year)) +   # whole years (2026-11-11 review A7, A8)
+    theme_ccx() +
+    # both panels now label the release year at their left edge, beside the other panel's last year: a wider gap
+    # (it read "2300 2050" with ggplot's 5.5 pt)
+    theme(panel.spacing.x = grid::unit(PULSE_PART_PANEL_GAP_LINES, "lines"))
 }
 
 # ---------------------------------------------------------------------
@@ -1842,12 +1901,15 @@ plot_d13c <- function(out, obs, yr_range, hemi = "both", rep_dC = 0) {
     scale_colour_manual(values = cols[names(cols) %in%
                                       unique(c(mod$who, pts$who))]) +
     # 2026-10-15 review: the longer keys overflow one legend row at 760 px; two rows, as the Keeling chart
-    guides(colour = guide_legend(nrow = 2, byrow = TRUE)) +
+    # 2026-11-11 review A13: ggplot's own row count (one row up to five keys), read across; nrow = 2 put a
+    # two-key legend (Southern only, measurements off) on two rows
+    guides(colour = guide_legend(byrow = TRUE)) +
     labs(x = LAB_YEAR, y = app_plotmath(LAB_D13C),
          caption = app_provenance_caption(paste0(
            # 2026-10-15 review: "of card 1" -> "of Known issue 1"
            "Solid = the comparison the calibration scored (box minus the station offset of Known issue 1); ",
            "faint = the box itself; points = measurements.", gap))) +
+    scale_x_continuous(breaks = app_year_breaks()) +   # whole years (2026-11-11 review A7)
     theme_ccx()
 }
 
@@ -1872,6 +1934,7 @@ plot_d14c <- function(out, obs, yr_range) {
       "Measured, Northern Hemisphere" = "#7b241c",
       "Measured, Southern Hemisphere" = "#1a5276")) +
     labs(x = LAB_YEAR, y = app_plotmath(LAB_D14C), caption = app_provenance_caption()) +
+    scale_x_continuous(breaks = app_year_breaks()) +   # whole years (2026-11-11 review A7)
     theme_ccx()
 }
 
@@ -1901,7 +1964,9 @@ plot_d14c <- function(out, obs, yr_range) {
 #'   (Marcus 2026-10-01, B7), PRECOMPUTED by calibration/build_futures_ribbons.R
 #'   and subset by the caller; drawn UNDER the lines in each scenario's own hue.
 #' @param note optional caption sentence (the band's label, or why none is drawn)
-plot_future <- function(runs, yvar, ylab, view = NULL, fair = NULL, bands = NULL, note = NULL) {
+#' @param colours named colours keyed by run name (app_scenario_colours(), global.R): each run keeps ITS colour
+#'   whatever else is drawn (2026-11-11 review A3). NULL keeps ggplot's hues by position (tests, other callers).
+plot_future <- function(runs, yvar, ylab, view = NULL, fair = NULL, bands = NULL, note = NULL, colours = NULL) {
   d <- do.call(rbind, lapply(names(runs), function(n) {
     cl <- runs[[n]]$climate
     data.frame(year = cl$year, y = cl[[yvar]], who = n)
@@ -1930,21 +1995,35 @@ plot_future <- function(runs, yvar, ylab, view = NULL, fair = NULL, bands = NULL
     # drawn FIRST, faint, no outline: the line stays the thing the eye follows
     g <- g + geom_ribbon(data = bands, aes(x = year, ymin = lo, ymax = hi, fill = who),
                          inherit.aes = FALSE, alpha = FUTURE_BAND_ALPHA, colour = NA,
-                         show.legend = FALSE) +
-      scale_colour_hue(aesthetics = c("colour", "fill"))
+                         show.legend = FALSE)
+    if (is.null(colours)) g <- g + scale_colour_hue(aesthetics = c("colour", "fill"))
   }
-  if (!is.null(fair) && nrow(fair)) {
+  # every run must have a colour, or it would be dropped from the scale and vanish: refuse rather than draw
+  if (!is.null(colours)) {
+    if (!all(lev %in% names(colours))) stop("plot_future(): no colour for ", paste(setdiff(lev, names(colours)), collapse = ", "))
+    g <- g + scale_colour_manual(values = colours[lev], breaks = lev, aesthetics = c("colour", "fill"))
+  }
+  has_fair <- !is.null(fair) && nrow(fair) > 0
+  if (has_fair) {
     # the lines' hues (see above); only when every label matches, so nothing can turn NA and vanish
     if (!is.null(fair$who) && all(fair$who %in% lev)) fair$who <- factor(fair$who, levels = lev)
-    # ⚠ The FaIR layer is drawn FIRST so the emulator sits on top of its own
-    # reference; and `show.legend = FALSE` because the linetype is explained in
-    # the caption rather than by a second legend that would repeat every label.
-    g <- g + geom_line(data = fair, linewidth = 0.55, linetype = "22",
-                       alpha = 0.9, show.legend = FALSE)
+    # ⚠ The FaIR layer is drawn FIRST so the emulator sits on top of its own reference. It joins the LINETYPE legend
+    # only (2026-11-11 review A13: two keys, "This model" solid and FaIR dashed; before, the dashes were explained in
+    # the caption alone); in the colour legend it would draw a dashed key beside every scenario.
+    fair$src <- KEY_FUTURE_FAIR
+    g <- g + geom_line(data = fair, aes(linetype = src), linewidth = 0.55, alpha = 0.9,
+                       show.legend = c(colour = FALSE, linetype = TRUE)) +
+      scale_linetype_manual(values = stats::setNames(c("solid", "22"), c(KEY_FUTURE_MODEL, KEY_FUTURE_FAIR)),
+                            breaks = c(KEY_FUTURE_MODEL, KEY_FUTURE_FAIR), name = NULL)
   }
-  g + geom_line(linewidth = 0.8) +
+  g + (if (has_fair) geom_line(aes(linetype = KEY_FUTURE_MODEL), linewidth = 0.8) else geom_line(linewidth = 0.8)) +
+    # read across: seven scenarios take two rows, which ggplot fills down the columns by default
+    guides(colour = guide_legend(byrow = TRUE, order = 1),
+           linetype = guide_legend(order = 2, override.aes = list(colour = PAL[["obs"]]))) +
     labs(x = LAB_YEAR, y = app_plotmath(ylab), caption = app_provenance_caption(note)) +
-    theme_ccx()
+    theme_ccx() +
+    # the line-style key on its own row under the scenarios (beside seven of them it ran off the right edge)
+    (if (has_fair) theme(legend.box = "vertical"))
 }
 # The ribbons' opacity: faint enough that two overlapping scenarios' bands stay
 # readable as two, and that the line on top stays the dominant mark.
@@ -2009,6 +2088,7 @@ plot_pulse_decay <- function(base_cl, pulse_cl, pulse_year, pulse_gtc, tag = NUL
     scale_y_continuous(labels = function(x) paste0(round(100 * x), "%")) +
     labs(x = LAB_YEAR, y = LAB_PULSE_AIRBORNE,
          caption = app_provenance_caption(if (!is.null(tag)) PULSE_TAG_DECAY_NOTE)) +
+    scale_x_continuous(breaks = app_year_breaks(release = pulse_year)) +   # whole years (2026-11-11 review A7, A8)
     theme_ccx()
 }
 
@@ -2067,6 +2147,7 @@ plot_pulse_warming <- function(base_cl, pulse_cl, pulse_year, pulse_gtc, fair = 
     guides(colour = guide_legend(ncol = 1), linetype = guide_legend(ncol = 1)) +
     labs(x = LAB_YEAR, y = LAB_PULSE_WARMING,
          caption = app_provenance_caption()) +
+    scale_x_continuous(breaks = app_year_breaks(release = pulse_year)) +   # whole years (2026-11-11 review A7, A8)
     theme_ccx()
 }
 
@@ -2169,8 +2250,9 @@ plot_box_diagram <- function(fx, stock, p, n_layers = 10L, scale = 1) {
   # 2026-10-15 LAYOUT (Marcus: legibility). Every label is anchored at `pos` along its own arrow (0 = tail,
   # 1 = head) and pushed off it by hj / vj, so a label can be slid away from a neighbor without moving the arrow.
   arrows_df <- rbind(data.frame(
-    x    = c(1.75, 1,   3,   2.62, 4.95, 2.0, 2.0),
-    xend = c(1,    3,   2.25, 4.55, 2.62, 2.0, 2.0),
+    # litterfall (2nd) ran box centre to box centre, its head hidden under the soil box: edge to edge (2026-11-11 A1)
+    x    = c(1.75, 1.72, 3,   2.62, 4.95, 2.0, 2.0),
+    xend = c(1,    2.12, 2.25, 4.55, 2.62, 2.0, 2.0),
     y    = c(3.68, 2.4, 2.7, 3.76, 3.22, 4.7, 2.55),
     yend = c(2.8,  2.4, 3.68, 3.12, 3.92, 4.3, 3.62),
     val  = c(fx$gpp, fx$litter, fx$rh, as_down, as_up, fx$foss, fx$luc),
@@ -2179,8 +2261,12 @@ plot_box_diagram <- function(fx, stock, p, n_layers = 10L, scale = 1) {
     hj   = c(1.15, 0.5, -0.1, 0.45, 0.5, -0.2, -0.05),
     # litterfall's label sits UNDER its arrow (vj > 1), Marcus 2026-10-15; "respiration" is slid toward the air and
     # "air to warm sea" set below its arrow between it and the mixed-layer box; "warm sea to air" sits above its own
-    vj   = c(0.5,  1.6, 0.5, 1.3, -0.35, 0.5, 0.5),
-    pos  = c(0.5,  0.5, 0.65, 0.62, 0.45, 0.5, 0.5),
+    # 2026-11-11 review A1: on the host's wider font "air to warm sea" ran under the mixed-layer box, the litterfall
+    # number under the soil box, and the "warm sea to air" arrow through "warm": litterfall lower (1.6 -> 2.15), "air
+    # to warm sea" back along its arrow (0.62 -> 0.5), "warm sea to air" toward its tail and higher (0.45 -> 0.30,
+    # -0.35 -> -0.55). Clearances measured on this machine's font with ~15 % to spare for the host's.
+    vj   = c(0.5,  2.15, 0.5, 1.3, -0.55, 0.5, 0.5),
+    pos  = c(0.5,  0.5, 0.65, 0.5, 0.30, 0.5, 0.5),
     # ⚠ THE NEW ARROW'S NAME IS READ FROM R/fluxes.R's CHANNEL TABLE, which
     # states that nothing downstream may name a channel in prose without reading
     # it from there. The older arrows predate that rule and keep their teaching
@@ -2261,6 +2347,6 @@ plot_box_diagram <- function(fx, stock, p, n_layers = 10L, scale = 1) {
                               "so an average CO₂ molecule stays only ~%.1f years. ",
                               "The increase in atmospheric carbon concentrations persists for centuries."),   # Marcus 2026-10-15
                        fx$atm_out, fx$tau_turn),
-               app_text_px("diagram"), diagram_note_pt(DIAGRAM_NOTE_SIZE_BOLD * scale))) +
+               app_text_px("diagram"), diagram_note_pt(DIAGRAM_NOTE_SIZE_BOLD * scale), face = "bold")) +
     xlim(0.1, xmax) + ylim(-1.45, 4.9) + theme_void()
 }
