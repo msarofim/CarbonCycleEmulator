@@ -2,6 +2,14 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-11-11 (k) — **Full suites at `2bc18f62` and `34252dc7`: one new failure in each, the U.S.-spelling lint on a batch-A error message ("no colour for"). Fixed in the code; batch A's A3 test, which expected the British text, edited with Marcus's approval. Not deployed.**
+
+- **Suite @ `2bc18f62`** (relaunched after the first run died; 24.1 min): 9,710 passed, 1 failed, 1 standing skip (`l2-enso-limb`), 0 errored, 233 warnings (unchanged). Per file against `8be0095a`: `app-review-20261111` new (38), `plot-text-fits` 111 → 121, `takeaway-arithmetic` 26 → 35, `stylised-takeaway` 63 → 65, and `app-us-spelling` 9 with 1 failed. ⚠ (i) gave the first two increments as +7 and +8; the suite counts +10 and +9.
+- **Suite @ `34252dc7`** (23.3 min): 9,718 passed, the same 1 failed, 1 skip, 0 errored, 233 warnings. Only `app-review-20261111` changed (38 → 46, (j)'s A11b). Logs and per-file counts `outputs/diagnostics/suite_20261111_{2bc18f62,34252dc7}{.log,_perfile.csv}`; launch scripts kept in `~/ccx_frozen/`; worktrees removed.
+- **The failure:** `test-app-us-spelling` reads every string literal in the app, and batch A's guard in `plot_future()` (app/R/plots.R) said `stop("plot_future(): no colour for ", ...)`. Batch A's A3 test matched that text, so no code change could pass both. Claude stopped and asked; Marcus chose "Fix both": the message now says "no color for", and ⚠ **test edited, flagged:** A3's `expect_error()` pattern is "no color". With the code change alone, A3 failed ("no color for Other" against "no colour"); with both, review 46 and spelling 9 pass.
+- **Comment:** (j)'s comment in `app_dl_server()` said every link stayed disabled; it now says some did (18 of 54 on one run, a race), as measured.
+- The `34252dc7` bundle (built and checked in (j)) is superseded by the bundle from this commit; it was never published.
+
 ## 2026-11-11 (j) — **Fixed a batch-A bug found serving its bundle: with A11's rule hiding the Download line until the chart draws, Shiny suspended the links and some never got an address (18 of 54 at 1440 × 900, on four tabs). Every download output is now registered never to suspend. The `2bc18f62` bundle is quarantined. Not deployed.**
 
 - **Found:** step 3 of the deploy recipe. `check_live_pointer.py` on the bundle at `2bc18f62` (port 7795) read the first CSV as empty. In the browser, `k_plot_csv` was on screen with `href=""`, class `disabled`, and `.clientdata_output_k_plot_csv_hidden` was `true`. Two tests separated the cause: firing Shiny's visibility re-check (a `shown` event on a descendant of `body`) gave the visible links their addresses and left the inactive tab's links hidden; and the new browser check below fails on this bundle and passes on the fix.

@@ -59,7 +59,7 @@ test_that("A3. a scenario keeps its colour whatever else is ticked; your pathway
   expect_setequal(names(e$APP_SCENARIO_COLOURS), unname(e$APP_SCENARIOS))
   expect_length(unique(cols), length(cols))
   expect_error(e$plot_future(c(rv_runs("vvL", e), list(Other = rv_runs("vvM", e)[[1]])), "co2_ppm", "CO2", colours = cols),
-               "no colour")
+               "no color")   # U.S. spelling (test-app-us-spelling); was "no colour", Marcus 2026-11-11
 })
 
 test_that("A7/A8. year axes break on whole years; the Pulse lab labels its release year, also when thinned", {

@@ -2000,7 +2000,7 @@ plot_future <- function(runs, yvar, ylab, view = NULL, fair = NULL, bands = NULL
   }
   # every run must have a colour, or it would be dropped from the scale and vanish: refuse rather than draw
   if (!is.null(colours)) {
-    if (!all(lev %in% names(colours))) stop("plot_future(): no colour for ", paste(setdiff(lev, names(colours)), collapse = ", "))
+    if (!all(lev %in% names(colours))) stop("plot_future(): no color for ", paste(setdiff(lev, names(colours)), collapse = ", "))
     g <- g + scale_colour_manual(values = colours[lev], breaks = lev, aesthetics = c("colour", "fill"))
   }
   has_fair <- !is.null(fair) && nrow(fair) > 0
