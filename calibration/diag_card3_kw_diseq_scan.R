@@ -18,7 +18,7 @@
 # hilda31w the k_w = 1446 profile (CHANGELOG 10-13 q) found the cold-box names (hs_asx_frac, h_hs, u_hs) absorb k_w.
 # The re-optimized reading at hilda31fl is the price profile (run_price_profile.R --hold=k_w=1446), read separately.
 #
-# Usage: Rscript calibration/diag_card3_kw_diseq_scan.R     # ~2 min, read-only, no RNG
+# Usage: Rscript calibration/diag_card3_kw_diseq_scan.R [--profile=<profile_k_w_A.rds>]   # ~2 min, read-only, no RNG
 # =====================================================================
 t_start <- Sys.time()
 for (f in list.files("R", pattern = "[.]R$", full.names = TRUE)) source(f)
@@ -102,7 +102,37 @@ for (k in names(cross)) say("  %-6s %s   (at x1: model %+.3f vs bottles %+.3f +-
   p1$D[[k]], OBS[[k]], SE[[k]], (p1$D[[k]] - OBS[[k]]) / SE[[k]])
 say("  card 3's typed factor: x%.2f (hilda29l, both mixed-layer levels)\n", KS_TYPED)
 
-saveRDS(list(table = tab, points = P, obs = OBS, se = SE, cross = cross, KW0 = KW0, families = KS_FAMILIES,
+# ---- optional: the RE-FITTED point of a price profile (run_price_profile.R --hold=k_w=...) ---------------------
+# --profile=<profile_k_w_<tag>.rds>: the 30 other names at the profile's optimum and k_w at the held value. GATE: the
+# dg path at that vector reproduces the profile's own stored likelihood rows (the objective it was optimized on); an
+# overlay that missed a name fails here instead of reading a point no one fitted.
+KS_PROFILE <- sub("^--profile=", "", grep("^--profile=", commandArgs(trailingOnly = TRUE), value = TRUE))
+PROF <- NULL
+if (length(KS_PROFILE)) {
+  pf <- readRDS(KS_PROFILE); hold <- pf$provenance$hold
+  if (!identical(pf$provenance$mode_md5, md5)) stop(KS_PROFILE, " was run at another mode file")
+  pm2 <- v0$pm
+  for (n in names(pf$result$par)) pm2[[n]] <- pf$result$par[[n]]
+  pm2[[names(hold)]] <- hold[[1]]
+  v <- v0; v$pm <- pm2; v$p <- ccx_overlay_par(v0$p, pm2)
+  for (n in c("luc_scale", "bomb_total", "sigma_d14c", "rep_dC", "grad_off_co2", "grad_off_d13c")) v[[n]] <- pm2[[n]]
+  r <- dg_run(v); stv <- unlist(dg_streams(r, v))
+  gp <- max(abs(stv[names(pf$result$streams)] - pf$result$streams))
+  say("\n=== the profile's re-fitted point: %s (%s = %g, start %s) ===\n", basename(KS_PROFILE), names(hold), hold[[1]], pf$provenance$start)
+  say("PROFILE GATE: the dg path reproduces the profile's stored likelihood rows, max |diff| %.1e -> %s\n", gp,
+      if (gp < 1e-4) "PASS" else "FAIL")
+  if (gp >= 1e-4) stop("the profile point does not reproduce its own rows")
+  d <- stv[nm_rows] - ref[nm_rows]
+  fam <- vapply(KS_FAMILIES, function(p) sum(d[grepl(p, nm_rows, perl = TRUE)]), 0)
+  gD <- dg_gateD_verdict(dg_gateD(r, v), do_D)
+  Dp <- c(gD$region[c("NH_ml", "SH_ml", "NH_hs", "SH_hs")], NH = gD$hemi[["NH"]], SH = gD$hemi[["SH"]], asym = gD$asym)
+  say("  likelihood vs the canonical %+.2f: %s\n", sum(d), paste(sprintf("%s %+.2f", names(fam), fam), collapse = ", "))
+  say("  %-6s %9s %9s %9s %18s\n", "D", "canonical", "profile", "bottles", "profile z vs bottles")
+  for (k in names(OBS)) say("  %-6s %+9.3f %+9.3f %+9.3f %18.1f\n", k, p1$D[[k]], Dp[[k]], OBS[[k]], (Dp[[k]] - OBS[[k]]) / SE[[k]])
+  PROF <- list(file = KS_PROFILE, md5 = unname(tools::md5sum(KS_PROFILE)), gate = gp, dlik = sum(d), fam = fam, D = Dp)
+}
+
+saveRDS(list(table = tab, points = P, obs = OBS, se = SE, cross = cross, KW0 = KW0, families = KS_FAMILIES, profile = PROF,
              provenance = list(driver = KS_DRIVER, commit = commit, dirty = dirty, canonical = KS_ARM, mode_file = mode_file,
                                mode_md5 = md5, obs_file = do_D$file, obs_built = do_D$built,
                                method = "dg path (dg_vector/dg_run/dg_streams); k_w scaled, every other name at the mode",
