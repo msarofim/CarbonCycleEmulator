@@ -1,0 +1,9 @@
+unmutated test-diagram-pixels.R: RESULT: none 
+M1 Soil box narrower (1.03 -> 0.92)            test-diagram-pixels.R              expect 2.         got 2.
+M2 litterfall head into Soil                   test-diagram-pixels.R              expect 1.,2.      got 1.,2.
+M3 label gap 0.07 -> 0.01                      test-diagram-pixels.R              expect 1.,2.      got 1.,2.
+M4 Vegetation back at x = 1                    test-diagram-pixels.R              expect 1.,2.      got 1.,2.
+M5 no descender allowance (respiration)        test-diagram-pixels.R              expect 1.,2.      got 1.,2.
+M6 old height (482 -> 440 px)                  test-diagram-pixels.R              expect 1.,2.      got 1.,2.
+M7 air-to-warm-sea head into the box           test-diagram-pixels.R              expect 1.,2.      got 1.,2.
+M8 mixing labels on their arrows (dx 0)        test-diagram-pixels.R              expect 1.,2.      got 1.,2.

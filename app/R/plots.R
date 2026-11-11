@@ -2197,7 +2197,9 @@ DIAGRAM_BOX_SIZE       <- 3.8   # the box names (was 3.4)
 # size multiplied by diagram_scale(w) -- so text keeps its proportion to the boxes instead of shrinking on a wide
 # screen (at 1280 px the panel is ~714 px, and fixed sizes read ~20 % smaller than tuned).
 DIAGRAM_REF_PX <- 565
-DIAGRAM_ASPECT <- 440 / 565
+# 2026-11-11: 440 -> 482 px tall at DIAGRAM_REF_PX, with ylim's top 4.9 -> 5.5 (the same ~63 px per data unit, which
+# DIAGRAM_BOX_HH assumes): in DejaVu the labels between the atmosphere and the row below needed two tiers.
+DIAGRAM_ASPECT <- 482 / 565
 DIAGRAM_SCALE_RANGE <- c(0.9, 1.6)   # never much below the tuned size: a narrower panel crowds a little instead
 diagram_scale <- function(px) {
   if (is.null(px) || length(px) != 1L || !is.finite(px) || px <= 0) return(1)
@@ -2215,24 +2217,65 @@ diagram_note_pt <- function(size) size * ggplot2::.pt
 # two channels are R/fluxes.R's: the biological pump's export (`pump`, down) and the mixing exchange (`ml_int`,
 # net, NEGATIVE = upward -- deep water is richer in dissolved carbon, so mixing carries it up). Each is drawn in
 # the direction its sign says, so a mixing term that turned downward could not be drawn pointing up.
-diagram_mix_pair <- function(x_dn, x_up, y_top, y_bot, export, mixing) {
+diagram_mix_pair <- function(x_dn, x_up, y_top, y_bot, export, mixing, dy = 0, gap = DIAGRAM_HEAD_GAP,
+                             lg = DIAGRAM_LABEL_GAP) {
   up <- mixing < 0
+  # y_top / y_bot are the two boxes' facing edges; a head stops `gap` short of the box it points at
   data.frame(x = c(x_dn, x_up), xend = c(x_dn, x_up),
-             y = c(y_top, if (up) y_bot else y_top), yend = c(y_bot, if (up) y_top else y_bot),
-             val = c(export, abs(mixing)), hj = c(1.12, -0.12), vj = c(0.5, 0.5), pos = 0.5,
+             y = c(y_top, if (up) y_bot else y_top), yend = c(y_bot + gap, if (up) y_top - gap else y_bot + gap),
+             val = c(export, abs(mixing)), hj = c(1, 0), vj = c(0.5, 0.5), pos = 0.5, dx = c(-lg, lg), dy = dy,
              nm = c("biological\npump", if (up) "returned up\nby mixing" else "mixed down"))
 }
 
+# ⭐ FIXED-SIZE BOXES (2026-11-11, CHANGELOG 11-11 n). The boxes were geom_label()s, sized by the font, while every arrow
+# end was a fixed coordinate, so a wider font grew the boxes over the arrow ends. The host draws in DejaVu Sans, about
+# 22 % wider in bold than this machine's Helvetica, and there the litterfall arrowhead disappeared under the Soil box.
+# Each box now has a fixed half-width and half-height in data units: the DejaVu name plus geom_label's 0.4-line padding,
+# measured at DIAGRAM_REF_PX, plus ~1 px. The name is drawn centred inside, and an arrow that starts or ends on a box is
+# placed on its edge. Text and layout both scale with the width, so the sizes hold at every drawn width (552 px and up).
+# Gate: test-diagram-pixels.R checks the drawn pixels in both fonts.
+DIAGRAM_BOX_HW <- c(atm = 0.65, veg = 0.84, soil = 1.03, ml = 0.64, deep = 0.64, cs = 1.02, cd = 0.55)
+DIAGRAM_BOX_HH <- c(one = 0.14, two = 0.265)
+DIAGRAM_BOX_LINEHEIGHT <- 1.2   # geom_label's, which drew the names until 2026-11-11
+DIAGRAM_BOX_R_PT <- 1.9         # the corner radius geom_label drew (0.15 lines at the name's size)
+# A flow label sits DIAGRAM_LABEL_GAP from its arrow, whatever the length of its lines: the label is justified to the
+# side it sits on (hjust / vjust 0, 0.5 or 1) and moved by dx / dy. Until 2026-11-11 the offset was hjust 1.12 and the
+# like, a fraction of each LINE's width, so a short line such as "62" sat ~1 px from its arrow.
+DIAGRAM_LABEL_GAP <- 0.07       # data units, ~4.5 px at DIAGRAM_REF_PX
+DIAGRAM_HEAD_GAP  <- 0.03       # data units between an arrowhead's tip and the box it points at, ~2 px
+
+# ⛔ LAND CLEARING IS ITS OWN ARROW (2026-09-22, Marcus): it was once ADDED INTO "respiration" (`fx$rh +
+# fx$luc`), hiding the flux the land-use convention is about (R1: an INTERNAL TRANSFER out of the land into the
+# air). It leaves BOTH land pools (pro rata, ccx_luc_pool_shares()), so it is ONE arrow rising from between the
+# two land boxes. (The footnote said which pools it comes out of until 2026-10-15; Marcus cut that sentence.)
+# 2026-10-15 LAYOUT (Marcus: legibility). Every label is anchored at `pos` along its own arrow (0 = tail,
+# 1 = head), then moved by dx / dy and justified by hj / vj (2026-11-11: see DIAGRAM_LABEL_GAP).
+# Marcus 2026-10-15: litterfall's label sits UNDER its arrow; land-use change reads "1.2 / land-use / change", close
+# to its arrow; "air to warm sea" sits below its arrow and "warm sea to air" above its own.
 plot_box_diagram <- function(fx, stock, p, n_layers = 10L, scale = 1) {
   hs_on <- isTRUE(p$hs_frac > 0)
-  boxes <- data.frame(
-    x = c(2, 1, 3, 5, 5), y = c(4, 2.4, 2.4, 3.0, 1.2),
+  bx <- data.frame(
+    id = c("atm", "veg", "soil", "ml", "deep"),
+    x = c(1.95, 0.62, 2.85, 5.1, 5.1), y = c(4.5, 2.35, 2.35, 3.4, 1.2),
     lab = c("Atmosphere", "Vegetation\n(leaves + wood)",
             # + the inert pool when the structure carries it (2026-09-30); the
             # shipped app's mode has none, so its label is unchanged
             if (ccx_inert_on(p)) "Soil\n(fast + slow + inert)" else "Soil\n(fast + slow)",
             "Ocean\nmixed layer", sprintf("Deep ocean\n(%d layers)", as.integer(n_layers))),
     col = c(PAL[["atm"]], PAL[["land"]], PAL[["land"]], PAL[["ocean"]], PAL[["ocean"]]))
+  if (hs_on)
+    bx <- rbind(bx, data.frame(
+      id = c("cs", "cd"), x = c(6.9, 6.9), y = c(4.85, 1.2),
+      lab = c(sprintf("Cold surface\n(high latitude, %.0f%%)", 100 * p$hs_frac), "Cold deep\nocean"),
+      col = c(PAL[["ocean"]], PAL[["ocean"]])))
+  bx$hw <- unname(DIAGRAM_BOX_HW[bx$id])
+  bx$hh <- unname(DIAGRAM_BOX_HH[ifelse(grepl("\n", bx$lab, fixed = TRUE), "two", "one")])
+  # a box's edges: l(eft), r(ight), t(op), b(ottom)
+  E <- function(id, side) {
+    b <- bx[bx$id == id, ]
+    switch(side, l = b$x - b$hw, r = b$x + b$hw, t = b$y + b$hh, b = b$y - b$hh)
+  }
+  g <- DIAGRAM_HEAD_GAP; lg <- DIAGRAM_LABEL_GAP
   as_down <- fx$as_down - if (hs_on) fx$hs_as_down else 0
   as_up   <- fx$as_up   - if (hs_on) fx$hs_as_up   else 0
   # ⛔ THE WARM "TO THE DEEP" ARROW IS THE WARM ROUTE ONLY (2026-10-12 pre-beta code review). It drew
@@ -2243,30 +2286,21 @@ plot_box_diagram <- function(fx, stock, p, n_layers = 10L, scale = 1) {
   wr <- ccx_flux_warm_route(fx)
   # x/xend/yend and the flux each segment carries, kept in ONE table so a
   # moved arrow cannot end up with another arrow's number.
-  # ⛔ LAND CLEARING IS ITS OWN ARROW (2026-09-22, Marcus): it was once ADDED INTO "respiration" (`fx$rh +
-  # fx$luc`), hiding the flux the land-use convention is about (R1: an INTERNAL TRANSFER out of the land into the
-  # air). It leaves BOTH land pools (pro rata, ccx_luc_pool_shares()), so it is ONE arrow rising from between the
-  # two land boxes. (The footnote said which pools it comes out of until 2026-10-15; Marcus cut that sentence.)
-  # 2026-10-15 LAYOUT (Marcus: legibility). Every label is anchored at `pos` along its own arrow (0 = tail,
-  # 1 = head) and pushed off it by hj / vj, so a label can be slid away from a neighbor without moving the arrow.
+  gap_mid <- (E("veg", "r") + E("soil", "l")) / 2   # land-use change rises from between the land boxes
   arrows_df <- rbind(data.frame(
-    # litterfall (2nd) ran box centre to box centre, its head hidden under the soil box: edge to edge (2026-11-11 A1)
-    x    = c(1.75, 1.72, 3,   2.62, 4.95, 2.0, 2.0),
-    xend = c(1,    2.12, 2.25, 4.55, 2.62, 2.0, 2.0),
-    y    = c(3.68, 2.4, 2.7, 3.76, 3.22, 4.7, 2.55),
-    yend = c(2.8,  2.4, 3.68, 3.12, 3.92, 4.3, 3.62),
+    # photosynthesis, litterfall, respiration, air to warm sea, warm sea to air, fossil fuels, land-use change
+    x    = c(1.4,                E("veg", "r"),       2.95,               2.5,                4.7,                1.95,             gap_mid),
+    xend = c(0.7,                E("soil", "l") - g,  2.25,               E("ml", "l") - g,   E("atm", "r") + g,  1.95,             gap_mid),
+    y    = c(E("atm", "b"),      2.35,                E("soil", "t"),     E("atm", "b"),      E("ml", "t"),       5.3,              2.5),
+    yend = c(E("veg", "t") + g,  2.35,                E("atm", "b") - g,  3.6,                4.39,               E("atm", "t") + g, E("atm", "b") - g),
     val  = c(fx$gpp, fx$litter, fx$rh, as_down, as_up, fx$foss, fx$luc),
-    # land-use change: hj -0.12 -> -0.05 with its name on two lines (Marcus 2026-10-15, comments 10.15.26b:
-    # "1.2 / land-use / change", closer to the arrow's line)
-    hj   = c(1.15, 0.5, -0.1, 0.45, 0.5, -0.2, -0.05),
-    # litterfall's label sits UNDER its arrow (vj > 1), Marcus 2026-10-15; "respiration" is slid toward the air and
-    # "air to warm sea" set below its arrow between it and the mixed-layer box; "warm sea to air" sits above its own
-    # 2026-11-11 review A1: on the host's wider font "air to warm sea" ran under the mixed-layer box, the litterfall
-    # number under the soil box, and the "warm sea to air" arrow through "warm": litterfall lower (1.6 -> 2.15), "air
-    # to warm sea" back along its arrow (0.62 -> 0.5), "warm sea to air" toward its tail and higher (0.45 -> 0.30,
-    # -0.35 -> -0.55). Clearances measured on this machine's font with ~15 % to spare for the host's.
-    vj   = c(0.5,  2.15, 0.5, 1.3, -0.55, 0.5, 0.5),
-    pos  = c(0.5,  0.5, 0.65, 0.5, 0.30, 0.5, 0.5),
+    # each label is justified at the corner nearest its arrow, so a sloped arrow runs away from the text
+    hj   = c(1,    0.5,  0,    1,    0,    0,    0),
+    vj   = c(0,    1,    0,    1,    0,    0.5,  0.5),
+    pos  = c(0.3,  0.5,  0.04, 0.95, 0,    0.5,  0.5),
+    dx   = c(-lg,  0,    lg,   0,    lg,   lg,   lg),
+    # respiration's label is bottom-justified, which sets its BASELINE on the anchor: + 0.04 for the descender of "p"
+    dy   = c(0,    E("veg", "b") - lg - 2.35, 0.04, -lg, lg, 0, 0),
     # ⚠ THE NEW ARROW'S NAME IS READ FROM R/fluxes.R's CHANNEL TABLE, which
     # states that nothing downstream may name a channel in prose without reading
     # it from there. The older arrows predate that rule and keep their teaching
@@ -2276,46 +2310,51 @@ plot_box_diagram <- function(fx, stock, p, n_layers = 10L, scale = 1) {
              if (hs_on) "warm sea to air" else "sea to air",
              "fossil fuels",
              sub(" ", "\n", tolower(CCX_FLUX_CHANNELS[["luc"]]), fixed = TRUE))),
-    diagram_mix_pair(4.82, 5.18, 2.6, 1.7, wr[["pump"]], wr[["ml_int"]]))
+    diagram_mix_pair(4.92, 5.28, E("ml", "b"), E("deep", "t"), wr[["pump"]], wr[["ml_int"]], dy = 0.05))
   xmax <- 6.1
   if (hs_on) {
     xmax <- 7.9
     # The cold boxes sit to the right; their air-sea pair leaves the atmosphere
-    # ABOVE the warm pair (y 4.12 / 3.92 against 3.75) so the two pairs never
-    # cross, and their labels are pushed to the right-hand end of the arrows.
-    boxes <- rbind(boxes, data.frame(
-      x = c(6.9, 6.9), y = c(3.75, 1.2),
-      lab = c(sprintf("Cold surface\n(high latitude, %.0f%%)", 100 * p$hs_frac), "Cold deep\nocean"),
-      col = c(PAL[["ocean"]], PAL[["ocean"]])))
-    # The cold column gets the same two-arrow pair (2026-10-15): export `hs_pump` down, and the rest of the
-    # cold surface -> cold deep net (`hs_hd_net` INCLUDES the export) as mixing, in the direction of its sign.
+    # ABOVE the warm pair so the two pairs never cross, and their labels are pushed
+    # toward the cold box. The cold column gets the same two-arrow pair (2026-10-15):
+    # export `hs_pump` down, and the rest of the cold surface -> cold deep net
+    # (`hs_hd_net` INCLUDES the export) as mixing, in the direction of its sign.
     arrows_df <- rbind(arrows_df, data.frame(
-      x    = c(2.62, 6.35, 6.3),
-      xend = c(6.35, 2.62, 5.6),
-      y    = c(4.17, 3.66, 1.35),
-      yend = c(3.92, 4.04, 1.35),
+      # air to cold sea, cold sea to air, cold deep to interior
+      x    = c(2.4,              E("cs", "l"),       E("cd", "l")),
+      xend = c(E("cs", "l") - g, E("atm", "r") + g,  E("deep", "r") + g),
+      y    = c(E("atm", "t"),    4.72,               1.2),
+      yend = c(5.05,             4.55,               1.2),
       val  = c(fx$hs_as_down, fx$hs_as_up, fx$hd_int_net),
-      hj   = c(0.5, 0.5, 0.5),
-      vj   = c(-0.35, 1.35, -0.6),
-      pos  = c(0.72, 0.28, 0.5),
-      nm   = c("air to cold sea", "cold sea to air", "cold deep to interior")),
-      diagram_mix_pair(6.72, 7.08, 3.35, 1.7, fx$hs_pump, fx$hs_hd_net - fx$hs_pump))
+      hj   = c(1,   0,   0.5),
+      vj   = c(0,   1,   0),
+      pos  = c(0.7, 0.425, 0.5),
+      dx   = c(0,   0,   0),
+      dy   = c(lg, -lg, E("deep", "t") + lg - 1.2),
+      # "cold deep to interior" on two lines sits between the two columns' arrows
+      nm   = c("air to cold sea", "cold sea to air", "cold deep\nto interior")),
+      diagram_mix_pair(6.72, 7.08, E("cs", "b"), E("cd", "t"), fx$hs_pump, fx$hs_hd_net - fx$hs_pump, dy = 0.1))
   }
   # 2026-10-15 (Marcus, comments 10.15.26b): the footnote no longer says which land pools land-use change
   # draws on, nor that the warm arrows exclude the cold boxes -- "both of these should be the default
   # assumption of someone looking at this chart".
   # one decimal below 10 GtC/yr, so the small cold-box flows do not round to 2 and 4
   arrows_df$lab <- sprintf(ifelse(arrows_df$val < 9.5, "%.1f\n%s", "%.0f\n%s"), arrows_df$val, arrows_df$nm)
+  arrows_df$lx <- arrows_df$x + arrows_df$pos * (arrows_df$xend - arrows_df$x) + arrows_df$dx
+  arrows_df$ly <- arrows_df$y + arrows_df$pos * (arrows_df$yend - arrows_df$y) + arrows_df$dy
+  # one rounded rectangle per box, in data units (annotation_custom: geom_rect has no corner radius)
+  box_layers <- lapply(seq_len(nrow(bx)), function(i) annotation_custom(
+    grid::roundrectGrob(r = grid::unit(DIAGRAM_BOX_R_PT * scale, "pt"), gp = grid::gpar(fill = bx$col[i], col = NA)),
+    xmin = bx$x[i] - bx$hw[i], xmax = bx$x[i] + bx$hw[i], ymin = bx$y[i] - bx$hh[i], ymax = bx$y[i] + bx$hh[i]))
   ggplot() +
     geom_segment(data = arrows_df, aes(x, y, xend = xend, yend = yend),
                  arrow = arrow(length = unit(0.16 * scale, "cm"), type = "closed"),
                  colour = "grey45", linewidth = 0.5 * scale) +
-    geom_text(data = arrows_df,
-              aes(x + pos * (xend - x), y + pos * (yend - y), label = lab, hjust = hj, vjust = vj),
+    geom_text(data = arrows_df, aes(lx, ly, label = lab, hjust = hj, vjust = vj),
               size = DIAGRAM_ARROW_SIZE * scale, colour = "grey20", lineheight = 0.9) +
-    geom_label(data = boxes, aes(x, y, label = lab, fill = I(col)),
-               colour = "white", fontface = "bold", size = DIAGRAM_BOX_SIZE * scale,
-               label.padding = unit(0.4, "lines"), label.r = unit(0.15, "lines")) +
+    box_layers +
+    geom_text(data = bx, aes(x, y, label = lab), colour = "white", fontface = "bold",
+              size = DIAGRAM_BOX_SIZE * scale, lineheight = DIAGRAM_BOX_LINEHEIGHT) +
     # ⚠ WRAPPED, NOT HAND-BROKEN. This footnote used to carry a literal "\n" at a
     # point that happened to fit; adding the land-use clause (2026-09-22) pushed
     # the second line past BOTH panel edges, because an annotate() label clips
@@ -2348,5 +2387,5 @@ plot_box_diagram <- function(fx, stock, p, n_layers = 10L, scale = 1) {
                               "The increase in atmospheric carbon concentrations persists for centuries."),   # Marcus 2026-10-15
                        fx$atm_out, fx$tau_turn),
                app_text_px("diagram"), diagram_note_pt(DIAGRAM_NOTE_SIZE_BOLD * scale), face = "bold")) +
-    xlim(0.1, xmax) + ylim(-1.45, 4.9) + theme_void()
+    xlim(0.1, xmax) + ylim(-1.45, 5.5) + theme_void()
 }

@@ -1,0 +1,13 @@
+viewport 375: diagram output 565 px, image [565, 440], clientData 565, scrolls sideways True
+viewport 576: diagram output 552 px, image [552, 430], clientData 552, scrolls sideways False
+viewport 700: diagram output 676 px, image [676, 526], clientData 676, scrolls sideways False
+viewport 768: diagram output 744 px, image [744, 579], clientData 744, scrolls sideways False
+viewport 900: diagram output 876 px, image [876, 682], clientData 876, scrolls sideways False
+viewport 1024: diagram output 573 px, image [573, 446], clientData 573.328125, scrolls sideways False
+viewport 1280: diagram output 723 px, image [722, 563], clientData 722.65625, scrolls sideways False
+viewport 1440: diagram output 816 px, image [815, 635], clientData 815.984375, scrolls sideways False
+viewport 1920: diagram output 1096 px, image [1095, 854], clientData 1095.984375, scrolls sideways False
+viewport 577: diagram output 553 px, image [553, 431], clientData 553, scrolls sideways False
+viewport 991: diagram output 967 px, image [967, 753], clientData 967, scrolls sideways False
+viewport 992: diagram output 555 px, image [554, 432], clientData 554.65625, scrolls sideways False
+viewport 1000: diagram output 559 px, image [559, 436], clientData 559.328125, scrolls sideways False
