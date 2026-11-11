@@ -16,6 +16,8 @@ shinyapps.io target `carbotope.shinyapps.io/carbotope` (ruling R3) is now the do
 part that is expensive to undo — renaming after the post circulates breaks every link
 anyone has shared — so set the account/app name at the FIRST deploy, not after.
 
+⚠ **Superseded 2026-11-10/11:** carbotope.org is now the landing page on GitHub Pages ("The landing page" below), and
+the Porkbun forward described next is deleted. Kept as the record of what shared links did from 10-21 to 11-10.
 **The short address (2026-10-21): https://carbotope.org** is a registrar FORWARD to the URL above, not
 a custom domain: Connect Cloud maps an owned domain only on Enhanced and up, and the account is on Basic.
 Registered by Marcus at Porkbun (2026-10-21, expires 2028-10-21; Porkbun nameservers). Apex and `www`
@@ -30,7 +32,7 @@ send a 302 to the app over http and https (Let's Encrypt certificate for `carbot
 - **To move the app:** edit the forward's destination at Porkbun. The banner's "Short link: CarboTope.org"
   (`APP_SHORT_URL`, `app/global.R`) names the domain, not the host, so it needs no change.
 
-**The landing page (2026-11-10; PREPARED, NOT LIVE until the switch below).** Marcus: "Go with option 1, the landing
+**The landing page (built 2026-11-10; LIVE at https://carbotope.org since 2026-11-11, HTTPS enforced).** Marcus: "Go with option 1, the landing
 page with a button." `docs/` holds a static page for https://carbotope.org, served by GitHub Pages from `main` /docs.
 Crawlers and link previews read it without waking the app; the Connect Cloud app keeps its default robots.txt (every
 crawler but LinkedInBot and Twitterbot disallowed, CHANGELOG 2026-11-10 a). An address with a query goes on to the app
@@ -43,12 +45,16 @@ read 2026-11-10: add the domain on GitHub before changing DNS, or someone else c
    record it shows (host `_github-pages-challenge-msarofim`) at Porkbun; press Verify. Keep the record.
 2. ✅ 2026-11-10 (`gh api`). Repository → Settings → Pages: deploy from branch `main`, folder `/docs`; custom domain
    `carbotope.org`. GitHub committed `docs/CNAME` ("Create CNAME", `3d867ab8`); the test holds it.
-3. Porkbun: delete the URL forwards (apex, `www`, and the wildcard: GitHub advises against wildcard records), and any
+3. ✅ 2026-11-10 (Marcus). Porkbun: delete the URL forwards (apex, `www`, and the wildcard: GitHub advises against wildcard records), and any
    records Porkbun set for forwarding. Add A `185.199.108.153`, `185.199.109.153`, `185.199.110.153`,
    `185.199.111.153`; AAAA `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`;
    CNAME `www` → `msarofim.github.io`. GitHub then redirects `www` to the apex. DNS can take up to 24 h.
-4. When GitHub has issued the certificate (up to 24 h): tick "Enforce HTTPS".
+4. ✅ 2026-11-11 (`gh api`, `https_enforced`). When GitHub has issued the certificate (up to 24 h): tick "Enforce HTTPS".
 During the switch carbotope.org may be briefly unreachable; the app's own address keeps working throughout.
+⛔ **GitHub never requested the certificate on its own** (2026-11-10 21:10 to 11-11 12:04 UTC: `https_certificate` null,
+the health check stuck at "202 Accepted", browsers refusing https://carbotope.org). The domain had been saved before DNS
+pointed at GitHub, as step 2 requires. **Removing and re-adding the custom domain** (`PUT /pages` with `cname` null, then
+`carbotope.org`) issued it within seconds. GitHub commits "Delete CNAME" and "Create CNAME"; pull them.
 
 **Deliberately NOT renamed** (Marcus's scoping of R3): the repository stays
 `CarbonCycleEmulator` and the code keeps its `ccx_` prefix. Neither is public-facing.
