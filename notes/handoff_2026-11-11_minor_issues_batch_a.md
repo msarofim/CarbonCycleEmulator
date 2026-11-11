@@ -20,8 +20,16 @@ Supersedes `notes/handoff_2026-10-25_alt_text_live.md` for the app's live state.
 
 - **Batch A done** in `2bc18f62` (CHANGELOG 2026-11-11 i): all 16 items, new `test-app-review-20261111.R`, mutation
   script `outputs/diagnostics/review_20261111/mutate_batch_a.sh` (12/12). The landing preview image is live (docs/).
-- **In flight:** full suite at `2bc18f62` (`~/ccx_frozen/suite_20261111_2bc18f62.sh`, worktree
-  `~/ccx_frozen/suite_20261111_2bc18f62`; remove it after). Then bundle, local check, Marcus publishes, live checks.
+- ~~In flight: full suite at `2bc18f62`~~ (died with that session; superseded, see below).
+- **Later still (CHANGELOG 2026-11-11 j, k, l):** serving the `2bc18f62` bundle found a batch-A bug: A11's rule hid
+  the Download line while the chart drew, Shiny suspended the links, and 18 of 54 never got an address. Fixed in
+  `34252dc7` (`suspendWhenHidden = FALSE` in `app_dl_server()`; gate A11b; browser check
+  `outputs/diagnostics/review_20261111/check_dl_links.py`; old bundle quarantined). The suites then failed the U.S.-spelling
+  lint on batch A's "no colour for" error; Marcus chose "Fix both" (message and A3's pattern; test edit flagged), `01cdaf99`.
+- **Deploy candidate:** `~/ccx_frozen/bundle_20261111_01cdaf99`. Suite 9,719 / 0 / 1 skip / 233 warnings; served locally,
+  all checks pass. Marcus publishes (command in CHANGELOG l), then the live checks in §3 step 5, plus `check_dl_links.py`
+  on the live URL. Headless Chrome on 9333 was left running for the live checks (PID 49106; `kill 49106` if this
+  session did not).
 - **Check live after deploy:** card 2's facet titles ("CO₂ gradient", "δ¹³C gradient") drew without their digits on this
   laptop only; the host drew them before. The box diagram's labels were tuned on this laptop's narrower font.
 - **Tools added:** `outputs/diagnostics/review_20261111/shoot_imgs.py` saves a chart's own PNG (page-clip screenshots

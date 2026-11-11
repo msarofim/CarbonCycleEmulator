@@ -2,6 +2,13 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-11-11 (l) — **Full suite @ `01cdaf99`: 9,719 passed, 0 failed, 1 standing skip, 0 errored, 233 warnings, 24.8 min. Bundle `~/ccx_frozen/bundle_20261111_01cdaf99` built and served locally: every tab draws, every Download link under a drawn chart works at 1440 × 900 and 375 × 812, the CSV names `01cdaf9`. Ready for Marcus to publish.**
+
+- **Suite:** against `34252dc7` the only per-file change is `app-us-spelling` (1 failed → 0). Log and per-file counts `outputs/diagnostics/suite_20261111_01cdaf99{.log,_perfile.csv}`; launch script kept in `~/ccx_frozen/`; worktree removed. README's test line cites it.
+- **Bundle:** 117 files, 7.4 MB, same mode file. Against the live bundle (`8be0095a`) it differs in `app/R/{downloads,plots,plots_review}.R`, `app/{global,server,ui}.R` and `FROZEN_FROM_COMMIT.txt`; against the checked `34252dc7` bundle only in (k)'s error message and comment.
+- **Served locally** (port 7795, headless Chrome 9333; `outputs/diagnostics/review_20261111/bundle_01cdaf99/`): `check_live_pointer.py` at 1440 × 900, both pointers open their card, every tab draws with alt text and no output errors, CSV `01cdaf9`; its one FAIL is Build your own before "Run it" (by design). `check_dl_links.py` ALL OK, 10/10 panes at each width.
+- **To publish (Marcus):** `Rscript -e 'rsconnect::deployApp("/Users/MarcusMarcus/ccx_frozen/bundle_20261111_01cdaf99", appId = "01a14244-5cc3-1951-7b06-9e2fb07beae3", account = "saraphreport", server = "connect.posit.cloud", forceUpdate = TRUE)'`. Check that 4 GB / 2 CPU survive.
+
 ## 2026-11-11 (k) — **Full suites at `2bc18f62` and `34252dc7`: one new failure in each, the U.S.-spelling lint on a batch-A error message ("no colour for"). Fixed in the code; batch A's A3 test, which expected the British text, edited with Marcus's approval. Not deployed.**
 
 - **Suite @ `2bc18f62`** (relaunched after the first run died; 24.1 min): 9,710 passed, 1 failed, 1 standing skip (`l2-enso-limb`), 0 errored, 233 warnings (unchanged). Per file against `8be0095a`: `app-review-20261111` new (38), `plot-text-fits` 111 → 121, `takeaway-arithmetic` 26 → 35, `stylised-takeaway` 63 → 65, and `app-us-spelling` 9 with 1 failed. ⚠ (i) gave the first two increments as +7 and +8; the suite counts +10 and +9.
