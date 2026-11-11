@@ -2,6 +2,12 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-11-11 (g) — **Live checks on the `8be0095` deploy (Marcus: "I published it; do the live checks"): revision `01a1cac5`, 4 GB / 2 CPU and the timeouts kept; every tab draws at 1440 × 900 and 200 × 800; the two short charts' y titles are clear of the caption; the navbar name opens carbotope.org in the same tab.** Record: `outputs/diagnostics/live_20261111_axis_title/` (`live_browser_checks.md`).
+
+- `time_tab_draws.py` ALL OK at both sizes (slowest 5.6 s); `check_live_pointer.py` at 1440 × 900: pointers, CSV `8be0095`, every chart drawn (its one FAIL is Build your own before "Run it", by design); `check_scan_ui.py` ALL OK at 1440 × 900 and 375 × 812.
+- On the host the residual chart's caption wraps to two lines (wider host font) and still clears the wrapped title.
+- **Not tagged.** Whether this deploy gets a tag is Marcus's.
+
 ## 2026-11-11 (f) — **Full suite @ `8be0095a`: 9,652 passed, 0 failed, 1 standing skip, 0 errored, 233 warnings, 23.4 min. Bundle `~/ccx_frozen/bundle_20261111_8be0095a` built and served locally: every tab draws, both short charts' titles clear of the caption, the CSV names `8be0095`. Not published.**
 
 - **Suite** (frozen worktree, `data-raw/downloads` linked 79 + 3; launch script `~/ccx_frozen/suite_20261111_8be0095a.sh` kept; worktree removed): warnings unchanged at 233. Per-file changes against `54e9ef80`: `test-app-a11y` 125 → 126, `test-app-phone-layout` 55 → 132, `test-app-short-link` 8 → 13, `test-landing-page` new (52). (d)'s "74 → 133" for phone-layout is corrected there: 55 was the 11-02 count, 132 the final one. Log and per-file counts `outputs/diagnostics/suite_20261111_8be0095a{.log,_perfile.csv}`; README's test line cites it.
