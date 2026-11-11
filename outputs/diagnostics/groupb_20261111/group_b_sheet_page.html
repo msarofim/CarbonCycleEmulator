@@ -1,0 +1,590 @@
+<title>CarboTope Group B Decisions</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/* Layout: one reading column of decision cards under a sticky progress bar; science, design, wording, units in order. */
+:root {
+  --bg: #f3f6f7; --surface: #ffffff; --ink: #1c2a34; --muted: #5a6a76; --line: #d6dee3;
+  --accent: #0f7466; --accent-ink: #ffffff; --accent-soft: #dff1ed;
+  --quote: #edf2f5; --note-bg: #fbf3dc; --note-ink: #5e4700; --pending: #8a5a00; --pending-soft: #fbedd0;
+  --bad: #a3313e;
+  --f-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #10171c; --surface: #172129; --ink: #e2e9ee; --muted: #98a9b5; --line: #2a3943;
+  --accent: #4fc0aa; --accent-ink: #0d1a17; --accent-soft: #15342e;
+  --quote: #1c2932; --note-bg: #2c2613; --note-ink: #ead08a; --pending: #f0c060; --pending-soft: #33280f;
+  --bad: #f08a95; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #10171c; --surface: #172129; --ink: #e2e9ee; --muted: #98a9b5; --line: #2a3943;
+  --accent: #4fc0aa; --accent-ink: #0d1a17; --accent-soft: #15342e;
+  --quote: #1c2932; --note-bg: #2c2613; --note-ink: #ead08a; --pending: #f0c060; --pending-soft: #33280f;
+  --bad: #f08a95; color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 880px; margin: 0 auto; padding-block: 28px 64px; display: flex; flex-direction: column; gap: 28px; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: 1.9rem; font-weight: 600; }
+h2 { font-size: 1.3rem; font-weight: 600; }
+h3 { font-size: 1.08rem; font-weight: 600; line-height: 1.35; }
+p { margin: 0; }
+code, .mono { font-family: var(--f-mono); font-size: 0.84em; }
+a { color: var(--accent); }
+
+header.intro { display: flex; flex-direction: column; gap: 10px; }
+.eyebrow { font: 500 0.75rem/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.lede { color: var(--muted); max-width: 68ch; }
+
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line);
+  padding-block: 10px; display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; }
+.progress { display: flex; align-items: center; gap: 10px; font-variant-numeric: tabular-nums; min-width: 0; }
+.meter { width: 140px; max-width: 30vw; height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.meter > i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .25s; }
+.filters { display: flex; flex-wrap: wrap; gap: 6px; }
+.filters button, .btn { font: 500 0.82rem var(--f-body); border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  border-radius: 999px; padding: 5px 12px; cursor: pointer; }
+.filters button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn:focus-visible, .filters button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.store { font-size: 0.8rem; color: var(--muted); margin-left: auto; }
+.store.warn { color: var(--pending); }
+
+section.group { display: flex; flex-direction: column; gap: 16px; }
+.group-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; border-bottom: 2px solid var(--ink); padding-bottom: 6px; }
+.group-head p { color: var(--muted); font-size: 0.9rem; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.card.decided { border-left: 4px solid var(--accent); }
+.card-head { display: flex; gap: 12px; align-items: flex-start; }
+.tag { font: 600 0.78rem/1 var(--f-mono); padding: 5px 7px; border-radius: 5px; background: var(--quote); color: var(--ink); flex: none; margin-top: 2px; }
+.card-head .t { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.where { font: 0.78rem var(--f-mono); color: var(--muted); overflow-wrap: anywhere; }
+.chip { display: inline-block; font: 600 0.72rem/1.4 var(--f-body); letter-spacing: 0.03em; padding: 1px 8px; border-radius: 999px; }
+.chip.pending { background: var(--pending-soft); color: var(--pending); }
+.label { font: 600 0.72rem var(--f-body); letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
+.block { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+blockquote { margin: 0; background: var(--quote); border-radius: 6px; padding: 10px 14px; font-size: 0.93rem; }
+.found { font-size: 0.93rem; display: flex; flex-direction: column; gap: 8px; }
+.found ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; font-size: 0.84rem; font-variant-numeric: tabular-nums; min-width: 100%; }
+th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 600; color: var(--muted); font-size: 0.76rem; }
+
+.figs { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+figure { margin: 0; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+figure button { padding: 0; border: 1px solid var(--line); border-radius: 6px; background: #fff; cursor: zoom-in; overflow: hidden; max-height: 220px; display: block; }
+figure img { display: block; width: 100%; height: auto; }
+figcaption { font-size: 0.78rem; color: var(--muted); }
+.lightbox { position: fixed; inset: 0; z-index: 20; background: rgba(8, 14, 18, 0.86); display: flex; align-items: center; justify-content: center;
+  padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); cursor: zoom-out; }
+.lightbox img { max-width: 100%; max-height: 100%; background: #fff; border-radius: 4px; }
+
+.options { display: flex; flex-direction: column; gap: 6px; border: 0; margin: 0; padding: 0; min-width: 0; }
+.opt { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; cursor: pointer; }
+.opt:hover { border-color: var(--accent); }
+.opt input { margin-top: 4px; accent-color: var(--accent); }
+.opt.checked { border-color: var(--accent); background: var(--accent-soft); }
+.opt .ol { font-weight: 600; }
+.opt .ot { font-size: 0.9rem; color: var(--ink); }
+.rec { font: 600 0.7rem var(--f-body); letter-spacing: 0.05em; text-transform: uppercase; color: var(--accent); margin-left: 6px; }
+.recnote { font-size: 0.86rem; color: var(--muted); }
+textarea { width: 100%; box-sizing: border-box; min-height: 64px; resize: vertical; font: 0.9rem/1.45 var(--f-body); color: var(--ink);
+  background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; }
+.foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.saved { font-size: 0.78rem; color: var(--muted); }
+.saved.err { color: var(--bad); }
+
+/* compact rows for the small items */
+.mini { display: flex; flex-direction: column; gap: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.mini-head { padding: 14px 20px 10px; display: flex; flex-direction: column; gap: 4px; }
+.row { display: grid; grid-template-columns: 52px minmax(0, 1fr) minmax(0, 220px); gap: 12px; padding: 12px 20px; border-top: 1px solid var(--line); align-items: start; }
+.row.decided { box-shadow: inset 4px 0 0 var(--accent); }
+.row .tag { justify-self: start; }
+.row .txt { display: flex; flex-direction: column; gap: 4px; font-size: 0.88rem; min-width: 0; }
+.row .now { color: var(--muted); }
+.row .draft::before { content: "→ "; color: var(--accent); font-weight: 600; }
+.row .ctl { display: flex; flex-direction: column; gap: 6px; }
+.pills { display: flex; flex-wrap: wrap; gap: 4px; }
+.pill { position: relative; }
+.pill input { position: absolute; opacity: 0; pointer-events: none; }
+.pill span { display: inline-block; font-size: 0.78rem; padding: 3px 10px; border: 1px solid var(--line); border-radius: 999px; cursor: pointer; }
+.pill input:checked + span { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.pill input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.row textarea { min-height: 34px; font-size: 0.82rem; padding: 5px 8px; }
+@media (max-width: 640px) {
+  .row { grid-template-columns: 1fr; }
+  .card { padding: 14px; }
+  .store { margin-left: 0; width: 100%; }
+}
+.hide { display: none !important; }
+.wrap > *, section.group > *, .card > *, .found > *, .block > * { min-width: 0; max-width: 100%; }
+.tbl { max-width: 100%; }
+.lede, .found p, blockquote { overflow-wrap: break-word; }
+.prov { font-size: 0.82rem; color: var(--muted); display: flex; flex-direction: column; gap: 6px; }
+@media (prefers-reduced-motion: reduce) { .meter > i { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header class="intro">
+    <span class="eyebrow">CarboTope minor-issues review · 2026-11-11 · group B</span>
+    <h1>CarboTope group B decisions</h1>
+    <p class="lede">Items B1 to B21 and B10. Nothing in the app has changed. Each item shows the current text or behaviour as it renders in the live build, what was measured or found, the options, and my recommendation. Pick an option and add your own wording or a note where you want one. Choices save as you make them.</p>
+  </header>
+
+  <div class="bar" role="region" aria-label="Progress and filters">
+    <div class="progress"><div class="meter" aria-hidden="true"><i id="meterFill"></i></div><span id="progressText">0 of 0 decided</span></div>
+    <div class="filters" id="filters">
+      <button type="button" data-f="all" aria-pressed="true">All</button>
+      <button type="button" data-f="open" aria-pressed="false">Undecided</button>
+      <button type="button" data-f="science" aria-pressed="false">Science</button>
+      <button type="button" data-f="design" aria-pressed="false">Design</button>
+      <button type="button" data-f="wording" aria-pressed="false">Wording</button>
+      <button type="button" class="btn" id="copyBtn">Copy my choices</button>
+    </div>
+    <span class="store" id="storeStatus">Connecting to the saved choices…</span>
+  </div>
+
+  <main id="main" class="wrap" style="padding:0;gap:36px"></main>
+
+  <footer class="prov">
+    <span class="label">Where the numbers come from</span>
+    <p>Science numbers are measured at the canonical calibration <code>hilda31fl</code> by committed drivers: <code>calibration/diag_card4_enso_estimators.R</code> (B19; bootstrap seed 20261111, two runs identical), <code>calibration/diag_card3_kw_diseq_scan.R</code> (B20, card 3) and <code>calibration/diag_card7_sst_amp.R</code> (B21). Outputs are in <code>outputs/diagnostics/</code> under the same names with <code>_20261111_hilda31fl</code>. B4 and B11 numbers: <code>outputs/diagnostics/groupb_20261111/groupb_numbers.R</code>.</p>
+    <p>Screenshots: headless Chrome at 1440 × 900, a 375 × 812 phone and a 768 × 1024 tablet (emulation, not a real device), from the live build's code. B14 prototypes ran in a throwaway copy of the app. The Markdown version is <code>notes/decision_sheet_2026-11-11_group_b.md</code>.</p>
+  </footer>
+</div>
+<div class="lightbox hide" id="lightbox" role="dialog" aria-label="Enlarged screenshot"><img id="lightboxImg" alt=""></div>
+
+<script>
+const LEAVE = { key: "leave", label: "Leave as is" };
+const OWN = { key: "own", label: "My own wording or choice (write it below)" };
+const WORD_OPTS = [{ key: "draft", label: "Use the draft" }, LEAVE, OWN];
+const SMALL_OPTS = [{ key: "apply", label: "Apply" }, { key: "skip", label: "Skip" }, { key: "own", label: "Other" }];
+
+const GROUPS = [
+  { id: "science", title: "Science", sub: "B19 to B21, measured at hilda31fl. The card texts depend on these." },
+  { id: "design", title: "Design", sub: "B12 to B18, with screenshots and, for B14, prototypes run in the app." },
+  { id: "wording", title: "Wording", sub: "B1 to B9 and B11. Drafts only; the current text is quoted as rendered." },
+  { id: "units", title: "Unit glosses", sub: "B10. Uses the existing gloss mechanism and wording." }
+];
+
+const ITEMS = [
+/* ---------------- SCIENCE ---------------- */
+{ id: "b19", group: "science", tag: "B19", title: "Card 4's last sentence: “on the What-if tab's measure it is less”",
+  where: "app/R/review.R:762–770 (detail and ask). Card 4a's caption computes its own word and is unaffected.",
+  now: `<p>“On the first chart's measure the model's variability is more ENSO-driven than the record's; on the What-if tab's measure it is less — so we cannot say the missing variance is not El Niño-shaped.”</p><p>Ask: “And if the missing variability is not clearly El Niño, not volcanic and not a trend — what would you look for next?”</p>`,
+  found: `<div class="tbl"><table><thead><tr><th>Estimator</th><th>Years</th><th>Lag 0</th><th>Lag 3</th><th>Lag 6</th><th>Lag 9</th><th>r peaks at (model / record)</th></tr></thead><tbody>
+<tr><td>Card 4a's chart (GATE V; GCB)</td><td>1959–2024</td><td>+0.48 vs +0.29, clear</td><td>+0.75 vs +0.49, clear</td><td>+0.79 vs +0.52, clear</td><td>+0.74 vs +0.50, clear</td><td>5 / 5 months</td></tr>
+<tr><td>What-if tab as drawn (NOAA MBL, annual means differenced)</td><td>1980–2024</td><td>+0.29 vs −0.15, clear</td><td>+0.58 vs +0.19, clear</td><td>+0.67 vs +0.37, clear</td><td>+0.71 vs +0.47, clear</td><td>11 / 11 months</td></tr>
+<tr><td>The 10-15 reading (model annual means vs GCB Jan-to-Jan)</td><td>1959–2024</td><td>+0.18 vs +0.29, not clear (p 0.38)</td><td>+0.49 vs +0.48</td><td>+0.59 vs +0.50</td><td>+0.64 vs +0.48, clear</td><td>11 / 5 months</td></tr>
+</tbody></table></div>
+<p class="recnote">Model r vs record r with observed Niño 3.4. “Clear” means the 90% interval of the difference excludes zero.</p>
+<ul><li>The 11-11 review's six numbers reproduce exactly on the second row, the series the What-if tab draws.</li>
+<li>The 10-15 “less” came from the third row. It pairs the model's annual-mean differences (centred near 1 January) with GCB's January-to-January series (centred near 1 July), so the model's correlation peaks 6 months later than the record's. The app has avoided this pairing since 2026-09-26.</li>
+<li>On both like-for-like rows the model and the record peak at the same lag, and the model's r is higher at every lag.</li></ul>
+<div class="tbl"><table><thead><tr><th>Variance split at the shared peak lag (fractions of the record's variance)</th><th>Model: ENSO-related</th><th>Model: the rest</th><th>Record: ENSO-related</th><th>Record: the rest</th></tr></thead><tbody>
+<tr><td>Card 4a's estimator (lag 5)</td><td>0.47</td><td>0.28</td><td>0.27</td><td>0.73</td></tr>
+<tr><td>What-if estimator (lag 11)</td><td>0.24</td><td>0.21</td><td>0.26</td><td>0.74</td></tr></tbody></table></div>
+<p>The model's shortfall is in the part that does not follow the index (0.45 and 0.53 of the record's variance). Its ENSO-related part is equal to or larger than the record's. This is a linear split on one lagged annual index.</p>`,
+  figs: [{ src: "shots/b19_card4a_variance.png", cap: "Card 4a's chart and caption as drawn now." }],
+  options: [
+    { key: "a", label: "(a) Rewrite the sentence and the ask", text: "“On both charts' measures the model's growth follows the ENSO index more closely than the measured growth does. The variance the model lacks is in the part that does not follow ENSO.” Ask: “And if the missing variability is not El Niño, volcanic or a trend, what would you look for next?”" },
+    { key: "b", label: "(b) Delete the sentence, keep the ask", text: "" },
+    { key: "c", label: "(c) Leave as is", text: "The sentence's second clause is not supported at this calibration." },
+    OWN],
+  rec: "a", recNote: "It restores the 09-22 finding on the estimator the app now uses. A test in test-review-card-numbers.R could recompute r on both estimators and fail if either reverses; nothing checks this sentence today." },
+
+{ id: "b20-card3", group: "science", tag: "B20", title: "Card 3's “about 15%”",
+  where: "app/R/review.R:656–667",
+  now: `<p>“There is a related quantitative tension: the ocean bottles and the atmospheric δ¹³C decline disagree by about 15% on how fast the air and sea exchange isotopes — the surface bottles want it slower, the atmospheric δ¹³C decline holds it where it is — so a fix that satisfies one moves away from the other.”</p>`,
+  found: `<p>k_w scaled ×0.70–1.30 at the canonical, everything else at the mode; gate D's disequilibria against the GLODAP bottles.</p>
+<div class="tbl"><table><thead><tr><th>Disequilibrium (‰)</th><th>Model at ×1</th><th>Bottles</th><th>k_w factor that meets the bottles</th></tr></thead><tbody>
+<tr><td>Northern mixed layer</td><td>+1.061</td><td>+1.278 ± 0.023</td><td>×0.78 (slower)</td></tr>
+<tr><td>Southern mixed layer</td><td>+0.936</td><td>+1.055 ± 0.021</td><td>×0.87 (slower)</td></tr>
+<tr><td>Northern hemisphere average (card 3's chart)</td><td>+0.929</td><td>+1.007 ± 0.022</td><td>×0.90 (slower)</td></tr>
+<tr><td>Southern hemisphere average (card 3's chart)</td><td>+0.836</td><td>+0.721 ± 0.019</td><td>×1.19 (faster)</td></tr>
+<tr><td>Northern / southern cold high-latitude box</td><td>+0.035 / +0.160</td><td>−0.481 / −1.062</td><td>none in ×0.70–1.30</td></tr>
+<tr><td>North-minus-south asymmetry</td><td>+0.093</td><td>+0.286 ± 0.029</td><td>none (0.084–0.100 across the scan)</td></tr></tbody></table></div>
+<ul><li>The two mixed-layer levels still want slower exchange, by 13–22%. The 15% at hilda29l was “both at ×0.85”.</li>
+<li>The hemisphere averages, which card 3's chart draws, now pull opposite ways.</li>
+<li>With nothing else re-fitted, ×0.85 costs 618 log-likelihood: atmospheric Δ¹⁴C 391, atmospheric δ¹³C level 198, CO₂ 16. The re-fitted reading comes from card 7's profile below.</li></ul>`,
+  options: [
+    { key: "a", label: "(a) Reword to the current numbers", text: "“There is a related tension: the surface-ocean bottles want the air–sea isotope exchange 13–22% slower in the warm surface layer than the atmospheric records allow, while the cold high-latitude water misses the bottles at any exchange speed.”" },
+    { key: "b", label: "(b) Cut the sentence", text: "Card 7 already carries the gas-exchange-speed story; card 3's version now depends on which boxes are averaged." },
+    { key: "c", label: "(c) Leave as is", text: "" },
+    OWN],
+  rec: "b", recNote: "Provisional until card 7's profile lands. At hilda31w, with everything re-fitted, the δ¹³C rows did not hold k_w up (−2.68 against +7.09 for Δ¹⁴C), which puts “the atmospheric δ¹³C decline holds it where it is” in conflict with card 7's “the data prefer the literature value”." },
+
+{ id: "b20-card7", group: "science", tag: "B20", title: "Card 7: “The data prefer the literature value”", pending: true,
+  where: "app/R/review.R:886–892",
+  now: `<p>“One fitted value is a compromise between two sources rather than a measurement: the air–sea gas transfer speed comes out at about 1,840 m per year, against the literature's 1,446 (Naegler 2009). The data prefer the literature value; what holds it higher is the stated prior on how much gas exchange the cold high-latitude box gets, and the two cannot both hold.”</p>`,
+  found: `<p>Being measured now: the k_w = 1446 price profile at hilda31fl (two starts, the 30 other parameters re-fitted), started 16:22, expected to finish around 18:30–19:30.</p>
+<p>At hilda31w (10-13) the data preferred 1,446 by +6.21 log-likelihood (atmospheric Δ¹⁴C +7.09, δ¹³C −2.68), and hs_asx_frac's prior was 88% of what holds k_w higher. This card will be updated with the hilda31fl numbers.</p>`,
+  options: [
+    { key: "keep", label: "Keep the sentence if the profile confirms it", text: "" },
+    { key: "wait", label: "Show me the numbers first", text: "" },
+    OWN],
+  rec: null, recNote: "Decide after the result is in." },
+
+{ id: "b21", group: "science", tag: "B21", title: "Card 7 and What pins down what? on the seasonal SST amplitude",
+  where: "Card 7: app/R/review.R:869–873. Map paragraph: app/server.R:1272–1276 (its three names are computed).",
+  now: `<p>Card 7: “The stand-ins that matter most for what this app claims are the station offset (issue 1), the δ¹³C gradient offset (issue 2 is scored net of it), and a seasonal sea-surface-temperature amplitude fitted well under the observed one.”</p>
+<p>What pins down what?: “Some parameters have little influence on the model, and are not well constrained by observations, such as “Southern sea-surface seasonal temperature swing”, “Northern sea-surface seasonal temperature swing”, and “Share of bomb-test 14C released in the Northern Hemisphere”.”</p>`,
+  found: `<ul><li>Fitted half-amplitudes: north 1.50 K against ERSSTv5's 2.24 K (67%); south 1.60 K against 1.75 K (91%).</li>
+<li>On the map the two SST swings are the two least influential of the 25 model parameters (total leverage 1.11 and 1.34; the next is 1.73, the largest 8.01).</li>
+<li>Moving both to the measured values, nothing else re-fitted: −12.9 log-likelihood (CO₂ seasonal rows −12.1). The seasonal cycle the Keeling tab draws changes by −3.6% in the north (7.19 → 6.93 ppm peak to trough; Mauna Loa 6.75) and −6.8% in the south.</li>
+<li>Setting both to zero instead: −290 log-likelihood, and the southern cycle grows by 64%.</li></ul>
+<p>Both texts are true; they measure different things. Card 7's “matter most” is the claim the numbers do not support, and “fitted well under the observed one” holds for the north only.</p>`,
+  options: [
+    { key: "a", label: "(a) Take it off card 7's “matter most” list", text: "“The stand-ins that matter most for what this app claims are the station offset (issue 1) and the δ¹³C gradient offset (issue 2 is scored net of it).” The table below still lists both SST swings." },
+    { key: "b", label: "(b) Keep it, with the measured size", text: "“… and the northern seasonal sea-surface-temperature swing, fitted at about two thirds of the measured one, which changes the seasonal cycle on the Keeling tab by about 4%.”" },
+    { key: "c", label: "(c) Leave as is", text: "" },
+    OWN],
+  rec: "a", recNote: "The two offsets' “matter most” was not re-measured here; that half of the sentence is carried as written." },
+
+/* ---------------- DESIGN ---------------- */
+{ id: "b12", group: "design", tag: "B12", title: "Controls the Keeling and Where texts ignore",
+  where: "app/server.R:87 (Keeling takeaway), :143 and the three readouts (Where), app/R/plots.R:840 (plot_seasonal())",
+  now: `<p>With Years 2000–2024 and “Southern only” set, the Keeling takeaway still reads “At Mauna Loa, the model produces 315 ppm in 1958, rising to 423 ppm in 2024; …”, and the seasonal chart still draws Mauna Loa. With Years 1900–1960 on the Where tab the readouts still give 317 / 234 / 224 GtC, the 1750–2024 totals. The seasonal chart's window is fixed at 2000–2024.</p>`,
+  figs: [{ src: "shots/b12_keeling_2000_2024_SH_viewport.png", cap: "Keeling tab, 2000–2024, Southern only." },
+         { src: "shots/b12_b13_keeling_seasonal_SH.png", cap: "Seasonal chart in the same state: still Mauna Loa." },
+         { src: "shots/b12_where_1900_1960_viewport.png", cap: "Where tab, 1900–1960: readouts are 1750–2024 totals." }],
+  options: [
+    { key: "a", label: "(a) All three follow the controls", text: "The takeaway names the chosen station and years; the readouts give the window's carbon; the seasonal chart draws the South Pole for “Southern only” and both stations for “Both”." },
+    { key: "b", label: "(b) Seasonal chart follows the hemisphere; the takeaway and readouts stay fixed and say so", text: "For example “Since 1750, to 2024” above the readouts. The seasonal chart also follows the measurements checkbox." },
+    LEAVE, OWN],
+  rec: "b", recNote: "The readouts are cumulative stocks, so “the carbon of 1900–1960” would be a different quantity (emitted in the window, and where it went) and needs its own wording. The South Pole cycle is small and reversed in phase, which is worth a student seeing." },
+
+{ id: "b13", group: "design", tag: "B13", title: "The seasonal chart's “Measured” curve is a fitted wave",
+  where: "app/R/plots.R:840–865",
+  now: `<p>Both curves are the mean one-harmonic fit (a sine and cosine per year, averaged over 2000–2024). The measured one is labelled “Measured, Mauna Loa”. It is what the calibration scores.</p>`,
+  figs: [{ src: "shots/b12_b13_keeling_seasonal_SH.png", cap: "The seasonal chart as drawn." }],
+  options: [
+    { key: "a", label: "(a) Relabel and add a caption sentence", text: "“Measured, Mauna Loa (one annual wave fitted to each year)”; caption: “Both curves are the average of a single annual wave fitted to each year, 2000–2024, the form the calibration scores.”" },
+    { key: "b", label: "(b) Draw the measured monthly means as twelve points", text: "Shows the real shape, including what one wave leaves out. Needs the model curve on the same footing to stay like-for-like." },
+    LEAVE, OWN],
+  rec: "a", recNote: "(a) now; (b) is the better chart but needs a matching model curve (monthly means too)." },
+
+{ id: "b14", group: "design", tag: "B14", title: "Airborne fraction before about 1900",
+  where: "app/R/plots.R:934–950 (plot_airborne_fraction()), Where tab",
+  now: `<p>The monthly ratio of the two cumulative stocks, from the first month with more than 1 GtC emitted. The airborne carbon's seasonal swing (about 5 GtC within each year) over a small denominator draws a solid band: the ratio swings 484 points within 1754, 64 in 1780, 13 in 1850, 5 in 1900 and 0.7 in 2024. At 1750–1900 the axis runs −100% to 300%. The dashed 50% line is drawn but nearly invisible.</p>`,
+  found: `<ul><li>Annual means remove the band from 1755 on: the annual-mean ratio changes by at most 1.1 points from one year to the next, and by under 0.5 points from 1959.</li>
+<li>The annual-mean ratio falls from 62% in 1755 to 36% by 1850: the air holds more of an emission that is still young.</li>
+<li>The monthly swing stays below 10 points from 1864, 5 points from 1908 and 2 points from 1966.</li></ul>`,
+  figs: [{ src: "shots/b14_now_af_1750_1900.png", cap: "Now, 1750–1900." },
+         { src: "shots/b14_now_af_1750_2024.png", cap: "Now, the default window." },
+         { src: "shots/b14_protoC_af_1750_2024.png", cap: "C: annual means from the start, default window." },
+         { src: "shots/b14_protoC_af_1750_1900.png", cap: "C: 1750–1900." },
+         { src: "shots/b14_protoA_af_1750_2024.png", cap: "A: annual means from 1908." },
+         { src: "shots/b14_protoA_af_1750_1900.png", cap: "A: a window ending before 1908 shows a note." },
+         { src: "shots/b14_protoB_af_1750_2024.png", cap: "B: monthly ratio from 1959." }],
+  options: [
+    { key: "C", label: "(C) Annual means from the start", text: "No band and no threshold; every window draws a chart." },
+    { key: "A", label: "(A) Annual means from a threshold year", text: "Starts where the monthly swing stays below a chosen size (5 points: 1908; 10 points: 1864; 2 points: 1966). Write the threshold in the note." },
+    { key: "B", label: "(B) Monthly ratio from 1959, GCB's first year", text: "Keeps a ±1-point seasonal sawtooth." },
+    LEAVE, OWN],
+  rec: "C", recNote: "With the 50% line darkened. If you would rather not show the 18th-century decline, (A) at a threshold you choose." },
+
+{ id: "b15", group: "design", tag: "B15", title: "The residual strip's years",
+  where: "app/R/plots.R:1510–1512 (caption); app/server.R:595–605 (comment)",
+  now: `<p>The strip runs 1980–2024 (the measured record) under a growth chart that runs 1850–2024 at the default window. Its caption ends “Same years and same estimators as the panel above.” The code comment above it says the strip shares the growth chart's x limits; it shares the window's measured years only.</p>`,
+  figs: [{ src: "shots/b15_growth_and_resid_viewport.png", cap: "Growth chart and residual strip at the default window." }],
+  options: [
+    { key: "a", label: "(a) Caption from the window, and correct the code comment", text: "“Positive = the model grew faster than the measured record that year. The years with measurements (1980–2024), on the same estimators as the panel above.”" },
+    { key: "b", label: "(b) (a), and give the strip the growth chart's x limits", text: "A year sits under the same year, but the 45 measured years shrink into the right quarter of the strip." },
+    LEAVE, OWN],
+  rec: "a", recNote: "" },
+
+{ id: "b16", group: "design", tag: "B16", title: "Phone: “Run it” sits below the chart it fills",
+  where: "app/ui.R:666 (s_go), :677 (p_go). Below 576 px the lead (takeaway and chart) comes before the controls.",
+  now: `<p>At 375 × 812 in Build your own, the takeaway is at y 202, the chart 249–649 and the button at y 956. After “Run it” the screen shows the button and the bottom of the chart; the new takeaway is 508 px above the top of the screen.</p>`,
+  figs: [{ src: "shots/b16_phone_build_after_run_viewport.png", cap: "What a phone shows right after “Run it”." },
+         { src: "shots/b16_proto_scroll_to_takeaway_viewport.png", cap: "Option (a): scrolled to the takeaway." }],
+  options: [
+    { key: "a", label: "(a) Scroll to the takeaway once the new chart has drawn", text: "Narrow screens only, on the button's click." },
+    { key: "b", label: "(b) Put the Futures controls above the chart on phones", text: "Other tabs keep lead-first." },
+    { key: "c", label: "(c) A small “Run it” bar fixed to the bottom of the screen", text: "Build your own and Pulse lab only." },
+    LEAVE, OWN],
+  rec: "a", recNote: "It keeps one phone layout for every tab." },
+
+{ id: "b17", group: "design", tag: "B17", title: "Portrait tablet (768 px): a 168 px sidebar",
+  where: "sidebarPanel(width = 3) on each tab (app/ui.R:372, :422, :512, :587, :642, :827), col-sm-3 from 576 px up",
+  now: `<p>From 576 px up the sidebar keeps a quarter of the row: 168 px wide at 768, the slider 134 px. The two handles of “Years shown” touch and the labels merge (“1958 — 2024”), the scenario dropdown wraps to three lines over its arrow, and “Build your own” wraps one word per line.</p>`,
+  figs: [{ src: "shots/b17_tablet768_keeling_top_viewport.png", cap: "Keeling tab at 768 px." },
+         { src: "shots/b17_tablet768_pulse_top_viewport.png", cap: "Pulse lab at 768 px." }],
+  options: [
+    { key: "a", label: "(a) Below 992 px, give the sidebar the full width, under the lead, as on phones", text: "Keep the wide navbar." },
+    { key: "b", label: "(b) Widen the sidebar to 5/12 between 768 and 991 px", text: "" },
+    { key: "c", label: "(c) Leave as is", text: "Portrait tablets are a small share of readers." },
+    OWN],
+  rec: "a", recNote: "It reuses the phone arrangement, which the phone-layout tests already cover." },
+
+{ id: "b18", group: "design", tag: "B18", title: "Cosmetic layout", small: true,
+  sub: "All five recommended; 5 is a defect, the others are polish.",
+  figs: [{ src: "shots/b18_phone_keeling_top_viewport.png", cap: "Phone: banner inset from the content." },
+         { src: "shots/b18_phone_where_readouts_viewport.png", cap: "Phone: readouts at different heights; “view” wraps alone." },
+         { src: "shots/b17_tablet768_pulse_top_viewport.png", cap: "768 px: “The extra CO” without the ₂." }],
+  rows: [
+    { id: "b18-1", tag: "1", now: "The yellow banner is inset from the content on both sides (desktop: banner about 26–1414 px, content 12–1428).", draft: "Same left and right edges as the content." },
+    { id: "b18-2", tag: "2", now: "Phone: the three Where readouts sit at different heights (air at y 399, land and ocean at 420; “Taken up by land” wraps to two lines).", draft: "Labels on one line (“In the air”, “In land”, “In the ocean”), or the numbers on a common baseline." },
+    { id: "b18-3", tag: "3", now: "Phone: “view” of “Copy link to this view” wraps onto its own line.", draft: "Keep the link on one line, moving it to its own line when it does not fit." },
+    { id: "b18-4", tag: "4", now: "Tap targets: Download links 15 px tall, slider handles 22 × 22 px.", draft: "32 px minimum height on touch screens (padding; no visual change on desktop)." },
+    { id: "b18-5", tag: "5", now: "New: at 768 px the Pulse lab legend prints “The extra CO” with the subscript ₂ missing.", draft: "Find which fitting step drops it and fix it." }] },
+
+/* ---------------- WORDING ---------------- */
+{ id: "b1", group: "wording", tag: "B1", title: "What pins down what? takeaway (your 10-02 sentence)",
+  where: "app/server.R:1156–1159",
+  now: `<p>“The metrics most sensitive to changes in this model are δ13C level &amp; gradient — led by …; CO2 level — led by …; Δ14C in the air (bomb) — mostly influenced by …. A metric low on the chart is one this model could change a good deal without results changing substantially.”</p>`,
+  problem: "The second sentence reads as the reverse of what is meant, and “metric” is the tab's “measurement”.",
+  options: [{ key: "draft", label: "Use the draft", text: "“The measurements most sensitive to changes in this model are … . A measurement low on the chart changes little even when the model's parameters change a good deal.”" }, LEAVE, OWN] },
+
+{ id: "b2", group: "wording", tag: "B2", title: "Pulse lab, temperature view: “keeps 104%”",
+  where: "app/server.R:916–921",
+  now: `<p>“Release 100 GtC in 2050 and the world is 0.14 °C warmer a century later, and 0.14 °C warmer after 250 years. Over that stretch the warming keeps 104% of its century-later value and the airborne carbon keeps 82%, so the warming is the longer-lived of the two.”</p>`,
+  options: [{ key: "draft", label: "Use the draft", text: "“… By then the warming is at 104% of its century-later value and the airborne carbon at 82%, so the warming is the longer-lived of the two.”" }, LEAVE, OWN] },
+
+{ id: "b3", group: "wording", tag: "B3", title: "What if…? with nothing ticked",
+  where: "app/server.R:456–459",
+  now: `<p>“Nothing is switched off, so the charts show the full model against the measurements. Tick one or more boxes to remove a mechanism; tick several to remove them together.”</p>`,
+  problem: "The first chart (CO₂ level) has no measurements; only the growth chart does.",
+  options: [{ key: "draft", label: "Use the draft", text: "“Nothing is switched off, so the charts show the full model, and the growth-rate chart compares it with the measurements. Tick one or more boxes to remove a mechanism; tick several to remove them together.”" }, LEAVE, OWN] },
+
+{ id: "b4", group: "wording", tag: "B4", title: "What if…? takeaway for year-to-year switches (changed since the review)",
+  where: "app/server.R:692–732",
+  now: `<p>“With El Niño / La Niña switched off, global-average CO2 in 2024 would be 426 ppm instead of 425 — a difference of +1 ppm.”</p>`,
+  found: `<p>The unrounded change is +0.16 ppm (volcanic aerosols +0.22, both +0.38). The full model sits at 425.43, next to a rounding boundary, so batch A's rule (print the difference of the rounded values) prints +1. The sentence the review saw (“unchanged to the nearest ppm — these are year-to-year mechanisms…”, plural for one switch) is no longer reached.</p>`,
+  options: [
+    { key: "a", label: "(a) Under 1 ppm, print the change to one decimal and explain", text: "“With El Niño / La Niña switched off, global-average CO₂ in 2024 changes by +0.2 ppm. This switch acts year to year: it moves the wobble rather than the level, and the growth-rate chart below is where it shows up.” (Plural form for several switches.) Larger changes keep A2's sentence." },
+    { key: "b", label: "(b) Keep A2's rule and fix only the grammar", text: "" },
+    LEAVE, OWN],
+  rec: "a", recNote: "It keeps A2's property (the printed difference equals the printed numbers) wherever levels are printed." },
+
+{ id: "b5", group: "wording", tag: "B5", title: "Forest regrowth: −1.22 beside “1.22 GtC absorbed/year”",
+  where: "Readouts app/server.R:317–336; takeaway :367–404",
+  now: `<p>Readouts: “Deforestation, gross 2.51 / Forest regrowth −1.22 / Net, the land-use input the model is given 1.29 / GtC per year, 2015–2024 average”. Takeaway: “…in the last decade it has compensated for 49% (1.22 GtC absorbed/year versus 2.51 GtC emitted/year).”</p>`,
+  options: [{ key: "draft", label: "Use the draft", text: "Keep the readouts' signs (they make 2.51 − 1.22 = 1.29 visible) and extend the unit line: “GtC per year, 2015–2024 average; negative values are taken out of the air.”" }, LEAVE, OWN] },
+
+{ id: "b6", group: "wording", tag: "B6", title: "Pulse lab: “Runs the model twice”",
+  where: "app/ui.R:681–682. app_pulse_runs() makes three runs: without the pulse, with it, and with its carbon tagged.",
+  now: `<p>“Runs the model twice, with and without the pulse, from identical starting conditions, and takes the difference. The difference is what the extra carbon does.”</p>`,
+  options: [{ key: "draft", label: "Use the draft", text: "“Runs the model with and without the pulse, from identical starting conditions, and takes the difference: that is what the extra carbon does. A third run tags the pulse's carbon atoms to follow where they go.”" }, LEAVE, OWN] },
+
+{ id: "b7", group: "wording", tag: "B7", title: "Under the hood, “Parameters”",
+  where: "app/ui.R:906–913",
+  now: `<p>“These are the numbers the calibration fits, and the few it holds at a stated value. Everything else — ocean area, the mass of the atmosphere, carbonate chemistry constants — is fixed from measurements and cited in the repository. The El Niño settings are fitted in a separate step and then held. A value held at 0 is a mechanism that is in the code but switched off.”</p>`,
+  found: `<p>The table has 45 rows: 31 fitted, 14 held. Of the 14, four are fitted in the separate step (the El Niño land response, north and south, its delay, and the El Niño upwelling limb); seven are held at 0 (ventilation loop and its ENSO modulation, overturning, southern seasonal entrainment, the two ENSO ocean sensitivities, plant growth's response to warming); three are held at other values (equatorial upwelling cell 27 Sv, its ENSO modulation 1, biological pump 9.08 GtC/yr). Eight of the 14 have “ENSO” in their names; four of those are the ones fitted in the separate step.</p>`,
+  options: [{ key: "draft", label: "Use the draft", text: "“These are the numbers the calibration fits (31) and the ones it holds at a stated value (14). Everything else, such as ocean area, the mass of the atmosphere and carbonate chemistry constants, is fixed from measurements and cited in the repository. Four held values, the El Niño land response and its delay and the El Niño upwelling limb, are fitted in a separate step to the year-to-year record. A value held at 0 is a mechanism that is in the code but switched off. The equatorial upwelling cell, its El Niño modulation and the biological pump are held at fixed values.” (The counts would be computed from the table.)" }, LEAVE, OWN] },
+
+{ id: "b8", group: "wording", tag: "B8", title: "Pulse partition takeaway: “in this box”, “residence lifetime” (your 10-16 text)",
+  where: "app/R/plots.R:167–174 (PULSE_DEPTH_TAKEAWAY)",
+  now: `<p>“…The left panel shows how much excess carbon stays in each reservoir (the rate of decline in the atmosphere in this box informs the “perturbation lifetime”). The right panel shows where the individual carbon atoms from the pulse end up (the rate of decline in the atmosphere in this box informs the “residence lifetime”). …”</p>`,
+  problem: "“Box” means a reservoir elsewhere in the app; “residence lifetime” mixes two terms.",
+  options: [{ key: "draft", label: "Use the draft", text: "“box” → “panel” (twice); “residence lifetime” → “residence time”." }, LEAVE, OWN] },
+
+{ id: "b9", group: "wording", tag: "B9", title: "Small items", small: true,
+  figs: [{ src: "shots/b9_card8_oclim.png", cap: "Card 8's caption: the range printed high to low." }],
+  rows: [
+    { id: "b9-1", tag: "1", now: "Keeling takeaway (app/server.R:117): “with a couple exceptions”", draft: "“with a couple of exceptions”" },
+    { id: "b9-2", tag: "2", now: "Card 4 (app/R/review.R:764): “the What-if tab's measure”", draft: "“the What if…? tab's measure” (moot if B19 (a) is taken)" },
+    { id: "b9-3", tag: "3", now: "Card 7's table (app/R/review.R:110, :113): “the same, southern hemisphere”", draft: "“the same, Southern Hemisphere”, as the chart legends" },
+    { id: "b9-4", tag: "4", now: "Futures (app/server.R:1040, :1065): “1.36 °C per 1000 GtC”, “about 1.4 °C per 1000 GtC”", draft: "“1,000 GtC”, the app's form elsewhere (“about 1,840 m”)" },
+    { id: "b9-5", tag: "5", now: "Under the hood drivers table (app/server.R:1426): “IGCC”", draft: "“Indicators of Global Climate Change (IGCC)”" },
+    { id: "b9-6", tag: "6", now: "Card 8 caption (rv_plot_oclim): “-0.43 GtC/yr here (-0.38 to -0.49 across the ten ocean-model setups), -0.20 ± 0.05”", draft: "Low to high and true minus signs: “−0.43 GtC/yr here (−0.49 to −0.38 across …), −0.20 ± 0.05”" },
+    { id: "b9-7", tag: "7", now: "Pulse partition caption (app/R/plots.R:1826, :186): “Left: This is how much extra carbon each reservoir holds because of the pulse. Right: the same pulse, with its carbon atoms tagged.”", draft: "“Left: how much extra carbon each reservoir holds because of the pulse. Right: the same pulse, with its carbon atoms tagged.”" },
+    { id: "b9-8", tag: "8", now: "FaIR checkbox in Scenarios (app/global.R:1245): “Compare with FaIR, a widely used climate emulator.”", draft: "Drop the final period (the Pulse lab label has none)" },
+    { id: "b9-9", tag: "9", now: "Landing page title and descriptions (docs/index.html:25–31, my wording): “a carbon-cycle model built for students”; your lead (:102): “a new simple carbon cycle model”", draft: "Title and descriptions follow your lead: “carbon cycle model”" },
+    { id: "b9-10", tag: "10", now: "“air-sea” vs “air–sea”: not found in the rendered text of the live build (only “air–sea”); chart images not searched", draft: "No change needed" }] },
+
+{ id: "b11", group: "wording", tag: "B11", title: "Panels with a heading and no takeaway", small: true,
+  sub: "Numbers would be computed live, as the other takeaways are. The airborne-fraction range uses annual means (B14's option C).",
+  rows: [
+    { id: "b11-af", tag: "AF", now: "Airborne fraction (app/ui.R:469): no takeaway.", draft: "“About 41% of all the carbon emitted since 1750 is still in the air. Since 1850 that share has stayed between 32% and 41%.” (2024: 40.9%; lowest 32.1% in 1863)" },
+    { id: "b11-gcb", tag: "GCB", now: "“Does the model agree with the measured budget?” (app/ui.R:470–471): no takeaway.", draft: "“Over 2015–2024 the model's ocean takes up 3.12 GtC a year and the Global Carbon Budget's 3.22; the model's land takes up 3.03 and the budget's 2.36.”" },
+    { id: "b11-d14c", tag: "Δ¹⁴C", now: "“Δ¹⁴C: the bomb spike and how fast it drained away” (app/ui.R:628): the tab takeaway above the δ¹³C chart covers both charts.", draft: "No new text: move the tab takeaway's second sentence (“Δ14C tells a different story: …”) under this heading" }] },
+
+/* ---------------- UNITS ---------------- */
+{ id: "b10", group: "units", tag: "B10", title: "Unit glosses, ready to apply",
+  where: "app/ui.R: unit_note_ppm(), unit_note_gtc(), gloss()",
+  found: `<div class="tbl"><table><thead><tr><th>Tab</th><th>Missing</th><th>Change</th></tr></thead><tbody>
+<tr><td>Isotope fingerprints</td><td>The takeaway prints “2.34‰”; the ‰ gloss is inside the collapsed “What the two isotopes tell you” box (app/ui.R:615)</td><td>A visible one-line note in the sidebar: “Isotope ratios are given in ‰.” with the per-mil gloss (a unit_note_permil() beside unit_note_ppm())</td></tr>
+<tr><td>Futures, Build your own</td><td>The takeaway prints “10.5 GtC a year”; only the Pulse lab pill has the GtC note (app/ui.R:683)</td><td>unit_note_gtc() in the Build your own pill</td></tr>
+<tr><td>What if…?</td><td>The “Our emissions” driver chart is in GtC; the sidebar has only the ppm note (app/ui.R:527)</td><td>unit_note_gtc() under unit_note_ppm()</td></tr>
+<tr><td>Under the hood</td><td>The parameter table shows ppm and ‰; only the GtC note is there (app/ui.R:902)</td><td>unit_note_ppm() and unit_note_permil() beside it</td></tr></tbody></table></div>`,
+  options: [{ key: "all", label: "Apply all four", text: "" }, { key: "some", label: "Apply some (say which below)", text: "" }, { key: "none", label: "Apply none", text: "" }],
+  rec: "all", recNote: "" }
+];
+
+/* ---------------- state ---------------- */
+const state = {};            // id -> {choice, note}
+const savedAt = {};          // id -> ISO string from the store
+const DECISION_IDS = [];
+ITEMS.forEach(it => { if (it.rows) it.rows.forEach(r => DECISION_IDS.push(r.id)); else DECISION_IDS.push(it.id); });
+let db = null, storeMode = "connecting";
+const LS_KEY = "carbotope-groupb-draft";
+
+function esc(s) { const d = document.createElement("div"); d.textContent = s == null ? "" : String(s); return d.innerHTML; }
+function titleOf(id) {
+  for (const it of ITEMS) { if (it.id === id) return it.tag + " " + it.title; if (it.rows) { const r = it.rows.find(x => x.id === id); if (r) return it.tag + "." + r.tag; } }
+  return id;
+}
+
+/* ---------------- render ---------------- */
+function optionHTML(id, o, rec) {
+  return `<label class="opt" data-opt="${o.key}"><input type="radio" name="c-${id}" id="c-${id}-${o.key}" value="${o.key}">
+    <span><span class="ol">${esc(o.label)}</span>${o.key === rec ? '<span class="rec">Recommended</span>' : ""}${o.text ? `<span class="ot" style="display:block">${esc(o.text)}</span>` : ""}</span></label>`;
+}
+function figsHTML(figs) {
+  if (!figs || !figs.length) return "";
+  return `<div class="figs">${figs.map(f => `<figure><button type="button" class="zoom" data-src="${f.src}" aria-label="Enlarge: ${esc(f.cap)}"><img src="${f.src}" alt="${esc(f.cap)}" loading="lazy"></button><figcaption>${esc(f.cap)}</figcaption></figure>`).join("")}</div>`;
+}
+function cardHTML(it) {
+  const rec = it.rec || null;
+  return `<article class="card" id="card-${it.id}" data-id="${it.id}" data-group="${it.group}">
+    <div class="card-head"><span class="tag">${it.tag}</span><div class="t"><h3>${esc(it.title)} ${it.pending ? '<span class="chip pending">Measuring</span>' : ""}</h3>${it.where ? `<span class="where">${esc(it.where)}</span>` : ""}</div></div>
+    ${it.now ? `<div class="block"><span class="label">Now</span><blockquote>${it.now}</blockquote></div>` : ""}
+    ${it.problem ? `<div class="block"><span class="label">Problem</span><p>${esc(it.problem)}</p></div>` : ""}
+    ${it.found ? `<div class="block"><span class="label">${it.group === "units" ? "What changes" : "Found"}</span><div class="found">${it.found}</div></div>` : ""}
+    ${figsHTML(it.figs)}
+    <fieldset class="options"><legend class="label" style="margin-bottom:6px">Your choice</legend>${it.options.map(o => optionHTML(it.id, o, rec)).join("")}</fieldset>
+    ${it.recNote ? `<p class="recnote">${rec ? "Why I recommend it: " : ""}${esc(it.recNote)}</p>` : ""}
+    <div class="block"><label class="label" for="n-${it.id}">Your wording or note</label><textarea id="n-${it.id}" data-id="${it.id}" placeholder="Optional"></textarea></div>
+    <div class="foot"><span class="saved" id="s-${it.id}"></span></div>
+  </article>`;
+}
+function miniHTML(it) {
+  return `<article class="mini" id="card-${it.id}" data-group="${it.group}" data-mini="1">
+    <div class="mini-head"><div class="card-head"><span class="tag">${it.tag}</span><div class="t"><h3>${esc(it.title)}</h3>${it.sub ? `<span class="recnote">${esc(it.sub)}</span>` : ""}</div></div>${it.figs ? `<div style="margin-top:10px">${figsHTML(it.figs)}</div>` : ""}</div>
+    ${it.rows.map(r => `<div class="row" id="card-${r.id}" data-id="${r.id}">
+      <span class="tag">${esc(r.tag)}</span>
+      <div class="txt"><span class="now">${esc(r.now)}</span><span class="draft">${esc(r.draft)}</span></div>
+      <div class="ctl"><div class="pills" role="radiogroup" aria-label="Choice for ${esc(it.tag)}.${esc(r.tag)}">${SMALL_OPTS.map(o => `<label class="pill"><input type="radio" name="c-${r.id}" id="c-${r.id}-${o.key}" value="${o.key}"><span>${o.label}</span></label>`).join("")}</div>
+        <textarea id="n-${r.id}" data-id="${r.id}" placeholder="Note" aria-label="Note for ${esc(it.tag)}.${esc(r.tag)}"></textarea><span class="saved" id="s-${r.id}"></span></div>
+    </div>`).join("")}
+  </article>`;
+}
+function render() {
+  const main = document.getElementById("main");
+  main.innerHTML = GROUPS.map(g => `<section class="group" data-section="${g.id}"><div class="group-head"><h2>${g.title}</h2><p>${esc(g.sub)}</p></div>
+    ${ITEMS.filter(it => it.group === g.id).map(it => it.small ? miniHTML(it) : cardHTML(it)).join("")}</section>`).join("");
+}
+
+function applyState(id, fromStore) {
+  const s = state[id] || {};
+  document.querySelectorAll(`input[name="c-${id}"]`).forEach(inp => {
+    inp.checked = inp.value === s.choice;
+    const opt = inp.closest(".opt"); if (opt) opt.classList.toggle("checked", inp.checked);
+  });
+  const ta = document.getElementById("n-" + id);
+  if (ta && !(fromStore && document.activeElement === ta)) ta.value = s.note || "";
+  const el = document.getElementById("card-" + id);
+  if (el) el.classList.toggle("decided", !!s.choice);
+  const sv = document.getElementById("s-" + id);
+  if (sv && fromStore && savedAt[id]) { sv.classList.remove("err"); sv.textContent = "Saved " + new Date(savedAt[id]).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }); }
+}
+function updateProgress() {
+  const n = DECISION_IDS.filter(id => state[id] && state[id].choice).length;
+  document.getElementById("progressText").textContent = `${n} of ${DECISION_IDS.length} decided`;
+  document.getElementById("meterFill").style.width = (100 * n / DECISION_IDS.length) + "%";
+  applyFilter();
+}
+
+/* ---------------- filter ---------------- */
+let filter = "all";
+function applyFilter() {
+  document.querySelectorAll("section.group").forEach(sec => {
+    const g = sec.dataset.section;
+    const groupOk = filter === "all" || filter === "open" || filter === g || (filter === "wording" && g === "units");
+    let anyShown = false;
+    sec.querySelectorAll(".card, .mini").forEach(c => {
+      let show = groupOk;
+      if (show && filter === "open") {
+        if (c.dataset.mini) {
+          let rowsOpen = 0;
+          c.querySelectorAll(".row").forEach(r => { const open = !(state[r.dataset.id] && state[r.dataset.id].choice); r.classList.toggle("hide", !open); if (open) rowsOpen++; });
+          show = rowsOpen > 0;
+        } else show = !(state[c.dataset.id] && state[c.dataset.id].choice);
+      } else if (c.dataset.mini) c.querySelectorAll(".row").forEach(r => r.classList.remove("hide"));
+      c.classList.toggle("hide", !show); if (show) anyShown = true;
+    });
+    sec.classList.toggle("hide", !anyShown);
+  });
+}
+document.getElementById("filters").addEventListener("click", e => {
+  const b = e.target.closest("button[data-f]"); if (!b) return;
+  filter = b.dataset.f;
+  document.querySelectorAll("#filters button[data-f]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  applyFilter();
+});
+
+/* ---------------- saving ---------------- */
+const inflight = {}, noteTimers = {};
+function persistLocal() { try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch (e) {} }
+function save(id) {
+  const sv = document.getElementById("s-" + id);
+  if (!db) { persistLocal(); if (sv) { sv.classList.remove("err"); sv.textContent = storeMode === "local" ? "Kept in this browser only" : "Waiting for the store…"; } return; }
+  const body = { choice: (state[id] && state[id].choice) || null, note: (state[id] && state[id].note) || "", item: titleOf(id), updatedAt: new Date().toISOString() };
+  if (sv) { sv.classList.remove("err"); sv.textContent = "Saving…"; }
+  inflight[id] = (inflight[id] || Promise.resolve()).then(() => db.doc("decisions/" + id).set(body)).then(
+    () => { savedAt[id] = body.updatedAt; if (sv) sv.textContent = "Saved"; },
+    err => { if (sv) { sv.classList.add("err"); sv.textContent = err && err.code === "invalid_argument" ? "Not saved: this view can't write" : "Not saved, try again"; } });
+}
+document.addEventListener("change", e => {
+  const t = e.target; if (!(t instanceof HTMLInputElement) || t.type !== "radio" || !t.name.startsWith("c-")) return;
+  const id = t.name.slice(2);
+  state[id] = Object.assign({}, state[id], { choice: t.value });
+  applyState(id, false); updateProgress(); save(id);
+});
+document.addEventListener("input", e => {
+  const t = e.target; if (!(t instanceof HTMLTextAreaElement) || !t.dataset.id) return;
+  const id = t.dataset.id;
+  state[id] = Object.assign({}, state[id], { note: t.value });
+  clearTimeout(noteTimers[id]); noteTimers[id] = setTimeout(() => save(id), 900);
+});
+
+/* ---------------- copy ---------------- */
+document.getElementById("copyBtn").addEventListener("click", async () => {
+  const lines = DECISION_IDS.map(id => { const s = state[id] || {}; return `${titleOf(id)}: ${s.choice || "undecided"}${s.note ? " | " + s.note.replace(/\s+/g, " ") : ""}`; });
+  const txt = lines.join("\n"); const btn = document.getElementById("copyBtn");
+  try { await navigator.clipboard.writeText(txt); btn.textContent = "Copied"; }
+  catch (e) { const ta = document.createElement("textarea"); ta.value = txt; ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); btn.textContent = "Copied"; } catch (e2) { btn.textContent = "Copy failed"; } ta.remove(); }
+  setTimeout(() => { btn.textContent = "Copy my choices"; }, 1800);
+});
+
+/* ---------------- lightbox ---------------- */
+const lb = document.getElementById("lightbox"), lbImg = document.getElementById("lightboxImg");
+document.addEventListener("click", e => { const z = e.target.closest(".zoom"); if (!z) return; lbImg.src = z.dataset.src; lbImg.alt = z.getAttribute("aria-label"); lb.classList.remove("hide"); });
+lb.addEventListener("click", () => lb.classList.add("hide"));
+document.addEventListener("keydown", e => { if (e.key === "Escape") lb.classList.add("hide"); });
+
+/* ---------------- boot ---------------- */
+render();
+DECISION_IDS.forEach(id => applyState(id, false));
+updateProgress();
+const status = document.getElementById("storeStatus");
+function useLocal(msg) {
+  storeMode = "local"; status.classList.add("warn"); status.textContent = msg;
+  try { const raw = localStorage.getItem(LS_KEY); if (raw) { Object.assign(state, JSON.parse(raw) || {}); DECISION_IDS.forEach(id => applyState(id, false)); updateProgress(); } } catch (e) {}
+}
+(async () => {
+  let d = null;
+  try { d = window.claude && window.claude.use ? await window.claude.use("db") : null; } catch (e) { d = null; }
+  if (!d) { useLocal("Saving isn't available in this view; choices stay in this browser only."); return; }
+  db = d; storeMode = "db";
+  let gotDefinitive = false;
+  const timer = setTimeout(() => { if (!gotDefinitive) { status.classList.add("warn"); status.textContent = "Saved choices can't be reached yet; new choices will save when the connection returns."; } }, 10000);
+  db.collection("decisions").onSnapshot(snap => {
+    snap.docs.forEach(doc => {
+      if (!doc.exists) return; const v = doc.data() || {};
+      state[doc.id] = Object.assign({}, state[doc.id], { choice: v.choice || undefined, note: v.note || "" });
+      if (v.updatedAt) savedAt[doc.id] = v.updatedAt;
+      applyState(doc.id, true);
+    });
+    updateProgress();
+    if (!snap.metadata.fromCache && !gotDefinitive) { gotDefinitive = true; clearTimeout(timer); status.classList.remove("warn"); status.textContent = "Choices save to this page as you make them."; }
+  }, err => { clearTimeout(timer); db = null; useLocal("The saved choices could not be loaded; new choices stay in this browser only."); });
+})();
+</script>

@@ -45,7 +45,12 @@ Last commit: `6bade1d2`. Working tree clean apart from this note.
      with everything re-fitted, do the atmospheric δ¹³C rows still hold `k_w` up? At `hilda31w` they did not (−2.68
      against +7.09 for Δ¹⁴C), which is why the sheet recommends cutting card 3's sentence: it conflicts with card 7's
      "the data prefer the literature value". If the δ¹³C rows now hold, switch the recommendation to option (a).
-  6. Commit, add a CHANGELOG line under (q) or a new (r), send Marcus the updated sheet.
+  6. Commit, add a CHANGELOG line under (q) or a new (r), send Marcus the updated sheet. Update the fill-in page
+     too: https://claude.ai/artifact/MTiQHcqrUMichcsaNx8vMC (source `outputs/diagnostics/groupb_20261111/group_b_sheet_page.html`,
+     screenshots from `shots/`). Edit the `b20-card7` item (drop `pending`, fill `found`, options, `rec`), then publish
+     with `url` set to that link (read it first with the Artifact tool's `read`). Marcus's choices live in the page's
+     store, collection `decisions`, one document per item id (`b19`, `b20-card3`, …, `b9-1` …); read them with
+     ArtifactData `list`, not by asking.
   7. Remove the frozen worktree (`git -C <repo> worktree remove ~/ccx_frozen/20261111_kw1446_profile_hilda31fl`) once
      the outputs are copied and the read reproduces from the copies.
 
@@ -86,5 +91,5 @@ Last commit: `6bade1d2`. Working tree clean apart from this note.
 
 - Profile processes 87528 / 87529 and the frozen worktree (section 2). Nothing else: headless Chrome (9341) killed,
   the app server on 7788 and both prototype servers stopped, the prototype worktree removed.
-- Marcus has not been asked yet whether he wants the sheet as a browser page to fill in (the previous handoff left that
-  as "ask"); the end-of-session message offered it.
+- The sheet is also a fill-in page (Marcus asked for it): https://claude.ai/artifact/MTiQHcqrUMichcsaNx8vMC, private,
+  db capability, 37 decisions saved to collection `decisions` as he picks them (empty at publish, checked).
