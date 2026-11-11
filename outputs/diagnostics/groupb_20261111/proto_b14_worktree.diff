@@ -1,0 +1,43 @@
+diff --git a/app/R/plots.R b/app/R/plots.R
+index 7814cd64..e91404cf 100644
+--- a/app/R/plots.R
++++ b/app/R/plots.R
+@@ -932,6 +932,38 @@ plot_partition <- function(pt, yr_range) {
+ }
+ 
+ plot_airborne_fraction <- function(pt, yr_range) {
++  # PROTOTYPE (group B item B14, 2026-11-11; throwaway worktree, never merged): CCX_PROTO_B14 = "A" draws annual
++  # means from the first year after which the monthly ratio's within-year swing stays below 5 points; "B" draws the
++  # monthly ratio from GCB's first year.
++  pm <- Sys.getenv("CCX_PROTO_B14", "")
++  if (pm %in% c("A", "B", "C")) {
++    m <- pt[pt$emitted > 1, ]; yrm <- floor(m$t + 1e-9)
++    sw <- tapply(m$atmosphere / m$emitted, yrm, function(x) diff(range(x)))
++    y0 <- if (pm == "A") max(as.integer(names(sw))[sw >= 0.05]) + 1L else if (pm == "C") min(yrm) + 1L else min(APP_GCB$year)
++    if (pm %in% c("A", "C")) {
++      yy <- floor(pt$t + 1e-9); n <- table(yy); full <- as.integer(names(n)[n == 12])
++      a <- stats::aggregate(cbind(atmosphere, emitted) ~ year, data = data.frame(year = yy, pt)[yy %in% full, ], FUN = mean)
++      d <- data.frame(t = a$year + 0.5, af = a$atmosphere / a$emitted)[a$year >= y0, ]
++      cap <- if (pm == "A") sprintf("Annual means, from %d: before then so little had been emitted that the ratio swings with the seasons. Dashed line at 50%%.", y0)
++             else "Annual means. Dashed line at 50%."
++    } else {
++      d <- data.frame(t = pt$t, af = pt$atmosphere / pt$emitted)[pt$t >= y0, ]
++      cap <- sprintf("From %d, the first year of the Global Carbon Budget. Dashed line at 50%%.", y0)
++    }
++    d <- d[d$t >= yr_range[1] & d$t <= yr_range[2] + 1, ]
++    if (!nrow(d))
++      return(ggplot() + annotate("text", x = 0, y = 0, size = 3.6, colour = "grey30",
++                                 label = paste(strwrap(sprintf(paste("The airborne fraction is drawn from %d on: before then",
++                                   "too little carbon had been emitted for the ratio to mean much. Move the window past %d to see it."), y0, y0), 48),
++                                   collapse = "\n")) + theme_void())
++    return(ggplot(d, aes(t, af)) +
++      geom_hline(yintercept = 0.5, colour = "grey75", linewidth = 0.3, linetype = "22") +
++      geom_line(colour = PAL[["model"]], linewidth = 0.8) +
++      scale_y_continuous(labels = function(x) paste0(round(100 * x), "%")) +
++      labs(x = LAB_YEAR, y = "Share of all emissions still in the air",
++           caption = app_provenance_caption(cap, panel = "half")) +
++      scale_x_continuous(breaks = app_year_breaks()) + theme_ccx())
++  }
+   k <- pt$t >= yr_range[1] & pt$t <= yr_range[2] & pt$emitted > 1
+   d <- pt[k, ]
+   d$af <- d$atmosphere / d$emitted

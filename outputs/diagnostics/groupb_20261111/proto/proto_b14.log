@@ -1,0 +1,42 @@
+proto_b14.R | commit 3b80ad57 | canonical hilda31fl | 2026-11-11 16:40
+
+=== the monthly ratio (cumulative airborne / cumulative emitted) per year, from the first month emitted > 1 GtC ===
+  1754: cumulative emitted    1.1 GtC; airborne carbon's within-year range 5.24 GtC; ratio's swing 484.5 points (mean 62%)
+  1760: cumulative emitted    2.5 GtC; airborne carbon's within-year range 5.24 GtC; ratio's swing 207.4 points (mean 57%)
+  1780: cumulative emitted    8.3 GtC; airborne carbon's within-year range 5.24 GtC; ratio's swing  63.8 points (mean 45%)
+  1800: cumulative emitted   15.1 GtC; airborne carbon's within-year range 5.22 GtC; ratio's swing  35.0 points (mean 40%)
+  1825: cumulative emitted   25.7 GtC; airborne carbon's within-year range 5.19 GtC; ratio's swing  20.4 points (mean 37%)
+  1850: cumulative emitted   40.9 GtC; airborne carbon's within-year range 5.17 GtC; ratio's swing  12.8 points (mean 36%)
+  1875: cumulative emitted   62.2 GtC; airborne carbon's within-year range 5.05 GtC; ratio's swing   8.3 points (mean 34%)
+  1900: cumulative emitted   95.5 GtC; airborne carbon's within-year range 4.91 GtC; ratio's swing   5.3 points (mean 35%)
+  1925: cumulative emitted  146.5 GtC; airborne carbon's within-year range 4.90 GtC; ratio's swing   3.5 points (mean 35%)
+  1950: cumulative emitted  212.7 GtC; airborne carbon's within-year range 5.24 GtC; ratio's swing   2.6 points (mean 36%)
+  1959: cumulative emitted  248.6 GtC; airborne carbon's within-year range 4.55 GtC; ratio's swing   2.1 points (mean 37%)
+  2000: cumulative emitted  518.0 GtC; airborne carbon's within-year range 5.27 GtC; ratio's swing   1.2 points (mean 39%)
+  2024: cumulative emitted  771.3 GtC; airborne carbon's within-year range 5.55 GtC; ratio's swing   0.7 points (mean 41%)
+  the swing stays below 10 points from 1864 on (cumulative emitted then 52 GtC)
+  the swing stays below  5 points from 1908 on (cumulative emitted then 110 GtC)
+  the swing stays below  2 points from 1966 on (cumulative emitted then 281 GtC)
+  GCB's annual budget begins 1959
+
+=== panels (520 x 260 px, res 96) ===
+  wrote outputs/diagnostics/groupb_20261111/proto/b14_now_1750_2024.png
+  wrote outputs/diagnostics/groupb_20261111/proto/b14_now_1750_1900.png
+  wrote outputs/diagnostics/groupb_20261111/proto/b14_A_annual_from1908_1750_2024.png
+  wrote outputs/diagnostics/groupb_20261111/proto/b14_A_annual_from1908_1750_1900.png
+  wrote outputs/diagnostics/groupb_20261111/proto/b14_B_monthly_from1959.png
+
+=== the annual-mean ratio and its year-to-year change ===
+  1755: annual-mean ratio  61.8%, change from the year before  1.1 points
+  1760: annual-mean ratio  56.1%, change from the year before  1.0 points
+  1780: annual-mean ratio  45.2%, change from the year before  0.4 points
+  1800: annual-mean ratio  40.0%, change from the year before  0.2 points
+  1825: annual-mean ratio  37.1%, change from the year before  0.1 points
+  1850: annual-mean ratio  35.9%, change from the year before  0.2 points
+  1875: annual-mean ratio  33.9%, change from the year before  0.2 points
+  1900: annual-mean ratio  34.9%, change from the year before  0.3 points
+  1950: annual-mean ratio  35.6%, change from the year before  0.2 points
+  2000: annual-mean ratio  39.1%, change from the year before  0.2 points
+  year-to-year change stays below 2.0 points from 1754 on
+  year-to-year change stays below 1.0 points from 1886 on
+  year-to-year change stays below 0.5 points from 1959 on

@@ -1,0 +1,7 @@
+[
+ {"url": "?_inputs_&tabs=%22Known%20issues%22"}, {"wait": 2000},
+ {"js": "document.querySelectorAll('details').forEach(d => d.open = true); true", "as": "opened"},
+ {"scroll": "#rv_oclim", "block": "center"}, {"waitimg": "#rv_oclim"}, {"shot": "b9_card8_oclim", "el": "#rv_oclim"},
+ {"scroll": "#rv_oclim_stake", "block": "center"}, {"waitimg": "#rv_oclim_stake"}, {"shot": "b9_card8_oclim_stake", "el": "#rv_oclim_stake"},
+ {"scroll": "#rv_variance", "block": "center"}, {"waitimg": "#rv_variance"}, {"shot": "b19_card4a_variance", "el": "#rv_variance"}
+]

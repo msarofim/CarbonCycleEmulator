@@ -1,0 +1,14 @@
+[
+ {"url": "?_inputs_&tabs=%22The%20Keeling%20Curve%22&k_years=%5B2000%2C2024%5D&k_hemi=%22SH%22&k_obs=true"},
+ {"waitimg": "#k_plot"}, {"waitimg": "#k_seasonal"}, {"wait": 1500},
+ {"js": "document.getElementById('k_takeaway').innerText", "as": "k_takeaway_2000_SH"},
+ {"scrolly": 0}, {"shot": "b12_keeling_2000_2024_SH_viewport"},
+ {"scroll": "#k_seasonal", "block": "center"}, {"shot": "b12_b13_keeling_seasonal_SH", "el": "#k_seasonal"},
+ {"js": "(() => { const a = document.getElementById('k_seasonal'); let e = a, out = []; for (let k = 0; k < 4; k++) { e = e.previousElementSibling; if (!e) break; out.push(e.tagName + ': ' + e.innerText.slice(0, 300)); } return out; })()", "as": "k_seasonal_preceding"},
+ {"url": "?_inputs_&tabs=%22Where%20does%20the%20carbon%20go%3F%22&w_years=%5B1900%2C1960%5D"},
+ {"waitimg": "#w_partition"}, {"wait": 1500},
+ {"js": "['w_takeaway','w_atm','w_land','w_ocean'].map(i => i + ': ' + document.getElementById(i).innerText).join(' | ')", "as": "where_1900_1960"},
+ {"scrolly": 0}, {"shot": "b12_where_1900_1960_viewport"},
+ {"url": "?_inputs_&tabs=%22Where%20does%20the%20carbon%20go%3F%22&w_years=%5B1750%2C1900%5D"},
+ {"scroll": "#w_af", "block": "center"}, {"waitimg": "#w_af"}, {"shot": "b14_af_1750_1900", "el": "#w_af"}
+]

@@ -1,0 +1,21 @@
+{
+ "tap_targets_links": [
+  "data (CSV): 15 px tall, 1 line box(es)",
+  "figure (PNG): 15 px tall, 1 line box(es)",
+  "Copy link to this view: 34 px tall, 2 line box(es)"
+ ],
+ "slider_handles": [
+  "22x22",
+  "22x22"
+ ],
+ "banner_vs_content_lr": {
+  "banner": [
+   0,
+   375
+  ],
+  "takeaway": [
+   30,
+   345
+  ]
+ }
+}

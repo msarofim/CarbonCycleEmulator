@@ -1,0 +1,5 @@
+[
+ {"scrolly": 0}, {"waitimg": "#k_plot"}, {"shot": "b17_tablet768_keeling_top_viewport"},
+ {"js": "(() => { const s = document.querySelector('.well, .sidebar, form.well, .bslib-sidebar-layout > .sidebar'); const w = document.querySelector('#k_years'); const r = e => e ? Math.round(e.getBoundingClientRect().width) : null; return {sidebar_w: r(s), sidebar_class: s ? s.className : null, slider_w: r(w ? w.parentElement : null)}; })()", "as": "tablet_sidebar"},
+ {"url": "?_inputs_&tabs=%22Futures%22&f_mode=%22Pulse%20lab%22"}, {"wait": 3000}, {"scrolly": 0}, {"shot": "b17_tablet768_pulse_top_viewport"}
+]

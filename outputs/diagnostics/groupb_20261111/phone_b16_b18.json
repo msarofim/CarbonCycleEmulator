@@ -1,0 +1,16 @@
+[
+ {"scrolly": 0}, {"shot": "b18_phone_keeling_top_viewport"},
+ {"js": "(() => { const b = document.querySelector('.ccx-beta-banner, .alert, .beta-banner'); const c = document.querySelector('.container-fluid, main'); const r = e => e ? Math.round(e.getBoundingClientRect().width) : null; return {banner: b ? b.className + ' ' + r(b) : null, content: r(document.getElementById('k_takeaway')), vw: window.innerWidth}; })()", "as": "banner_widths_phone"},
+ {"url": "?_inputs_&tabs=%22Where%20does%20the%20carbon%20go%3F%22"}, {"waitimg": "#w_partition"},
+ {"scroll": "#w_atm", "block": "center"}, {"shot": "b18_phone_where_readouts", "el": "#w_atm", "pad": 0},
+ {"js": "['w_atm','w_land','w_ocean'].map(i => { const e = document.getElementById(i).parentElement; const b = e.getBoundingClientRect(); return i + ' top ' + Math.round(b.top + scrollY) + ' h ' + Math.round(b.height); })", "as": "where_readout_boxes_phone"},
+ {"js": "Array.from(document.querySelectorAll('a')).filter(a => /Copy link/.test(a.innerText)).slice(0,1).map(a => { const r = a.getClientRects(); return a.innerText + ' rects ' + r.length; })", "as": "copy_link_rects"},
+ {"js": "Array.from(document.querySelectorAll('.shiny-download-link, a.shiny-download-link')).slice(0,3).map(a => Math.round(a.getBoundingClientRect().height))", "as": "download_link_heights"},
+ {"url": "?_inputs_&tabs=%22Futures%22&f_mode=%22Build%20your%20own%22"}, {"wait": 2500},
+ {"scroll": "#s_go", "block": "center"}, {"shot": "b16_phone_build_before_run_viewport"},
+ {"js": "(() => { const b = document.getElementById('s_go').getBoundingClientRect(); const p = document.getElementById('f_plot').getBoundingClientRect(); const t = document.getElementById('f_takeaway').getBoundingClientRect(); return {button_y: Math.round(b.top + scrollY), takeaway_y: Math.round(t.top + scrollY), plot_y: Math.round(p.top + scrollY), plot_bottom: Math.round(p.bottom + scrollY)}; })()", "as": "phone_build_positions"},
+ {"click": "#s_go"}, {"waitimg": "#f_plot"}, {"wait": 2000},
+ {"shot": "b16_phone_build_after_run_viewport"},
+ {"js": "(() => { const t = document.getElementById('f_takeaway').getBoundingClientRect(); return {scrollY: Math.round(scrollY), takeaway_top_in_viewport: Math.round(t.top), takeaway_text: document.getElementById('f_takeaway').innerText.slice(0, 200)}; })()", "as": "phone_after_run"},
+ {"scroll": "#f_takeaway", "block": "start"}, {"shot": "b16_proto_scroll_to_takeaway_viewport"}
+]

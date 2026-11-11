@@ -1,0 +1,7 @@
+[
+ {"url": "?_inputs_&tabs=%22Where%20does%20the%20carbon%20go%3F%22"}, {"waitimg": "#w_partition"},
+ {"scroll": "#w_takeaway", "block": "start"}, {"shot": "b18_phone_where_readouts_viewport"},
+ {"js": "Array.from(document.querySelectorAll('a')).filter(a => a.offsetParent && /data \\(CSV\\)|figure \\(PNG\\)|Copy link/.test(a.innerText)).slice(0,3).map(a => a.innerText + ': ' + Math.round(a.getBoundingClientRect().height) + ' px tall, ' + a.getClientRects().length + ' line box(es)')", "as": "tap_targets_links"},
+ {"js": "Array.from(document.querySelectorAll('.irs-handle')).filter(h => h.offsetParent).slice(0,2).map(h => Math.round(h.getBoundingClientRect().width) + 'x' + Math.round(h.getBoundingClientRect().height))", "as": "slider_handles"},
+ {"js": "(() => { const b = Array.from(document.querySelectorAll('div')).find(d => /^BETA v/.test(d.innerText.trim()) && d.children.length < 6); const t = document.getElementById('w_takeaway'); const r = e => { const x = e.getBoundingClientRect(); return [Math.round(x.left), Math.round(x.right)]; }; return {banner: r(b), takeaway: r(t)}; })()", "as": "banner_vs_content_lr"}
+]

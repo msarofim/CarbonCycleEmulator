@@ -1,0 +1,10 @@
+{
+ "k_takeaway_2000_SH": "At Mauna Loa, the model produces 315 ppm in 1958, rising to 423 ppm in 2024; the measured value is about 425 ppm. The model's inputs are emissions, global temperature, sea-surface temperature, an index of El Ni\u00f1o and La Ni\u00f1a (ENSO), volcanic aerosol light diffusion and nitrogen deposition, and its calibration data include the CO2 level and seasonal cycle at both Mauna Loa and the South Pole. But it is not an abstract regression: with a couple exceptions, it is designed around parameters that represent physical processes.",
+ "k_seasonal_preceding": [
+  "P: Strip out the long-term rise and one year is left: the land breathing in during the northern growing season and out again in winter.",
+  "H5: The seasonal cycle on its own",
+  "HR: ",
+  "DIV: Known issue 1: Two model lines are drawn. The solid one shows the model result including a fitted station offset. The faint one is the box before the offset. See \u201cKnown issues\u201d \u2192 issue 1, \u201cThe model's CO2 sits above Mauna Loa\u201d."
+ ],
+ "where_1900_1960": "w_takeaway: Of the 777 GtC of carbon emitted since 1750, 317 GtC is still in the air, 234 GtC was taken up by the land sink (while land clearing released 272 GtC from it) and 224 GtC is in the ocean \u2014 41%, 30% and 29% of the total. | w_atm: 317 GtC | w_land: 234 GtC | w_ocean: 224 GtC"
+}

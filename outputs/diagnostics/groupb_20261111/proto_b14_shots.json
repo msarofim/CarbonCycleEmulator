@@ -1,0 +1,8 @@
+[
+ {"url": "?_inputs_&tabs=%22Where%20does%20the%20carbon%20go%3F%22&w_years=%5B1750%2C2024%5D"},
+ {"scroll": "#w_af", "block": "center"}, {"waitimg": "#w_af"}, {"shot": "PFX_af_1750_2024", "el": "#w_af"},
+ {"url": "?_inputs_&tabs=%22Where%20does%20the%20carbon%20go%3F%22&w_years=%5B1750%2C1900%5D"},
+ {"scroll": "#w_af", "block": "center"}, {"waitimg": "#w_af"}, {"shot": "PFX_af_1750_1900", "el": "#w_af"},
+ {"url": "?_inputs_&tabs=%22Where%20does%20the%20carbon%20go%3F%22&w_years=%5B1850%2C2024%5D"},
+ {"scroll": "#w_af", "block": "center"}, {"waitimg": "#w_af"}, {"shot": "PFX_af_1850_2024", "el": "#w_af"}
+]

@@ -1,0 +1,15 @@
+groupb_numbers.R | commit 3b80ad57 | canonical hilda31fl | 2026-11-11 16:46
+
+== B4: global-average CO2 in 2024, unrounded; the full model 425.433 ppm ==
+  enso                   off 425.595 ppm, difference +0.161 (printed: 426 instead of 425, +1 ppm)
+  volcanic               off 425.650 ppm, difference +0.217 (printed: 426 instead of 425, +1 ppm)
+  enso+volcanic          off 425.811 ppm, difference +0.378 (printed: 426 instead of 425, +1 ppm)
+  warming_feedback       off 419.654 ppm, difference -5.779 (printed: 420 instead of 425, −5 ppm)
+  revelle                off 411.416 ppm, difference -14.017 (printed: 411 instead of 425, −14 ppm)
+
+== B11 airborne fraction (annual means of the two cumulative stocks) ==
+  2024: 40.9%; since 1850 the lowest 32.1% (1863), the highest 40.9% (2024)
+  the Where tab's own takeaway: 317 of 777 GtC in the air = 41% (last month of the run)
+
+== B11 budget bars, 2015-2024 average (plot_gcb_bars()'s arithmetic) ==
+  ocean: model 3.12, GCB 3.22 GtC/yr | land: model 3.03, GCB 2.36 GtC/yr

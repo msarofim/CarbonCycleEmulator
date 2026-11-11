@@ -1,0 +1,31 @@
+{
+ "banner_widths_phone": {
+  "banner": null,
+  "content": 319,
+  "vw": 375
+ },
+ "where_readout_boxes_phone": [
+  "w_atm top 399 h 29",
+  "w_land top 420 h 29",
+  "w_ocean top 420 h 29"
+ ],
+ "copy_link_rects": [
+  "Copy link to this view rects 0"
+ ],
+ "download_link_heights": [
+  0,
+  0,
+  0
+ ],
+ "phone_build_positions": {
+  "button_y": 956,
+  "takeaway_y": 202,
+  "plot_y": 249,
+  "plot_bottom": 649
+ },
+ "phone_after_run": {
+  "scrollY": 710,
+  "takeaway_top_in_viewport": -508,
+  "takeaway_text": "Your pathway reaches 701 ppm and +4.0 \u00b0C by 2150. Fossil emissions never stop on this pathway \u2014 they hold at today's 10.5 GtC a year all the way to 2150 \u2014 so carbon keeps being added to what is alread"
+ }
+}
