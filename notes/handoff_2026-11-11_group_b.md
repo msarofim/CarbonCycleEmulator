@@ -1,5 +1,8 @@
 # Handoff 2026-11-11: CarboTope minor-issues review, group B
 
+> **Continued in `notes/handoff_2026-11-11_group_b_sheet.md`:** the decision sheet is written
+> (`notes/decision_sheet_2026-11-11_group_b.md`); card 7's `k_w` profile is the one open item.
+
 Supersedes `notes/handoff_2026-11-11_minor_issues_batch_a.md` for the app's live state. Read with `CLAUDE.md`,
 `~/.claude/CLAUDE.md`, the review note `notes/review_2026-11-11_minor_issues.md` (group B is its §B, items B1–B21),
 and memory `INDEX_ccx_app_build.md` (host, deploy, the two 11-11 traps below).
