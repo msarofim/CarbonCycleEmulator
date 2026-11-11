@@ -16,6 +16,18 @@ Supersedes `notes/handoff_2026-10-25_alt_text_live.md` for the app's live state.
 - **Next:** Marcus said "Go ahead with A; write the handoff first". Batch A = items A1–A16 of
   `notes/review_2026-11-11_minor_issues.md`. Group B (B1–B21) waits for Marcus.
 
+## 1b. Progress (updated 2026-11-11, later the same day)
+
+- **Batch A done** in `2bc18f62` (CHANGELOG 2026-11-11 i): all 16 items, new `test-app-review-20261111.R`, mutation
+  script `outputs/diagnostics/review_20261111/mutate_batch_a.sh` (12/12). The landing preview image is live (docs/).
+- **In flight:** full suite at `2bc18f62` (`~/ccx_frozen/suite_20261111_2bc18f62.sh`, worktree
+  `~/ccx_frozen/suite_20261111_2bc18f62`; remove it after). Then bundle, local check, Marcus publishes, live checks.
+- **Check live after deploy:** card 2's facet titles ("CO₂ gradient", "δ¹³C gradient") drew without their digits on this
+  laptop only; the host drew them before. The box diagram's labels were tuned on this laptop's narrower font.
+- **Tools added:** `outputs/diagnostics/review_20261111/shoot_imgs.py` saves a chart's own PNG (page-clip screenshots
+  on a phone catch the fixed navbar); `validate_palette_cdp.py` runs the dataviz skill's palette validator in headless
+  Chrome (no node here).
+
 ## 2. Decisions this session (with reasons)
 
 - **Session logging live** since 11-02 (app/R/sessionlog.R): `CCX_SESSION` start/end JSON lines. Read with
