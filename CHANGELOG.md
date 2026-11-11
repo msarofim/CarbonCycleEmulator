@@ -2,6 +2,12 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-11-11 (c) — **The landing page links the introductory Substack post under the button (Marcus: "Add a link to https://thesaraphreport.substack.com/p/the-debut-of-carbotope-beta-a-new somewhere on that first page."). The footer already linked it; this one is visible without scrolling. Wording is Claude's draft.**
+
+- **Page:** "Read the introductory post on The Saraph Report (Substack), where comments are open." after the button and its note. The post's own title was not read: a plain `curl` of the post returned no title, and a retry with a browser user agent was refused by the auto-mode classifier, so the link text does not quote it.
+- **Test:** block 1 now requires every Substack link on the page to be `APP_FEEDBACK_URL` (two of them; 52 expectations). A truncated address in the new link fails block 1 (ad hoc, appended to `mutate_landing_page.log`).
+- **Browser** (local `docs/`): 1440 × 900 and 375 × 812, no horizontal scroll; the link's address is the post's.
+
 ## 2026-11-11 (b) — **The landing page now gives each tab a one-sentence description (Marcus: "Maybe add one sentence descriptions about why a user might be interested in each of the tabs?"). Claude's draft, for Marcus to edit; live on push.**
 
 - **Page:** the "In the app" list became a definition list: each tab's name, then one sentence on what a visitor can do there, written from the tab's contents (its controls, charts and takeaways in `app/ui.R`; the What if…? switches from `ccx_mechanism_choices()`; the Futures pills).

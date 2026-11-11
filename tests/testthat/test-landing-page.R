@@ -38,6 +38,10 @@ test_that("1. every address on the page is the right one", {
   expect_match(h, sprintf('<a class="button" id="open-app" href="%s">', app), fixed = TRUE)
   expect_match(h, sprintf('href="%s"', .lp_const("APP_REPO_URL")), fixed = TRUE)
   expect_match(h, sprintf('href="%s"', .lp_const("APP_FEEDBACK_URL")), fixed = TRUE)
+  # every Substack link is the post (2026-11-11: a second one sits under the button)
+  sub_links <- regmatches(h, gregexpr('href="https://[^"]*substack\\.com[^"]*"', h))[[1]]
+  expect_gte(length(sub_links), 2L)
+  expect_true(all(sub_links == sprintf('href="%s"', .lp_const("APP_FEEDBACK_URL"))), info = paste(unique(sub_links), collapse = " "))
   expect_match(.lp_html("404.html"), sprintf('href="%s"', app), fixed = TRUE)
 })
 

@@ -13,3 +13,4 @@ M11 two tabs swapped (ad hoc, 2026-11-11 b)          expect 3b.    got 3b.      
 M12 a description dropped (ad hoc, 2026-11-11 b)     expect 3b.    got 3b.      OK
 M13 two sentences in one (ad hoc, 2026-11-11 b)      expect 3b.    got 3b.      OK
 M14 em-dash in a description (ad hoc, 2026-11-11 b)  expect 3b.    got 3b.      OK
+M15 Substack link truncated (ad hoc, 2026-11-11 c) expect 1.     got 1.       OK
