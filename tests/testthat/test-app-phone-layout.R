@@ -79,7 +79,11 @@ test_that("2. above APP_FIT_MAX_PX, and with no live width, the plot comes back 
   pf_at(e, 351, 380, expect_identical(e$app_fit_plot(q), q))
 })
 
-test_that("3. a plain y title taller than its panel wraps; a plotmath one is left alone", {
+# ⚠ 2026-11-11: this block's last expectation was "a plotmath title is left alone" (the limitation then documented in
+# plots.R). Marcus's report that the seasonal chart's plotmath y title ran into the caption is that limitation, so it
+# now requires the plotmath title to wrap as well: same text, stacked lines, inside its room.
+pf_pm_lines <- function(lab) strsplit(attr(lab, "ccx_src"), "\n", fixed = TRUE)[[1]]
+test_that("3. a y title taller than its panel wraps, plain text and plotmath alike", {
   skip_if_no_fit(); e <- .pf_env
   ttl <- "Share of all emissions still in the air"
   mk <- function(y) ggplot(data.frame(x = 1:3, y = 1:3), aes(x, y)) + geom_line() +
@@ -93,9 +97,66 @@ test_that("3. a plain y title taller than its panel wraps; a plotmath one is lef
     expect_true(grepl("\n", lab, fixed = TRUE))
     expect_identical(gsub("\n", " ", lab, fixed = TRUE), ttl)  # moved, not reworded
     expect_lte(e$.fit_text_px(lab, e$CCX_BASE_SIZE), pf_geo(e, q)$y_room)
-    pm <- mk(e$app_plotmath("CO₂ above the annual mean (ppm)"))
-    expect_identical(ggplot2::ggplot_build(e$app_fit_plot(pm))$plot$labels$y,
-                     ggplot2::ggplot_build(pm)$plot$labels$y)
+    pm_txt <- "CO₂ above the annual mean (ppm)"
+    pm <- mk(e$app_plotmath(pm_txt))
+    expect_gt(e$.fit_text_px(ggplot2::ggplot_build(pm)$plot$labels$y, e$CCX_BASE_SIZE), pf_geo(e, pm)$y_room)
+    pq <- e$app_fit_plot(pm)
+    plab <- ggplot2::ggplot_build(pq)$plot$labels$y
+    expect_true(is.expression(plab))
+    expect_gte(length(pf_pm_lines(plab)), 2L)
+    expect_identical(paste(pf_pm_lines(plab), collapse = " "), pm_txt)      # moved, not reworded
+    expect_match(deparse(plab[[1]]), "atop(displaystyle(", fixed = TRUE)
+    expect_lte(e$.fit_text_px(plab, e$CCX_BASE_SIZE), pf_geo(e, pq)$y_room)
+  })
+})
+
+# 2026-11-11 (Marcus): "On the keeling curve page, the y-axis label of the 2nd graph and the carbotope.org (beta) are
+# overlapping. Same with the 3rd graph on the what-if page." Both are SHORT charts (260 and 200 px) in a WIDE panel,
+# where app_fit_plot() used to return at once. Fixtures shaped like the two charts at their 1440 px size.
+pf_short <- function(e, y, extra_cap = NULL, title = NULL) {
+  d <- data.frame(x = rep(1:12, 2), y = c(sin(1:12), cos(1:12)), k = rep(c("Measured, Mauna Loa", "Model"), each = 12))
+  ggplot(d, aes(x, y, colour = k)) + geom_line() +
+    labs(x = NULL, y = y, colour = NULL, title = title, caption = e$app_provenance_caption(extra_cap)) + e$theme_ccx()
+}
+test_that("3c. at desktop width a short chart's y title is fitted too; nothing else is touched there", {
+  skip_if_no_fit(); e <- .pf_env
+  W <- 1045L                                    # the full panel at a 1440 px window (measured 2026-11-11)
+  cases <- list(
+    seasonal = list(h = 260L, y = e$app_plotmath("CO₂ above the annual mean (ppm)"), title = "Average seasonal cycle, 2000–2024"),
+    resid    = list(h = 200L, y = "Model – measured (ppm per year)",
+                    cap = "Positive = the model grew faster than the measured record that year."))
+  for (nm in names(cases)) {
+    cs <- cases[[nm]]
+    pf_at(e, W, cs$h, {
+      p <- pf_short(e, cs$y, cs$cap, cs$title)
+      lab0 <- ggplot2::ggplot_build(p)$plot$labels$y
+      expect_gt(e$.fit_text_px(lab0, e$CCX_BASE_SIZE), pf_geo(e, p)$y_room, label = paste(nm, "overflows as drawn"))
+      q <- e$app_fit_plot(p)
+      lab <- ggplot2::ggplot_build(q)$plot$labels$y
+      expect_lte(e$.fit_text_px(lab, e$CCX_BASE_SIZE), pf_geo(e, q)$y_room, label = paste(nm, "fits once fitted"))
+      txt <- if (is.expression(lab)) paste(pf_pm_lines(lab), collapse = " ") else gsub("\n", " ", lab, fixed = TRUE)
+      expect_identical(txt, if (is.expression(lab0)) attr(lab0, "ccx_src") else lab0)
+      # the wide path changes the y title only: legend, x title and theme as they were
+      expect_identical(q$guides, p$guides)
+      expect_identical(q$theme, p$theme)
+      expect_identical(ggplot2::ggplot_build(q)$plot$labels$x, ggplot2::ggplot_build(p)$plot$labels$x)
+    })
+  }
+  # just above APP_FIT_MAX_PX, a chart with BOTH a tall y title and an overflowing one-row legend: the title is
+  # fitted, the legend is left as drawn (wide layouts keep their legends; block 2)
+  pf_at(e, e$APP_FIT_MAX_PX + 1L, 200L, {
+    p <- pf_legend_plot(e) + guides(colour = guide_legend(nrow = 1)) + labs(y = "Model – measured (ppm per year)")
+    expect_gt(pf_geo(e, p)$legend_over, 0.5)
+    q <- e$app_fit_plot(p)
+    expect_identical(q$guides, p$guides)
+    expect_identical(q$theme, p$theme)
+    expect_true(grepl("\n", ggplot2::ggplot_build(q)$plot$labels$y, fixed = TRUE))
+  })
+  # a wide chart whose y title fits is returned as it came, without being built (the cheap check)
+  pf_at(e, W, 380L, {
+    p <- pf_short(e, e$app_plotmath("CO₂ (ppm)"))
+    expect_false(e$.fit_y_title_maybe_tall(p))
+    expect_identical(e$app_fit_plot(p), p)
   })
 })
 
@@ -113,6 +174,79 @@ test_that("3b. a subtitle no wrapper handled is wrapped to the plot; one app_sub
     expect_lte(e$.fit_text_px(got, e$SUBTITLE_PT), e$app_text_px("full"))
     pre <- e$app_subtitle(paste(sub, sub))                                   # already wrapped to this width
     expect_identical(ggplot2::ggplot_build(e$app_fit_plot(mk(pre)))$plot$labels$subtitle, pre)
+  })
+})
+
+# 3d. The REAL charts. Every chart ui.R draws at a fixed height (plotOutput(..., height = "Npx") and the Known-issues
+# cards' review_card() heights), built by the running app's own plot functions at the two widths the wide path sees:
+# just above APP_FIT_MAX_PX and the full panel at 1440 px. After app_fit_plot() every y title fits its room, and
+# the cheap check (.fit_y_title_maybe_tall, APP_FIT_Y_CHECK_FRAC) never waves through a title that does not.
+# Not covered: charts whose height is set by renderUI (cm_map, cm_tension, w_imbalance_plot, w_regrowth_plot) and the
+# box diagram ("auto").
+.pf_app_dir <- file.path(.root, "app")
+pf_ui_heights <- function() {
+  walk <- function(e, fn, acc) {
+    if (is.call(e)) {
+      if (is.name(e[[1]]) && identical(as.character(e[[1]]), fn)) acc[[length(acc) + 1L]] <- e
+      for (a in as.list(e)[-1]) if (!missing(a)) acc <- walk(a, fn, acc)
+    }
+    acc
+  }
+  src <- parse(file.path(.pf_app_dir, "ui.R"), keep.source = FALSE)
+  px <- function(h) if (is.character(h) && grepl("^[0-9]+px$", h)) as.integer(sub("px$", "", h)) else NA_integer_
+  hts <- integer(0)
+  for (e in unlist(lapply(src, walk, "plotOutput", list()))) {
+    a <- as.list(e)[-1]
+    if (is.character(a[[1]]) && !is.null(a$height) && !is.na(px(a$height))) hts[a[[1]]] <- px(a$height)
+  }
+  for (e in unlist(lapply(src, walk, "review_card", list()))) {   # review_card(n, plot_id, plot_height, extra_id, extra_height)
+    a <- as.list(e)[-1]
+    if (length(a) >= 2L && is.character(a[[2]])) hts[a[[2]]] <- px(if (length(a) >= 3L) a[[3]] else "330px")
+    if (length(a) >= 4L && is.character(a[[4]])) hts[a[[4]]] <- px(if (length(a) >= 5L) a[[5]] else "300px")
+  }
+  hts[!is.na(hts)]
+}
+test_that("3d. every fixed-height app chart: at desktop widths its y title fits, and the cheap check skips none that would not", {
+  skip_if_no_fit(); skip_if_not_installed("shiny"); skip_if_not_installed("bslib")
+  skip_if(!file.exists(file.path(.pf_app_dir, "ui.R")), "app absent")
+  skip_if_no_cpp(); skip_if_no_climate()
+  hts <- pf_ui_heights()
+  expect_true(all(c("k_seasonal", "c_resid") %in% names(hts)))
+  expect_identical(unname(hts[c("k_seasonal", "c_resid")]), c(260L, 200L))
+  app <- suppressMessages(shiny::shinyAppDir(.pf_app_dir))
+  shiny::testServer(app, {
+    AE <- environment(renderPlotFit); A <- function(nm) get(nm, envir = AE)
+    mech_drv <- names(Filter(function(m) !is.null(m$driver), A("CCX_MECHANISMS")))
+    session$setInputs(tabs = "The Keeling Curve", k_years = c(1958, 2024), k_hemi = "both", k_obs = TRUE,
+                      w_years = c(1850, 2024), c_mech = mech_drv, c_years = c(1850, 2024),
+                      i_years = c(1940, 2024), i_hemi = "both", f_mode = "Scenarios",
+                      f_scen = c("vvL", "vvM", "vvH"), f_yvar = "co2_ppm", f_fair = FALSE, cm_level = "component")
+    tested <- character(0)
+    for (W in c(A("APP_FIT_MAX_PX") + 1L, 1045L)) for (id in intersect(names(hts), ls(dl_plots))) {
+      f <- tempfile(fileext = ".png")
+      if (requireNamespace("ragg", quietly = TRUE)) ragg::agg_png(f, width = W, height = hts[[id]], res = 72)
+      else grDevices::png(f, width = W, height = hts[[id]], res = 72)
+      res <- tryCatch({
+        p <- A("app_dl_build")(get(id, dl_plots), W, session)
+        if (!inherits(p, "ggplot")) NULL else {
+          A("app_set_panel_px")(W)
+          q <- A("app_fit_plot")(p)
+          A("app_clear_panel_px")()
+          pt <- A(".fit_axis_title_pt")(p, "axis.title.y.left")
+          m <- function(x) { b <- ggplot2::ggplot_build(x); lab <- b$plot$labels$y
+            list(need = if (is.null(lab)) 0 else A(".fit_text_px")(lab, pt),
+                 room = A(".fit_geometry")(ggplot2::ggplot_gtable(b))$y_room) }
+          list(before = m(p), after = m(q), flagged = A(".fit_y_title_maybe_tall")(p))
+        }
+      }, finally = { grDevices::dev.off(); unlink(f) })
+      if (is.null(res) || is.null(res$after$room)) next
+      tag <- sprintf("%s at %d x %d", id, W, hts[[id]])
+      expect_lte(res$after$need, res$after$room, label = paste(tag, "y title after fitting"))
+      if (!res$flagged) expect_lte(res$before$need, res$before$room, label = paste(tag, "skipped by the cheap check"))
+      tested <- union(tested, id)
+    }
+    expect_true(all(c("k_seasonal", "c_resid") %in% tested))
+    expect_gte(length(tested), 15L)
   })
 })
 

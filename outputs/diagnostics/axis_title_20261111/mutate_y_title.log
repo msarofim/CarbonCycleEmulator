@@ -1,0 +1,7 @@
+unmutated: RESULT: none 
+M1 wide panels returned at once (pre-fix gate)   expect 3c,3d        got 3c.,3d.
+M2 plotmath titles not wrapped (pre-fix)         expect 3,3c,3d      got 3.,3c.,3d.
+M3 cheap check far too lax (0.95)                expect 3c,3d        got 3c.,3d.
+M4 wide path also refits legends                 expect 3c           got 3c.
+M5 stacked lines without displaystyle            expect 3            got 3.
+plots.R restored

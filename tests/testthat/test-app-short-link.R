@@ -67,6 +67,36 @@ test_that("the chart caption names the short address and the stage, as global.R 
   expect_false(identical(x[["credit"]], sprintf("%s (%s)", "CarboTope.com", "beta")))
 })
 
+# 2026-11-11 (Marcus): "If you click "Carbotope" on the app page it should take you back to the landing page." The
+# short address is the landing page since 11-11 (docs/, app/DEPLOY.md). navbarPage()'s title and windowTitle are
+# read from ui.R's parse tree and evaluated on global.R's constants.
+sl_navbar_call <- function() {
+  found <- NULL
+  walk <- function(e) if (is.call(e)) {
+    if (is.name(e[[1]]) && identical(as.character(e[[1]]), "navbarPage")) found <<- e
+    for (a in as.list(e)[-1]) if (!missing(a)) walk(a)
+  }
+  for (e in parse(file.path(.sl_app, "ui.R"), keep.source = FALSE)) walk(e)
+  found
+}
+sl_brand <- function() {
+  env <- new.env(parent = globalenv())
+  for (e in .sl_assignments(file.path(.sl_app, "global.R"), c(.sl_consts, "APP_TITLE"))) eval(e, env)
+  nb <- sl_navbar_call()
+  list(title = as.character(eval(nb$title, env)), window = eval(nb$windowTitle, env),
+       url = env$APP_SHORT_URL, name = env$APP_TITLE)
+}
+test_that("the app's name in the navbar links to the landing page, in the same tab; the window title is the name", {
+  skip_if_not_installed("shiny")
+  library(shiny)
+  x <- sl_brand()
+  expect_identical(x$url, "https://carbotope.org")
+  expect_match(x$title, sprintf('^<a href="%s"', x$url))
+  expect_identical(gsub("<[^>]+>", "", x$title), x$name)
+  expect_false(grepl("target=", x$title, fixed = TRUE))
+  expect_identical(x$window, x$name)
+})
+
 test_that("MUTATION: the check rejects a missing link, a label that differs from the link, and a same-tab link", {
   skip_if_not_installed("shiny")
   library(shiny)

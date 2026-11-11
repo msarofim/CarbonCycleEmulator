@@ -102,7 +102,24 @@ app_plotmath_str <- function(s) {
   out
 }
 #' A title for labs(): an expression when the string carries a super/subscript, the string unchanged otherwise.
-app_plotmath <- function(s) if (grepl(PLOTMATH_RX, s)) parse(text = app_plotmath_str(s), keep.source = FALSE) else s
+#' The expression keeps its source string as attribute "ccx_src" (2026-11-11), so app_fit_plot() can wrap it.
+app_plotmath <- function(s) {
+  if (!grepl(PLOTMATH_RX, s)) return(s)
+  e <- parse(text = app_plotmath_str(s), keep.source = FALSE)
+  attr(e, "ccx_src") <- s
+  e
+}
+#' Several lines of a title as ONE plotmath expression, stacked with atop() (plotmath has no line break).
+#' displaystyle() keeps every line at the title's size. Measured 2026-11-11 (ragg, 13 pt): two stacked lines are as
+#' wide as the same two lines of plain text and 6 pt taller.
+app_plotmath_lines <- function(lines) {
+  stack <- function(x) if (length(x) == 1L) sprintf("displaystyle(%s)", app_plotmath_str(x))
+                       else sprintf("atop(displaystyle(%s), %s)", app_plotmath_str(x[1]), stack(x[-1]))
+  if (length(lines) == 1L) return(app_plotmath(lines))
+  e <- parse(text = stack(lines), keep.source = FALSE)
+  attr(e, "ccx_src") <- paste(lines, collapse = "\n")
+  e
+}
 #' Legend-key labels (a scale's `labels =`): one expression per break, so every key is set the same way.
 app_plotmath_labels <- function(x) parse(text = vapply(as.character(x), app_plotmath_str, ""), keep.source = FALSE)
 # The pulse lab's two y axes (F4). Named because the radio that switches
@@ -442,9 +459,12 @@ app_legend_nrow <- function(keys, panel = "full", pt = SUBTITLE_PT) {
 # title wraps to the room its panel gives it, a title or subtitle no wrapper handled wraps to the plot,
 # colliding category labels turn on end, and crowded tick labels get fewer breaks. A plot that fits comes back
 # untouched.
-# ⚠ It runs only at or below APP_FIT_MAX_PX, the full panel at the 768 px floor where every slot was audited
-# (above): wider layouts are not touched and pay no measuring cost. Called by renderPlotFit() (server.R).
-# ⚠ A plotmath title (CO₂, δ¹³C ...) is an expression and cannot be wrapped; one that overflows is left as is.
+# ⚠ It runs in full only at or below APP_FIT_MAX_PX, the full panel at the 768 px floor where every slot was audited
+# (above). Wider, only the y title is fitted, and only on a plot whose title the cheap check flags: a y title
+# overflows by HEIGHT, which a wide panel does not cure (2026-11-11: the 260 px seasonal chart and the 200 px residual
+# chart ran theirs into the caption at 1440 px). Called by renderPlotFit() (server.R).
+# ⚠ A plotmath title (CO₂, δ¹³C ...) cannot carry a line break; it is re-set as stacked lines (app_plotmath_lines()).
+# Until 2026-11-11 one that overflowed was left as is.
 APP_FIT_MAX_PX <- APP_PANEL_PX[["full"]]
 APP_FIT_KEY_GAP_PT <- 2    # vertical gap between legend rows once a legend is refitted (theme_ccx()'s default: 6.5)
 
@@ -592,6 +612,15 @@ APP_FIT_KEY_GAP_PT <- 2    # vertical gap between legend rows once a legend is r
     if (edges[[i + 1L]][["first_l"]] - edges[[i]][["last_r"]] < 2) hit <- TRUE
   if (hit) n_max else 0L
 }
+# Could the y title be taller than its panel? The cheap test that lets a wide plot skip the build (2026-11-11): the
+# title's length against APP_FIT_Y_CHECK_FRAC of the device's height. A title set by an aesthetic rather than labs()
+# is not seen here; test-app-phone-layout.R (block 3d) builds every app plot at its drawn height to hold the cut-off.
+APP_FIT_Y_CHECK_FRAC <- 0.4
+.fit_y_title_maybe_tall <- function(p) {
+  lab <- p$labels$y
+  if (is.null(lab) || !(is.character(lab) || is.expression(lab)) || length(lab) != 1L) return(FALSE)
+  .fit_text_px(lab, .fit_axis_title_pt(p, "axis.title.y.left")) > APP_FIT_Y_CHECK_FRAC * .fit_px_h(grid::unit(1, "npc"))
+}
 .fit_axis_title_pt <- function(p, el) {
   e <- tryCatch(ggplot2::calc_element(el, p$theme), error = function(err) NULL)
   if (!is.null(e) && is.numeric(e$size)) e$size else CCX_BASE_SIZE
@@ -603,7 +632,12 @@ APP_FIT_KEY_GAP_PT <- 2    # vertical gap between legend rows once a legend is r
 #' not a ggplot, or when nothing overflows. Never fails a render: an error leaves the plot as it was.
 app_fit_plot <- function(p) {
   px <- app_live_panel_px()
-  if (is.null(px) || px > APP_FIT_MAX_PX || !inherits(p, "ggplot")) return(p)
+  if (is.null(px) || !inherits(p, "ggplot")) return(p)
+  # ⭐ A Y TITLE TALLER THAN ITS PANEL IS A HEIGHT PROBLEM, so it is fitted at EVERY width (2026-11-11, Marcus: on the
+  # Keeling tab's seasonal chart (260 px) and What if...?'s residual chart (200 px) the y title ran into the caption at
+  # 1440 px). Above APP_FIT_MAX_PX only that step runs, and only when the cheap check below says it might be needed.
+  narrow <- px <= APP_FIT_MAX_PX
+  if (!narrow && !.fit_y_title_maybe_tall(p)) return(p)
   # ⚠ The steps below reassign `p`, so the error handler returns this copy. It returned `p` until 2026-10-25, i.e.
   # whatever step it failed in, and that plot's own error then reached the screen when Shiny printed it.
   p0 <- p
@@ -614,7 +648,7 @@ app_fit_plot <- function(p) {
     #    closer, and as many columns as fit -- estimated from the labels, then checked by rebuilding
     #    ⚠ The first guess is made without rebuilding: centered on the plot, a legend's room is the plot's
     #    width inside its margins. Every rebuild costs a full ggplot_build (~0.35 s for the partition chart).
-    if (geo$legend_over > 0.5) {
+    if (narrow && geo$legend_over > 0.5) {
       p <- p + theme(legend.box = "vertical", legend.location = "plot",
                      legend.key.spacing.y = grid::unit(APP_FIT_KEY_GAP_PT, "pt"))
       lay <- .fit_legend_layout(p, b, geo$plot_room)
@@ -625,15 +659,22 @@ app_fit_plot <- function(p) {
         lay$n <- lay$n - 1L
       }
     }
-    # 2. axis titles: a plain-text title wider (x) or taller (y) than its panel is wrapped to it
+    # 2. axis titles: a title wider (x) or taller (y) than its panel is wrapped to it. Plain text wraps with "\n";
+    #    a plotmath title (app_plotmath(), CO₂ ...) is re-set from its source string as stacked lines
+    #    (app_plotmath_lines(), 2026-11-11; it was left to overflow before). Above APP_FIT_MAX_PX, y only.
     labs_now <- b$plot$labels
-    for (ax in c("x", "y")) {
+    for (ax in if (narrow) c("x", "y") else "y") {
       lab <- labs_now[[ax]]; rm_ <- geo[[paste0(ax, "_room")]]
-      if (is.null(rm_) || !is.character(lab) || length(lab) != 1L || !nzchar(lab)) next
+      src <- if (is.character(lab)) lab else attr(lab, "ccx_src")
+      if (is.null(rm_) || !is.character(src) || length(src) != 1L || !nzchar(src)) next
       pt <- .fit_axis_title_pt(p, if (ax == "x") "axis.title.x.bottom" else "axis.title.y.left")
-      if (.fit_text_px(lab, pt) > rm_ * APP_TEXT_SAFETY)
-        p <- p + do.call(labs, stats::setNames(list(app_wrap_px(lab, rm_ * APP_TEXT_SAFETY, pt)), ax))
+      if (.fit_text_px(lab, pt) > rm_ * APP_TEXT_SAFETY) {
+        w <- app_wrap_px(gsub("\n", " ", src, fixed = TRUE), rm_ * APP_TEXT_SAFETY, pt)
+        new <- if (is.character(lab)) w else app_plotmath_lines(strsplit(w, "\n", fixed = TRUE)[[1]])
+        p <- p + do.call(labs, stats::setNames(list(new), ax))
+      }
     }
+    if (!narrow) return(p)
     # 2b. a title or subtitle not already wrapped by app_subtitle() (the What-if driver chart's subtitle is a
     #     mechanism's label, CCX_MECHANISMS) is wrapped to the plot's width
     for (sl in c("title", "subtitle")) {

@@ -234,7 +234,11 @@ phone_tab_js <- sprintf("
   });", jsonlite::toJSON(APP_TAB_MENU_LABEL, auto_unbox = TRUE))
 
 function(request) navbarPage(   # a function of the request: deep links (app/R/links.R, 2026-10-20)
-  title = APP_TITLE,
+  # 2026-11-11 (Marcus): "If you click "Carbotope" on the app page it should take you back to the landing page."
+  # The name links to the landing page (APP_SHORT_URL) in the same tab; the window title stays the plain name.
+  title = tags$a(href = APP_SHORT_URL, class = "ccx-brand-link",
+                 `aria-label` = paste(APP_TITLE, "home page"), APP_TITLE),
+  windowTitle = APP_TITLE,
   lang = "en",   # 2026-10-21: screen readers pick the voice from it; the page had no lang
   id = "tabs",
   theme = bs_theme(version = 5, bootswatch = "flatly", base_font = font_google("Inter")),
@@ -251,6 +255,8 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
          this is a no-op (already row), so the rule cannot drift with the
          breakpoint it was written for. */
       .navbar .navbar-nav { flex-direction: row; flex-wrap: wrap; }
+      /* 2026-11-11: the name links to the landing page (navbarPage title); it keeps the brand's look */
+      .navbar .navbar-brand a.ccx-brand-link { color: inherit; text-decoration: none; }
       .takeaway { font-size: 1.08rem; line-height: 1.5; background: #eef5fb;
                   border-left: 4px solid #1b6ca8; padding: 10px 14px;
                   margin-bottom: 14px; border-radius: 3px; }

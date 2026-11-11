@@ -125,8 +125,17 @@ ay_src <- function() paste(unlist(lapply(file.path(.ay_app_dir, c("ui.R", "R/rev
 
 test_that("4. the page has a language, and every new-tab link says so and sets rel = noopener", {
   skip_if(!all(file.exists(.ay_files)), "app files absent")
-  ui <- paste(readLines(file.path(.ay_app_dir, "ui.R"), warn = FALSE), collapse = "\n")
-  expect_true(grepl('navbarPage(', ui, fixed = TRUE) && grepl('title = APP_TITLE,\\s*\\n\\s*lang = "en"', ui))
+  # navbarPage()'s lang, read off the parse tree. ⚠ Until 2026-11-11 this matched the text 'title = APP_TITLE,' then
+  # 'lang = "en"'; the title became a link to the landing page that day (test-app-short-link.R), and the language
+  # check is now on the argument itself.
+  nb <- NULL
+  walk <- function(e) if (is.call(e)) {
+    if (is.name(e[[1]]) && identical(as.character(e[[1]]), "navbarPage")) nb <<- e
+    for (a in as.list(e)[-1]) if (!missing(a)) walk(a)
+  }
+  for (e in parse(file.path(.ay_app_dir, "ui.R"), keep.source = FALSE)) walk(e)
+  expect_false(is.null(nb))
+  expect_identical(nb$lang, "en")
   r <- ay_new_tab_problems(ay_src())
   expect_gte(r$n, 4L)   # the card links, the repository, the short link, the Substack word
   expect_identical(r$bad, character(0))
