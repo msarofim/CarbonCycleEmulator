@@ -1,5 +1,7 @@
 # Handoff 2026-11-11: CarboTope minor-issues batch A
 
+**Superseded for the live state and the next step by `notes/handoff_2026-11-11_group_b.md`** (64d91397 live; group B next).
+
 Supersedes `notes/handoff_2026-10-25_alt_text_live.md` for the app's live state. Read with `CLAUDE.md`,
 `~/.claude/CLAUDE.md`, and memory `ccx_connect_cloud_deploy` (host, deploy, visit log, landing page).
 
