@@ -2,6 +2,12 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-11-11 (h) — **Minor-issues review of the live app and landing page (Marcus: "Review the rest of carbotope for any other minor issues that should be fixed"). Report only, nothing changed: `notes/review_2026-11-11_minor_issues.md`, screenshots `outputs/diagnostics/review_20261111/`.**
+
+- Three parallel passes: desktop visual (57 states, console logged, no errors), phone and tablet (375, 360, 768, 1024 px; no sideways scroll anywhere), and text and links (every reader string rendered at `hilda31fl`; every external link 200). Server log since the publish: 63 sessions, one warning (the reviewers' +5 %/yr run outside the CO₂-forcing fit, which the app already notes on screen).
+- 16 fixes that need no wording decision (A1–A16: the box diagram's clipped sentence, the What-if takeaway's rounding, scenario colours that change with the selection, phone tables splitting numbers, phone chart clipping, …) and 21 items for Marcus (B1–B21: wording, unit glosses, design choices, and three Known-issues claims to re-measure at `hilda31fl`).
+- One reported finding withdrawn on checking: the desktop pass said Build your own at +5 %/yr shows "no caveat"; `output$f_notes` shows "Outside the fitted range: …" for it (`app_erf_range_note()`).
+
 ## 2026-11-11 (g) — **Live checks on the `8be0095` deploy (Marcus: "I published it; do the live checks"): revision `01a1cac5`, 4 GB / 2 CPU and the timeouts kept; every tab draws at 1440 × 900 and 200 × 800; the two short charts' y titles are clear of the caption; the navbar name opens carbotope.org in the same tab.** Record: `outputs/diagnostics/live_20261111_axis_title/` (`live_browser_checks.md`).
 
 - `time_tab_draws.py` ALL OK at both sizes (slowest 5.6 s); `check_live_pointer.py` at 1440 × 900: pointers, CSV `8be0095`, every chart drawn (its one FAIL is Build your own before "Run it", by design); `check_scan_ui.py` ALL OK at 1440 × 900 and 375 × 812.
