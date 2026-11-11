@@ -34,7 +34,10 @@ Supersedes `notes/handoff_2026-10-25_alt_text_live.md` for the app's live state.
   (matched to 102 px of 152,550). Fixed-size boxes, arrows on box edges, labels at a fixed gap, image 482 px tall at
   565. Gate `test-diagram-pixels.R` (both fonts; DejaVu from matplotlib's copy in the miniforge cache, or
   `CCX_DEJAVU_DIR`). Commit `64d91397`; suite 9,741 / 0 / 1 skip / 233 warnings.
-- **Deploy candidate:** `~/ccx_frozen/bundle_20261111_64d91397`, served locally, all checks pass. Marcus publishes (command
+- **LIVE since 20:38 UTC (CHANGELOG 2026-11-11 p):** `64d91397`, revision `01a1cc55`; live checks all pass and the live
+  diagram matches the DejaVu render. GitHub Pages: the build for `0e032cef` failed to start (GitHub side, landing page
+  unaffected); check that the next push's build succeeds (`gh run list --repo msarofim/CarbonCycleEmulator`).
+- **Was the deploy candidate:** `~/ccx_frozen/bundle_20261111_64d91397`, served locally, all checks pass. Marcus publishes (command
   in CHANGELOG o), then the live checks in §3 step 5, `check_dl_links.py` on the live URL, and the live diagram against
   `outputs/diagnostics/diagram_font_20261111/render_diagram.R dejavu` (diagram area only; the footnotes wrap to the
   live width).

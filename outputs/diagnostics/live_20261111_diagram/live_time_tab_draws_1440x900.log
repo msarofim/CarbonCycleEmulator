@@ -1,0 +1,12 @@
+connect 7.0 s after navigate
+  The Keeling Curve: 2/2 drawn after 2.5 s, errors 0, connected True -> OK
+  Where does the carbon go?: 5/5 drawn after 5.1 s, errors 0, connected True -> OK
+  What if…?: 3/3 drawn after 3.8 s, errors 0, connected True -> OK
+  Isotope fingerprints: 2/2 drawn after 1.0 s, errors 0, connected True -> OK
+  Futures / Scenarios: 1/1 drawn after 5.1 s, errors 0, connected True -> OK
+  Futures / Build your own: skipped (waits for its button)
+  Futures / Pulse lab: 2/2 drawn after 2.3 s, errors 0, connected True -> OK
+  Known issues: 9/9 drawn after 6.1 s, errors 0, connected True -> OK
+  What pins down what?: 2/2 drawn after 1.0 s, errors 0, connected True -> OK
+  Under the hood: 1/1 drawn after 0.8 s, errors 0, connected True -> OK
+total 37 s; ALL OK
