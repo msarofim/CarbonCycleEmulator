@@ -28,13 +28,16 @@ Supersedes `notes/handoff_2026-10-25_alt_text_live.md` for the app's live state.
   lint on batch A's "no colour for" error; Marcus chose "Fix both" (message and A3's pattern; test edit flagged), `01cdaf99`.
 - **LIVE since 19:00 UTC (CHANGELOG 2026-11-11 m):** `01cdaf99`, revision `01a1cbfb`; live checks all pass. Open: the
   box diagram on the host's font (litterfall arrowhead hidden; land-use arrow on Soil's corner) and, at the tuned 565 px
-  on any font, the 92 and 69 arrows touching "warm" and "respiration". Not fixed; Marcus to decide.
-- **Was the deploy candidate:** `~/ccx_frozen/bundle_20261111_01cdaf99`. Suite 9,719 / 0 / 1 skip / 233 warnings; served locally,
-  all checks pass. Marcus publishes (command in CHANGELOG l), then the live checks in §3 step 5, plus `check_dl_links.py`
-  on the live URL. Headless Chrome on 9333 was left running for the live checks (PID 49106; `kill 49106` if this
-  session did not).
-- **Check live after deploy:** card 2's facet titles ("CO₂ gradient", "δ¹³C gradient") drew without their digits on this
-  laptop only; the host drew them before. The box diagram's labels were tuned on this laptop's narrower font.
+  on any font, the 92 and 69 arrows touching "warm" and "respiration". Card 2's facet titles draw their digits on the
+  host (the gaps were this laptop's font). Headless Chrome 49106 is stopped.
+- **Box diagram fixed (CHANGELOG 2026-11-11 n, o; Marcus: "Yes, fix the box diagram"):** the host draws in DejaVu Sans
+  (matched to 102 px of 152,550). Fixed-size boxes, arrows on box edges, labels at a fixed gap, image 482 px tall at
+  565. Gate `test-diagram-pixels.R` (both fonts; DejaVu from matplotlib's copy in the miniforge cache, or
+  `CCX_DEJAVU_DIR`). Commit `64d91397`; suite 9,741 / 0 / 1 skip / 233 warnings.
+- **Deploy candidate:** `~/ccx_frozen/bundle_20261111_64d91397`, served locally, all checks pass. Marcus publishes (command
+  in CHANGELOG o), then the live checks in §3 step 5, `check_dl_links.py` on the live URL, and the live diagram against
+  `outputs/diagnostics/diagram_font_20261111/render_diagram.R dejavu` (diagram area only; the footnotes wrap to the
+  live width).
 - **Tools added:** `outputs/diagnostics/review_20261111/shoot_imgs.py` saves a chart's own PNG (page-clip screenshots
   on a phone catch the fixed navbar); `validate_palette_cdp.py` runs the dataviz skill's palette validator in headless
   Chrome (no node here).

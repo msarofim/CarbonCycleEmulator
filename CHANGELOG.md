@@ -2,6 +2,12 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-11-11 (o) — **Full suite @ `64d91397`: 9,741 passed, 0 failed, 1 standing skip, 0 errored, 233 warnings, 25.5 min. Bundle `~/ccx_frozen/bundle_20261111_64d91397` built and served locally: every tab draws, every Download link works at 1440 × 900 and 375 × 812, the CSV names `64d9139`, and its diagram is pixel-identical to the checkout's. Ready for Marcus to publish.**
+
+- **Suite:** against `01cdaf99` the only per-file change is the new `test-diagram-pixels` (22, none skipped: the DejaVu block ran in the frozen worktree). Log and per-file counts `outputs/diagnostics/suite_20261111_64d91397{.log,_perfile.csv}`; launch script kept in `~/ccx_frozen/`; worktree removed. README's test line cites it.
+- **Bundle:** 117 files, 7.4 MB, same mode file. Against the live bundle (`01cdaf99`) it differs only in `app/R/plots.R` and `FROZEN_FROM_COMMIT.txt`. Served locally (port 7795, headless Chrome 9336; `outputs/diagnostics/diagram_font_20261111/bundle_64d91397/`): `check_live_pointer.py`'s one FAIL is Build your own before "Run it" (by design); `check_dl_links.py` ALL OK at both sizes; the diagram at 1440 × 900 is 815 × 696 and matches the checkout's image in every pixel.
+- **To publish (Marcus):** `Rscript -e 'rsconnect::deployApp("/Users/MarcusMarcus/ccx_frozen/bundle_20261111_64d91397", appId = "01a14244-5cc3-1951-7b06-9e2fb07beae3", account = "saraphreport", server = "connect.posit.cloud", forceUpdate = TRUE)'`. After it: the usual live checks, and the live diagram against the DejaVu render (`render_diagram.R dejavu`), which should now match it.
+
 ## 2026-11-11 (n) — **Box diagram fixed for the host's font (Marcus: "Yes, fix the box diagram"). The host draws in DejaVu Sans, about 22 % wider in bold than this machine's Helvetica; the boxes are now a fixed size, arrows end on box edges, labels keep a fixed gap from their arrows, and the image is 42 px taller at 565 px. A new pixel gate checks both fonts at the drawn widths. Not deployed.** Record: `outputs/diagnostics/diagram_font_20261111/` (README).
 
 - **The host's font, measured:** the diagram drawn with ragg on DejaVu Sans (matplotlib's copy, registered as "sans") matches the live image to 102 of 152,550 pixels at 565 px (max 2/255); on Helvetica it differs in 15,201, and Helvetica matches this machine's app exactly. ⚠ ggplot's text uses the default family "", which ragg resolves without systemfonts' registry, so the emulation points the text and label geoms at "sans".
