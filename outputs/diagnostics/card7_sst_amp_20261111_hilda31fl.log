@@ -1,0 +1,45 @@
+calibration/diag_card7_sst_amp.R | commit 68ea6221 | canonical hilda31fl (refit_20261023_hilda31fl_flask_hilda_csl3v0kaidgbemwtcf, md5 80c487f576f9a1e44f7900597d95a3e4) | 2026-11-11 16:30
+
+=== (1) the fitted seasonal SST half-amplitudes vs ERSSTv5 (1975-2024 hemispheric climatology) ===
+  NH: fitted 1.501 K vs observed 2.237 K = 67% of observed; map's marginal sd (unconstrained) 0.158
+  SH: fitted 1.595 K vs observed 1.746 K = 91% of observed; map's marginal sd (unconstrained) 0.133
+
+=== (2) the map (constraint_map.rds; step = 1.00 conditional Hessian sd (unconstrained), symmetric) ===
+  total leverage, the 25 model parameters, lowest first:
+     1 sst_seas_amp_SH    1.11   <- SST seasonal swing
+     2 sst_seas_amp_NH    1.34   <- SST seasonal swing
+     3 bomb_share_NH      1.73
+     4 seas_T_amp_SH      1.76
+     5 seas_T_amp_NH      2.00
+     6 seas_lag_p_SH      2.44
+     7 npp_frac_NH        2.45
+     8 q10                3.02
+     9 seas_T_lag         3.38
+    10 h_ml               3.49
+    11 seas_lag_p_NH      3.68
+    12 bomb_total         3.79
+    13 pump_grad          4.17
+    14 luc_scale          4.47
+    15 kz_deep_frac       4.59
+    16 tau_ex             4.60
+    17 ndep_ret           4.71
+    18 fert_k             4.73
+    19 beta_max           4.81
+    20 u_hs               4.90
+    21 h_hs               5.03
+    22 kz                 5.55
+    23 pump_hs_gcm2       5.80
+    24 hs_asx_frac        7.97
+    25 k_w                8.01
+  the app's 'little influence' list (the 3 lowest): sst_seas_amp_SH, sst_seas_amp_NH, bomb_share_NH
+
+HARNESS GATE: dg streams at the canonical vs stored, diff 2.9e-11 -> PASS
+
+=== (3) forward runs, everything else at the mode; seasonal cycle = mean one-harmonic fit 1975-2024 (the Keeling tab's) ===
+  stations (scored series): MLO peak-to-trough 6.75 ppm, peak month 3.56; SPO 1.17 ppm, peak month 9.01
+  fitted       amp NH 1.50 SH 1.60 K | NH box 7.19 ppm (+0.0% vs fitted), SH box 1.15 ppm (+0.0%) | dlik     +0.00 | co2_seasonal +0.00, d13c_seasonal +0.00, co2_other +0.00, d13c_other +0.00, d14c +0.00, ocean_surface +0.00, gcb +0.00
+  observed     amp NH 2.24 SH 1.75 K | NH box 6.93 ppm (-3.6% vs fitted), SH box 1.07 ppm (-6.8%) | dlik    -12.93 | co2_seasonal -12.07, d13c_seasonal -0.69, co2_other -0.09, d13c_other +0.07, d14c -0.11, ocean_surface -0.01, gcb -0.03
+  NH_observed  amp NH 2.24 SH 1.60 K | NH box 6.93 ppm (-3.6% vs fitted), SH box 1.13 ppm (-1.4%) | dlik    -11.48 | co2_seasonal -10.89, d13c_seasonal -0.74, co2_other +0.33, d13c_other -0.02, d14c -0.10, ocean_surface -0.01, gcb -0.05
+  zero         amp NH 0.00 SH 0.00 K | NH box 7.75 ppm (+7.8% vs fitted), SH box 1.88 ppm (+64.0%) | dlik   -289.83 | co2_seasonal -292.42, d13c_seasonal -0.22, co2_other +3.59, d13c_other -0.88, d14c +0.21, ocean_surface +0.01, gcb -0.12
+
+provenance: calibration/diag_card7_sst_amp.R @68ea6221; hilda31fl md5 80c487f576f9a1e44f7900597d95a3e4; no RNG; saved outputs/diagnostics/card7_sst_amp_20261111_hilda31fl.{log,rds} | 0.1 min
