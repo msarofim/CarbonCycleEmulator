@@ -1,4 +1,4 @@
-calibration/diag_card3_kw_diseq_scan.R | commit 68ea6221 | canonical hilda31fl (refit_20261023_hilda31fl_flask_hilda_csl3v0kaidgbemwtcf, md5 80c487f576f9a1e44f7900597d95a3e4) | 2026-11-11 16:29
+calibration/diag_card3_kw_diseq_scan.R | commit 9551d7db | canonical hilda31fl (refit_20261023_hilda31fl_flask_hilda_csl3v0kaidgbemwtcf, md5 80c487f576f9a1e44f7900597d95a3e4) | 2026-11-11 18:58
 bottles (GLODAP, area-weighted; obs_hemi_diseq.rds): NH_ml +1.278 +- 0.023; SH_ml +1.055 +- 0.021; NH_hs -0.481 +- 0.049; SH_hs -1.062 +- 0.049; NH +1.007 +- 0.022; SH +0.721 +- 0.019; asym +0.286 +- 0.029
 HARNESS GATE 1: dg streams at the canonical vs stored: sum -1011.7564 vs -1011.7564 (diff 2.9e-11) -> PASS
 HARNESS GATE 2: k_w x1 reproduces the canonical: dlik +0.0e+00 -> PASS
@@ -31,4 +31,16 @@ family split: 26 rows, each in exactly one of 8 families; closes to 1.4e-12
   asym   none in the scanned range   (at x1: model +0.093 vs bottles +0.286 +- 0.029, z -6.7)
   card 3's typed factor: x0.85 (hilda29l, both mixed-layer levels)
 
-provenance: calibration/diag_card3_kw_diseq_scan.R @68ea6221; hilda31fl md5 80c487f576f9a1e44f7900597d95a3e4; no RNG; saved outputs/diagnostics/card3_kw_diseq_scan_20261111_hilda31fl.{log,rds} | 0.2 min
+=== the profile's re-fitted point: profile_k_w_A.rds (k_w = 1446, start canonical) ===
+PROFILE GATE: the dg path reproduces the profile's stored likelihood rows, max |diff| 6.2e-11 -> PASS
+  likelihood vs the canonical +6.28: d13c_level -0.98, d13c_seasonal -0.77, d13c_other -0.71, d14c_atm +5.87, d14c_ocean +1.71, co2 +1.50, gcb -0.36, ocean_surface +0.01
+  D      canonical   profile   bottles profile z vs bottles
+  NH_ml     +1.061    +1.285    +1.278                0.3
+  SH_ml     +0.936    +1.131    +1.055                3.6
+  NH_hs     +0.035    +0.202    -0.481               13.8
+  SH_hs     +0.160    +0.255    -1.062               27.1
+  NH        +0.929    +1.146    +1.007                6.4
+  SH        +0.836    +1.018    +0.721               15.4
+  asym      +0.093    +0.127    +0.286               -5.5
+
+provenance: calibration/diag_card3_kw_diseq_scan.R @9551d7db; hilda31fl md5 80c487f576f9a1e44f7900597d95a3e4; no RNG; saved outputs/diagnostics/card3_kw_diseq_scan_20261111_hilda31fl.{log,rds} | 0.2 min

@@ -31,8 +31,10 @@ KS_KW_LIT <- 1446                                           # Naegler 2009, card
 KS_FAC    <- c(0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 1.00, 1.05, 1.10, 1.15, 1.20, 1.30)
 KS_TYPED  <- 0.85                                           # card 3's "about 15%": hilda29l's x0.85 (09-21 g)
 KS_FAMILIES <- c(d13c_level = "^d13c_level", d13c_seasonal = "^d13c_seasonal", d13c_other = "^d13c_(?!level|seasonal)",
-                 d14c_atm = "^d14c_(NH|SH)$", d14c_ocean = "^(d14c_(?!NH$|SH$)|excess_c14)", co2 = "^co2", gcb = "^gcb",
+                 d14c_atm = "^d14c_(NH|SH|intcal)$", d14c_ocean = "^(d14c_profile|excess_c14)", co2 = "^co2", gcb = "^gcb",
                  ocean_surface = "^(ocean_grad|hs_surf)")   # every row of the objective in exactly one family (gated below)
+# d14c_intcal (tree rings) is ATMOSPHERIC Δ14C, as in diag_price_profile_read.R's FAM. Until 2026-11-11 19:10 the
+# d14c_ocean pattern caught it ("d14c_ anything but NH/SH"); pre-fix outputs in outputs/quarantine/20261111_card3_intcal_family/.
 KS_GATE_TOL <- 1e-6
 KS_STEM <- file.path("outputs", "diagnostics", sprintf("card3_kw_diseq_scan_%s_%s", format(Sys.Date(), "%Y%m%d"), KS_ARM))
 
