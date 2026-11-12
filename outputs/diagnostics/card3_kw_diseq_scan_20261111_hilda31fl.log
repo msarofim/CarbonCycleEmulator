@@ -1,0 +1,46 @@
+calibration/diag_card3_kw_diseq_scan.R | commit 4ff3d448 | canonical hilda31fl (refit_20261023_hilda31fl_flask_hilda_csl3v0kaidgbemwtcf, md5 80c487f576f9a1e44f7900597d95a3e4) | 2026-11-11 19:00
+bottles (GLODAP, area-weighted; obs_hemi_diseq.rds): NH_ml +1.278 +- 0.023; SH_ml +1.055 +- 0.021; NH_hs -0.481 +- 0.049; SH_hs -1.062 +- 0.049; NH +1.007 +- 0.022; SH +0.721 +- 0.019; asym +0.286 +- 0.029
+HARNESS GATE 1: dg streams at the canonical vs stored: sum -1011.7564 vs -1011.7564 (diff 2.9e-11) -> PASS
+HARNESS GATE 2: k_w x1 reproduces the canonical: dlik +0.0e+00 -> PASS
+family split: 26 rows, each in exactly one of 8 families; closes to 1.4e-12
+
+=== k_w x fac at hilda31fl (k_w x1 = 1837.9 m/yr; x0.787 = 1446, the literature value), everything else fixed ===
+  D in permil (bottles: NH_ml +1.278, SH_ml +1.055, NH +1.007, SH +0.721, asym +0.286); likelihood change vs the canonical
+     fac     k_w |   NH_ml   SH_ml   NH_hs   SH_hs      NH      SH    asym |     dlik | d13c_level d13c_seasonal d13c_other  d14c_atm d14c_ocean       co2       gcb ocean_surface
+   0.700  1286.5 |  +1.382  +1.244  +0.128  +0.290  +1.221  +1.121  +0.100 | -3320.96 |  -1023.11     -1.01    -60.11  -2118.83    -33.70    -86.40     -1.55     +3.77
+   0.750  1378.4 |  +1.316  +1.180  +0.106  +0.261  +1.161  +1.062  +0.099 | -2079.48 |   -646.88     -0.80    -40.61  -1322.48    -16.96    -53.85     -1.12     +3.21
+   0.787  1446.0 |  +1.272  +1.137  +0.092  +0.241  +1.120  +1.022  +0.098 | -1406.44 |   -441.48     -0.65    -29.53   -890.32     -9.89    -36.47     -0.86     +2.77
+   0.800  1470.3 |  +1.256  +1.122  +0.087  +0.235  +1.106  +1.008  +0.098 | -1206.00 |   -380.02     -0.60    -26.12   -761.68     -8.07    -31.33     -0.78     +2.61
+   0.850  1562.2 |  +1.201  +1.070  +0.071  +0.212  +1.056  +0.959  +0.097 |  -617.55 |   -198.40     -0.43    -15.56   -384.81     -3.53    -16.29     -0.51     +1.98
+   0.900  1654.1 |  +1.151  +1.021  +0.057  +0.193  +1.010  +0.915  +0.095 |  -250.97 |    -83.51     -0.27     -8.10   -151.90     -1.33     -6.89     -0.30     +1.33
+   0.950  1746.0 |  +1.104  +0.977  +0.045  +0.175  +0.968  +0.874  +0.094 |   -57.69 |    -21.09     -0.12     -3.08    -31.78     -0.36     -1.79     -0.13     +0.67
+   1.000  1837.9 |  +1.061  +0.936  +0.035  +0.160  +0.929  +0.836  +0.093 |    +0.00 |     +0.00     +0.00     +0.00     +0.00     +0.00     +0.00     +0.00     +0.00
+   1.050  1929.8 |  +1.021  +0.898  +0.026  +0.146  +0.893  +0.802  +0.091 |   -48.42 |    -11.52     +0.11     +1.53    -37.26     +0.08     -0.78     +0.11     -0.67
+   1.100  2021.7 |  +0.984  +0.863  +0.019  +0.134  +0.860  +0.770  +0.090 |  -179.72 |    -48.77     +0.20     +1.82   -128.29     +0.06     -3.58     +0.19     -1.35
+   1.150  2113.6 |  +0.949  +0.831  +0.012  +0.123  +0.828  +0.740  +0.088 |  -375.53 |   -106.28     +0.27     +1.13   -260.92     +0.01     -7.97     +0.26     -2.02
+   1.200  2205.5 |  +0.916  +0.801  +0.006  +0.113  +0.799  +0.712  +0.087 |  -621.24 |   -179.71     +0.32     -0.35   -425.46     -0.05    -13.63     +0.32     -2.69
+   1.300  2389.3 |  +0.857  +0.746  -0.003  +0.096  +0.747  +0.662  +0.084 | -1217.98 |   -361.01     +0.38     -5.07   -820.75     -0.18    -27.75     +0.40     -3.99
+
+=== the k_w factor at which each D meets its bottles (log-linear between bracketing points) ===
+  NH_ml  x0.782 (k_w 1437)   (at x1: model +1.061 vs bottles +1.278 +- 0.023, z -9.3)
+  SH_ml  x0.865 (k_w 1590)   (at x1: model +0.936 vs bottles +1.055 +- 0.021, z -5.5)
+  NH_hs  none in the scanned range   (at x1: model +0.035 vs bottles -0.481 +- 0.049, z +10.4)
+  SH_hs  none in the scanned range   (at x1: model +0.160 vs bottles -1.062 +- 0.049, z +25.1)
+  NH     x0.904 (k_w 1662)   (at x1: model +0.929 vs bottles +1.007 +- 0.022, z -3.6)
+  SH     x1.185 (k_w 2177)   (at x1: model +0.836 vs bottles +0.721 +- 0.019, z +6.0)
+  asym   none in the scanned range   (at x1: model +0.093 vs bottles +0.286 +- 0.029, z -6.7)
+  card 3's typed factor: x0.85 (hilda29l, both mixed-layer levels)
+
+=== the profile's re-fitted point: profile_k_w_A.rds (k_w = 1446, start canonical) ===
+PROFILE GATE: the dg path reproduces the profile's stored likelihood rows, max |diff| 6.2e-11 -> PASS
+  likelihood vs the canonical +6.28: d13c_level -0.98, d13c_seasonal -0.77, d13c_other -0.71, d14c_atm +7.32, d14c_ocean +0.26, co2 +1.50, gcb -0.36, ocean_surface +0.01
+  D      canonical   profile   bottles profile z vs bottles
+  NH_ml     +1.061    +1.285    +1.278                0.3
+  SH_ml     +0.936    +1.131    +1.055                3.6
+  NH_hs     +0.035    +0.202    -0.481               13.8
+  SH_hs     +0.160    +0.255    -1.062               27.1
+  NH        +0.929    +1.146    +1.007                6.4
+  SH        +0.836    +1.018    +0.721               15.4
+  asym      +0.093    +0.127    +0.286               -5.5
+
+provenance: calibration/diag_card3_kw_diseq_scan.R @4ff3d448; hilda31fl md5 80c487f576f9a1e44f7900597d95a3e4; no RNG; saved outputs/diagnostics/card3_kw_diseq_scan_20261111_hilda31fl.{log,rds} | 0.1 min

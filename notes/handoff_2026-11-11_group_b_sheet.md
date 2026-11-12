@@ -1,5 +1,12 @@
 # Handoff 2026-11-11: group B decision sheet, one row pending
 
+**UPDATE 2026-11-11 19:10: section 2 is DONE.** The profile converged (both starts, 1.0e-6 apart), its outputs are in
+`outputs/diagnostics/price_profile_20261111_hilda31fl/`, the sheet and the fill-in page (version 2) carry card 7's
+numbers, and card 3's recommendation (b) is confirmed. The frozen worktree is removed. A labelling bug in the card 3
+driver was fixed on the way (`4ff3d448`; quarantine `outputs/quarantine/20261111_card3_intcal_family/`). CHANGELOG
+2026-11-11 (r). **What is left: Marcus's choices** (read collection `decisions` with ArtifactData when he says he is
+done; it was empty at 19:05).
+
 Continues `notes/handoff_2026-11-11_group_b.md` (the plan). Read with `CLAUDE.md`, `~/.claude/CLAUDE.md` and the
 sheet itself, `notes/decision_sheet_2026-11-11_group_b.md`. CHANGELOG 2026-11-11 (q).
 

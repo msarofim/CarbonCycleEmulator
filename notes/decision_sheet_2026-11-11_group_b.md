@@ -96,25 +96,52 @@ and the two cannot both hold."
 - The two mixed-layer levels still want slower exchange, by 13–22 % (`hilda29l`'s 15 % was "both at ×0.85").
 - The hemisphere averages, which card 3's chart draws, now pull opposite ways: the north wants slower, the south
   faster. The cold boxes miss by 0.5–1.2 ‰ at any exchange speed in the scan.
-- With nothing else re-fitted, ×0.85 costs 618 log-likelihood: atmospheric Δ¹⁴C 391, atmospheric δ¹³C level 198,
+- With nothing else re-fitted, ×0.85 costs 618 log-likelihood: atmospheric Δ¹⁴C 385, atmospheric δ¹³C level 198,
   CO₂ 16. So the atmospheric Δ¹⁴C rows resist a slower exchange about twice as hard as the δ¹³C decline does.
   Re-fitted (the profile below), the picture changes.
+- (Corrected 11-11 evening: the first version printed 391 for Δ¹⁴C because the driver counted the IntCal tree-ring
+  row as ocean Δ¹⁴C. Pre-fix outputs in `outputs/quarantine/20261111_card3_intcal_family/`.)
 
-**Card 7, measured:** PENDING. The `k_w` = 1446 price profile (the 10-13 recipe: two starts, the 30 other names
-re-fitted) is running at `hilda31fl`; at `hilda31w` it gave the data's preference for 1,446 as +6.21 log-likelihood
-(atmospheric Δ¹⁴C +7.09, δ¹³C −2.68) and `hs_asx_frac`'s prior as 88 % of what holds `k_w` higher.
+**Card 7, measured** (`calibration/run_price_profile.R` at `6c6cc9fd`: `k_w` held at 1,446, the 30 other names
+re-fitted from two starts, which agree to 1.0e-6 in logpost; read by `calibration/diag_price_profile_read.R` →
+`outputs/diagnostics/price_profile_20261111_hilda31fl/read_k_w_20261111.{log,rds}`; no RNG):
 
-**Options for card 3** (to settle once card 7's number is in)
+| `k_w` = 1,446 against the canonical's 1,838 | `hilda31fl` (now) | `hilda31w` (10-13) |
+|---|---|---|
+| likelihood, all 26 rows (> 0: 1,446 fits better) | +6.28 | +6.21 |
+| atmospheric Δ¹⁴C (north, south, IntCal) | +7.32 | +7.09 |
+| atmospheric δ¹³C | −2.45 | −2.68 |
+| CO₂ | +1.50 | +1.88 |
+| `hs_asx_frac`'s prior (share of the other names' prior change) | −20.12 (89 %) | −19.92 (88 %) |
+| posterior price of 1,446, natural scale | −15.34 | −15.40 |
+
+- Card 7's sentence holds at `hilda31fl`. The data prefer 1,446 by 6.3 log-likelihood. What holds `k_w` near 1,840 is
+  the prior on `hs_asx_frac` (the cold box's share of the gas exchange): to fit 1,446 it moves from 0.73 to 1.67, and
+  its prior z (the prior's CDF as a normal quantile) from 0.75 to 6.26. "About 1,840" matches the canonical's 1,837.9.
+- Re-fitted, the atmospheric δ¹³C rows favour the faster exchange by 2.45, a third of what atmospheric Δ¹⁴C gives the
+  slower one. Card 3's "the atmospheric δ¹³C decline holds it where it is" does not hold at `hilda31fl`.
+- Gate D at the re-fitted point (`calibration/diag_card3_kw_diseq_scan.R --profile=…`, its profile gate reproduces the
+  stored rows to 6e-11): the northern mixed layer meets the bottles (+1.285 against +1.278), the southern overshoots
+  (+1.131 against +1.055). The hemisphere averages that card 3's chart draws move further from the bottles in both
+  hemispheres (north +1.146, south +1.018, against +1.007 and +0.721), and so do the cold boxes (+0.20 / +0.26
+  against −0.48 / −1.06). At the literature value card 3's chart would match the bottles less well.
+
+**Options for card 7**
+- (a) Keep as is. Every number and claim in it reproduces at `hilda31fl`.
+- (b) Your own wording.
+
+**Options for card 3**
 - (a) Re-word to the current numbers: "There is a related tension: the surface-ocean bottles want the air–sea isotope
-  exchange 13–22% slower in the warm surface layer than the atmospheric records allow, while the cold high-latitude
-  water misses the bottles at any exchange speed."
+  exchange 13–22% slower in the warm surface layer, while the cold high-latitude water misses the bottles at any
+  exchange speed." (The first draft ended the first clause "than the atmospheric records allow"; the profile shows the
+  atmospheric Δ¹⁴C records favour the slower exchange, so that clause is gone.)
 - (b) Cut the sentence. Card 7 already carries the gas-exchange-speed story, and card 3's version now depends on which
   boxes are averaged.
 - (c) Leave as is.
 
-**Recommendation:** (b), unless the profile shows the atmospheric δ¹³C rows holding `k_w` once everything else is
-re-fitted. At `hilda31w` they did not (−2.68 against +7.09 for Δ¹⁴C), which would put card 3's "the atmospheric δ¹³C
-decline holds it where it is" in conflict with card 7's "the data prefer the literature value".
+**Recommendation:** card 7 (a); card 3 (b). Re-fitted, the atmospheric δ¹³C rows do not hold `k_w` up (−2.45 against
++7.32 for Δ¹⁴C), so card 3's current sentence conflicts with card 7's "the data prefer the literature value". Option
+(a) for card 3 is accurate but adds a second gas-exchange story beside card 7's.
 
 **Decision (card 3):** ______  **Decision (card 7):** ______
 
@@ -455,6 +482,8 @@ choice (it uses annual means, option C's series).
 - Science drivers committed at `68ea6221`; outputs at `3b80ad57` (logs stamp `68ea6221`, clean).
 - Capture tool `outputs/diagnostics/groupb_20261111/cdp_shoot.py` and its action lists; B14 prototype script and
   worktree diff in the same folder; `groupb_numbers.R` for B4 and B11.
-- Card 7's `k_w` profile: frozen worktree `~/ccx_frozen/20261111_kw1446_profile_hilda31fl` at `6c6cc9fd`, launch script
-  `~/ccx_frozen/20261111_kw1446_profile_hilda31fl_launch.sh`, both starts passed the canonical's reproduction gate
-  (diff 0).
+- Card 7's `k_w` profile: run from a frozen worktree at `6c6cc9fd`; both starts passed the canonical's reproduction
+  gate (diff 0) and converged in 2 cycles (136 and 153 CPU-min). Outputs, logs and launch script copied byte-identical
+  to `outputs/diagnostics/price_profile_20261111_hilda31fl/` (`logs/` inside); the read is `read_k_w_20261111.{log,rds}`.
+- Card 3's scan with the profile section: `outputs/diagnostics/card3_kw_diseq_scan_20261111_hilda31fl.{log,rds}`,
+  stamped `4ff3d448` (the IntCal family fix); the pre-fix outputs are in `outputs/quarantine/20261111_card3_intcal_family/`.

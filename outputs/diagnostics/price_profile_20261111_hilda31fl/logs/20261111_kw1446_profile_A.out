@@ -1,0 +1,18 @@
+=== calibration/run_price_profile.R @6c6cc9fd, 2026-11-11 16:22: hold k_w = 1446, start canonical, tag A ===
+[ccx_adopt_mode_band] h_ml -> [42.5, 200] (mode 69.6916); kz -> [1161.6, 27808] (mode 13818.8237)
+GATE: the canonical's logpost -1050.120651 vs stored -1050.120651 (diff 0.00e+00, tol 5e-05) -> PASS; its likelihood -1011.756378
+held: k_w = 1446 (15 pins); 30 free names
+start: 0 names from ., 30 from hilda31fl; logpost -2456.5338
+  cycle 1 NM 1: logpost -1078.5833 (gain 1377.9505, 6001 evals, 31.5 CPU-min)
+  cycle 1 NM 2: logpost -1072.5396 (gain 6.0437, 6001 evals, 61.3 CPU-min)
+  cycle 1 NM 3: logpost -1071.5776 (gain 0.9620, 6001 evals, 87.5 CPU-min)
+  cycle 1 BFGS: logpost -1069.4161 (gain 2.1615, convergence 0, 106.5 CPU-min)
+  cycle 2 NM 1: logpost -1069.4161 (gain 0.0000, 4441 evals, 132.4 CPU-min)
+  cycle 2 BFGS: logpost -1069.4161 (gain 0.0000, convergence 0, 136.3 CPU-min)
+cycle 2 gained 0.0000 < 0.5: CONVERGED
+
+RESULT (A): logpost -1069.4161, likelihood -1005.4805, log-prior -63.9356
+vs the canonical (hilda31fl, k_w free): likelihood +6.2759, logpost -19.2954 (NOT comparable as a posterior: different held sets; compare on LIKELIHOOD)
+largest moves from the canonical (in its Laplace u-sd): hs_asx_frac +11.8, h_hs +4.2, bomb_total -2.5, u_hs -2.1, kz +2.1, pump_hs_gcm2 -1.4, rep_dC +0.8, sst_seas_amp_NH +0.7
+provenance: calibration/run_price_profile.R @6c6cc9fd; hilda31fl; hold k_w = 1446; start canonical; no RNG
+wrote outputs/diagnostics/price_profile_20261111_hilda31fl/profile_k_w_A.rds

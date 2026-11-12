@@ -1,0 +1,79 @@
+calibration/diag_price_profile_read.R @9551d7db, 2026-11-11 18:58
+  canonical hilda31fl (md5 80c487f576f9a1e44f7900597d95a3e4)
+  profile k_w = 1446: starts A, B, from outputs/diagnostics/price_profile_20261111_hilda31fl
+    A: start canonical; converged TRUE; 136.4 CPU-min; driver @6c6cc9fd
+    B: start calibration/output/refit_20261005_kw1446_hilda_csl3v0kaidgbe/mode_fit_pumpN.rds; converged TRUE; 153.4 CPU-min; driver @6c6cc9fd
+[ccx_adopt_mode_band] h_ml -> [42.5, 200] (mode 69.6916); kz -> [1161.6, 27808] (mode 13818.8237)
+
+=== 0. EACH POINT REPRODUCES ITS STORED LOGPOST IN ITS OWN OBJECTIVE (tol 5e-05 = CCX_REPRO_TOL) ===
+  canonical    logpost -1050.120651 (stored -1050.120651, diff +0.0e+00)  likelihood -1011.7564 on 26 rows  prior+Jacobian -38.3643
+  profile A    logpost -1069.416057 (stored -1069.416057, diff +0.0e+00)  likelihood -1005.4805 on 26 rows  prior+Jacobian -63.9356
+  profile B    logpost -1069.416056 (stored -1069.416056, diff +0.0e+00)  likelihood -1005.4677 on 26 rows  prior+Jacobian -63.9484
+
+=== 1. THE PRICE OF k_w = 1446 ON LIKELIHOOD (the same 26 rows; > 0 = the held point fits BETTER) ===
+  d14c_SH                canonical   -286.294 | A   +3.322 | B   +3.323
+  d14c_NH                canonical   -286.468 | A   +2.546 | B   +2.550
+  d14c_intcal            canonical   -543.209 | A   +1.449 | B   +1.448
+  co2_icecore            canonical   -510.956 | A   +1.010 | B   +1.009
+  d13c_level_MLO         canonical     65.819 | A   -0.846 | B   -0.848
+  d13c_icecore           canonical     66.431 | A   -0.672 | B   -0.669
+  hs_surf_d13c           canonical     -2.518 | A   -0.665 | B   -0.664
+  ocean_grad_d13c        canonical     -2.720 | A   +0.578 | B   +0.577
+  excess_c14_ocean       canonical     -9.548 | A   +0.464 | B   +0.464
+  gcb_land_sink          canonical    -23.298 | A   -0.450 | B   -0.447
+  d13c_seasonal_MLO      canonical    222.776 | A   -0.418 | B   -0.421
+  co2_level_SPO          canonical    -63.634 | A   +0.377 | B   +0.376
+  d14c_profile_ab        canonical     -3.256 | A   -0.371 | B   -0.372
+  d13c_seasonal_SPO      canonical    250.549 | A   -0.350 | B   -0.348
+  co2_seasonal_SPO       canonical     67.805 | A   +0.273 | B   +0.273
+  ocean_grad_dic         canonical     -6.776 | A   +0.250 | B   +0.253
+  co2_seasonal_MLO       canonical    -14.073 | A   -0.234 | B   -0.232
+  ocean_grad_alk         canonical     -5.949 | A   -0.218 | B   -0.222
+  d14c_profile_level     canonical     -3.272 | A   +0.174 | B   +0.174
+  co2_level_MLO          canonical    -64.431 | A   +0.151 | B   +0.149
+  d13c_level_SPO         canonical     58.623 | A   -0.131 | B   -0.123
+  gcb_ocean_sink         canonical     -3.120 | A   +0.090 | B   +0.091
+  co2_gradient           canonical    -13.798 | A   -0.080 | B   -0.079
+  hs_surf_dic            canonical     -4.172 | A   +0.067 | B   +0.067
+  d13c_gradient          canonical    105.928 | A   -0.034 | B   -0.034
+  d14c_profile_bd        canonical     -2.195 | A   -0.007 | B   -0.007
+  TOTAL: A +6.2759, B +6.2887 (canonical -1011.7564)
+  A by family: CO2 +1.498 | d13C -2.451 | atm_d14C +7.318 | ocean_14C +0.260 | GCB -0.360 | ocean_grad_surface +0.012
+
+=== 2. THE PRIOR LEDGER at A (natural-scale prior log-density + log-Jacobian, the objective's own terms) ===
+  name                    canonical            A   z canon       z A   d prior     d jac
+  hs_asx_frac               0.73093       1.6692      0.75      6.26   -20.119    -0.503
+  h_hs                       295.22       470.56      1.27      2.73    -2.438    -1.447
+  u_hs                       22.225       15.749     -0.84     -2.26    -1.865    -0.422
+  pump_hs_gcm2               75.092       55.182      1.98      1.47    +1.193    -0.163
+  rep_dC                     4.2196       4.4048      4.22      4.40    -0.799    +0.000
+  ndep_ret                   7.8209       5.8847      1.04      0.62    +0.637    -0.284
+  sst_seas_amp_NH            1.5007       1.6666     -1.60     -1.18    +0.477    +0.105
+  bomb_total                 118.49       116.31      1.50      1.31    +0.280    -0.019
+  npp_frac_NH               0.63446      0.62673      0.90      0.70    +0.154    +0.012
+  pump_grad                  332.49       338.18      1.42      1.49    -0.116    +0.017
+  imb_share_land            0.72803      0.74595      1.45      1.52    -0.068    -0.044
+  sigma_d14c                  5.382       5.0796      0.11      0.02    +0.063    -0.058
+  k_w's own term at the canonical: prior -7.5448 at 1837.9 vs -6.5861 at 1446 (difference -0.9588); Jacobian 7.5164 vs 7.2766
+  logpost difference -19.2954 = likelihood +6.2759 + the other names' priors -22.5730 + their Jacobians -3.0268 - k_w's own term at the canonical (-0.0284)  [check -1.8e-14]
+  => on the NATURAL scale (no Jacobians): likelihood +6.2759, the other names' priors -22.5730, k_w's prior +0.9588 => the posterior price of 1446 is -15.3383
+  the largest single prior move: hs_asx_frac -20.119, i.e. 89 % of the other names' net prior change (-22.573)
+
+=== 3. WHAT ABSORBS IT: each name's move from the canonical, in the canonical's MARGINAL Laplace sd (u-space) ===
+  k_w itself: 1837.9 -> 1446 = -8.41 marginal sd
+  hs_asx_frac               0.73093 ->       1.6692  +11.75 sd   (B +11.76 sd)
+  h_hs                       295.22 ->       470.56   +4.18 sd   (B  +4.19 sd)
+  bomb_total                 118.49 ->       116.31   -2.52 sd   (B  -2.52 sd)
+  u_hs                       22.225 ->       15.749   -2.08 sd   (B  -2.09 sd)
+  kz                          13819 ->        16009   +2.07 sd   (B  +2.07 sd)
+  pump_hs_gcm2               75.092 ->       55.182   -1.44 sd   (B  -1.44 sd)
+  rep_dC                     4.2196 ->       4.4048   +0.78 sd   (B  +0.77 sd)
+  sst_seas_amp_NH            1.5007 ->       1.6666   +0.66 sd   (B  +0.67 sd)
+  sigma_d14c                  5.382 ->       5.0796   -0.53 sd   (B  -0.54 sd)
+  luc_scale                    0.94 ->      0.95632   +0.53 sd   (B  +0.53 sd)
+  ndep_ret                   7.8209 ->       5.8847   -0.53 sd   (B  -0.53 sd)
+  kz_deep_frac             0.007865 ->    0.0071066   -0.32 sd   (B  -0.32 sd)
+  START AGREEMENT B vs A: logpost +1.03e-06, likelihood +1.28e-02; largest u-space separation 0.004 marginal sd (npp_frac_NH) [descriptive bin 0.1]
+
+=== 4. BESIDE THE 10-05 READ (kw1446_price_read_20261005.rds; its canonical hilda34g) ===
+  likelihood +2.7541 then, +6.2759 now | other names' priors -23.9851 then, -22.5730 now | hs_asx_frac's prior -21.786 then, -20.119 now | posterior price -20.0148 then, -15.3383 now

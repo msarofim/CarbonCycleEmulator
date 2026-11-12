@@ -211,24 +211,33 @@ const ITEMS = [
 <tr><td>North-minus-south asymmetry</td><td>+0.093</td><td>+0.286 ± 0.029</td><td>none (0.084–0.100 across the scan)</td></tr></tbody></table></div>
 <ul><li>The two mixed-layer levels still want slower exchange, by 13–22%. The 15% at hilda29l was “both at ×0.85”.</li>
 <li>The hemisphere averages, which card 3's chart draws, now pull opposite ways.</li>
-<li>With nothing else re-fitted, ×0.85 costs 618 log-likelihood: atmospheric Δ¹⁴C 391, atmospheric δ¹³C level 198, CO₂ 16. The re-fitted reading comes from card 7's profile below.</li></ul>`,
+<li>With nothing else re-fitted, ×0.85 costs 618 log-likelihood: atmospheric Δ¹⁴C 385, atmospheric δ¹³C level 198, CO₂ 16. (Corrected from 391: the first scan counted the IntCal tree-ring row as ocean Δ¹⁴C.)</li>
+<li>Re-fitted (card 7's profile below), the atmospheric δ¹³C rows favour the faster exchange by 2.45 log-likelihood and atmospheric Δ¹⁴C the slower one by 7.32. Card 3's “the atmospheric δ¹³C decline holds it where it is” does not hold at hilda31fl.</li>
+<li>At the re-fitted k_w = 1,446 point the northern mixed layer meets the bottles (+1.285 against +1.278) and the southern overshoots (+1.131 against +1.055). The hemisphere averages that card 3's chart draws move further from the bottles in both hemispheres (north +1.146, south +1.018, against +1.007 and +0.721), and so do the cold boxes.</li></ul>`,
   options: [
-    { key: "a", label: "(a) Reword to the current numbers", text: "“There is a related tension: the surface-ocean bottles want the air–sea isotope exchange 13–22% slower in the warm surface layer than the atmospheric records allow, while the cold high-latitude water misses the bottles at any exchange speed.”" },
+    { key: "a", label: "(a) Reword to the current numbers", text: "“There is a related tension: the surface-ocean bottles want the air–sea isotope exchange 13–22% slower in the warm surface layer, while the cold high-latitude water misses the bottles at any exchange speed.” (The first draft said “slower … than the atmospheric records allow”; the profile shows atmospheric Δ¹⁴C favours the slower exchange, so that clause is gone.)" },
     { key: "b", label: "(b) Cut the sentence", text: "Card 7 already carries the gas-exchange-speed story; card 3's version now depends on which boxes are averaged." },
     { key: "c", label: "(c) Leave as is", text: "" },
     OWN],
-  rec: "b", recNote: "Provisional until card 7's profile lands. At hilda31w, with everything re-fitted, the δ¹³C rows did not hold k_w up (−2.68 against +7.09 for Δ¹⁴C), which puts “the atmospheric δ¹³C decline holds it where it is” in conflict with card 7's “the data prefer the literature value”." },
+  rec: "b", recNote: "Re-fitted at hilda31fl, the atmospheric δ¹³C rows do not hold k_w up (−2.45 against +7.32 for Δ¹⁴C), so the current sentence conflicts with card 7's “the data prefer the literature value”. Option (a) is accurate but adds a second gas-exchange story beside card 7's." },
 
-{ id: "b20-card7", group: "science", tag: "B20", title: "Card 7: “The data prefer the literature value”", pending: true,
+{ id: "b20-card7", group: "science", tag: "B20", title: "Card 7: “The data prefer the literature value”",
   where: "app/R/review.R:886–892",
   now: `<p>“One fitted value is a compromise between two sources rather than a measurement: the air–sea gas transfer speed comes out at about 1,840 m per year, against the literature's 1,446 (Naegler 2009). The data prefer the literature value; what holds it higher is the stated prior on how much gas exchange the cold high-latitude box gets, and the two cannot both hold.”</p>`,
-  found: `<p>Being measured now: the k_w = 1446 price profile at hilda31fl (two starts, the 30 other parameters re-fitted), started 16:22, expected to finish around 18:30–19:30.</p>
-<p>At hilda31w (10-13) the data preferred 1,446 by +6.21 log-likelihood (atmospheric Δ¹⁴C +7.09, δ¹³C −2.68), and hs_asx_frac's prior was 88% of what holds k_w higher. This card will be updated with the hilda31fl numbers.</p>`,
+  found: `<p>k_w held at 1,446 and the 30 other parameters re-fitted, from two starts that agree to 1.0e-6 in log-posterior. Read by calibration/diag_price_profile_read.R.</p>
+<div class="tbl"><table><thead><tr><th>k_w = 1,446 against the canonical's 1,838</th><th>hilda31fl (now)</th><th>hilda31w (10-13)</th></tr></thead><tbody>
+<tr><td>Likelihood, all 26 rows (&gt; 0: 1,446 fits better)</td><td>+6.28</td><td>+6.21</td></tr>
+<tr><td>Atmospheric Δ¹⁴C (north, south, IntCal)</td><td>+7.32</td><td>+7.09</td></tr>
+<tr><td>Atmospheric δ¹³C</td><td>−2.45</td><td>−2.68</td></tr>
+<tr><td>CO₂</td><td>+1.50</td><td>+1.88</td></tr>
+<tr><td>hs_asx_frac's prior (share of the other parameters' prior change)</td><td>−20.12 (89%)</td><td>−19.92 (88%)</td></tr>
+<tr><td>Posterior price of 1,446, natural scale</td><td>−15.34</td><td>−15.40</td></tr></tbody></table></div>
+<ul><li>The data prefer 1,446 by 6.3 log-likelihood. What holds k_w near 1,840 is the prior on hs_asx_frac (the cold box's share of the gas exchange): to fit 1,446 it moves from 0.73 to 1.67, and its prior z from 0.75 to 6.26.</li>
+<li>“About 1,840” matches the canonical's 1,837.9. Every claim in the sentence reproduces at hilda31fl.</li></ul>`,
   options: [
-    { key: "keep", label: "Keep the sentence if the profile confirms it", text: "" },
-    { key: "wait", label: "Show me the numbers first", text: "" },
+    { key: "a", label: "(a) Keep as is", text: "" },
     OWN],
-  rec: null, recNote: "Decide after the result is in." },
+  rec: "a", recNote: "The profile at hilda31fl gives the same reading as 10-13's at hilda31w, to within 0.4 log-likelihood in every family." },
 
 { id: "b21", group: "science", tag: "B21", title: "Card 7 and What pins down what? on the seasonal SST amplitude",
   where: "Card 7: app/R/review.R:869–873. Map paragraph: app/server.R:1272–1276 (its three names are computed).",
