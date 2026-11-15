@@ -60,6 +60,15 @@ test_that("B19. card 4a reproduces diag_card4_enso_estimators.R's WHATIF row (n,
   expect_gt(abs(g$sd_ratio - v$ratio), 0.1)
 })
 
+test_that("B19. the card's window is the What if...? slider's default, as ui.R writes it", {
+  ui <- ccx_code_lines(readLines(file.path(.gb_dir, "ui.R"), warn = FALSE))
+  i <- grep('sliderInput\\("c_years"', ui)
+  blk <- paste(ui[i:(i + 3L)], collapse = " ")
+  start <- as.integer(sub('.*value[[:space:]]*=[[:space:]]*c\\(([0-9]{4}),[[:space:]]*APP_HIST_YEARS\\[2\\]\\).*', "\\1", blk))
+  expect_identical(c(start, as.integer(.gb_app$APP_HIST_YEARS[2])), as.integer(.gb_app$APP_CF_YEARS_DEFAULT))
+  expect_false(identical(c(1900L, as.integer(.gb_app$APP_HIST_YEARS[2])), as.integer(.gb_app$APP_CF_YEARS_DEFAULT)))   # POWER
+})
+
 test_that("B19. the model's ENSO r exceeds the record's at every lag 0-18 on the card's measure (option a's promise)", {
   e <- .gb_app; v <- e$rv_growth_variability()
   for (lag in 0:18) {

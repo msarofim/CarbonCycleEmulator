@@ -77,9 +77,10 @@ say("%s | commit %s%s | canonical %s (%s, md5 %s) | %s\n", CE_DRIVER, commit, if
 # ---- gates --------------------------------------------------------------------
 # the slider default this driver assumes is the one ui.R declares
 ui_txt <- paste(readLines(file.path(ROOT, "app", "ui.R")), collapse = "\n")
-# 2026-11-15 (group B B19): ui.R reads the default from APP_CF_YEARS_DEFAULT (global.R), which card 4a also reads
-if (!grepl("\"c_years\"[^)]*value = APP_CF_YEARS_DEFAULT", ui_txt) || !identical(as.integer(APP_CF_YEARS_DEFAULT), CE_SLIDER))
-  stop("ui.R's c_years default is not APP_CF_YEARS_DEFAULT = c(", CE_SLIDER[1], ", ", CE_SLIDER[2], "): update CE_SLIDER")
+if (!grepl(sprintf("\"c_years\"[^)]*value = c\\(%d, *APP_HIST_YEARS\\[2\\]\\)", CE_SLIDER[1]), ui_txt))
+  stop("ui.R's c_years default is not c(", CE_SLIDER[1], ", APP_HIST_YEARS[2]): update CE_SLIDER")
+# 2026-11-15 (group B B19): card 4a reads the same default from APP_CF_YEARS_DEFAULT (global.R)
+if (!identical(as.integer(APP_CF_YEARS_DEFAULT), CE_SLIDER)) stop("APP_CF_YEARS_DEFAULT is not ", CE_SLIDER[1], "-", CE_SLIDER[2])
 # the app's historical run is the canonical's (APP_PARAMS decoded from the mode file)
 md <- readRDS(mode_file)
 # bomb_total / luc_scale / rep_dC have no slot in the parameter list (memory ccx_app_label_tables_gated): the app

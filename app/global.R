@@ -750,7 +750,7 @@ app_pulse_runs <- function(inp) {
 # His sentence at the default settings (vvM, 2050, 100 GtC): "Between 100 and 250 years, the warming actually increases
 # a little (4%), whereas the airborne carbon concentrations drop another 18%." MEASURED over every background, release
 # year and three pulse sizes (outputs/diagnostics/groupb_build_20261115/b2_pulse_keep.log): the warming change runs
-# -6.4 % to +6.1 % (it falls in five of the seven backgrounds) and the airborne carbon -44 % to +6 % (it rises in the
+# -6.4 % to +6.1 % (it falls in 120 of the 168 settings) and the airborne carbon -44 % to +6 % (it rises in 8, the
 # High background's early releases). So each clause has a rising, a falling and a level form, and "a little" is
 # said only below PULSE_TAIL_LITTLE_MAX_PCT (every measured setting is below it; a larger change drops the words).
 PULSE_TAIL_LITTLE_MAX_PCT <- 10
@@ -1023,8 +1023,9 @@ app_mech_list <- function(off, sentence_start = FALSE) {
 # numeric form prints "+0" and has to be replaced by words. Standing rule --
 # labels derive from named constants (~/.claude/CLAUDE.md).
 TAKEAWAY_PPM_RESOLUTION <- 0.5
-# The What-if tab's "Years shown" default (ui.R c_years). Known-issues card 4a draws that tab's measure on this window
-# cut to the observed record (group B B19, 2026-11-15), so the card and the tab's opening view cannot differ.
+# The What-if tab's "Years shown" default (ui.R c_years, written there as c(1850, APP_HIST_YEARS[2]) for
+# test-ui-year-bounds-lint.R). Known-issues card 4a draws that tab's measure on this window cut to the observed record
+# (group B B19, 2026-11-15); test-app-review-20261115.R fails if the two differ.
 APP_CF_YEARS_DEFAULT <- c(1850L, as.integer(APP_HIST_YEARS[2]))
 # Group B B4 (Marcus 2026-11-15, option a: "under 1 ppm one decimal"). Below this unrounded change the What-if
 # takeaway prints the change to one decimal and no levels.

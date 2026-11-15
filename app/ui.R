@@ -607,7 +607,9 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
                            selected = names(CCX_MECHANISMS)[1]),
         sliderInput("c_years", "Years shown",
                     min = APP_HIST_YEARS[1], max = APP_HIST_YEARS[2],
-                    value = APP_CF_YEARS_DEFAULT, step = 1, sep = "", ticks = FALSE),   # card 4a reads it (B19)
+                    value = c(1850, APP_HIST_YEARS[2]), step = 1, sep = "", ticks = FALSE),
+        # ^ group B B19: Known-issues card 4a draws this tab's measure on this default window (APP_CF_YEARS_DEFAULT,
+        #   global.R; test-app-review-20261115.R holds the two equal). Kept in this form for test-ui-year-bounds-lint.R.
         unit_note_ppm(),
         unit_note_gtc(),   # group B B10: the "Our emissions" driver chart is in GtC
         uiOutput("c_blurb")
