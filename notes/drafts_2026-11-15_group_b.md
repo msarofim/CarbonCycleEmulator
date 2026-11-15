@@ -10,6 +10,9 @@ caption now reads "…averaged over the twelve months to each January, where bot
 printed only when both series' r peak at the quoted lag (scanned 0–18 months by `rv_growth_variability()`). T1 and T2
 results below (§1c). The second draft (§1b) is unchanged and still his to approve.
 
+**UPDATE 2026-11-15 (third answer):** "Approve the second draft". §1b ships as written; every item in this note is
+settled. His "add an improved ENSO fit to the refit list" is item 3 of `notes/next_refit_candidates.md`.
+
 ## 1c. T1 and T2: why the misses follow the same calendar year's ENSO index
 
 `calibration/diag_card4_enso_knockouts.R` (`outputs/diagnostics/card4_enso_knockouts_20261115_hilda31fl.log`). Two
@@ -58,7 +61,7 @@ card 4a's measure shows it: its calendar-year index sits on the early side. Not 
 the record its early-side dip (the handoff's H1 reading, an ocean taking up more CO₂ as El Niño develops, is one
 candidate), or whether a few events carry it (T4).
 
-## 1b. Card 4's last paragraph, second draft (in the code now; awaiting approval)
+## 1b. Card 4's last paragraph, second draft (in the code; approved 2026-11-15)
 
 "We looked for a pattern in the misses. The model tends to grow faster than the record in El Niño years and slower in
 La Niña years, and three of the five largest overshoots are 1991–1993, after Pinatubo. The misses show no trend. The

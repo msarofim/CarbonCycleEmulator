@@ -15,9 +15,9 @@ Marcus: "run T1 and T2; use 11 months with 'where both peak', and continue work"
 - Suite at `8ba6c320` 9,892 / 0 / 1 skip; mutations 18/18; bundle `~/ccx_frozen/bundle_20261115_8ba6c320` checked
   locally (`outputs/diagnostics/groupb_bundle_20261115/README.md`).
 
-**Still open:** card 4's second draft (§2 item 1 below; drafts note §1b) has NOT been approved in words; the bundle
-carries it. If he changes it: edit `app/R/review.R`, re-run the two gate files and the mutation script, rebuild the
-bundle (no full suite needed for a copy change in card 4 unless a gated fact changes). Then §4 step 4: he publishes
+**Approved (Marcus, 2026-11-15): "Approve the second draft".** Card 4's paragraph ships as in the bundle; no rebuild.
+He also asked for "an improved ENSO fit" on the refit list (`notes/next_refit_candidates.md` item 3) and for the last
+12 hours of usage before publishing (CHANGELOG 11-15 h). Next, §4 step 4: he publishes
 ```
 Rscript -e 'rsconnect::deployApp("/Users/MarcusMarcus/ccx_frozen/bundle_20261115_8ba6c320", appId = "01a14244-5cc3-1951-7b06-9e2fb07beae3", account = "saraphreport", server = "connect.posit.cloud", forceUpdate = TRUE)'
 ```
