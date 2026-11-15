@@ -1,5 +1,8 @@
 # Handoff 2026-11-11: group B decision sheet, one row pending
 
+**SUPERSEDED 2026-11-15** by `notes/handoff_2026-11-15_group_b_build.md`: Marcus's choices are in, and the next
+session builds them.
+
 **UPDATE 2026-11-11 19:10: section 2 is DONE.** The profile converged (both starts, 1.0e-6 apart), its outputs are in
 `outputs/diagnostics/price_profile_20261111_hilda31fl/`, the sheet and the fill-in page (version 2) carry card 7's
 numbers, and card 3's recommendation (b) is confirmed. The frozen worktree is removed. A labelling bug in the card 3

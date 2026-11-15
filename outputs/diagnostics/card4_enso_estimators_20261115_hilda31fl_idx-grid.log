@@ -1,0 +1,51 @@
+calibration/diag_card4_enso_estimators.R | commit 557ce422 | canonical hilda31fl (refit_20261023_hilda31fl_flask_hilda_csl3v0kaidgbemwtcf, md5 80c487f576f9a1e44f7900597d95a3e4) | 2026-11-15 13:14
+  likelihood-only fitted names (not in the model's parameter list, so not in the run): sigma_d14c, grad_off_co2, grad_off_d13c, imb_share_land, imb_share_ocean_rest
+GATE: the app's parameters vs the mode file's par_mode, max relative difference 0.0e+00 over 26 fitted names -> PASS
+index (--index=grid): ERSST v6 grid Nino 3.4, fixed base 1991-2020 (lib_enso_index.R; MANIFEST ersst_v6_monthly, sha256 checked): the product-swap control for the two below
+  GATEV  n 66, 1959-2024 | card 4a caption (GATE V: GtC/yr, AF regression; GCB; 1959-2024)
+  WHATIF n 45, 1980-2024 | What-if tab as drawn (NOAA MBL, annual means; 1980-2024; ns df 3)
+  N7     n 66, 1959-2024 | 10-15 'What-if' reading (GCB atm_growth; 1959-2024; ns df 3)
+  N7_80  n 45, 1980-2024 | GCB atm_growth on the What-if years (1980-2024; ns df 3)
+
+=== r with Nino 3.4 (annual mean of the 12 months ending LAG months before December); model minus record ===
+  90% interval: paired moving-block bootstrap, block 3 yr, B 5000, seed 20261111. Williams' t: dependent r sharing the index.
+  est     lag   n    r_mod   r_obs     diff  90% interval          W t    W p    r(m,o)    sd m/o
+  GATEV     0  66   +0.458  +0.292   +0.166  [-0.005, +0.336]   +1.92  0.059    +0.703     0.864
+  GATEV     3  66   +0.761  +0.513   +0.248  [+0.126, +0.404]   +3.89  0.000    +0.703     0.864
+  GATEV     6  66   +0.800  +0.541   +0.259  [+0.149, +0.412]   +4.39  0.000    +0.703     0.864
+  GATEV     9  66   +0.750  +0.516   +0.234  [+0.126, +0.389]   +3.60  0.001    +0.703     0.864
+  WHATIF    0  45   +0.273  -0.168   +0.442  [+0.277, +0.615]   +4.59  0.000    +0.707     0.672
+  WHATIF    3  45   +0.585  +0.200   +0.385  [+0.248, +0.563]   +4.31  0.000    +0.707     0.672
+  WHATIF    6  45   +0.666  +0.393   +0.273  [+0.142, +0.460]   +3.11  0.003    +0.707     0.672
+  WHATIF    9  45   +0.706  +0.494   +0.212  [+0.083, +0.394]   +2.51  0.016    +0.707     0.672
+  N7        0  66   +0.153  +0.289   -0.136  [-0.357, +0.078]   -1.17  0.246    +0.541     0.727
+  N7        3  66   +0.483  +0.499   -0.016  [-0.179, +0.172]   -0.15  0.878    +0.541     0.727
+  N7        6  66   +0.587  +0.524   +0.063  [-0.064, +0.231]   +0.67  0.507    +0.541     0.727
+  N7        9  66   +0.630  +0.498   +0.133  [+0.016, +0.291]   +1.43  0.157    +0.541     0.727
+  N7_80     0  45   +0.273  +0.225   +0.048  [-0.170, +0.290]   +0.36  0.720    +0.595     0.649
+  N7_80     3  45   +0.585  +0.485   +0.100  [-0.093, +0.306]   +0.89  0.376    +0.595     0.649
+  N7_80     6  45   +0.666  +0.546   +0.120  [-0.049, +0.300]   +1.18  0.246    +0.595     0.649
+  N7_80     9  45   +0.706  +0.550   +0.156  [+0.004, +0.316]   +1.60  0.117    +0.595     0.649
+
+=== the 11-11 review's numbers (lags 0/3/6): model +0.29/+0.58/+0.67 vs record -0.15/+0.19/+0.37 ===
+  GATEV  max |difference| from the review's six numbers 0.442
+  WHATIF max |difference| from the review's six numbers 0.023
+  N7     max |difference| from the review's six numbers 0.439
+  N7_80  max |difference| from the review's six numbers 0.375
+
+=== card 4: 'more ENSO-driven' (model r > record r) per estimator and lag; 'clear' = the 90% interval excludes 0 ===
+  GATEV  lag 0: model MORE (not clear); lag 3: model MORE (clear); lag 6: model MORE (clear); lag 9: model MORE (clear)
+  WHATIF lag 0: model MORE (clear); lag 3: model MORE (clear); lag 6: model MORE (clear); lag 9: model MORE (clear)
+  N7     lag 0: model LESS (not clear); lag 3: model LESS (not clear); lag 6: model MORE (not clear); lag 9: model MORE (clear)
+  N7_80  lag 0: model MORE (not clear); lag 3: model MORE (not clear); lag 6: model MORE (not clear); lag 9: model MORE (clear)
+
+=== the lag (months, 0-18) at which r peaks, per series ===
+  GATEV  model peaks at lag  5 (r +0.801); record at lag  5 (r +0.542)
+  WHATIF model peaks at lag 11 (r +0.729); record at lag 12 (r +0.531)
+  N7     model peaks at lag 11 (r +0.660); record at lag  5 (r +0.526)
+  N7_80  model peaks at lag 11 (r +0.729); record at lag  8 (r +0.553)
+
+=== variance split at the shared peak lag (fractions of the RECORD's variance) ===
+  GATEV  lag  5: model total 0.75 = ENSO-related 0.48 + rest 0.27; record 1.00 = ENSO-related 0.29 + rest 0.71 -> the model's shortfall is 0.44 in the rest and +0.18 in the ENSO part
+
+provenance: calibration/diag_card4_enso_estimators.R @557ce422; hilda31fl md5 80c487f576f9a1e44f7900597d95a3e4; seed 20261111 (bootstrap); saved outputs/diagnostics/card4_enso_estimators_20261115_hilda31fl_idx-grid.{log,rds} | 0.1 min

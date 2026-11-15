@@ -29,6 +29,33 @@ Read from the page's store on 11-15; full text, notes included, in
   prior?"). Answers in the 11-15 reply; not yet decided.
 - **New: B22** (below), from a comment on the Futures tab.
 
+**Decided 11-15 (second reply):**
+- **B19:** "move card 4a to the what-if measure if it is the better measure". It is: GATE V's model side differences
+  the model's stock at calendar-year boundaries (`dg_af_annual_model()`), which 09-26 measured to add the model's
+  seasonal-cycle error to its growth rate (RMS 0.397 → 0.491 ppm/yr; `data-raw/build_mbl_global_growth.R`), and its
+  record before 1980 is the years GCB itself calls least certain. Cost: 1959–1979 are lost, and card 4a no longer
+  shows GATE V's own statistic. The variability ratio card 4a prints goes from 0.86× to about 0.67×, and card 4's
+  numerical claims made on the GCB measure ("sixty-six years", the 1991 and 1983 misses) must be re-measured: on the
+  matched estimator 1991 is +0.43, an ordinary year (09-26), against +1.02 on the mismatched pairing.
+- **B19, the RONI test** (`calibration/diag_card4_enso_estimators.R --index=…`, `557ce422`; outputs
+  `card4_enso_estimators_20261115_hilda31fl_idx-{grid,relsst_lp,relsst}.{log,rds}`; the default reproduces 11-11's
+  tables exactly). On every index, ERSST v6's absolute Niño 3.4 (a product control), the 09-29 low-passed relative
+  index, and Niño 3.4 minus the unfiltered 20°S–20°N mean (RONI's subtraction), the model's r exceeds the record's at
+  every lag on both like-for-like estimators, with 90 % intervals excluding zero at lags 3–9. The record does not follow
+  the relative index more closely: peak r 0.52 on all four indices on card 4a's estimator; 0.51 shipped against 0.47
+  RONI-like on the What-if one. The test sees only year-to-year variation (the spline removes the slow part of the
+  growth series), which is not where absolute and relative indices differ most. No change follows.
+- **B20 card 7:** his wording, corrected for one point (`hs_asx_frac` is gas exchange per unit area relative to warm
+  water, and the prior alone does not exclude 1,446): "One fitted value is a compromise between two sources rather
+  than a measurement: the air–sea gas transfer speed comes out at about 1,840 m per year, against the literature's
+  1,446 (Naegler 2009). The data are more consistent with the literature value. What holds the fitted value higher is
+  the prior on how fast the cold high-latitude ocean exchanges gas, which comes from measured ice cover, winds and
+  water temperature, and the fit cannot match both that prior and the literature value."
+- **B20, the prior:** a wider prior goes on the refit list, `notes/next_refit_candidates.md` (item 1), with what it
+  reopens.
+- **B22:** (c), the Pulse lab's stale rule for Build your own plus a "Calculating…" label.
+- **B13** stays open.
+
 ---
 
 ## Science (B19–B21)
