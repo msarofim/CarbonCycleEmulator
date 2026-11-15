@@ -209,7 +209,8 @@ AC_CHECKS_1015 <- list(
   c("K comparison gloss old", "long tail of carbon dioxide is robust", NA),
   c("K issue 1 plain",        "until now the panel drew the box", "offset between the hemispheric box and the station data that"),
   c("K issue 4 title",        "Year-to-year variability is about 60% of observed", "Year-to-year variability is somewhat smaller than observed"),
-  c("K issue 4 share",        "only about 60% of the observed", "wobble in CO₂ growth is only about 70–90% of the observed"),
+  # RE-PINNED 2026-11-15 (group B, Marcus: "About two thirds"): card 4a now draws one measure (0.672).
+  c("K issue 4 share",        "only about 60% of the observed", "wobble in CO₂ growth is only about two thirds of the observed"),
   c("K issue 4 index name",   "Niño3.4 index (annual mean)", "ENSO index (Niño 3.4, annual mean)"),
   c("K issue 5 title",        "decays faster here than in the multi-model mean", "Comparing CO₂ pulse decay rates to other sources"),
   c("K issue 5 ask",          "acceptable to teach, or does it undercut the lesson?", "What is the best comparison for long-term CO₂ decay?"),
@@ -476,7 +477,9 @@ AC_CHECKS_1115 <- list(
   c("B20 card 7 his wording",      "The data prefer the literature value", "The data are more consistent with the literature value."),
   c("B20 card 7 the prior",        "and the two cannot both hold", "which comes from measured ice cover,"),
   c("B21 SST off the list",        "seasonal sea-surface-temperature amplitude fitted well", "δ¹³C gradient offset (issue 2 is scored net of it)."),
-  c("B19 one measure",             "on the What-if tab's measure it", "The variance the model lacks is in the part that does not")
+  c("B19 one measure",             "on the What-if tab's measure it", "the variance it lacks is in"),
+  c("B19 plain: two thirds",       "about 70–90% of the observed", "about two thirds of the observed one"),
+  c("B19 ask: no volcanic",        "not El Ni\\u00f1o, volcanic or a trend", "not El Ni\\u00f1o or a trend,")
 )
 
 test_that("all of Marcus's 2026-11-15 copy rulings (group B) are still applied", {

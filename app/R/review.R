@@ -718,8 +718,9 @@ RV_CARDS <- list(
        plain = paste("The model's ENSO sensitivity is close to right — push the",
                      "index and the ocean sink responds by nearly the amount the",
                      "Global Carbon Budget shows. But the total year-to-year",
-                     "wobble in CO₂ growth is only about 70–90% of the observed",
-                     "one, depending on the period and the method."),
+                     # group B (Marcus 2026-11-15: "About two thirds"): card 4a's measure, model/record sd 0.672;
+                     # test-app-review-20261115.R holds two thirds as the nearest simple fraction to the ratio
+                     "wobble in CO₂ growth is only about two thirds of the observed one."),
                      # 2026-10-15 (Marcus: "Is this statement still true?"): NO, and REMOVED. His 10-06 timing
                      # sentence ("peaking a month after the Pacific warmth index rather than five months") was
                      # measured at hilda33p (+1 vs +5). At hilda29e (enso_growth_fit_20261008_hilda29e) and at
@@ -795,21 +796,21 @@ RV_CARDS <- list(
                       # 1991-1993 three of the five largest. No trend (r 0.00) and decade means <= 0.41 of one year's sd.
                       # DRAFT for Marcus (11-15); the last two sentences are B19 option (a) adapted to one measure. The
                       # typed facts are held by test-app-review-20261115.R.
-                      "\n\nWe looked for a pattern in the misses. Over forty-five years, the",
-                      "year-by-year difference between the model's growth and the measured",
-                      "growth is related to the ENSO index of the same calendar year, which",
-                      "suggests the model responds to El Ni\u00f1o sooner than the measured growth",
-                      "does. It shows no trend, and the decade averages all sit well inside",
-                      "one year's scatter. Three of the five largest overshoots are",
-                      "1991\u20131993: the model does not draw down as much carbon after",
-                      "Pinatubo as the record does.",
-                      "The model's growth follows the ENSO index more closely than the measured",
-                      "growth does. The variance the model lacks is in the part that does not",
-                      "follow ENSO."),
-       # B19 option (a)'s ask (Marcus 2026-11-15)
+                      # 2026-11-15, second draft (Marcus: "too long", and why would a model tuned to the growth record
+                      # respond sooner?): measured facts only, the "sooner" reading withdrawn. El Nino / La Nina years
+                      # = the top / bottom quartile of the run's ENSO index: mean miss +0.30 (10 of 12 positive) /
+                      # -0.17 (9 of 12 negative) ppm/yr; the association holds without 1982-84 and 1991-93 (r +0.40).
+                      "\n\nWe looked for a pattern in the misses. The model tends to grow faster",
+                      "than the record in El Ni\u00f1o years and slower in La Ni\u00f1a years, and",
+                      "three of the five largest overshoots are 1991\u20131993, after Pinatubo.",
+                      "The misses show no trend. The model's growth follows the ENSO index more",
+                      "closely than the measured growth does, and the variance it lacks is in",
+                      "the part that does not follow ENSO."),
+       # B19 option (a)'s ask (Marcus 2026-11-15), "volcanic" dropped (Marcus: "Drop volcanic"; the misses after
+       # Pinatubo are among the largest)
        ask = paste("Is a model that gets the ENSO sensitivity right but only part",
                    "of the variance acceptable for teaching what makes CO₂ wobble?",
-                   "And if the missing variability is not El Ni\u00f1o, volcanic or a trend,",
+                   "And if the missing variability is not El Ni\u00f1o or a trend,",
                    "what would you look for next?")),
   list(id = 5, key = "pulse", class = "comparison",
        # Marcus 2026-10-15: title and ask are his; the plain is his own comment's statement ("We do decay

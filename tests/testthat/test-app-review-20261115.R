@@ -90,21 +90,26 @@ test_that("B19. card 4's typed facts hold on the card's measure (diag_card4_what
   ann <- function(x) { a <- stats::aggregate(list(x = x), list(year = floor(F$t + 1e-9)), mean); stats::setNames(a$x, a$year) }
   res <- v$model_anom - v$obs_anom
   enso <- ann(F$enso)[as.character(v$years)]
-  words <- c(`45` = "forty-five", `44` = "forty-four", `46` = "forty-six")
-  expect_identical(length(v$years), 45L)
-  expect_match(det, sprintf("Over %s years", words[[as.character(length(v$years))]]), fixed = TRUE)
-  # "is related to the ENSO index of the same calendar year"
-  expect_match(det, "is related to the ENSO index of the same calendar year", fixed = TRUE)
+  # "The model tends to grow faster than the record in El Niño years and slower in La Niña years": the top / bottom
+  # quartile of the run's ENSO index, and the association itself
+  expect_match(det, "tends to grow faster than the record in El Niño years and slower in La Niña years", fixed = TRUE)
+  q <- stats::quantile(enso, c(0.25, 0.75))
+  expect_gt(mean(res[enso >= q[2]]), 0); expect_lt(mean(res[enso <= q[1]]), 0)
   expect_lt(stats::cor.test(res, enso)$p.value, 0.05)
-  # "It shows no trend"
+  # "The misses show no trend"
+  expect_match(det, "The misses show no trend.", fixed = TRUE)
   expect_gt(stats::cor.test(res, v$years)$p.value, 0.05)
-  # "the decade averages all sit well inside one year's scatter": every full decade's mean under half a year's sd
-  dec <- tapply(res, (v$years %/% 10) * 10, mean); n_dec <- tapply(res, (v$years %/% 10) * 10, length)
-  expect_lt(max(abs(dec[n_dec >= 5])) / stats::sd(res), 0.5)
-  # "Three of the five largest overshoots are 1991–1993"
+  # "three of the five largest overshoots are 1991–1993, after Pinatubo"
   top5 <- v$years[order(-res)][1:5]
   expect_identical(sum(top5 %in% 1991:1993), 3L)
-  expect_match(det, "Three of the five largest overshoots are 1991–1993", fixed = TRUE)
+  expect_match(det, "three of the five largest overshoots are 1991–1993, after Pinatubo", fixed = TRUE)
+  expect_false(grepl("sooner", det, fixed = TRUE))                                  # the withdrawn reading (11-15)
+  # the plain's "about two thirds" (Marcus 11-15) is the nearest simple fraction to card 4a's ratio
+  pl <- Filter(function(c) identical(c$id, 4), e$RV_CARDS)[[1]]$plain
+  fr <- c(`one half` = 1/2, `three fifths` = 3/5, `two thirds` = 2/3, `three quarters` = 3/4, `four fifths` = 4/5)
+  expect_identical(names(fr)[which.min(abs(fr - v$ratio))], "two thirds")
+  expect_match(pl, "about two thirds of the observed one", fixed = TRUE)
+  expect_false(names(fr)[which.min(abs(fr - 0.864))] == "two thirds")              # POWER: GATE V's ratio is not
   # POWER: the 10-15 text's claims fail on this measure -- 1991 is not the largest, and ENSO is associated
   expect_false(v$years[which.max(res)] == 1991L)
   expect_false(grepl("sixty-six", det, fixed = TRUE))

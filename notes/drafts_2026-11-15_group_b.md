@@ -1,5 +1,23 @@
 # Group B: the drafts that need Marcus's approval before the bundle (2026-11-15)
 
+**UPDATE 2026-11-15, his answers:** (1) "too long", and why would a model tuned to the growth record respond sooner?
+The "sooner" reading is withdrawn; second draft below (§1b) states measured facts only; hypotheses and tests in the
+handoff (`notes/handoff_2026-11-15_group_b_bundle.md` §3). (2) asked for pros and cons (handoff §3); lag 11 stays built
+until he chooses. (3) "About two thirds": applied. (4) "Drop volcanic": applied. (5) B14 note approved.
+
+## 1b. Card 4's last paragraph, second draft (in the code now; awaiting approval)
+
+"We looked for a pattern in the misses. The model tends to grow faster than the record in El Niño years and slower in
+La Niña years, and three of the five largest overshoots are 1991–1993, after Pinatubo. The misses show no trend. The
+model's growth follows the ENSO index more closely than the measured growth does, and the variance it lacks is in the
+part that does not follow ENSO."
+
+(El Niño / La Niña years = the top / bottom quartile of the run's ENSO index: mean miss +0.30 ppm/yr, 10 of 12 positive /
+−0.17, 9 of 12 negative. 1991–1993 fall in the El Niño quartile; without 1982–84 and 1991–93 the association is r +0.40,
+p 0.012.)
+
+---
+
 Built at `fd10dfaa` + `bc7c691c` (CHANGELOG 2026-11-15 c, d). Everything below is in the code as drafted, so the suite
 and the local app run with it; change any of it and the copy pins move with it.
 

@@ -9,7 +9,8 @@ C = "tests/testthat/test-app-review-copy.R"
 MUTANTS = [
     ("B19 card lag off the shared peak", "app/R/review.R", "RV_GROWTH_ENSO_LAG_MO <- 11L", "RV_GROWTH_ENSO_LAG_MO <- 5L", G),
     ("B19 another smooth than the tab's", "app/R/plots.R", "GROWTH_ANOM_DF <- 3L", "GROWTH_ANOM_DF <- 4L", G),
-    ("B19 card text's overshoot claim", "app/R/review.R", '"one year\'s scatter. Three of the five largest overshoots are",', '"one year\'s scatter. The largest overshoots are",', G),
+    ("B19 card text's overshoot claim", "app/R/review.R", '"three of the five largest overshoots are 1991\\u20131993, after Pinatubo.",', '"the largest overshoots are 1991\\u20131993, after Pinatubo.",', G),
+    ("B19 plain's fraction", "app/R/review.R", '"wobble in CO₂ growth is only about two thirds of the observed one."),', '"wobble in CO₂ growth is only about three quarters of the observed one."),', G),
     ("B4 threshold", "app/global.R", "TAKEAWAY_PPM_SMALL <- 1\n", "TAKEAWAY_PPM_SMALL <- 0.1\n", G),
     ("B2 his wording", "app/global.R", 'sprintf("drop another %d%%", -pC)', 'sprintf("drop %d%%", -pC)', G),
     ("B7 count", "app/R/params_meta.R", 'sum(set == "fitted"), sum(set == "held")', 'sum(set == "held"), sum(set == "held")', G),

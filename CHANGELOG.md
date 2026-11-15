@@ -2,6 +2,12 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-11-15 (e) — **Marcus's answers on the group B drafts: card 4's plain "about two thirds", "volcanic" dropped from its ask, the B14 note approved; card 4's paragraph redrafted shorter with the "sooner" reading withdrawn (his question: why would a model tuned to the growth record respond sooner?). Lag choice and the paragraph still open. Handoff `notes/handoff_2026-11-15_group_b_bundle.md`.**
+
+- Card 4's paragraph, second draft: measured facts only (El Niño / La Niña quartile composites of the miss, the 1991–1993 overshoots, no trend, option (a)). The quartile check found 1991–1993 inside the El Niño quartile (the 1991–92 El Niño coincided with Pinatubo); the ENSO association holds without the eruption years (r +0.40).
+- "Sooner" withdrawn: it read a lag-correlation shape as a mechanism. The main calibration does not score year-to-year growth; four held parameters fitted in a separate step on another estimator do. Hypotheses and four cheap tests (knockouts, the module's estimator, the residual's lag profile, leave-one-event-out) are in the handoff, not run.
+- Gates: the plain's "two thirds" is held as the nearest simple fraction to card 4a's ratio (GATE V's 0.864 would not be); the paragraph's facts re-gated; copy pins for the plain and the ask; **one more earlier pin re-pinned** (10-15 "K issue 4 share", "70–90%" → "two thirds"). Mutation script gains the plain's fraction (17 mutants).
+
 ## 2026-11-15 (d) — **Group B checked: suite, mutations, browser.** Drafts for Marcus in `notes/drafts_2026-11-15_group_b.md` (card 4's paragraph, card 4a's lag, card 4's plain and ask, the B14 note). Not bundled: that waits for his answer.
 
 - **Full suite at `fd10dfaa`** (frozen worktree, 25.8 min): 9,877 passed, **1 failed**, 1 standing skip (baseline 9,741 / 0 / 1; per-file diff: only the new gate file +120, the copy file +17 and the failure). The failure was `test-ui-year-bounds-lint.R` 1: B19 had changed the What-if slider's default to `value = APP_CF_YEARS_DEFAULT`, and the lint requires each "Years shown" default to be written `c(<start>, APP_HIST_YEARS[2])` in ui.R. **Fixed in the code, the lint unchanged:** ui.R is back to `c(1850, APP_HIST_YEARS[2])`; card 4a still reads `APP_CF_YEARS_DEFAULT`, and a new check in `test-app-review-20261115.R` fails if the two differ (`diag_card4_enso_estimators.R`'s gate restored to its 11-11 form plus the same check). Both files pass (18 / 122).

@@ -1,5 +1,8 @@
 # Handoff 2026-11-15: build group B (CarboTope minor issues, batch B)
 
+**SUPERSEDED 2026-11-15** by `notes/handoff_2026-11-15_group_b_bundle.md`: group B is built and checked; two answers
+from Marcus remain, then the bundle.
+
 Marcus asked for this note ("Yes, write the handoff note", 11-15) so a fresh session builds his group B decisions.
 Read with `CLAUDE.md`, `~/.claude/CLAUDE.md` (word-choice rules apply to every string a reader sees), memory
 `INDEX_ccx_app.md` and `INDEX_ccx_app_build.md`, and the two notes this one continues:
