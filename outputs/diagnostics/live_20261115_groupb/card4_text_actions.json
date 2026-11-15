@@ -1,0 +1,16 @@
+[
+ {
+  "url": "?_inputs_&tabs=%22Known%20issues%22"
+ },
+ {
+  "waitimg": "#rv_variance"
+ },
+ {
+  "js": "(() => { const t = document.body.textContent; return ['We looked for a pattern in the misses.', 'the variance it lacks is in the part that does not follow ENSO.', 'about two thirds', 'And if the missing variability is not El Niño or a trend, what would you look for next?', 'volcanic'].map(s => s + ' :: ' + t.includes(s)); })()",
+  "as": "card4_strings"
+ },
+ {
+  "js": "(() => { const t = document.body.textContent; const i = t.indexOf('We looked for a pattern'); const d = Array.from(document.querySelectorAll('details')).find(e => e.textContent.includes('We looked for a pattern')); return {snippet: t.slice(i, i + 420).replace(/\\s+/g, ' '), in_details: !!d, details_open: d ? d.open : null}; })()",
+  "as": "card4_paragraph"
+ }
+]

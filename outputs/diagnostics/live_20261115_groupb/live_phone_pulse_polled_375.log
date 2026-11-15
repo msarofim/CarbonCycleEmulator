@@ -1,0 +1,18 @@
+b22_pulse_300ms_after_click = {"calc_label_on": true, "plot_opacity": "0.35"}
+calc_on_after_2s = true
+calc_on_after_4s = true
+calc_on_after_6s = true
+calc_on_after_8s = true
+calc_on_after_10s = true
+calc_on_after_12s = false
+calc_on_after_14s = false
+calc_on_after_16s = false
+calc_on_after_18s = false
+calc_on_after_20s = false
+calc_on_after_22s = false
+calc_on_after_24s = false
+calc_on_after_26s = false
+calc_on_after_28s = false
+calc_on_after_30s = false
+b16_pulse_after_release = {"scrollY": 182, "takeaway_top_in_viewport": 20, "calc_label_on": false, "takeaway": "Release 200 GtC in 2050 and 51% of it is still in the air a "}
+saved outputs/diagnostics/live_20261115_groupb/shots_phone/b16_phone_pulse_after_release_polled_viewport.png

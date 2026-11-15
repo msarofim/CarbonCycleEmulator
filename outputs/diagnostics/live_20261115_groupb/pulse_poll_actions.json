@@ -1,0 +1,134 @@
+[
+ {
+  "url": "?_inputs_&tabs=%22Futures%22&f_mode=%22Pulse%20lab%22&p_gtc=200"
+ },
+ {
+  "wait": 3000
+ },
+ {
+  "scroll": "#p_go",
+  "block": "center"
+ },
+ {
+  "click": "#p_go"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "js": "({calc_label_on: document.getElementById('f_calc').classList.contains('on'), plot_opacity: getComputedStyle(document.getElementById('f_plot')).opacity})",
+  "as": "b22_pulse_300ms_after_click"
+ },
+ {
+  "wait": 2000
+ },
+ {
+  "js": "document.getElementById('f_calc').classList.contains('on')",
+  "as": "calc_on_after_2s"
+ },
+ {
+  "wait": 2000
+ },
+ {
+  "js": "document.getElementById('f_calc').classList.contains('on')",
+  "as": "calc_on_after_4s"
+ },
+ {
+  "wait": 2000
+ },
+ {
+  "js": "document.getElementById('f_calc').classList.contains('on')",
+  "as": "calc_on_after_6s"
+ },
+ {
+  "wait": 2000
+ },
+ {
+  "js": "document.getElementById('f_calc').classList.contains('on')",
+  "as": "calc_on_after_8s"
+ },
+ {
+  "wait": 2000
+ },
+ {
+  "js": "document.getElementById('f_calc').classList.contains('on')",
+  "as": "calc_on_after_10s"
+ },
+ {
+  "wait": 2000
+ },
+ {
+  "js": "document.getElementById('f_calc').classList.contains('on')",
+  "as": "calc_on_after_12s"
+ },
+ {
+  "wait": 2000
+ },
+ {
+  "js": "document.getElementById('f_calc').classList.contains('on')",
+  "as": "calc_on_after_14s"
+ },
+ {
+  "wait": 2000
+ },
+ {
+  "js": "document.getElementById('f_calc').classList.contains('on')",
+  "as": "calc_on_after_16s"
+ },
+ {
+  "wait": 2000
+ },
+ {
+  "js": "document.getElementById('f_calc').classList.contains('on')",
+  "as": "calc_on_after_18s"
+ },
+ {
+  "wait": 2000
+ },
+ {
+  "js": "document.getElementById('f_calc').classList.contains('on')",
+  "as": "calc_on_after_20s"
+ },
+ {
+  "wait": 2000
+ },
+ {
+  "js": "document.getElementById('f_calc').classList.contains('on')",
+  "as": "calc_on_after_22s"
+ },
+ {
+  "wait": 2000
+ },
+ {
+  "js": "document.getElementById('f_calc').classList.contains('on')",
+  "as": "calc_on_after_24s"
+ },
+ {
+  "wait": 2000
+ },
+ {
+  "js": "document.getElementById('f_calc').classList.contains('on')",
+  "as": "calc_on_after_26s"
+ },
+ {
+  "wait": 2000
+ },
+ {
+  "js": "document.getElementById('f_calc').classList.contains('on')",
+  "as": "calc_on_after_28s"
+ },
+ {
+  "wait": 2000
+ },
+ {
+  "js": "document.getElementById('f_calc').classList.contains('on')",
+  "as": "calc_on_after_30s"
+ },
+ {
+  "js": "(() => ({scrollY: Math.round(scrollY), takeaway_top_in_viewport: Math.round(document.getElementById('f_takeaway').getBoundingClientRect().top), calc_label_on: document.getElementById('f_calc').classList.contains('on'), takeaway: document.getElementById('f_takeaway').innerText.slice(0, 60)}))()",
+  "as": "b16_pulse_after_release"
+ },
+ {
+  "shot": "b16_phone_pulse_after_release_polled_viewport"
+ }
+]

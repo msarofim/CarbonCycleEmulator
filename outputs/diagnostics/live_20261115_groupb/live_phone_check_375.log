@@ -1,0 +1,13 @@
+b18_1_banner_phone = {"banner": [12, 363], "takeaway": [12, 363], "vw": 375}
+pointer_coarse = true
+b18_4_download_link_heights = [32, 32, 32]
+b18_3_copy_link_rects = ["Copy link to this view rects 1"]
+b18_2_readout_number_tops = ["w_atm number top 442", "w_land number top 442", "w_ocean number top 442"]
+saved outputs/diagnostics/live_20261115_groupb/shots_phone/b18_2_phone_where_readouts_after.png
+b16_build_before_click = {"scrollY": 510, "takeaway_top_in_viewport": -308}
+b22_build_300ms_after_click = {"calc_label_on": true, "plot_opacity": "0.35"}
+b16_build_after_run = {"scrollY": 182, "takeaway_top_in_viewport": 20, "calc_label_on": false, "takeaway": "Your pathway reaches 701 ppm and +4.0 \u00b0C by 2150. Fossil emissions never stop on"}
+saved outputs/diagnostics/live_20261115_groupb/shots_phone/b16_phone_build_after_run_viewport.png
+b22_pulse_300ms_after_click = {"calc_label_on": true, "plot_opacity": "0.35"}
+b16_pulse_after_release = {"scrollY": 702, "takeaway_top_in_viewport": -500, "calc_label_on": true, "takeaway": "Release the pulse to see results at these settings."}
+saved outputs/diagnostics/live_20261115_groupb/shots_phone/b16_phone_pulse_after_release_viewport.png

@@ -1,0 +1,14 @@
+{
+ "card4_strings": [
+  "We looked for a pattern in the misses. :: true",
+  "the variance it lacks is in the part that does not follow ENSO. :: true",
+  "about two thirds :: true",
+  "And if the missing variability is not El Ni\u00f1o or a trend, what would you look for next? :: true",
+  "volcanic :: true"
+ ],
+ "card4_paragraph": {
+  "snippet": "We looked for a pattern in the misses. The model tends to grow faster than the record in El Ni\u00f1o years and slower in La Ni\u00f1a years, and three of the five largest overshoots are 1991\u20131993, after Pinatubo. The misses show no trend. The model's growth follows the ENSO index more closely than the measured growth does, and the variance it lacks is in the part that does not follow ENSO. ",
+  "in_details": true,
+  "details_open": false
+ }
+}

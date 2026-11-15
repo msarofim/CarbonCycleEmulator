@@ -2,6 +2,14 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-11-15 (i) — **Live checks on the group B deploy (Marcus: "I published it; do the live checks"): revision `01a1e15d`, 4 GB / 2 CPU and the timeouts kept; every tab draws at 1440 × 900 and 375 × 812; every Download link works at both sizes; scan UI ALL OK; card 4a's caption says "where both peak"; card 4 carries the approved paragraph; the log is clean. The phone check's pulse step needed a longer wait on the host (done in 10–12 s), not a fix. `main` pushed, which puts B9.9's landing page title on carbotope.org.** Record: `outputs/diagnostics/live_20261115_groupb/` (`live_browser_checks.md`).
+
+- **Revision** (`host_revision_20261115.json`): published 22:39:22–22:39:28 UTC from `~/ccx_frozen/bundle_20261115_8ba6c320`; 4096 MB, 2 CPU, timeouts 1200 / 1800 / idle 5, init 60.
+- **Checks** (headless Chrome, 22:40–22:50 UTC): `time_tab_draws.py` ALL OK at both sizes (slowest 5.6 s); `check_live_pointer.py` at 1440 × 900: both pointers open their card, every tab draws with alt text and no output errors, the CSV names `8ba6c32`, and its one FAIL is Build your own before "Run it" (by design); `check_scan_ui.py` and `check_dl_links.py` ALL OK at both sizes; `log_problems.R` since 22:39: 150 lines, 25 sessions, all headless, no problem-looking line.
+- **Group B on the host:** card 4a's caption "…to each January, where both peak, r is +0.73 for the model and +0.51 for the measurements (n = 45)…"; card 4's second-draft paragraph in its collapsed details, "about two thirds", and the ask without "volcanic".
+- **Phone** (`phone_check.json`, 375 × 812): as at the bundle except the pulse step, whose fixed 6 s wait ended mid-calculation (a 200 GtC pulse is not precomputed). Polled every 2 s: done between 10 and 12 s (11.8 s on 10-15), then the takeaway 20 px from the top with the result. The script's wait is the laptop's; not changed.
+- **Old log channel:** the previous revision's channel (`01a1cc55`) was still readable after the publish, all 1,366 lines; this answers (h)'s open question for the first 15 minutes at least.
+
 ## 2026-11-15 (h) — **Marcus: "Approve the second draft, and add an improved ENSO fit to the refit list. Do an analysis of the last 12 hours of CarboTope usage before I publish a new model." Card 4's second draft approved as bundled (no rebuild); the ENSO timing is item 3 of `notes/next_refit_candidates.md`. Visit log: 3 visits in the last 12 hours, each under 35 s, each opening Futures directly; no container ran from 16:29 EST to the read at 17:30, so a publish then would have interrupted nobody.**
 
 - **Approval:** recorded in `notes/drafts_2026-11-15_group_b.md` (§1b) and the handoff's §0. The bundle `~/ccx_frozen/bundle_20261115_8ba6c320` already carries the paragraph.
