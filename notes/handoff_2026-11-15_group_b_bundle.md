@@ -23,6 +23,9 @@ Rscript -e 'rsconnect::deployApp("/Users/MarcusMarcus/ccx_frozen/bundle_20261115
 ```
 then the live checks (batch A §3 step 5) and push `main` (B9.9 landing page title). B13 still open.
 
+**DONE 2026-11-15 (CHANGELOG 11-15 i):** published by Marcus (revision `01a1e15d`), live checks pass, `main` pushed, the landing
+page title is live. Open: B13; refit list items 1–3 (`notes/next_refit_candidates.md`); T3/T4 not run.
+
 ## 1. Where things stand
 
 - **Built:** every group B item except B13 (still open, nothing built). Commits `fd10dfaa` (the build), `bc7c691c`
