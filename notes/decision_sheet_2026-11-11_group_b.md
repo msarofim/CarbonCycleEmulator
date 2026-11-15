@@ -13,6 +13,22 @@ Drafts follow your word-choice rules in `~/.claude/CLAUDE.md`; rewrite freely.
 
 Order: science first (the card texts depend on it), then design, then wording, then B10.
 
+## Marcus's decisions (fill-in page, 2026-11-14/15)
+
+Read from the page's store on 11-15; full text, notes included, in
+`outputs/diagnostics/groupb_20261111/decisions_20261115.json`. The blanks below are not filled in one by one.
+
+- **As recommended:** B4 (a), B10 all four, B12 (b), B15 (a), B16 (a), B17 (a), B20 card 3 (b), B21 (a); B9 (all ten)
+  and B11 (all three) and B18 (all five) applied; the drafts for B1, B3, B5, B7, B8.
+- **His wording:** B2 (own sentence); B4 (a) with his sentence, which names El Niño and must also serve the volcanic
+  and both-off switches; B6 (the draft, edited).
+- **Chosen with an addition:** B14 (C), plus a note whenever the window includes years before 1900 saying the
+  airborne fraction is poorly defined then because human emissions were small.
+- **Open, with questions:** B13 ("what would it take to move to (b)?"; answered under B13), B19 (why card 4a and the
+  What-if tab use different estimators; a relative ENSO index), B20 card 7 (his wording; "should we reevaluate the
+  prior?"). Answers in the 11-15 reply; not yet decided.
+- **New: B22** (below), from a comment on the Futures tab.
+
 ---
 
 ## Science (B19–B21)
@@ -230,6 +246,19 @@ calibration scores.
 **Recommendation:** (a) now; (b) is the better chart but needs a model curve on the same footing (monthly means too)
 to stay like-for-like.
 
+**What (b) takes** (Marcus asked 11-15; measured by `outputs/diagnostics/groupb_20261111/b13_monthly_shape.R` → `.log`,
+`99912026`, `hilda31fl`, no RNG): one helper used for both curves (each year 2000–2024 detrended by its own level and
+linear trend, the regression the calibration already fits, then averaged by calendar month), twelve points per curve,
+a new caption, and the chart's CSV download. No takeaway text quotes the one-wave amplitude. What it would show:
+
+| 2000–2024 | peak-to-peak | one wave misses by (rms / max) | peak / trough month |
+|---|---|---|---|
+| Measured, Mauna Loa | 7.48 ppm | 0.63 / 1.13 ppm | May / September |
+| Model, northern box | 7.42 ppm | 0.39 / 0.65 ppm | May / October |
+
+The measured cycle has a sharper late-summer drawdown than one wave; the model's monthly points follow it within
+0.65 ppm in every month.
+
 **Decision:** ______
 
 ### B14. Airborne fraction before about 1900
@@ -328,6 +357,30 @@ over its arrow, and "Build your own" wraps one word per line (`shots/b17_tablet7
 **Recommendation:** all five; 5 is a defect, the others are polish.
 
 ---
+
+### B22. Futures, Build your own: the previous result stays on screen (comment, 11-15)
+
+**Comment** (relayed by Marcus): after switching from "Change by a fixed rate" to "Hold at today's level" and
+clicking Run it, the old result stayed visible for a moment; a "Calculating…" label beside the chart would help
+students tell which scenario they are looking at.
+
+**Measured** (local app at `1c7da6d3`, whose app code is the live `64d91397`; the in-app browser): after the switch, the +1 %/yr result
+(1,154 ppm, +5.4 °C) stays at full opacity with no cue until Run it is pressed. After the press the run takes 1.3 s;
+the old chart stays at full opacity for 1.0 s, Shiny's default fade starts at 1.1 s, and the new result (701 ppm,
++4.0 °C) appears at 1.3 s. No busy indicator is enabled. The Pulse lab already greys a stale result (your 10-20
+ruling, `app_pulse_stale()`); Build your own has no equivalent.
+
+**Options**
+- (a) The Pulse lab's rule for Build your own: once a setting differs from the run on screen, grey the chart,
+  takeaway and notes, with "Chart reflects previous settings. Press Run it to update." under the button.
+- (b) A "Calculating…" label beside the chart from the press until the new chart draws (Build your own and the
+  Pulse lab), and the chart greyed at once instead of after Shiny's one-second delay.
+- (c) Both.
+
+**Recommendation:** (c). (a) covers the long gap before the press, which is when a student can misread the chart;
+(b) covers the 1.3 s run.
+
+**Decision:** ______
 
 ## Wording (B1–B9, B11)
 

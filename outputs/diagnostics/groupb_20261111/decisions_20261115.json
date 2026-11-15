@@ -1,0 +1,228 @@
+{
+ "source": "https://claude.ai/artifact/MTiQHcqrUMichcsaNx8vMC, collection decisions (ArtifactData list, 2026-11-15)",
+ "n": 37,
+ "decisions": {
+  "b1": {
+   "choice": "draft",
+   "item": "B1 What pins down what? takeaway (your 10-02 sentence)",
+   "note": "",
+   "updatedAt": "2026-11-15T17:40:00.644Z"
+  },
+  "b2": {
+   "choice": "own",
+   "item": "B2 Pulse lab, temperature view: “keeps 104%”",
+   "note": "Between 100 and 250 years, the warming actually increases a little (4%), whereas the airborne carbon concentrations drop another 18%. ",
+   "updatedAt": "2026-11-15T17:41:26.514Z"
+  },
+  "b3": {
+   "choice": "draft",
+   "item": "B3 What if…? with nothing ticked",
+   "note": "",
+   "updatedAt": "2026-11-15T17:41:37.153Z"
+  },
+  "b4": {
+   "choice": "a",
+   "item": "B4 What if…? takeaway for year-to-year switches (changed since the review)",
+   "note": "With El Niño / La Niña switched off, global-average CO₂ in 2024 changes by +0.2 ppm. This switch mostly impacts year-to-year variability rather than growth over time: see the growth-rate chart below.\"",
+   "updatedAt": "2026-11-15T17:43:22.238Z"
+  },
+  "b5": {
+   "choice": "draft",
+   "item": "B5 Forest regrowth: −1.22 beside “1.22 GtC absorbed/year”",
+   "note": "",
+   "updatedAt": "2026-11-15T17:43:55.750Z"
+  },
+  "b6": {
+   "choice": "draft",
+   "item": "B6 Pulse lab: “Runs the model twice”",
+   "note": "Runs the model with and without the pulse, from identical starting conditions, and takes the difference to estimate the impact of the extra carbon. A third run tags the pulse's carbon atoms to follow where they go.",
+   "updatedAt": "2026-11-15T17:44:46.528Z"
+  },
+  "b7": {
+   "choice": "draft",
+   "item": "B7 Under the hood, “Parameters”",
+   "note": "",
+   "updatedAt": "2026-11-15T17:50:06.234Z"
+  },
+  "b8": {
+   "choice": "draft",
+   "item": "B8 Pulse partition takeaway: “in this box”, “residence lifetime” (your 10-16 text)",
+   "note": "",
+   "updatedAt": "2026-11-15T17:50:33.644Z"
+  },
+  "b9-1": {
+   "choice": "apply",
+   "item": "B9.1",
+   "note": "",
+   "updatedAt": "2026-11-15T17:50:41.108Z"
+  },
+  "b9-2": {
+   "choice": "apply",
+   "item": "B9.2",
+   "note": "",
+   "updatedAt": "2026-11-15T17:50:47.624Z"
+  },
+  "b9-3": {
+   "choice": "apply",
+   "item": "B9.3",
+   "note": "",
+   "updatedAt": "2026-11-15T17:50:48.830Z"
+  },
+  "b9-4": {
+   "choice": "apply",
+   "item": "B9.4",
+   "note": "",
+   "updatedAt": "2026-11-15T17:50:54.583Z"
+  },
+  "b9-5": {
+   "choice": "apply",
+   "item": "B9.5",
+   "note": "",
+   "updatedAt": "2026-11-15T17:50:57.155Z"
+  },
+  "b9-6": {
+   "choice": "apply",
+   "item": "B9.6",
+   "note": "",
+   "updatedAt": "2026-11-15T17:51:07.918Z"
+  },
+  "b9-7": {
+   "choice": "apply",
+   "item": "B9.7",
+   "note": "",
+   "updatedAt": "2026-11-15T17:51:14.742Z"
+  },
+  "b9-8": {
+   "choice": "apply",
+   "item": "B9.8",
+   "note": "",
+   "updatedAt": "2026-11-15T17:51:16.988Z"
+  },
+  "b9-9": {
+   "choice": "apply",
+   "item": "B9.9",
+   "note": "",
+   "updatedAt": "2026-11-15T17:51:18.689Z"
+  },
+  "b9-10": {
+   "choice": "apply",
+   "item": "B9.10",
+   "note": "",
+   "updatedAt": "2026-11-15T17:51:23.429Z"
+  },
+  "b10": {
+   "choice": "all",
+   "item": "B10 Unit glosses, ready to apply",
+   "note": "",
+   "updatedAt": "2026-11-15T17:51:54.826Z"
+  },
+  "b11-af": {
+   "choice": "apply",
+   "item": "B11.AF",
+   "note": "",
+   "updatedAt": "2026-11-15T17:51:29.557Z"
+  },
+  "b11-d14c": {
+   "choice": "apply",
+   "item": "B11.Δ¹⁴C",
+   "note": "",
+   "updatedAt": "2026-11-15T17:51:46.680Z"
+  },
+  "b11-gcb": {
+   "choice": "apply",
+   "item": "B11.GCB",
+   "note": "",
+   "updatedAt": "2026-11-15T17:51:43.575Z"
+  },
+  "b12": {
+   "choice": "b",
+   "item": "B12 Controls the Keeling and Where texts ignore",
+   "note": "",
+   "updatedAt": "2026-11-14T19:39:01.029Z"
+  },
+  "b13": {
+   "choice": "own",
+   "item": "B13 The seasonal chart's “Measured” curve is a fitted wave",
+   "note": "What would it take to move to (b)? If we go with (a), then the only thing I don't like is the phrase \"the form the calibration scores\" which feels awkward. ",
+   "updatedAt": "2026-11-15T17:33:00.802Z"
+  },
+  "b14": {
+   "choice": "own",
+   "item": "B14 Airborne fraction before about 1900",
+   "note": "(C), but maybe with a note that pops up when any window includes pre-1900 data that says something about airborne fraction being poorly defined before the 20th century because of low human emissions. ",
+   "updatedAt": "2026-11-14T19:43:29.130Z"
+  },
+  "b15": {
+   "choice": "a",
+   "item": "B15 The residual strip's years",
+   "note": "",
+   "updatedAt": "2026-11-14T19:43:36.829Z"
+  },
+  "b16": {
+   "choice": "a",
+   "item": "B16 Phone: “Run it” sits below the chart it fills",
+   "note": "",
+   "updatedAt": "2026-11-14T19:43:52.834Z"
+  },
+  "b17": {
+   "choice": "a",
+   "item": "B17 Portrait tablet (768 px): a 168 px sidebar",
+   "note": "",
+   "updatedAt": "2026-11-14T19:44:04.459Z"
+  },
+  "b18-1": {
+   "choice": "apply",
+   "item": "B18.1",
+   "note": "",
+   "updatedAt": "2026-11-14T19:44:29.160Z"
+  },
+  "b18-2": {
+   "choice": "apply",
+   "item": "B18.2",
+   "note": "",
+   "updatedAt": "2026-11-14T19:44:30.967Z"
+  },
+  "b18-3": {
+   "choice": "apply",
+   "item": "B18.3",
+   "note": "",
+   "updatedAt": "2026-11-14T19:44:33.516Z"
+  },
+  "b18-4": {
+   "choice": "apply",
+   "item": "B18.4",
+   "note": "",
+   "updatedAt": "2026-11-14T19:44:36.417Z"
+  },
+  "b18-5": {
+   "choice": "apply",
+   "item": "B18.5",
+   "note": "",
+   "updatedAt": "2026-11-14T19:44:38.150Z"
+  },
+  "b19": {
+   "choice": null,
+   "item": "B19 Card 4's last sentence: “on the What-if tab's measure it is less”",
+   "note": "Why do Card 4a and the What-if use different ENSO approache sin the first place? That seems like a problematic inconsistency. Also, have we considered using a relative ENSO measure rather than an absolute one? (see https://tamino.wordpress.com/2026/11/12/a-big-el-nino/)",
+   "updatedAt": "2026-11-15T17:39:21.986Z"
+  },
+  "b20-card3": {
+   "choice": "b",
+   "item": "B20 Card 3's “about 15%”",
+   "note": "",
+   "updatedAt": "2026-11-14T19:34:00.343Z"
+  },
+  "b20-card7": {
+   "choice": null,
+   "item": "B20 Card 7: “The data prefer the literature value”",
+   "note": "1) change \"the data prefer\" to \"the data are more consistent with...\". 2) \"what holds the fitted value higher is the prior on the rate of gas exchange in the cold high-latitude box which is incompatible with the literature value.\" 3) should we reevaluate the prior? ",
+   "updatedAt": "2026-11-14T19:37:32.211Z"
+  },
+  "b21": {
+   "choice": "a",
+   "item": "B21 Card 7 and What pins down what? on the seasonal SST amplitude",
+   "note": "",
+   "updatedAt": "2026-11-14T19:38:20.179Z"
+  }
+ }
+}
