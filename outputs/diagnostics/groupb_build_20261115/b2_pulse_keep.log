@@ -1,0 +1,29 @@
+b2_pulse_keep.R | commit 811fb9c4 | canonical hilda31fl | 2026-11-15 14:12 | 168 settings (backgrounds x release years x sizes 10/100/500 GtC) 
+
+warming change from y1 to y2: -6.4% to +6.1% (median -2.1%); negative in 120 of 168 settings
+airborne carbon change:       -43.9% to +6.0% (median -26.7%); positive in 8 of 168 settings
+rounded warming change: -6:13 -5:11 -4:20 -3:21 -2:33 -1:17 0:8 1:5 2:4 3:6 4:8 5:15 6:7
+
+by background and release year (default size):
+      year
+bg     2030 2040 2050 2060 2070 2080 2090 2100
+  vvH    -5   -4   -2    0    2    3    4    5
+  vvHL    3    1   -1   -1   -2   -2   -2   -3
+  vvL    -4   -4   -4   -4   -4   -4   -3   -3
+  vvLN   -4   -5   -6   -6   -6   -6   -6   -6
+  vvM     4    4    4    5    5    5    5    5
+  vvML    0   -1   -2   -2   -2   -2   -2   -2
+  vvVL   -3   -3   -3   -3   -3   -2   -2   -2
+
+airborne carbon, same:
+      year
+bg     2030 2040 2050 2060 2070 2080 2090 2100
+  vvH     6    3    1   -1   -2   -3   -4   -5
+  vvHL  -42  -41  -39  -37  -34  -32  -29  -26
+  vvL   -31  -30  -29  -27  -25  -23  -21  -19
+  vvLN  -44  -42  -40  -37  -34  -31  -28  -25
+  vvM   -16  -17  -18  -18  -18  -17  -17  -16
+  vvML  -37  -36  -35  -33  -31  -29  -27  -24
+  vvVL  -30  -29  -29  -28  -26  -24  -23  -21
+
+largest |keep_T(size) - keep_T(default)| across sizes, percentage points: 1.86 
