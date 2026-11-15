@@ -83,6 +83,21 @@ test_that("B19. the model's ENSO r exceeds the record's at every lag 0-18 on the
   expect_lt(n7$r_model, n7$r_obs)
 })
 
+test_that("B19. the caption says 'where both peak' because both series' r peak at the quoted lag (Marcus 11-15)", {
+  e <- .gb_app; v <- e$rv_growth_variability()
+  # recomputed here from rv_enso_annual(), not read from the function's own scan
+  r <- t(vapply(0:18, function(L) { x <- e$rv_enso_annual(L)[as.character(v$years)]; ok <- is.finite(x)
+    c(stats::cor(v$model_anom[ok], x[ok]), stats::cor(v$obs_anom[ok], x[ok])) }, c(0, 0)))
+  expect_identical(c(0:18)[which.max(r[, 1])], e$RV_GROWTH_ENSO_LAG_MO)
+  expect_identical(c(0:18)[which.max(r[, 2])], e$RV_GROWTH_ENSO_LAG_MO)
+  expect_identical(c(v$enso$peak_model, v$enso$peak_obs), rep(e$RV_GROWTH_ENSO_LAG_MO, 2L))
+  expect_identical(e$RV_GROWTH_ENSO_SCAN_MO, 0:18)
+  cap <- gsub("\\s+", " ", e$rv_plot_variance()$labels$caption)
+  expect_match(cap, "averaged over the twelve months to each January, where both peak, r is +0.73", fixed = TRUE)
+  # POWER: at the calendar year (lag 0) neither series peaks, so a caption quoting it could not say so
+  expect_false(which.max(r[, 1]) == 1L || which.max(r[, 2]) == 1L)
+})
+
 test_that("B19. card 4's typed facts hold on the card's measure (diag_card4_whatif_residuals.R's numbers)", {
   e <- .gb_app; v <- e$rv_growth_variability()
   det <- Filter(function(c) identical(c$id, 4), e$RV_CARDS)[[1]]$detail

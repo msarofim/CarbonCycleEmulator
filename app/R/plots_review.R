@@ -225,11 +225,15 @@ rv_plot_variance <- function() rv_guard(rv_growth_variability(), function(x) {
            # the comparative word is COMPUTED from the two r values; card 4's detail states both readings.
            # 2026-11-15 (B19): one measure now, so "on this chart's measure" is gone; the index is averaged over the
            # twelve months ending in the month the lag names (RV_GROWTH_ENSO_LAG_MO), and the word is still computed
+           # 2026-11-15 (Marcus: "use 11 months with 'where both peak'"): the phrase prints only when both series'
+           # r peak at the quoted lag (rv_growth_variability()'s scan), so it cannot outlive the fact
            sprintf(
-             paste("Against the ENSO index averaged over the twelve months to each %s, r is %s for the model",
+             paste("Against the ENSO index averaged over the twelve months to each %s%s, r is %s for the model",
                    "and %s for the measurements (n = %d): the model's growth follows the ENSO index %s the",
                    "measured growth does."),
-             rv_lag_month(x$enso$lag), rv_signed("%+.2f", x$enso$r_model), rv_signed("%+.2f", x$enso$r_obs),
+             rv_lag_month(x$enso$lag),
+             if (x$enso$peak_model == x$enso$lag && x$enso$peak_obs == x$enso$lag) ", where both peak" else "",
+             rv_signed("%+.2f", x$enso$r_model), rv_signed("%+.2f", x$enso$r_obs),
              x$enso$n, if (x$enso$r_model > x$enso$r_obs) "more closely than" else "less closely than")))) +
     theme_ccx()
 })

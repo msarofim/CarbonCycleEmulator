@@ -1,0 +1,55 @@
+calibration/diag_card4_enso_knockouts.R | commit 2941fd0c | canonical hilda31fl (md5 80c487f576f9a1e44f7900597d95a3e4) | 2026-11-15 14:47
+GATE: the app's parameters vs the mode's model list, max |difference| 0.0e+00 over 132 names -> PASS
+the ENSO settings at the mode: gamma_enso_land_NH 0.6632, gamma_enso_land_SH 0.6356, w_enso_l2 16.79; lag_enso_land 5.929 months; ocean direct terms 0/0; equatorial cell off
+runs done (4 arms, app span 1750-2024 and gate span 1750-2025) | 0.1 min
+GATE 1: full arm vs APP_HIST, max |dCO2| 0.00e+00 ppm -> PASS
+GATE 2: both-off arm vs the What-if ENSO switch (index zeroed), max |dCO2| 0.00e+00 ppm -> PASS (the land term and the limb are every path that reads the index)
+GATE 3: full arm's card 4a numbers vs rv_growth_variability(), max |difference| 0.00e+00 -> PASS
+
+=== T1 on card 4a's measure (1980-2024, n 45; annual means differenced, anomaly about ns df 3) ===
+  r with Nino 3.4, the twelve months ending LAG months before December (LAG 11 = the caption's)
+  arm        sd ratio  r@0   r@3   r@6   r@11    peak(lag)  | miss: r with driver (cal. yr), r@0, r@11
+  full          0.672  +0.29  +0.58  +0.67  +0.73    +0.73 (11)  | +0.48, +0.48, -0.03
+  ocean_off     0.870  +0.35  +0.68  +0.77  +0.83    +0.83 (11)  | +0.59, +0.58, +0.28
+  land_off      0.441  -0.07  -0.24  -0.30  -0.39    -0.07 ( 0)  | +0.12, +0.12, -0.70
+  both_off      0.414  +0.18  +0.22  +0.21  +0.14    +0.22 ( 4)  | +0.26, +0.26, -0.53
+  record            1  -0.15  +0.19  +0.37  +0.51    +0.51 (11)  | NA, NA, NA
+    full       = full model (the canonical)
+    ocean_off  = ocean upwelling limb off (w_enso_l2 = 0)
+    land_off   = land ENSO response off (gamma_enso_land_NH, gamma_enso_land_SH = 0)
+    both_off   = both off
+  each pathway's contribution (full minus that arm): sd land 0.321, ocean 0.110 ppm/yr; interaction sd 0.000
+    land  contribution: r@0 +0.33, r@3 +0.71, r@6 +0.83, r@11 +0.95; peak +0.95 at lag 12, trough +0.33 at lag 0
+    ocean contribution: r@0 -0.45, r@3 -0.82, r@6 -0.91, r@11 -0.96; peak -0.42 at lag 18, trough -0.96 at lag 11
+
+=== T2 on the module's estimator (centred 12-month growth, monthly, 1980-2024, n 540; detrended ns df 5) ===
+  r with the monthly Nino 3.4 LAG months earlier; r(model, record) is the module's fit statistic
+  arm        sd ratio r(m,rec)  r@-6  r@0   r@3   r@6     peak(lag)  | miss r@0, r@peak-of-record
+  full          0.644   +0.684  +0.12  +0.48  +0.67  +0.73    +0.73 ( 6)  | +0.03, -0.05
+  ocean_off     0.819   +0.660  +0.16  +0.58  +0.76  +0.79    +0.80 ( 5)  | +0.24, +0.20
+  land_off      0.380   +0.200  +0.02  -0.25  -0.35  -0.38    +0.02 (-6)  | -0.39, -0.65
+  both_off      0.357   +0.493  +0.17  +0.19  +0.15  +0.09    +0.20 (-2)  | -0.25, -0.53
+  record            1           -0.20  +0.29  +0.47  +0.50    +0.51 ( 5)
+    land  contribution: sd 0.377 ppm/yr; r@-6 +0.10, r@0 +0.60, r@3 +0.83, r@6 +0.91; peak +0.91 at lag 6, trough -0.13 at lag 18
+    ocean contribution: sd 0.118 ppm/yr; r@-6 -0.26, r@0 -0.78, r@3 -0.90, r@6 -0.84; peak +0.09 at lag 18, trough -0.90 at lag 4
+  full arm, model minus record (90% interval, block 24 mo, B 2000, seed 20261115):
+    r at lag -6 (card 4a's calendar year): +0.320  [+0.205, +0.464]
+    r at lag 0:  +0.190  [+0.076, +0.331]
+    r at lag 5 (the record's peak): +0.222  [+0.133, +0.323]
+    peak lag:    +1 months  [-1, +2]
+
+=== full profiles: model (full arm) and record ===
+  card 4a's measure  lag:     0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18
+                    model: +0.29+0.42+0.52+0.58+0.62+0.65+0.67+0.68+0.70+0.71+0.72+0.73+0.71+0.66+0.58+0.49+0.41+0.35+0.29
+                   record: -0.15-0.03+0.09+0.19+0.27+0.33+0.37+0.41+0.45+0.47+0.49+0.51+0.50+0.47+0.41+0.34+0.28+0.23+0.18
+  module estimator   lag:    -6   -5   -4   -3   -2   -1    0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18
+                    model: +0.12+0.16+0.21+0.27+0.33+0.40+0.48+0.55+0.62+0.67+0.71+0.73+0.73+0.71+0.67+0.61+0.53+0.44+0.33+0.22+0.11-0.00-0.10-0.19-0.26
+                   record: -0.20-0.13-0.06+0.02+0.11+0.20+0.29+0.37+0.43+0.47+0.50+0.51+0.50+0.48+0.45+0.41+0.36+0.29+0.22+0.15+0.08+0.01-0.04-0.08-0.13
+            ocean_off model: +0.16+0.22+0.28+0.35+0.42+0.50+0.58+0.65+0.71+0.76+0.79+0.80+0.79+0.76+0.71+0.65+0.56+0.47+0.36+0.25+0.14+0.03-0.07-0.16-0.23
+             land_off model: +0.02-0.02-0.07-0.11-0.16-0.21-0.25-0.29-0.33-0.35-0.37-0.38-0.38-0.38-0.37-0.35-0.33-0.31-0.30-0.28-0.27-0.26-0.25-0.23-0.22
+             both_off model: +0.17+0.18+0.19+0.20+0.20+0.20+0.19+0.18+0.17+0.15+0.14+0.12+0.09+0.07+0.04+0.01-0.02-0.06-0.09-0.13-0.17-0.20-0.23-0.26-0.29
+    miss (full minus record): +0.38+0.33+0.27+0.21+0.15+0.08+0.03-0.01-0.05-0.06-0.06-0.05-0.04-0.03-0.02-0.02-0.02-0.01-0.01-0.01-0.02-0.02-0.04-0.05-0.06
+  card 4a's measure, miss:   +0.48+0.44+0.37+0.29+0.21+0.16+0.11+0.07+0.03+0.00-0.01-0.03-0.04-0.04-0.03-0.02-0.01+0.01+0.02
+  the two lag axes: card 4a's LAG L = the module's L - 6. Peaks: model 11 -> 5 (module 6), record 11 -> 5 (module 5)
+
+provenance: calibration/diag_card4_enso_knockouts.R @2941fd0c; hilda31fl md5 80c487f576f9a1e44f7900597d95a3e4; seed 20261115 (bootstrap); saved outputs/diagnostics/card4_enso_knockouts_20261115_hilda31fl.{log,rds} | 0.1 min

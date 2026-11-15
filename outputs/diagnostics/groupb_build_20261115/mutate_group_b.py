@@ -8,6 +8,7 @@ G = "tests/testthat/test-app-review-20261115.R"
 C = "tests/testthat/test-app-review-copy.R"
 MUTANTS = [
     ("B19 card lag off the shared peak", "app/R/review.R", "RV_GROWTH_ENSO_LAG_MO <- 11L", "RV_GROWTH_ENSO_LAG_MO <- 5L", G),
+    ("B19 'where both peak' scan cut short", "app/R/review.R", "RV_GROWTH_ENSO_SCAN_MO <- 0:18", "RV_GROWTH_ENSO_SCAN_MO <- 0:10", G),
     ("B19 another smooth than the tab's", "app/R/plots.R", "GROWTH_ANOM_DF <- 3L", "GROWTH_ANOM_DF <- 4L", G),
     ("B19 card text's overshoot claim", "app/R/review.R", '"three of the five largest overshoots are 1991\\u20131993, after Pinatubo.",', '"the largest overshoots are 1991\\u20131993, after Pinatubo.",', G),
     ("B19 plain's fraction", "app/R/review.R", '"wobble in CO₂ growth is only about two thirds of the observed one."),', '"wobble in CO₂ growth is only about three quarters of the observed one."),', G),

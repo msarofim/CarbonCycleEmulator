@@ -424,7 +424,11 @@ rv_variability <- function() rv_memo("variability", function() {
 # since 09-22), averaged over the twelve months ending RV_GROWTH_ENSO_LAG_MO months before each December. 11 is where
 # BOTH series' r peak on this measure (diag_card4_enso_estimators, 11-11); at lag 0 the record's r is negative.
 # ⚠ Which lag the caption quotes is Marcus's choice (drafts 11-15); the comparative word is the same at every lag.
+# 2026-11-15, Marcus: "use 11 months with 'where both peak'". The caption says so only when both series' r peak at
+# RV_GROWTH_ENSO_LAG_MO over the lags RV_GROWTH_ENSO_SCAN_MO; rv_growth_variability() scans them, and
+# test-app-review-20261115.R fails if either peak moves (the phrase would drop out of the caption).
 RV_GROWTH_ENSO_LAG_MO <- 11L
+RV_GROWTH_ENSO_SCAN_MO <- 0:18
 #' The ENSO index, one value per year: the mean of the twelve months ending `lag` months before that year's December
 rv_enso_annual <- function(lag, en = as.data.frame(readRDS(ccx_path("data", "forcing_enso.rds")))) {
   en <- en[order(en$year, en$month), ]
@@ -444,10 +448,16 @@ rv_growth_variability <- function() rv_memo("growth_variability", function() {
   oa <- app_growth_anom(data.frame(year = d$year, g = d$g_obs))
   x <- rv_enso_annual(RV_GROWTH_ENSO_LAG_MO)[as.character(d$year)]
   ok <- is.finite(x)
+  scan <- vapply(RV_GROWTH_ENSO_SCAN_MO, function(L) {
+    xs <- rv_enso_annual(L)[as.character(d$year)]; k <- is.finite(xs)
+    c(stats::cor(ma[k], xs[k]), stats::cor(oa[k], xs[k]))
+  }, c(0, 0))
   list(years = d$year, model_anom = unname(ma), obs_anom = unname(oa), window = range(d$year),
        sd_model = stats::sd(ma), sd_obs = stats::sd(oa), ratio = stats::sd(ma) / stats::sd(oa),
        enso = list(lag = RV_GROWTH_ENSO_LAG_MO, n = sum(ok), r_model = stats::cor(ma[ok], x[ok]),
-                   r_obs = stats::cor(oa[ok], x[ok])))
+                   r_obs = stats::cor(oa[ok], x[ok]),
+                   peak_model = RV_GROWTH_ENSO_SCAN_MO[which.max(scan[1, ])],
+                   peak_obs = RV_GROWTH_ENSO_SCAN_MO[which.max(scan[2, ])]))
 })
 
 rv_enso_slope <- function() rv_memo("enso_slope", function() {
