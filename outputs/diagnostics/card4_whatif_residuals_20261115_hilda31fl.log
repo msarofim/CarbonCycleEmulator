@@ -1,0 +1,37 @@
+calibration/diag_card4_whatif_residuals.R | commit fd10dfaa | canonical hilda31fl (md5 80c487f576f9a1e44f7900597d95a3e4) | 2026-11-15 13:58
+card 4a's measure: 1980-2024, n = 45 (the What if...? tab's window from APP_CF_YEARS_DEFAULT 1850-2024, cut to the record)
+  anomaly sd: model 0.308, record 0.459 ppm/yr (ratio 0.672); residual mean -0.000, sd 0.325 ppm/yr
+  ENSO r (Nino 3.4, twelve months to January; lag 11): model +0.726, record +0.506, n 45
+
+=== claim 2: the residual's association (two-sided p; 'significant' = p < 0.05) ===
+  ENSO index (the run's driver, calendar year)   r +0.484  p 0.001  n 45  <- SIGNIFICANT
+  observed Nino 3.4, card 4a's lag (11 mo)       r -0.025  p 0.869  n 45  
+  volcanic AOD (the run's driver)                r +0.410  p 0.005  n 45  <- SIGNIFICANT
+  year (a trend; the decade)                     r +0.000  p 1.000  n 45  
+  |r| needed for p < 0.05 at n = 45: 0.294
+  -> the card's three (ENSO driver, AOD, year): AT LEAST ONE reaches significance (claim 2 FAILS)
+
+=== claim 3: decade averages of the residual against one year's scatter (residual sd 0.325) ===
+  1980s  n 10  mean -0.095  (0.29 of one year's sd)
+  1990s  n 10  mean +0.135  (0.41 of one year's sd)
+  2000s  n 10  mean -0.105  (0.32 of one year's sd)
+  2010s  n 10  mean +0.082  (0.25 of one year's sd)
+  2020s  n  5  mean -0.035  (0.11 of one year's sd)
+  -> largest |decade mean| (decades with >= 5 years): 0.41 of one year's sd
+
+=== claim 4: the 6 largest overshoots and undershoots (+ = the model grew faster) ===
+  overshoots:  1992 +0.616, 2014 +0.547, 1993 +0.545, 1997 +0.540, 1991 +0.483, 1982 +0.451
+  undershoots: 1999 -0.506, 2016 -0.413, 2003 -0.403, 1985 -0.399, 1998 -0.379, 1988 -0.378
+  1982 (El Chichon, eruption year): residual +0.451, z +1.39, overshoot rank 6 of 45
+  1983 (El Chichon, the year after): residual -0.229, z -0.70, overshoot rank 31 of 45
+  1991 (Pinatubo, eruption year): residual +0.483, z +1.49, overshoot rank 5 of 45
+  1992 (Pinatubo, the year after): residual +0.616, z +1.90, overshoot rank 1 of 45
+  -> the single largest overshoot is 1992 (+0.616); 1991 is NOT the largest (claim 4's first half FAILS)
+
+=== robustness of the residual's associations (block bootstrap 3 yr, B 5000, seed 20261115; drop = 1982,1983,1984,1991,1992,1993) ===
+  enso  Spearman +0.439 (p 0.003) | without the eruption years +0.400 (p 0.012, n 39) | 90% interval [+0.282, +0.680] <- ROBUST
+  aod   Spearman +0.324 (p 0.030) | without the eruption years +0.057 (p 0.729, n 39) | 90% interval [-0.020, +0.620] <- rests on the eruption years
+  lag-1 autocorrelation of the residual: +0.074
+  the five largest overshoots: 1992, 2014, 1993, 1997, 1991; of them in 1991-1993: 3
+
+saved outputs/diagnostics/card4_whatif_residuals_20261115_hilda31fl.{log,rds}

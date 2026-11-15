@@ -867,14 +867,16 @@ plot_seasonal <- function(out, obs, window, hemi = "NH", show_obs = TRUE) {
     rbind(m, wave(mean(oh$a[ko]), mean(oh$b[ko]), lab_o[[h]]))
   }))
   d$who <- factor(d$who, levels = intersect(c(lab_m, lab_o), unique(d$who)))
-  ggplot(d, aes(month, co2, colour = who)) +
+  # the measured curves dashed: a hemisphere's model and station colours are close (checked 2026-11-15, Southern only)
+  ggplot(d, aes(month, co2, colour = who, linetype = who)) +
     geom_hline(yintercept = 0, colour = "grey70", linewidth = 0.3) +
     geom_line(linewidth = 0.9) +
     scale_x_continuous(breaks = seq(0, 12, 2),
                        labels = c("Jan", "Mar", "May", "Jul", "Sep", "Nov", "Jan")) +
     scale_colour_manual(values = stats::setNames(c(PAL[["nh"]], PAL[["sh"]], "#7b241c", "#1a5276"),
                                                  c(lab_m, lab_o))) +
-    guides(colour = guide_legend(byrow = TRUE)) +
+    scale_linetype_manual(values = stats::setNames(c("solid", "solid", "22", "22"), c(lab_m, lab_o))) +
+    guides(colour = guide_legend(byrow = TRUE), linetype = guide_legend(byrow = TRUE)) +
     labs(x = NULL, y = app_plotmath("CO₂ above the annual mean (ppm)"),
          subtitle = sprintf("Average seasonal cycle, %d–%d", window[1], window[2]),
          caption = app_provenance_caption()) +

@@ -438,7 +438,9 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
         });
       });
     "))),
-    div(style = "padding: 0 14px;", provenance_banner())
+    # group B B18 #1 (2026-11-15): no side padding, so the banner's edges are the content's (measured at 1024 px: banner
+    # 26-983 against the sidebar's left 12 and the chart's right 997; the wrapper already spans 12-997)
+    div(provenance_banner())
   ),
 
   # ---- 1. The Keeling Curve ------------------------------------------

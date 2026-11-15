@@ -1,0 +1,22 @@
+b4_all_combos.R | commit fd10dfaa | canonical hilda31fl | 2026-11-15 13:58 | 127 combinations of 7 switches | year 2024 | full 425.433 ppm 
+
+Combinations with |difference| < 1 ppm: 3
+      switches   level     diff
+          enso 425.595 0.161363
+      volcanic 425.650 0.216787
+ enso+volcanic 425.811 0.378164
+
+The ten smallest that are NOT under the threshold:
+                               switches   level      diff
+         warming_feedback+enso+volcanic 420.031  -5.40265
+              warming_feedback+volcanic 419.869  -5.56419
+                  warming_feedback+enso 419.816  -5.61731
+                       warming_feedback 419.654  -5.77883
+                  enso+volcanic+revelle 411.755 -13.67852
+                       volcanic+revelle 411.596 -13.83758
+                           enso+revelle 411.575 -13.85814
+                                revelle 411.416 -14.01718
+ warming_feedback+enso+volcanic+revelle 410.669 -14.76464
+      warming_feedback+volcanic+revelle 410.509 -14.92437
+
+mean run time 0.25 s
