@@ -267,3 +267,52 @@ app_param_table <- function(names, values, meta = APP_PARAM_META, extra = charac
     tab$Set <- ifelse(names %in% held, "held", ifelse(names %in% fitted, "fitted", "—"))
   tab
 }
+
+# ---- Under the hood, "Parameters": the paragraph above the table (group B B7, Marcus 2026-11-15, the draft) ----
+# The counts are the table's own "Set" column; the two typed groups are GATED against the mode (a refit that moves a
+# name in or out of either group stops here, and test-app-review-20261115.R catches it before a deploy; in app/R/ because
+# app_param_table() is: a function defined in global.R cannot see app/R/ under shinyAppDir()).
+# The held values fitted in a separate step to the year-to-year record (the constraint map's `module` names).
+APP_PARAMS_SEPARATE_STEP <- c("gamma_enso_land_NH", "gamma_enso_land_SH", "lag_enso_land", "w_enso_l2")
+APP_PARAMS_SEPARATE_STEP_TEXT <- "the El Niño land response and its delay and the El Niño upwelling limb"
+# The held values that are neither from that step nor 0.
+APP_PARAMS_FIXED_HELD <- c("w_eq", "gamma_eq", "pump_export")
+APP_PARAMS_FIXED_HELD_TEXT <- "The equatorial upwelling cell, its El Niño modulation and the biological pump"
+#' The table "Under the hood" prints (server.R output$h_params and the paragraph above it read the same one)
+app_param_table_live <- function()
+  app_param_table(CCX_PARAM_NAMES,
+                  c(APP_PARAMS, list(bomb_total = APP_BOMB_TOTAL, luc_scale = APP_LUC_SCALE, rep_dC = APP_REP_DC),
+                    APP_IMB_SHARES, APP_LIK_ONLY),
+                  extra = APP_GATED_FIT, fitted = APP_FITTED_NAMES, held = APP_HELD_NAMES)
+#' The problems with the two typed groups at this mode (character(0) when both hold)
+app_params_intro_problems <- function(held = APP_HELD_NAMES, values = APP_PARAMS,
+                                      module = if (is.null(APP_CMAP)) NULL else APP_CMAP$module$names) {
+  v <- vapply(held, function(n) { x <- values[[n]]; if (is.null(x)) NA_real_ else as.numeric(x)[1] }, numeric(1))
+  fixed <- held[!(held %in% APP_PARAMS_SEPARATE_STEP) & !is.na(v) & v != 0]
+  out <- c(if (!all(APP_PARAMS_SEPARATE_STEP %in% held)) "a separate-step name is not held",
+    if (!is.null(module) && !setequal(module, APP_PARAMS_SEPARATE_STEP))
+      sprintf("the separate step fits %s, the text names %s", paste(sort(module), collapse = ", "),
+              paste(sort(APP_PARAMS_SEPARATE_STEP), collapse = ", ")),
+    if (!setequal(fixed, APP_PARAMS_FIXED_HELD))
+      sprintf("held at a value other than 0: %s, the text names %s", paste(sort(fixed), collapse = ", "),
+              paste(sort(APP_PARAMS_FIXED_HELD), collapse = ", ")))
+  if (is.null(out)) character(0) else out
+}
+#' The paragraph's text, from the table's Set column (`set`)
+app_params_intro <- function(set = app_param_table_live()$Set, problems = app_params_intro_problems()) {
+  # no mode file loaded (the defaults): nothing was fitted, so nothing is counted
+  if (is.null(set)) return(paste("No calibration is loaded in this build, so these are the model's default values.",
+                                 "Everything else, such as ocean area, the mass of the atmosphere and carbonate",
+                                 "chemistry constants, is fixed from measurements and cited in the repository."))
+  if (length(problems)) stop("app_params_intro(): ", paste(problems, collapse = "; "))
+  n_sep <- length(APP_PARAMS_SEPARATE_STEP)
+  paste(sprintf("These are the numbers the calibration fits (%d) and the ones it holds at a stated value (%d).",
+                sum(set == "fitted"), sum(set == "held")),
+        "Everything else, such as ocean area, the mass of the atmosphere and carbonate chemistry constants, is fixed",
+        "from measurements and cited in the repository.",
+        sprintf("%s held values, %s, are fitted in a separate step to the year-to-year record.",
+                tools::toTitleCase(app_number_word(n_sep)), APP_PARAMS_SEPARATE_STEP_TEXT),
+        "A value held at 0 is a mechanism that is in the code but switched off.",
+        sprintf("%s are held at fixed values.", APP_PARAMS_FIXED_HELD_TEXT))
+}
+

@@ -198,25 +198,24 @@ rv_plot_diseq <- function() rv_guard(rv_gateD(), function(x) {
 # ---------------------------------------------------------------------
 # CARD 4a -- the interannual growth anomaly, model vs observed
 # ---------------------------------------------------------------------
-rv_plot_variance <- function() rv_guard(rv_variability(), function(x) {
-  n <- min(length(x$years), length(x$obs_anom), length(x$model_anom))
-  d <- rbind(
-    data.frame(year = x$years[seq_len(n)], v = as.numeric(x$obs_anom)[seq_len(n)],
-               who = "Measured"),
-    data.frame(year = x$years[seq_len(n)], v = as.numeric(x$model_anom)[seq_len(n)],
-               who = "Model"))
-  v <- x$verdict
+# 2026-11-15 (group B B19, Marcus: "move card 4a to the what-if measure"): the What if...? tab's year-to-year measure
+# (rv_growth_variability(), app/R/review.R), in that tab's unit; until then GATE V's (GtC/yr, 1959-2024).
+#' The month a twelve-month ENSO average ends in, from its lag (0 = December)
+rv_lag_month <- function(lag) month.name[((11L - lag) %% 12L) + 1L]
+rv_plot_variance <- function() rv_guard(rv_growth_variability(), function(x) {
+  d <- rbind(data.frame(year = x$years, v = x$obs_anom, who = "Measured"),
+             data.frame(year = x$years, v = x$model_anom, who = "Model"))
   ggplot(d, aes(year, v, colour = who)) +
     geom_hline(yintercept = 0, colour = "grey55", linewidth = 0.4) +
     geom_line(linewidth = 0.7) +
     scale_colour_manual(values = stats::setNames(c(RV_COL_OBS(), RV_COL_MODEL()),
                                                  c("Measured", "Model"))) +
-    labs(x = LAB_YEAR, y = "Growth-rate anomaly (GtC/yr)",
-         # 2026-10-15 review: the unit (GtC/yr) added to the standard deviations
+    scale_x_continuous(breaks = app_year_breaks()) +
+    labs(x = LAB_YEAR, y = "Growth-rate anomaly (ppm per year)",
          caption = rv_cap(paste(sprintf(
-           paste("Standard deviation: model %.3f GtC/yr against %.3f ± %.3f measured",
-                 "— %.2f×. Same detrending applied to both."),
-           v$sd_model, v$sd_obs, v$se_obs, v$ratio),
+           paste("Standard deviation: model %.2f ppm per year, measured %.2f (%.2f×).",
+                 "The years (%d–%d) and the detrending of the What if…? tab's growth chart."),
+           x$sd_model, x$sd_obs, x$ratio, x$window[1], x$window[2]),
            # N7 (Marcus 2026-09-22): "commonalities between the years it over-
            # and undershoots?" The answer that matters is this one -- the model
            # is MORE ENSO-correlated than the record is, so the variance it is
@@ -224,12 +223,14 @@ rv_plot_variance <- function() rv_guard(rv_variability(), function(x) {
            # ⛔ 2026-10-15 review: SOFTENED. True on THIS chart's estimator (hilda31w: r +0.48 vs +0.29) but
            # REVERSED on the What-if tab's (+0.18 vs +0.29), so "what is missing is not El Niño-shaped" is cut and
            # the comparative word is COMPUTED from the two r values; card 4's detail states both readings.
-           if (is.null(x$enso)) "" else sprintf(
-             paste("These anomalies track the ENSO index at r %+.2f for the model",
-                   "and %+.2f for the measurements (n = %d): on this chart's measure the",
-                   "model tracks the ENSO index %s the record does."),
-             x$enso$r_model, x$enso$r_obs, x$enso$n,
-             if (x$enso$r_model > x$enso$r_obs) "more closely than" else "less closely than")))) +
+           # 2026-11-15 (B19): one measure now, so "on this chart's measure" is gone; the index is averaged over the
+           # twelve months ending in the month the lag names (RV_GROWTH_ENSO_LAG_MO), and the word is still computed
+           sprintf(
+             paste("Against the ENSO index averaged over the twelve months to each %s, r is %s for the model",
+                   "and %s for the measurements (n = %d): the model's growth follows the ENSO index %s the",
+                   "measured growth does."),
+             rv_lag_month(x$enso$lag), rv_signed("%+.2f", x$enso$r_model), rv_signed("%+.2f", x$enso$r_obs),
+             x$enso$n, if (x$enso$r_model > x$enso$r_obs) "more closely than" else "less closely than")))) +
     theme_ccx()
 })
 
@@ -381,12 +382,14 @@ rv_plot_oclim <- function() rv_guard(rv_ocean_climate(), function(x) {
     geom_line(aes(y = r), linewidth = 1.0, na.rm = TRUE) +
     scale_colour_manual(values = stats::setNames(c(RV_COL_OBS(), RV_COL_MODEL()), c(lab_g, lab_m))) +
     labs(x = NULL, y = "Ocean uptake change (GtC/yr)",
+         # group B B9.6 (Marcus 2026-11-15): the range low to high, and true minus signs (rv_signed())
          caption = rv_cap(sprintf(paste(
-           "%d–%d: %.2f GtC/yr here (%.2f to %.2f across the ten ocean-model setups), %.2f ± %.2f in",
-           "the ocean models; per degree of sea-surface warming %.1f ± %.1f times as strong. Below %.1f",
+           "%d–%d: %s GtC/yr here (%s to %s across the ten ocean-model setups), %s ± %.2f in",
+           "the ocean models; per degree of sea-surface warming %.1f ± %.1f times as strong. Below %s",
            "GtC/yr from %d here, from %d in the ocean models. Thick lines: %d-year means. A comparison, not a test."),
-           e$window[1], e$window[2], e$ccx[["mean"]], e$ccx[["max"]], e$ccx[["min"]], e$gcb[["mean"]], e$gcb[["sd"]],
-           s$per_K_ratio[["ratio"]], s$per_K_ratio[["se"]], s$emergence[["threshold"]],
+           e$window[1], e$window[2], rv_signed("%.2f", e$ccx[["mean"]]), rv_signed("%.2f", e$ccx[["min"]]),
+           rv_signed("%.2f", e$ccx[["max"]]), rv_signed("%.2f", e$gcb[["mean"]]), e$gcb[["sd"]],
+           s$per_K_ratio[["ratio"]], s$per_K_ratio[["se"]], rv_signed("%.1f", s$emergence[["threshold"]]),
            as.integer(s$emergence[["ccx"]]), as.integer(s$emergence[["gcb"]]), RV_OCLIM_RUN))) +
     theme_ccx()
 })

@@ -746,6 +746,28 @@ app_pulse_runs <- function(inp) {
     gtc = inp$p_gtc, year = inp$p_year, bg = inp$p_bg)
 }
 
+# ---- THE PULSE LAB'S TEMPERATURE TAKEAWAY, ITS SECOND SENTENCE (group B B2, Marcus 2026-11-15) ----
+# His sentence at the default settings (vvM, 2050, 100 GtC): "Between 100 and 250 years, the warming actually increases
+# a little (4%), whereas the airborne carbon concentrations drop another 18%." MEASURED over every background, release
+# year and three pulse sizes (outputs/diagnostics/groupb_build_20261115/b2_pulse_keep.log): the warming change runs
+# -6.4 % to +6.1 % (it falls in five of the seven backgrounds) and the airborne carbon -44 % to +6 % (it rises in the
+# High background's early releases). So each clause has a rising, a falling and a level form, and "a little" is
+# said only below PULSE_TAIL_LITTLE_MAX_PCT (every measured setting is below it; a larger change drops the words).
+PULSE_TAIL_LITTLE_MAX_PCT <- 10
+#' The sentence, from the two ratios (century-later = 1) and the two horizons in years after release
+app_pulse_tail <- function(keep_T, keep_C, h1, h2) {
+  pT <- round(100 * (keep_T - 1)); pC <- round(100 * (keep_C - 1))
+  little <- if (abs(pT) < PULSE_TAIL_LITTLE_MAX_PCT) " a little" else ""
+  warm <- if (pT > 0) sprintf("actually increases%s (%d%%)", little, pT)
+          else if (pT < 0) sprintf("decreases%s (%d%%)", little, -pT)
+          else "stays about the same"
+  carb <- if (pC < 0) sprintf("drop another %d%%", -pC)
+          else if (pC > 0) sprintf("rise %d%%", pC)
+          else "stay about the same"
+  sprintf("Between %d and %d years, the warming %s, whereas the airborne carbon concentrations %s.",
+          h1, h2, warm, carb)
+}
+
 #' Whether a set of pulse-lab inputs is EXACTLY the default: the same names as APP_PULSE_DEFAULTS
 #' and every value identical. Anything else (another value, a missing or an extra input) is not.
 app_pulse_is_default <- function(inp, defaults = APP_PULSE_DEFAULTS) {
@@ -798,6 +820,28 @@ app_pulse_stale <- function(shown_inp, now_inp) !is.null(shown_inp) && !identica
 APP_PULSE_RESULT_IDS <- c("f_takeaway", "f_plot", "f_fair_note", "f_partition", "f_pulse_permanence", "f_notes")
 # Marcus 2026-10-20: his wording, verbatim.
 APP_PULSE_STALE_NOTE <- "Chart reflects previous settings. Release the pulse to update."
+
+# ---- BUILD YOUR OWN: THE SAME RULE (group B B22, Marcus 2026-11-15, option c) ----------------------------------
+# A comment on the live app: after switching pathway and pressing Run it, the old result stayed on screen and could be
+# misread. Measured at 64d91397: before the press the old result stays at full opacity indefinitely; after it the run
+# takes 1.3 s and Shiny's own fade starts at 1.1 s. So (server.R) the Pulse lab's rule above, for Build your own: once
+# the pathway on the controls differs from the run on screen, its result is grayed (APP_BUILD_RESULT_IDS) with
+# APP_BUILD_STALE_NOTE under the button; and (ui.R, APP_CALC_JS) both buttons gray the chart at once and show
+# APP_CALC_LABEL beside it until the new chart arrives.
+# The outputs that draw Build your own's result: every output that reads stylised_run() (test-app-review-20261115.R
+# derives the set from server.R, as test-app-precompute.R 11 does for the pulse).
+APP_BUILD_RESULT_IDS <- c("f_takeaway", "f_plot", "f_notes")
+# His 10-20 Pulse wording, with this pill's button.
+APP_BUILD_STALE_NOTE <- sprintf("Chart reflects previous settings. Press %s to update.", APP_BUILD_RUN_LABEL)
+#' The pathway the Build-your-own controls describe: the kind, the background, and only the slider that kind shows
+#' (a hidden slider moved earlier does not change the run, so it does not gray it)
+app_build_inputs <- function(input) {
+  k <- input$s_kind
+  c(list(s_kind = k, s_bg = input$s_bg),
+    if (identical(k, "to_zero")) list(s_zero_year = input$s_zero_year),
+    if (identical(k, "rate")) list(s_rate = input$s_rate))
+}
+APP_CALC_LABEL <- "Calculating\u2026"
 
 # ---- THE FUTURES RIBBONS (Marcus 2026-10-01, review 10-01c B7: "Laplace first, MCMC as the check") ----
 # PRECOMPUTED by calibration/build_futures_ribbons.R and only READ here: the app
@@ -925,6 +969,17 @@ APP_IMBALANCE_HEADING <- "Is the model's land sink too high?"
 # function defined at the top level of ui.R is not reliably in scope inside the
 # server function. global.R is the one file both are guaranteed to see.
 takeaway <- function(...) div(class = "takeaway", ...)
+# Group B B11 / B14 (Marcus 2026-11-15). The airborne-fraction takeaway's range starts here (the draft's "Since 1850").
+AF_RANGE_FROM <- 1850L
+# B14, his addition: a note whenever the Where window starts before this year. His words: "airborne fraction being
+# poorly defined before the 20th century because of low human emissions"; the century is read off the year.
+AF_NOTE_BEFORE <- 1900L
+app_af_early_note <- function(before = AF_NOTE_BEFORE) {
+  c_n <- before %/% 100L + 1L
+  sfx <- if (c_n %% 100L %in% 11:13) "th" else c("th", "st", "nd", "rd", rep("th", 6))[c_n %% 10L + 1L]
+  sprintf("The airborne fraction is poorly defined before the %d%s century because human emissions were small.",
+          c_n, sfx)
+}
 # Under the hood's takeaway (Marcus 2026-10-21, "8", his wording; "lists" -> "list" to agree with "tables").
 APP_HOOD_TAKEAWAY <- paste(APP_TITLE, "is a set of carbon pools in each hemisphere, joined with flows;",
                            "the tables below list the parameters included, the inputs, and the observations",
@@ -968,6 +1023,18 @@ app_mech_list <- function(off, sentence_start = FALSE) {
 # numeric form prints "+0" and has to be replaced by words. Standing rule --
 # labels derive from named constants (~/.claude/CLAUDE.md).
 TAKEAWAY_PPM_RESOLUTION <- 0.5
+# The What-if tab's "Years shown" default (ui.R c_years). Known-issues card 4a draws that tab's measure on this window
+# cut to the observed record (group B B19, 2026-11-15), so the card and the tab's opening view cannot differ.
+APP_CF_YEARS_DEFAULT <- c(1850L, as.integer(APP_HIST_YEARS[2]))
+# Group B B4 (Marcus 2026-11-15, option a: "under 1 ppm one decimal"). Below this unrounded change the What-if
+# takeaway prints the change to one decimal and no levels.
+TAKEAWAY_PPM_SMALL <- 1
+# The switches that act year to year, for which his sentence "This switch mostly impacts year-to-year variability
+# rather than growth over time" is true. MEASURED: exactly these and their pair are the combinations of the seven
+# switches that move 2024 CO2 by under 1 ppm (+0.16, +0.22, +0.38; the next smallest is warming + both at -5.40;
+# outputs/diagnostics/groupb_build_20261115/b4_all_combos.log). The sentence is added only when every ticked switch is
+# one of these, so a future small change from another switch prints the number without it.
+APP_MECH_YEAR_TO_YEAR <- c("enso", "volcanic")
 
 #' The What-if sentence's three numbers, as printed: both levels rounded to the ppm, and the difference OF THOSE
 #' (2026-11-11 review A2: "486 ppm instead of 425 — a difference of +60 ppm" printed round(485.88 - 425.43) next to
@@ -977,6 +1044,13 @@ TAKEAWAY_PPM_RESOLUTION <- 0.5
 app_ppm_change <- function(with_switch, without_switch) {
   a <- round(with_switch); b <- round(without_switch); d <- b - a
   list(full = a, off = b, d = d, signed = paste0(if (d > 0) "+" else if (d < 0) "−" else "", abs(d)))
+}
+#' Group B B4 (Marcus 2026-11-15, option a): whether the unrounded change is under `below` (TAKEAWAY_PPM_SMALL), and
+#' its one-decimal form with a true minus sign, so "+0.16 ppm" no longer prints as "+1 ppm" beside 426 and 425
+app_ppm_small <- function(with_switch, without_switch, below = TAKEAWAY_PPM_SMALL) {
+  raw <- without_switch - with_switch; r1 <- round(raw, 1)
+  list(raw = raw, small = abs(raw) < below,
+       signed1 = if (r1 == 0) "less than 0.1" else paste0(if (r1 > 0) "+" else "−", sprintf("%.1f", abs(r1))))
 }
 
 #' The legend key for the counterfactual line: short by construction
@@ -1242,7 +1316,8 @@ APP_FAIR_PULSE_OFFGRID_FMT <- c(
 # The Futures checkbox serves TWO overlays: FaIR's scenario runs (Scenarios) and FaIR's pulse (Pulse lab). Marcus
 # 2026-10-15 asked for "Compare with FaIR (100 GtC pulse only)"; that is true of the pulse lab only, so the label
 # follows the pill (server.R updates it). The size is the grid's, never typed.
-APP_FAIR_CHECK_LAB_SCEN  <- "Compare with FaIR, a widely used climate emulator."   # Marcus 2026-10-21 (the old label: CHANGELOG 10-21 h)
+# Marcus 2026-10-21 (the old label: CHANGELOG 10-21 h); group B B9.8 (Marcus 2026-11-15): no final period, as the Pulse lab's
+APP_FAIR_CHECK_LAB_SCEN  <- "Compare with FaIR, a widely used climate emulator"
 APP_FAIR_CHECK_LAB_PULSE <- "Compare with FaIR (%g GtC pulse only)"
 app_fair_check_label <- function(mode) {
   if (!identical(mode, "Pulse lab") || is.null(APP_FAIR_PULSE)) return(APP_FAIR_CHECK_LAB_SCEN)

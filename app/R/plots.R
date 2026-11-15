@@ -164,13 +164,15 @@ KEY_OCEAN_DEEP_FMT  <- "Deep ocean (below %s m)"
 # as CO₂ (the app's form). A paragraph rather than house rule 7's one sentence, by his choice. He
 # judged the three ocean bands to need no separate explanation, so the line and tooltip that were
 # placeholders under the panels are gone.
+# group B B8 (Marcus 2026-11-15, the draft): "in this box" -> "in this panel" (twice; "box" is a reservoir elsewhere
+# in the app) and "residence lifetime" -> "residence time".
 PULSE_DEPTH_TAKEAWAY <- paste(
   "Carbon is emitted directly into the atmosphere, but plants take up CO₂ out of the air and",
   "carbon also mixes into the surface ocean.",
   "The left panel shows how much excess carbon stays in each reservoir",
-  "(the rate of decline in the atmosphere in this box informs the “perturbation lifetime”).",
+  "(the rate of decline in the atmosphere in this panel informs the “perturbation lifetime”).",
   "The right panel shows where the individual carbon atoms from the pulse end up",
-  "(the rate of decline in the atmosphere in this box informs the “residence lifetime”).",
+  "(the rate of decline in the atmosphere in this panel informs the “residence time”).",
   "While the land and surface ocean equilibrate quickly, mixing into the deep ocean is a slow process.")
 # 2026-10-15 review: "leave the air within years" -> measured 49 % of the tagged atoms still in the air at +5 yr, 20 % at +20
 # Marcus 2026-10-21: his wording, verbatim except "CO2" set as CO₂ (the app's form).
@@ -183,7 +185,8 @@ PULSE_TAG_PARTITION_NOTE <- "Right: the same pulse, with its carbon atoms tagged
 # Marcus 2026-10-16: the clause "the difference between running with it and without" and the sentence
 # "It is not a trace of where those particular molecules went..." deleted. The distinction that sentence
 # drew is now drawn by the tagged panel beside it and by his takeaway above both.
-PULSE_PARTITION_NOTE <- "This is how much extra carbon each reservoir holds because of the pulse."
+# group B B9.7 (Marcus 2026-11-15): "This is" cut; the caption reads "Left: how much extra carbon ...".
+PULSE_PARTITION_NOTE <- "how much extra carbon each reservoir holds because of the pulse."
 # \u26d4 THIS CAPTION USED TO BE FALSE OF HALF ITS OWN CHART. It said "annual
 # means differenced" while the MEASURED series was GCB's `atm_growth` -- NOAA's
 # published Jan-to-Jan `co2_gr_gl`, a different estimator. Fixed 2026-09-26; the
@@ -840,28 +843,38 @@ plot_keeling <- function(out, obs, yr_range, hemi = "both", show_obs = TRUE,
 
 #' The seasonal cycle on its own: one average year
 #' @param window c(first, last) year averaged: APP_SEAS_WINDOW (global.R), read from the record since 2026-10-21
-plot_seasonal <- function(out, obs, window) {
-  ms <- ccx_model_year_stats(out, "co2_NH")
-  k <- ms$year >= window[1] & ms$year <= window[2]
-  a <- mean(ms$a[k]); b <- mean(ms$b[k])
-  oh <- ccx_year_harmonic(obs$co2$decimal_date[obs$co2$station == "MLO"],
-                          obs$co2$co2_ppm[obs$co2$station == "MLO"])
-  ko <- oh$year >= window[1] & oh$year <= window[2]
-  ao <- mean(oh$a[ko]); bo <- mean(oh$b[ko])
-
+#' @param hemi,show_obs the Keeling tab's "Hemisphere" and "Show measurements" controls (group B B12, Marcus
+#'   2026-11-15, option b): "NH" draws the northern box and Mauna Loa, "SH" the southern box and the South Pole,
+#'   "both" all four; the labels and colours are plot_keeling()'s, so a curve keeps its name and colour between the
+#'   two charts. The window stays fixed (APP_SEAS_WINDOW).
+plot_seasonal <- function(out, obs, window, hemi = "NH", show_obs = TRUE) {
+  hs <- switch(hemi, both = c("NH", "SH"), NH = "NH", SH = "SH")
+  lab_m <- c(NH = "Model, Northern Hemisphere", SH = "Model, Southern Hemisphere")
+  lab_o <- c(NH = "Measured, Mauna Loa", SH = "Measured, South Pole")
+  stn   <- c(NH = "MLO", SH = "SPO")
   phi <- seq(0, 1, length.out = 200)
-  d <- rbind(
-    data.frame(month = phi * 12, co2 = a * sin(2 * pi * phi) + b * cos(2 * pi * phi),
-               who = "Model"),
-    data.frame(month = phi * 12, co2 = ao * sin(2 * pi * phi) + bo * cos(2 * pi * phi),
-               who = "Measured, Mauna Loa"))
+  wave <- function(a, b, who) data.frame(month = phi * 12, co2 = a * sin(2 * pi * phi) + b * cos(2 * pi * phi),
+                                         who = who)
+  d <- do.call(rbind, lapply(hs, function(h) {
+    ms <- ccx_model_year_stats(out, paste0("co2_", h))
+    k <- ms$year >= window[1] & ms$year <= window[2]
+    m <- wave(mean(ms$a[k]), mean(ms$b[k]), lab_m[[h]])
+    if (!show_obs) return(m)
+    s <- obs$co2$station == stn[[h]]
+    oh <- ccx_year_harmonic(obs$co2$decimal_date[s], obs$co2$co2_ppm[s])
+    ko <- oh$year >= window[1] & oh$year <= window[2]
+    if (!any(ko)) return(m)
+    rbind(m, wave(mean(oh$a[ko]), mean(oh$b[ko]), lab_o[[h]]))
+  }))
+  d$who <- factor(d$who, levels = intersect(c(lab_m, lab_o), unique(d$who)))
   ggplot(d, aes(month, co2, colour = who)) +
     geom_hline(yintercept = 0, colour = "grey70", linewidth = 0.3) +
     geom_line(linewidth = 0.9) +
     scale_x_continuous(breaks = seq(0, 12, 2),
                        labels = c("Jan", "Mar", "May", "Jul", "Sep", "Nov", "Jan")) +
-    scale_colour_manual(values = c(Model = PAL[["model"]],
-                                   `Measured, Mauna Loa` = PAL[["obs"]])) +
+    scale_colour_manual(values = stats::setNames(c(PAL[["nh"]], PAL[["sh"]], "#7b241c", "#1a5276"),
+                                                 c(lab_m, lab_o))) +
+    guides(colour = guide_legend(byrow = TRUE)) +
     labs(x = NULL, y = app_plotmath("CO₂ above the annual mean (ppm)"),
          subtitle = sprintf("Average seasonal cycle, %d–%d", window[1], window[2]),
          caption = app_provenance_caption()) +
@@ -931,20 +944,40 @@ plot_partition <- function(pt, yr_range) {
     theme_ccx()
 }
 
+# ---- THE AIRBORNE FRACTION (group B B14, Marcus 2026-11-15: option C, annual means from the start) ----
+# The monthly ratio of the two cumulative stocks drew a solid band before ~1900: the air's ~5 GtC seasonal swing over
+# a small cumulative-emissions denominator (484 points within 1754, 5 in 1900; groupb_20261111/proto_b14.R). Annual
+# means remove it: the ratio then changes by under 2 points from one year to the next from 1755 on (largest 1.6, in
+# 1863) and under 0.5 from 1959 (the sheet's "at most 1.1" read the 1755 row of that log). A year enters once every one of its
+# months has more than AF_MIN_EMITTED_GTC emitted (the old monthly floor), and only full years count.
+AF_MIN_EMITTED_GTC <- 1
+AF_REF_LINE <- 0.5                         # the dashed reference line; darkened 11-15 (it was grey75, 0.3 wide)
+AF_REF_COLOUR <- "grey40"
+AF_REF_WIDTH <- 0.5
+NOTE_AF <- sprintf("Annual means. Dashed line at %d%%.", round(100 * AF_REF_LINE))
+#' Annual-mean airborne fraction: year, af (the takeaway and the chart read this one table)
+app_af_annual <- function(pt) {
+  yy <- floor(pt$t + 1e-9)
+  n <- table(yy); full <- as.integer(names(n)[n == 12L])
+  ok <- tapply(pt$emitted > AF_MIN_EMITTED_GTC, yy, all)
+  use <- intersect(full, as.integer(names(ok)[ok]))
+  a <- stats::aggregate(cbind(atmosphere, emitted) ~ year, data = data.frame(year = yy, pt)[yy %in% use, ], FUN = mean)
+  data.frame(year = a$year, af = a$atmosphere / a$emitted)
+}
+
 plot_airborne_fraction <- function(pt, yr_range) {
-  k <- pt$t >= yr_range[1] & pt$t <= yr_range[2] & pt$emitted > 1
-  d <- pt[k, ]
-  d$af <- d$atmosphere / d$emitted
+  a <- app_af_annual(pt)
+  d <- a[a$year >= yr_range[1] & a$year <= yr_range[2], ]
+  d$t <- d$year + 0.5                      # an annual mean sits mid-year, as the other annual series
   ggplot(d, aes(t, af)) +
-    geom_hline(yintercept = 0.5, colour = "grey75", linewidth = 0.3, linetype = "22") +
+    geom_hline(yintercept = AF_REF_LINE, colour = AF_REF_COLOUR, linewidth = AF_REF_WIDTH, linetype = "22") +
     geom_line(colour = PAL[["model"]], linewidth = 0.8) +
     scale_y_continuous(labels = function(x) paste0(round(100 * x), "%")) +
     labs(x = LAB_YEAR, y = "Share of all emissions still in the air",
          # ⚠ HALF-WIDTH PANEL (264 px). Measured 2026-09-25: this caption and
          # plot_gcb_bars()'s had been clipping at EVERY viewport width on the
          # full-panel budget.
-         caption = app_provenance_caption(
-           "Dashed line at 50% for reference.", panel = "half")) +
+         caption = app_provenance_caption(NOTE_AF, panel = "half")) +
     scale_x_continuous(breaks = app_year_breaks()) +   # whole years (2026-11-11 review A7)
     theme_ccx()
 }
@@ -999,15 +1032,19 @@ app_sinks_annual <- function(out, F) {
 
 # 2026-10-15 review: the window was typed (2014-2023), a year short of the data; now the last ten years ending at the
 # splice year -- the same decade the regrowth readouts use (obs[2] - 9 .. obs[2]). Read at call time (global.R).
-plot_gcb_bars <- function(out, gcb, F, window = c(APP_SPLICE_YEAR - 9L, APP_SPLICE_YEAR)) {
+#' The four bars' values (group B B11, 2026-11-15: the takeaway above the bars reads this same table)
+app_gcb_bar_values <- function(out, gcb, F, window = c(APP_SPLICE_YEAR - 9L, APP_SPLICE_YEAR)) {
   ann <- app_sinks_annual(out, F)
   k <- ann$yr >= window[1] & ann$yr <= window[2]
   g <- gcb[gcb$year >= window[1] & gcb$year <= window[2], ]
-  d <- rbind(
+  rbind(
     data.frame(sink = "Ocean", who = "This model", gtc = mean(ann$ocean_sink[k], na.rm = TRUE)),
     data.frame(sink = "Ocean", who = "Global Carbon Budget", gtc = mean(g$ocean_sink)),
     data.frame(sink = "Land",  who = "This model", gtc = mean(ann$land_sink[k], na.rm = TRUE)),
     data.frame(sink = "Land",  who = "Global Carbon Budget", gtc = mean(g$land_sink)))
+}
+plot_gcb_bars <- function(out, gcb, F, window = c(APP_SPLICE_YEAR - 9L, APP_SPLICE_YEAR)) {
+  d <- app_gcb_bar_values(out, gcb, F, window)
   ggplot(d, aes(sink, gtc, fill = who)) +
     geom_col(position = position_dodge(width = 0.7), width = 0.6) +
     geom_text(aes(label = sprintf("%.2f", gtc)),
@@ -1507,9 +1544,12 @@ plot_growth_resid <- function(base, alt = NULL, obs = NULL,
     geom_point(size = 0.8) +
     scale_colour_manual(values = cols[names(cols) %in% unique(d$who)]) +
     labs(x = LAB_YEAR, y = LAB_GROWTH_RESID,
-         caption = app_provenance_caption(paste(
+         # group B B15 (Marcus 2026-11-15, option a): the years from the data drawn. "Same years ... as the panel
+         # above" was untrue at the default window (the growth chart runs 1850-2024, the strip 1980-2024).
+         caption = app_provenance_caption(sprintf(paste(
            "Positive = the model grew faster than the measured record that year.",
-           "Same years and same estimators as the panel above."))) +
+           "The years with measurements (%d–%d), on the same estimators as the panel above."),
+           min(d$year), max(d$year)))) +
     scale_x_continuous(breaks = app_year_breaks()) +   # whole years (2026-11-11 review A7)
     theme_ccx()
 }
@@ -1740,6 +1780,21 @@ app_growth_residuals <- function(base, alt, obs, yr) {
 # dozen-year bar the scatter sentence already uses, and named so the two cannot
 # drift apart.
 GROWTH_RESID_MIN_YEARS <- 12L
+
+# ---- THE WHAT-IF TAB'S YEAR-TO-YEAR MEASURE, AS FUNCTIONS (group B B19, Marcus 2026-11-15) ----------------------
+# Known-issues card 4a now draws this tab's measure ("move card 4a to the what-if measure if it is the better
+# measure"), so the window and the anomaly the scatter sentence uses live here, once: server.R (cf_window(),
+# c_growth_note) and the card (rv_growth_variability(), app/R/review.R) call the same two functions.
+# The decadal smooth the year-to-year anomaly is taken about: a natural spline with this many degrees of freedom.
+GROWTH_ANOM_DF <- 3L
+#' The years compared: the slider's window intersected with the observed record (`obs_span`, NULL = no record)
+app_growth_window <- function(slider, obs_span) {
+  if (is.null(obs_span)) return(slider)
+  c(max(slider[1], obs_span[1]), min(slider[2], obs_span[2]))
+}
+#' The year-to-year anomaly of a growth series (columns year, g): its residual about the decadal smooth
+app_growth_anom <- function(g, df = GROWTH_ANOM_DF)
+  stats::residuals(stats::lm(g ~ splines::ns(year, df = df), data = g))
 
 #' Where the pulse carbon ends up: share in air, land and ocean over time
 #'

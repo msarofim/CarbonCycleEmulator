@@ -107,10 +107,10 @@ RV_SHIMS <- list(
   rep_dC          = "converts the model's hemispheric box to a station reading",
   grad_off_d13c   = "absorbs the north\u2013south \u03b4\u00b9\u00b3C offset the model cannot produce",
   sst_seas_amp_NH = "a seasonal sea-surface temperature the fit chooses instead of the observed one",
-  sst_seas_amp_SH = "the same, southern hemisphere",
+  sst_seas_amp_SH = "the same, Southern Hemisphere",   # group B B9.3 (Marcus 2026-11-15): as the chart legends
   ent_seas_amp_SH = "a seasonal entrainment amplitude standing in for a seasonal mixed layer",
   gamma_enso_ocn_NH = "an ENSO ocean coefficient standing in for ocean transport",
-  gamma_enso_ocn_SH = "the same, southern hemisphere"
+  gamma_enso_ocn_SH = "the same, Southern Hemisphere"
 )
 
 #' GATE: does the stand-in list still describe parameters this build carries?
@@ -409,6 +409,47 @@ rv_variability <- function() rv_memo("variability", function() {
        verdict = dg_gateV_verdict(gv, ov), gv = gv, ov = ov)
 })
 
+# ---- CARD 4a SINCE GROUP B (B19, Marcus 2026-11-15: "move card 4a to the what-if measure if it is the better
+# measure") ----------------------------------------------------------------------------------------------------
+# It is the better one: GATE V (rv_variability() above, kept for the calibration's own use and its precompute key)
+# differences the model's stock at CALENDAR-YEAR BOUNDARIES (dg_af_annual_model()), which 09-26 measured to add the
+# model's seasonal-cycle error to its growth rate (RMS 0.397 -> 0.491 ppm/yr; data-raw/build_mbl_global_growth.R), and
+# its record before 1980 is the years GCB calls least certain. The card now draws the What if...? tab's own series:
+# app_annual_growth(APP_HIST$out) against app_obs_growth(APP_OBS_GROWTH) (NOAA MBL, annual means differenced), on that
+# tab's opening window cut to the record (app_growth_window(APP_CF_YEARS_DEFAULT, ...)), each about its own decadal
+# smooth (app_growth_anom()). Reference: calibration/diag_card4_enso_estimators.R's WHATIF row (11-11: n 45,
+# 1980-2024, sd ratio 0.672; r at lag 0 +0.291 vs -0.147, peak at lag 11 +0.726 vs +0.506); test-app-review-20261115.R
+# reproduces it from this function.
+# The ENSO index the caption correlates with: the observed Nino 3.4 (data/forcing_enso.rds nino34_anom, card 4a's
+# since 09-22), averaged over the twelve months ending RV_GROWTH_ENSO_LAG_MO months before each December. 11 is where
+# BOTH series' r peak on this measure (diag_card4_enso_estimators, 11-11); at lag 0 the record's r is negative.
+# ⚠ Which lag the caption quotes is Marcus's choice (drafts 11-15); the comparative word is the same at every lag.
+RV_GROWTH_ENSO_LAG_MO <- 11L
+#' The ENSO index, one value per year: the mean of the twelve months ending `lag` months before that year's December
+rv_enso_annual <- function(lag, en = as.data.frame(readRDS(ccx_path("data", "forcing_enso.rds")))) {
+  en <- en[order(en$year, en$month), ]
+  mi <- en$year * 12L + en$month - 1L
+  yrs <- sort(unique(en$year))
+  stats::setNames(vapply(yrs, function(y) {
+    k <- match((y * 12L + 11L - lag) - 0:11, mi)
+    if (anyNA(k) || any(!is.finite(en$nino34_anom[k]))) NA_real_ else mean(en$nino34_anom[k])
+  }, 0), yrs)
+}
+rv_growth_variability <- function() rv_memo("growth_variability", function() {
+  mg <- app_annual_growth(APP_HIST$out); ob <- app_obs_growth(APP_OBS_GROWTH)
+  win <- app_growth_window(APP_CF_YEARS_DEFAULT, range(ob$year))
+  d <- merge(mg, ob, by = "year", suffixes = c("_mod", "_obs"))
+  d <- d[d$year >= win[1] & d$year <= win[2], ]
+  ma <- app_growth_anom(data.frame(year = d$year, g = d$g_mod))
+  oa <- app_growth_anom(data.frame(year = d$year, g = d$g_obs))
+  x <- rv_enso_annual(RV_GROWTH_ENSO_LAG_MO)[as.character(d$year)]
+  ok <- is.finite(x)
+  list(years = d$year, model_anom = unname(ma), obs_anom = unname(oa), window = range(d$year),
+       sd_model = stats::sd(ma), sd_obs = stats::sd(oa), ratio = stats::sd(ma) / stats::sd(oa),
+       enso = list(lag = RV_GROWTH_ENSO_LAG_MO, n = sum(ok), r_model = stats::cor(ma[ok], x[ok]),
+                   r_obs = stats::cor(oa[ok], x[ok])))
+})
+
 rv_enso_slope <- function() rv_memo("enso_slope", function() {
   rv_need_gates()
   en <- as.data.frame(readRDS(ccx_path("data", "forcing_enso.rds")))
@@ -656,13 +697,12 @@ RV_CARDS <- list(
                       "second, independent observation (GLODAP ocean bottle samples",
                       "from the surface, rather than atmospheric stations). The miss",
                       "is on both sides: the north is too small and the south too",
-                      "large, the south by more. There is a related quantitative tension:",
-                      "the ocean bottles and the atmospheric δ¹³C",
-                      "decline disagree by about 15% on how fast the air and sea",
-                      "exchange isotopes — the surface bottles want it slower, the",
-                      "atmospheric δ¹³C decline holds it where",
-                      "it is — so a fix that satisfies one moves away from the",
-                      "other. Note also that the southern cold box equilibrates",
+                      # group B B20 card 3 (Marcus 2026-11-15, option b): the "about 15%" tension sentence CUT. At
+                      # hilda31fl the mixed layers want k_w x0.78 / x0.87, the hemisphere averages pull opposite ways,
+                      # and re-fitted at k_w = 1,446 the atmospheric δ¹³C rows favour the faster exchange (-2.45 against
+                      # Δ¹⁴C's +7.32): card 7 carries the gas-exchange story (diag_card3_kw_diseq_scan.R; sheet B20).
+                      "large, the south by more.",
+                      "Note also that the southern cold box equilibrates",
                       "with the deep ocean, so its disequilibrium is a statement",
                       "about the model's deep δ¹³C, not its surface."),
        ask = paste("Same question as issue 2 — these are one flaw with two",
@@ -745,29 +785,32 @@ RV_CARDS <- list(
                       # finding is the one in the chart caption. Qualitative here
                       # on purpose -- the numbers are model-dependent and belong
                       # where they are computed.
-                      "\n\nWe looked for a pattern in the misses and did not find",
-                      "one. Year by year, the difference between the model's growth",
-                      # 2026-10-15 review (Marcus: "Apply all"): "El Ni\u00f1o index" -> "ENSO index"; 1983 is the year
-                      # AFTER El Chich\u00f3n (April 1982), not the eruption; and the closing claim ("more El Ni\u00f1o-driven
-                      # ... so the variance it lacks is of some other kind") held on the first chart's estimator
-                      # (r +0.48 vs +0.29) but REVERSED on the What-if tab's (+0.18 vs +0.29), so both are stated.
-                      # The ask's "is not El Ni\u00f1o" -> "is not clearly El Ni\u00f1o" to match.
-                      "and the measured growth shows no usable association with the",
-                      "ENSO index, with volcanic aerosol, or with the decade:",
-                      "over sixty-six years none of the three reaches significance,",
-                      "and the decade averages all sit well inside one year's",
-                      "scatter. The single largest overshoot is 1991 \u2014 the model",
-                      "does not draw down as much carbon after Pinatubo as the",
-                      "record does \u2014 but 1983, the year after El Chich\u00f3n (the other",
-                      "big eruption), misses the other way, so even that is not a rule.",
-                      "On the first chart's measure the model's variability is more",
-                      "ENSO-driven than the record's; on the What-if tab's measure it",
-                      "is less \u2014 so we cannot say the missing variance is not",
-                      "El Ni\u00f1o-shaped."),
+                      # ⛔ 2026-11-15 (group B B19): RE-MEASURED on the measure card 4a now draws (the What if...? tab's;
+                      # calibration/diag_card4_whatif_residuals.R -> outputs/diagnostics/card4_whatif_residuals_20261115_
+                      # hilda31fl.log). The 10-15 paragraph was measured on the mismatched N7 pairing (model annual-mean
+                      # differences against GCB Jan-to-Jan, 1959-2024) and two of its claims fail here: the year-by-year
+                      # difference IS associated with the run's ENSO index (r +0.48, p 0.001; Spearman, without the
+                      # eruption years and a block bootstrap all agree) and with volcanic AOD (r +0.41), the latter
+                      # resting on the eruption years (r +0.06 without them); and the largest overshoot is 1992, with
+                      # 1991-1993 three of the five largest. No trend (r 0.00) and decade means <= 0.41 of one year's sd.
+                      # DRAFT for Marcus (11-15); the last two sentences are B19 option (a) adapted to one measure. The
+                      # typed facts are held by test-app-review-20261115.R.
+                      "\n\nWe looked for a pattern in the misses. Over forty-five years, the",
+                      "year-by-year difference between the model's growth and the measured",
+                      "growth is related to the ENSO index of the same calendar year, which",
+                      "suggests the model responds to El Ni\u00f1o sooner than the measured growth",
+                      "does. It shows no trend, and the decade averages all sit well inside",
+                      "one year's scatter. Three of the five largest overshoots are",
+                      "1991\u20131993: the model does not draw down as much carbon after",
+                      "Pinatubo as the record does.",
+                      "The model's growth follows the ENSO index more closely than the measured",
+                      "growth does. The variance the model lacks is in the part that does not",
+                      "follow ENSO."),
+       # B19 option (a)'s ask (Marcus 2026-11-15)
        ask = paste("Is a model that gets the ENSO sensitivity right but only part",
                    "of the variance acceptable for teaching what makes CO₂ wobble?",
-                   "And if the missing variability is not clearly El Ni\u00f1o, not volcanic and",
-                   "not a trend \u2014 what would you look for next?")),
+                   "And if the missing variability is not El Ni\u00f1o, volcanic or a trend,",
+                   "what would you look for next?")),
   list(id = 5, key = "pulse", class = "comparison",
        # Marcus 2026-10-15: title and ask are his; the plain is his own comment's statement ("We do decay
        # faster than Joos et al. 2013 in the early years, but not as fast as FaIR"), checked at hilda31w:
@@ -867,10 +910,12 @@ RV_CARDS <- list(
                       "allowed to move at all, carried at a stated number. Some",
                       "parameters are in both — a stand-in that was switched off by",
                       "holding it at zero. The stand-ins that matter most for what",
-                      "this app claims are the station offset (issue 1), the",
-                      "δ¹³C gradient offset (issue 2 is scored net of it), and a",
-                      "seasonal sea-surface-temperature amplitude fitted well",
-                      "under the observed one.",
+                      # group B B21 (Marcus 2026-11-15, option a): the seasonal SST amplitude taken off this list. Moving
+                      # both swings to ERSSTv5's changes the Keeling seasonal cycle by -3.6 % (N) / -6.8 % (S), and
+                      # they are the two least influential parameters on the map (diag_card7_sst_amp.R). The table
+                      # below still lists both.
+                      "this app claims are the station offset (issue 1) and the",
+                      "δ¹³C gradient offset (issue 2 is scored net of it).",
                       # 2026-10-06 (Marcus: "Add a line about k_w to the known issues tab"): wording
                       # drafted for his review; approved 2026-10-21 ("Approve 11 & 12"). The record: the k_w = 1446 price arm (CHANGELOG 10-05 a)
                       # fits 2.75 BETTER on likelihood; its -20 posterior price is ONE prior,
@@ -884,12 +929,20 @@ RV_CARDS <- list(
                       # by +6.21 log-likelihood (+2.75 at hilda34g; atmospheric d14C +7.09), and hs_asx_frac's prior is
                       # -19.92 of the -22.56 prior cost (88 %); posterior price -15.40 (was -20.01). Both claims hold;
                       # whether "slightly" still fits +6.2 is Marcus's wording call.
+                      # group B B20 card 7 (Marcus 2026-11-15): his wording, with one point corrected in the sheet
+                      # ("Decided 11-15": hs_asx_frac is gas exchange per unit area relative to warm water, and the prior
+                      # alone does not exclude 1,446). RE-MEASURED at hilda31fl 2026-11-11 (r): the data favour 1,446 by
+                      # +6.28 log-likelihood (atmospheric Δ¹⁴C +7.32), hs_asx_frac's prior 89 % of the prior cost
+                      # (price_profile_20261111_hilda31fl/read_k_w_20261111.log). The prior's centre is measured from
+                      # ice cover x wind x Schmidt number (data/obs_hs_exchange_factor.rds; R/calibrate.R).
                       "One fitted value is a compromise between two sources rather",
                       "than a measurement: the air\u2013sea gas transfer speed comes out at",
                       "about 1,840 m per year, against the literature's 1,446 (Naegler",   # Marcus 2026-10-15 ("Apply all the app text suggestions"): 1,840 = the table
-                      "2009). The data prefer the literature value; what holds",   # Marcus 2026-10-15 ("Apply all the app text suggestions"): "slightly" cut (+6.21 log-lik)
-                      "it higher is the stated prior on how much gas exchange the cold",
-                      "high-latitude box gets, and the two cannot both hold."),
+                      "2009). The data are more consistent with the literature value.",
+                      "What holds the fitted value higher is the prior on how fast the cold",
+                      "high-latitude ocean exchanges gas, which comes from measured ice cover,",
+                      "winds and water temperature, and the fit cannot match both that prior",
+                      "and the literature value."),
        ask = paste("Which of these would you want carried by a real mechanism",
                    "before you would use the model to teach from?")),
   # 2026-10-08 (j) (Marcus: "go ahead with the card"): the ocean's climate effect and H2 are ONE issue (CHANGELOG

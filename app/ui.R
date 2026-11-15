@@ -48,6 +48,9 @@ GLOSS_PPM <- "parts per million: molecules of CO₂ in every million molecules o
 GLOSS_GTC <- "gigatonnes of carbon: a billion tonnes"
 unit_note_ppm <- function() p(tags$small("CO₂ is measured in ", gloss("ppm", GLOSS_PPM), "."))
 unit_note_gtc <- function() p(tags$small("Carbon is measured in ", gloss("GtC", GLOSS_GTC), "."))
+# Group B B10 (Marcus 2026-11-15, "all"): the per-mil note, for the tabs that print ‰ outside a collapsed box
+GLOSS_PERMIL <- "per mil: parts per thousand"
+unit_note_permil <- function() p(tags$small("Isotope ratios are given in ", gloss("‰", GLOSS_PERMIL), "."))
 
 # `takeaway()` and `info_box()` moved to global.R 2026-09-24: server.R needs them
 # too (the regrowth section renders through uiOutput), and a UI helper defined in
@@ -193,12 +196,7 @@ phone_css <- sprintf("
     #ccx-tab-select { display: block; width: auto; flex: 0 1 auto; min-width: 0;
                       padding-right: 28px; background-position: right 8px center; }
     .tab-content > .tab-pane { margin-top: 0; }      /* the banner's own margin already separates them */
-    .row > [role='main'] { display: contents; }
-    .row > [role='main'] > .ccx-lead, .row > [role='main'] > .ccx-rest {
-      flex: 0 0 100%%; max-width: 100%%;
-      padding-left: calc(var(--bs-gutter-x) * .5); padding-right: calc(var(--bs-gutter-x) * .5); }
-    .row > [role='main'] > .ccx-lead { order: -1; margin-bottom: 14px; }
-    .row > [role='main'] > .ccx-rest { order: 1; }
+    /* item 2 (lead, controls, rest) applies up to APP_STACK_MAX_PX since group B B17: stack_css below */
     .readout { font-size: 1.2rem; }                  /* three across in a 351 px column */
     .shiny-plot-output:not(#h_diagram) { min-height: %2$dpx; }
     /* The box diagram: at 351 px its labels ran into each other (its text never shrinks below 0.9 of the tuned
@@ -213,6 +211,74 @@ phone_css <- sprintf("
     .navbar > .container-fluid { flex-wrap: wrap; }
     #ccx-tab-select { flex: 1 1 100%%; margin: 2px 0 6px 0; }
   }", APP_PHONE_MAX_PX, APP_PHONE_PLOT_MIN_PX, as.integer(DIAGRAM_REF_PX), APP_PHONE_NARROW_PX)
+
+# ---- AFTER A PRESS OF "Run it" OR "Release the pulse" (group B, Marcus 2026-11-15) ----------------------------
+# B22 (c): the chart grays at once and APP_CALC_LABEL shows beside it, until the chart's new value arrives (Shiny's own
+# fade began only after ~1 s of a 1.3 s run). A press that changes nothing sends no new chart, so the server going busy
+# and then idle also ends it, and a timeout covers a lost message.
+# B16 (a): below APP_PHONE_MAX_PX the controls sit under the chart (the lead comes first), so after the press the screen
+# shows the button and the chart's foot; once the new chart has arrived the page scrolls to the takeaway above it.
+APP_CALC_TIMEOUT_MS <- 30000
+APP_CALC_JS <- sprintf("
+  (function () {
+    var pending = false, busySeen = false, scrollAfter = false, timer = null;
+    function finish() {
+      if (!pending) return;
+      pending = false; busySeen = false; clearTimeout(timer);
+      $('#f_plot').removeClass('ccx-calc'); $('#f_calc').removeClass('on');
+      if (scrollAfter) {
+        var t = document.getElementById('f_takeaway');
+        t = t && (t.closest('.takeaway') || t);
+        if (t) {
+          var nav = document.querySelector('.navbar'), off = 8;
+          if (nav && /fixed|sticky/.test(getComputedStyle(nav).position)) off += nav.getBoundingClientRect().height;
+          window.scrollTo({ top: t.getBoundingClientRect().top + window.pageYOffset - off, behavior: 'smooth' });
+        }
+      }
+    }
+    $(document).on('click', '#s_go, #p_go', function () {
+      pending = true; busySeen = false;
+      scrollAfter = window.matchMedia('(max-width: %1$.2fpx)').matches;
+      $('#f_plot').addClass('ccx-calc'); $('#f_calc').addClass('on');
+      clearTimeout(timer); timer = setTimeout(finish, %2$d);
+    });
+    $(document).on('shiny:value shiny:error', function (e) { if (pending && e.name === 'f_plot') setTimeout(finish, 0); });
+    $(document).on('shiny:busy', function () { if (pending) busySeen = true; });
+    $(document).on('shiny:idle', function () { if (pending && busySeen) setTimeout(finish, 0); });
+  })();", APP_PHONE_MAX_PX, as.integer(APP_CALC_TIMEOUT_MS))
+
+# ---- PORTRAIT TABLETS (group B B17, Marcus 2026-11-15, option a) ----------------------------------------------
+# From 576 px the sidebar kept a quarter of the row (col-sm-3): 168 px at 768, where the two "Years shown" handles
+# touched and "Build your own" wrapped one word per line. Below APP_STACK_MAX_PX (BS5's `lg` breakpoint) the phone
+# arrangement now applies: the lead, then the sidebar at full width, then the rest of the main panel. The navbar keeps
+# its links above APP_PHONE_MAX_PX.
+APP_STACK_MAX_PX <- 991.98
+stack_css <- sprintf("
+  @media (max-width: %1$.2fpx) {
+    .row > [role='main'] { display: contents; }
+    .row > [role='main'] > .ccx-lead, .row > [role='main'] > .ccx-rest {
+      flex: 0 0 100%%; max-width: 100%%;
+      padding-left: calc(var(--bs-gutter-x) * .5); padding-right: calc(var(--bs-gutter-x) * .5); }
+    .row > [role='main'] > .ccx-lead { order: -1; margin-bottom: 14px; }
+    .row > [role='main'] > .ccx-rest { order: 1; }
+    .row > div:has(> form.well[role='complementary']) { flex: 0 0 100%%; max-width: 100%%; width: 100%%; }
+  }", APP_STACK_MAX_PX)
+
+# ---- COSMETIC LAYOUT (group B B18, Marcus 2026-11-15, all five) ----------------------------------------------
+#   2. the readouts' numbers share a baseline when one label wraps (phone: "Taken up by land" took two lines);
+#   3. "Copy link to this view" stays on one line, moving to its own line when it does not fit;
+#   4. on a touch screen a Download link and a slider handle take at least APP_TAP_MIN_PX (padding and an invisible
+#      hit area: nothing changes on a mouse screen).
+# Items 1 (the banner's edges) and 5 (the Pulse lab legend's ₂ at 768 px) are fixed where they arise.
+APP_TAP_MIN_PX <- 32
+tidy_css <- sprintf("
+  .ccx-readouts { align-items: flex-end; }
+  a.ccx-share { white-space: nowrap; display: inline-block; }
+  @media (pointer: coarse) {
+    .ccx-dl a { display: inline-block; min-height: %1$dpx; line-height: %1$dpx; }
+    .irs-handle::after { content: ''; position: absolute; left: 50%%; top: 50%%;
+                         width: %1$dpx; height: %1$dpx; transform: translate(-50%%, -50%%); }
+  }", as.integer(APP_TAP_MIN_PX))
 
 # The select: one option per navbar link, in the links' order and with their text, so a tab added, renamed or
 # reordered in navbarPage() below needs nothing here. Choosing an option clicks that link (Bootstrap shows the
@@ -295,6 +361,14 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
       /* 2026-10-20 (Marcus's ruling, quoted in global.R): the pulse lab's result once a pulse
          setting has changed; server.R toggles it through the ccx_pulse_stale message below */
       .pulse-stale { opacity: 0.35; filter: grayscale(100%); transition: opacity 0.2s; }
+      /* group B B22 (2026-11-15): the same gray from a press of Run it / Release the pulse until the new chart
+         arrives (APP_CALC_JS), with the label over the chart's top right corner */
+      .ccx-calc-wrap { position: relative; }
+      .ccx-calc { opacity: 0.35; filter: grayscale(100%); }
+      .ccx-calc-label { display: none; position: absolute; top: 6px; right: 10px; z-index: 5;
+                        background: #fff; border: 1px solid #b3b6b7; border-radius: 4px;
+                        padding: 2px 9px; font-size: 0.9rem; font-weight: 600; color: #333; }
+      .ccx-calc-label.on { display: block; }
     ")),
     # ⚠ SUPERSCRIPT AND SUBSCRIPT DIGITS (Marcus 2026-10-15, comments 10.15.26b: "the 4 in Δ¹⁴C looks weird").
     # Google serves Inter in subsets, and none covers U+2070-209F, so the browser drew ⁴ (and the ₂ in CO₂) in a
@@ -344,6 +418,8 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
       })();
     ")),
     tags$style(HTML(phone_css)),       # phones (2026-10-20): see APP_PHONE_MAX_PX above
+    tags$style(HTML(stack_css)),       # portrait tablets and phones (group B B17): see APP_STACK_MAX_PX above
+    tags$style(HTML(tidy_css)),        # group B B18
     tags$script(HTML(phone_tab_js)),
     # 2026-10-21: unit glosses open on a tap; the Known-issue pointers open their card; "Copy link to this view"
     tags$style(HTML(GLOSS_CSS)),
@@ -353,6 +429,7 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
     tags$script(HTML(APP_SESSION_JS)),   # 2026-11-02: the referring site's host, for the session log (sessionlog.R)
     # The pulse lab's result grays out while its settings differ from the ones it was run at (server.R
     # pulse_stale(); global.R APP_PULSE_RESULT_IDS). shiny.js is loaded in <head>, so Shiny exists here.
+    tags$script(HTML(APP_CALC_JS)),   # group B B16 + B22 (2026-11-15)
     tags$script(HTML("
       Shiny.addCustomMessageHandler('ccx_pulse_stale', function (m) {
         (m.ids || []).forEach(function (id) {
@@ -448,9 +525,11 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
       main_panel(
         lead = tagList(
           takeaway(textOutput("w_takeaway", inline = TRUE)),
+          # group B B12 (Marcus 2026-11-15, option b): the readouts are the run's totals whatever "Years shown" says
+          div(class = "readout-label", sprintf("Since %d, to %d", APP_HIST_YEARS[1], APP_HIST_YEARS[2])),
           # `col-4` (2026-10-20): the three readouts stay side by side on a phone too, rather than stacking into
           # ~170 px between the takeaway and the chart; at 576 px and up `col-sm-4` already set the same width
-          fluidRow(
+          fluidRow(class = "ccx-readouts",   # group B B18 #2: numbers on one baseline
             column(4, class = "col-4", div(class = "readout-label", LAB_STILL_IN_AIR),
                    div(class = "readout", textOutput("w_atm", inline = TRUE))),
             column(4, class = "col-4", div(class = "readout-label", "Taken up by land"),
@@ -465,9 +544,12 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
         div(class = "caveat", tags$strong("About land use: "),
             textOutput("w_luc_note", inline = TRUE)),
         hr(),
+        # group B B11 (Marcus 2026-11-15): each panel gets a takeaway; B14: the airborne-fraction note under its chart
         fluidRow(
-          column(6, h5("Airborne fraction"), plotOutput("w_af", height = "260px")),
+          column(6, h5("Airborne fraction"), takeaway(textOutput("w_af_takeaway", inline = TRUE)),
+                 plotOutput("w_af", height = "260px"), uiOutput("w_af_note")),
           column(6, h5("Does the model agree with the measured budget?"),
+                 takeaway(textOutput("w_gcb_takeaway", inline = TRUE)),
                  plotOutput("w_gcb", height = "260px"))
         ),
         # ---- THE IMBALANCE BAND (handoff 09-24 e item 3) ---------------
@@ -523,8 +605,9 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
                            selected = names(CCX_MECHANISMS)[1]),
         sliderInput("c_years", "Years shown",
                     min = APP_HIST_YEARS[1], max = APP_HIST_YEARS[2],
-                    value = c(1850, APP_HIST_YEARS[2]), step = 1, sep = "", ticks = FALSE),
+                    value = APP_CF_YEARS_DEFAULT, step = 1, sep = "", ticks = FALSE),   # card 4a reads it (B19)
         unit_note_ppm(),
+        unit_note_gtc(),   # group B B10: the "Our emissions" driver chart is in GtC
         uiOutput("c_blurb")
       ),
       main_panel(
@@ -593,6 +676,7 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
         radioButtons("i_hemi", "Hemisphere (\u03b4\u00b9\u00b3C)",
                      c("Both" = "both", "Northern only" = "NH",
                        "Southern only" = "SH")),
+        unit_note_permil(),   # group B B10: the takeaway prints ‰; the gloss was only inside the collapsed box
         # 2026-10-15 review: δ / Δ / ‰ get tooltips; the δ¹³C fall is credited to land-use carbon as well as
         # fossil (both are plant carbon); Δ¹⁴C's decline measures EXCHANGE of atoms, not net uptake.
         info_box("What the two isotopes tell you",
@@ -612,7 +696,7 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
                    "tests, and how fast it fell tells us how quickly carbon atoms",
                    "are swapped between the air, the ocean and the land — much",
                    "faster than extra CO₂ is removed (see Futures → Pulse lab)."),
-                 p(tags$small("Both are reported in ", gloss("‰", "per mil: parts per thousand"),
+                 p(tags$small("Both are reported in ", gloss("‰", GLOSS_PERMIL),
                               ", as small differences from a reference ratio.")))
       ),
       main_panel(
@@ -625,6 +709,7 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
                           "right; the difference between them is not.")),
         hr(),
         h5("Δ¹⁴C: the bomb spike and how fast it drained away"),
+        takeaway(textOutput("i_d14c_takeaway", inline = TRUE)),   # group B B11: moved from the tab's takeaway
         plotOutput("i_d14c", height = "300px"),
         info_box("Why the southern spike arrives later and smaller",
                  p("Nearly all atmospheric weapons tests were in the north. The",
@@ -663,7 +748,9 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
                                          -5, 5, 1, step = 0.5)),
             selectInput("s_bg", "Everything else follows", APP_SCENARIOS,
                         selected = APP_SCENARIO_BG),
-            actionButton("s_go", APP_BUILD_RUN_LABEL, class = "btn-primary btn-sm")
+            actionButton("s_go", APP_BUILD_RUN_LABEL, class = "btn-primary btn-sm"),
+            uiOutput("s_stale_note"),   # group B B22 (2026-11-15): as the Pulse lab's p_stale_note
+            unit_note_gtc()   # group B B10: the takeaway prints GtC a year
           ),
           tabPanel(
             "Pulse lab", br(),
@@ -678,8 +765,10 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
             uiOutput("p_stale_note"),   # 2026-10-20: shown while the result on screen is for other settings
             # 2026-10-21 (Marcus: "Do 1-7"): the one statement of the method; the "How this is computed" box under
             # the chart said the same and is gone, and its one extra fact (identical starting conditions) is here.
-            helpText("Runs the model twice, with and without the pulse, from identical starting",
-                     "conditions, and takes the difference. The difference is what the extra carbon does."),
+            # group B B6 (Marcus 2026-11-15): his edit of the draft, verbatim (app_pulse_runs() makes three runs)
+            helpText("Runs the model with and without the pulse, from identical starting conditions, and",
+                     "takes the difference to estimate the impact of the extra carbon. A third run tags the",
+                     "pulse's carbon atoms to follow where they go."),
             unit_note_gtc()
           )
         ),
@@ -718,7 +807,11 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
       main_panel(
         lead = tagList(
           takeaway(textOutput("f_takeaway", inline = TRUE)),
-          plotOutput("f_plot", height = "400px")),
+          # group B B22 (2026-11-15): "Calculating…" beside the chart from a press until its new chart arrives
+          # (APP_CALC_JS); placed before the plot so the plot and its Download line stay adjacent (the A11 rule)
+          div(class = "ccx-calc-wrap",
+              div(id = "f_calc", class = "ccx-calc-label", role = "status", `aria-live` = "polite", APP_CALC_LABEL),
+              plotOutput("f_plot", height = "400px"))),
         # The splice caption (Marcus 2026-09-22). Every mode on this tab -- the
         # scenarios, build-your-own and the pulse lab -- used to carry the
         # SSP/LUH2 land-use history instead of the observed budget the Keeling
@@ -900,17 +993,13 @@ function(request) navbarPage(   # a function of the request: deep links (app/R/l
         # scrolls sideways inside this wrapper (2026-10-20, phone_css)
         div(class = "ccx-diagram", plotOutput("h_diagram", height = "auto")),
         unit_note_gtc(),
+        unit_note_ppm(), unit_note_permil(),   # group B B10: the parameter table shows ppm and ‰
         h4("Parameters"),
         # 2026-10-06 (Marcus: "Mark held rows (Recommended)"): "and the few it holds at a stated
         # value" added; the table's "Set" column says which (app/R/params_meta.R)
-        p("These are the numbers the calibration fits, and the few it holds at a",
-          "stated value. Everything else — ocean",
-          "area, the mass of the atmosphere, carbonate chemistry constants — is",
-          "fixed from measurements and cited in the repository.",
-          # Marcus 2026-10-15 ("Apply all the app text suggestions"): the El Niño rows say "held" -- they were fitted in a separate step
-          # (app_cmap_module_note); and the held-at-0 rows are mechanisms switched off
-          "The El Niño settings are fitted in a separate step and then held. A value held",
-          "at 0 is a mechanism that is in the code but switched off."),
+        # group B B7 (Marcus 2026-11-15, the draft): the counts from the table and the held groups named
+        # (app_params_intro(), global.R; the two named groups are gated against the mode)
+        p(app_params_intro()),
         tableOutput("h_params")
       ),
       column(

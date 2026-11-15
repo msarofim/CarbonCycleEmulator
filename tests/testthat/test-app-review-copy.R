@@ -117,7 +117,8 @@ AC_CHECKS_1001 <- list(
   c("A1 card 6 retired (caption)",        "in the simpler version's favour", NA),
   # RE-PINNED 2026-10-11 (Marcus: "Re-pin both (Recommended)"): his 10-11 paragraph replaced the
   # horizon sentence and carries its claim ("about 1.4 degC per 1000 GtC from any time period ...").
-  c("A2 pulse box: one figure",           "NOT in when you look", "per 1000 GtC from any"),
+  # RE-PINNED 2026-11-15 (group B B9.4, Marcus: "apply"): "1000 GtC" -> "1,000 GtC", the app's form elsewhere.
+  c("A2 pulse box: one figure",           "NOT in when you look", "per 1,000 GtC from any"),
   c("A3/B5 '(the land sink)' label gone", "CO₂ fertilization (the land sink)", NA),   # U.S. spelling since 10-15
   c("A3/B5 'IS the land sink' gone",      "IS the land sink", NA),
   c("A3 'single cause' gone",            "sink has a single cause", NA),
@@ -142,7 +143,9 @@ AC_CHECKS_1001 <- list(
 AC_CHECKS_1006 <- list(
   c("W1 warming caveat: the third effect", NA, "It also removes a third, smaller effect"),
   c("W1 warming caveat: DESIGN's sentence", NA, "the upper ocean becomes more layered and"),
-  c("H1 held rows: the intro clause",      "These are the numbers the calibration fits. Everything", "and the few it holds at a"),
+  # RE-PINNED 2026-11-15 (group B B7, Marcus: the draft): "and the few it holds at a" -> the counted form.
+  c("H1 held rows: the intro clause",      "These are the numbers the calibration fits. Everything",
+    "and the ones it holds at a stated value (%d)."),
   c("H1 held rows: the column is wired",   NA, "held = APP_HELD_NAMES"),
   # carbotopecomments.10.2.26, his rulings of 10-06 on card 4 (the ENSO TIMING miss): his wording
   # replaced the 10-04 draft's in both places, so the draft's phrases must not appear either.
@@ -225,12 +228,14 @@ AC_CHECKS_1015 <- list(
 # Marcus 2026-10-21: the pre-redeploy scan's wording ("Use 'Still in the air'", his takeaway sentence, the FaIR
 # label, drafts 10 and 11, and "1b, 2a, 3a, 4a, 5").
 AC_CHECKS_1021 <- list(
+  # RE-PINNED 2026-11-15 (group B B9.1, Marcus: "apply"): "a couple exceptions" -> "a couple of exceptions".
   c("K takeaway sentence",   "not an abstract regression: it only adjusts quantities that",
-                             "not an abstract regression: with a couple exceptions, it is designed around"),
+                             "not an abstract regression: with a couple of exceptions, it is designed around"),
   c("K takeaway SST + ENSO", "global temperature, an ENSO index",
                              "sea-surface temperature, an index of El Niño and La Niña (ENSO)"),
   c("W still in the air",    "Stayed in the air", "LAB_STILL_IN_AIR <- \"Still in the air\""),
-  c("F FaIR checkbox",       "Compare with standard FaIR", "Compare with FaIR, a widely used climate emulator."),
+  # RE-PINNED 2026-11-15 (group B B9.8, Marcus: "apply"): the final period dropped, as the Pulse lab's label.
+  c("F FaIR checkbox",       "Compare with standard FaIR", "Compare with FaIR, a widely used climate emulator\""),
   c("F build prompt",        NA, "Choose a pathway and press \\u201c%s\\u201d."),
   c("I pulse lab pointer",   "(see the Pulse lab)", "(see Futures → Pulse lab)"),
   c("C no colour reference", "the purple", "is drawn as zero: the “Without” line is what the counterfactual ran with."),
@@ -248,7 +253,7 @@ test_that("all of Marcus's 2026-10-21 copy rulings are still applied", {
 test_that("MUTATION: the 10-21 list fires when an old phrase returns or a new one goes", {
   m1 <- paste(.ac_src, '  "is drawn as zero: the purple line is what the counterfactual ran with."', sep = "\n")
   expect_true(any(grepl("C no colour reference", ac_audit(m1, AC_CHECKS_1021), fixed = TRUE)))
-  m2 <- gsub("with a couple exceptions, it is designed around", "it only adjusts", .ac_src, fixed = TRUE)
+  m2 <- gsub("with a couple of exceptions, it is designed around", "it only adjusts", .ac_src, fixed = TRUE)   # re-pinned 11-15 (B9.1)
   expect_true(any(grepl("K takeaway sentence", ac_audit(m2, AC_CHECKS_1021), fixed = TRUE)))
   for (ck in AC_CHECKS_1021) expect_true(!is.na(ck[[2]]) || !is.na(ck[[3]]), info = ck[[1]])
 })
@@ -358,14 +363,17 @@ test_that("MUTATION: the 10-15 list fires when an old phrase returns or a new on
 # Marcus 2026-10-16, on the pulse lab's partition panels after the ocean was split by depth: caption cuts,
 # his takeaway paragraph over both panels, and no separate line on the three ocean groups.
 AC_CHECKS_1016 <- list(
+  # RE-PINNED 2026-11-15 (group B B9.7, Marcus: "apply"): "This is" cut, so the caption reads "Left: how much ...".
   c("P caption: perturbation clause cut", "the difference between running with it and",
-    "This is how much extra carbon each reservoir holds because of the pulse."),
+    "\"how much extra carbon each reservoir holds because of the pulse.\""),
   c("P caption: not-a-trace sentence cut", "It is not a trace of where those particular molecules", NA),
   c("P caption: tagged note",             "and followed wherever they go", "Right: the same pulse, with its carbon atoms tagged."),
   c("P caption: no 'own' atoms",          "with its own carbon atoms", NA),
   c("P caption: closure sentence cut",    "The shares add to 100%", NA),
   c("P takeaway: surface ocean",          NA, "carbon also mixes into the surface ocean."),
-  c("P takeaway: residence lifetime",     NA, "(the rate of decline in the atmosphere in this box informs the “residence lifetime”)."),
+  # RE-PINNED 2026-11-15 (group B B8, Marcus: the draft): "in this box" -> "in this panel", "residence lifetime" ->
+  # "residence time".
+  c("P takeaway: residence lifetime",     NA, "(the rate of decline in the atmosphere in this panel informs the “residence time”)."),
   c("P takeaway: deep ocean slow",        NA, "While the land and surface ocean equilibrate quickly, mixing into the deep ocean is a slow process."),
   c("P no ocean-groups placeholder",      "[MARCUS:", NA),
   # "Keys are fine as drafted" (Marcus 2026-10-16)
@@ -448,4 +456,38 @@ test_that("MUTATION: the strip removes whole-line comments and nothing else", {
   expect_equal(length(kept), 2L)
   expect_true(any(grepl("p(\"", kept, fixed = TRUE)))
   expect_true(any(grepl("x <- 1", kept, fixed = TRUE)))
+})
+
+# GROUP B (Marcus 2026-11-14/15, notes/decision_sheet_2026-11-11_group_b.md; his choices in
+# outputs/diagnostics/groupb_20261111/decisions_20261115.json). The drafts he took as written (B1, B3, B5, B7, B8, B9,
+# B11), his own words (B6, B20 card 7 as corrected), the cut (B20 card 3) and the list change (B21). The numbers his
+# sentences carry (B2, B4) and card 4's re-measured facts (B19) are held by test-app-review-20261115.R.
+AC_CHECKS_1115 <- list(
+  c("B1 measurement, not metric",  "A metric low on the chart", "A measurement low on the chart changes"),
+  c("B3 growth chart compares",    "against the measurements. Tick one or more", "growth-rate chart compares it with the"),
+  c("B5 negative values",          NA, "negative values are taken out of the air"),
+  c("B6 third run",                "Runs the model twice", "A third run tags the"),
+  c("B6 his clause",               NA, "takes the difference to estimate the impact of the extra carbon"),
+  c("B8 panel, not box",           "atmosphere in this box informs", "in this panel informs the “perturbation lifetime”"),
+  c("B9.3 Southern Hemisphere",    "the same, southern hemisphere", "the same, Southern Hemisphere"),
+  c("B9.5 IGCC spelled out",       NA, "Indicators of Global Climate Change (IGCC)"),
+  c("B11 Δ14C under its chart",    NA, "textOutput(\"i_d14c_takeaway\""),
+  c("B20 card 3 sentence cut",     "disagree by about 15% on how fast the air and sea", NA),
+  c("B20 card 7 his wording",      "The data prefer the literature value", "The data are more consistent with the literature value."),
+  c("B20 card 7 the prior",        "and the two cannot both hold", "which comes from measured ice cover,"),
+  c("B21 SST off the list",        "seasonal sea-surface-temperature amplitude fitted well", "δ¹³C gradient offset (issue 2 is scored net of it)."),
+  c("B19 one measure",             "on the What-if tab's measure it", "The variance the model lacks is in the part that does not")
+)
+
+test_that("all of Marcus's 2026-11-15 copy rulings (group B) are still applied", {
+  problems <- ac_audit(.ac_src, AC_CHECKS_1115)
+  expect_equal(problems, character(0), info = paste(problems, collapse = " | "))
+})
+
+test_that("MUTATION: the 11-15 list fires when an old phrase returns or a new one goes", {
+  m1 <- paste(.ac_src, '  "2009). The data prefer the literature value; what holds",', sep = "\n")
+  expect_true(any(grepl("B20 card 7 his wording", ac_audit(m1, AC_CHECKS_1115), fixed = TRUE)))
+  m2 <- gsub("A third run tags the", "It tags the", .ac_src, fixed = TRUE)
+  expect_true(any(grepl("B6 third run", ac_audit(m2, AC_CHECKS_1115), fixed = TRUE)))
+  for (ck in AC_CHECKS_1115) expect_true(!is.na(ck[[2]]) || !is.na(ck[[3]]), info = ck[[1]])
 })

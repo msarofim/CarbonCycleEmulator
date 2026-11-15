@@ -82,7 +82,10 @@ function(input, output, session) {
   output$k_plot <- renderPlotFit("k_plot", 
     plot_keeling(APP_HIST$out, APP_OBS, input$k_years, input$k_hemi, input$k_obs))
 
-  output$k_seasonal <- renderPlotFit("k_seasonal", plot_seasonal(APP_HIST$out, APP_OBS, APP_SEAS_WINDOW))
+  # group B B12 (Marcus 2026-11-15, option b): the seasonal chart follows "Hemisphere" and "Show measurements"; the
+  # takeaway above (which names its station and years) and the window stay fixed
+  output$k_seasonal <- renderPlotFit("k_seasonal", plot_seasonal(APP_HIST$out, APP_OBS, APP_SEAS_WINDOW,
+                                                                 input$k_hemi, input$k_obs))
 
   output$k_takeaway <- renderText({
     # 2026-10-12 code review: the three numbers come from app_keeling_numbers() (global.R) -- the
@@ -114,7 +117,8 @@ function(input, output, session) {
                   "seasonal cycle at both Mauna Loa and the South Pole. But it is",
                   # Marcus 2026-10-21, verbatim (it read "it only adjusts quantities that stand for physical
                   # things", which Known issues 1 and 7 contradict: a correction with no mechanism; stand-ins).
-                  "not an abstract regression: with a couple exceptions, it is designed around",
+                  # group B B9.1 (Marcus 2026-11-15): "a couple exceptions" -> "a couple of exceptions"
+                  "not an abstract regression: with a couple of exceptions, it is designed around",
                   "parameters that represent physical processes."),
             kn$start, kn$start_year, kn$now, kn$now_year, kn$obs_now)
   })
@@ -128,6 +132,28 @@ function(input, output, session) {
   output$w_partition <- renderPlotFit("w_partition", plot_partition(partition(), input$w_years))
   output$w_af  <- renderPlotFit("w_af", plot_airborne_fraction(partition(), input$w_years))
   output$w_gcb <- renderPlotFit("w_gcb", plot_gcb_bars(APP_HIST$out, APP_GCB, hist_F()))
+  # Group B B11 (Marcus 2026-11-15, the drafts): a takeaway for each of the two half-width panels, every number from
+  # the table its chart draws (app_af_annual(), app_gcb_bar_values()). Both are about the whole run, as the readouts
+  # above them are (B12 b).
+  output$w_af_takeaway <- renderText({
+    a <- app_af_annual(partition()); k <- a$year >= AF_RANGE_FROM
+    sprintf("About %s of all the carbon emitted since %d is still in the air. Since %d that share has stayed between %s and %s.",
+            fmt_pct(a$af[nrow(a)]), APP_HIST_YEARS[1], AF_RANGE_FROM, fmt_pct(min(a$af[k])), fmt_pct(max(a$af[k])))
+  })
+  # Group B B14 (Marcus 2026-11-15): his addition to option C, shown whenever the window starts before AF_NOTE_BEFORE.
+  output$w_af_note <- renderUI({
+    if (input$w_years[1] >= AF_NOTE_BEFORE) return(NULL)
+    div(class = "caveat", app_af_early_note())
+  })
+  output$w_gcb_takeaway <- renderText({
+    v <- app_gcb_bar_values(APP_HIST$out, APP_GCB, hist_F())
+    w <- c(APP_SPLICE_YEAR - 9L, APP_SPLICE_YEAR)
+    g <- function(s, who) v$gtc[v$sink == s & v$who == who]
+    sprintf(paste("Over %d–%d the model's ocean takes up %.2f GtC a year and the Global Carbon Budget's %.2f;",
+                  "the model's land takes up %.2f and the budget's %.2f."),
+            w[1], w[2], g("Ocean", "This model"), g("Ocean", "Global Carbon Budget"),
+            g("Land", "This model"), g("Land", "Global Carbon Budget"))
+  })
 
   latest <- reactive({
     pt <- partition()
@@ -323,7 +349,7 @@ function(input, output, session) {
     obs <- APP_LUC_SPLIT$obs_window
     now <- h[h$year >= obs[2] - 9 & h$year <= obs[2], ]
     tagList(
-      fluidRow(
+      fluidRow(class = "ccx-readouts",   # group B B18 #2: numbers on one baseline
         column(4, div(class = "readout-label", "Deforestation, gross"),
                div(class = "readout", sprintf("%.2f", mean(now$gross_GtC)))),
         column(4, div(class = "readout-label", "Forest regrowth"),
@@ -332,8 +358,10 @@ function(input, output, session) {
         column(4, div(class = "readout-label", "Net, the land-use input the model is given"),
                div(class = "readout", sprintf("%.2f", mean(now$net_GtC))))
       ),
+      # group B B5 (Marcus 2026-11-15, the draft): the readouts keep their signs (2.51 - 1.22 = 1.29 stays visible)
       div(class = "readout-label",
-          sprintf("GtC per year, %d–%d average", min(now$year), max(now$year))),
+          sprintf("GtC per year, %d–%d average; negative values are taken out of the air",
+                  min(now$year), max(now$year))),
       br(),
       takeaway(textOutput("w_regrowth_takeaway", inline = TRUE)),
       plotOutput("w_regrowth_plot", height = "330px"),
@@ -453,10 +481,11 @@ function(input, output, session) {
   output$c_blurb <- renderUI({
     off <- cf_off()
     if (!length(off))
+      # group B B3 (Marcus 2026-11-15, the draft): only the growth-rate chart has measurements
       return(div(style = "margin-top:12px; font-size:0.93rem;",
-                 "Nothing is switched off, so the charts show the full model",
-                 "against the measurements. Tick one or more boxes to remove",
-                 "a mechanism; tick several to remove them together."))
+                 "Nothing is switched off, so the charts show the full model, and the",
+                 "growth-rate chart compares it with the measurements. Tick one or more",
+                 "boxes to remove a mechanism; tick several to remove them together."))
     div(style = "margin-top:12px; font-size:0.93rem;",
         lapply(off, function(n) {
           m <- CCX_MECHANISMS[[n]]
@@ -503,10 +532,7 @@ function(input, output, session) {
     o <- app_obs_growth(APP_OBS_GROWTH)
     if (is.null(o)) NULL else range(o$year)
   })
-  cf_window <- reactive({
-    sp <- cf_obs_span(); if (is.null(sp)) return(input$c_years)
-    c(max(input$c_years[1], sp[1]), min(input$c_years[2], sp[2]))
-  })
+  cf_window <- reactive(app_growth_window(input$c_years, cf_obs_span()))   # plots.R (group B B19: shared with card 4a)
 
   # MEASURED, not asserted: the scatter each series carries about its own
   # decadal trend. A sentence claiming the wobbles shrink has to be a sentence
@@ -528,7 +554,7 @@ function(input, output, session) {
     scatter <- function(g) {
       g <- g[g$year >= yr[1] & g$year <= yr[2], ]
       if (nrow(g) < GROWTH_RESID_MIN_YEARS) return(NA_real_)
-      stats::sd(stats::residuals(stats::lm(g ~ splines::ns(year, df = 3), data = g)))
+      stats::sd(app_growth_anom(g))   # plots.R (group B B19: shared with card 4a)
     }
     mod_g <- app_annual_growth      # ⛔ ONE definition, shared with the chart (F2)
     a  <- scatter(mod_g(APP_HIST$out))
@@ -601,10 +627,11 @@ function(input, output, session) {
   # rather than on its axes. The residuals are roughly +/-0.5 ppm/yr against a
   # growth rate that runs 0-3, so drawn on the shared axis they would be a flat
   # squiggle along the bottom, colliding with the low end of the data.
-  # ⛔ IT SHARES THE GROWTH CHART'S x LIMITS AND ITS WINDOW, and takes the
+  # ⛔ IT SHARES THE GROWTH CHART'S WINDOW, CUT TO THE MEASURED YEARS (cf_window()), and takes the
   # SAME app_annual_growth / app_obs_growth definitions, so the strip cannot
-  # come to describe different years or a different estimator from the panel it
-  # sits under.
+  # come to describe a different estimator from the panel it sits under. It does NOT share that chart's x limits:
+  # at the default window the growth chart runs from 1850 and the strip from 1980, the record's start, and its caption
+  # names the years (group B B15, 2026-11-15; this comment said "x limits" until then).
   output$c_resid <- renderPlotFit("c_resid",
     plot_growth_resid(APP_HIST$out, cf_alt(), APP_OBS_GROWTH, cf_window(),
                       app_mech_key(cf_off())))
@@ -716,12 +743,21 @@ function(input, output, session) {
     # printed difference would be "+0" (app_ppm_change(): both levels rounded, then differenced; 2026-11-11). Until
     # then it was |unrounded difference| < TAKEAWAY_PPM_RESOLUTION, which could print a difference that did not
     # equal the two printed levels.
-    if (pc$d == 0)
-      return(sprintf(paste("With %s switched off, global-average CO₂ in %d is unchanged to the",
-                           "nearest ppm — these are year-to-year mechanisms, and",
-                           "they move the wobble rather than the level. The",
-                           "growth-rate chart below is where they show up."),
-                     app_mech_list(off), y_now))
+    #
+    # Group B B4 (Marcus 2026-11-15, option a, his sentence): a change under TAKEAWAY_PPM_SMALL prints to one decimal
+    # (El Niño alone +0.16 printed "+1 ppm" beside "426 instead of 425", the full model at 425.43 being by a rounding
+    # boundary). The "unchanged to the nearest ppm" sentence (d == 0) is a subset of this branch and is gone. His second
+    # sentence names "this switch"; several switches take the plural, and it is said only of the year-to-year
+    # switches (APP_MECH_YEAR_TO_YEAR, where it is measured to hold).
+    ps <- app_ppm_small(co2_now(a), co2_now(b))
+    if (ps$small) {
+      s <- sprintf("With %s switched off, global-average CO₂ in %d changes by %s ppm.",
+                   app_mech_list(off), y_now, ps$signed1)
+      if (all(off %in% APP_MECH_YEAR_TO_YEAR))
+        s <- paste(s, if (length(off) == 1L) "This switch mostly impacts" else "These switches mostly impact",
+                   "year-to-year variability rather than growth over time: see the growth-rate chart below.")
+      return(s)
+    }
     sprintf(paste("With %s switched off, global-average CO₂ in %d would be %.0f ppm instead of",
                   "%.0f — a difference of %s ppm."),
             app_mech_list(off), y_now, pc$off, pc$full, pc$signed)
@@ -743,16 +779,21 @@ function(input, output, session) {
     # January with a December, across the seasonal cycle.
     d13c_drop <- app_annual_mean_of(o$t, o$d13c_NH, 1850) -
                  app_annual_mean_of(o$t, o$d13c_NH, max(floor(o$t + 1e-9)))
-    ip <- which.max(o$d14c_NH)
     # 2026-10-15 review: the fall was credited to fossil carbon only; land-use carbon is ¹³C-poor plant carbon too
+    # Group B B11 (Marcus 2026-11-15): the Δ¹⁴C sentence moved, unchanged, under its own chart (i_d14c_takeaway)
     sprintf(paste("δ¹³C has fallen %.2f‰ since 1850 as fossil and land-use carbon (both originally",
                   "from plants) diluted the air — the fingerprint that the extra CO₂ is fossil and",
-                  "land-use carbon. Δ¹⁴C tells",
+                  "land-use carbon."),
+            d13c_drop)
+  })
+  output$i_d14c_takeaway <- renderText({
+    o <- APP_HIST$out
+    ip <- which.max(o$d14c_NH)
+    sprintf(paste("Δ¹⁴C tells",
                   "a different story: weapons testing %s by %d, and",
                   # Marcus 2026-10-02 (carbotopecomment), his wording
                   "the rate at which it declines provides information about the",
                   "speed of carbon exchange between pools."),
-            d13c_drop,
             # Marcus 2026-10-15 ("Apply all the app text suggestions"): what nearly doubled is the air's carbon-14, not Δ¹⁴C (≈0 -> +900‰)
             if (o$d14c_NH[ip] > 500) "nearly doubled the air's carbon-14" else "sent it spiking",
             floor(o$t[ip]))
@@ -823,9 +864,19 @@ function(input, output, session) {
   pulse_runs  <- reactive({ s <- pulse_shown(); req(s); s$pr })
   pulse_stale <- reactive(identical(input$f_mode, "Pulse lab") &&
                             app_pulse_stale(pulse_shown()$inp, pulse_inputs()))
+  # Group B B22 (Marcus 2026-11-15): the same rule for Build your own (global.R APP_BUILD_RESULT_IDS). The inputs of
+  # the run on screen are captured at the press, in the same flush as stylised_run()'s own capture.
+  build_inputs <- reactive(app_build_inputs(input))
+  build_shown  <- reactiveVal(NULL)
+  observeEvent(input$s_go, build_shown(build_inputs()))
+  build_stale  <- reactive(identical(input$f_mode, "Build your own") &&
+                             app_pulse_stale(build_shown(), build_inputs()))
+  # ONE message for both modes: they share f_plot, f_takeaway and f_notes, so two observers would undo each other
   observe(session$sendCustomMessage("ccx_pulse_stale",
-                                    list(stale = pulse_stale(), ids = as.list(APP_PULSE_RESULT_IDS))))
+                                    list(stale = pulse_stale() || build_stale(),
+                                         ids = as.list(union(APP_PULSE_RESULT_IDS, APP_BUILD_RESULT_IDS)))))
   output$p_stale_note <- renderUI(if (pulse_stale()) div(class = "caveat", APP_PULSE_STALE_NOTE))
+  output$s_stale_note <- renderUI(if (build_stale()) div(class = "caveat", APP_BUILD_STALE_NOTE))
 
   output$f_plot <- renderPlotFit("f_plot", {
     if (identical(input$f_mode, "Pulse lab")) {
@@ -913,12 +964,11 @@ function(input, output, session) {
         # of shapes and the pulse size cancels out of it.
         keep_T <- if (dT(y1) > 0) dT(y2) / dT(y1) else NA_real_
         keep_C <- f(y2) / f(y1)
-        tail <- if (is.na(keep_T)) "" else sprintf(
-          paste(" Over that stretch the warming keeps %s of its century-later",
-                "value and the airborne carbon keeps %s, so the %s is the",
-                "longer-lived of the two."),
-          fmt_pct(keep_T), fmt_pct(keep_C),
-          if (keep_T > keep_C) "warming" else "carbon")
+        # Group B B2 (Marcus 2026-11-15): his sentence replaces "keeps 104% ... keeps 82%, so the warming is the
+        # longer-lived of the two". His words are kept; the years and the two percentages are the run's, and both
+        # verbs follow the sign (app_pulse_tail(), global.R): across the tab's 168 settings the warming changes by
+        # -6.4 % to +6.1 % and the airborne carbon by -44 % to +6 % (b2_pulse_keep.log).
+        tail <- if (is.na(keep_T)) "" else paste0(" ", app_pulse_tail(keep_T, keep_C, y1 - pr$year, y2 - pr$year))
         # 2026-11-11 review A8: two significant figures below 0.1 °C (a 10 GtC pulse printed "0.01 °C ... 0.01 °C"
         # for 0.015 and 0.014); two decimals as before at 0.1 °C and above (app_degC_small(), global.R)
         sprintf(paste0("Release %d GtC in %d and the world is %s °C warmer ",
@@ -1037,7 +1087,7 @@ function(input, output, session) {
     per1000 <- at(y100) / pr$gtc * 1000
     info_box("What this says about carbon and temperature",
       p(sprintf(paste("This %d GtC pulse warms the world by %.3f \u00b0C a century",
-                      "later \u2014 %.2f \u00b0C per 1000 GtC \u2014 and by %s of its peak",
+                      "later \u2014 %.2f \u00b0C per 1,000 GtC \u2014 and by %s of its peak",   # B9.4: "1,000" (11-15)
                       "warming still at %d, %d years after release."),
                 pr$gtc, at(y100), per1000, fmt_pct(keep), yend, yend - pr$year)),
       # Marcus 2026-10-11 (CarboTopecomments.10.11.26), his two "Change"s, verbatim.
@@ -1062,7 +1112,7 @@ function(input, output, session) {
                       "insensitive to the size of the pulse in this model.",
                       "At the default settings (%s background, released %d), across pulses",
                       "from %g to %g GtC, the figure above moves by only %.1f%%,",
-                      "and the impact on temperature is about %.1f °C per 1000 GtC from any",
+                      "and the impact on temperature is about %.1f °C per 1,000 GtC from any",   # B9.4 (11-15)
                       "time period between %d and %d years after release."),
                 sub("\\s*\\(.*\\)$", "", names(APP_SCENARIOS)[match(APP_SCENARIO_BG, APP_SCENARIOS)]),
                 APP_PULSE_YEAR_DEFAULT,
@@ -1153,10 +1203,12 @@ function(input, output, session) {
     who <- vapply(top, function(r) app_cmap_holder_phrase(APP_CMAP$MC[r, ], APP_CMAP_STAB$n_lost[[r]],
                                                            APP_CMAP_STAB$provenance$n_draws),
                   character(1))
-    paste0("The metrics most sensitive to changes in this model are ",
+    # Marcus 2026-10-02; group B B1 (Marcus 2026-11-15, the draft): "metric" -> the tab's "measurement", and the
+    # second sentence reworded (it read as the reverse of what is meant)
+    paste0("The measurements most sensitive to changes in this model are ",
            paste(sprintf("%s — %s", top, who), collapse = "; "),
-           ". A metric low on the chart is one this model could change a good",
-           " deal without results changing substantially.")   # Marcus 2026-10-02
+           ". A measurement low on the chart changes little even when the model's",
+           " parameters change a good deal.")
   })
 
   output$cm_pin_note <- renderText({
@@ -1311,14 +1363,10 @@ function(input, output, session) {
   output$h_params <- renderTable(
     # + the GATED D2/D3 names when the mode fits them (2026-10-01): CCX_PARAM_NAMES is this process's
     # table and the gate is closed in the app; the D3 shares are likelihood-side and carried from the
-    # mode file like rep_dC
-    app_param_table(CCX_PARAM_NAMES,
-                    c(APP_PARAMS, list(bomb_total = APP_BOMB_TOTAL,
-                                       luc_scale  = APP_LUC_SCALE,
-                                       rep_dC     = APP_REP_DC), APP_IMB_SHARES, APP_LIK_ONLY),
-                    extra = APP_GATED_FIT,
-                    # 2026-10-06: the "Set" column, from the mode file's own lists (params_meta.R)
-                    fitted = APP_FITTED_NAMES, held = APP_HELD_NAMES),
+    # mode file like rep_dC. 2026-10-06: the "Set" column, from the mode file's own lists (params_meta.R).
+    # Group B B7 (2026-11-15): one constructor, app_param_table_live() (global.R), so the paragraph above the
+    # table counts the same rows.
+    app_param_table_live(),
     striped = TRUE, width = "100%")
 
   # ---- 7. Known issues (the beta review) -----------------------------
@@ -1423,7 +1471,8 @@ function(input, output, session) {
       Covers = unname(APP_DRIVER_COVERS[c("emissions", "emissions", "gmst", "sst", "enso", "aod", "c14", "ndep")]),
       Source = c("Global Carbon Budget 2025",
                  "Global Carbon Budget 2025 (OSCAR v3.1 before 1850)",
-                 "IGCC", "Met Office Hadley Centre HadSST.4.2.0.0", "NOAA PSL",
+                 "Indicators of Global Climate Change (IGCC)",   # group B B9.5 (Marcus 2026-11-15)
+                 "Met Office Hadley Centre HadSST.4.2.0.0", "NOAA PSL",
                  "NASA GISS, CMIP7 stratospheric aerosol",
                  "Tans (1981) / Naegler & Levin (2006); Laemmel et al. 2025",
                  "Built from NOx and NH\u2083 emissions, CMIP7 ScenarioMIP (van Vuuren et al.)"),
@@ -1470,9 +1519,15 @@ function(input, output, session) {
   # one log line when the visit starts and one when it ends (2026-11-02; app/R/sessionlog.R)
   app_session_log_server(input, session)
   # While the pulse lab's result is grayed (its settings changed, no click yet) its charts still hold the
-  # previous run, so their downloads carry the gray-out note instead (Marcus 2026-10-20).
+  # previous run, so their downloads carry the gray-out note instead (Marcus 2026-10-20). Group B B22 (2026-11-15): the
+  # same for Build your own. (One line below: test-app-precompute.R 12 removes it as its mutant.)
+  dl_withheld <- function(id) {
+    if (id %in% APP_PULSE_RESULT_IDS && isTRUE(pulse_stale())) return(APP_PULSE_STALE_NOTE)
+    if (id %in% APP_BUILD_RESULT_IDS && isTRUE(build_stale())) return(APP_BUILD_STALE_NOTE)
+    NULL
+  }
   app_dl_server(output, session, dl_plots, link = links$url,
                 futures = function() list(mode = input$f_mode, yvar = input$f_yvar),
-                withheld = function(id) if (id %in% APP_PULSE_RESULT_IDS && isTRUE(pulse_stale())) APP_PULSE_STALE_NOTE)
+                withheld = function(id) dl_withheld(id))
 }
 
