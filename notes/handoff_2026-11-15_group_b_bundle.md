@@ -5,6 +5,24 @@ Supersedes `notes/handoff_2026-11-15_group_b_build.md` (the build plan). Read wi
 `notes/drafts_2026-11-15_group_b.md` (the drafts and his answers). Batch A's handoff
 (`notes/handoff_2026-11-11_minor_issues_batch_a.md` §3) is the bundle, deploy and live-check recipe.
 
+## 0. UPDATE 2026-11-15 (later): T1/T2 run, caption done, checked and bundled (CHANGELOG 11-15 f, g)
+
+Marcus: "run T1 and T2; use 11 months with 'where both peak', and continue work". Done:
+- T1/T2 (`calibration/diag_card4_enso_knockouts.R`; write-up `notes/drafts_2026-11-15_group_b.md` §1c, memory
+  `ccx_card4_early_side_not_sooner`): on the module's estimator the peaks coincide and the miss is uncorrelated there;
+  the difference is on the early side, where card 4a's calendar-year index sits. T3, T4 not run.
+- Card 4a's caption: "…to each January, where both peak, r is…", printed only when both series peak at the lag.
+- Suite at `8ba6c320` 9,892 / 0 / 1 skip; mutations 18/18; bundle `~/ccx_frozen/bundle_20261115_8ba6c320` checked
+  locally (`outputs/diagnostics/groupb_bundle_20261115/README.md`).
+
+**Still open:** card 4's second draft (§2 item 1 below; drafts note §1b) has NOT been approved in words; the bundle
+carries it. If he changes it: edit `app/R/review.R`, re-run the two gate files and the mutation script, rebuild the
+bundle (no full suite needed for a copy change in card 4 unless a gated fact changes). Then §4 step 4: he publishes
+```
+Rscript -e 'rsconnect::deployApp("/Users/MarcusMarcus/ccx_frozen/bundle_20261115_8ba6c320", appId = "01a14244-5cc3-1951-7b06-9e2fb07beae3", account = "saraphreport", server = "connect.posit.cloud", forceUpdate = TRUE)'
+```
+then the live checks (batch A §3 step 5) and push `main` (B9.9 landing page title). B13 still open.
+
 ## 1. Where things stand
 
 - **Built:** every group B item except B13 (still open, nothing built). Commits `fd10dfaa` (the build), `bc7c691c`

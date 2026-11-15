@@ -2,6 +2,12 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-11-15 (g) — **Group B checked at `8ba6c320` and bundled: full suite 9,892 passed, 0 failed, 1 standing skip; mutations 18 of 18; bundle `~/ccx_frozen/bundle_20261115_8ba6c320` served locally, every tab draws at 1440 × 900 and 375 × 812, every Download link works, the phone checks hold. Ready for Marcus to publish once he approves card 4's second draft, which the bundle carries.**
+
+- **Suite** (frozen worktree, 79 downloads linked per file, 25.0 min; `outputs/diagnostics/suite_20261115_8ba6c320.log` and `_perfile.csv`): 9,892 / 0 / 1 skip / 233 warnings. Against `fd10dfaa` per file: `test-app-review-20261115.R` 120 → 132, `test-app-review-copy.R` 146 → 148, `test-ui-year-bounds-lint.R` 1 failure → 0; no other file changed.
+- **Mutation test** (`mutate_group_b.py`, clean tree, no app running): 18 of 18 caught, including the new "where both peak" mutant (`groupb_build_20261115/mutate_group_b_8ba6c320.log`).
+- **Bundle** (117 files, 7.4 MB): against the live `64d91397` bundle, the seven group B app files differ and nothing else (no `data/` change); the CSVs name `8ba6c32`. Local checks in `outputs/diagnostics/groupb_bundle_20261115/` (README): Build your own before "Run it" is the one expected non-draw; phone values as at (d).
+
 ## 2026-11-15 (f) — **Marcus: "run T1 and T2; use 11 months with 'where both peak'". Card 4a keeps the 11-month lag and its caption now says "where both peak", printed only when both series' r peak there. T1 and T2 answer his "sooner" question: on the estimator the ENSO settings were fitted to, the model and the record peak at the same lag and the miss is uncorrelated there; the two differ on the early side, where card 4a's calendar-year index sits. Card 4's second draft unchanged, still his to approve.**
 
 - **T1 and T2** (`calibration/diag_card4_enso_knockouts.R` @`2941fd0c`, read-only, 0.1 min; log and .rds `outputs/diagnostics/card4_enso_knockouts_20261115_hilda31fl`). Gates, all exact (0): the full run is the app's run and card 4a's numbers; land and limb both off equals the What-if ENSO switch (the index zeroed), so those two are the only pathways reading the index (the ocean direct terms are pinned at 0, the equatorial cell is off).

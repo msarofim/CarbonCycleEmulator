@@ -1,0 +1,5 @@
+[
+ {"url": "?_inputs_&tabs=%22Known%20issues%22"}, {"waitimg": "#rv_variance"},
+ {"scroll": "#rv_variance", "block": "start"}, {"wait": 500},
+ {"shot": "card4a_rv_variance", "el": "#rv_variance", "pad": 8}
+]
