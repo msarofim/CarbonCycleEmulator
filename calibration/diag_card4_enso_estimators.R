@@ -29,6 +29,7 @@
 # Williams' t for two dependent correlations sharing one variable (Steiger 1980, eq. 7).
 #
 # Usage: Rscript calibration/diag_card4_enso_estimators.R      # ~3 min, read-only; changes no app text
+#        [--index=shipped|grid|relsst_lp|relsst]                # 11-15; non-default writes ..._idx-<name>.{log,rds}
 # =====================================================================
 t_start <- Sys.time()
 ROOT <- normalizePath(getwd())
@@ -51,8 +52,19 @@ CE_B        <- 5000L                      # bootstrap replicates
 CE_BLOCK    <- 3L                         # moving-block length, years
 CE_CI       <- c(0.05, 0.95)              # a 90 % interval
 CE_REVIEW   <- list(lags = c(0L, 3L, 6L), r_model = c(0.29, 0.58, 0.67), r_obs = c(-0.15, 0.19, 0.37))  # B19's numbers
+# --index= (added 2026-11-15, Marcus: "Do the cheap test for the RONI"): which observed index every r is taken against.
+# The model is still the canonical's, forced by its own (detrended) index; only the correlating index changes.
+CE_INDEX <- sub("^--index=", "", grep("^--index=", commandArgs(trailingOnly = TRUE), value = TRUE)[1])
+if (is.na(CE_INDEX)) CE_INDEX <- "shipped"
+CE_INDEX_SRC <- c(
+  shipped   = "data/forcing_enso.rds nino34_anom, observed (not the model's detrended driver)",
+  grid      = "ERSST v6 grid Nino 3.4, fixed base 1991-2020 (lib_enso_index.R; MANIFEST ersst_v6_monthly, sha256 checked): the product-swap control for the two below",
+  relsst_lp = "data/forcing_enso_relsst.rds nino34_relsst_lp: ERSST v6 Nino 3.4 minus the 21-yr low-passed 20S-20N mean (09-29; partial window in its last 10 yr)",
+  relsst    = "ERSST v6 Nino 3.4 minus the UNFILTERED 20S-20N mean anomaly, fixed base 1991-2020: RONI's subtraction (its variance rescaling omitted; r and r^2 shares do not depend on scale)")
+if (!CE_INDEX %in% names(CE_INDEX_SRC)) stop("--index must be one of ", paste(names(CE_INDEX_SRC), collapse = ", "))
 CE_STEM <- file.path("outputs", "diagnostics",
-                     sprintf("card4_enso_estimators_%s_%s", format(Sys.Date(), "%Y%m%d"), CCX_MODE_CANONICAL))
+                     sprintf("card4_enso_estimators_%s_%s%s", format(Sys.Date(), "%Y%m%d"), CCX_MODE_CANONICAL,
+                             if (CE_INDEX == "shipped") "" else paste0("_idx-", CE_INDEX)))
 
 commit <- ccx_git_stamp(); dirty <- ccx_stamp_dirty(commit)
 mode_file <- ccx_mode_file(); md5 <- unname(tools::md5sum(mode_file))
@@ -89,7 +101,28 @@ say("GATE: the app's parameters vs the mode file's par_mode, max relative differ
 if (max(dp) >= 1e-10) stop("the app's parameters are not the canonical's mode")
 
 # ---- the index ----------------------------------------------------------------
-en <- as.data.frame(readRDS(ccx_path("data", "forcing_enso.rds")))
+ersst_v6 <- function() {   # the checksummed v6 grid, read as data-raw/build_enso_relsst.R reads it
+  source(ccx_path("calibration", "lib_enso_index.R"))
+  man <- utils::read.csv(ccx_path("data-raw", "downloads", "MANIFEST.csv"), stringsAsFactors = FALSE)
+  row <- man[man$key == "ersst_v6_monthly", ]
+  stopifnot(nrow(row) == 1L, identical(digest::digest(file = ccx_path(row$file), algo = "sha256"), row$sha256))
+  ccx_path(row$file)
+}
+en <- switch(CE_INDEX,
+  shipped   = as.data.frame(readRDS(ccx_path("data", "forcing_enso.rds"))),
+  relsst_lp = with(readRDS(ccx_path("data", "forcing_enso_relsst.rds")),
+                   data.frame(year = year, month = month, nino34_anom = nino34_relsst_lp)),
+  {   # grid, relsst (v5 is eix_relative_sst()'s default; the v6 path is passed explicitly, as the 09-29 build does)
+    p <- ersst_v6()
+    n34 <- eix_fixed_base(eix_ersst_box(EIX_BOX_N34, path = p)); v <- n34$value
+    if (CE_INDEX == "relsst") {
+      tr <- eix_fixed_base(eix_ersst_box(EIX_BOX_TROP, path = p))
+      m <- match(n34$year * 12L + n34$month, tr$year * 12L + tr$month); stopifnot(!anyNA(m))
+      v <- v - tr$value[m]
+    }
+    data.frame(year = n34$year, month = n34$month, nino34_anom = v)
+  })
+say("index (--index=%s): %s\n", CE_INDEX, CE_INDEX_SRC[[CE_INDEX]])
 en <- en[order(en$year, en$month), ]
 idx_annual <- function(lag) {   # mean of the 12 months ending `lag` months before December of each year
   mi <- en$year * 12L + en$month - 1L                     # month index
@@ -217,7 +250,7 @@ prov <- list(driver = CE_DRIVER, commit = commit, dirty = dirty, canonical = CCX
              mode_md5 = md5, model_series = "APP_HIST$out via app_annual_growth() (app/global.R startup run)",
              obs = c(MBL = "data/mbl_global_growth.rds $growth (APP_OBS_GROWTH)", GCB = "data/gcb_budget.rds atm_growth / GtC_PER_PPM",
                      GATEV = "rv_variability() (lib_design_gates.R dg_v_anom)"),
-             index = "data/forcing_enso.rds nino34_anom, observed (not the model's detrended driver)",
+             index = CE_INDEX_SRC[[CE_INDEX]], index_option = CE_INDEX,
              windows = list(whatif = win_whatif, n7 = CE_N7_WIN, slider_default = CE_SLIDER), spline_df = CE_DF,
              rng = sprintf("set.seed(%d) immediately before each estimator x lag bootstrap (%d replicates, moving block %d yr)",
                            CE_SEED, CE_B, CE_BLOCK),
