@@ -2,6 +2,12 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-11-21 (a) — **Visit log, past three days (Marcus: "Evaluate usage over the past three days"): 2 browser visits from 11-18 13:05 to 11-21 13:05 EST, neither changing a control. 11-19 09:03 a phone, 35 s on the Keeling tab, from carbotope.org; 11-21 09:06 a desktop tab on the Keeling tab that closed at the 20-minute connection timeout (1,219 s), so it was most likely left open untouched.**
+
+- **Log** (`read_visit_log.R` at 18:05 UTC; data in `~/ccx_frozen/usage_logs/rev_01a1e15d_read_20261121/`, not committed): revision `01a1e15d`'s channel is 1,136 lines, all of it read, 11-15 17:39 to 11-21 09:32 EST; nothing after 09:32.
+- **The window:** 7 container loads, 68 container-minutes, 4 first page draws, 2 of them with no session within 2 min (11-20 22:46, 11-21 08:04: a landing-page visitor's wake request or a crawler; the log cannot tell). No problem-looking line. The host moved from Connect 2026.10.0 to 2026.11.0 during the week; no effect seen.
+- **The revision so far** (6 days): 25 headless sessions (the 11-15 live checks and the thumbnail render) and 5 from browsers. 11-15 18:00 desktop from carbotope.org, 147 s, a Build-your-own run with the y variable changed; 11-16 06:49 and 11:19 phones that opened Futures directly (18 s, 319 s), the last of five Futures-first visits that began 11-15 06:24; then the two above. The previous revision had 7 in 4 days (11-15 h).
+
 ## 2026-11-15 (i) — **Live checks on the group B deploy (Marcus: "I published it; do the live checks"): revision `01a1e15d`, 4 GB / 2 CPU and the timeouts kept; every tab draws at 1440 × 900 and 375 × 812; every Download link works at both sizes; scan UI ALL OK; card 4a's caption says "where both peak"; card 4 carries the approved paragraph; the log is clean. The phone check's pulse step needed a longer wait on the host (done in 10–12 s), not a fix. `main` pushed, which puts B9.9's landing page title on carbotope.org.** Record: `outputs/diagnostics/live_20261115_groupb/` (`live_browser_checks.md`).
 
 - **Revision** (`host_revision_20261115.json`): published 22:39:22–22:39:28 UTC from `~/ccx_frozen/bundle_20261115_8ba6c320`; 4096 MB, 2 CPU, timeouts 1200 / 1800 / idle 5, init 60.
